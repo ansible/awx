@@ -5,11 +5,11 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Card as _Card,
-  CardBody,
   CardHeader,
   PageSection,
   Tooltip,
 } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import UserForm from '../shared/UserForm';
 import { UsersAPI } from '@api';
@@ -41,7 +41,7 @@ function UserAdd({ history, i18n }) {
   return (
     <PageSection>
       <Card>
-        <CardHeader css="text-align: right">
+        <CardHeader className="at-u-textRight">
           <Tooltip content={i18n._(t`Close`)} position="top">
             <CardCloseButton onClick={handleCancel} />
           </Tooltip>

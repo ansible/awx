@@ -2,16 +2,11 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  Card,
-  CardHeader,
-  CardBody,
-  Tooltip,
-} from '@patternfly/react-core';
+import { PageSection, Card, CardHeader, Tooltip } from '@patternfly/react-core';
 
 import { TeamsAPI } from '@api';
 import { Config } from '@contexts/Config';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 
 import TeamForm from '../shared/TeamForm';

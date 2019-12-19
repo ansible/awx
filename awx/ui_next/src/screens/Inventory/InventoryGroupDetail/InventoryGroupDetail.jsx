@@ -1,25 +1,19 @@
 import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 
-import { CardBody, Button } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { VariablesInput as CodeMirrorInput } from '@components/CodeMirrorInput';
+import { VariablesDetail } from '@components/CodeMirrorInput';
+import { CardBody } from '@components/Card';
 import ErrorDetail from '@components/ErrorDetail';
 import AlertModal from '@components/AlertModal';
-import { formatDateString } from '@util/dates';
 
 import { GroupsAPI } from '@api';
-import { DetailList, Detail } from '@components/DetailList';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 
-const VariablesInput = styled(CodeMirrorInput)`
-  .pf-c-form__label {
-    font-weight: 600;
-    font-size: 16px;
-  }
-  margin: 20px 0;
-`;
+// TODO: extract this into a component for use in all relevant Detail views
 const ActionButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -28,6 +22,7 @@ const ActionButtonWrapper = styled.div`
     margin-left: 20px;
   }
 `;
+
 function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   const {
     summary_fields: { created_by, modified_by },
@@ -50,52 +45,26 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
     }
   };
 
-  let createdBy = '';
-  if (created) {
-    if (created_by && created_by.username) {
-      createdBy = (
-        <span>
-          {i18n._(t`${formatDateString(inventoryGroup.created)} by`)}{' '}
-          <Link to={`/users/${created_by.id}`}>{created_by.username}</Link>
-        </span>
-      );
-    } else {
-      createdBy = formatDateString(inventoryGroup.created);
-    }
-  }
-
-  let modifiedBy = '';
-  if (modified) {
-    if (modified_by && modified_by.username) {
-      modifiedBy = (
-        <span>
-          {i18n._(t`${formatDateString(inventoryGroup.modified)} by`)}{' '}
-          <Link to={`/users/${modified_by.id}`}>{modified_by.username}</Link>
-        </span>
-      );
-    } else {
-      modifiedBy = formatDateString(inventoryGroup.modified);
-    }
-  }
-
   return (
-    <CardBody css="padding-top: 20px">
+    <CardBody>
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />
-      </DetailList>
-      <VariablesInput
-        id="inventoryGroup-variables"
-        readOnly
-        value={variables}
-        rows={4}
-        label={i18n._(t`Variables`)}
-      />
-      <DetailList>
-        {createdBy && <Detail label={i18n._(t`Created`)} value={createdBy} />}
-        {modifiedBy && (
-          <Detail label={i18n._(t`Modified`)} value={modifiedBy} />
-        )}
+        <VariablesDetail
+          label={i18n._(t`Variables`)}
+          value={variables}
+          rows={4}
+        />
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={modified}
+          user={modified_by}
+        />
       </DetailList>
       <ActionButtonWrapper>
         <Button

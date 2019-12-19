@@ -1,7 +1,8 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { PageSection, Card, CardBody } from '@patternfly/react-core';
+import { PageSection, Card } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import { HostsAPI } from '@api';
 import { Config } from '@contexts/Config';
 import HostForm from '../shared';

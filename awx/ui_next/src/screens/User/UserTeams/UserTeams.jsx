@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { CardBody } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 
 class UserAdd extends Component {
   render() {

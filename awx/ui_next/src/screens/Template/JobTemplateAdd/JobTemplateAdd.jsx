@@ -2,13 +2,8 @@ import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  PageSection,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Card, CardHeader, PageSection, Tooltip } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';

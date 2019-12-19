@@ -2,15 +2,11 @@ import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CardBody as PFCardBody, Button } from '@patternfly/react-core';
-import styled from 'styled-components';
+import { Button } from '@patternfly/react-core';
 
+import { CardBody } from '@components/Card';
 import { DetailList, Detail } from '@components/DetailList';
 import { formatDateString } from '@util/dates';
-
-const CardBody = styled(PFCardBody)`
-  padding-top: 20px;
-`;
 
 class TeamDetail extends Component {
   render() {

@@ -80,7 +80,7 @@ describe('<InventoryGroupDetail />', () => {
       'Bar'
     );
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
-    expect(wrapper.find('Detail[label="Modified"]').length).toBe(1);
-    expect(wrapper.find('VariablesInput').prop('value')).toBe('bizz: buzz');
+    expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
+    expect(wrapper.find('VariablesDetail').prop('value')).toBe('bizz: buzz');
   });
 });

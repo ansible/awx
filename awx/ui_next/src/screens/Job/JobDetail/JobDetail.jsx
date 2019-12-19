@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CardBody, Button } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 import AlertModal from '@components/AlertModal';
 import { DetailList, Detail } from '@components/DetailList';
+import { CardBody } from '@components/Card';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import ErrorDetail from '@components/ErrorDetail';

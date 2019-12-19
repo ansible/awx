@@ -30,7 +30,7 @@ describe('<HostDetail />', () => {
     mountWithContexts(<HostDetail host={mockHost} />);
   });
 
-  test('should render Details', async done => {
+  test('should render Details', async () => {
     const wrapper = mountWithContexts(<HostDetail host={mockHost} />);
     const testParams = [
       { label: 'Name', value: 'Foo' },
@@ -46,23 +46,22 @@ describe('<HostDetail />', () => {
       expect(detail.find('dt').text()).toBe(label);
       expect(detail.find('dd').text()).toBe(value);
     }
-    done();
   });
 
-  test('should show edit button for users with edit permission', async done => {
+  test('should show edit button for users with edit permission', async () => {
     const wrapper = mountWithContexts(<HostDetail host={mockHost} />);
-    const editButton = await waitForElement(wrapper, 'HostDetail Button');
+    // VariablesDetail has two buttons
+    const editButton = wrapper.find('Button').at(2);
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/hosts/1/edit');
-    done();
   });
 
-  test('should hide edit button for users without edit permission', async done => {
+  test('should hide edit button for users without edit permission', async () => {
     const readOnlyHost = { ...mockHost };
     readOnlyHost.summary_fields.user_capabilities.edit = false;
     const wrapper = mountWithContexts(<HostDetail host={readOnlyHost} />);
     await waitForElement(wrapper, 'HostDetail');
-    expect(wrapper.find('HostDetail Button').length).toBe(0);
-    done();
+    // VariablesDetail has two buttons
+    expect(wrapper.find('Button').length).toBe(2);
   });
 });

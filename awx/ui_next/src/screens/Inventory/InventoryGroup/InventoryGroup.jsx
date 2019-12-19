@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { CardHeader } from '@patternfly/react-core';
 
 import { Switch, Route, withRouter, Link, Redirect } from 'react-router-dom';
 import { GroupsAPI } from '@api';
@@ -9,6 +8,7 @@ import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import { TabbedCardHeader } from '@components/Card';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 
@@ -97,12 +97,12 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
     !history.location.pathname.endsWith('edit')
   ) {
     cardHeader = (
-      <CardHeader style={{ padding: 0 }}>
+      <TabbedCardHeader>
         <RoutedTabs history={history} tabsArray={tabsArray} />
         <CardCloseButton
           linkTo={`/inventories/inventory/${inventory.id}/groups`}
         />
-      </CardHeader>
+      </TabbedCardHeader>
     );
   }
   return (

@@ -228,6 +228,14 @@ export const User = shape({
   last_login: string,
 });
 
+// stripped-down User object found in summary_fields (e.g. modified_by)
+export const SummaryFieldUser = shape({
+  id: number.isRequired,
+  username: string.isRequired,
+  first_name: string,
+  last_name: string,
+});
+
 export const Group = shape({
   id: number.isRequired,
   type: oneOf(['group']),

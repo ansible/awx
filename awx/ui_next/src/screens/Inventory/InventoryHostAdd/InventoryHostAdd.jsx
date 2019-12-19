@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { CardBody } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
 import InventoryHostForm from '../shared/InventoryHostForm';
 import { InventoriesAPI } from '@api';
 

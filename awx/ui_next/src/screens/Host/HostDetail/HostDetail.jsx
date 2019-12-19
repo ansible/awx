@@ -4,10 +4,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { Host } from '@types';
-import { formatDateString } from '@util/dates';
-import { Button, CardBody } from '@patternfly/react-core';
-import { DetailList, Detail } from '@components/DetailList';
-import CodeMirrorInput from '@components/CodeMirrorInput';
+import { Button } from '@patternfly/react-core';
+import { CardBody } from '@components/Card';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import { VariablesDetail } from '@components/CodeMirrorInput';
 
 const ActionButtonWrapper = styled.div`
   display: flex;
@@ -21,32 +21,8 @@ const ActionButtonWrapper = styled.div`
 function HostDetail({ host, i18n }) {
   const { created, description, id, modified, name, summary_fields } = host;
 
-  let createdBy = '';
-  if (created) {
-    if (summary_fields.created_by && summary_fields.created_by.username) {
-      createdBy = i18n._(
-        t`${formatDateString(created)} by ${summary_fields.created_by.username}`
-      );
-    } else {
-      createdBy = formatDateString(created);
-    }
-  }
-
-  let modifiedBy = '';
-  if (modified) {
-    if (summary_fields.modified_by && summary_fields.modified_by.username) {
-      modifiedBy = i18n._(
-        t`${formatDateString(modified)} by ${
-          summary_fields.modified_by.username
-        }`
-      );
-    } else {
-      modifiedBy = formatDateString(modified);
-    }
-  }
-
   return (
-    <CardBody css="padding-top: 20px">
+    <CardBody>
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />
@@ -66,23 +42,20 @@ function HostDetail({ host, i18n }) {
             }
           />
         )}
-        {/* TODO: Link to user in users */}
-        <Detail label={i18n._(t`Created`)} value={createdBy} />
-        {/* TODO: Link to user in users */}
-        <Detail label={i18n._(t`Last Modified`)} value={modifiedBy} />
-        <Detail
-          fullWidth
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={modified}
+          user={summary_fields.modified_by}
+        />
+        <VariablesDetail
           label={i18n._(t`Variables`)}
-          value={
-            <CodeMirrorInput
-              mode="yaml"
-              readOnly
-              value={host.variables}
-              onChange={() => {}}
-              rows={6}
-              hasErrors={false}
-            />
-          }
+          value={host.variables}
+          rows={6}
         />
       </DetailList>
       <ActionButtonWrapper>
