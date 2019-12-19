@@ -141,6 +141,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'webhook_credential': DEFAULT_SUMMARY_FIELDS,
     'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
+    'credential_type': DEFAULT_SUMMARY_FIELDS,
 }
 
 
@@ -4664,6 +4665,10 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 
     def get_summary_fields(self, obj):
         summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
+
+        if isinstance(obj.unified_job_template, SystemJobTemplate):
+            summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+
         if 'inventory' in summary_fields:
             return summary_fields
 

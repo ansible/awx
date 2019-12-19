@@ -1,6 +1,6 @@
 import React from 'react';
-
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { act } from 'react-dom/test-utils';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import MultiCredentialsLookup from './MultiCredentialsLookup';
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
 
@@ -8,9 +8,6 @@ jest.mock('@api');
 
 describe('<MultiCredentialsLookup />', () => {
   let wrapper;
-  let lookup;
-  let credLookup;
-  let onChange;
 
   const credentials = [
     { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
@@ -18,8 +15,9 @@ describe('<MultiCredentialsLookup />', () => {
     { name: 'Gatsby', id: 21, kind: 'vault' },
     { name: 'Gatsby', id: 8, kind: 'Machine' },
   ];
+
   beforeEach(() => {
-    CredentialTypesAPI.read.mockResolvedValue({
+    CredentialTypesAPI.read.mockResolvedValueOnce({
       data: {
         results: [
           {
@@ -46,17 +44,6 @@ describe('<MultiCredentialsLookup />', () => {
         count: 3,
       },
     });
-    onChange = jest.fn();
-    wrapper = mountWithContexts(
-      <MultiCredentialsLookup
-        onError={() => {}}
-        credentials={credentials}
-        onChange={onChange}
-        tooltip="This is credentials look up"
-      />
-    );
-    lookup = wrapper.find('Lookup');
-    credLookup = wrapper.find('MultiCredentialsLookup');
   });
 
   afterEach(() => {
@@ -64,16 +51,40 @@ describe('<MultiCredentialsLookup />', () => {
     wrapper.unmount();
   });
 
-  test('MultiCredentialsLookup renders properly', () => {
+  test('MultiCredentialsLookup renders properly', async () => {
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={onChange}
+          onError={() => {}}
+        />
+      );
+    });
     expect(wrapper.find('MultiCredentialsLookup')).toHaveLength(1);
     expect(CredentialTypesAPI.read).toHaveBeenCalled();
   });
 
   test('onChange is called when you click to remove a credential from input', async () => {
-    const chip = wrapper.find('PFChip').find({ isOverflowChip: false });
-    const button = chip.at(1).find('ChipButton');
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={onChange}
+          onError={() => {}}
+        />
+      );
+    });
+    const chip = wrapper.find('CredentialChip');
     expect(chip).toHaveLength(4);
-    button.prop('onClick')();
+    const button = chip.at(1).find('ChipButton');
+    await act(async () => {
+      button.invoke('onClick')();
+    });
     expect(onChange).toBeCalledWith([
       { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
       { id: 21, kind: 'vault', name: 'Gatsby' },
@@ -81,33 +92,122 @@ describe('<MultiCredentialsLookup />', () => {
     ]);
   });
 
-  test('can change credential types', () => {
-    lookup.prop('selectCategory')({}, 'Vault');
-    expect(credLookup.state('selectedCredentialType')).toEqual({
-      id: 500,
-      key: 500,
-      kind: 'vault',
-      type: 'buzz',
-      value: 'Vault',
-      label: 'Vault',
-      isDisabled: false,
+  test('should change credential types', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={() => {}}
+          onError={() => {}}
+        />
+      );
     });
-    expect(CredentialsAPI.read).toHaveBeenCalled();
+    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    const select = await waitForElement(wrapper, 'AnsibleSelect');
+    CredentialsAPI.read.mockResolvedValueOnce({
+      data: {
+        results: [
+          { id: 1, kind: 'cloud', name: 'New Cred', url: 'www.google.com' },
+        ],
+        count: 1,
+      },
+    });
+    expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      select.invoke('onChange')({}, 500);
+    });
+    wrapper.update();
+    expect(CredentialsAPI.read).toHaveBeenCalledTimes(3);
+    expect(wrapper.find('OptionsList').prop('options')).toEqual([
+      { id: 1, kind: 'cloud', name: 'New Cred', url: 'www.google.com' },
+    ]);
   });
-  test('Toggle credentials only adds 1 credential per credential type except vault(see below)', () => {
-    lookup.prop('onToggleItem')({ name: 'Party', id: 9, kind: 'Machine' });
+
+  test('should only add 1 credential per credential type except vault(see below)', async () => {
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={onChange}
+          onError={() => {}}
+        />
+      );
+    });
+    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    wrapper.update();
+    const optionsList = wrapper.find('OptionsList');
+    expect(optionsList.prop('multiple')).toEqual(false);
+    act(() => {
+      optionsList.invoke('selectItem')({
+        id: 5,
+        kind: 'Machine',
+        name: 'Cred 5',
+        url: 'www.google.com',
+      });
+    });
+    wrapper.update();
+    act(() => {
+      wrapper.find('Button[variant="primary"]').invoke('onClick')();
+    });
     expect(onChange).toBeCalledWith([
       { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
       { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
       { id: 21, kind: 'vault', name: 'Gatsby' },
-      { id: 9, kind: 'Machine', name: 'Party' },
+      { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
     ]);
   });
-  test('Toggle credentials only adds 1 credential per credential type', () => {
-    lookup.prop('onToggleItem')({ name: 'Party', id: 22, kind: 'vault' });
+
+  test('should allow multiple vault credentials', async () => {
+    const onChange = jest.fn();
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <MultiCredentialsLookup
+          value={credentials}
+          tooltip="This is credentials look up"
+          onChange={onChange}
+          onError={() => {}}
+        />
+      );
+    });
+    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    wrapper.update();
+    const typeSelect = wrapper.find('AnsibleSelect');
+    act(() => {
+      typeSelect.invoke('onChange')({}, 500);
+    });
+    wrapper.update();
+    const optionsList = wrapper.find('OptionsList');
+    expect(optionsList.prop('multiple')).toEqual(true);
+    act(() => {
+      optionsList.invoke('selectItem')({
+        id: 5,
+        kind: 'Machine',
+        name: 'Cred 5',
+        url: 'www.google.com',
+      });
+    });
+    wrapper.update();
+    act(() => {
+      wrapper.find('Button[variant="primary"]').invoke('onClick')();
+    });
     expect(onChange).toBeCalledWith([
-      ...credentials,
-      { name: 'Party', id: 22, kind: 'vault' },
+      { id: 1, kind: 'cloud', name: 'Foo', url: 'www.google.com' },
+      { id: 2, kind: 'ssh', name: 'Alex', url: 'www.google.com' },
+      { id: 21, kind: 'vault', name: 'Gatsby' },
+      { id: 8, kind: 'Machine', name: 'Gatsby' },
+      { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
     ]);
   });
 });

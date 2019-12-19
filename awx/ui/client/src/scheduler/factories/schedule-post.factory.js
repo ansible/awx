@@ -18,7 +18,7 @@ export default
                 scheduleData.rrule = RRuleToAPI(rrule.toString(), scope);
                 scheduleData.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
 
-                if (scope.cleanupJob) {
+                if (scope.askDaysToKeep) {
                     extra_vars = {
                         "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
                     };

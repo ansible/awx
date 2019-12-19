@@ -1,6 +1,8 @@
 import pytest
 import base64
+import contextlib
 import json
+from unittest import mock
 
 from django.db import connection
 from django.test.utils import override_settings
@@ -12,6 +14,18 @@ from awx.main.models.oauth import (OAuth2Application as Application,
                                    OAuth2AccessToken as AccessToken)
 from awx.sso.models import UserEnterpriseAuth
 from oauth2_provider.models import RefreshToken
+
+
+@contextlib.contextmanager
+def immediate_on_commit():
+    """
+    Context manager executing transaction.on_commit() hooks immediately as
+    if the connection was in auto-commit mode.
+    """
+    def on_commit(func):
+        func()
+    with mock.patch('django.db.connection.on_commit', side_effect=on_commit) as patch:
+        yield patch
 
 
 @pytest.mark.django_db
@@ -52,6 +66,41 @@ def test_token_creation_disabled_for_external_accounts(oauth_application, post, 
         else:
             assert 'OAuth2 Tokens cannot be created by users associated with an external authentication provider' in smart_str(resp.content)  # noqa
             assert AccessToken.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_existing_token_disabled_for_external_accounts(oauth_application, get, post, admin):
+    UserEnterpriseAuth(user=admin, provider='radius').save()
+    url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
+    with override_settings(RADIUS_SERVER='example.org', ALLOW_OAUTH2_FOR_EXTERNAL_USERS=True):
+        resp = post(
+            url,
+            data='grant_type=password&username=admin&password=admin&scope=read',
+            content_type='application/x-www-form-urlencoded',
+            HTTP_AUTHORIZATION='Basic ' + smart_str(base64.b64encode(smart_bytes(':'.join([
+                oauth_application.client_id, oauth_application.client_secret
+            ])))),
+            status=201
+        )
+        token = json.loads(resp.content)['access_token']
+        assert AccessToken.objects.count() == 1
+
+        with immediate_on_commit():
+            resp = get(
+                drf_reverse('api:user_me_list', kwargs={'version': 'v2'}),
+                HTTP_AUTHORIZATION='Bearer ' + token,
+                status=200
+            )
+            assert json.loads(resp.content)['results'][0]['username'] == 'admin'
+
+    with override_settings(RADIUS_SERVER='example.org', ALLOW_OAUTH2_FOR_EXTERNAL_USER=False):
+        with immediate_on_commit():
+            resp = get(
+                drf_reverse('api:user_me_list', kwargs={'version': 'v2'}),
+                HTTP_AUTHORIZATION='Bearer ' + token,
+                status=401
+            )
+            assert b'To establish a login session' in resp.content
 
 
 @pytest.mark.django_db

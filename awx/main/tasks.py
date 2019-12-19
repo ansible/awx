@@ -264,6 +264,12 @@ def apply_cluster_membership_policies():
 
 
 @task(queue='tower_broadcast_all', exchange_type='fanout')
+def set_migration_flag():
+    logger.debug('Received migration-in-progress signal, will serve redirect.')
+    cache.set('migration_in_progress', True)
+
+
+@task(queue='tower_broadcast_all', exchange_type='fanout')
 def handle_setting_changes(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -1336,7 +1342,7 @@ class BaseTask(object):
 
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
-                    cancelled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
+                    canceled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
                     check_callback=self.check_handler,
                     pod_manager=pod_manager
                 )
@@ -2154,7 +2160,7 @@ class RunProjectUpdate(BaseTask):
             try:
                 instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
-                    logger.debug("ProjectUpdate({0}) was cancelled".format(instance.pk))
+                    logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
                     return
                 fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
@@ -2183,7 +2189,10 @@ class RunProjectUpdate(BaseTask):
             project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
-                self.original_branch = git_repo.active_branch
+                if git_repo.head.is_detached:
+                    self.original_branch = git_repo.head.commit
+                else:
+                    self.original_branch = git_repo.active_branch
 
     @staticmethod
     def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
@@ -2215,25 +2224,28 @@ class RunProjectUpdate(BaseTask):
             copy_tree(project_path, destination_folder)
 
     def post_run_hook(self, instance, status):
-        if self.playbook_new_revision:
-            instance.scm_revision = self.playbook_new_revision
-            instance.save(update_fields=['scm_revision'])
-        if self.job_private_data_dir:
-            # copy project folder before resetting to default branch
-            # because some git-tree-specific resources (like submodules) might matter
-            self.make_local_copy(
-                instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
-                instance.scm_type, instance.scm_revision
-            )
-            if self.original_branch:
-                # for git project syncs, non-default branches can be problems
-                # restore to branch the repo was on before this run
-                try:
-                    self.original_branch.checkout()
-                except Exception:
-                    # this could have failed due to dirty tree, but difficult to predict all cases
-                    logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
-        self.release_lock(instance)
+        # To avoid hangs, very important to release lock even if errors happen here
+        try:
+            if self.playbook_new_revision:
+                instance.scm_revision = self.playbook_new_revision
+                instance.save(update_fields=['scm_revision'])
+            if self.job_private_data_dir:
+                # copy project folder before resetting to default branch
+                # because some git-tree-specific resources (like submodules) might matter
+                self.make_local_copy(
+                    instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
+                    instance.scm_type, instance.scm_revision
+                )
+                if self.original_branch:
+                    # for git project syncs, non-default branches can be problems
+                    # restore to branch the repo was on before this run
+                    try:
+                        self.original_branch.checkout()
+                    except Exception:
+                        # this could have failed due to dirty tree, but difficult to predict all cases
+                        logger.exception('Failed to restore project repo to prior state after {}'.format(instance.log_format))
+        finally:
+            self.release_lock(instance)
         p = instance.project
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             if self.playbook_new_revision:
@@ -2731,10 +2743,11 @@ class RunSystemJob(BaseTask):
                 json_vars = {}
             else:
                 json_vars = json.loads(system_job.extra_vars)
-            if 'days' in json_vars:
-                args.extend(['--days', str(json_vars.get('days', 60))])
-            if 'dry_run' in json_vars and json_vars['dry_run']:
-                args.extend(['--dry-run'])
+            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+                if 'days' in json_vars:
+                    args.extend(['--days', str(json_vars.get('days', 60))])
+                if 'dry_run' in json_vars and json_vars['dry_run']:
+                    args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates',
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',

@@ -32,7 +32,7 @@
       {{ kubernetes_deployment_name }} \
       -n {{ kubernetes_namespace }} -o=jsonpath='{.status.replicas}'
   register: deployment_details
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Set expected post-deployment Replicas value
   set_fact:
@@ -48,7 +48,7 @@
 - name: Get Postgres Service Detail
   shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
   register: postgres_svc_details
-  ignore_errors: yes
+  ignore_errors: true
   when: "pg_hostname is not defined or pg_hostname == ''"
 
 - name: Deploy PostgreSQL (OpenShift)
@@ -67,12 +67,11 @@
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password | quote }} \
-          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_admin_password | quote }} \
-          -e POSTGRESQL_DATABASE={{ pg_database }} \
+          -e POSTGRESQL_DATABASE={{ pg_database | quote }} \
           -e POSTGRESQL_VERSION=10 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
-      no_log: yes
+      no_log: true
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
@@ -83,7 +82,7 @@
     - name: Template PostgreSQL Deployment (Kubernetes)
       set_fact:
         pg_values: "{{ lookup('template', 'postgresql-values.yml.j2') }}"
-      no_log: yes
+      no_log: true
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
@@ -95,7 +94,7 @@
           --values - \
           stable/postgresql
       register: kubernetes_pg_activate
-      no_log: yes
+      no_log: true
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
@@ -186,14 +185,44 @@
   include_tasks: ssl_cert_gen.yml
   when: "rabbitmq_use_ssl|default(False)|bool"
 
-- name: Get Kubernetes API version
+- name: Get Kubernetes Config
   command: |
-    {{ kubectl_or_oc }} version -o json
+    {{ kubectl_or_oc }} config view -o json
+  register: kube_config_cmd
+  no_log: true
+
+- name: Convert kube config to dictionary
+  set_fact:
+    kube_config: "{{ kube_config_cmd.stdout | from_json }}"
+  no_log: true
+
+- name: Extract current context from kube config
+  set_fact:
+    current_kube_context: "{{ kube_config['current-context'] }}"
+
+- name: Find cluster for current context
+  set_fact:
+    kube_cluster: |
+      {{ (kube_config.contexts |
+          selectattr("name", "equalto", current_kube_context) |
+          list)[0].context.cluster }}
+
+- name: Find server for current context
+  set_fact:
+    kube_server: |
+      {{ (kube_config.clusters |
+          selectattr("name", "equalto", kube_cluster|trim) |
+          list)[0].cluster.server }}
+
+- name: Get kube version from api server
+  uri:
+    url: "{{ kube_server | trim }}/version"
+    validate_certs: false
   register: kube_version
 
 - name: Extract server version from command output
   set_fact:
-    kube_api_version: "{{ (kube_version.stdout | from_json).serverVersion.gitVersion[1:] }}"
+    kube_api_version: "{{ kube_version.json.gitVersion[1:] }}"
 
 - name: Determine StatefulSet api version
   set_fact:
@@ -206,7 +235,7 @@
     - 'configmap'
     - 'deployment'
     - 'secret'
-  no_log: yes
+  no_log: true
 
 - name: Apply Deployment
   shell: |
@@ -215,7 +244,7 @@
     - "{{ configmap }}"
     - "{{ deployment }}"
     - "{{ secret }}"
-  no_log: yes
+  no_log: true
 
 - name: Delete any existing management pod
   shell: |
@@ -249,21 +278,21 @@
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "echo 'from django.contrib.auth.models import User; nsu = User.objects.filter(is_superuser=True).count(); exit(0 if nsu > 0 else 1)' | awx-manage shell"
   register: super_check
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: super_check.rc > 0
 
 - name: create django super user if it does not exist
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('{{ admin_user }}', '{{ admin_email }}', '{{ admin_password }}')\" | awx-manage shell"
-  no_log: yes
+  no_log: true
   when: super_check.rc > 0
 
 - name: update django super user password
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
       bash -c "awx-manage update_password --username='{{ admin_user }}' --password='{{ admin_password }}'"
-  no_log: yes
+  no_log: true
   register: result
   changed_when: "'Password updated' in result.stdout"
 
@@ -285,4 +314,4 @@
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ kubernetes_deployment_replica_size }}
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ replicas | default(kubernetes_deployment_replica_size) }}

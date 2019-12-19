@@ -103,7 +103,7 @@ def main():
                 result = team.delete(name=name, organization=org['id'])
         except (exc.NotFound) as excinfo:
             module.fail_json(msg='Failed to update team, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
+        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
             module.fail_json(msg='Failed to update team: {0}'.format(excinfo), changed=False)
 
     json_output['changed'] = result['changed']

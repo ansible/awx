@@ -72,12 +72,11 @@ from awx.api.generics import (
     SubListDestroyAPIView
 )
 from awx.api.versioning import reverse
-from awx.conf.license import get_license
 from awx.main import models
 from awx.main.utils import (
     camelcase_to_underscore,
     extract_ansible_vars,
-    get_awx_version,
+    get_awx_http_client_headers,
     get_object_or_400,
     getattrd,
     get_pk_from_dict,
@@ -1386,6 +1385,7 @@ class CredentialExternalTest(SubDetailAPIView):
 
     model = models.Credential
     serializer_class = serializers.EmptySerializer
+    obj_permission_type = 'use'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1643,18 +1643,6 @@ class HostInsights(GenericAPIView):
 
         return session
 
-    def _get_headers(self):
-        license = get_license(show_key=False).get('license_type', 'UNLICENSED')
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': '{} {} ({})'.format(
-                'AWX' if license == 'open' else 'Red Hat Ansible Tower',
-                get_awx_version(),
-                license
-            )
-        }
-
-        return headers
 
     def _get_platform_info(self, host, session, headers):
         url = '{}/api/inventory/v1/hosts?insights_id={}'.format(
@@ -1721,7 +1709,7 @@ class HostInsights(GenericAPIView):
         username = cred.get_input('username', default='')
         password = cred.get_input('password', default='')
         session = self._get_session(username, password)
-        headers = self._get_headers()
+        headers = get_awx_http_client_headers()
 
         data = self._get_insights(host, session, headers)
         return Response(data, status=status.HTTP_200_OK)

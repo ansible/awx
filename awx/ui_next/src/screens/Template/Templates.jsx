@@ -7,6 +7,7 @@ import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 import { TemplateList } from './TemplateList';
 import Template from './Template';
+import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';
 
 class Templates extends Component {
@@ -53,15 +54,31 @@ class Templates extends Component {
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
           <Route
-            path={`${match.path}/:templateType/add`}
+            path={`${match.path}/job_template/add`}
             render={() => <JobTemplateAdd />}
           />
           <Route
-            path={`${match.path}/:templateType/:id`}
+            path={`${match.path}/job_template/:id`}
             render={({ match: newRouteMatch }) => (
               <Config>
                 {({ me }) => (
                   <Template
+                    history={history}
+                    location={location}
+                    setBreadcrumb={this.setBreadCrumbConfig}
+                    me={me || {}}
+                    match={newRouteMatch}
+                  />
+                )}
+              </Config>
+            )}
+          />
+          <Route
+            path={`${match.path}/workflow_job_template/:id`}
+            render={({ match: newRouteMatch }) => (
+              <Config>
+                {({ me }) => (
+                  <WorkflowJobTemplate
                     history={history}
                     location={location}
                     setBreadcrumb={this.setBreadCrumbConfig}

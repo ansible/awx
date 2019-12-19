@@ -1,3 +1,4 @@
+---
 clouds:
   vexxhost:
     profile: vexxhost
@@ -19,6 +20,6 @@ clouds:
       password: stack
       project_name: stack
 ansible:
-  use_hostnames: True
-  expand_hostvars: False
-  fail_on_errors: True
+  use_hostnames: true
+  expand_hostvars: false
+  fail_on_errors: true

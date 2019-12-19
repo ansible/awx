@@ -199,8 +199,6 @@ export const Host = shape({
   enabled: bool,
   instance_id: string,
   variables: string,
-  has_active_failures: bool,
-  has_inventory_sources: bool,
   last_job: number,
   last_job_host_summary: number,
 });
@@ -228,4 +226,18 @@ export const User = shape({
   is_system_auditor: bool,
   ldap_dn: string,
   last_login: string,
+});
+
+export const Group = shape({
+  id: number.isRequired,
+  type: oneOf(['group']),
+  url: string,
+  related: shape({}),
+  summary_fields: shape({}),
+  created: string,
+  modified: string,
+  name: string.isRequired,
+  description: string,
+  inventory: number,
+  variables: string,
 });

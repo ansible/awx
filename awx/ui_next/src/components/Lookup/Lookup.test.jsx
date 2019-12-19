@@ -1,11 +1,9 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
-import { createMemoryHistory } from 'history';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import Lookup, { _Lookup } from './Lookup';
-
-let mockData = [{ name: 'foo', id: 1, isChecked: false }];
-const mockColumns = [{ name: 'Name', key: 'name', isSortable: true }];
+import { getQSConfig } from '@util/qs';
+import Lookup from './Lookup';
 
 /**
  * Check that an element is present on the document body
@@ -44,348 +42,118 @@ async function checkInputTagValues(wrapper, expected) {
   });
 }
 
-/**
- * Check lookup modal list for expected values
- * @param {wrapper} enzyme wrapper instance
- * @param {expected} array of [selected, text] pairs describing
- * the expected visible state of the modal data list
- */
-async function checkModalListValues(wrapper, expected) {
-  // fail if modal isn't actually visible
-  checkRootElementPresent('body div[role="dialog"]');
-  // check list item values
-  const rows = await waitForElement(
-    wrapper,
-    'DataListItemRow',
-    el => el.length === expected.length
-  );
-  expect(rows).toHaveLength(expected.length);
-  rows.forEach((el, index) => {
-    const [expectedChecked, expectedText] = expected[index];
-    expect(expectedText).toEqual(el.text());
-    expect(expectedChecked).toEqual(el.find('input').props().checked);
-  });
-}
-
-/**
- * Check lookup modal selection tags for expected values
- * @param {wrapper} enzyme wrapper instance
- * @param {expected} array of expected tag values
- */
-async function checkModalTagValues(wrapper, expected) {
-  // fail if modal isn't actually visible
-  checkRootElementPresent('body div[role="dialog"]');
-  // check modal chip values
-  const chips = await waitForElement(
-    wrapper,
-    'Modal Chip span',
-    el => el.length === expected.length
-  );
-  expect(chips).toHaveLength(expected.length);
-  chips.forEach((el, index) => {
-    expect(el.text()).toEqual(expected[index]);
-  });
-}
-
-describe('<Lookup multiple/>', () => {
-  let wrapper;
-  let onChange;
-
-  beforeEach(() => {
-    const mockSelected = [{ name: 'foo', id: 1, url: '/api/v2/item/1' }];
-    onChange = jest.fn();
-    document.body.innerHTML = '';
-    wrapper = mountWithContexts(
-      <Lookup
-        multiple
-        lookupHeader="Foo Bar"
-        name="foobar"
-        value={mockSelected}
-        onLookupSave={onChange}
-        getItems={() => ({
-          data: {
-            count: 2,
-            results: [
-              ...mockSelected,
-              { name: 'bar', id: 2, url: '/api/v2/item/2' },
-            ],
-          },
-        })}
-        columns={mockColumns}
-        sortedColumnKey="name"
-      />
-    );
-  });
-
-  test('Initially renders succesfully', () => {
-    expect(wrapper.find('Lookup')).toHaveLength(1);
-  });
-
-  test('Expected items are shown', async done => {
-    expect(wrapper.find('Lookup')).toHaveLength(1);
-    await checkInputTagValues(wrapper, ['foo']);
-    done();
-  });
-
-  test('Open and close modal', async done => {
-    checkRootElementNotPresent('body div[role="dialog"]');
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    checkRootElementPresent('body div[role="dialog"]');
-    // This check couldn't pass unless api response was formatted properly
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    wrapper.find('Modal button[aria-label="Close"]').simulate('click');
-    checkRootElementNotPresent('body div[role="dialog"]');
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    checkRootElementPresent('body div[role="dialog"]');
-    wrapper
-      .find('Modal button')
-      .findWhere(e => e.text() === 'Cancel')
-      .first()
-      .simulate('click');
-    checkRootElementNotPresent('body div[role="dialog"]');
-    done();
-  });
-
-  test('Add item with checkbox then save', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    wrapper
-      .find('DataListItemRow')
-      .findWhere(el => el.text() === 'bar')
-      .find('input[type="checkbox"]')
-      .simulate('change');
-    await checkModalListValues(wrapper, [[true, 'foo'], [true, 'bar']]);
-    wrapper
-      .find('Modal button')
-      .findWhere(e => e.text() === 'Save')
-      .first()
-      .simulate('click');
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange.mock.calls[0][0].map(({ name }) => name)).toEqual([
-      'foo',
-      'bar',
-    ]);
-    done();
-  });
-
-  test('Add item with checkbox then cancel', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    wrapper
-      .find('DataListItemRow')
-      .findWhere(el => el.text() === 'bar')
-      .find('input[type="checkbox"]')
-      .simulate('change');
-    await checkModalListValues(wrapper, [[true, 'foo'], [true, 'bar']]);
-    wrapper
-      .find('Modal button')
-      .findWhere(e => e.text() === 'Cancel')
-      .first()
-      .simulate('click');
-    expect(onChange).toHaveBeenCalledTimes(0);
-    await checkInputTagValues(wrapper, ['foo']);
-    done();
-  });
-
-  test('Remove item with checkbox', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, ['foo']);
-    wrapper
-      .find('DataListItemRow')
-      .findWhere(el => el.text() === 'foo')
-      .find('input[type="checkbox"]')
-      .simulate('change');
-    await checkModalListValues(wrapper, [[false, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, []);
-    done();
-  });
-
-  test('Remove item with selected icon button', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, ['foo']);
-    wrapper
-      .find('Modal Chip')
-      .findWhere(el => el.text() === 'foo')
-      .first()
-      .find('button')
-      .simulate('click');
-    await checkModalListValues(wrapper, [[false, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, []);
-    done();
-  });
-
-  test('Remove item with input group button', async done => {
-    await checkInputTagValues(wrapper, ['foo']);
-    wrapper
-      .find('Lookup InputGroup Chip')
-      .findWhere(el => el.text() === 'foo')
-      .first()
-      .find('button')
-      .simulate('click');
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith([], 'foobar');
-    done();
-  });
-});
+const QS_CONFIG = getQSConfig('test', {});
+const TestList = () => <div />;
 
 describe('<Lookup />', () => {
   let wrapper;
   let onChange;
 
+  async function mountWrapper() {
+    const mockSelected = [{ name: 'foo', id: 1, url: '/api/v2/item/1' }];
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Lookup
+          id="test"
+          multiple
+          header="Foo Bar"
+          value={mockSelected}
+          onChange={onChange}
+          qsConfig={QS_CONFIG}
+          renderOptionsList={({ state, dispatch, canDelete }) => (
+            <TestList
+              id="options-list"
+              state={state}
+              dispatch={dispatch}
+              canDelete={canDelete}
+            />
+          )}
+        />
+      );
+    });
+    return wrapper;
+  }
+
   beforeEach(() => {
-    const mockSelected = { name: 'foo', id: 1, url: '/api/v2/item/1' };
     onChange = jest.fn();
     document.body.innerHTML = '';
-    wrapper = mountWithContexts(
-      <Lookup
-        lookupHeader="Foo Bar"
-        name="foobar"
-        value={mockSelected}
-        onLookupSave={onChange}
-        getItems={() => ({
-          data: {
-            count: 2,
-            results: [
-              mockSelected,
-              { name: 'bar', id: 2, url: '/api/v2/item/2' },
-            ],
-          },
-        })}
-        columns={mockColumns}
-        sortedColumnKey="name"
-      />
-    );
   });
 
-  test('Initially renders succesfully', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should render succesfully', async () => {
+    wrapper = await mountWrapper();
     expect(wrapper.find('Lookup')).toHaveLength(1);
   });
 
-  test('Expected items are shown', async done => {
+  test('should show selected items', async () => {
+    wrapper = await mountWrapper();
     expect(wrapper.find('Lookup')).toHaveLength(1);
     await checkInputTagValues(wrapper, ['foo']);
-    done();
   });
 
-  test('Open and close modal', async done => {
+  test('should open and close modal', async () => {
+    wrapper = await mountWrapper();
     checkRootElementNotPresent('body div[role="dialog"]');
     wrapper.find('button[aria-label="Search"]').simulate('click');
     checkRootElementPresent('body div[role="dialog"]');
-    // This check couldn't pass unless api response was formatted properly
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    wrapper.find('Modal button[aria-label="Close"]').simulate('click');
-    checkRootElementNotPresent('body div[role="dialog"]');
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    checkRootElementPresent('body div[role="dialog"]');
+    const list = wrapper.find('TestList');
+    expect(list).toHaveLength(1);
+    expect(list.prop('state')).toEqual({
+      selectedItems: [{ id: 1, name: 'foo', url: '/api/v2/item/1' }],
+      value: [{ id: 1, name: 'foo', url: '/api/v2/item/1' }],
+      multiple: true,
+      isModalOpen: true,
+      required: false,
+    });
+    expect(list.prop('dispatch')).toBeTruthy();
+    expect(list.prop('canDelete')).toEqual(true);
     wrapper
       .find('Modal button')
       .findWhere(e => e.text() === 'Cancel')
       .first()
       .simulate('click');
     checkRootElementNotPresent('body div[role="dialog"]');
-    done();
   });
 
-  test('Change selected item with radio control then save', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, ['foo']);
+  test('should remove item when X button clicked', async () => {
+    wrapper = await mountWrapper();
+    await checkInputTagValues(wrapper, ['foo']);
     wrapper
-      .find('DataListItemRow')
-      .findWhere(el => el.text() === 'bar')
-      .find('input[type="radio"]')
-      .simulate('change');
-    await checkModalListValues(wrapper, [[false, 'foo'], [true, 'bar']]);
-    await checkModalTagValues(wrapper, ['bar']);
-    wrapper
-      .find('Modal button')
-      .findWhere(e => e.text() === 'Save')
+      .find('Lookup InputGroup Chip')
+      .findWhere(el => el.text() === 'foo')
       .first()
-      .simulate('click');
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const [[{ name }]] = onChange.mock.calls;
-    expect(name).toEqual('bar');
-    done();
-  });
-
-  test('Change selected item with checkbox then cancel', async done => {
-    wrapper.find('button[aria-label="Search"]').simulate('click');
-    await checkModalListValues(wrapper, [[true, 'foo'], [false, 'bar']]);
-    await checkModalTagValues(wrapper, ['foo']);
-    wrapper
-      .find('DataListItemRow')
-      .findWhere(el => el.text() === 'bar')
-      .find('input[type="radio"]')
-      .simulate('change');
-    await checkModalListValues(wrapper, [[false, 'foo'], [true, 'bar']]);
-    await checkModalTagValues(wrapper, ['bar']);
-    wrapper
-      .find('Modal button')
-      .findWhere(e => e.text() === 'Cancel')
-      .first()
-      .simulate('click');
-    expect(onChange).toHaveBeenCalledTimes(0);
-    done();
-  });
-
-  test('should re-fetch data when URL params change', async done => {
-    mockData = [{ name: 'foo', id: 1, isChecked: false }];
-    const history = createMemoryHistory({
-      initialEntries: ['/organizations/add'],
-    });
-    const getItems = jest.fn();
-    const LookupWrapper = mountWithContexts(
-      <_Lookup
-        multiple
-        name="foo"
-        lookupHeader="Foo Bar"
-        onLookupSave={() => {}}
-        value={mockData}
-        columns={mockColumns}
-        sortedColumnKey="name"
-        getItems={getItems}
-        location={{ history }}
-        i18n={{ _: val => val.toString() }}
-      />
-    );
-    expect(getItems).toHaveBeenCalledTimes(1);
-    history.push('organizations/add?page=2');
-    LookupWrapper.setProps({
-      location: { history },
-    });
-    LookupWrapper.update();
-    expect(getItems).toHaveBeenCalledTimes(2);
-    done();
-  });
-
-  test('should clear its query params when closed', async () => {
-    mockData = [{ name: 'foo', id: 1, isChecked: false }];
-    const history = createMemoryHistory({
-      initialEntries: ['/organizations/add?inventory.name=foo&bar=baz'],
-    });
-    wrapper = mountWithContexts(
-      <_Lookup
-        multiple
-        name="foo"
-        lookupHeader="Foo Bar"
-        onLookupSave={() => {}}
-        value={mockData}
-        columns={mockColumns}
-        sortedColumnKey="name"
-        getItems={() => {}}
-        location={{ history }}
-        history={history}
-        qsNamespace="inventory"
-        i18n={{ _: val => val.toString() }}
-      />
-    );
-    wrapper
-      .find('InputGroup Button')
-      .at(0)
       .invoke('onClick')();
-    wrapper.find('Modal').invoke('onClose')();
-    expect(history.location.search).toEqual('?bar=baz');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith([]);
+  });
+
+  test('should pass canDelete false if required single select', async () => {
+    await act(async () => {
+      const mockSelected = { name: 'foo', id: 1, url: '/api/v2/item/1' };
+      wrapper = mountWithContexts(
+        <Lookup
+          id="test"
+          header="Foo Bar"
+          required
+          value={mockSelected}
+          onChange={onChange}
+          qsConfig={QS_CONFIG}
+          renderOptionsList={({ state, dispatch, canDelete }) => (
+            <TestList
+              id="options-list"
+              state={state}
+              dispatch={dispatch}
+              canDelete={canDelete}
+            />
+          )}
+        />
+      );
+    });
+    wrapper.find('button[aria-label="Search"]').simulate('click');
+    const list = wrapper.find('TestList');
+    expect(list.prop('canDelete')).toEqual(false);
   });
 });

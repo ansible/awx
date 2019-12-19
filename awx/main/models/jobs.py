@@ -634,7 +634,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         else:
             # If for some reason we can't count the hosts then lets assume the impact as forks
             if self.inventory is not None:
-                count_hosts = self.inventory.hosts.count()
+                count_hosts = self.inventory.total_hosts
                 if self.job_slice_count > 1:
                     # Integer division intentional
                     count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
@@ -1106,8 +1106,8 @@ class SystemJobOptions(BaseModel):
     SYSTEM_JOB_TYPE = [
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('clearsessions', _('Removes expired browser sessions from the database')),
-        ('cleartokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
+        ('cleanup_sessions', _('Removes expired browser sessions from the database')),
+        ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens'))
     ]
 
     class Meta:
@@ -1182,18 +1182,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
-        if 'days' in data:
-            try:
-                if type(data['days']) is bool:
-                    raise ValueError
-                if float(data['days']) != int(data['days']):
-                    raise ValueError
-                days = int(data['days'])
-                if days < 0:
-                    raise ValueError
-            except ValueError:
-                errors_list.append(_("days must be a positive integer."))
-                rejected['days'] = data.pop('days')
+        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+            if 'days' in data:
+                try:
+                    if isinstance(data['days'], (bool, type(None))):
+                        raise ValueError
+                    if float(data['days']) != int(data['days']):
+                        raise ValueError
+                    days = int(data['days'])
+                    if days < 0:
+                        raise ValueError
+                except ValueError:
+                    errors_list.append(_("days must be a positive integer."))
+                    rejected['days'] = data.pop('days')
 
         if errors_list:
             errors['extra_vars'] = errors_list

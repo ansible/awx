@@ -39,11 +39,6 @@
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
 
-- name: Delete any existing management pod
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
-
 - name: Wait for scale down
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} get pods \
@@ -55,62 +50,71 @@
   until: (tower_pods.stdout | trim) == '0'
   retries: 30
 
-- name: Template management pod
-  set_fact:
-    management_pod: "{{ lookup('template', 'management-pod.yml.j2') }}"
+- name: Setup Management Pod & Restore (External DB)
+  block:
+    - name: Delete any existing management pod
+      shell: |
+        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          delete pod ansible-tower-management --grace-period=0 --ignore-not-found
 
-- name: Create management pod
-  shell: |
-    echo {{ management_pod | quote }} | {{ kubectl_or_oc }} apply -f -
+    - name: Template management pod
+      set_fact:
+        management_pod: "{{ lookup('template', 'management-pod.yml.j2') }}"
 
-- name: Wait for management pod to start
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      get pod ansible-tower-management -o jsonpath="{.status.phase}"
-  register: result
-  until: result.stdout == "Running"
-  retries: 60
-  delay: 10
+    - name: Create management pod
+      shell: |
+        echo {{ management_pod | quote }} | {{ kubectl_or_oc }} apply -f -
 
-- name: Temporarily grant createdb role
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        scl enable rh-postgresql10 -- psql \
-        --host={{ pg_hostname | default('postgresql') }} \
-        --port={{ pg_port | default('5432') }} \
-        --username=postgres \
-        --dbname=template1 -c 'ALTER USER {{ pg_username }} CREATEDB;'"
-  no_log: true
+    - name: Wait for management pod to start
+      shell: |
+        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          get pod ansible-tower-management -o jsonpath="{.status.phase}"
+      register: result
+      until: result.stdout == "Running"
+      retries: 60
+      delay: 10
+
+    - name: Perform a PostgreSQL restore (for External Postgres)
+      shell: |
+        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
+            scl enable rh-postgresql10 -- psql \
+            --host={{ pg_hostname | default('postgresql') }} \
+            --port={{ pg_port | default('5432') }} \
+            --username={{ pg_username }} \
+            --dbname=template1" < {{ playbook_dir }}/tower-openshift-restore/tower.db
+      no_log: true
+
+    - name: Delete management pod
+      shell: |
+        {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+  when: pg_hostname is defined or pg_hostname != ''
+
+- name: Restore (Containerized DB)
+  block:
+    - name: Temporarily grant createdb role
+      shell: |
+        POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+        {{ kubectl_or_oc }} exec $POD -n {{ kubernetes_namespace }} -- bash -c "\
+          psql --dbname=template1 -c 'ALTER USER {{ pg_username }} CREATEDB;'"
+
+    - name: Perform a PostgreSQL restore
+      shell: |
+        POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+        {{ kubectl_or_oc }} exec -i $POD -n {{ kubernetes_namespace }} -- bash -c "\
+          psql --dbname=template1" < {{ playbook_dir }}/tower-openshift-restore/tower.db
+      no_log: true
+
+    - name: Revoke createdb role
+      shell: |
+        POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+          get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
+        {{ kubectl_or_oc }} exec $POD -n {{ kubernetes_namespace }} -- bash -c "\
+          psql --dbname=template1 -c 'ALTER USER {{ pg_username }} NOCREATEDB;'"
   when: pg_hostname is not defined or pg_hostname == ''
-
-- name: Perform a PostgreSQL restore
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        scl enable rh-postgresql10 -- psql \
-        --host={{ pg_hostname | default('postgresql') }} \
-        --port={{ pg_port | default('5432') }} \
-        --username={{ pg_username }} \
-        --dbname=template1" < {{ playbook_dir }}/tower-openshift-restore/tower.db
-  no_log: true
-
-- name: Revoke createdb role
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password | quote }} \
-        scl enable rh-postgresql10 -- psql \
-        --host={{ pg_hostname | default('postgresql') }} \
-        --port={{ pg_port | default('5432') }} \
-        --username=postgres \
-        --dbname=template1 -c 'ALTER USER {{ pg_username }} NOCREATEDB;'"
-  no_log: true
-  when: pg_hostname is not defined or pg_hostname == ''
-
-- name: Delete management pod
-  shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
 
 - name: Remove restore directory
   file:

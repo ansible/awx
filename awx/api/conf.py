@@ -62,3 +62,15 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
 )
+register(
+    'LOGIN_REDIRECT_OVERRIDE',
+    field_class=fields.CharField,
+    allow_blank=True,
+    required=False,
+    default='',
+    label=_('Login redirect override URL'),
+    help_text=_('URL to which unauthorized users will be redirected to log in. '
+                'If blank, users will be sent to the Tower login page.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)

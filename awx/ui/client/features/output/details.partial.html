@@ -12,9 +12,9 @@
             class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.cancelJob()"
-            ng-show="vm.status.value === 'Pending' ||
-                     vm.status.value === 'Waiting' ||
-                     vm.status.value === 'Running'"
+            ng-show="vm.status.unmapped === 'pending' ||
+                     vm.status.unmapped === 'waiting' ||
+                     vm.status.unmapped === 'running'"
             aw-tool-tip="{{:: vm.strings.get('tooltips.CANCEL') }}"
             data-original-title=""
             title="">
@@ -27,11 +27,11 @@
             data-placement="top"
             ng-click="vm.deleteJob()"
             ng-show="vm.canDelete && (
-                   vm.status.value === 'New' ||
-                   vm.status.value === 'Successful' ||
-                   vm.status.value === 'Failed' ||
-                   vm.status.value === 'Error' ||
-                   vm.status.value === 'Canceled')"
+                   vm.status.unmapped === 'new' ||
+                   vm.status.unmapped === 'successful' ||
+                   vm.status.unmapped === 'failed' ||
+                   vm.status.unmapped === 'error' ||
+                   vm.status.unmapped === 'canceled')"
             aw-tool-tip="{{:: vm.strings.get('tooltips.DELETE') }}"
             data-original-title=""
             title="">

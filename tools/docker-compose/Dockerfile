@@ -16,6 +16,7 @@ RUN dnf -y update && \
   curl \
   gcc \
   gcc-c++ \
+  gettext \
   git-core \
   glibc-langpack-en \
   krb5-workstation \
@@ -102,10 +103,7 @@ RUN cd /usr/local/bin && \
 ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
 RUN dnf install -y kubectl
 
-RUN dnf -y remove *-devel \
-  gcc \
-  gcc-c++ \
-  nodejs
+RUN dnf -y remove nodejs
 
 RUN dnf -y clean all
 
@@ -129,7 +127,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 
 # Pre-create things that we need to write to
-RUN for dir in /var/lib/awx/ /var/log/tower/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+RUN for dir in /var/lib/awx/ /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
 RUN for file in /etc/passwd /etc/supervisord.conf \

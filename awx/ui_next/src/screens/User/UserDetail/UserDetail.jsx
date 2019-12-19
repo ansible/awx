@@ -42,7 +42,11 @@ class UserDetail extends Component {
     return (
       <CardBody>
         <DetailList>
-          <Detail label={i18n._(t`Username`)} value={username} />
+          <Detail
+            label={i18n._(t`Username`)}
+            value={username}
+            dataCy="user-detail-username"
+          />
           <Detail label={i18n._(t`Email`)} value={email} />
           <Detail label={i18n._(t`First Name`)} value={`${first_name}`} />
           <Detail label={i18n._(t`Last Name`)} value={`${last_name}`} />

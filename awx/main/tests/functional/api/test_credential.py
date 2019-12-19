@@ -1439,3 +1439,15 @@ def test_create_credential_with_invalid_url_xfail(post, organization, admin, url
     assert response.status_code == status
     if status != 201:
         assert response.data['inputs']['server_url'] == [msg]
+
+
+@pytest.mark.django_db
+def test_external_credential_rbac_test_endpoint(post, alice, external_credential):
+    url = reverse('api:credential_external_test', kwargs={'pk': external_credential.pk})
+    data = {'metadata': {'key': 'some_key'}}
+
+    external_credential.read_role.members.add(alice)
+    assert post(url, data, alice).status_code == 403
+
+    external_credential.use_role.members.add(alice)
+    assert post(url, data, alice).status_code == 202

@@ -27,7 +27,7 @@ class Inventories extends Component {
     };
   }
 
-  setBreadCrumbConfig = inventory => {
+  setBreadCrumbConfig = (inventory, group) => {
     const { i18n } = this.props;
     if (!inventory) {
       return;
@@ -57,6 +57,15 @@ class Inventories extends Component {
       ),
       [`/inventories/inventory/${inventory.id}/sources`]: i18n._(t`Sources`),
       [`/inventories/inventory/${inventory.id}/groups`]: i18n._(t`Groups`),
+      [`/inventories/inventory/${inventory.id}/groups/add`]: i18n._(
+        t`Create New Group`
+      ),
+      [`/inventories/inventory/${inventory.id}/groups/${group &&
+        group.id}`]: `${group && group.name}`,
+      [`/inventories/inventory/${inventory.id}/groups/${group &&
+        group.id}/details`]: i18n._(t`Group Details`),
+      [`/inventories/inventory/${inventory.id}/groups/${group &&
+        group.id}/edit`]: i18n._(t`Edit Details`),
     };
     this.setState({ breadcrumbConfig });
   };

@@ -481,3 +481,12 @@ def test_create_with_undefined_template_variable_xfail(post, admin):
     }, admin)
     assert response.status_code == 400
     assert "'api_tolkien' is undefined" in json.dumps(response.data)
+
+
+@pytest.mark.django_db
+def test_credential_type_rbac_external_test(post, alice, admin, credentialtype_external):
+    # only admins may use the credential type test endpoint
+    url = reverse('api:credential_type_external_test', kwargs={'pk': credentialtype_external.pk})
+    data = {'inputs': {}, 'metadata': {}}
+    assert post(url, data, admin).status_code == 202
+    assert post(url, data, alice).status_code == 403

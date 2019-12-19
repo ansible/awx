@@ -92,11 +92,6 @@ objects:
               secretKeyRef:
                 key: database-password
                 name: ${DATABASE_SERVICE_NAME}
-          - name: POSTGRESQL_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: database-admin-password
-                name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_DATABASE
             valueFrom:
               secretKeyRef:
@@ -175,12 +170,6 @@ parameters:
   from: '[a-zA-Z0-9]{16}'
   generate: expression
   name: POSTGRESQL_PASSWORD
-  required: true
-- description: Password for the PostgreSQL connection admin user.
-  displayName: PostgreSQL Connection Admin Password
-  from: '[a-zA-Z0-9]{16}'
-  generate: expression
-  name: POSTGRESQL_ADMIN_PASSWORD
   required: true
 - description: Name of the PostgreSQL database accessed.
   displayName: PostgreSQL Database Name

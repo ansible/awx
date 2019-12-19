@@ -40,71 +40,72 @@ const ListGroup = styled.span`
   }
 `;
 
-class OrganizationListItem extends React.Component {
-  static propTypes = {
-    organization: Organization.isRequired,
-    detailUrl: string.isRequired,
-    isSelected: bool.isRequired,
-    onSelect: func.isRequired,
-  };
-
-  render() {
-    const { organization, isSelected, onSelect, detailUrl, i18n } = this.props;
-    const labelId = `check-action-${organization.id}`;
-    return (
-      <DataListItem key={organization.id} aria-labelledby={labelId}>
-        <DataListItemRow>
-          <DataListCheck
-            id={`select-organization-${organization.id}`}
-            checked={isSelected}
-            onChange={onSelect}
-            aria-labelledby={labelId}
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="divider">
-                <VerticalSeparator />
-                <span id={labelId}>
-                  <Link to={`${detailUrl}`}>
-                    <b>{organization.name}</b>
-                  </Link>
-                </span>
-              </DataListCell>,
-              <DataListCell key="related-field-counts">
-                <ListGroup>
-                  {i18n._(t`Members`)}
-                  <Badge isRead>
-                    {organization.summary_fields.related_field_counts.users}
-                  </Badge>
-                </ListGroup>
-                <ListGroup>
-                  {i18n._(t`Teams`)}
-                  <Badge isRead>
-                    {organization.summary_fields.related_field_counts.teams}
-                  </Badge>
-                </ListGroup>
-              </DataListCell>,
-              <ActionButtonCell lastcolumn="true" key="action">
-                {organization.summary_fields.user_capabilities.edit && (
-                  <Tooltip
-                    content={i18n._(t`Edit Organization`)}
-                    position="top"
+function OrganizationListItem({
+  organization,
+  isSelected,
+  onSelect,
+  detailUrl,
+  i18n,
+}) {
+  const labelId = `check-action-${organization.id}`;
+  return (
+    <DataListItem key={organization.id} aria-labelledby={labelId}>
+      <DataListItemRow>
+        <DataListCheck
+          id={`select-organization-${organization.id}`}
+          checked={isSelected}
+          onChange={onSelect}
+          aria-labelledby={labelId}
+        />
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key="divider">
+              <VerticalSeparator />
+              <span id={labelId}>
+                <Link to={`${detailUrl}`}>
+                  <b>{organization.name}</b>
+                </Link>
+              </span>
+            </DataListCell>,
+            <DataListCell key="related-field-counts">
+              <ListGroup>
+                {i18n._(t`Members`)}
+                <Badge isRead>
+                  {organization.summary_fields.related_field_counts.users}
+                </Badge>
+              </ListGroup>
+              <ListGroup>
+                {i18n._(t`Teams`)}
+                <Badge isRead>
+                  {organization.summary_fields.related_field_counts.teams}
+                </Badge>
+              </ListGroup>
+            </DataListCell>,
+            <ActionButtonCell lastcolumn="true" key="action">
+              {organization.summary_fields.user_capabilities.edit && (
+                <Tooltip content={i18n._(t`Edit Organization`)} position="top">
+                  <ListActionButton
+                    variant="plain"
+                    component={Link}
+                    to={`/organizations/${organization.id}/edit`}
                   >
-                    <ListActionButton
-                      variant="plain"
-                      component={Link}
-                      to={`/organizations/${organization.id}/edit`}
-                    >
-                      <PencilAltIcon />
-                    </ListActionButton>
-                  </Tooltip>
-                )}
-              </ActionButtonCell>,
-            ]}
-          />
-        </DataListItemRow>
-      </DataListItem>
-    );
-  }
+                    <PencilAltIcon />
+                  </ListActionButton>
+                </Tooltip>
+              )}
+            </ActionButtonCell>,
+          ]}
+        />
+      </DataListItemRow>
+    </DataListItem>
+  );
 }
+
+OrganizationListItem.propTypes = {
+  organization: Organization.isRequired,
+  detailUrl: string.isRequired,
+  isSelected: bool.isRequired,
+  onSelect: func.isRequired,
+};
+
 export default withI18n()(OrganizationListItem);

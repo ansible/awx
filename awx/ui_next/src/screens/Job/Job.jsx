@@ -76,8 +76,8 @@ class Job extends Component {
     }
 
     const tabsArray = [
-      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 0 },
-      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 1 },
+      { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
+      { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
     ];
 
     let cardHeader = (
@@ -115,7 +115,7 @@ class Job extends Component {
     if (lookup && job) {
       return (
         <Switch>
-          <Redirect from="jobs/:id" to={`/jobs/${jobType}/:id/details`} />
+          <Redirect from="jobs/:id" to={`/jobs/${jobType}/:id/output`} />
           <Redirect
             from="jobs/:id/details"
             to={`/jobs/${jobType}/:id/details`}

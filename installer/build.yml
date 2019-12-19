@@ -3,5 +3,5 @@
   hosts: all
   gather_facts: false
   roles:
-    - { role: image_build }
-    - { role: image_push, when: "docker_registry is defined" }
+    - {role: image_build}
+    - {role: image_push, when: "docker_registry is defined"}

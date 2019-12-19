@@ -283,11 +283,11 @@ mountWithContexts(<Organization />< {
 
 ## Internationalization
 
-Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) project.  [Official documentation here](https://lingui.js.org/).  We use this libary to mark our strings for translation.  If you want to see this in action you'll need to take the following steps:
+Internationalization leans on the [lingui](https://github.com/lingui/js-lingui) project.  [Official documentation here](https://lingui.js.org/).  We use this library to mark our strings for translation.  If you want to see this in action you'll need to take the following steps:
 
 ### Marking strings for translation and replacement in the UI
 
-The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been traslated.  For consistency and ease of use, we have consolidated on one pattern for the codebase.  To set strings to be translated in the UI:
+The lingui library provides various React helpers for dealing with both marking strings for translation, and replacing strings that have been translated.  For consistency and ease of use, we have consolidated on one pattern for the codebase.  To set strings to be translated in the UI:
 
 - import the withI18n function and wrap the export of your component in it (i.e. `export default withI18n()(Foo)`)
 - doing the above gives you access to the i18n object on props.  Make sure to put it in the scope of the function that contains strings needed to be translated (i.e. `const { i18n } = this.props;`)

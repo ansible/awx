@@ -71,6 +71,7 @@ setup(
     extras_require={
         'formatting': ['jq'],
         'websockets': ['websocket-client>0.54.0'],
+        'crypto': ['cryptography']
     },
     entry_points={
         'console_scripts': [

@@ -4,7 +4,7 @@
     registry: "{{ docker_registry }}"
     username: "{{ docker_registry_username }}"
     password: "{{ docker_registry_password | quote }}"
-    reauthorize: yes
+    reauthorize: true
   when: docker_registry is defined and docker_registry_password is defined
   delegate_to: localhost
 
@@ -30,7 +30,7 @@
         name: "{{ web_image }}"
         repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
         tag: "{{ item }}"
-        push: yes
+        push: true
       with_items:
         - "latest"
         - "{{ awx_version }}"
@@ -40,7 +40,7 @@
         name: "{{ task_image }}"
         repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
         tag: "{{ item }}"
-        push: yes
+        push: true
       with_items:
         - "latest"
         - "{{ awx_version }}"

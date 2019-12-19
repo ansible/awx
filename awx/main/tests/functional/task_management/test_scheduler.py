@@ -4,6 +4,7 @@ import json
 from datetime import timedelta
 
 from awx.main.scheduler import TaskManager
+from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import encrypt_field
 from awx.main.models import WorkflowJobTemplate, JobTemplate
 
@@ -326,3 +327,59 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1
     assert len(iu) == 1
+
+
+@pytest.mark.django_db
+def test_job_not_blocking_project_update(default_instance_group, job_template_factory):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job"])
+    job = objects.jobs["job"]
+    job.instance_group = default_instance_group
+    job.status = "running"
+    job.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        task_manager = TaskManager()
+        task_manager._schedule()
+
+        proj = objects.project
+        project_update = proj.create_project_update()
+        project_update.instance_group = default_instance_group
+        project_update.status = "pending"
+        project_update.save()
+        assert not task_manager.is_job_blocked(project_update)
+
+        dependency_graph = DependencyGraph(None)
+        dependency_graph.add_job(job)
+        assert not dependency_graph.is_job_blocked(project_update)
+
+
+@pytest.mark.django_db
+def test_job_not_blocking_inventory_update(default_instance_group, job_template_factory, inventory_source_factory):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job"])
+    job = objects.jobs["job"]
+    job.instance_group = default_instance_group
+    job.status = "running"
+    job.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        task_manager = TaskManager()
+        task_manager._schedule()
+
+        inv = objects.inventory
+        inv_source = inventory_source_factory("ec2")
+        inv_source.source = "ec2"
+        inv.inventory_sources.add(inv_source)
+        inventory_update = inv_source.create_inventory_update()
+        inventory_update.instance_group = default_instance_group
+        inventory_update.status = "pending"
+        inventory_update.save()
+
+        assert not task_manager.is_job_blocked(inventory_update)
+
+        dependency_graph = DependencyGraph(None)
+        dependency_graph.add_job(job)
+        assert not dependency_graph.is_job_blocked(inventory_update)

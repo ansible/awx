@@ -13,8 +13,7 @@ import urllib.parse
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from django.db.migrations.executor import MigrationExecutor
-from django.db import IntegrityError, connection
+from django.db import IntegrityError
 from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
@@ -24,6 +23,7 @@ from django.urls import reverse, resolve
 
 from awx.main.models import ActivityStream
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
+from awx.main.utils.db import migration_in_progress_check_or_relase
 from awx.conf import fields, register
 
 
@@ -213,8 +213,7 @@ class URLModificationMiddleware(MiddlewareMixin):
 class MigrationRanCheckMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        executor = MigrationExecutor(connection)
-        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-        if bool(plan) and \
-                getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
+        if migration_in_progress_check_or_relase():
+            if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
+                return
             return redirect(reverse("ui:migrations_notran"))

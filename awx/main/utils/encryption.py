@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import base64
 import hashlib
 import logging
@@ -35,7 +37,7 @@ class Fernet256(Fernet):
         self._backend = backend
 
 
-def get_encryption_key(field_name, pk=None):
+def get_encryption_key(field_name, pk=None, secret_key=None):
     '''
     Generate key for encrypted password based on field name,
     ``settings.SECRET_KEY``, and instance pk (if available).
@@ -46,19 +48,58 @@ def get_encryption_key(field_name, pk=None):
     '''
     from django.conf import settings
     h = hashlib.sha512()
-    h.update(smart_bytes(settings.SECRET_KEY))
+    h.update(smart_bytes(secret_key or settings.SECRET_KEY))
     if pk is not None:
         h.update(smart_bytes(str(pk)))
     h.update(smart_bytes(field_name))
     return base64.urlsafe_b64encode(h.digest())
 
 
-def encrypt_value(value, pk=None):
+def encrypt_value(value, pk=None, secret_key=None):
+    #
+    # ⚠️  D-D-D-DANGER ZONE ⚠️
+    #
+    # !!! BEFORE USING THIS FUNCTION PLEASE READ encrypt_field !!!
+    #
     TransientField = namedtuple('TransientField', ['pk', 'value'])
-    return encrypt_field(TransientField(pk=pk, value=value), 'value')
+    return encrypt_field(TransientField(pk=pk, value=value), 'value', secret_key=secret_key)
 
 
-def encrypt_field(instance, field_name, ask=False, subfield=None):
+def encrypt_field(instance, field_name, ask=False, subfield=None, secret_key=None):
+    #
+    # ⚠️  D-D-D-DANGER ZONE ⚠️
+    #
+    # !!! PLEASE READ BEFORE USING THIS FUNCTION ANYWHERE !!!
+    #
+    # You should know that this function is used in various places throughout
+    # AWX for symmetric encryption - generally it's used to encrypt sensitive
+    # values that we store in the AWX database (such as SSH private keys for
+    # credentials).
+    #
+    # If you're reading this function's code because you're thinking about
+    # using it to encrypt *something new*, please remember that AWX has
+    # official support for *regenerating* the SECRET_KEY (on which the
+    # symmetric key is based):
+    #
+    # $ awx-manage regenerate_secret_key
+    # $ setup.sh -k
+    #
+    # ...so you'll need to *also* add code to support the
+    # migration/re-encryption of these values (the code in question lives in
+    # `awx.main.management.commands.regenerate_secret_key`):
+    #
+    # For example, if you find that you're adding a new database column that is
+    # encrypted, in addition to calling `encrypt_field` in the appropriate
+    # places, you would also need to update the `awx-manage regenerate_secret_key`
+    # so that values are properly migrated when the SECRET_KEY changes.
+    #
+    # This process *generally* involves adding Python code to the
+    # `regenerate_secret_key` command, i.e.,
+    #
+    # 1.  Query the database for existing encrypted values on the appropriate object(s)
+    # 2.  Decrypting them using the *old* SECRET_KEY
+    # 3.  Storing newly encrypted values using the *newly generated* SECRET_KEY
+    #
     '''
     Return content of the given instance and field name encrypted.
     '''
@@ -76,7 +117,11 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
     value = smart_str(value)
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
-    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
+    key = get_encryption_key(
+        field_name,
+        getattr(instance, 'pk', None),
+        secret_key=secret_key
+    )
     f = Fernet256(key)
     encrypted = f.encrypt(smart_bytes(value))
     b64data = smart_str(base64.b64encode(encrypted))
@@ -99,7 +144,7 @@ def decrypt_value(encryption_key, value):
     return smart_str(value)
 
 
-def decrypt_field(instance, field_name, subfield=None):
+def decrypt_field(instance, field_name, subfield=None, secret_key=None):
     '''
     Return content of the given instance and field name decrypted.
     '''
@@ -115,7 +160,11 @@ def decrypt_field(instance, field_name, subfield=None):
     value = smart_str(value)
     if not value or not value.startswith('$encrypted$'):
         return value
-    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
+    key = get_encryption_key(
+        field_name,
+        getattr(instance, 'pk', None),
+        secret_key=secret_key
+    )
 
     try:
         return smart_str(decrypt_value(key, value))

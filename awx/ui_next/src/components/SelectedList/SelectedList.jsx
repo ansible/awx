@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Split as PFSplit, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { ChipGroup, Chip, CredentialChip } from '../Chip';
+import { ChipGroup, Chip } from '../Chip';
 import VerticalSeparator from '../VerticalSeparator';
 
 const Split = styled(PFSplit)`
@@ -26,34 +26,31 @@ class SelectedList extends Component {
       onRemove,
       displayKey,
       isReadOnly,
-      isCredentialList,
+      renderItemChip,
     } = this.props;
-    const chips = isCredentialList
-      ? selected.map(item => (
-          <CredentialChip
-            key={item.id}
-            isReadOnly={isReadOnly}
-            onClick={() => onRemove(item)}
-            credential={item}
-          >
-            {item[displayKey]}
-          </CredentialChip>
-        ))
-      : selected.map(item => (
-          <Chip
-            key={item.id}
-            isReadOnly={isReadOnly}
-            onClick={() => onRemove(item)}
-          >
-            {item[displayKey]}
-          </Chip>
-        ));
+
+    const renderChip =
+      renderItemChip ||
+      (({ item, removeItem }) => (
+        <Chip key={item.id} onClick={removeItem} isReadOnly={isReadOnly}>
+          {item[displayKey]}
+        </Chip>
+      ));
+
     return (
       <Split>
         <SplitLabelItem>{label}</SplitLabelItem>
         <VerticalSeparator />
         <SplitItem>
-          <ChipGroup numChips={5}>{chips}</ChipGroup>
+          <ChipGroup numChips={5}>
+            {selected.map(item =>
+              renderChip({
+                item,
+                removeItem: () => onRemove(item),
+                canDelete: !isReadOnly,
+              })
+            )}
+          </ChipGroup>
         </SplitItem>
       </Split>
     );
@@ -66,6 +63,7 @@ SelectedList.propTypes = {
   onRemove: PropTypes.func,
   selected: PropTypes.arrayOf(PropTypes.object).isRequired,
   isReadOnly: PropTypes.bool,
+  renderItemChip: PropTypes.func,
 };
 
 SelectedList.defaultProps = {
@@ -73,6 +71,7 @@ SelectedList.defaultProps = {
   label: 'Selected',
   onRemove: () => null,
   isReadOnly: false,
+  renderItemChip: null,
 };
 
 export default SelectedList;

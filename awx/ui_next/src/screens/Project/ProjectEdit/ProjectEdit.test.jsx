@@ -144,8 +144,8 @@ describe('<ProjectEdit />', () => {
       wrapper = mountWithContexts(<ProjectEdit project={projectData} />, {
         context: { router: { history } },
       });
+      wrapper.find('CardCloseButton').simulate('click');
     });
-    wrapper.find('CardCloseButton').simulate('click');
     expect(history.location.pathname).toEqual('/projects/123/details');
   });
 
@@ -157,7 +157,9 @@ describe('<ProjectEdit />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('ProjectEdit button[aria-label="Cancel"]').simulate('click');
+    await act(async () => {
+      wrapper.find('ProjectEdit button[aria-label="Cancel"]').simulate('click');
+    });
     expect(history.location.pathname).toEqual('/projects/123/details');
   });
 });

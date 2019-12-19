@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import HostAdd from './HostAdd';
@@ -7,8 +8,11 @@ import { HostsAPI } from '@api';
 jest.mock('@api');
 
 describe('<HostAdd />', () => {
-  test('handleSubmit should post to api', () => {
-    const wrapper = mountWithContexts(<HostAdd />);
+  test('handleSubmit should post to api', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostAdd />);
+    });
     const updatedHostData = {
       name: 'new name',
       description: 'new description',
@@ -19,21 +23,15 @@ describe('<HostAdd />', () => {
     expect(HostsAPI.create).toHaveBeenCalledWith(updatedHostData);
   });
 
-  test('should navigate to hosts list when cancel is clicked', () => {
+  test('should navigate to hosts list when cancel is clicked', async () => {
     const history = createMemoryHistory({});
-    const wrapper = mountWithContexts(<HostAdd />, {
-      context: { router: { history } },
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostAdd />, {
+        context: { router: { history } },
+      });
     });
-    wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
-    expect(history.location.pathname).toEqual('/hosts');
-  });
-
-  test('should navigate to hosts list when close (x) is clicked', () => {
-    const history = createMemoryHistory({});
-    const wrapper = mountWithContexts(<HostAdd />, {
-      context: { router: { history } },
-    });
-    wrapper.find('button[aria-label="Close"]').prop('onClick')();
+    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(history.location.pathname).toEqual('/hosts');
   });
 
@@ -51,11 +49,14 @@ describe('<HostAdd />', () => {
         ...hostData,
       },
     });
-    const wrapper = mountWithContexts(<HostAdd />, {
-      context: { router: { history } },
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostAdd />, {
+        context: { router: { history } },
+      });
     });
     await waitForElement(wrapper, 'button[aria-label="Save"]');
-    await wrapper.find('HostForm').prop('handleSubmit')(hostData);
+    await wrapper.find('HostForm').invoke('handleSubmit')(hostData);
     expect(history.location.pathname).toEqual('/hosts/5');
   });
 });

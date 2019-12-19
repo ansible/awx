@@ -1,3 +1,4 @@
+---
 - hosts: all
   vars:
     scan_use_checksum: false
@@ -33,4 +34,3 @@
         get_checksum: '{{ scan_use_checksum }}'
         recursive: '{{ scan_use_recursive }}'
       when: scan_file_paths is defined and ansible_os_family == "Windows"
-

@@ -1,3 +1,4 @@
+---
 # Structure for the Elastic Stack docker configuration came from docker-elk:
 # https://github.com/deviantony/docker-elk
 # docker-elk is under the MIT License,
@@ -15,8 +16,8 @@ services:
       - "9300:9300"
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-    # networks: # add back in when a connection to tower_tools is possible
-    #   - docker_elk
+      # networks: # add back in when a connection to tower_tools is possible
+      #   - docker_elk
 
   logstash:
     build: elastic/logstash/

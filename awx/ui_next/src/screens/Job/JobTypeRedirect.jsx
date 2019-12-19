@@ -10,7 +10,7 @@ const NOT_FOUND = 'not found';
 
 class JobTypeRedirect extends Component {
   static defaultProps = {
-    view: 'details',
+    view: 'output',
   };
 
   constructor(props) {

@@ -3,53 +3,46 @@
 - name: openshift_project should be defined
   assert:
     that:
-    - openshift_project is defined and openshift_project != ''
+      - openshift_project is defined and openshift_project != ''
     msg: "Set the value of 'openshift_project' in the inventory file."
 
 - name: openshift_user should be defined
   assert:
     that:
-    - openshift_user is defined and openshift_user != ''
+      - openshift_user is defined and openshift_user != ''
     msg: "Set the value of 'openshift_user' in the inventory file."
 
 - name: openshift_password or openshift_token should be defined
   assert:
     that:
-    - (openshift_password is defined and openshift_password != '') or
-      (openshift_token is defined and openshift_token != '')
+      - (openshift_password is defined and openshift_password != '') or
+        (openshift_token is defined and openshift_token != '')
     msg: "Set the value of 'openshift_password' or 'openshift_token' in the inventory file."
 
 - name: docker_registry should be defined if not using dockerhub
   assert:
     that:
-    - docker_registry is defined and docker_registry != ''
+      - docker_registry is defined and docker_registry != ''
     msg: "Set the value of 'docker_registry' in the inventory file."
   when: dockerhub_base is not defined
 
 - name: docker_registry_repository should be defined if not using dockerhub
   assert:
     that:
-    - docker_registry_repository is defined and docker_registry_repository != ''
+      - docker_registry_repository is defined and docker_registry_repository != ''
     msg: "Set the value of 'docker_registry_repository' in the inventory file."
   when: dockerhub_base is not defined
 
 - name: docker_registry_username should be defined if not using dockerhub
   assert:
     that:
-    - docker_registry_username is defined and docker_registry_username != ''
+      - docker_registry_username is defined and docker_registry_username != ''
     msg: "Set the value of 'docker_registry_username' in the inventory file."
   when: dockerhub_base is not defined
 
 - name: docker_registry_password should be defined
   assert:
     that:
-    - docker_registry_password is defined and docker_registry_password != ''
+      - docker_registry_password is defined and docker_registry_password != ''
     msg: "Set the value of 'docker_registry_password' in the inventory file."
   when: dockerhub_base is not defined
-
-- name: pg_admin_password should be defined
-  assert:
-    that:
-      - pg_admin_password is defined and pg_admin_password != ''
-  when:
-    - pg_hostname is not defined or pg_hostname == ''

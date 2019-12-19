@@ -123,6 +123,22 @@ def project_playbooks():
 
 
 @pytest.fixture
+def run_computed_fields_right_away(request):
+
+    def run_me(inventory_id, should_update_hosts=True):
+        i = Inventory.objects.get(id=inventory_id)
+        i.update_computed_fields(update_hosts=should_update_hosts)
+
+    mocked = mock.patch(
+        'awx.main.signals.update_inventory_computed_fields.delay',
+        new=run_me
+    )
+    mocked.start()
+
+    request.addfinalizer(mocked.stop)
+
+
+@pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
@@ -280,14 +296,21 @@ def credentialtype_external():
         }],
         'required': ['url', 'token', 'key'],
     }
-    external_type = CredentialType(
-        kind='external',
-        managed_by_tower=True,
-        name='External Service',
-        inputs=external_type_inputs
-    )
-    external_type.save()
-    return external_type
+
+    class MockPlugin(object):
+        def backend(self, **kwargs):
+            return 'secret'
+
+    with mock.patch('awx.main.models.credential.CredentialType.plugin', new_callable=PropertyMock) as mock_plugin:
+        mock_plugin.return_value = MockPlugin()
+        external_type = CredentialType(
+            kind='external',
+            managed_by_tower=True,
+            name='External Service',
+            inputs=external_type_inputs
+        )
+        external_type.save()
+        yield external_type
 
 
 @pytest.fixture
