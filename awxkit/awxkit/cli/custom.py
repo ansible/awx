@@ -1,4 +1,5 @@
 import functools
+import json
 
 from six import with_metaclass
 
@@ -539,5 +540,15 @@ class SettingsModify(CustomAction):
 
     def perform(self, key, value):
         self.page.endpoint = self.page.endpoint + 'all/'
-        resp = self.page.patch(**{key: value})
+        patch_value = value
+        if self.is_json(value):
+            patch_value = json.loads(value)
+        resp = self.page.patch(**{key: patch_value})
         return resp.from_json({'key': key, 'value': resp[key]})
+
+    def is_json(self, data):
+        try:
+            json.loads(data)
+        except json.decoder.JSONDecodeError:
+            return False
+        return True

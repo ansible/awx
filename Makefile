@@ -119,7 +119,7 @@ clean-api:
 	rm -rf awx/projects
 
 clean-awxkit:
-	rm -rf awxkit/*.egg-info awxkit/.tox
+	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
 
 # convenience target to assert environment variables are defined
 guard-%:
