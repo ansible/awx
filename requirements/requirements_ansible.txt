@@ -2,7 +2,7 @@ adal==1.2.2               # via msrestazure
 apache-libcloud==2.5.0
 appdirs==1.4.3            # via openstacksdk
 applicationinsights==0.11.9  # via azure-cli-core
-argcomplete==1.10.3       # via azure-cli-core, knack
+argcomplete==1.10.3
 azure-cli-core==2.0.35
 azure-cli-nspkg==3.0.2
 azure-common==1.1.11
@@ -79,11 +79,11 @@ oauthlib==3.1.0           # via requests-oauthlib
 openstacksdk==0.31.1
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
 ovirt-engine-sdk-python==4.3.0
-packaging==19.2
+packaging==20.0
 paramiko==2.7.1           # via azure-cli-core, ncclient
 pbr==5.4.4                # via keystoneauth1, openstacksdk, os-service-types, stevedore
 psutil==5.4.3
-pyasn1-modules==0.2.7     # via google-auth
+pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, requests-credssp, rsa
 pycparser==2.19           # via cffi
 pycurl==7.43.0.1
@@ -92,11 +92,11 @@ pyjwt==1.7.1              # via adal, azure-cli-core
 pykerberos==1.2.1         # via requests-kerberos
 pynacl==1.3.0             # via paramiko
 pyopenssl==19.1.0         # via azure-cli-core, requests-credssp
-pyparsing==2.4.5          # via packaging
+pyparsing==2.4.6          # via packaging
 python-dateutil==2.8.1    # via adal, azure-storage, botocore
 pyvmomi==6.7.3
 pywinrm[kerberos]==0.3.0
-pyyaml==5.2               # via azure-cli-core, knack, openstacksdk
+pyyaml==5.3               # via azure-cli-core, knack, openstacksdk
 requests-credssp==1.0.2
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
@@ -106,7 +106,7 @@ requestsexceptions==1.4.0  # via openstacksdk
 rsa==4.0                  # via google-auth
 s3transfer==0.2.1         # via boto3
 selectors2==2.0.1         # via ncclient
-six==1.13.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, requests-credssp, stevedore
+six==1.14.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, requests-credssp, stevedore
 stevedore==1.31.0         # via keystoneauth1
 tabulate==0.8.2           # via azure-cli-core, knack
 typing==3.7.4.1; python_version < "3" # via msrest

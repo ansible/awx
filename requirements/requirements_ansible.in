@@ -62,5 +62,6 @@ requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
 openstacksdk==0.31.1
+argcomplete<1.11.0  # see UPGRADE BLOCKERs
 pip==19.3.1  # see upgrade blockers
 setuptools==41.6.0  # see upgrade blockers

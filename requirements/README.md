@@ -129,6 +129,12 @@ This breaks a very large amount of AWX code that assumes these fields
 are returned as dicts. Upgrading this library will require a refactor
 to accomidate this change.
 
+### argcomplete
+
+Versions 1.11.0 and higher indirectly require setuptools 42 or greater.
+This is conflicts with the state of other requirements, but
+removing this pin should be attempted when setuptools is upgraded.
+
 ### pip and setuptools
 
 The offline installer needs to have functionality confirmed before upgrading these.
