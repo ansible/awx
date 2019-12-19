@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
@@ -7,6 +7,7 @@ import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { ChipGroup, Chip } from '@components/Chip';
 import { VariablesDetail } from '@components/CodeMirrorInput';
+import DeleteButton from '@components/DeleteButton';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { InventoriesAPI } from '@api';
@@ -16,6 +17,7 @@ function InventoryDetail({ inventory, i18n }) {
   const [instanceGroups, setInstanceGroups] = useState([]);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -31,7 +33,15 @@ function InventoryDetail({ inventory, i18n }) {
     })();
   }, [inventory.id]);
 
-  const { organization } = inventory.summary_fields;
+  const deleteInventory = async () => {
+    await InventoriesAPI.destroy(inventory.id);
+    history.push(`/inventories`);
+  };
+
+  const {
+    organization,
+    user_capabilities: userCapabilities,
+  } = inventory.summary_fields;
 
   if (hasContentLoading) {
     return <ContentLoading />;
@@ -85,16 +95,25 @@ function InventoryDetail({ inventory, i18n }) {
           user={inventory.summary_fields.modified_by}
         />
       </DetailList>
-      {inventory.summary_fields.user_capabilities.edit && (
-        <CardActionsRow>
+      <CardActionsRow>
+        {userCapabilities.edit && (
           <Button
             component={Link}
             to={`/inventories/inventory/${inventory.id}/edit`}
           >
             {i18n._(t`Edit`)}
           </Button>
-        </CardActionsRow>
-      )}
+        )}
+        {userCapabilities.delete && (
+          <DeleteButton
+            name={inventory.name}
+            modalTitle={i18n._(t`Delete Inventory`)}
+            onConfirm={deleteInventory}
+          >
+            {i18n._(t`Delete`)}
+          </DeleteButton>
+        )}
+      </CardActionsRow>
     </CardBody>
   );
 }

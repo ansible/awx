@@ -7,8 +7,8 @@ const CardActionsWrapper = styled.div`
   justify-content: flex-end;
   margin-top: 20px;
 
-  & > :not(:first-child) {
-    margin-left: 20px;
+  & > .pf-c-card__actions > :not(:first-child) {
+    margin-left: 0.5rem;
   }
 `;
 
