@@ -20,23 +20,6 @@ const QS_CONFIG = getQSConfig('project', {
   order_by: 'name',
 });
 
-const fetchCredentialTypes = async credentials => {
-  const typeIds = Array.from(
-    credentials.reduce((accumulator, credential) => {
-      accumulator.add(credential.credential_type);
-      return accumulator;
-    }, new Set())
-  );
-
-  const {
-    data: { results },
-  } = await CredentialTypesAPI.read({
-    or__id: typeIds,
-  });
-
-  return results;
-};
-
 const assignCredentialKinds = (credentials, credentialTypes) => {
   const typesById = credentialTypes.reduce((accumulator, type) => {
     accumulator[type.id] = type.name;
@@ -55,43 +38,62 @@ function CredentialList({ i18n }) {
   const [contentError, setContentError] = useState(null);
   const [credentialCount, setCredentialCount] = useState(0);
   const [credentials, setCredentials] = useState([]);
+  const [credentialTypes, setCredentialTypes] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasContentLoading, setHasContentLoading] = useState(true);
   const [selected, setSelected] = useState([]);
 
   const location = useLocation();
 
-  useEffect(() => {
-    async function fetchData() {
-      const params = parseQueryString(QS_CONFIG, location.search);
+  const loadCredentials = async ({ search }) => {
+    const params = parseQueryString(QS_CONFIG, search);
+    setContentError(null);
+    setHasContentLoading(true);
+    try {
+      const [
+        {
+          data: { count, results },
+        },
+        {
+          data: { actions: optionActions },
+        },
+        {
+          data: { results: credentialTypeResults },
+        },
+      ] = await Promise.all([
+        CredentialsAPI.read(params),
+        loadCredentialActions(),
+        loadCredentialTypes(),
+      ]);
 
-      try {
-        const [
-          {
-            data: { count, results },
-          },
-          {
-            data: { actions: optionActions },
-          },
-        ] = await Promise.all([
-          CredentialsAPI.read(params),
-          CredentialsAPI.readOptions(),
-        ]);
-
-        const credentialTypes = await fetchCredentialTypes(results);
-
-        setCredentials(assignCredentialKinds(results, credentialTypes));
-        setCredentialCount(count);
-        setActions(optionActions);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
+      setActions(optionActions);
+      setCredentialCount(count);
+      setCredentials(assignCredentialKinds(results, credentialTypeResults));
+      setCredentialTypes(credentialTypeResults);
+    } catch (error) {
+      setContentError(error);
+    } finally {
+      setHasContentLoading(false);
     }
+  };
 
-    fetchData();
-  }, [location]);
+  useEffect(() => {
+    loadCredentials(location);
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadCredentialTypes = () => {
+    if (credentialTypes) {
+      return Promise.resolve({ data: { results: credentialTypes } });
+    }
+    return CredentialTypesAPI.read({ page_size: 200 });
+  };
+
+  const loadCredentialActions = () => {
+    if (actions) {
+      return Promise.resolve({ data: { actions } });
+    }
+    return CredentialsAPI.readOptions();
+  };
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...credentials] : []);
@@ -106,7 +108,7 @@ function CredentialList({ i18n }) {
   };
 
   const handleDelete = async () => {
-    setIsLoading(true);
+    setHasContentLoading(true);
 
     try {
       await Promise.all(
@@ -122,15 +124,13 @@ function CredentialList({ i18n }) {
         data: { count, results },
       } = await CredentialsAPI.read(params);
 
-      const credentialTypes = await fetchCredentialTypes(results);
-
       setCredentials(assignCredentialKinds(results, credentialTypes));
       setCredentialCount(count);
     } catch (error) {
       setContentError(error);
     }
 
-    setIsLoading(false);
+    setHasContentLoading(false);
   };
 
   const canAdd =
@@ -143,7 +143,7 @@ function CredentialList({ i18n }) {
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={isLoading}
+          hasContentLoading={hasContentLoading}
           items={credentials}
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
