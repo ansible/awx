@@ -43,8 +43,10 @@ options:
       type: str
     extra_vars:
       description:
-        - Extra_vars to use for the job_template. Prepend C(@) if a file.
-      type: list
+        - extra_vars to use for the Job Template. Prepend C(@) if a file.
+        - ask_extra_vars needs to be set to True via tower_job_template module
+          when creating the Job Template.
+      type: dict
     limit:
       description:
         - Limit to use for the I(job_template).
@@ -67,6 +69,15 @@ EXAMPLES = '''
   tower_job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
+
+- name: Launch a job template with extra_vars on remote Tower instance
+  tower_job_launch:
+    job_template: "My Job Template"
+    extra_vars:
+      var1: "My First Variable"
+      var2: "My Second Variable"
+      var3: "My Third Variable"
+    job_type: run
 
 # Launch job template with inventory and credential for prompt on launch
 - name: Launch a job with inventory and credential
@@ -94,6 +105,7 @@ status:
     sample: pending
 '''
 
+import json
 
 from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
 
@@ -106,6 +118,19 @@ except ImportError:
     pass
 
 
+def update_fields(module, p):
+    params = p.copy()
+
+    params_update = {}
+    extra_vars = params.get('extra_vars')
+
+    if extra_vars:
+        params_update['extra_vars'] = [json.dumps(extra_vars)]
+
+    params.update(params_update)
+    return params
+
+
 def main():
     argument_spec = dict(
         job_template=dict(required=True, type='str'),
@@ -114,11 +139,11 @@ def main():
         credential=dict(type='str', default=None),
         limit=dict(),
         tags=dict(type='list'),
-        extra_vars=dict(type='list'),
+        extra_vars=dict(type='dict', required=False),
     )
 
     module = TowerModule(
-        argument_spec,
+        argument_spec=argument_spec,
         supports_check_mode=True
     )
 
@@ -133,6 +158,8 @@ def main():
             if isinstance(tags, list):
                 params['tags'] = ','.join(tags)
             job = tower_cli.get_resource('job')
+
+            params = update_fields(module, params)
 
             lookup_fields = ('job_template', 'inventory', 'credential')
             for field in lookup_fields:
