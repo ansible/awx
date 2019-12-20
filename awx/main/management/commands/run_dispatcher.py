@@ -15,7 +15,7 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.pool import AutoscalePool
-from awx.main.dispatch.worker import AWXConsumer, TaskWorker
+from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -130,20 +130,8 @@ class Command(BaseCommand):
         AWXProxyHandler.disable()
         with Connection(settings.BROKER_URL) as conn:
             try:
-                bcast = 'tower_broadcast_all'
-                queues = [
-                    Queue(q, Exchange(q), routing_key=q)
-                    for q in (settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()])
-                ]
-                queues.append(
-                    Queue(
-                        construct_bcast_queue_name(bcast),
-                        exchange=Exchange(bcast, type='fanout'),
-                        routing_key=bcast,
-                        reply=True
-                    )
-                )
-                consumer = AWXConsumer(
+                queues = ['tower_broadcast_all'] + settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()]
+                consumer = AWXConsumerPG(
                     'dispatcher',
                     conn,
                     TaskWorker(),

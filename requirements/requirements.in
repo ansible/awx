@@ -31,6 +31,7 @@ jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
 openshift==0.9.0
 ordereddict==1.1
+pgpubsub
 prometheus_client==0.6.0
 psutil==5.4.3
 psycopg2==2.8.2

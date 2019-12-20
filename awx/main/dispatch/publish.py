@@ -1,10 +1,14 @@
 import inspect
 import logging
 import sys
+import json
 from uuid import uuid4
+import psycopg2
 
 from django.conf import settings
 from kombu import Exchange, Producer
+from django.db import connection
+from pgpubsub import PubSub
 
 from awx.main.dispatch.kombu import Connection
 
@@ -86,21 +90,15 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with Connection(settings.BROKER_URL) as conn:
-                        exchange = Exchange(queue, type=exchange_type or 'direct')
-                        producer = Producer(conn)
-                        logger.debug('publish {}({}, queue={})'.format(
-                            cls.name,
-                            task_id,
-                            queue
-                        ))
-                        producer.publish(obj,
-                                         serializer='json',
-                                         compression='bzip2',
-                                         exchange=exchange,
-                                         declare=[exchange],
-                                         delivery_mode="persistent",
-                                         routing_key=queue)
+                    conf = settings.DATABASES['default']
+                    conn = psycopg2.connect(dbname=conf['NAME'],
+                                            host=conf['HOST'],
+                                            user=conf['USER'],
+                                            password=conf['PASSWORD'])
+                    conn.set_session(autocommit=True)
+                    logger.warn(f"Send message to queue {queue}")
+                    pubsub = PubSub(conn)
+                    pubsub.notify(queue, json.dumps(obj))
                 return (obj, queue)
 
         # If the object we're wrapping *is* a class (e.g., RunJob), return

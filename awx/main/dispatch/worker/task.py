@@ -8,12 +8,12 @@ from kubernetes.config import kube_config
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
-from .base import BaseWorker
+from .basepg import BaseWorkerPG
 
 logger = logging.getLogger('awx.main.dispatch')
 
 
-class TaskWorker(BaseWorker):
+class TaskWorker(BaseWorkerPG):
     '''
     A worker implementation that deserializes task messages and runs native
     Python code.
