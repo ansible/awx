@@ -35,6 +35,7 @@ import traceback
 
 from ansible.module_utils._text import to_native
 from ansible.module_utils.urls import urllib_error, ConnectionError, socket, httplib
+from ansible.module_utils.urls import Request  # noqa (the sole purpose of this line is to allow for import into other files)
 from ansible.errors import AnsibleParserError
 
 TOWER_CLI_IMP_ERR = None
