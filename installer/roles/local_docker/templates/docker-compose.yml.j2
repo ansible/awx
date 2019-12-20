@@ -58,6 +58,9 @@ services:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
+    {% if ldaptls_reqcert is defined %}
+      LDAPTLS_REQCERT: "{{ ldaptls_reqcert }}"
+    {% endif %}
 
   task:
     image: {{ awx_task_docker_actual_image }}
@@ -149,3 +152,13 @@ services:
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
   {% endif %}
+
+{% if docker_compose_subnet is defined %}
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  {{ docker_compose_subnet }}
+{% endif %}

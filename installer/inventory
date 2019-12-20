@@ -159,3 +159,9 @@ secret_key=awxsecret
 # which makes include "optional" - i.e. not fail
 # if file is absent
 #extra_nginx_include="/etc/nginx/awx_extra[.]conf"
+
+# Define ldaptls_reqcert variable and use it in awx_web container to ignore CA certificate
+#ldaptls_reqcert="never"
+
+# Docker compose explicit subnet. Set subnet CIDR to avoid overlapping on your network
+#docker_compose_subnet="172.17.0.1/16"
