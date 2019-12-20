@@ -2549,7 +2549,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 if not isinstance(val, allow_types):
                     return Response(dict(error=_("'{field_name}' in survey question {idx} expected to be {type_label}.").format(
                         field_name=field_name, type_label=type_label, **context
-                    )))
+                    )), status=status.HTTP_400_BAD_REQUEST)
             if survey_item['variable'] in variable_set:
                 return Response(dict(error=_("'variable' '%(item)s' duplicated in survey question %(survey)s.") % {
                     'item': survey_item['variable'], 'survey': str(idx)}), status=status.HTTP_400_BAD_REQUEST)
@@ -2564,7 +2564,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                     "'{survey_item[type]}' in survey question {idx} is not one of '{allowed_types}' allowed question types."
                 ).format(
                     allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
-                )))
+                )), status=status.HTTP_400_BAD_REQUEST)
             if 'default' in survey_item and survey_item['default'] != '':
                 if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
                     type_label = 'string'
@@ -2582,7 +2582,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                     if survey_item[key] is not None and (not isinstance(survey_item[key], int)):
                         return Response(dict(error=_(
                             "The {min_or_max} limit in survey question {idx} expected to be integer."
-                        ).format(min_or_max=key, **context)))
+                        ).format(min_or_max=key, **context)), status=status.HTTP_400_BAD_REQUEST)
             # if it's a multiselect or multiple choice, it must have coices listed
             # choices and defualts must come in as strings seperated by /n characters.
             if qtype == 'multiselect' or qtype == 'multiplechoice':
@@ -2592,7 +2592,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 else:
                     return Response(dict(error=_(
                         "Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context)
-                    )))
+                    )), status=status.HTTP_400_BAD_REQUEST)
                 # If there is a default string split it out removing extra /n characters.
                 # Note: There can still be extra newline characters added in the API, these are sanitized out using .strip()
                 if 'default' in survey_item:
@@ -2606,11 +2606,11 @@ class JobTemplateSurveySpec(GenericAPIView):
                         if len(list_of_defaults) > 1:
                             return Response(dict(error=_(
                                 "Multiple Choice (Single Select) can only have one default value.".format(**context)
-                            )))
+                            )), status=status.HTTP_400_BAD_REQUEST)
                     if any(item not in survey_item['choices'] for item in list_of_defaults):
                         return Response(dict(error=_(
                             "Default choice must be answered from the choices listed.".format(**context)
-                        )))
+                        )), status=status.HTTP_400_BAD_REQUEST)
 
             # Process encryption substitution
             if ("default" in survey_item and isinstance(survey_item['default'], str) and

@@ -220,6 +220,30 @@ def test_survey_spec_passwords_with_default_required(job_template_factory, post,
 
 
 @pytest.mark.django_db
+def test_survey_spec_default_not_allowed(job_template, post, admin_user):
+    survey_input_data = {
+        'description': 'A survey',
+        'spec': [{
+            'question_name': 'You must choose wisely',
+            'variable': 'your_choice',
+            'default': 'blue',
+            'required': False,
+            'type': 'multiplechoice',
+            "choices": ["red", "green", "purple"]
+        }],
+        'name': 'my survey'
+    }
+    r = post(
+        url=reverse(
+            'api:job_template_survey_spec',
+            kwargs={'pk': job_template.id}
+        ),
+        data=survey_input_data, user=admin_user, expect=400
+    )
+    assert r.data['error'] == 'Default choice must be answered from the choices listed.'
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('default, status', [
     ('SUPERSECRET', 200),
     ({'some-invalid': 'dict'}, 400),
