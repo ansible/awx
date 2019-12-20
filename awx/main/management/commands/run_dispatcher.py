@@ -64,20 +64,8 @@ class Command(BaseCommand):
         AWXProxyHandler.disable()
         with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             try:
-                bcast = 'tower_broadcast_all'
-                queues = [
-                    Queue(q, Exchange(q), routing_key=q)
-                    for q in (settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()])
-                ]
-                queues.append(
-                    Queue(
-                        construct_bcast_queue_name(bcast),
-                        exchange=Exchange(bcast, type='fanout'),
-                        routing_key=bcast,
-                        reply=True
-                    )
-                )
-                consumer = AWXConsumer(
+                queues = ['tower_broadcast_all'] + settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()]
+                consumer = AWXConsumerPG(
                     'dispatcher',
                     conn,
                     TaskWorker(),
