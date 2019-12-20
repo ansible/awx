@@ -411,7 +411,11 @@ test_collection_sanity:
 
 build_collection:
 	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
-	ansible-galaxy collection build awx_collection --output-path=awx_collection
+	ansible-galaxy collection build awx_collection --force --output-path=awx_collection
+
+install_collection: build_collection
+	rm -rf ~/.ansible/collections/ansible_collections/awx/awx
+	ansible-galaxy collection install awx_collection/awx-awx-$(VERSION).tar.gz
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
