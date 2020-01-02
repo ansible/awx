@@ -296,3 +296,15 @@ def test_cluster_node_long_node_name(inventory, project):
     # node name is very long, we just want to make sure it does not error
     entry = ActivityStream.objects.filter(job=job).first()
     assert entry.action_node.startswith('ffffff')
+
+
+@pytest.mark.django_db
+def test_credential_defaults_idempotency():
+    CredentialType.setup_tower_managed_defaults()
+    old_inputs = CredentialType.objects.get(name='Ansible Tower', kind='cloud').inputs
+    prior_count = ActivityStream.objects.count()
+    # this is commonly re-ran in migrations, and no changes should be shown
+    # because inputs and injectors are not actually tracked in the database
+    CredentialType.setup_tower_managed_defaults()
+    assert CredentialType.objects.get(name='Ansible Tower', kind='cloud').inputs == old_inputs
+    assert ActivityStream.objects.count() == prior_count

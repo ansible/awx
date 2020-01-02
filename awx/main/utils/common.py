@@ -379,7 +379,12 @@ def get_allowed_fields(obj, serializer_mapping):
         'oauth2accesstoken': ['last_used'],
         'oauth2application': ['client_secret']
     }
-    field_blacklist = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(obj._meta.model_name, [])
+    model_name = obj._meta.model_name
+    field_blacklist = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
+    # see definition of from_db for CredentialType
+    # injection logic of any managed types are incompatible with activity stream
+    if model_name == 'credentialtype' and obj.managed_by_tower and obj.namespace:
+        field_blacklist.extend(['inputs', 'injectors'])
     if field_blacklist:
         allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
     return allowed_fields
