@@ -153,6 +153,7 @@ class TeamsList extends Component {
               itemCount={itemCount}
               pluralizedItemName={i18n._(t`Teams`)}
               qsConfig={QS_CONFIG}
+              onRowClick={this.handleSelect}
               toolbarColumns={[
                 {
                   name: i18n._(t`Name`),

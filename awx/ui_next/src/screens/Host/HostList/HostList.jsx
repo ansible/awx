@@ -189,6 +189,7 @@ class HostsList extends Component {
               itemCount={itemCount}
               pluralizedItemName={i18n._(t`Hosts`)}
               qsConfig={QS_CONFIG}
+              onRowClick={this.handleSelect}
               toolbarColumns={[
                 {
                   name: i18n._(t`Name`),

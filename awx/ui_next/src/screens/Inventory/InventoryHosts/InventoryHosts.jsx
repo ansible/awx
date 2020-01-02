@@ -131,6 +131,7 @@ function InventoryHosts({ i18n, location, match }) {
         itemCount={hostCount}
         pluralizedItemName={i18n._(t`Hosts`)}
         qsConfig={QS_CONFIG}
+        onRowClick={handleSelect}
         toolbarColumns={[
           {
             name: i18n._(t`Name`),

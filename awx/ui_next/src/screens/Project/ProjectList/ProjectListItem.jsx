@@ -60,7 +60,11 @@ class ProjectListItem extends React.Component {
     const { project, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${project.id}`;
     return (
-      <DataListItem key={project.id} aria-labelledby={labelId}>
+      <DataListItem
+        key={project.id}
+        aria-labelledby={labelId}
+        id={`${project.id}`}
+      >
         <DataListItemRow>
           <DataListCheck
             id={`select-project-${project.id}`}

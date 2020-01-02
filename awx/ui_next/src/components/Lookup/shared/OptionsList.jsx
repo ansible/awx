@@ -51,6 +51,7 @@ function OptionsList({
         qsConfig={qsConfig}
         toolbarColumns={columns}
         hasContentLoading={isLoading}
+        onRowClick={selectItem}
         renderItem={item => (
           <CheckboxListItem
             key={item.id}

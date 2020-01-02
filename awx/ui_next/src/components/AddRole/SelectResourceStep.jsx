@@ -100,6 +100,7 @@ class SelectResourceStep extends React.Component {
               itemCount={count}
               qsConfig={this.qsConfig}
               toolbarColumns={columns}
+              onRowClick={onRowClick}
               renderItem={item => (
                 <CheckboxListItem
                   isSelected={selectedResourceRows.some(i => i.id === item.id)}

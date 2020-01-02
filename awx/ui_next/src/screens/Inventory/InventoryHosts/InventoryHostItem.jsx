@@ -35,7 +35,7 @@ function InventoryHostItem(props) {
   const labelId = `check-action-${host.id}`;
 
   return (
-    <DataListItem key={host.id} aria-labelledby={labelId}>
+    <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
       <DataListItemRow>
         <DataListCheck
           id={`select-host-${host.id}`}

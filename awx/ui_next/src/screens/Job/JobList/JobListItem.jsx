@@ -32,6 +32,7 @@ class JobListItem extends Component {
       <DataListItem
         aria-labelledby={`check-action-${job.id}`}
         css="--pf-c-data-list__expandable-content--BoxShadow: none;"
+        id={`${job.id}`}
       >
         <DataListItemRow>
           <DataListCheck
