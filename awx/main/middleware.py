@@ -18,7 +18,6 @@ from django.db import IntegrityError, connection
 from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
-from django.core.cache import cache
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse, resolve
@@ -214,11 +213,8 @@ class URLModificationMiddleware(MiddlewareMixin):
 class MigrationRanCheckMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        if cache.get('migration_in_progress', False):
-            executor = MigrationExecutor(connection)
-            plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-            if not bool(plan):
-                logger.info('Detected that migration finished, migration page taken down.')
-                cache.delete('migration_in_progress')
-            elif getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
-                return redirect(reverse("ui:migrations_notran"))
+        executor = MigrationExecutor(connection)
+        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+        if bool(plan) and \
+                getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
+            return redirect(reverse("ui:migrations_notran"))
