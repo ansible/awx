@@ -903,6 +903,11 @@ def galaxy_validate(serializer, attrs):
             setting_name = '{}{}'.format(prefix, k.upper())
             errors.setdefault(setting_name, [])
             errors[setting_name].append(msg)
+    if not galaxy_data['url']:
+        if _new_value('PUBLIC_GALAXY_ENABLED') is False:
+            errors.setdefault('PUBLIC_GALAXY_ENABLED', [])
+            msg = _('A URL for Primary Galaxy must be defined before disabling public Galaxy.')
+            errors['PUBLIC_GALAXY_ENABLED'].append(msg)
 
     if errors:
         raise serializers.ValidationError(errors)
