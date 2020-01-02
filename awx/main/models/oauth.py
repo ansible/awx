@@ -124,11 +124,6 @@ class OAuth2AccessToken(AbstractAccessToken):
     def is_valid(self, scopes=None):
         valid = super(OAuth2AccessToken, self).is_valid(scopes)
         if valid:
-            try:
-                self.validate_external_users()
-            except oauth2.AccessDeniedError:
-                logger.exception(f'Failed to authenticate {self.user.username}')
-                return False
             self.last_used = now()
 
             def _update_last_used():
@@ -146,5 +141,6 @@ class OAuth2AccessToken(AbstractAccessToken):
                 ).format(external_account))
 
     def save(self, *args, **kwargs):
-        self.validate_external_users()
+        if not self.pk:
+            self.validate_external_users()
         super(OAuth2AccessToken, self).save(*args, **kwargs)
