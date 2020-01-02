@@ -64,11 +64,15 @@ def test_job_launch_with_prompting(run_module, admin_user, project, inventory, m
 
 
 @pytest.mark.django_db
-def test_create_job_template_with_old_machine_cred(run_module, admin_user, project, inventory, machine_credential):
+def test_create_job_template_with_old_credentials(
+        run_module, admin_user, project, inventory,
+        machine_credential, vault_credential):
 
     module_args = {
         'name': 'foo', 'playbook': 'helloworld.yml',
-        'project': project.name, 'inventory': inventory.name, 'credential': machine_credential.name,
+        'project': project.name, 'inventory': inventory.name,
+        'credential': machine_credential.name,
+        'vault_credential': vault_credential.name,
         'job_type': 'run',
         'state': 'present'
     }
@@ -87,11 +91,14 @@ def test_create_job_template_with_old_machine_cred(run_module, admin_user, proje
         }
     }
 
-    assert machine_credential.id in [cred.pk for cred in jt.credentials.all()]
+    assert set([machine_credential.id, vault_credential.id]) == set([
+        cred.pk for cred in jt.credentials.all()])
 
 
 @pytest.mark.django_db
-def test_create_job_template_with_new_credentials(run_module, admin_user, project, inventory, machine_credential):
+def test_create_job_template_with_new_credentials(
+        run_module, admin_user, project, inventory,
+        machine_credential, vault_credential):
     jt = JobTemplate.objects.create(
         name='foo',
         playbook='helloworld.yml',
@@ -102,7 +109,7 @@ def test_create_job_template_with_new_credentials(run_module, admin_user, projec
         name='foo',
         playbook='helloworld.yml',
         project=project.name,
-        credentials=[machine_credential.name]
+        credentials=[machine_credential.name, vault_credential.name]
     ), admin_user)
     assert result.pop('changed', None), result
 
@@ -113,4 +120,5 @@ def test_create_job_template_with_new_credentials(run_module, admin_user, projec
         "id": jt.id
     }
 
-    assert [machine_credential.id] == [cred.pk for cred in jt.credentials.all()]
+    assert set([machine_credential.id, vault_credential.id]) == set([
+        cred.pk for cred in jt.credentials.all()])

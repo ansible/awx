@@ -146,3 +146,13 @@ def machine_credential(organization):
         credential_type=ssh_type, name='machine-cred',
         inputs={'username': 'test_user', 'password': 'pas4word'}
     )
+
+
+@pytest.fixture
+def vault_credential(organization):
+    ct = CredentialType.defaults['vault']()
+    ct.save()
+    return Credential.objects.create(
+        credential_type=ct, name='vault-cred',
+        inputs={'vault_id': 'foo', 'vault_password': 'pas4word'}
+    )
