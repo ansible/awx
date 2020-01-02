@@ -264,12 +264,6 @@ def apply_cluster_membership_policies():
 
 
 @task(queue='tower_broadcast_all', exchange_type='fanout')
-def set_migration_flag():
-    logger.debug('Received migration-in-progress signal, will serve redirect.')
-    cache.set('migration_in_progress', True)
-
-
-@task(queue='tower_broadcast_all', exchange_type='fanout')
 def handle_setting_changes(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
