@@ -120,6 +120,7 @@ data:
                 include {{ extra_nginx_include }};
                 {%- endif %}
                 proxy_set_header X-Forwarded-Port 443;
+                uwsgi_param HTTP_X_FORWARDED_PORT 443;
             }
         }
     }
