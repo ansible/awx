@@ -3,6 +3,16 @@ from .plugin import CredentialPlugin
 from django.utils.translation import ugettext_lazy as _
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 from azure.common.credentials import ServicePrincipalCredentials
+from msrestazure import azure_cloud
+
+
+# https://github.com/Azure/msrestazure-for-python/blob/master/msrestazure/azure_cloud.py
+clouds = [
+    vars(azure_cloud)[n]
+    for n in dir(azure_cloud)
+    if n.startswith("AZURE_") and n.endswith("_CLOUD")
+]
+default_cloud = vars(azure_cloud)["AZURE_PUBLIC_CLOUD"]
 
 
 azure_keyvault_inputs = {
@@ -24,6 +34,12 @@ azure_keyvault_inputs = {
         'id': 'tenant',
         'label': _('Tenant ID'),
         'type': 'string'
+    }, {
+        'id': 'cloud_name',
+        'label': _('Cloud Environment'),
+        'help_text': _('Specify which azure cloud environment to use.'),
+        'choices': list(set([default_cloud.name] + [c.name for c in clouds])),
+        'default': default_cloud.name
     }],
     'metadata': [{
         'id': 'secret_field',
@@ -36,12 +52,13 @@ azure_keyvault_inputs = {
         'type': 'string',
         'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
     }],
-    'required': ['url', 'client', 'secret', 'tenant', 'secret_field'],
+    'required': ['url', 'client', 'secret', 'tenant', 'cloud', 'secret_field'],
 }
 
 
 def azure_keyvault_backend(**kwargs):
     url = kwargs['url']
+    [cloud] = [c for c in clouds if c.name == kwargs['cloud_name']]
 
     def auth_callback(server, resource, scope):
         credentials = ServicePrincipalCredentials(
@@ -49,7 +66,7 @@ def azure_keyvault_backend(**kwargs):
             client_id = kwargs['client'],
             secret = kwargs['secret'],
             tenant = kwargs['tenant'],
-            resource = "https://vault.azure.net",
+            resource = f"https://{cloud.suffixes.keyvault_dns.split('.', 1).pop()}",
         )
         token = credentials.token
         return token['token_type'], token['access_token']
