@@ -129,7 +129,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     FIELDS_TO_PRESERVE_AT_COPY = [
         'unified_job_template', 'workflow_job_template', 'success_nodes', 'failure_nodes',
-        'always_nodes', 'parent_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
+        'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
         'char_prompts'
     ]
     REENCRYPTION_BLACKLIST_AT_COPY = ['extra_data', 'survey_passwords']
@@ -207,6 +207,11 @@ class WorkflowJobNode(WorkflowNodeBase):
         help_text=_("Indicates that a job will not be created when True. Workflow runtime "
                     "semantics will mark this True if the node is in a path that will "
                     "decidedly not be ran. A value of False means the node may not run."),
+    )
+    all_parents_must_converge = models.BooleanField(
+        default=False,
+        help_text=_("If enabled then the node will only run if all of the parent nodes "
+                    "have met the criteria to reach this node")
     )
 
     def get_absolute_url(self, request=None):

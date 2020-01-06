@@ -83,17 +83,11 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
     def add_always_node(self, unified_job_template):
         return self._add_node(self.related.always_nodes, unified_job_template)
 
-    def add_any_successes_node(self, unified_job_template):
-        return self._add_node(self.related.success_nodes, unified_job_template)
-
-    def add_all_successes_node(self, unified_job_template):
-        return self._add_node(self.related.success_nodes, unified_job_template)
-
-    def add_any_failure_node(self, unified_job_template):
+    def add_failure_node(self, unified_job_template):
         return self._add_node(self.related.failure_nodes, unified_job_template)
 
-    def add_all_failures_node(self, unified_job_template):
-        return self._add_node(self.related.failure_nodes, unified_job_template)
+    def add_success_node(self, unified_job_template):
+        return self._add_node(self.related.success_nodes, unified_job_template)
 
     def add_credential(self, credential):
         with suppress(exc.NoContent):
