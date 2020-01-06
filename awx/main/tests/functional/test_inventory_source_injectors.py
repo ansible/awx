@@ -60,7 +60,11 @@ INI_TEST_VARS = {
     'satellite6': {
         'satellite6_group_patterns': 'foo_group_patterns',
         'satellite6_group_prefix': 'foo_group_prefix',
-        'satellite6_want_hostcollections': True
+        'satellite6_want_hostcollections': True,
+        'satellite6_want_ansible_ssh_host': True,
+        'satellite6_rich_params': True,
+        'satellite6_want_facts': True
+
     },
     'cloudforms': {
         'version': '2.4',
