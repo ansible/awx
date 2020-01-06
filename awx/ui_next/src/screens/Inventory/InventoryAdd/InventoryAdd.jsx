@@ -48,7 +48,9 @@ function InventoryAdd({ history, i18n }) {
         data: { id: inventoryId },
       } = await InventoriesAPI.create({
         organization: organization.id,
-        insights_credential: insights_credential.id,
+        insights_credential: insights_credential
+          ? insights_credential.id
+          : null,
         ...remainingValues,
       });
       if (instanceGroups) {
@@ -68,7 +70,15 @@ function InventoryAdd({ history, i18n }) {
   };
 
   if (error) {
-    return <ContentError />;
+    return (
+      <PageSection>
+        <Card>
+          <CardBody>
+            <ContentError error={error} />
+          </CardBody>
+        </Card>
+      </PageSection>
+    );
   }
   if (isLoading) {
     return <ContentLoading />;

@@ -77,6 +77,8 @@ function InventoryForm({
                     form.setFieldValue('organization', value);
                   }}
                   value={field.value}
+                  touched={form.touched.organization}
+                  error={form.errors.organization}
                   required
                 />
               )}
