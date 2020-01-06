@@ -62,6 +62,17 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
         with open(filepath, 'w') as f:
             f.write('%s %s\n' % (request.method, request.get_full_path()))
             pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
+
+        if settings.AWX_REQUEST_PROFILE_WITH_DOT:
+            from gprof2dot import main as generate_dot
+            raw = os.path.join(self.dest, filename) + '.raw'
+            pstats.Stats(self.prof).dump_stats(raw)
+            generate_dot([
+                '-n', '2.5', '-f', 'pstats', '-o',
+                os.path.join( self.dest, filename).replace('.pstats', '.dot'),
+                raw
+            ])
+            os.remove(raw)
         return filepath
 
 
