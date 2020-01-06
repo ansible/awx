@@ -31,7 +31,7 @@ function InventoryGroupItem({
   const editUrl = `/inventories/inventory/${inventoryId}/groups/${group.id}/edit`;
 
   return (
-    <DataListItem key={group.id} aria-labelledby={labelId}>
+    <DataListItem key={group.id} aria-labelledby={labelId} id={`${group.id}`}>
       <DataListItemRow>
         <DataListCheck
           aria-labelledby={labelId}

@@ -30,7 +30,7 @@ class TeamListItem extends React.Component {
     const { team, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${team.id}`;
     return (
-      <DataListItem key={team.id} aria-labelledby={labelId}>
+      <DataListItem key={team.id} aria-labelledby={labelId} id={`${team.id}`}>
         <DataListItemRow>
           <DataListCheck
             id={`select-team-${team.id}`}

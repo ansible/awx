@@ -24,11 +24,13 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
 >
   <DataListItem
     aria-labelledby="items-list-item-9000"
+    id="9000"
     key="9000"
   >
     <li
       aria-labelledby="items-list-item-9000"
       className="pf-c-data-list__item"
+      id="9000"
     >
       <DataListItemRow
         key=".0"

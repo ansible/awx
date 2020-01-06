@@ -153,6 +153,7 @@ class UsersList extends Component {
               itemCount={itemCount}
               pluralizedItemName="Users"
               qsConfig={QS_CONFIG}
+              onRowClick={this.handleSelect}
               toolbarColumns={[
                 {
                   name: i18n._(t`Username`),

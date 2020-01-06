@@ -21,7 +21,11 @@ const CheckboxListItem = ({
 }) => {
   const CheckboxRadio = isRadio ? DataListRadio : DataListCheck;
   return (
-    <DataListItem key={itemId} aria-labelledby={`check-action-item-${itemId}`}>
+    <DataListItem
+      key={itemId}
+      aria-labelledby={`check-action-item-${itemId}`}
+      id={`${itemId}`}
+    >
       <DataListItemRow>
         <CheckboxRadio
           id={`selected-${itemId}`}

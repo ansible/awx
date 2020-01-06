@@ -19,7 +19,11 @@ const DetailWrapper = styled(TextContent)`
 
 export default function PaginatedDataListItem({ item }) {
   return (
-    <DataListItem aria-labelledby={`items-list-item-${item.id}`} key={item.id}>
+    <DataListItem
+      aria-labelledby={`items-list-item-${item.id}`}
+      key={item.id}
+      id={`${item.id}`}
+    >
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[

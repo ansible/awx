@@ -41,6 +41,7 @@ function NotificationListItem(props) {
     <DataListItem
       aria-labelledby={`items-list-item-${notification.id}`}
       key={notification.id}
+      id={`${notification.id}`}
     >
       <DataListItemRow>
         <DataListItemCells

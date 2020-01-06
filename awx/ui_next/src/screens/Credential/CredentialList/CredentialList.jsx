@@ -122,6 +122,7 @@ function CredentialList({ i18n }) {
           items={credentials}
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
+          onRowClick={handleSelect}
           renderItem={item => (
             <CredentialListItem
               key={item.id}

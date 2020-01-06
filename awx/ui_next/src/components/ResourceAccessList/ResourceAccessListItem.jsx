@@ -72,7 +72,11 @@ class ResourceAccessListItem extends React.Component {
     const [teamRoles, userRoles] = this.getRoleLists();
 
     return (
-      <DataListItem aria-labelledby="access-list-item" key={accessRecord.id}>
+      <DataListItem
+        aria-labelledby="access-list-item"
+        key={accessRecord.id}
+        id={`${accessRecord.id}`}
+      >
         <DataListItemRow>
           <DataListItemCells
             dataListCells={[

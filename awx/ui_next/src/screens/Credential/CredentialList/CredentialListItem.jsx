@@ -36,7 +36,11 @@ function CredentialListItem({
   const canEdit = credential.summary_fields.user_capabilities.edit;
 
   return (
-    <DataListItem key={credential.id} aria-labelledby={labelId}>
+    <DataListItem
+      key={credential.id}
+      aria-labelledby={labelId}
+      id={`${credential.id}`}
+    >
       <DataListItemRow>
         <DataListCheck
           id={`select-credential-${credential.id}`}

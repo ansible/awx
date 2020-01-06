@@ -176,6 +176,7 @@ function InventoryGroupsList({ i18n, location, match }) {
         items={groups}
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
+        onRowClick={handleSelect}
         renderItem={item => (
           <InventoryGroupItem
             key={item.id}

@@ -27,7 +27,14 @@ class PaginatedDataList extends React.Component {
     super(props);
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleSetPageSize = this.handleSetPageSize.bind(this);
+    this.handleListItemSelect = this.handleListItemSelect.bind(this);
   }
+
+  handleListItemSelect = (id = 0) => {
+    const { items, onRowClick } = this.props;
+    const match = items.find(item => item.id === Number(id));
+    onRowClick(match);
+  };
 
   handleSetPage(event, pageNumber) {
     const { history, qsConfig } = this.props;
@@ -95,7 +102,12 @@ class PaginatedDataList extends React.Component {
       );
     } else {
       Content = (
-        <DataList aria-label={dataListLabel}>{items.map(renderItem)}</DataList>
+        <DataList
+          aria-label={dataListLabel}
+          onSelectDataListItem={id => this.handleListItemSelect(id)}
+        >
+          {items.map(renderItem)}
+        </DataList>
       );
     }
 
@@ -157,6 +169,7 @@ PaginatedDataList.propTypes = {
   renderToolbar: PropTypes.func,
   hasContentLoading: PropTypes.bool,
   contentError: PropTypes.shape(),
+  onRowClick: PropTypes.func,
 };
 
 PaginatedDataList.defaultProps = {
@@ -167,6 +180,7 @@ PaginatedDataList.defaultProps = {
   showPageSizeOptions: true,
   renderItem: item => <PaginatedDataListItem key={item.id} item={item} />,
   renderToolbar: props => <DataListToolbar {...props} />,
+  onRowClick: () => null,
 };
 
 export { PaginatedDataList as _PaginatedDataList };

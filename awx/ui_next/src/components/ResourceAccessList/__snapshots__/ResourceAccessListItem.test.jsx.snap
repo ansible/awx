@@ -34,11 +34,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
 >
   <DataListItem
     aria-labelledby="access-list-item"
+    id="2"
     key="2"
   >
     <li
       aria-labelledby="access-list-item"
       className="pf-c-data-list__item"
+      id="2"
     >
       <DataListItemRow
         key=".0"

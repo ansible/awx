@@ -155,6 +155,7 @@ class ProjectsList extends Component {
               itemCount={itemCount}
               pluralizedItemName={i18n._(t`Projects`)}
               qsConfig={QS_CONFIG}
+              onRowClick={this.handleSelect}
               toolbarColumns={[
                 {
                   name: i18n._(t`Name`),

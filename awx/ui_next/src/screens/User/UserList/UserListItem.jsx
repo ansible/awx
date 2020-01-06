@@ -30,7 +30,7 @@ class UserListItem extends React.Component {
     const { user, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${user.id}`;
     return (
-      <DataListItem key={user.id} aria-labelledby={labelId}>
+      <DataListItem key={user.id} aria-labelledby={labelId} id={`${user.id}`}>
         <DataListItemRow>
           <DataListCheck
             id={`select-user-${user.id}`}

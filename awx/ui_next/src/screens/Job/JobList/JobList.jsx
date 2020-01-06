@@ -162,6 +162,7 @@ class JobList extends Component {
             itemCount={itemCount}
             pluralizedItemName="Jobs"
             qsConfig={QS_CONFIG}
+            onRowClick={this.handleSelect}
             toolbarColumns={[
               {
                 name: i18n._(t`Name`),

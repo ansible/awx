@@ -211,8 +211,9 @@ class TemplatesList extends Component {
             hasContentLoading={hasContentLoading}
             items={templates}
             itemCount={itemCount}
-            pluralizedItemName="Templates"
+            pluralizedItemName={i18n._(t`Templates`)}
             qsConfig={QS_CONFIG}
+            onRowClick={this.handleSelect}
             toolbarColumns={[
               {
                 name: i18n._(t`Name`),

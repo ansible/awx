@@ -49,7 +49,11 @@ function OrganizationListItem({
 }) {
   const labelId = `check-action-${organization.id}`;
   return (
-    <DataListItem key={organization.id} aria-labelledby={labelId}>
+    <DataListItem
+      key={organization.id}
+      aria-labelledby={labelId}
+      id={`${organization.id}`}
+    >
       <DataListItemRow>
         <DataListCheck
           id={`select-organization-${organization.id}`}

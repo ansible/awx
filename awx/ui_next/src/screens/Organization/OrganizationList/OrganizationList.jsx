@@ -118,6 +118,7 @@ function OrganizationsList({ i18n }) {
             itemCount={itemCount}
             pluralizedItemName="Organizations"
             qsConfig={QS_CONFIG}
+            onRowClick={handleSelect}
             toolbarColumns={[
               {
                 name: i18n._(t`Name`),

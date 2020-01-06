@@ -35,7 +35,7 @@ describe('<MultiSelect />', () => {
       />
     );
     const component = wrapper.find('MultiSelect');
-    const input = component.find('TextInput');
+    const input = component.find('TextInputBase');
     input.invoke('onChange')('Flabadoo');
     input.simulate('keydown', { key: 'Enter' });
 
@@ -58,7 +58,7 @@ describe('<MultiSelect />', () => {
       />
     );
 
-    const input = wrapper.find('TextInput');
+    const input = wrapper.find('TextInputBase');
     input.simulate('focus');
     wrapper.update();
     const event = {

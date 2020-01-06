@@ -30,7 +30,11 @@ class InventoryListItem extends React.Component {
     const { inventory, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${inventory.id}`;
     return (
-      <DataListItem key={inventory.id} aria-labelledby={labelId}>
+      <DataListItem
+        key={inventory.id}
+        aria-labelledby={labelId}
+        id={`${inventory.id}`}
+      >
         <DataListItemRow>
           <DataListCheck
             id={`select-inventory-${inventory.id}`}

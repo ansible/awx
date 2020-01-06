@@ -173,6 +173,7 @@ class InventoriesList extends Component {
             itemCount={itemCount}
             pluralizedItemName={i18n._(t`Inventories`)}
             qsConfig={QS_CONFIG}
+            onRowClick={this.handleSelect}
             toolbarColumns={[
               {
                 name: i18n._(t`Name`),

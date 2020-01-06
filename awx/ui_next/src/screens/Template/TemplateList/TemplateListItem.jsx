@@ -70,6 +70,7 @@ class TemplateListItem extends Component {
       <DataListItem
         aria-labelledby={`check-action-${template.id}`}
         css="--pf-c-data-list__expandable-content--BoxShadow: none;"
+        id={`${template.id}`}
       >
         <DataListItemRow>
           <DataListCheck
