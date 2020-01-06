@@ -35,8 +35,7 @@ import traceback
 
 from ansible.module_utils._text import to_native
 from ansible.module_utils.urls import urllib_error, ConnectionError, socket, httplib
-from ansible.module_utils.urls import Request  # noqa (the sole purpose of this line is to allow for import into other files)
-from ansible.errors import AnsibleParserError
+from ansible.module_utils.urls import Request  # noqa
 
 TOWER_CLI_IMP_ERR = None
 try:
@@ -63,14 +62,14 @@ def make_request(request_handler, tower_url):
         # If Tower gives a readable error message, display that message to the user.
         if callable(getattr(e, 'read', None)):
             n_error_msg += ' with message: {err_msg}'.format(err_msg=to_native(e.read()))
-        raise AnsibleParserError(n_error_msg)
+        raise CollectionsParserError(n_error_msg)
 
     # Attempt to parse JSON.
     try:
         return json.loads(response.read())
     except (ValueError, TypeError) as e:
         # If the JSON parse fails, print the ValueError
-        raise AnsibleParserError('Failed to parse json from host: {err}'.format(err=to_native(e)))
+        raise CollectionsParserError('Failed to parse json from host: {err}'.format(err=to_native(e)))
 
 
 def tower_auth_config(module):
@@ -142,3 +141,7 @@ class TowerModule(AnsibleModule):
         if not HAS_TOWER_CLI:
             self.fail_json(msg=missing_required_lib('ansible-tower-cli'),
                            exception=TOWER_CLI_IMP_ERR)
+
+
+class CollectionsParserError(Exception):
+    pass
