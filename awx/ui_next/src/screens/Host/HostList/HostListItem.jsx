@@ -34,7 +34,7 @@ class HostListItem extends React.Component {
       isSelected,
       onSelect,
       detailUrl,
-      toggleHost,
+      onToggleHost,
       toggleLoading,
       i18n,
     } = this.props;
@@ -93,7 +93,7 @@ class HostListItem extends React.Component {
                       toggleLoading ||
                       !host.summary_fields.user_capabilities.edit
                     }
-                    onChange={() => toggleHost(host)}
+                    onChange={() => onToggleHost(host)}
                     aria-label={i18n._(t`Toggle host`)}
                   />
                 </Tooltip>

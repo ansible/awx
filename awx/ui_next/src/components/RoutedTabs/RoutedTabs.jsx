@@ -57,23 +57,25 @@ function RoutedTabs(props) {
 
   return (
     <Tabs activeKey={getActiveTabId()} onSelect={handleTabSelect}>
-      {tabsArray.map(tab => (
-        <Tab
-          aria-label={`${tab.name}`}
-          eventKey={tab.id}
-          key={tab.id}
-          link={tab.link}
-          title={
-            tab.isNestedTabs ? (
-              <>
-                <CaretLeftIcon /> {tab.name}
-              </>
-            ) : (
-              tab.name
-            )
-          }
-        />
-      ))}
+      {tabsArray
+        .filter(tab => tab.isNestedTab || !tab.name.startsWith('Return'))
+        .map(tab => (
+          <Tab
+            aria-label={`${tab.name}`}
+            eventKey={tab.id}
+            key={tab.id}
+            link={tab.link}
+            title={
+              tab.isNestedTab ? (
+                <>
+                  <CaretLeftIcon /> {tab.name}
+                </>
+              ) : (
+                tab.name
+              )
+            }
+          />
+        ))}
     </Tabs>
   );
 }

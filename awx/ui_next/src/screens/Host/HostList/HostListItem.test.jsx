@@ -4,7 +4,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import HostsListItem from './HostListItem';
 
-let toggleHost;
+let onToggleHost;
 
 const mockHost = {
   id: 1,
@@ -24,7 +24,7 @@ const mockHost = {
 
 describe('<HostsListItem />', () => {
   beforeEach(() => {
-    toggleHost = jest.fn();
+    onToggleHost = jest.fn();
   });
 
   afterEach(() => {
@@ -38,7 +38,7 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={mockHost}
-        toggleHost={toggleHost}
+        onToggleHost={onToggleHost}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
@@ -52,7 +52,7 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={copyMockHost}
-        toggleHost={toggleHost}
+        onToggleHost={onToggleHost}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
@@ -64,7 +64,7 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={mockHost}
-        toggleHost={toggleHost}
+        onToggleHost={onToggleHost}
       />
     );
     wrapper
@@ -72,7 +72,7 @@ describe('<HostsListItem />', () => {
       .first()
       .find('input')
       .simulate('change');
-    expect(toggleHost).toHaveBeenCalledWith(mockHost);
+    expect(onToggleHost).toHaveBeenCalledWith(mockHost);
   });
 
   test('handles toggle click when host is disabled', () => {
@@ -82,7 +82,7 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={mockHost}
-        toggleHost={toggleHost}
+        onToggleHost={onToggleHost}
       />
     );
     wrapper
@@ -90,6 +90,6 @@ describe('<HostsListItem />', () => {
       .first()
       .find('input')
       .simulate('change');
-    expect(toggleHost).toHaveBeenCalledWith(mockHost);
+    expect(onToggleHost).toHaveBeenCalledWith(mockHost);
   });
 });

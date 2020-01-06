@@ -46,14 +46,17 @@ class Hosts extends Component {
   };
 
   render() {
-    const { match, history, location } = this.props;
+    const { match, history, location, inventory } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route path={`${match.path}/add`} render={() => <HostAdd />} />
+          <Route
+            path={`${match.path}/add`}
+            render={() => <HostAdd history={history} />}
+          />
           <Route
             path={`${match.path}/:id`}
             render={() => (
@@ -64,6 +67,7 @@ class Hosts extends Component {
                     location={location}
                     setBreadcrumb={this.setBreadcrumbConfig}
                     me={me || {}}
+                    inventory={inventory}
                   />
                 )}
               </Config>

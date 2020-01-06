@@ -50,8 +50,7 @@ describe('<HostDetail />', () => {
 
   test('should show edit button for users with edit permission', async () => {
     const wrapper = mountWithContexts(<HostDetail host={mockHost} />);
-    // VariablesDetail has two buttons
-    const editButton = wrapper.find('Button').at(2);
+    const editButton = wrapper.find('Button[aria-label="edit"]');
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/hosts/1/edit');
   });
@@ -61,7 +60,6 @@ describe('<HostDetail />', () => {
     readOnlyHost.summary_fields.user_capabilities.edit = false;
     const wrapper = mountWithContexts(<HostDetail host={readOnlyHost} />);
     await waitForElement(wrapper, 'HostDetail');
-    // VariablesDetail has two buttons
-    expect(wrapper.find('Button').length).toBe(2);
+    expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
   });
 });

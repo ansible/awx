@@ -238,7 +238,7 @@ class HostsList extends Component {
                   detailUrl={`${match.url}/${o.id}`}
                   isSelected={selected.some(row => row.id === o.id)}
                   onSelect={() => this.handleSelect(o)}
-                  toggleHost={this.handleHostToggle}
+                  onToggleHost={this.handleHostToggle}
                   toggleLoading={toggleLoading === o.id}
                 />
               )}
