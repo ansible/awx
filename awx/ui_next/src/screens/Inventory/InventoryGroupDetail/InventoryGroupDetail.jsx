@@ -9,9 +9,9 @@ import { VariablesDetail } from '@components/CodeMirrorInput';
 import { CardBody } from '@components/Card';
 import ErrorDetail from '@components/ErrorDetail';
 import AlertModal from '@components/AlertModal';
-
-import { GroupsAPI } from '@api';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
+import { GroupsAPI, InventoriesAPI } from '@api';
 
 // TODO: extract this into a component for use in all relevant Detail views
 const ActionButtonWrapper = styled.div`
@@ -34,11 +34,14 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   } = inventoryGroup;
   const [error, setError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const handleDelete = async () => {
+  const handleDelete = async option => {
     setIsDeleteModalOpen(false);
     try {
-      await GroupsAPI.destroy(inventoryGroup.id);
+      if (option === 'delete') {
+        await GroupsAPI.destroy(inventoryGroup.id);
+      } else {
+        await InventoriesAPI.promoteGroup(match.params.id, inventoryGroup.id);
+      }
       history.push(`/inventories/inventory/${match.params.id}/groups`);
     } catch (err) {
       setError(err);
@@ -87,35 +90,12 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         </Button>
       </ActionButtonWrapper>
       {isDeleteModalOpen && (
-        <AlertModal
-          variant="danger"
-          title={i18n._(t`Delete Inventory Group`)}
-          isOpen={isDeleteModalOpen}
+        <InventoryGroupsDeleteModal
+          groups={[inventoryGroup]}
           onClose={() => setIsDeleteModalOpen(false)}
-          actions={[
-            <Button
-              key="delete"
-              variant="danger"
-              aria-label={i18n._(t`confirm delete`)}
-              onClick={handleDelete}
-            >
-              {i18n._(t`Delete`)}
-            </Button>,
-            <Button
-              key="cancel"
-              variant="secondary"
-              aria-label={i18n._(t`cancel delete`)}
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              {i18n._(t`Cancel`)}
-            </Button>,
-          ]}
-        >
-          {i18n._(t`Are you sure you want to delete:`)}
-          <br />
-          <strong>{inventoryGroup.name}</strong>
-          <br />
-        </AlertModal>
+          isModalOpen={isDeleteModalOpen}
+          onDelete={handleDelete}
+        />
       )}
       {error && (
         <AlertModal
