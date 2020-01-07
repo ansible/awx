@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { string, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
@@ -14,9 +14,7 @@ function VariablesDetail({ value, label, rows }) {
   const [currentValue, setCurrentValue] = useState(value);
   const [error, setError] = useState(null);
 
-  if (!value) {
-    return null;
-  }
+  useEffect(() => setCurrentValue(value), [value]);
 
   return (
     <>
@@ -62,7 +60,7 @@ function VariablesDetail({ value, label, rows }) {
       >
         <CodeMirrorInput
           mode={mode}
-          value={currentValue}
+          value={currentValue || '---'}
           readOnly
           rows={rows}
           css="margin-top: 10px"
