@@ -5,12 +5,15 @@ import os
 import logging
 import signal
 import sys
+import redis
+import json
 from uuid import UUID
 from queue import Empty as QueueEmpty
 
 from django import db
 from kombu import Producer
 from kombu.mixins import ConsumerMixin
+from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
 
@@ -109,6 +112,90 @@ class AWXConsumer(ConsumerMixin):
         signal.signal(signal.SIGTERM, self.stop)
         self.worker.on_start()
         super(AWXConsumer, self).run(*args, **kwargs)
+
+    def stop(self, signum, frame):
+        self.should_stop = True  # this makes the kombu mixin stop consuming
+        logger.warn('received {}, stopping'.format(signame(signum)))
+        self.worker.on_stop()
+        raise SystemExit()
+
+
+class AWXRedisConsumer(object):
+
+    def __init__(self, name, connection, worker, queues=[], pool=None):
+        self.should_stop = False
+
+        self.name = name
+        self.connection = connection
+        self.total_messages = 0
+        self.queues = queues
+        self.worker = worker
+        self.pool = pool
+        if pool is None:
+            self.pool = WorkerPool()
+        self.pool.init_workers(self.worker.work_loop)
+
+    @property
+    def listening_on(self):
+        return f'listening on {self.queues}'
+
+    '''
+    def control(self, body, message):
+        logger.warn(body)
+        control = body.get('control')
+        if control in ('status', 'running'):
+            producer = Producer(
+                channel=self.connection,
+                routing_key=message.properties['reply_to']
+            )
+            if control == 'status':
+                msg = '\n'.join([self.listening_on, self.pool.debug()])
+            elif control == 'running':
+                msg = []
+                for worker in self.pool.workers:
+                    worker.calculate_managed_tasks()
+                    msg.extend(worker.managed_tasks.keys())
+            producer.publish(msg)
+        elif control == 'reload':
+            for worker in self.pool.workers:
+                worker.quit()
+        else:
+            logger.error('unrecognized control message: {}'.format(control))
+        message.ack()
+    '''
+
+    def process_task(self, body, message):
+        if 'control' in body:
+            try:
+                return self.control(body, message)
+            except Exception:
+                logger.exception("Exception handling control message:")
+                return
+        if len(self.pool):
+            if "uuid" in body and body['uuid']:
+                try:
+                    queue = UUID(body['uuid']).int % len(self.pool)
+                except Exception:
+                    queue = self.total_messages % len(self.pool)
+            else:
+                queue = self.total_messages % len(self.pool)
+        else:
+            queue = 0
+        self.pool.write(queue, body)
+        self.total_messages += 1
+
+    def run(self, *args, **kwargs):
+        signal.signal(signal.SIGINT, self.stop)
+        signal.signal(signal.SIGTERM, self.stop)
+        self.worker.on_start()
+
+        queue = redis.Redis.from_url(settings.BROKER_URL)
+        while True:
+            res = queue.blpop(self.queues)
+            res = json.loads(res[1])
+            self.process_task(res, res)
+            if self.should_stop:
+                return
 
     def stop(self, signum, frame):
         self.should_stop = True  # this makes the kombu mixin stop consuming

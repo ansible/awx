@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from kombu import Exchange, Queue, Connection
 
-from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
+from awx.main.dispatch.worker import AWXRedisConsumer, CallbackBrokerWorker
 
 
 class Command(BaseCommand):
@@ -20,17 +20,11 @@ class Command(BaseCommand):
         with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             consumer = None
             try:
-                consumer = AWXConsumer(
+                consumer = AWXRedisConsumer(
                     'callback_receiver',
                     conn,
                     CallbackBrokerWorker(),
-                    [
-                        Queue(
-                            settings.CALLBACK_QUEUE,
-                            Exchange(settings.CALLBACK_QUEUE, type='direct'),
-                            routing_key=settings.CALLBACK_QUEUE
-                        )
-                    ]
+                    queues=[getattr(settings, 'CALLBACK_QUEUE', '')],
                 )
                 consumer.run()
             except KeyboardInterrupt:
