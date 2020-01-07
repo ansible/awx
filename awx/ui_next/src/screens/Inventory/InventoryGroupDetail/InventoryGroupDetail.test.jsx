@@ -44,7 +44,13 @@ describe('<InventoryGroupDetail />', () => {
         />,
         {
           context: {
-            router: { history, route: { location: history.location } },
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
           },
         }
       );
@@ -64,7 +70,13 @@ describe('<InventoryGroupDetail />', () => {
     await waitForElement(wrapper, 'Modal', el => el.length === 1);
     expect(wrapper.find('Modal').length).toBe(1);
     await act(async () => {
-      wrapper.find('button[aria-label="confirm delete"]').simulate('click');
+      wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('ModalBoxFooter Button[aria-label="Delete"]')
+        .invoke('onClick')();
     });
     expect(GroupsAPI.destroy).toBeCalledWith(1);
   });
