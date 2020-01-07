@@ -190,11 +190,11 @@ describe('<DataListToolbar />', () => {
     const upAlphaIconSelector = 'SortAlphaUpIcon';
 
     const numericColumns = [
-      { name: 'ID', key: 'id', isDefault: true },
+      { name: 'ID', key: 'id' },
     ];
 
     const alphaColumns = [
-      { name: 'Name', key: 'name', isDefault: true },
+      { name: 'Name', key: 'name' },
     ];
 
     const searchColumns = [
@@ -252,7 +252,7 @@ describe('<DataListToolbar />', () => {
       { name: 'Name', key: 'name', isDefault: true }
     ];
     const sortColumns = [
-      { name: 'Name', key: 'name', isDefault: true }
+      { name: 'Name', key: 'name' }
     ];
 
     toolbar = mountWithContexts(

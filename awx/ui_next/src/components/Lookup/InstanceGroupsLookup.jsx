@@ -71,15 +71,15 @@ function InstanceGroupsLookup(props) {
                 isDefault: true
               },
               {
-                name: i18n._(t`Credential name`),
+                name: i18n._(t`Credential Name`),
                 key: 'credential__name'
               },
               {
-                name: i18n._(t`Created by (username)`),
+                name: i18n._(t`Created By (Username)`),
                 key: 'created_by__username',
               },
               {
-                name: i18n._(t`Modified by (username)`),
+                name: i18n._(t`Modified By (Username)`),
                 key: 'modified_by__username',
               },
             ]}

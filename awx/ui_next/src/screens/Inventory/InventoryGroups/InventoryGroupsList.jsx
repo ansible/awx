@@ -184,16 +184,16 @@ function InventoryGroupsList({ i18n, location, match }) {
             isDefault: true
           },
           {
-            name: i18n._(t`Is root group`),
+            name: i18n._(t`Is Root Group`),
             key: 'parents__isnull',
             isBoolean: true
           },
           {
-            name: i18n._(t`Created by (username)`),
+            name: i18n._(t`Created By (Username)`),
             key: 'created_by__username',
           },
           {
-            name: i18n._(t`Modified by (username)`),
+            name: i18n._(t`Modified By (Username)`),
             key: 'modified_by__username',
           },
         ]}

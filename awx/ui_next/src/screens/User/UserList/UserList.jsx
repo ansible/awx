@@ -161,11 +161,11 @@ class UsersList extends Component {
                   isDefault: true
                 },
                 {
-                  name: i18n._(t`First name`),
+                  name: i18n._(t`First Name`),
                   key: 'first_name',
                 },
                 {
-                  name: i18n._(t`Last name`),
+                  name: i18n._(t`Last Name`),
                   key: 'last_name',
                 }
               ]}
@@ -175,11 +175,11 @@ class UsersList extends Component {
                   key: 'username',
                 },
                 {
-                  name: i18n._(t`First name`),
+                  name: i18n._(t`First Name`),
                   key: 'first_name',
                 },
                 {
-                  name: i18n._(t`Last name`),
+                  name: i18n._(t`Last Name`),
                   key: 'last_name',
                 },
               ]}

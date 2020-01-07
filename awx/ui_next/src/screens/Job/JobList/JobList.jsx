@@ -174,11 +174,11 @@ class JobList extends Component {
                 key: 'id'
               },
               {
-                name: i18n._(t`Label name`),
-                key: 'label__name'
+                name: i18n._(t`Label Name`),
+                key: 'labels__name'
               },
               {
-                name: i18n._(t`Job type`),
+                name: i18n._(t`Job Type`),
                 key: `type`,
                 options: [
                   [
@@ -208,7 +208,7 @@ class JobList extends Component {
                 ]
               },
               {
-                name: i18n._(t`Created by (username)`),
+                name: i18n._(t`Created By (Username)`),
                 key: 'created_by__username'
               },
               {

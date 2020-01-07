@@ -193,6 +193,7 @@ function removeParam(oldVal, deleteVal) {
  * @return {object} merged namespaced params object
  */
 export function mergeParams(oldParams, newParams) {
+  debugger;
   const merged = {};
   Object.keys(oldParams).forEach(key => {
     merged[key] = mergeParam(oldParams[key], newParams[key]);

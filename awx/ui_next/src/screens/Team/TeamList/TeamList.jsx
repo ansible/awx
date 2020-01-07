@@ -161,15 +161,15 @@ class TeamsList extends Component {
                   isDefault: true
                 },
                 {
-                  name: i18n._(t`Organization name`),
+                  name: i18n._(t`Organization Name`),
                   key: 'organization__name',
                 },
                 {
-                  name: i18n._(t`Created by (username)`),
+                  name: i18n._(t`Created By (Username)`),
                   key: 'created_by__username',
                 },
                 {
-                  name: i18n._(t`Modified by (username)`),
+                  name: i18n._(t`Modified By (Username)`),
                   key: 'modified_by__username',
                 },
               ]}

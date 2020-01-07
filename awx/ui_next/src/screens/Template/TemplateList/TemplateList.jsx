@@ -239,11 +239,11 @@ class TemplatesList extends Component {
                 key: 'job_template__playbook',
               },
               {
-                name: i18n._(t`Created by (username)`),
+                name: i18n._(t`Created By (Username)`),
                 key: 'created_by__username',
               },
               {
-                name: i18n._(t`Modified by (username)`),
+                name: i18n._(t`Modified By (Username)`),
                 key: 'modified_by__username',
               },
             ]}

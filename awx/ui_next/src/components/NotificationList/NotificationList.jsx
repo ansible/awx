@@ -11,7 +11,6 @@ import PaginatedDataList from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
 import { NotificationTemplatesAPI } from '@api';
-import { type } from 'os';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,
@@ -222,11 +221,11 @@ class NotificationList extends Component {
               ]
             },
             {
-              name: i18n._(t`Created by (username)`),
+              name: i18n._(t`Created By (Username)`),
               key: 'created_by__username',
             },
             {
-              name: i18n._(t`Modified by (username)`),
+              name: i18n._(t`Modified By (Username)`),
               key: 'modified_by__username',
             },
           ]}

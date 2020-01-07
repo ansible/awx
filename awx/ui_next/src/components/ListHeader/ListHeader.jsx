@@ -38,8 +38,10 @@ class ListHeader extends React.Component {
 
   handleSearch(key, value) {
     const { location, qsConfig } = this.props;
-    const oldParams = parseQueryString(qsConfig, location.search);
-    this.pushHistoryState(mergeParams(oldParams, { [key]: value }));
+    let params = parseQueryString(qsConfig, location.search);
+    params = mergeParams(params, { [key]: value });
+    params = replaceParams(params, { 'page' : 1 })
+    this.pushHistoryState(params);
   }
 
   handleReplaceSearch(key, value) {
