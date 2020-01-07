@@ -14,10 +14,12 @@ GroupsAPI.readDetail.mockResolvedValue({
     name: 'Foo',
     description: 'Bar',
     variables: 'bizz: buzz',
+    created: '1/12/2019',
+    modified: '1/13/2019',
     summary_fields: {
       inventory: { id: 1 },
-      created_by: { id: 1, name: 'Athena' },
-      modified_by: { id: 1, name: 'Apollo' },
+      created_by: { id: 1, username: 'Athena' },
+      modified_by: { id: 1, username: 'Apollo' },
     },
   },
 });
