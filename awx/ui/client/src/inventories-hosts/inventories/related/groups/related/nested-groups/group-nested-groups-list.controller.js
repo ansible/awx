@@ -6,11 +6,11 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'NestedGroupListDefinition', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'groupData', 'ProcessErrors',
+    'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'groupData', 'ProcessErrors',
     '$transitions',
     function($scope, $rootScope, $state, $stateParams, NestedGroupListDefinition, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors,
+        Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors,
         $transitions){
 
         let list = NestedGroupListDefinition;

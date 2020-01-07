@@ -5,11 +5,9 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'HostsRelatedGroupsList', 'InventoryUpdate',
-    'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'host', 'GroupsService',
+    'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'host', 'GroupsService',
     function($scope, $rootScope, $state, $stateParams, HostsRelatedGroupsList, InventoryUpdate,
-        CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, host, GroupsService){
+        CancelSourceUpdate, rbacUiControlService, GetBasePath, Dataset, Find, qs, inventoryData, host, GroupsService){
 
         let list = HostsRelatedGroupsList;
 

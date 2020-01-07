@@ -6,10 +6,10 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'HostNestedGroupListDefinition', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'ProcessErrors', 'host',
+    'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'ProcessErrors', 'host',
     function($scope, $rootScope, $state, $stateParams, HostNestedGroupListDefinition, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, ProcessErrors, host){
+        Dataset, Find, qs, inventoryData, canAdd, ProcessErrors, host){
 
         let list = HostNestedGroupListDefinition;
 

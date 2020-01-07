@@ -5,12 +5,10 @@
  *************************************************/
  export default
     ['$scope', '$state', '$stateParams', 'listDefinition', 'InventoryUpdate',
-    'GroupsService', 'CancelSourceUpdate',
-    'GetHostsStatusMsg', 'Dataset', 'inventoryData', 'canAdd',
+    'GroupsService', 'CancelSourceUpdate', 'Dataset', 'inventoryData', 'canAdd',
     'InventoryHostsStrings', '$transitions', 'GetBasePath', 'Rest',
     function($scope, $state, $stateParams, listDefinition, InventoryUpdate,
-        GroupsService, CancelSourceUpdate,
-        GetHostsStatusMsg, Dataset, inventoryData, canAdd,
+        GroupsService, CancelSourceUpdate, Dataset, inventoryData, canAdd,
         InventoryHostsStrings, $transitions, GetBasePath, Rest){
 
         let list = listDefinition;
