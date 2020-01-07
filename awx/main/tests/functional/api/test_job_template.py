@@ -119,6 +119,22 @@ def test_extra_credential_unique_type_xfail(get, post, organization_factory, job
 
 
 @pytest.mark.django_db
+def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, inventory, settings):
+    project.use_role.members.add(alice)
+    inventory.use_role.members.add(alice)
+    settings.MAX_FORKS = 10
+    response = post(reverse('api:job_template_list'), {
+        'name': 'Some name',
+        'project': project.id,
+        'inventory': inventory.id,
+        'playbook': 'helloworld.yml',
+        'forks': 11,
+    }, alice)
+    assert response.status_code == 400
+    assert 'Maximum number of forks (10) exceeded' in str(response.data)
+
+
+@pytest.mark.django_db
 def test_attach_extra_credential(get, post, organization_factory, job_template_factory, credential):
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
