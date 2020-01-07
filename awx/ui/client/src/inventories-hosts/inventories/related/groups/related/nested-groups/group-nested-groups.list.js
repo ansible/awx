@@ -19,15 +19,11 @@
         layoutClass: 'List-staticColumnLayout--groups',
         staticColumns: [
             {
-                field: 'failed_hosts',
                 content: {
                     label: '',
-                    nosort: true,
                     mode: 'all',
                     iconOnly: true,
-                    awToolTip: "{{ nested_group.hosts_status_tip }}",
                     dataPlacement: "top",
-                    icon: "{{ 'fa icon-job-' + nested_group.hosts_status_class }}",
                     columnClass: 'status-column'
                 }
             }
