@@ -9,6 +9,7 @@ import random
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 
+from awx.main.models.events import emit_event_detail
 from awx.main.models import (
     UnifiedJob,
     Job,
@@ -16,14 +17,6 @@ from awx.main.models import (
     ProjectUpdate,
     InventoryUpdate,
     SystemJob
-)
-from awx.main.consumers import emit_channel_notification
-from awx.api.serializers import (
-    JobEventWebSocketSerializer,
-    AdHocCommandEventWebSocketSerializer,
-    ProjectUpdateEventWebSocketSerializer,
-    InventoryUpdateEventWebSocketSerializer,
-    SystemJobEventWebSocketSerializer
 )
 
 
@@ -96,21 +89,6 @@ class ReplayJobEvents(JobStatusLifeCycle):
             raise RuntimeError("No events for job id {}".format(job.id))
         return job_events, count
 
-    def get_serializer(self, job):
-        if type(job) is Job:
-            return JobEventWebSocketSerializer
-        elif type(job) is AdHocCommand:
-            return AdHocCommandEventWebSocketSerializer
-        elif type(job) is ProjectUpdate:
-            return ProjectUpdateEventWebSocketSerializer
-        elif type(job) is InventoryUpdate:
-            return InventoryUpdateEventWebSocketSerializer
-        elif type(job) is SystemJob:
-            return SystemJobEventWebSocketSerializer
-        else:
-            raise RuntimeError("Job is of type {} and replay is not yet supported.".format(type(job)))
-            sys.exit(1)
-
     def run(self, job_id, speed=1.0, verbosity=0, skip_range=[], random_seed=0, final_status_delay=0, debug=False):
         stats = {
             'events_ontime': {
@@ -136,7 +114,6 @@ class ReplayJobEvents(JobStatusLifeCycle):
         try:
             job = self.get_job(job_id)
             job_events, job_event_count = self.get_job_events(job)
-            serializer = self.get_serializer(job)
         except RuntimeError as e:
             print("{}".format(e.message))
             sys.exit(1)
@@ -162,8 +139,7 @@ class ReplayJobEvents(JobStatusLifeCycle):
                 stats['replay_start'] = self.replay_start
                 je_previous = je_current
 
-            je_serialized = serializer(je_current).data
-            emit_channel_notification('{}-{}'.format(je_serialized['group_name'], job.id), je_serialized)
+            emit_event_detail(je_current)
 
             replay_offset = self.replay_offset(je_previous.created, speed)
             recording_diff = (je_current.created - je_previous.created).total_seconds() * (1.0 / speed)

@@ -60,7 +60,7 @@ class TestReplayJobEvents():
         r.emit_job_status = lambda job, status: True
         return r
 
-    @mock.patch('awx.main.management.commands.replay_job_events.emit_channel_notification', lambda *a, **kw: None)
+    @mock.patch('awx.main.management.commands.replay_job_events.emit_event_detail', lambda *a, **kw: None)
     def test_sleep(self, mocker, replayer):
         replayer.run(3, 1)
 
@@ -74,7 +74,7 @@ class TestReplayJobEvents():
             mock.call(0.000001),
         ])
 
-    @mock.patch('awx.main.management.commands.replay_job_events.emit_channel_notification', lambda *a, **kw: None)
+    @mock.patch('awx.main.management.commands.replay_job_events.emit_event_detail', lambda *a, **kw: None)
     def test_speed(self, mocker, replayer):
         replayer.run(3, 2)
 

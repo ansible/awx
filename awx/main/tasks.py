@@ -703,6 +703,7 @@ class BaseTask(object):
     def __init__(self):
         self.cleanup_paths = []
         self.parent_workflow_job_id = None
+        self.host_map = {}
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -1001,11 +1002,17 @@ class BaseTask(object):
         return False
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = dict(hostvars=True)
+        script_params = dict(hostvars=True, towervars=True)
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
         script_data = instance.inventory.get_script_data(**script_params)
+        # maintain a list of host_name --> host_id
+        # so we can associate emitted events to Host objects
+        self.host_map = {
+            hostname: hv.pop('remote_tower_id', '')
+            for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()
+        }
         json_data = json.dumps(script_data)
         handle, path = tempfile.mkstemp(dir=private_data_dir)
         f = os.fdopen(handle, 'w')
@@ -1114,6 +1121,15 @@ class BaseTask(object):
                 event_data.pop('parent_uuid', None)
         if self.parent_workflow_job_id:
             event_data['workflow_job_id'] = self.parent_workflow_job_id
+        if self.host_map:
+            host = event_data.get('event_data', {}).get('host', '').strip()
+            if host:
+                event_data['host_name'] = host
+                if host in self.host_map:
+                    event_data['host_id'] = self.host_map[host]
+            else:
+                event_data['host_name'] = ''
+                event_data['host_id'] = ''
         should_write_event = False
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)

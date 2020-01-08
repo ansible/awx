@@ -1,6 +1,5 @@
 from datetime import datetime
 from django.utils.timezone import utc
-from unittest import mock
 import pytest
 
 from awx.main.models import (JobEvent, ProjectUpdateEvent, AdHocCommandEvent,
@@ -18,16 +17,11 @@ from awx.main.models import (JobEvent, ProjectUpdateEvent, AdHocCommandEvent,
     datetime(2018, 1, 1).isoformat(), datetime(2018, 1, 1)
 ])
 def test_event_parse_created(job_identifier, cls, created):
-    with mock.patch.object(cls, 'objects') as manager:
-        cls.create_from_data(**{
-            job_identifier: 123,
-            'created': created
-        })
-        expected_created = datetime(2018, 1, 1).replace(tzinfo=utc)
-        manager.create.assert_called_with(**{
-            job_identifier: 123,
-            'created': expected_created
-        })
+    event = cls.create_from_data(**{
+        job_identifier: 123,
+        'created': created
+    })
+    assert event.created == datetime(2018, 1, 1).replace(tzinfo=utc)
 
 
 @pytest.mark.parametrize('job_identifier, cls', [
@@ -38,24 +32,20 @@ def test_event_parse_created(job_identifier, cls, created):
     ['system_job_id', SystemJobEvent],
 ])
 def test_playbook_event_strip_invalid_keys(job_identifier, cls):
-    with mock.patch.object(cls, 'objects') as manager:
-        cls.create_from_data(**{
-            job_identifier: 123,
-            'extra_key': 'extra_value'
-        })
-        manager.create.assert_called_with(**{job_identifier: 123})
+    event = cls.create_from_data(**{
+        job_identifier: 123,
+        'extra_key': 'extra_value'
+    })
+    assert getattr(event, job_identifier) == 123
+    assert not hasattr(event, 'extra_key')
 
 
 @pytest.mark.parametrize('field', [
     'play', 'role', 'task', 'playbook'
 ])
 def test_really_long_event_fields(field):
-    with mock.patch.object(JobEvent, 'objects') as manager:
-        JobEvent.create_from_data(**{
-            'job_id': 123,
-            'event_data': {field: 'X' * 4096}
-        })
-        manager.create.assert_called_with(**{
-            'job_id': 123,
-            'event_data': {field: 'X' * 1023 + '…'}
-        })
+    event = JobEvent.create_from_data(**{
+        'job_id': 123,
+        'event_data': {field: 'X' * 4096}
+    })
+    assert event.event_data[field] == 'X' * 1023 + '…'

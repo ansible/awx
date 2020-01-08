@@ -28,6 +28,8 @@ from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.migrations._reencrypt import decrypt_field as old_decrypt_field
 
+import cachetools
+
 # FIXME: Gracefully handle when settings are accessed before the database is
 # ready (or during migrations).
 
@@ -134,6 +136,14 @@ def filter_sensitive(registry, key, value):
     if registry.is_setting_encrypted(key):
         return '$encrypted$'
     return value
+
+
+# settings.__getattr__ is called *constantly*, and the LOG_AGGREGATOR_ ones are
+# so ubiquitous when external logging is enabled that they should kept in memory
+# with a short TTL to avoid even having to contact memcached
+# the primary use case for this optimization is the callback receiver
+# when external logging is enabled
+LOGGING_SETTINGS_CACHE = cachetools.TTLCache(maxsize=50, ttl=1)
 
 
 class EncryptedCacheProxy(object):
@@ -437,11 +447,17 @@ class SettingsWrapper(UserSettingsHolder):
         return self._get_default('SETTINGS_MODULE')
 
     def __getattr__(self, name):
+        if name.startswith('LOG_AGGREGATOR_'):
+            cached = LOGGING_SETTINGS_CACHE.get(name)
+            if cached:
+                return cached
         value = empty
         if name in self.all_supported_settings:
             with _ctit_db_wrapper(trans_safe=True):
                 value = self._get_local(name)
         if value is not empty:
+            if name.startswith('LOG_AGGREGATOR_'):
+                LOGGING_SETTINGS_CACHE[name] = value
             return value
         value = self._get_default(name)
         # sometimes users specify RabbitMQ passwords that contain
