@@ -16,7 +16,7 @@
         multiSelect: true,
         trackBy: 'nested_group.id',
         basePath: 'api/v2/hosts/{{$stateParams.host_id}}/all_groups/',
-        layoutClass: 'List-staticColumnLayout--groups',
+        layoutClass: 'List-staticColumnLayout--hostNestedGroups',
         staticColumns: [
             {
                 field: 'failed_hosts',

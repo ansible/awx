@@ -17,18 +17,6 @@
         trackBy: 'nested_group.id',
         basePath:  'api/v2/groups/{{$stateParams.group_id}}/children/',
         layoutClass: 'List-staticColumnLayout--groups',
-        staticColumns: [
-            {
-                content: {
-                    label: '',
-                    mode: 'all',
-                    iconOnly: true,
-                    dataPlacement: "top",
-                    columnClass: 'status-column'
-                }
-            }
-        ],
-
         fields: {
             name: {
                 label: i18n._('Groups'),

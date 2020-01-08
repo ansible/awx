@@ -18,18 +18,6 @@
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/groups/',
         layoutClass: 'List-staticColumnLayout--groups',
         actionHolderClass: 'List-actionHolder List-actionHolder--rootGroups',
-        staticColumns: [
-            {
-                content: {
-                    label: '',
-                    mode: 'all',
-                    iconOnly: true,
-                    dataPlacement: "top",
-                    columnClass: 'status-column'
-                }
-            }
-        ],
-
         fields: {
             name: {
                 label: i18n._('Groups'),
