@@ -698,12 +698,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         'Credential',
         related_name='%(class)ss',
     )
-    # convergence_behavior = models.TextField(
-    #     blank=True,
-    #     default='AND',
-    #     editable=True,
-    #     help_text=_('The behavior by a convergence node')
-    # )
 
     def get_absolute_url(self, request=None):
         RealClass = self.get_real_instance_class()
@@ -1451,4 +1445,3 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def is_containerized(self):
         return False
-

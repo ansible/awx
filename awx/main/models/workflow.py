@@ -79,6 +79,12 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         symmetrical=False,
         related_name='%(class)ss_always',
     )
+    all_parents_must_converge = models.BooleanField(
+        'self',
+        default=False,
+        help_text=_("If enabled then the node will only run if all of the parent nodes "
+                    "have met the criteria to reach this node")
+    )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         related_name='%(class)ss',
@@ -102,7 +108,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         '''
         return ['workflow_job', 'unified_job_template',
                 'extra_data', 'survey_passwords',
-                'inventory', 'credentials', 'char_prompts']
+                'inventory', 'credentials', 'char_prompts', 'all_parents_must_converge']
 
     def create_workflow_job_node(self, **kwargs):
         '''
@@ -207,11 +213,6 @@ class WorkflowJobNode(WorkflowNodeBase):
         help_text=_("Indicates that a job will not be created when True. Workflow runtime "
                     "semantics will mark this True if the node is in a path that will "
                     "decidedly not be ran. A value of False means the node may not run."),
-    )
-    all_parents_must_converge = models.BooleanField(
-        default=False,
-        help_text=_("If enabled then the node will only run if all of the parent nodes "
-                    "have met the criteria to reach this node")
     )
 
     def get_absolute_url(self, request=None):
