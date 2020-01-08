@@ -62,18 +62,17 @@ class Command(BaseCommand):
         # in cpython itself:
         # https://bugs.python.org/issue37429
         AWXProxyHandler.disable()
-        with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
-            try:
-                queues = ['tower_broadcast_all'] + settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()]
-                consumer = AWXConsumerPG(
-                    'dispatcher',
-                    conn,
-                    TaskWorker(),
-                    queues,
-                    AutoscalePool(min_workers=4)
-                )
-                consumer.run()
-            except KeyboardInterrupt:
-                logger.debug('Terminating Task Dispatcher')
-                if consumer:
-                    consumer.stop()
+        try:
+            queues = ['tower_broadcast_all'] + settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()]
+            consumer = AWXConsumerPG(
+                'dispatcher',
+                None,
+                TaskWorker(),
+                queues,
+                AutoscalePool(min_workers=4)
+            )
+            consumer.run()
+        except KeyboardInterrupt:
+            logger.debug('Terminating Task Dispatcher')
+            if consumer:
+                consumer.stop()

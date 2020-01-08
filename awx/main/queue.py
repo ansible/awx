@@ -30,7 +30,6 @@ class AnsibleJSONEncoder(json.JSONEncoder):
 class CallbackQueueDispatcher(object):
 
     def __init__(self):
-        self.callback_connection = getattr(settings, 'BROKER_URL', None)
         self.queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.logger = logging.getLogger('awx.main.queue.CallbackQueueDispatcher')
         self.connection = redis.Redis.from_url(settings.BROKER_URL)

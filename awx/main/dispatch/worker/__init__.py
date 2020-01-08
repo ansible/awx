@@ -1,4 +1,3 @@
-from .base import AWXConsumer, AWXRedisConsumer, BaseWorker  # noqa
-from .basepg import AWXConsumerPG, BaseWorkerPG # noqa
+from .base import AWXConsumerRedis, AWXConsumerPG, BaseWorker  # noqa
 from .callback import CallbackBrokerWorker  # noqa
 from .task import TaskWorker  # noqa

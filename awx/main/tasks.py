@@ -264,7 +264,7 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def handle_setting_changes(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -275,7 +275,7 @@ def handle_setting_changes(setting_keys):
     cache.delete_many(cache_keys)
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def delete_project_files(project_path):
     # TODO: possibly implement some retry logic
     lock_file = project_path + '.lock'
@@ -293,7 +293,7 @@ def delete_project_files(project_path):
             logger.exception('Could not remove lock file {}'.format(lock_file))
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def profile_sql(threshold=1, minutes=1):
     if threshold == 0:
         cache.delete('awx-profile-sql-threshold')

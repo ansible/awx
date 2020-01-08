@@ -2,14 +2,13 @@ import inspect
 import logging
 import sys
 import json
+import re
 from uuid import uuid4
-import psycopg2
 
 from django.conf import settings
-from kombu import Exchange, Producer
 from django.db import connection
-from pgpubsub import PubSub
 
+from . import pg_bus_conn
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -42,24 +41,22 @@ class task:
     add.apply_async([1, 1])
     Adder.apply_async([1, 1])
 
-    # Tasks can also define a specific target queue or exchange type:
+    # Tasks can also define a specific target queue or use the special fan-out queue tower_broadcast:
 
     @task(queue='slow-tasks')
     def snooze():
         time.sleep(10)
 
-    @task(queue='tower_broadcast', exchange_type='fanout')
+    @task(queue='tower_broadcast')
     def announce():
         print("Run this everywhere!")
     """
 
-    def __init__(self, queue=None, exchange_type=None):
+    def __init__(self, queue=None):
         self.queue = queue
-        self.exchange_type = exchange_type
 
     def __call__(self, fn=None):
         queue = self.queue
-        exchange_type = self.exchange_type
 
         class PublisherMixin(object):
 
@@ -89,15 +86,8 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    conf = settings.DATABASES['default']
-                    conn = psycopg2.connect(dbname=conf['NAME'],
-                                            host=conf['HOST'],
-                                            user=conf['USER'],
-                                            password=conf['PASSWORD'])
-                    conn.set_session(autocommit=True)
-                    logger.warn(f"Send message to queue {queue}")
-                    pubsub = PubSub(conn)
-                    pubsub.notify(queue, json.dumps(obj))
+                    with pg_bus_conn() as conn:
+                        conn.notify(queue, json.dumps(obj))
                 return (obj, queue)
 
         # If the object we're wrapping *is* a class (e.g., RunJob), return

@@ -24,10 +24,7 @@ services:
     #entrypoint: ["bash"]
     environment:
       CURRENT_UID:
-      # BROKER_URL will go away when we use postgres as our message broker
       BROKER_URL: "redis://redis_1:63791"
-      REDIS_HOST: redis_1
-      REDIS_PORT: 63791
       SDB_HOST: 0.0.0.0
       SDB_PORT: 5899
       AWX_GROUP_QUEUES: alpha,tower
@@ -47,10 +44,7 @@ services:
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      # BROKER_URL will go away when we use postgres as our message broker
-      BROKER_URL: "redis://redis_1:63791"
-      REDIS_HOST: redis_2
-      REDIS_PORT: 63792
+      BROKER_URL: "redis://redis_2:63792"
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: bravo,tower
@@ -69,10 +63,7 @@ services:
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      # BROKER_URL will go away when we use postgres as our message broker
-      BROKER_URL: "redis://redis_1:63791"
-      REDIS_HOST: redis_3
-      REDIS_PORT: 63793
+      BROKER_URL: "redis://redis_3:63793"
       SDB_HOST: 0.0.0.0
       SDB_PORT: 8899
       AWX_GROUP_QUEUES: charlie,tower

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from kombu import Exchange, Queue, Connection
 
-from awx.main.dispatch.worker import AWXRedisConsumer, CallbackBrokerWorker
+from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 
 
 class Command(BaseCommand):
@@ -20,7 +20,7 @@ class Command(BaseCommand):
         with Connection(settings.BROKER_URL, transport_options=settings.BROKER_TRANSPORT_OPTIONS) as conn:
             consumer = None
             try:
-                consumer = AWXRedisConsumer(
+                consumer = AWXConsumerRedis(
                     'callback_receiver',
                     conn,
                     CallbackBrokerWorker(),
