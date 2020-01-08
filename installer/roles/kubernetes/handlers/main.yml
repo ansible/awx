@@ -1,0 +1,6 @@
+---
+- name: remove-rmq_cert_tempdir
+  file:
+    state: absent
+    path: "{{ rmq_cert_tempdir.path }}"
+
