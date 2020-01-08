@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-
 import { Switch, Route, withRouter, Link, Redirect } from 'react-router-dom';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+
 import { GroupsAPI } from '@api';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
@@ -40,7 +41,12 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
 
   const tabsArray = [
     {
-      name: i18n._(t`Return to Groups`),
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Groups`)}
+        </>
+      ),
       link: `/inventories/inventory/${inventory.id}/groups`,
       id: 99,
       isNestedTab: true,

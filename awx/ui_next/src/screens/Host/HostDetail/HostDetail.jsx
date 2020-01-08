@@ -1,14 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Host } from '@types';
 import { Button } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '@components/Card';
+import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import { Sparkline } from '@components/Sparkline';
+import DeleteButton from '@components/DeleteButton';
 import Switch from '@components/Switch';
+import { HostsAPI } from '@api';
 
 function HostDetail({ host, i18n }) {
 const ActionButtonWrapper = styled.div`
@@ -20,92 +24,62 @@ const ActionButtonWrapper = styled.div`
   }
 `;
 
-function HostDetail({
-  host,
-  history,
-  isDeleteModalOpen,
-  match,
-  i18n,
-  toggleError,
-  toggleLoading,
-  onHostDelete,
-  onToggleDeleteModal,
-  onToggleError,
-  onHandleHostToggle,
-}) {
+function HostDetail({ host, history, match, i18n, onUpdateHost }) {
   const { created, description, id, modified, name, summary_fields } = host;
-  let createdBy = '';
-  if (created) {
-    if (summary_fields.created_by && summary_fields.created_by.username) {
-      createdBy = (
-        <span>
-          {i18n._(t`${formatDateString(created)} by `)}{' '}
-          <Link to={`/users/${summary_fields.created_by.id}`}>
-            {summary_fields.created_by.username}
-          </Link>
-        </span>
-      );
-    } else {
-      createdBy = formatDateString(created);
-    }
-  }
 
-  let modifiedBy = '';
-  if (modified) {
-    if (summary_fields.modified_by && summary_fields.modified_by.username) {
-      modifiedBy = (
-        <span>
-          {i18n._(t`${formatDateString(modified)} by`)}{' '}
-          <Link to={`/users/${summary_fields.modified_by.id}`}>
-            {summary_fields.modified_by.username}
-          </Link>
-        </span>
-      );
-    } else {
-      modifiedBy = formatDateString(modified);
+  const [isLoading, setIsloading] = useState(false);
+  const [deletionError, setDeletionError] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState(false);
+  const [toggleError, setToggleError] = useState(false);
+
+  const handleHostToggle = async () => {
+    setToggleLoading(true);
+    try {
+      const { data } = await HostsAPI.update(host.id, {
+        enabled: !host.enabled,
+      });
+      onUpdateHost(data);
+    } catch (err) {
+      setToggleError(err);
+    } finally {
+      setToggleLoading(false);
     }
-  }
+  };
+
+  const handleHostDelete = async () => {
+    setIsloading(true);
+    try {
+      await HostsAPI.destroy(host.id);
+      setIsloading(false);
+      history.push(`/inventories/inventory/${match.params.id}/hosts`);
+    } catch (err) {
+      setDeletionError(err);
+    }
+  };
+
   if (toggleError && !toggleLoading) {
     return (
       <AlertModal
         variant="danger"
         title={i18n._(t`Error!`)}
         isOpen={toggleError && !toggleLoading}
-        onClose={onToggleError}
+        onClose={() => setToggleError(false)}
       >
         {i18n._(t`Failed to toggle host.`)}
         <ErrorDetail error={toggleError} />
       </AlertModal>
     );
   }
-  if (isDeleteModalOpen) {
+  if (!isLoading && deletionError) {
     return (
       <AlertModal
-        isOpen={isDeleteModalOpen}
-        title={i18n._(t`Delete Host`)}
+        isOpen={deletionError}
         variant="danger"
-        onClose={() => onToggleDeleteModal()}
+        title={i18n._(t`Error!`)}
+        onClose={() => setDeletionError(false)}
       >
-        {i18n._(t`Are you sure you want to delete:`)}
-        <br />
-        <strong>{host.name}</strong>
-        <ActionButtonWrapper>
-          <Button
-            variant="secondary"
-            aria-label={i18n._(t`Close`)}
-            onClick={() => onToggleDeleteModal()}
-          >
-            {i18n._(t`Cancel`)}
-          </Button>
-
-          <Button
-            variant="danger"
-            aria-label={i18n._(t`Delete`)}
-            onClick={() => onHostDelete()}
-          >
-            {i18n._(t`Delete`)}
-          </Button>
-        </ActionButtonWrapper>
+        {i18n._(t`Failed to delete ${host.name}.`)}
+        <ErrorDetail error={deletionError} />
       </AlertModal>
     );
   }
@@ -118,7 +92,7 @@ function HostDetail({
         labelOff={i18n._(t`Off`)}
         isChecked={host.enabled}
         isDisabled={!host.summary_fields.user_capabilities.edit}
-        onChange={onHandleHostToggle}
+        onChange={() => handleHostToggle()}
         aria-label={i18n._(t`Toggle Host`)}
       />
       <DetailList gutter="sm">
@@ -145,8 +119,16 @@ function HostDetail({
             }
           />
         )}
-        <Detail label={i18n._(t`Created`)} value={createdBy} />
-        <Detail label={i18n._(t`Last Modified`)} value={modifiedBy} />
+        <UserDateDetail
+          date={created}
+          label={i18n._(t`Created`)}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          user={summary_fields.modified_by}
+          date={modified}
+        />
         <VariablesDetail
           value={host.variables}
           rows={4}
@@ -169,6 +151,14 @@ function HostDetail({
             </Button>
           )}
       </CardActionsRow>
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              onConfirm={() => handleHostDelete()}
+              modalTitle={i18n._(t`Delete Host`)}
+              name={host.name}
+            />
+          )}
     </CardBody>
   );
 }

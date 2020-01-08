@@ -2,15 +2,16 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
 
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
@@ -26,16 +27,8 @@ class Host extends Component {
       hasContentLoading: true,
       contentError: null,
       isInitialized: false,
-      toggleLoading: false,
-      toggleError: null,
-      deletionError: false,
-      isDeleteModalOpen: false,
     };
     this.loadHost = this.loadHost.bind(this);
-    this.handleHostToggle = this.handleHostToggle.bind(this);
-    this.handleToggleError = this.handleToggleError.bind(this);
-    this.handleHostDelete = this.handleHostDelete.bind(this);
-    this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
   }
 
   async componentDidMount() {
@@ -56,40 +49,6 @@ class Host extends Component {
     }
   }
 
-  toggleDeleteModal() {
-    const { isDeleteModalOpen } = this.state;
-    this.setState({ isDeleteModalOpen: !isDeleteModalOpen });
-  }
-
-  async handleHostToggle() {
-    const { host } = this.state;
-    this.setState({ toggleLoading: true });
-    try {
-      const { data } = await HostsAPI.update(host.id, {
-        enabled: !host.enabled,
-      });
-      this.setState({ host: data });
-    } catch (err) {
-      this.setState({ toggleError: err });
-    } finally {
-      this.setState({ toggleLoading: null });
-    }
-  }
-
-  async handleHostDelete() {
-    const { host } = this.state;
-    const { match, history } = this.props;
-
-    this.setState({ hasContentLoading: true });
-    try {
-      await HostsAPI.destroy(host.id);
-      this.setState({ hasContentLoading: false });
-      history.push(`/inventories/inventory/${match.params.id}/hosts`);
-    } catch (err) {
-      this.setState({ deletionError: err });
-    }
-  }
-
   async loadHost() {
     const { match, setBreadcrumb, history, inventory } = this.props;
 
@@ -102,8 +61,9 @@ class Host extends Component {
 
       if (history.location.pathname.startsWith('/hosts')) {
         setBreadcrumb(data);
+      } else {
+        setBreadcrumb(inventory, data);
       }
-      setBreadcrumb(inventory, data);
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -111,29 +71,10 @@ class Host extends Component {
     }
   }
 
-  handleToggleError() {
-    this.setState({ toggleError: false });
-  }
-
   render() {
     const { location, match, history, i18n } = this.props;
-    const {
-      deletionError,
-      host,
-      isDeleteModalOpen,
-      toggleError,
-      hasContentLoading,
-      toggleLoading,
-      isInitialized,
-      contentError,
-    } = this.state;
+    const { host, hasContentLoading, isInitialized, contentError } = this.state;
     const tabsArray = [
-      {
-        name: i18n._(t`Return to Hosts`),
-        link: `/inventories/inventory/${match.params.id}/hosts`,
-        id: 99,
-        isNestedTab: !history.location.pathname.startsWith('/hosts'),
-      },
       {
         name: i18n._(t`Details`),
         link: `${match.url}/details`,
@@ -155,7 +96,18 @@ class Host extends Component {
         id: 3,
       },
     ];
-
+    if (!history.location.pathname.startsWith('/hosts')) {
+      tabsArray.unshift({
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Hosts`)}
+          </>
+        ),
+        link: `/inventories/inventory/${match.params.id}/hosts`,
+        id: 99,
+      });
+    }
     let cardHeader = (
       <TabbedCardHeader>
         <RoutedTabs
@@ -180,115 +132,98 @@ class Host extends Component {
       cardHeader = null;
     }
 
+    if (hasContentLoading) {
+      return <ContentLoading />;
+    }
+
     if (!hasContentLoading && contentError) {
       return (
-        <PageSection>
-          <Card className="awx-c-card">
-            <ContentError error={contentError}>
-              {contentError.response.status === 404 && (
-                <span>
-                  {i18n._(`Host not found.`)}{' '}
-                  <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
-                </span>
-              )}
-            </ContentError>
-          </Card>
-        </PageSection>
+        <Card className="awx-c-card">
+          <ContentError error={contentError}>
+            {contentError.response.status === 404 && (
+              <span>
+                {i18n._(`Host not found.`)}{' '}
+                <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
+              </span>
+            )}
+          </ContentError>
+        </Card>
       );
     }
+    const redirect = location.pathname.startsWith('/hosts') ? (
+      <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
+    ) : (
+      <Redirect
+        from="/inventories/inventory/:id/hosts/:hostId"
+        to="/inventories/inventory/:id/hosts/:hostId/details"
+        exact
+      />
+    );
     return (
-      <>
-        <PageSection
-          css={`
-            ${location.pathname.startsWith('/inventories')
-              ? 'padding: 0'
-              : 'null'}
-          `}
-        >
-          <Card className="awx-c-card">
-            {cardHeader}
-            <Switch>
-              <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
-              {host && (
-                <Route
-                  path={[
-                    '/hosts/:id/edit',
-                    '/inventories/inventory/:id/hosts/:hostId/edit',
-                  ]}
-                  render={() => <HostEdit match={match} host={host} />}
+      <Card className="awx-c-card">
+        {cardHeader}
+        <Switch>
+          {redirect}
+          {host && (
+            <Route
+              path={[
+                '/hosts/:id/details',
+                '/inventories/inventory/:id/hosts/:hostId/details',
+              ]}
+              render={() => (
+                <HostDetail
+                  host={host}
+                  onUpdateHost={newHost => this.setState({ host: newHost })}
                 />
               )}
-              {host && (
-                <Route
-                  path={[
-                    '/hosts/:id/details',
-                    '/inventories/inventory/:id/hosts/:hostId/details',
-                  ]}
-                  render={() => (
-                    <HostDetail
-                      match={match}
-                      host={host}
-                      history={history}
-                      onToggleDeleteModal={this.toggleDeleteModal}
-                      isDeleteModalOpen={isDeleteModalOpen}
-                      onHandleHostToggle={this.handleHostToggle}
-                      toggleError={toggleError}
-                      toggleLoading={toggleLoading}
-                      onToggleError={this.handleToggleError}
-                      onHostDelete={this.handleHostDelete}
-                    />
+            />
+          )}
+          ))
+          {host && (
+            <Route
+              path={[
+                '/hosts/:id/edit',
+                '/inventories/inventory/:id/hosts/:hostId/edit',
+              ]}
+              render={() => <HostEdit match={match} host={host} />}
+            />
+          )}
+          {host && (
+            <Route
+              path="/hosts/:id/facts"
+              render={() => <HostFacts host={host} />}
+            />
+          )}
+          {host && (
+            <Route
+              path="/hosts/:id/groups"
+              render={() => <HostGroups host={host} />}
+            />
+          )}
+          {host && (
+            <Route
+              path="/hosts/:id/completed_jobs"
+              render={() => <HostCompletedJobs host={host} />}
+            />
+          )}
+          <Route
+            key="not-found"
+            path="*"
+            render={() =>
+              !hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/hosts/${match.params.id}/details`}>
+                      {i18n._(`View Host Details`)}
+                    </Link>
                   )}
-                />
-              )}
-              {host && (
-                <Route
-                  path="/hosts/:id/facts"
-                  render={() => <HostFacts host={host} />}
-                />
-              )}
-              {host && (
-                <Route
-                  path="/hosts/:id/groups"
-                  render={() => <HostGroups host={host} />}
-                />
-              )}
-              {host && (
-                <Route
-                  path="/hosts/:id/completed_jobs"
-                  render={() => <HostCompletedJobs host={host} />}
-                />
-              )}
-              <Route
-                key="not-found"
-                path="*"
-                render={() =>
-                  !hasContentLoading && (
-                    <ContentError isNotFound>
-                      {match.params.id && (
-                        <Link to={`/hosts/${match.params.id}/details`}>
-                          {i18n._(`View Host Details`)}
-                        </Link>
-                      )}
-                    </ContentError>
-                  )
-                }
-              />
-              ,
-            </Switch>
-          </Card>
-        </PageSection>
-        {deletionError && (
-          <AlertModal
-            isOpen={deletionError}
-            variant="danger"
-            title={i18n._(t`Error!`)}
-            onClose={() => this.setState({ deletionError: false })}
-          >
-            {i18n._(t`Failed to delete ${host.name}.`)}
-            <ErrorDetail error={deletionError} />
-          </AlertModal>
-        )}
-      </>
+                </ContentError>
+              )
+            }
+          />
+          ,
+        </Switch>
+      </Card>
     );
   }
 }

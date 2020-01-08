@@ -39,51 +39,46 @@ class Inventories extends Component {
       '/inventories/inventory/add': i18n._(t`Create New Inventory`),
       '/inventories/smart_inventory/add': i18n._(t`Create New Smart Inventory`),
       [`/inventories/${inventoryKind}/${inventory.id}`]: `${inventory.name}`,
-      [`/inventories/${inventoryKind}/${inventory.id}/details`]: i18n._(
-        t`Details`
-      ),
-      [`/inventories/${inventoryKind}/${inventory.id}/edit`]: i18n._(
-        t`Edit Details`
-      ),
+
       [`/inventories/${inventoryKind}/${inventory.id}/access`]: i18n._(
         t`Access`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/completed_jobs`]: i18n._(
         t`Completed Jobs`
       ),
+      [`/inventories/${inventoryKind}/${inventory.id}/details`]: i18n._(
+        t`Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/edit`]: i18n._(
+        t`Edit Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups`]: i18n._(
+        t`Groups`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts`]: i18n._(t`Hosts`),
+
+      [`/inventories/${inventoryKind}/${inventory.id}/sources`]: i18n._(
+        t`Sources`
+      ),
+
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
+        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
+        nestedResource.id}/details`]: i18n._(t`Host Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
         nestedResource.id}`]: i18n._(
         t`${nestedResource && nestedResource.name}`
       ),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}/details`]: i18n._(t`Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/add`]: i18n._(
-        t`Create New Host`
-      ),
-      [`/inventories/${inventoryKind}/${inventory.id}/sources`]: i18n._(
-        t`Sources`
-      ),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups`]: i18n._(
-        t`Groups`
-      ),
+
       [`/inventories/${inventoryKind}/${inventory.id}/groups/add`]: i18n._(
         t`Create New Group`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
+        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
         nestedResource.id}/details`]: i18n._(t`Group Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts`]: i18n._(t`Hosts`),
-      [`/inventories/${inventoryKind}/${inventory.id}/sources`]: i18n._(
-        t`Sources`
-      ),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups`]: i18n._(
-        t`Groups`
-      ),
+        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
     };
     this.setState({ breadcrumbConfig });
   };

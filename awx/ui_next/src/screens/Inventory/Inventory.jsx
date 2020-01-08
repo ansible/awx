@@ -63,7 +63,7 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
     location.pathname.endsWith('edit') ||
     location.pathname.endsWith('add') ||
     location.pathname.includes('groups/') ||
-    history.location.pathname.includes(`/hosts/`)
+    location.pathname.includes('hosts/')
   ) {
     cardHeader = null;
   }

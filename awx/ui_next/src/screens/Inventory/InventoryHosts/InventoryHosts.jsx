@@ -3,7 +3,7 @@ import { Switch, Route, withRouter } from 'react-router-dom';
 
 import Host from '../../Host/Host';
 import InventoryHostList from './InventoryHostList';
-import HostAdd from '../InventoryHostAdd';
+import InventoryHostAdd from '../InventoryHostAdd';
 
 function InventoryHosts({ match, setBreadcrumb, i18n, inventory }) {
   return (
@@ -11,11 +11,11 @@ function InventoryHosts({ match, setBreadcrumb, i18n, inventory }) {
       <Route
         key="host-add"
         path="/inventories/inventory/:id/hosts/add"
-        render={() => <HostAdd match={match} />}
+        render={() => <InventoryHostAdd match={match} />}
       />
       ,
       <Route
-        key="details and edit"
+        key="host"
         path="/inventories/inventory/:id/hosts/:hostId"
         render={() => (
           <Host
