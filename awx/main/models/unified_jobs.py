@@ -817,18 +817,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Sanity check: Has the job just completed? If so, mark down its
         # completion time, and record its output to the database.
-        #import sdb
-        #sdb.set_trace()
         if self.status in ('successful', 'failed', 'error', 'canceled') and not self.finished:
-            # Record the `finished` time and if the job was canceled, set it to null.
+            # Record the `finished` time.
             self.finished = now()
-            if self.status == 'canceled':
-                self.finished = None
-                self.canceled = now()
             if 'finished' not in update_fields:
                 update_fields.append('finished')
-            if 'canceled' not in update_fields:
-                update_fields.append('canceled')
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
@@ -848,6 +841,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
 
+        if self.cancel_flag and not self.canceled_on:
+        # Record the 'canceled' time. 
+            self.canceled_on = now()
+            if 'canceled_on' not in update_fields:
+                update_fields.append('canceled_on')
         # Okay; we're done. Perform the actual save.
         result = super(UnifiedJob, self).save(*args, **kwargs)
 
@@ -1373,11 +1371,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     cancel_fields.append('job_explanation')
                 self.save(update_fields=cancel_fields)
                 self.websocket_emit_status("canceled")
-                if self.cancel_flag and not self.canceled_on:
-                    # Record the `finished` or 'canceled' time.
-                    self.canceled_on = now()
-                    if 'canceled_on' not in update_fields:
-                        update_fields.append('canceled_on')
         return self.cancel_flag
 
     @property
