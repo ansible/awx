@@ -178,7 +178,7 @@ class InventoriesList extends Component {
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),

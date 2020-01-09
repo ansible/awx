@@ -19,9 +19,7 @@ import {
   SortNumericUpIcon,
 } from '@patternfly/react-icons';
 
-import {
-  parseQueryString
-} from '@util/qs';
+import { parseQueryString } from '@util/qs';
 import { SortColumns, QSConfig } from '@types';
 import styled from 'styled-components';
 
@@ -51,7 +49,7 @@ class Sort extends React.Component {
       sortOrder = 'ascending';
     }
 
-    if (qsConfig.integerFields.filter(field => field === sortKey).length) {
+    if (qsConfig.integerFields.find(field => field === sortKey)) {
       isNumeric = true;
     } else {
       isNumeric = false;
@@ -61,7 +59,7 @@ class Sort extends React.Component {
       isSortDropdownOpen: false,
       sortKey,
       sortOrder,
-      isNumeric
+      isNumeric,
     };
 
     this.handleDropdownToggle = this.handleDropdownToggle.bind(this);
@@ -78,13 +76,11 @@ class Sort extends React.Component {
     const { sortOrder } = this.state;
     const { innerText } = target;
 
-    const [{ key: sortKey }] = columns.filter(
-      ({ name }) => name === innerText
-    );
+    const [{ key: sortKey }] = columns.filter(({ name }) => name === innerText);
 
     let isNumeric;
 
-    if (qsConfig.integerFields.filter(field => field === sortKey).length) {
+    if (qsConfig.integerFields.find(field => field === sortKey)) {
       isNumeric = true;
     } else {
       isNumeric = false;
@@ -131,23 +127,23 @@ class Sort extends React.Component {
       <Fragment>
         {sortedColumnName && (
           <InputGroup>
-            {sortDropdownItems.length > 0 && (<Dropdown
-              onToggle={this.handleDropdownToggle}
-              onSelect={this.handleDropdownSelect}
-              direction={up}
-              isOpen={isSortDropdownOpen}
-              toggle={
-                <DropdownToggle
-                  id="awx-sort"
-                  onToggle={this.handleDropdownToggle}
-                >
-                  {sortedColumnName}
-                </DropdownToggle>
-              }
-              dropdownItems={sortDropdownItems}
-            />) || (
-              <NoOptionDropdown>{sortedColumnName}</NoOptionDropdown>
-            )}
+            {(sortDropdownItems.length > 0 && (
+              <Dropdown
+                onToggle={this.handleDropdownToggle}
+                onSelect={this.handleDropdownSelect}
+                direction={up}
+                isOpen={isSortDropdownOpen}
+                toggle={
+                  <DropdownToggle
+                    id="awx-sort"
+                    onToggle={this.handleDropdownToggle}
+                  >
+                    {sortedColumnName}
+                  </DropdownToggle>
+                }
+                dropdownItems={sortDropdownItems}
+              />
+            )) || <NoOptionDropdown>{sortedColumnName}</NoOptionDropdown>}
             <Button
               variant={ButtonVariant.control}
               aria-label={i18n._(t`Sort`)}
@@ -165,11 +161,11 @@ class Sort extends React.Component {
 Sort.propTypes = {
   qsConfig: QSConfig.isRequired,
   columns: SortColumns.isRequired,
-  onSort: PropTypes.func
+  onSort: PropTypes.func,
 };
 
 Sort.defaultProps = {
-  onSort: null
+  onSort: null,
 };
 
 export default withI18n()(withRouter(Sort));

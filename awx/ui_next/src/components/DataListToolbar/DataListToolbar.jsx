@@ -2,12 +2,16 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  Checkbox,
-} from '@patternfly/react-core';
+import { Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { SearchIcon } from '@patternfly/react-icons';
-import { DataToolbar, DataToolbarContent, DataToolbarGroup, DataToolbarToggleGroup, DataToolbarItem } from '@patternfly/react-core/dist/umd/experimental';
+import {
+  DataToolbar,
+  DataToolbarContent,
+  DataToolbarGroup,
+  DataToolbarToggleGroup,
+  DataToolbarItem,
+} from '@patternfly/react-core/dist/umd/experimental';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
@@ -60,7 +64,8 @@ class DataListToolbar extends React.Component {
 
     const showExpandCollapse = onCompact && onExpand;
     return (
-      <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
+      <DataToolbar
+        id={`${qsConfig.namespace}-list-toolbar`}
         clearAllFilters={clearAllFilters}
         collapseListedFiltersBreakpoint="xl"
       >
@@ -89,11 +94,7 @@ class DataListToolbar extends React.Component {
               />
             </DataToolbarItem>
             <DataToolbarItem>
-              <Sort
-                qsConfig={qsConfig}
-                columns={sortColumns}
-                onSort={onSort}
-              />
+              <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
             </DataToolbarItem>
           </DataToolbarToggleGroup>
           <DataToolbarGroup>

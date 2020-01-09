@@ -17,7 +17,7 @@ describe('<OptionsList />', () => {
         value={[]}
         options={options}
         optionCount={3}
-        searchColumns={[{name: 'Foo', key: 'foo', isDefault: true}]}
+        searchColumns={[{ name: 'Foo', key: 'foo', isDefault: true }]}
         sortColumns={[{ name: 'Foo', key: 'foo' }]}
         qsConfig={qsConfig}
         selectItem={() => {}}
@@ -40,7 +40,7 @@ describe('<OptionsList />', () => {
         value={[options[1]]}
         options={options}
         optionCount={3}
-        searchColumns={[{name: 'Foo', key: 'foo', isDefault: true}]}
+        searchColumns={[{ name: 'Foo', key: 'foo', isDefault: true }]}
         sortColumns={[{ name: 'Foo', key: 'foo' }]}
         qsConfig={qsConfig}
         selectItem={() => {}}

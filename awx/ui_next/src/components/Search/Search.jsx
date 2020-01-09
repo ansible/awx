@@ -19,7 +19,7 @@ import {
 import {
   DataToolbarGroup,
   DataToolbarItem,
-  DataToolbarFilter
+  DataToolbarFilter,
 } from '@patternfly/react-core/dist/umd/experimental';
 import { SearchIcon } from '@patternfly/react-icons';
 import { parseQueryString } from '@util/qs';
@@ -44,7 +44,7 @@ class Search extends React.Component {
       isSearchDropdownOpen: false,
       searchKey: columns.find(col => col.isDefault).key,
       searchValue: '',
-      isFilterDropdownOpen: false
+      isFilterDropdownOpen: false,
     };
 
     this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
@@ -52,8 +52,12 @@ class Search extends React.Component {
     this.handleDropdownSelect = this.handleDropdownSelect.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.handleTextKeyDown = this.handleTextKeyDown.bind(this);
-    this.handleFilterDropdownToggle = this.handleFilterDropdownToggle.bind(this);
-    this.handleFilterDropdownSelect = this.handleFilterDropdownSelect.bind(this);
+    this.handleFilterDropdownToggle = this.handleFilterDropdownToggle.bind(
+      this
+    );
+    this.handleFilterDropdownSelect = this.handleFilterDropdownSelect.bind(
+      this
+    );
     this.handleFilterBooleanSelect = this.handleFilterBooleanSelect.bind(this);
   }
 
@@ -77,8 +81,8 @@ class Search extends React.Component {
     const { onSearch, qsConfig } = this.props;
 
     const isNonStringField =
-      qsConfig.integerFields.filter(field => field === searchKey).length ||
-      qsConfig.dateFields.filter(field => field === searchKey).length;
+      qsConfig.integerFields.find(field => field === searchKey) ||
+      qsConfig.dateFields.find(field => field === searchKey);
 
     const actualSearchKey = isNonStringField
       ? searchKey
@@ -121,7 +125,12 @@ class Search extends React.Component {
   render() {
     const { up } = DropdownPosition;
     const { columns, i18n, onRemove, qsConfig, location } = this.props;
-    const { isSearchDropdownOpen, searchKey, searchValue, isFilterDropdownOpen } = this.state;
+    const {
+      isSearchDropdownOpen,
+      searchKey,
+      searchValue,
+      isFilterDropdownOpen,
+    } = this.state;
     const { name: searchColumnName } = columns.find(
       ({ key }) => key === searchKey
     );
@@ -143,8 +152,8 @@ class Search extends React.Component {
       const queryParams = parseQueryString(qsConfig, location.search);
 
       const queryParamsByKey = {};
-      columns.forEach(({name, key}) => {
-        queryParamsByKey[key] = {key, label: name, chips: []};
+      columns.forEach(({ name, key }) => {
+        queryParamsByKey[key] = { key, label: name, chips: [] };
       });
       const nonDefaultParams = filterDefaultParams(
         Object.keys(queryParams || {}),
@@ -152,12 +161,13 @@ class Search extends React.Component {
       );
 
       nonDefaultParams.forEach(key => {
-        const columnKey = key
-          .replace('__icontains', '')
-          .replace('or__', '');
-        const label = columns
-          .filter(({key: keyToCheck}) => columnKey === keyToCheck).length ? columns
-          .filter(({key: keyToCheck}) => columnKey === keyToCheck)[0].name : columnKey;
+        const columnKey = key.replace('__icontains', '').replace('or__', '');
+        const label = columns.filter(
+          ({ key: keyToCheck }) => columnKey === keyToCheck
+        ).length
+          ? columns.filter(({ key: keyToCheck }) => columnKey === keyToCheck)[0]
+              .name
+          : columnKey;
 
         queryParamsByKey[columnKey] = { key, label, chips: [] };
 
@@ -171,7 +181,7 @@ class Search extends React.Component {
       });
 
       return queryParamsByKey;
-    }
+    };
 
     const chipsByKey = getChipsByKey();
 
@@ -179,7 +189,7 @@ class Search extends React.Component {
       <DataToolbarGroup variant="filter-group">
         <DataToolbarItem>
           {searchDropdownItems.length > 0 ? (
-          <Dropdown
+            <Dropdown
               onToggle={this.handleDropdownToggle}
               onSelect={this.handleDropdownSelect}
               direction={up}
@@ -195,68 +205,90 @@ class Search extends React.Component {
               isOpen={isSearchDropdownOpen}
               dropdownItems={searchDropdownItems}
               style={{ width: '100%' }}
-          />) : (<NoOptionDropdown>{searchColumnName}</NoOptionDropdown>)}
-        </DataToolbarItem>
-        {columns.map(({ key, name, options, isBoolean }) => (<DataToolbarFilter
-          chips={chipsByKey[key] ? chipsByKey[key].chips : []}
-          deleteChip={(unusedKey, val) => { onRemove(chipsByKey[key].key, val) }}
-          categoryName={chipsByKey[key] ? chipsByKey[key].label : key}
-          key={key}
-          showToolbarItem={searchKey === key}
-        >
-          {options && (<Select
-            variant={SelectVariant.checkbox}
-            aria-label={name}
-            onToggle={this.handleFilterDropdownToggle}
-            onSelect={(event, selection) => this.handleFilterDropdownSelect(key, event, selection)}
-            selections={chipsByKey[key].chips}
-            isExpanded={isFilterDropdownOpen}
-            placeholderText={`Filter by ${name.toLowerCase()}`}
-          >
-            {options.map(([optionKey]) => (
-              <Fragment key={optionKey}>
-                { /* TODO: update value to being object
-                  { actualValue: optionKey, toString: () => label }
-                  currently a pf bug that makes the checked logic
-                  not work with object-based values */ }
-                <SelectOption key={optionKey} value={optionKey} />
-              </Fragment>
-            ))}
-          </Select>) || isBoolean && (
-            <Select
-              aria-label={name}
-              onToggle={this.handleFilterDropdownToggle}
-              onSelect={(event, selection) => this.handleFilterBooleanSelect(key, selection)}
-              selections={chipsByKey[key].chips[0]}
-              isExpanded={isFilterDropdownOpen}
-              placeholderText={`Filter by ${name.toLowerCase()}`}
-            >
-              { /* TODO: update value to being object
-                  { actualValue: optionKey, toString: () => label }
-                  currently a pf bug that makes the checked logic
-                  not work with object-based values */ }
-              <SelectOption key="true" value="true" />
-              <SelectOption key="false" value="false" />
-            </Select>
-          ) || (<InputGroup>
-            {/* TODO: add support for dates:
-            qsConfig.dateFields.filter(field => field === key).length && "date" */}
-            <TextInput
-              type={qsConfig.integerFields.filter(field => field === key).length && "number" || "search"}
-              aria-label={i18n._(t`Search text input`)}
-              value={searchValue}
-              onChange={this.handleSearchInputChange}
-              onKeyDown={this.handleTextKeyDown}
             />
-            <Button
-              variant={ButtonVariant.control}
-              aria-label={i18n._(t`Search submit button`)}
-              onClick={this.handleSearch}
-            >
-              <SearchIcon />
-            </Button>
-          </InputGroup>)}
-        </DataToolbarFilter>))}
+          ) : (
+            <NoOptionDropdown>{searchColumnName}</NoOptionDropdown>
+          )}
+        </DataToolbarItem>
+        {columns.map(({ key, name, options, isBoolean }) => (
+          <DataToolbarFilter
+            chips={chipsByKey[key] ? chipsByKey[key].chips : []}
+            deleteChip={(unusedKey, val) => {
+              onRemove(chipsByKey[key].key, val);
+            }}
+            categoryName={chipsByKey[key] ? chipsByKey[key].label : key}
+            key={key}
+            showToolbarItem={searchKey === key}
+          >
+            {(options && (
+              <Select
+                variant={SelectVariant.checkbox}
+                aria-label={name}
+                onToggle={this.handleFilterDropdownToggle}
+                onSelect={(event, selection) =>
+                  this.handleFilterDropdownSelect(key, event, selection)
+                }
+                selections={chipsByKey[key].chips}
+                isExpanded={isFilterDropdownOpen}
+                placeholderText={`Filter by ${name.toLowerCase()}`}
+              >
+                {options.map(([optionKey]) => (
+                  <Fragment key={optionKey}>
+                    {/* TODO: update value to being object
+                  { actualValue: optionKey, toString: () => label }
+                  currently a pf bug that makes the checked logic
+                  not work with object-based values */}
+                    <SelectOption key={optionKey} value={optionKey} />
+                  </Fragment>
+                ))}
+              </Select>
+            )) ||
+              (isBoolean && (
+                <Select
+                  aria-label={name}
+                  onToggle={this.handleFilterDropdownToggle}
+                  onSelect={(event, selection) =>
+                    this.handleFilterBooleanSelect(key, selection)
+                  }
+                  selections={chipsByKey[key].chips[0]}
+                  isExpanded={isFilterDropdownOpen}
+                  placeholderText={`Filter by ${name.toLowerCase()}`}
+                >
+                  {/* TODO: update value to being object
+                  { actualValue: optionKey, toString: () => label }
+                  currently a pf bug that makes the checked logic
+                  not work with object-based values */}
+                  <SelectOption key="true" value="true" />
+                  <SelectOption key="false" value="false" />
+                </Select>
+              )) || (
+                <InputGroup>
+                  {/* TODO: add support for dates:
+            qsConfig.dateFields.filter(field => field === key).length && "date" */}
+                  <TextInput
+                    type={
+                      (qsConfig.integerFields.find(
+                        field => field === searchKey
+                      ) &&
+                        'number') ||
+                      'search'
+                    }
+                    aria-label={i18n._(t`Search text input`)}
+                    value={searchValue}
+                    onChange={this.handleSearchInputChange}
+                    onKeyDown={this.handleTextKeyDown}
+                  />
+                  <Button
+                    variant={ButtonVariant.control}
+                    aria-label={i18n._(t`Search submit button`)}
+                    onClick={this.handleSearch}
+                  >
+                    <SearchIcon />
+                  </Button>
+                </InputGroup>
+              )}
+          </DataToolbarFilter>
+        ))}
       </DataToolbarGroup>
     );
   }
@@ -266,12 +298,12 @@ Search.propTypes = {
   qsConfig: QSConfig.isRequired,
   columns: SearchColumns.isRequired,
   onSearch: PropTypes.func,
-  onRemove: PropTypes.func
+  onRemove: PropTypes.func,
 };
 
 Search.defaultProps = {
   onSearch: null,
-  onRemove: null
+  onRemove: null,
 };
 
 export default withI18n()(withRouter(Search));

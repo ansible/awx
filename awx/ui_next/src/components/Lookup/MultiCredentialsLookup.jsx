@@ -126,7 +126,7 @@ function MultiCredentialsLookup(props) {
                   {
                     name: i18n._(t`Name`),
                     key: 'name',
-                    isDefault: true
+                    isDefault: true,
                   },
                   {
                     name: i18n._(t`Created By (Username)`),
@@ -137,10 +137,12 @@ function MultiCredentialsLookup(props) {
                     key: 'modified_by__username',
                   },
                 ]}
-                sortColumns={[{
-                  name: i18n._(t`Name`),
-                  key: 'name'
-                }]}
+                sortColumns={[
+                  {
+                    name: i18n._(t`Name`),
+                    key: 'name',
+                  },
+                ]}
                 multiple={isMultiple}
                 header={i18n._(t`Credentials`)}
                 name="credentials"

@@ -80,7 +80,7 @@ class PaginatedDataList extends React.Component {
           {
             name: i18n._(t`Name`),
             key: 'name',
-            isDefault: true
+            isDefault: true,
           },
         ];
     const sortColumns = toolbarSortColumns.length

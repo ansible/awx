@@ -218,21 +218,15 @@ class TemplatesList extends Component {
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Type`),
                 key: 'type',
                 options: [
-                  [
-                    `job_template`,
-                    i18n._(t`Job Template`)
-                  ],
-                  [
-                    `workflow_job_template`,
-                    i18n._(t`Workflow Template`)
-                  ],
-                ]
+                  [`job_template`, i18n._(t`Job Template`)],
+                  [`workflow_job_template`, i18n._(t`Workflow Template`)],
+                ],
               },
               {
                 name: i18n._(t`Playbook name`),

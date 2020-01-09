@@ -24,7 +24,11 @@ class SelectResourceStep extends React.Component {
     this.qsConfig = getQSConfig('resource', {
       page: 1,
       page_size: 5,
-      order_by: `${props.sortColumns.filter(col => col.key === 'name').length ? 'name' : 'username'}`
+      order_by: `${
+        props.sortColumns.filter(col => col.key === 'name').length
+          ? 'name'
+          : 'username'
+      }`,
     });
   }
 

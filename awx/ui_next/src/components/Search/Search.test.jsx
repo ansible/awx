@@ -1,5 +1,8 @@
 import React from 'react';
-import { DataToolbar, DataToolbarContent } from '@patternfly/react-core/dist/umd/experimental';
+import {
+  DataToolbar,
+  DataToolbarContent,
+} from '@patternfly/react-core/dist/umd/experimental';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Search from './Search';
 
@@ -20,9 +23,7 @@ describe('<Search />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [
-      { name: 'Name', key: 'name', isDefault: true }
-    ];
+    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
 
     const searchBtn = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -30,16 +31,13 @@ describe('<Search />', () => {
     const onSearch = jest.fn();
 
     search = mountWithContexts(
-      <DataToolbar id={`${QS_CONFIG.namespace}-list-toolbar`}
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
         collapseListedFiltersBreakpoint="md"
       >
         <DataToolbarContent>
-          <Search
-            qsConfig={QS_CONFIG}
-            columns={columns}
-            onSearch={onSearch}
-          />
+          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
         </DataToolbarContent>
       </DataToolbar>
     );
@@ -53,21 +51,16 @@ describe('<Search />', () => {
   });
 
   test('handleDropdownToggle properly updates state', async () => {
-    const columns = [
-      { name: 'Name', key: 'name', isDefault: true }
-    ];
+    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar id={`${QS_CONFIG.namespace}-list-toolbar`}
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
         collapseListedFiltersBreakpoint="md"
       >
         <DataToolbarContent>
-          <Search
-            qsConfig={QS_CONFIG}
-            columns={columns}
-            onSearch={onSearch}
-          />
+          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
         </DataToolbarContent>
       </DataToolbar>
     ).find('Search');
@@ -83,16 +76,13 @@ describe('<Search />', () => {
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar id={`${QS_CONFIG.namespace}-list-toolbar`}
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
         collapseListedFiltersBreakpoint="md"
       >
         <DataToolbarContent>
-          <Search
-            qsConfig={QS_CONFIG}
-            columns={columns}
-            onSearch={onSearch}
-          />
+          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
         </DataToolbarContent>
       </DataToolbar>
     ).find('Search');

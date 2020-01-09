@@ -74,32 +74,17 @@ function ProjectLookup({
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Type`),
                 options: [
-                  [
-                    ``,
-                    i18n._(t`Manual`)
-                  ],
-                  [
-                    `git`,
-                    i18n._(t`Git`)
-                  ],
-                  [
-                    `hg`,
-                    i18n._(t`Mercurial`)
-                  ],
-                  [
-                    `svn`,
-                    i18n._(t`Subversion`)
-                  ],
-                  [
-                    `insights`,
-                    i18n._(t`Red Hat Insights`)
-                  ]
-                ]
+                  [``, i18n._(t`Manual`)],
+                  [`git`, i18n._(t`Git`)],
+                  [`hg`, i18n._(t`Mercurial`)],
+                  [`svn`, i18n._(t`Subversion`)],
+                  [`insights`, i18n._(t`Red Hat Insights`)],
+                ],
               },
               {
                 name: i18n._(t`SCM URL`),
@@ -118,7 +103,7 @@ function ProjectLookup({
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-              }
+              },
             ]}
             options={projects}
             optionCount={count}

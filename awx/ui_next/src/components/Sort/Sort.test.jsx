@@ -30,11 +30,7 @@ describe('<Sort />', () => {
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        qsConfig={qsConfig}
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
 
     wrapper.find(sortBtn).simulate('click');
@@ -62,17 +58,13 @@ describe('<Sort />', () => {
       {
         name: 'Bakery',
         key: 'bakery',
-      }
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        qsConfig={qsConfig}
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -99,17 +91,13 @@ describe('<Sort />', () => {
       {
         name: 'Bakery',
         key: 'bakery',
-      }
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        qsConfig={qsConfig}
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -136,17 +124,13 @@ describe('<Sort />', () => {
       {
         name: 'Bakery',
         key: 'bakery',
-      }
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        qsConfig={qsConfig}
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
 
     wrapper.instance().handleDropdownSelect({ target: { innerText: 'Bar' } });
@@ -172,17 +156,13 @@ describe('<Sort />', () => {
       {
         name: 'Bakery',
         key: 'bakery',
-      }
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        qsConfig={qsConfig}
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     expect(wrapper.state('isSortDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -216,12 +196,8 @@ describe('<Sort />', () => {
       integerFields: ['page', 'page_size'],
     };
 
-    const numericColumns = [
-      { name: 'ID', key: 'id' },
-    ];
-    const alphaColumns = [
-      { name: 'Name', key: 'name' },
-    ];
+    const numericColumns = [{ name: 'ID', key: 'id' }];
+    const alphaColumns = [{ name: 'Name', key: 'name' }];
     const onSort = jest.fn();
 
     sort = mountWithContexts(
@@ -236,11 +212,7 @@ describe('<Sort />', () => {
     expect(downNumericIcon.length).toBe(1);
 
     sort = mountWithContexts(
-      <Sort
-       qsConfig={qsConfigNumUp}
-        columns={numericColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfigNumUp} columns={numericColumns} onSort={onSort} />
     );
 
     const upNumericIcon = sort.find(upNumericIconSelector);
@@ -258,11 +230,7 @@ describe('<Sort />', () => {
     expect(downAlphaIcon.length).toBe(1);
 
     sort = mountWithContexts(
-      <Sort
-        qsConfig={qsConfigAlphaUp}
-        columns={alphaColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfigAlphaUp} columns={alphaColumns} onSort={onSort} />
     );
 
     const upAlphaIcon = sort.find(upAlphaIconSelector);

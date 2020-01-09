@@ -181,12 +181,12 @@ function InventoryGroupsList({ i18n, location, match }) {
           {
             name: i18n._(t`Name`),
             key: 'name',
-            isDefault: true
+            isDefault: true,
           },
           {
             name: i18n._(t`Is Root Group`),
             key: 'parents__isnull',
-            isBoolean: true
+            isBoolean: true,
           },
           {
             name: i18n._(t`Created By (Username)`),
@@ -200,8 +200,8 @@ function InventoryGroupsList({ i18n, location, match }) {
         toolbarSortColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'name'
-          }
+            key: 'name',
+          },
         ]}
         renderItem={item => (
           <InventoryGroupItem

@@ -25,12 +25,8 @@ describe('<DataListToolbar />', () => {
   const onSelectAll = jest.fn();
 
   test('it triggers the expected callbacks', () => {
-    const searchColumns = [
-      { name: 'Name', key: 'name', isDefault: true }
-    ];
-    const sortColumns = [
-      { name: 'Name', key: 'name' }
-    ];
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
     const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
     const selectAll = 'input[aria-label="Select all"]';
@@ -86,12 +82,12 @@ describe('<DataListToolbar />', () => {
 
     const searchColumns = [
       { name: 'Foo', key: 'foo', isDefault: true },
-      { name: 'Bar', key: 'bar' }
+      { name: 'Bar', key: 'bar' },
     ];
     const sortColumns = [
       { name: 'Foo', key: 'foo' },
       { name: 'Bar', key: 'bar' },
-      { name: 'Bakery', key: 'Bakery' }
+      { name: 'Bakery', key: 'Bakery' },
     ];
 
     toolbar = mountWithContexts(
@@ -189,17 +185,13 @@ describe('<DataListToolbar />', () => {
     const downAlphaIconSelector = 'SortAlphaDownIcon';
     const upAlphaIconSelector = 'SortAlphaUpIcon';
 
-    const numericColumns = [
-      { name: 'ID', key: 'id' },
-    ];
+    const numericColumns = [{ name: 'ID', key: 'id' }];
 
-    const alphaColumns = [
-      { name: 'Name', key: 'name' },
-    ];
+    const alphaColumns = [{ name: 'Name', key: 'name' }];
 
     const searchColumns = [
       { name: 'Name', key: 'name', isDefault: true },
-      { name: 'ID', key: 'id' }
+      { name: 'ID', key: 'id' },
     ];
 
     toolbar = mountWithContexts(
@@ -248,12 +240,8 @@ describe('<DataListToolbar />', () => {
   });
 
   test('should render additionalControls', () => {
-    const searchColumns = [
-      { name: 'Name', key: 'name', isDefault: true }
-    ];
-    const sortColumns = [
-      { name: 'Name', key: 'name' }
-    ];
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
 
     toolbar = mountWithContexts(
       <DataListToolbar
@@ -278,12 +266,8 @@ describe('<DataListToolbar />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const searchColumns = [
-      { name: 'Name', key: 'name', isDefault: true }
-    ];
-    const sortColumns = [
-      { name: 'Name', key: 'name' }
-    ];
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
     toolbar = mountWithContexts(
       <DataListToolbar
         qsConfig={QS_CONFIG}

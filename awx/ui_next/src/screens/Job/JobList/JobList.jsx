@@ -23,12 +23,16 @@ import { getQSConfig, parseQueryString } from '@util/qs';
 
 import JobListItem from './JobListItem';
 
-const QS_CONFIG = getQSConfig('job', {
-  page: 1,
-  page_size: 20,
-  order_by: '-finished',
-  not__launch_type: 'sync',
-}, ['page', 'page_size', 'id']);
+const QS_CONFIG = getQSConfig(
+  'job',
+  {
+    page: 1,
+    page_size: 20,
+    order_by: '-finished',
+    not__launch_type: 'sync',
+  },
+  ['page', 'page_size', 'id']
+);
 
 class JobList extends Component {
   constructor(props) {
@@ -167,88 +171,46 @@ class JobList extends Component {
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`ID`),
-                key: 'id'
+                key: 'id',
               },
               {
                 name: i18n._(t`Label Name`),
-                key: 'labels__name'
+                key: 'labels__name',
               },
               {
                 name: i18n._(t`Job Type`),
                 key: `type`,
                 options: [
-                  [
-                    `project_update`,
-                    i18n._(t`SCM Update`)
-                  ],
-                  [
-                    `inventory_update`,
-                    i18n._(t`Inventory Sync`)
-                  ],
-                  [
-                    `job`,
-                    i18n._(t`Playbook Run`)
-                  ],
-                  [
-                    `ad_hoc_command`,
-                    i18n._(t`Command`)
-                  ],
-                  [
-                    `system_job`,
-                    i18n._(t`Management Job`)
-                  ],
-                  [
-                    `workflow_job`,
-                    i18n._(t`Workflow Job`)
-                  ]
-                ]
+                  [`project_update`, i18n._(t`SCM Update`)],
+                  [`inventory_update`, i18n._(t`Inventory Sync`)],
+                  [`job`, i18n._(t`Playbook Run`)],
+                  [`ad_hoc_command`, i18n._(t`Command`)],
+                  [`system_job`, i18n._(t`Management Job`)],
+                  [`workflow_job`, i18n._(t`Workflow Job`)],
+                ],
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username'
+                key: 'created_by__username',
               },
               {
                 name: i18n._(t`Status`),
                 key: 'status',
                 options: [
-                  [
-                    `new`,
-                    i18n._(t`New`)
-                  ],
-                  [
-                    `pending`,
-                    i18n._(t`Pending`)
-                  ],
-                  [
-                    `waiting`,
-                    i18n._(t`Waiting`)
-                  ],
-                  [
-                    `running`,
-                    i18n._(t`Running`)
-                  ],
-                  [
-                    `successful`,
-                    i18n._(t`Successful`)
-                  ],
-                  [
-                    `failed`,
-                    i18n._(t`Failed`)
-                  ],
-                  [
-                    `error`,
-                    i18n._(t`Error`)
-                  ],
-                  [
-                    `canceled`,
-                    i18n._(t`Canceled`)
-                  ]
-                ]
-              }
+                  [`new`, i18n._(t`New`)],
+                  [`pending`, i18n._(t`Pending`)],
+                  [`waiting`, i18n._(t`Waiting`)],
+                  [`running`, i18n._(t`Running`)],
+                  [`successful`, i18n._(t`Successful`)],
+                  [`failed`, i18n._(t`Failed`)],
+                  [`error`, i18n._(t`Error`)],
+                  [`canceled`, i18n._(t`Canceled`)],
+                ],
+              },
             ]}
             toolbarSortColumns={[
               {

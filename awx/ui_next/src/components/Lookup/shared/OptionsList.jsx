@@ -101,7 +101,7 @@ OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
   searchColumns: [],
-  sortColumns: []
+  sortColumns: [],
 };
 
 export default withI18n()(OptionsList);

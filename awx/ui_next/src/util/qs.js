@@ -15,7 +15,7 @@ export function getQSConfig(
     throw new Error('a QS namespace is required');
   }
   // if order_by isn't passed, default to name
-  if (!Object.keys(defaultParams).filter(key => key === 'order_by').length) {
+  if (!defaultParams.order_by) {
     defaultParams.order_by = 'name';
   }
   return {
@@ -193,7 +193,6 @@ function removeParam(oldVal, deleteVal) {
  * @return {object} merged namespaced params object
  */
 export function mergeParams(oldParams, newParams) {
-  debugger;
   const merged = {};
   Object.keys(oldParams).forEach(key => {
     merged[key] = mergeParam(oldParams[key], newParams[key]);

@@ -202,7 +202,7 @@ class NotificationList extends Component {
             {
               name: i18n._(t`Name`),
               key: 'name',
-              isDefault: true
+              isDefault: true,
             },
             {
               name: i18n._(t`Type`),
@@ -218,7 +218,7 @@ class NotificationList extends Component {
                 ['slack', i18n._(t`Slack`)],
                 ['twilio', i18n._(t`Twilio`)],
                 ['webhook', i18n._(t`Webhook`)],
-              ]
+              ],
             },
             {
               name: i18n._(t`Created By (Username)`),

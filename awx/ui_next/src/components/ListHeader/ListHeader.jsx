@@ -2,7 +2,10 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { DataToolbar, DataToolbarContent } from '@patternfly/react-core/dist/umd/experimental';
+import {
+  DataToolbar,
+  DataToolbarContent,
+} from '@patternfly/react-core/dist/umd/experimental';
 import DataListToolbar from '@components/DataListToolbar';
 
 import {
@@ -40,7 +43,7 @@ class ListHeader extends React.Component {
     const { location, qsConfig } = this.props;
     let params = parseQueryString(qsConfig, location.search);
     params = mergeParams(params, { [key]: value });
-    params = replaceParams(params, { 'page' : 1 })
+    params = replaceParams(params, { page: 1 });
     this.pushHistoryState(params);
   }
 
@@ -54,7 +57,9 @@ class ListHeader extends React.Component {
     const { location, qsConfig } = this.props;
     let oldParams = parseQueryString(qsConfig, location.search);
     if (parseInt(value, 10)) {
-      oldParams = removeParams(qsConfig, oldParams, { [key]: parseInt(value, 10) });
+      oldParams = removeParams(qsConfig, oldParams, {
+        [key]: parseInt(value, 10),
+      });
     }
     this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
   }
@@ -96,7 +101,8 @@ class ListHeader extends React.Component {
     return (
       <Fragment>
         {isEmpty ? (
-          <DataToolbar id={`${qsConfig.namespace}-list-toolbar`}
+          <DataToolbar
+            id={`${qsConfig.namespace}-list-toolbar`}
             clearAllFilters={this.handleRemoveAll}
             collapseListedFiltersBreakpoint="md"
           >

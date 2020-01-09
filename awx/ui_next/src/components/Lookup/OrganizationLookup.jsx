@@ -74,7 +74,7 @@ function OrganizationLookup({
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
@@ -85,10 +85,12 @@ function OrganizationLookup({
                 key: 'modified_by__username',
               },
             ]}
-            sortColumns={[{
-              name: i18n._(t`Name`),
-              key: 'name'
-            }]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}

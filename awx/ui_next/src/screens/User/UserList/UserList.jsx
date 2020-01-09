@@ -158,7 +158,7 @@ class UsersList extends Component {
                 {
                   name: i18n._(t`Username`),
                   key: 'username',
-                  isDefault: true
+                  isDefault: true,
                 },
                 {
                   name: i18n._(t`First Name`),
@@ -167,7 +167,7 @@ class UsersList extends Component {
                 {
                   name: i18n._(t`Last Name`),
                   key: 'last_name',
-                }
+                },
               ]}
               toolbarSortColumns={[
                 {

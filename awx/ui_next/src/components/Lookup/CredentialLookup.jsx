@@ -27,7 +27,7 @@ function CredentialLookup({
   credentialTypeId,
   value,
   history,
-  i18n
+  i18n,
 }) {
   const [credentials, setCredentials] = useState([]);
   const [count, setCount] = useState(0);
@@ -79,7 +79,7 @@ function CredentialLookup({
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
@@ -88,12 +88,14 @@ function CredentialLookup({
               {
                 name: i18n._(t`Modified By (Username)`),
                 key: 'modified_by__username',
-              }
+              },
             ]}
-            sortColumns={[{
-              name: i18n._(t`Name`),
-              key: 'name'
-            }]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}

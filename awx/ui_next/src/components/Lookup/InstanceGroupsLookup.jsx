@@ -68,11 +68,11 @@ function InstanceGroupsLookup(props) {
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isDefault: true
+                isDefault: true,
               },
               {
                 name: i18n._(t`Credential Name`),
-                key: 'credential__name'
+                key: 'credential__name',
               },
               {
                 name: i18n._(t`Created By (Username)`),
@@ -83,10 +83,12 @@ function InstanceGroupsLookup(props) {
                 key: 'modified_by__username',
               },
             ]}
-            sortColumns={[{
-              name: i18n._(t`Name`),
-              key: 'name'
-            }]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             multiple={state.multiple}
             header={i18n._(t`Instance Groups`)}
             name="instanceGroups"

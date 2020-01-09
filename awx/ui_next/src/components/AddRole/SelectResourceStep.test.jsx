@@ -10,14 +10,14 @@ describe('<SelectResourceStep />', () => {
     {
       name: 'Username',
       key: 'username',
-      isDefault: true
+      isDefault: true,
     },
   ];
 
   const sortColumns = [
     {
       name: 'Username',
-      key: 'username'
+      key: 'username',
     },
   ];
   afterEach(() => {

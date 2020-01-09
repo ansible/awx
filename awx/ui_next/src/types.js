@@ -257,7 +257,7 @@ export const SearchColumns = arrayOf(
     key: string.isRequired,
     isDefault: bool,
     isBoolean: bool,
-    options: arrayOf(arrayOf(string, string))
+    options: arrayOf(arrayOf(string, string)),
   })
 );
 
