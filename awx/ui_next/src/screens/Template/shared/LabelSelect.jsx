@@ -2,40 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { LabelsAPI } from '@api';
-
-function setToString(labels) {
-  labels.forEach(label => {
-    label.toString = function toString() {
-      return this.id;
-    };
-  });
-  return labels;
-}
-
-// TODO: extract to shared file
-function usePFSelect(value, options, onChange) {
-  const [currentValue, setCurrentValue] = useState([]);
-
-  useEffect(() => {
-    if (value !== currentValue && options.length) {
-      const syncedValue = value.map(item =>
-        options.find(i => i.id === item.id)
-      );
-      setCurrentValue(syncedValue);
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [value, options]);
-
-  const handleSelect = (event, item) => {
-    if (currentValue.includes(item)) {
-      onChange(currentValue.filter(i => i.id !== item.id));
-    } else {
-      onChange(currentValue.concat(item));
-    }
-  };
-
-  return [currentValue, handleSelect];
-}
+import usePFSelect from '@components/MultiSelect/usePFSelect';
 
 async function loadLabelOptions(setLabels, onError) {
   let labels;
@@ -45,7 +12,7 @@ async function loadLabelOptions(setLabels, onError) {
       page_size: 200,
       order_by: 'name',
     });
-    labels = setToString(data.results);
+    labels = data.results;
     setLabels(labels);
     if (data.next && data.next.includes('page=2')) {
       const {
@@ -55,7 +22,7 @@ async function loadLabelOptions(setLabels, onError) {
         page_size: 200,
         order_by: 'name',
       });
-      setLabels(labels.concat(setToString(results)));
+      setLabels(labels.concat(results));
     }
   } catch (err) {
     onError(err);
@@ -63,8 +30,10 @@ async function loadLabelOptions(setLabels, onError) {
 }
 
 function LabelSelect({ value, placeholder, onChange, onError }) {
-  const [options, setOptions] = useState([]);
-  const [currentValue, handleSelect] = usePFSelect(value, options, onChange);
+  const { selections, onSelect, options, setOptions } = usePFSelect(
+    value,
+    onChange
+  );
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -73,7 +42,8 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
 
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
-  }, [onError]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const renderOptions = opts => {
     return opts.map(option => (
@@ -88,14 +58,14 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
       variant={SelectVariant.typeaheadMulti}
       aria-label="Select a state"
       onToggle={toggleExpanded}
-      onSelect={handleSelect}
+      onSelect={onSelect}
       onClear={() => onChange([])}
       onFilter={event => {
         const str = event.target.value.toLowerCase();
         const matches = options.filter(o => o.name.toLowerCase().includes(str));
         return renderOptions(matches);
       }}
-      selections={options.length ? setToString(currentValue) : []}
+      selections={selections}
       isExpanded={isExpanded}
       ariaLabelledBy="label-select"
       placeholderText={placeholder}
