@@ -132,7 +132,7 @@ class PoolWorker(object):
                 # when this occurs, it's _fine_ to ignore this KeyError because
                 # the purpose of self.managed_tasks is to just track internal
                 # state of which events are *currently* being processed.
-                pass
+                logger.warn('Event UUID {} appears to be have been duplicated.'.format(uuid))
 
     @property
     def current_task(self):
