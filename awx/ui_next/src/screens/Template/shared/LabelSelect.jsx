@@ -12,6 +12,31 @@ function setToString(labels) {
   return labels;
 }
 
+// TODO: extract to shared file
+function usePFSelect(value, options, onChange) {
+  const [currentValue, setCurrentValue] = useState([]);
+
+  useEffect(() => {
+    if (value !== currentValue && options.length) {
+      const syncedValue = value.map(item =>
+        options.find(i => i.id === item.id)
+      );
+      setCurrentValue(syncedValue);
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [value, options]);
+
+  const handleSelect = (event, item) => {
+    if (currentValue.includes(item)) {
+      onChange(currentValue.filter(i => i.id !== item.id));
+    } else {
+      onChange(currentValue.concat(item));
+    }
+  };
+
+  return [currentValue, handleSelect];
+}
+
 async function loadLabelOptions(setLabels, onError) {
   let labels;
   try {
@@ -39,34 +64,16 @@ async function loadLabelOptions(setLabels, onError) {
 
 function LabelSelect({ value, placeholder, onChange, onError }) {
   const [options, setOptions] = useState([]);
-  const [currentValue, setCurrentValue] = useState([]);
+  const [currentValue, handleSelect] = usePFSelect(value, options, onChange);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleSelect = (event, item) => {
-    if (currentValue.includes(item)) {
-      onChange(currentValue.filter(i => i.id !== item.id));
-    } else {
-      onChange(currentValue.concat(item));
-    }
-  };
-
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
   }, [onError]);
-
-  useEffect(() => {
-    if (value !== currentValue && options.length) {
-      const syncedValue = value.map(item =>
-        options.find(i => i.id === item.id)
-      );
-      setCurrentValue(syncedValue);
-    }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [value, options]);
 
   const renderOptions = opts => {
     return opts.map(option => (
