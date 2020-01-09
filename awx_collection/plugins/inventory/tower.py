@@ -98,15 +98,16 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # ansible-inventory -i @tower_inventory --list
 '''
 
-import re
 import os
-import json
+import re
+
 from ansible.module_utils import six
-from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
 from ansible.module_utils._text import to_text, to_native
 from ansible.errors import AnsibleParserError, AnsibleOptionsError
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
+
+from ..module_utils.ansible_tower import make_request, CollectionsParserError, Request
 
 # Python 2/3 Compatibility
 try:
@@ -120,25 +121,6 @@ class InventoryModule(BaseInventoryPlugin):
     # Stays backward compatible with tower inventory script.
     # If the user supplies '@tower_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
-
-    def make_request(self, request_handler, tower_url):
-        """Makes the request to given URL, handles errors, returns JSON
-        """
-        try:
-            response = request_handler.get(tower_url)
-        except (ConnectionError, urllib_error.URLError, socket.error, httplib.HTTPException) as e:
-            n_error_msg = 'Connection to remote host failed: {err}'.format(err=to_native(e))
-            # If Tower gives a readable error message, display that message to the user.
-            if callable(getattr(e, 'read', None)):
-                n_error_msg += ' with message: {err_msg}'.format(err_msg=to_native(e.read()))
-            raise AnsibleParserError(n_error_msg)
-
-        # Attempt to parse JSON.
-        try:
-            return json.loads(response.read())
-        except (ValueError, TypeError) as e:
-            # If the JSON parse fails, print the ValueError
-            raise AnsibleParserError('Failed to parse json from host: {err}'.format(err=to_native(e)))
 
     def verify_file(self, path):
         if path.endswith('@tower_inventory'):
@@ -180,7 +162,11 @@ class InventoryModule(BaseInventoryPlugin):
         inventory_url = '/api/v2/inventories/{inv_id}/script/?hostvars=1&towervars=1&all=1'.format(inv_id=inventory_id)
         inventory_url = urljoin(tower_host, inventory_url)
 
-        inventory = self.make_request(request_handler, inventory_url)
+        try:
+            inventory = make_request(request_handler, inventory_url)
+        except CollectionsParserError as e:
+            raise AnsibleParserError(to_native(e))
+
         # To start with, create all the groups.
         for group_name in inventory:
             if group_name != '_meta':
@@ -210,7 +196,12 @@ class InventoryModule(BaseInventoryPlugin):
         # Fetch extra variables if told to do so
         if self.get_option('include_metadata'):
             config_url = urljoin(tower_host, '/api/v2/config/')
-            config_data = self.make_request(request_handler, config_url)
+
+            try:
+                config_data = make_request(request_handler, config_url)
+            except CollectionsParserError as e:
+                raise AnsibleParserError(to_native(e))
+
             server_data = {}
             server_data['license_type'] = config_data.get('license_info', {}).get('license_type', 'unknown')
             for key in ('version', 'ansible_version'):
