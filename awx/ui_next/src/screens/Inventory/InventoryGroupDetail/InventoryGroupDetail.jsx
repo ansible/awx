@@ -3,27 +3,16 @@ import { t } from '@lingui/macro';
 
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
-import styled from 'styled-components';
+import { useHistory, useParams } from 'react-router-dom';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import ErrorDetail from '@components/ErrorDetail';
 import AlertModal from '@components/AlertModal';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 import { GroupsAPI, InventoriesAPI } from '@api';
 
-// TODO: extract this into a component for use in all relevant Detail views
-const ActionButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
-
-function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
+function InventoryGroupDetail({ i18n, inventoryGroup }) {
   const {
     summary_fields: { created_by, modified_by },
     created,
@@ -34,15 +23,21 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
   } = inventoryGroup;
   const [error, setError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const history = useHistory();
+  const params = useParams();
+
   const handleDelete = async option => {
+    const inventoryId = parseInt(params.id, 10);
+    const groupId = parseInt(params.groupId, 10);
     setIsDeleteModalOpen(false);
+
     try {
       if (option === 'delete') {
-        await GroupsAPI.destroy(inventoryGroup.id);
+        await GroupsAPI.destroy(groupId);
       } else {
-        await InventoriesAPI.promoteGroup(match.params.id, inventoryGroup.id);
+        await InventoriesAPI.promoteGroup(inventoryId, groupId);
       }
-      history.push(`/inventories/inventory/${match.params.id}/groups`);
+      history.push(`/inventories/inventory/${inventoryId}/groups`);
     } catch (err) {
       setError(err);
     }
@@ -69,13 +64,13 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
           user={modified_by}
         />
       </DetailList>
-      <ActionButtonWrapper>
+      <CardActionsRow>
         <Button
           variant="primary"
           aria-label={i18n._(t`Edit`)}
           onClick={() =>
             history.push(
-              `/inventories/inventory/${match.params.id}/groups/${inventoryGroup.id}/edit`
+              `/inventories/inventory/${params.id}/groups/${params.groupId}/edit`
             )
           }
         >
@@ -88,7 +83,7 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
         >
           {i18n._(t`Delete`)}
         </Button>
-      </ActionButtonWrapper>
+      </CardActionsRow>
       {isDeleteModalOpen && (
         <InventoryGroupsDeleteModal
           groups={[inventoryGroup]}
@@ -111,4 +106,4 @@ function InventoryGroupDetail({ i18n, history, match, inventoryGroup }) {
     </CardBody>
   );
 }
-export default withI18n()(withRouter(InventoryGroupDetail));
+export default withI18n()(InventoryGroupDetail);

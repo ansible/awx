@@ -133,7 +133,7 @@ class Host extends Component {
             {host && (
               <Route
                 path="/hosts/:id/details"
-                render={() => <HostDetail match={match} host={host} />}
+                render={() => <HostDetail host={host} />}
               />
             )}
             {host && (

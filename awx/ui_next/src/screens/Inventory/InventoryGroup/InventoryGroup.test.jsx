@@ -16,9 +16,11 @@ GroupsAPI.readDetail.mockResolvedValue({
     variables: 'bizz: buzz',
     summary_fields: {
       inventory: { id: 1 },
-      created_by: { id: 1, name: 'Athena' },
-      modified_by: { id: 1, name: 'Apollo' },
+      created_by: { id: 1, username: 'Athena' },
+      modified_by: { id: 1, username: 'Apollo' },
     },
+    created: '2020-04-25T01:23:45.678901Z',
+    modified: '2020-04-25T01:23:45.678901Z',
   },
 });
 describe('<InventoryGroup />', () => {
