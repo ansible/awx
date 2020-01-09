@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 import { OrganizationsAPI } from '@api';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { ChipGroup, Chip } from '@components/Chip';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
@@ -92,13 +92,13 @@ function OrganizationDetail({ i18n, organization }) {
           />
         )}
       </DetailList>
-      {summary_fields.user_capabilities.edit && (
-        <div css="margin-top: 10px; text-align: right;">
+      <CardActionsRow>
+        {summary_fields.user_capabilities.edit && (
           <Button component={Link} to={`/organizations/${id}/edit`}>
             {i18n._(t`Edit`)}
           </Button>
-        </div>
-      )}
+        )}
+      </CardActionsRow>
     </CardBody>
   );
 }

@@ -1,24 +1,14 @@
 import React from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
 import { Project } from '@types';
 import { Config } from '@contexts/Config';
 import { Button, List, ListItem } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { CredentialChip } from '@components/Chip';
 import { toTitleCase } from '@util/strings';
-
-const ActionButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
 
 function ProjectDetail({ project, i18n }) {
   const {
@@ -137,7 +127,7 @@ function ProjectDetail({ project, i18n }) {
           user={summary_fields.modified_by}
         />
       </DetailList>
-      <ActionButtonWrapper>
+      <CardActionsRow>
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
@@ -148,7 +138,7 @@ function ProjectDetail({ project, i18n }) {
               {i18n._(t`Edit`)}
             </Button>
           )}
-      </ActionButtonWrapper>
+      </CardActionsRow>
     </CardBody>
   );
 }
@@ -157,4 +147,4 @@ ProjectDetail.propTypes = {
   project: Project.isRequired,
 };
 
-export default withI18n()(withRouter(ProjectDetail));
+export default withI18n()(ProjectDetail);

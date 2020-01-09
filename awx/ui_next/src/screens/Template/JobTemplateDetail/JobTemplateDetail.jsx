@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import LaunchButton from '@components/LaunchButton';
 import ContentLoading from '@components/ContentLoading';
@@ -19,20 +19,12 @@ import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { JobTemplatesAPI } from '@api';
 
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
-
 const MissingDetail = styled(Detail)`
   dd& {
     color: red;
   }
 `;
+
 class JobTemplateDetail extends Component {
   constructor(props) {
     super(props);
@@ -317,7 +309,7 @@ class JobTemplateDetail extends Component {
               />
             )}
           </DetailList>
-          <ButtonGroup>
+          <CardActionsRow>
             {summary_fields.user_capabilities.edit && (
               <Button
                 component={Link}
@@ -340,7 +332,7 @@ class JobTemplateDetail extends Component {
                 )}
               </LaunchButton>
             )}
-          </ButtonGroup>
+          </CardActionsRow>
         </CardBody>
       )
     );

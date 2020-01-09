@@ -125,7 +125,7 @@ class Team extends Component {
             {team && (
               <Route
                 path="/teams/:id/details"
-                render={() => <TeamDetail match={match} team={team} />}
+                render={() => <TeamDetail team={team} />}
               />
             )}
             {team && (

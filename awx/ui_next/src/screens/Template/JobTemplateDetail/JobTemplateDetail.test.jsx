@@ -19,8 +19,8 @@ describe('<JobTemplateDetail />', () => {
     verbosity: 1,
     summary_fields: {
       user_capabilities: { edit: true },
-      created_by: { username: 'Joe' },
-      modified_by: { username: 'Joe' },
+      created_by: { id: 1, username: 'Joe' },
+      modified_by: { id: 1, username: 'Joe' },
       credentials: [
         { id: 1, kind: 'ssh', name: 'Credential 1' },
         { id: 2, kind: 'awx', name: 'Credential 2' },
@@ -28,6 +28,8 @@ describe('<JobTemplateDetail />', () => {
       inventory: { name: 'Inventory' },
       project: { name: 'Project' },
     },
+    created: '2020-04-25T01:23:45.678901Z',
+    modified: '2020-04-25T01:23:45.678901Z',
   };
 
   const mockInstanceGroups = {
@@ -100,12 +102,14 @@ describe('<JobTemplateDetail />', () => {
       skip_tags: 'coffe,tea',
       summary_fields: {
         user_capabilities: { edit: false },
-        created_by: { username: 'Joe' },
-        modified_by: { username: 'Joe' },
+        created_by: { id: 1, username: 'Joe' },
+        modified_by: { id: 1, username: 'Joe' },
         inventory: { name: 'Inventory' },
         project: { name: 'Project' },
         labels: { count: 1, results: [{ name: 'Label', id: 1 }] },
       },
+      created: '2020-04-25T01:23:45.678901Z',
+      modified: '2020-04-25T01:23:45.678901Z',
     };
     const wrapper = mountWithContexts(
       <JobTemplateDetail template={regularUser} />

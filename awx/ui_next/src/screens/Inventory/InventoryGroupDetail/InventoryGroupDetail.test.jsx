@@ -2,13 +2,12 @@ import React from 'react';
 import { GroupsAPI } from '@api';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
 import InventoryGroupDetail from './InventoryGroupDetail';
 
 jest.mock('@api');
+
 const inventoryGroup = {
   name: 'Foo',
   description: 'Bar',
@@ -27,6 +26,7 @@ const inventoryGroup = {
     },
   },
 };
+
 describe('<InventoryGroupDetail />', () => {
   let wrapper;
   let history;
@@ -86,7 +86,7 @@ describe('<InventoryGroupDetail />', () => {
       '/inventories/inventory/1/groups/1/edit'
     );
   });
-  test('details shoudld render with the proper values', () => {
+  test('details should render with the proper values', () => {
     expect(wrapper.find('Detail[label="Name"]').prop('value')).toBe('Foo');
     expect(wrapper.find('Detail[label="Description"]').prop('value')).toBe(
       'Bar'

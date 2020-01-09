@@ -205,7 +205,7 @@ class Project extends Component {
             {project && (
               <Route
                 path="/projects/:id/details"
-                render={() => <ProjectDetail match={match} project={project} />}
+                render={() => <ProjectDetail project={project} />}
               />
             )}
             {project && (

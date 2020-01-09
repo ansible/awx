@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
@@ -7,9 +7,10 @@ import styled from 'styled-components';
 
 import AlertModal from '@components/AlertModal';
 import { DetailList, Detail } from '@components/DetailList';
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
+import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
 import { StatusIcon } from '@components/Sparkline';
@@ -24,16 +25,6 @@ import {
   InventoriesAPI,
   AdHocCommandsAPI,
 } from '@api';
-import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
-
-const ActionButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
 
 const VariablesInput = styled(_VariablesInput)`
   .pf-c-form__label {
@@ -86,7 +77,7 @@ const getLaunchedByDetails = ({ summary_fields = {}, related = {} }) => {
   return { link, value };
 };
 
-function JobDetail({ job, i18n, history }) {
+function JobDetail({ job, i18n }) {
   const {
     credentials,
     instance_group: instanceGroup,
@@ -95,8 +86,8 @@ function JobDetail({ job, i18n, history }) {
     labels,
     project,
   } = job.summary_fields;
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState();
+  const history = useHistory();
 
   const { value: launchedByValue, link: launchedByLink } =
     getLaunchedByDetails(job) || {};
@@ -125,7 +116,6 @@ function JobDetail({ job, i18n, history }) {
       history.push('/jobs');
     } catch (err) {
       setErrorMsg(err);
-      setIsDeleteModalOpen(false);
     }
   };
 
@@ -262,7 +252,7 @@ function JobDetail({ job, i18n, history }) {
           label={i18n._(t`Artifacts`)}
         />
       )}
-      <ActionButtonWrapper>
+      <CardActionsRow>
         {job.type !== 'system_job' &&
           job.summary_fields.user_capabilities.start && (
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
@@ -274,45 +264,15 @@ function JobDetail({ job, i18n, history }) {
             </LaunchButton>
           )}
         {job.summary_fields.user_capabilities.delete && (
-          <Button
-            variant="danger"
-            aria-label={i18n._(t`Delete`)}
-            onClick={() => setIsDeleteModalOpen(true)}
+          <DeleteButton
+            name={job.name}
+            modalTitle={i18n._(t`Delete Job`)}
+            onConfirm={deleteJob}
           >
             {i18n._(t`Delete`)}
-          </Button>
+          </DeleteButton>
         )}
-      </ActionButtonWrapper>
-      {isDeleteModalOpen && (
-        <AlertModal
-          isOpen={isDeleteModalOpen}
-          title={i18n._(t`Delete Job`)}
-          variant="danger"
-          onClose={() => setIsDeleteModalOpen(false)}
-        >
-          {i18n._(t`Are you sure you want to delete:`)}
-          <br />
-          <strong>{job.name}</strong>
-          <ActionButtonWrapper>
-            <Button
-              variant="secondary"
-              aria-label={i18n._(t`Close`)}
-              component={Link}
-              to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
-            >
-              {i18n._(t`Cancel`)}
-            </Button>
-
-            <Button
-              variant="danger"
-              aria-label={i18n._(t`Delete`)}
-              onClick={deleteJob}
-            >
-              {i18n._(t`Delete`)}
-            </Button>
-          </ActionButtonWrapper>
-        </AlertModal>
-      )}
+      </CardActionsRow>
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}
@@ -330,4 +290,4 @@ JobDetail.propTypes = {
   job: Job.isRequired,
 };
 
-export default withI18n()(withRouter(JobDetail));
+export default withI18n()(JobDetail);

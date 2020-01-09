@@ -1,22 +1,12 @@
 import React from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
 import { Host } from '@types';
 import { Button } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-
-const ActionButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
 
 function HostDetail({ host, i18n }) {
   const { created, description, id, modified, name, summary_fields } = host;
@@ -58,7 +48,7 @@ function HostDetail({ host, i18n }) {
           rows={6}
         />
       </DetailList>
-      <ActionButtonWrapper>
+      <CardActionsRow>
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.edit && (
             <Button
@@ -69,7 +59,7 @@ function HostDetail({ host, i18n }) {
               {i18n._(t`Edit`)}
             </Button>
           )}
-      </ActionButtonWrapper>
+      </CardActionsRow>
     </CardBody>
   );
 }
@@ -78,4 +68,4 @@ HostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(withRouter(HostDetail));
+export default withI18n()(HostDetail);

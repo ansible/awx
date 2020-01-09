@@ -134,7 +134,7 @@ class User extends Component {
             {user && (
               <Route
                 path="/users/:id/details"
-                render={() => <UserDetail match={match} user={user} />}
+                render={() => <UserDetail user={user} />}
               />
             )}
             <Route
