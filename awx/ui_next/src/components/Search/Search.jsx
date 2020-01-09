@@ -221,27 +221,27 @@ class Search extends React.Component {
             showToolbarItem={searchKey === key}
           >
             {(options && (
-              <Select
-                variant={SelectVariant.checkbox}
-                aria-label={name}
-                onToggle={this.handleFilterDropdownToggle}
-                onSelect={(event, selection) =>
-                  this.handleFilterDropdownSelect(key, event, selection)
-                }
-                selections={chipsByKey[key].chips}
-                isExpanded={isFilterDropdownOpen}
-                placeholderText={`Filter by ${name.toLowerCase()}`}
-              >
-                {options.map(([optionKey]) => (
-                  <Fragment key={optionKey}>
-                    {/* TODO: update value to being object
-                  { actualValue: optionKey, toString: () => label }
-                  currently a pf bug that makes the checked logic
-                  not work with object-based values */}
+              <Fragment>
+                {/* TODO: update value to being object
+                    { actualValue: optionKey, toString: () => label }
+                    currently a pf bug that makes the checked logic
+                    not work with object-based values */}
+                <Select
+                  variant={SelectVariant.checkbox}
+                  aria-label={name}
+                  onToggle={this.handleFilterDropdownToggle}
+                  onSelect={(event, selection) =>
+                    this.handleFilterDropdownSelect(key, event, selection)
+                  }
+                  selections={chipsByKey[key].chips}
+                  isExpanded={isFilterDropdownOpen}
+                  placeholderText={`Filter by ${name.toLowerCase()}`}
+                >
+                  {options.map(([optionKey]) => (
                     <SelectOption key={optionKey} value={optionKey} />
-                  </Fragment>
-                ))}
-              </Select>
+                  ))}
+                </Select>
+              </Fragment>
             )) ||
               (isBoolean && (
                 <Select
