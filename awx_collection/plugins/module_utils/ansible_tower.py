@@ -51,6 +51,10 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 
+class CollectionsParserError(Exception):
+    pass
+
+
 def make_request(request_handler, tower_url):
     '''
     Makes the request to given URL, handles errors, returns JSON
@@ -141,7 +145,3 @@ class TowerModule(AnsibleModule):
         if not HAS_TOWER_CLI:
             self.fail_json(msg=missing_required_lib('ansible-tower-cli'),
                            exception=TOWER_CLI_IMP_ERR)
-
-
-class CollectionsParserError(Exception):
-    pass

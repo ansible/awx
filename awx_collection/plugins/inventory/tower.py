@@ -103,11 +103,11 @@ import re
 
 from ansible.module_utils import six
 from ansible.module_utils._text import to_text, to_native
-from ansible.errors import AnsibleOptionsError
+from ansible.errors import AnsibleParserError, AnsibleOptionsError
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
 
-from ..module_utils.ansible_tower import make_request, Request
+from ..module_utils.ansible_tower import make_request, CollectionsParserError, Request
 
 # Python 2/3 Compatibility
 try:
@@ -162,7 +162,11 @@ class InventoryModule(BaseInventoryPlugin):
         inventory_url = '/api/v2/inventories/{inv_id}/script/?hostvars=1&towervars=1&all=1'.format(inv_id=inventory_id)
         inventory_url = urljoin(tower_host, inventory_url)
 
-        inventory = make_request(request_handler, inventory_url)
+        try:
+            inventory = make_request(request_handler, inventory_url)
+        except CollectionsParserError as e:
+            raise AnsibleParserError(to_native(e))
+
         # To start with, create all the groups.
         for group_name in inventory:
             if group_name != '_meta':
@@ -192,7 +196,12 @@ class InventoryModule(BaseInventoryPlugin):
         # Fetch extra variables if told to do so
         if self.get_option('include_metadata'):
             config_url = urljoin(tower_host, '/api/v2/config/')
-            config_data = make_request(request_handler, config_url)
+
+            try:
+                config_data = make_request(request_handler, config_url)
+            except CollectionsParserError as e:
+                raise AnsibleParserError(to_native(e))
+
             server_data = {}
             server_data['license_type'] = config_data.get('license_info', {}).get('license_type', 'unknown')
             for key in ('version', 'ansible_version'):
