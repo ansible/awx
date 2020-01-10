@@ -1,9 +1,8 @@
-adal==1.2.1               # via msrestazure
+adal==1.2.2               # via msrestazure
 apache-libcloud==2.5.0
 appdirs==1.4.3            # via openstacksdk
 applicationinsights==0.11.9  # via azure-cli-core
-argcomplete==1.9.5        # via azure-cli-core, knack
-asn1crypto==0.24.0        # via cryptography
+argcomplete==1.10.3       # via azure-cli-core, knack
 azure-cli-core==2.0.35
 azure-cli-nspkg==3.0.2
 azure-common==1.1.11
@@ -39,82 +38,82 @@ azure-mgmt-web==0.41.0
 azure-nspkg==2.0.0
 azure-storage==0.35.1
 backports.ssl-match-hostname==3.5.0.1
-bcrypt==3.1.6             # via paramiko
+bcrypt==3.1.7             # via paramiko
 boto3==1.9.223
 boto==2.47.0
-botocore==1.12.223        # via boto3, s3transfer
-cachetools==3.1.0         # via google-auth
-certifi==2019.3.9         # via msrest, requests
-cffi==1.12.3              # via bcrypt, cryptography, pynacl
+botocore==1.12.253        # via boto3, s3transfer
+cachetools==3.1.1; python_version < "3" # via google-auth
+certifi==2019.11.28       # via msrest, requests
+cffi==1.13.2              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
-colorama==0.4.1           # via azure-cli-core, knack
-cryptography==2.6.1       # via adal, azure-keyvault, azure-storage, openstacksdk, paramiko, pyopenssl, requests-credssp, requests-kerberos, requests-ntlm
-decorator==4.4.0          # via dogpile.cache, openstacksdk
-docutils==0.14            # via botocore
-dogpile.cache==0.7.1      # via openstacksdk
+colorama==0.4.3           # via azure-cli-core, knack
+cryptography==2.8         # via adal, azure-keyvault, azure-storage, openstacksdk, paramiko, pyopenssl, requests-credssp, requests-kerberos, requests-ntlm
+decorator==4.4.1          # via dogpile.cache, openstacksdk
+docutils==0.15.2          # via botocore
+dogpile.cache==0.9.0      # via openstacksdk
 enum34==1.1.6; python_version < "3" # via cryptography, knack, msrest, ovirt-engine-sdk-python
-futures==3.2.0; python_version < "3" # via openstacksdk, s3transfer
+futures==3.3.0; python_version < "3" # via openstacksdk, s3transfer
 google-auth==1.6.2
 humanfriendly==4.18       # via azure-cli-core
 idna==2.8                 # via requests
-ipaddress==1.0.22; python_version < "3" # via cryptography, openstacksdk
+ipaddress==1.0.23; python_version < "3" # via cryptography, openstacksdk
 iso8601==0.1.12           # via keystoneauth1, openstacksdk
 isodate==0.6.0            # via msrest
 jinja2==2.10.1
 jmespath==0.9.4           # via azure-cli-core, boto3, botocore, knack, openstacksdk
-jsonpatch==1.23           # via openstacksdk
+jsonpatch==1.24           # via openstacksdk
 jsonpointer==2.0          # via jsonpatch
-keystoneauth1==3.14.0     # via openstacksdk
+keystoneauth1==3.18.0     # via openstacksdk
 knack==0.3.3              # via azure-cli-core
-lxml==4.3.3               # via ncclient, pyvmomi
+lxml==4.4.2               # via ncclient
 markupsafe==1.1.1         # via jinja2
 monotonic==1.5; python_version < "3" # via humanfriendly
 msrest==0.6.1
 msrestazure==0.5.0
-munch==2.3.2              # via openstacksdk
+munch==2.5.0              # via openstacksdk
 ncclient==0.6.3
 netaddr==0.7.19
 netifaces==0.10.9         # via openstacksdk
-ntlm-auth==1.3.0          # via requests-credssp, requests-ntlm
-oauthlib==3.0.1           # via requests-oauthlib
+ntlm-auth==1.4.0          # via requests-credssp, requests-ntlm
+oauthlib==3.1.0           # via requests-oauthlib
 openstacksdk==0.31.1
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
 ovirt-engine-sdk-python==4.3.0
-packaging==19.0
-paramiko==2.6.0           # via azure-cli-core, ncclient
-pbr==5.2.0                # via keystoneauth1, openstacksdk, os-service-types, stevedore
+packaging==19.2
+paramiko==2.7.1           # via azure-cli-core, ncclient
+pbr==5.4.4                # via keystoneauth1, openstacksdk, os-service-types, stevedore
 psutil==5.4.3
-pyasn1-modules==0.2.5     # via google-auth
-pyasn1==0.4.5             # via pyasn1-modules, requests-credssp, rsa
+pyasn1-modules==0.2.7     # via google-auth
+pyasn1==0.4.8             # via pyasn1-modules, requests-credssp, rsa
 pycparser==2.19           # via cffi
 pycurl==7.43.0.1
-pygments==2.3.1           # via azure-cli-core, knack
+pygments==2.5.2           # via azure-cli-core, knack
 pyjwt==1.7.1              # via adal, azure-cli-core
 pykerberos==1.2.1         # via requests-kerberos
 pynacl==1.3.0             # via paramiko
-pyopenssl==19.0.0         # via azure-cli-core, pyvmomi, requests-credssp
-pyparsing==2.4.0          # via packaging
-python-dateutil==2.6.1    # via adal, azure-storage, botocore
+pyopenssl==19.1.0         # via azure-cli-core, requests-credssp
+pyparsing==2.4.5          # via packaging
+python-dateutil==2.8.1    # via adal, azure-storage, botocore
 pyvmomi==6.7.3
 pywinrm[kerberos]==0.3.0
-pyyaml==5.1               # via azure-cli-core, knack, openstacksdk
+pyyaml==5.2               # via azure-cli-core, knack, openstacksdk
 requests-credssp==1.0.2
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
-requests-oauthlib==1.2.0  # via msrest
-requests==2.21.0
+requests-oauthlib==1.3.0  # via msrest
+requests==2.22.0
 requestsexceptions==1.4.0  # via openstacksdk
 rsa==4.0                  # via google-auth
 s3transfer==0.2.1         # via boto3
 selectors2==2.0.1         # via ncclient
-six==1.12.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, requests-credssp, stevedore
-stevedore==1.30.1         # via keystoneauth1
+six==1.13.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, requests-credssp, stevedore
+stevedore==1.31.0         # via keystoneauth1
 tabulate==0.8.2           # via azure-cli-core, knack
-typing==3.6.6; python_version < "3" # via msrest
-urllib3==1.24.3           # via botocore, requests
+typing==3.7.4.1; python_version < "3" # via msrest
+urllib3==1.25.7           # via botocore, requests
 wheel==0.30.0             # via azure-cli-core
 xmltodict==0.12.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==9.0.1
-setuptools==36.0.1
+pip==19.3.1
+setuptools==41.6.0

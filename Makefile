@@ -26,6 +26,9 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
+# These should be upgraded in the AWX and Ansible venv before attempting
+# to install the actual requirements
+VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -130,16 +133,16 @@ guard-%:
 
 virtualenv: virtualenv_ansible virtualenv_awx
 
+# virtualenv_* targets do not use --system-site-packages to prevent bugs installing packages
+# but Ansible venvs are expected to have this, so that must be done after venv creation
 virtualenv_ansible:
 	if [ "$(VENV_BASE)" ]; then \
 		if [ ! -d "$(VENV_BASE)" ]; then \
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+			virtualenv -p python $(VENV_BASE)/ansible && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
 
@@ -149,36 +152,46 @@ virtualenv_ansible_py3:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/ansible; \
+			virtualenv -p $(PYTHON) $(VENV_BASE)/ansible; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
 
+# flit is needed for offline install of certain packages, specifically ptyprocess
+# it is needed for setup, but not always recognized as a setup dependency
+# similar to pip, setuptools, and wheel, these are all needed here as a bootstrapping issues
 virtualenv_awx:
 	if [ "$(VENV_BASE)" ]; then \
 		if [ ! -d "$(VENV_BASE)" ]; then \
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/awx; \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed docutils==0.14; \
+			virtualenv -p $(PYTHON) $(VENV_BASE)/awx; \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP) && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) flit; \
 		fi; \
 	fi
 
+# --ignore-install flag is not used because *.txt files should specify exact versions
 requirements_ansible: virtualenv_ansible
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	# Same effect as using --system-site-packages flag on venv creation
+	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	# Same effect as using --system-site-packages flag on venv creation
+	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
@@ -186,13 +199,13 @@ requirements_ansible_dev:
 	fi
 
 # Install third-party requirements needed for AWX's environment.
+# this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
-	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
 	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
@@ -395,7 +408,7 @@ test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH py.test $(COLLECTION_TEST_DIRS)
+	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
 
 flake8_collection:
 	flake8 awx_collection/  # Different settings, in main exclude list

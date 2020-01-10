@@ -53,8 +53,6 @@ ovirt-engine-sdk-python==4.3.0    # minimum set inside Ansible facts module requ
 pycurl==7.43.0.1    # higher versions will not install without SSL backend specified
 # AWX usage
 psutil==5.4.3    # same as AWX requirement
-setuptools==36.0.1
-pip==9.0.1
 # VMware
 pyvmomi==6.7.3
 # WinRM
@@ -64,3 +62,5 @@ requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
 openstacksdk==0.31.1
+pip==19.3.1  # see upgrade blockers
+setuptools==41.6.0  # see upgrade blockers

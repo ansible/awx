@@ -1,53 +1,48 @@
-ansible-runner==1.4.4
-ansiconv==1.0.0
-appdirs==1.4.2
-asgi-amqp==1.1.4
-azure-keyvault==1.1.0
-boto==2.47.0
-channels==1.1.8
-celery==4.3.0
-daphne==1.3.0   # Last before backwards-incompatible channels 2 upgrade
-twisted[tls]>=17.1   # from daphne, see https://github.com/django/daphne/pull/257
-Django==2.2.4
-django-auth-ldap==1.7.0
-django-cors-headers==2.4.0
-django-crum==0.7.2
-django-extensions==2.0.0
-django-jsonfield==1.2.0
-django-oauth-toolkit==1.1.3
-django-polymorphic==2.0.2
-django-pglocks==1.0.2
-django-qsstats-magic==1.1.0
-django-radius==1.3.3
-django-solo==1.1.3
-django-split-settings==0.3.0
-django-taggit==0.22.2
-djangorestframework==3.9.4
-djangorestframework-yaml==1.0.3
-GitPython==2.1.11
-irc==16.2
-jinja2==2.10.1
-jsonschema==2.6.0
-Markdown==2.6.11    # used for formatting API help
-openshift==0.9.0
-ordereddict==1.1
-prometheus_client==0.6.0
-psutil==5.4.3
-psycopg2==2.8.2
-pygerduty==0.37.0
-pyparsing==2.2.0
-python-dateutil==2.7.2  # contains support for TZINFO= parsing
-python-memcached==1.59
-python-radius==1.0
-python3-saml==1.4.0
-social-auth-core==3.0.0
-social-auth-app-django==2.1.0
-requests==2.21.0
-requests-futures==0.9.7
-slackclient==1.1.2
-tacacs_plus==1.0
-twilio==6.10.4
-uWSGI==2.0.17
-uwsgitop==0.10.0
-pip==9.0.1
-setuptools==36.0.1
+ansible-runner
+ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
+asgi-amqp>=1.1.4  # see library notes, related to channels 2
+azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
+boto  # replacement candidate https://github.com/ansible/awx/issues/2115
+channels==1.1.8  # UPGRADE BLOCKER: Last before backwards-incompatible channels 2 upgrade
+celery==4.3.0  # see library notes
+daphne==1.4.2  # UPGRADE BLOCKER: last before channels 2 but not pinned by other deps
+django==2.2.8  # see UPGRADE BLOCKERs
+django-auth-ldap
+django-cors-headers
+django-crum
+django-extensions
+django-jsonfield==1.2.0  # see UPGRADE BLOCKERs
+django-oauth-toolkit==1.1.3  # see UPGRADE BLOCKERs
+django-polymorphic
+django-pglocks
+django-qsstats-magic
+django-radius==1.3.3  # FIX auth does not work with later versions
+django-solo
+django-split-settings
+django-taggit
+djangorestframework
+djangorestframework-yaml
+GitPython
+irc
+jinja2
+jsonschema
+Markdown  # used for formatting API help
+openshift
+prometheus_client
+psycopg2
+pygerduty
+pyparsing
+python-memcached
+python-radius
+python3-saml
+social-auth-core==3.2.0  # see UPGRADE BLOCKERs
+social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
+requests
+requests-futures  # see library notes
+slackclient==1.1.2  # see UPGRADE BLOCKERs
+tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
+twilio
+uWSGI
+uwsgitop
+pip==19.3.1  # see UPGRADE BLOCKERs
+setuptools==41.6.0  # see UPGRADE BLOCKERs
