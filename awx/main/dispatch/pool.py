@@ -66,6 +66,19 @@ class PoolWorker(object):
     def start(self):
         self.process.start()
 
+    @staticmethod
+    def tracking_data(data):
+        '''
+        Returns a dict with keys and values taken from data
+        but only including the entries that are relevant to task management
+        '''
+        new_data = {}
+        for field in ('task', 'uuid', 'args', 'kwargs'):
+            if field not in data:
+                continue
+            new_data[field] = data[field]
+        return new_data
+
     def put(self, body):
         uuid = '?'
         if isinstance(body, dict):
@@ -75,7 +88,7 @@ class PoolWorker(object):
         logger.debug('delivered {} to worker[{}] qsize {}'.format(
             uuid, self.pid, self.qsize
         ))
-        self.managed_tasks[uuid] = body
+        self.managed_tasks[uuid] = self.tracking_data(body)
         self.queue.put(body, block=True, timeout=5)
         self.messages_sent += 1
         self.calculate_managed_tasks()
