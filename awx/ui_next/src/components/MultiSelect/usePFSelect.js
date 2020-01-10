@@ -11,6 +11,7 @@ export default function usePFSelect(value, onChange) {
 
   useEffect(() => {
     if (value !== selections && options.length) {
+      console.log(value, typeof value);
       const syncedValue = value.map(item =>
         options.find(i => i.id === item.id)
       );

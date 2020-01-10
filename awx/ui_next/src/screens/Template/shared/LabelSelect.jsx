@@ -56,7 +56,6 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
   return (
     <Select
       variant={SelectVariant.typeaheadMulti}
-      aria-label="Select a state"
       onToggle={toggleExpanded}
       onSelect={onSelect}
       onClear={() => onChange([])}
