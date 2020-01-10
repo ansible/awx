@@ -213,8 +213,8 @@ class JobList extends Component {
               },
               {
                 name: i18n._(t`Limit`),
-                key: 'job__limit'
-              }
+                key: 'job__limit',
+              },
             ]}
             toolbarSortColumns={[
               {
