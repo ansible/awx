@@ -194,7 +194,7 @@ class JobList extends Component {
                 ],
               },
               {
-                name: i18n._(t`Created By (Username)`),
+                name: i18n._(t`Launched By (Username)`),
                 key: 'created_by__username',
               },
               {
@@ -211,6 +211,10 @@ class JobList extends Component {
                   [`canceled`, i18n._(t`Canceled`)],
                 ],
               },
+              {
+                name: i18n._(t`Limit`),
+                key: 'job__limit'
+              }
             ]}
             toolbarSortColumns={[
               {
