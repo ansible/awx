@@ -74,14 +74,6 @@ function InstanceGroupsLookup(props) {
                 name: i18n._(t`Credential Name`),
                 key: 'credential__name',
               },
-              {
-                name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
-              },
-              {
-                name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
-              },
             ]}
             sortColumns={[
               {
