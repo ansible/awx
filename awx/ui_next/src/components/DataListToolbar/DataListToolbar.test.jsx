@@ -180,10 +180,10 @@ describe('<DataListToolbar />', () => {
       integerFields: ['page', 'page_size', 'id'],
     };
 
-    const downNumericIconSelector = 'SortNumericDownIcon';
-    const upNumericIconSelector = 'SortNumericUpIcon';
-    const downAlphaIconSelector = 'SortAlphaDownIcon';
-    const upAlphaIconSelector = 'SortAlphaUpIcon';
+    const forwardNumericIconSelector = 'SortNumericDownIcon';
+    const reverseNumericIconSelector = 'SortNumericDownAltIcon';
+    const forwardAlphaIconSelector = 'SortAlphaDownIcon';
+    const reverseAlphaIconSelector = 'SortAlphaDownAltIcon';
 
     const numericColumns = [{ name: 'ID', key: 'id' }];
 
@@ -202,8 +202,8 @@ describe('<DataListToolbar />', () => {
       />
     );
 
-    const downNumericIcon = toolbar.find(downNumericIconSelector);
-    expect(downNumericIcon.length).toBe(1);
+    const reverseNumericIcon = toolbar.find(reverseNumericIconSelector);
+    expect(reverseNumericIcon.length).toBe(1);
 
     toolbar = mountWithContexts(
       <DataListToolbar
@@ -213,8 +213,8 @@ describe('<DataListToolbar />', () => {
       />
     );
 
-    const upNumericIcon = toolbar.find(upNumericIconSelector);
-    expect(upNumericIcon.length).toBe(1);
+    const forwardNumericIcon = toolbar.find(forwardNumericIconSelector);
+    expect(forwardNumericIcon.length).toBe(1);
 
     toolbar = mountWithContexts(
       <DataListToolbar
@@ -224,8 +224,8 @@ describe('<DataListToolbar />', () => {
       />
     );
 
-    const downAlphaIcon = toolbar.find(downAlphaIconSelector);
-    expect(downAlphaIcon.length).toBe(1);
+    const reverseAlphaIcon = toolbar.find(reverseAlphaIconSelector);
+    expect(reverseAlphaIcon.length).toBe(1);
 
     toolbar = mountWithContexts(
       <DataListToolbar
@@ -235,8 +235,8 @@ describe('<DataListToolbar />', () => {
       />
     );
 
-    const upAlphaIcon = toolbar.find(upAlphaIconSelector);
-    expect(upAlphaIcon.length).toBe(1);
+    const forwardAlphaIcon = toolbar.find(forwardAlphaIconSelector);
+    expect(forwardAlphaIcon.length).toBe(1);
   });
 
   test('should render additionalControls', () => {

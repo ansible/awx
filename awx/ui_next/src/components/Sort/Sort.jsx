@@ -14,9 +14,9 @@ import {
 } from '@patternfly/react-core';
 import {
   SortAlphaDownIcon,
-  SortAlphaUpIcon,
+  SortAlphaDownAltIcon,
   SortNumericDownIcon,
-  SortNumericUpIcon,
+  SortNumericDownAltIcon,
 } from '@patternfly/react-icons';
 
 import { parseQueryString } from '@util/qs';
@@ -117,10 +117,12 @@ class Sort extends React.Component {
     let SortIcon;
     if (isNumeric) {
       SortIcon =
-        sortOrder === 'ascending' ? SortNumericUpIcon : SortNumericDownIcon;
+        sortOrder === 'ascending'
+          ? SortNumericDownIcon
+          : SortNumericDownAltIcon;
     } else {
       SortIcon =
-        sortOrder === 'ascending' ? SortAlphaUpIcon : SortAlphaDownIcon;
+        sortOrder === 'ascending' ? SortAlphaDownIcon : SortAlphaDownAltIcon;
     }
 
     return (

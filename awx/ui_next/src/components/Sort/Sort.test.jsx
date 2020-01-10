@@ -170,10 +170,10 @@ describe('<Sort />', () => {
   });
 
   test('It displays correct sort icon', () => {
-    const downNumericIconSelector = 'SortNumericDownIcon';
-    const upNumericIconSelector = 'SortNumericUpIcon';
-    const downAlphaIconSelector = 'SortAlphaDownIcon';
-    const upAlphaIconSelector = 'SortAlphaUpIcon';
+    const forwardNumericIconSelector = 'SortNumericDownIcon';
+    const reverseNumericIconSelector = 'SortNumericDownAltIcon';
+    const forwardAlphaIconSelector = 'SortAlphaDownIcon';
+    const reverseAlphaIconSelector = 'SortAlphaDownAltIcon';
 
     const qsConfigNumDown = {
       namespace: 'item',
@@ -208,15 +208,15 @@ describe('<Sort />', () => {
       />
     );
 
-    const downNumericIcon = sort.find(downNumericIconSelector);
-    expect(downNumericIcon.length).toBe(1);
+    const reverseNumericIcon = sort.find(reverseNumericIconSelector);
+    expect(reverseNumericIcon.length).toBe(1);
 
     sort = mountWithContexts(
       <Sort qsConfig={qsConfigNumUp} columns={numericColumns} onSort={onSort} />
     );
 
-    const upNumericIcon = sort.find(upNumericIconSelector);
-    expect(upNumericIcon.length).toBe(1);
+    const forwardNumericIcon = sort.find(forwardNumericIconSelector);
+    expect(forwardNumericIcon.length).toBe(1);
 
     sort = mountWithContexts(
       <Sort
@@ -226,14 +226,14 @@ describe('<Sort />', () => {
       />
     );
 
-    const downAlphaIcon = sort.find(downAlphaIconSelector);
-    expect(downAlphaIcon.length).toBe(1);
+    const reverseAlphaIcon = sort.find(reverseAlphaIconSelector);
+    expect(reverseAlphaIcon.length).toBe(1);
 
     sort = mountWithContexts(
       <Sort qsConfig={qsConfigAlphaUp} columns={alphaColumns} onSort={onSort} />
     );
 
-    const upAlphaIcon = sort.find(upAlphaIconSelector);
-    expect(upAlphaIcon.length).toBe(1);
+    const forwardAlphaIcon = sort.find(forwardAlphaIconSelector);
+    expect(forwardAlphaIcon.length).toBe(1);
   });
 });
