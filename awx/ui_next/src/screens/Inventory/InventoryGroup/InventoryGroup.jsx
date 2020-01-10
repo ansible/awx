@@ -49,7 +49,6 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
       ),
       link: `/inventories/inventory/${inventory.id}/groups`,
       id: 99,
-      isNestedTab: true,
     },
     {
       name: i18n._(t`Details`),

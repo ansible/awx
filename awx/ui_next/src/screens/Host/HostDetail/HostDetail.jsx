@@ -14,16 +14,6 @@ import DeleteButton from '@components/DeleteButton';
 import Switch from '@components/Switch';
 import { HostsAPI } from '@api';
 
-function HostDetail({ host, i18n }) {
-const ActionButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  & > :not(:first-child) {
-    margin-left: 20px;
-  }
-`;
-
 function HostDetail({ host, history, match, i18n, onUpdateHost }) {
   const { created, description, id, modified, name, summary_fields } = host;
 
@@ -150,7 +140,6 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
               {i18n._(t`Edit`)}
             </Button>
           )}
-      </CardActionsRow>
         {summary_fields.user_capabilities &&
           summary_fields.user_capabilities.delete && (
             <DeleteButton
@@ -159,6 +148,7 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
               name={host.name}
             />
           )}
+      </CardActionsRow>
     </CardBody>
   );
 }
@@ -167,4 +157,4 @@ HostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(HostDetail);
+export default withI18n()(withRouter(HostDetail));

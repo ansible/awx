@@ -14,8 +14,6 @@ GroupsAPI.readDetail.mockResolvedValue({
     name: 'Foo',
     description: 'Bar',
     variables: 'bizz: buzz',
-    created: '1/12/2019',
-    modified: '1/13/2019',
     summary_fields: {
       inventory: { id: 1 },
       created_by: { id: 1, username: 'Athena' },

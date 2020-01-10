@@ -17,8 +17,6 @@ describe('<JobTemplateDetail />', () => {
     playbook: '',
     id: 1,
     verbosity: 1,
-    created: '1/12/2019',
-    modified: '1/13/2019',
     summary_fields: {
       user_capabilities: { edit: true },
       created_by: { id: 1, username: 'Joe' },
