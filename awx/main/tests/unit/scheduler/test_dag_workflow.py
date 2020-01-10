@@ -19,6 +19,7 @@ class WorkflowNode(object):
         self.job = job
         self.do_not_run = do_not_run
         self.unified_job_template = unified_job_template
+        self.all_parents_must_converge = False
 
 
 @pytest.fixture
