@@ -210,7 +210,7 @@ class Search extends React.Component {
             <NoOptionDropdown>{searchColumnName}</NoOptionDropdown>
           )}
         </DataToolbarItem>
-        {columns.map(({ key, name, options, isBoolean }) => (
+        {columns.map(({ key, name, options, isBoolean, booleanLabels = {} }) => (
           <DataToolbarFilter
             chips={chipsByKey[key] ? chipsByKey[key].chips : []}
             deleteChip={(unusedKey, val) => {
@@ -235,10 +235,12 @@ class Search extends React.Component {
                   }
                   selections={chipsByKey[key].chips}
                   isExpanded={isFilterDropdownOpen}
-                  placeholderText={`Filter by ${name.toLowerCase()}`}
+                  placeholderText={`Filter By ${name}`}
                 >
-                  {options.map(([optionKey]) => (
-                    <SelectOption key={optionKey} value={optionKey} />
+                  {options.map(([optionKey, optionLabel]) => (
+                    <SelectOption key={optionKey} value={optionKey}>
+                      {optionLabel}
+                    </SelectOption>
                   ))}
                 </Select>
               </Fragment>
@@ -252,14 +254,18 @@ class Search extends React.Component {
                   }
                   selections={chipsByKey[key].chips[0]}
                   isExpanded={isFilterDropdownOpen}
-                  placeholderText={`Filter by ${name.toLowerCase()}`}
+                  placeholderText={`Filter By ${name}`}
                 >
                   {/* TODO: update value to being object
                   { actualValue: optionKey, toString: () => label }
                   currently a pf bug that makes the checked logic
                   not work with object-based values */}
-                  <SelectOption key="true" value="true" />
-                  <SelectOption key="false" value="false" />
+                  <SelectOption key="true" value="true">
+                    {booleanLabels.true || i18n._(t`Yes`)}
+                  </SelectOption>
+                  <SelectOption key="false" value="false">
+                    {booleanLabels.false || i18n._(t`No`)}
+                  </SelectOption>
                 </Select>
               )) || (
                 <InputGroup>

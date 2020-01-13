@@ -257,6 +257,10 @@ export const SearchColumns = arrayOf(
     key: string.isRequired,
     isDefault: bool,
     isBoolean: bool,
+    booleanLabels: shape({
+      "true": string.isRequired,
+      "false": string.isRequired
+    }),
     options: arrayOf(arrayOf(string, string)),
   })
 );
