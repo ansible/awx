@@ -500,6 +500,10 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 type: 'workflow_job_template,job_template'
             };
 
+            $scope.all_parents_must_converge = _.get(
+                $scope, ['nodeConfig', 'node', 'all_parents_must_converge'],
+                _.get($scope, ['nodeConfig', 'node', 'originalNodeObject', 'all_parents_must_converge'], false)
+            );
             $scope.wf_maker_templates = [];
             $scope.wf_maker_template_dataset = {};
 
@@ -617,7 +621,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         $scope.confirmNodeForm = () => {
             const nodeFormData = {
-                edgeType: $scope.edgeType
+                edgeType: $scope.edgeType,
+                all_parents_must_converge: $scope.all_parents_must_converge,
             };
 
             if ($scope.activeTab === "approval") {

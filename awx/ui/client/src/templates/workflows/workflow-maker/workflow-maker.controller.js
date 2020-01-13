@@ -92,7 +92,8 @@ export default ['$scope', 'TemplatesService',
                     limit: null,
                     diff_mode: null,
                     verbosity: null,
-                    credential: null
+                    credential: null,
+                    all_parents_must_converge: _.get(node, 'all_parents_must_converge', false)
                 };
 
                 if (_.has(node, 'fullUnifiedJobTemplateObject')) {
@@ -637,6 +638,7 @@ export default ['$scope', 'TemplatesService',
                     });
                 }
             }
+            nodeRef[$scope.nodeConfig.nodeId].all_parents_must_converge = nodeFormData.all_parents_must_converge;
 
             $scope.graphState.arrayOfNodesForChart.map( (node) => {
                 if (node.id === nodeId) {

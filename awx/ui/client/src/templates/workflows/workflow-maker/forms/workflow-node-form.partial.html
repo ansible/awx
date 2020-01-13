@@ -183,6 +183,28 @@
             </select>
         </div>
     </div>
+    <div id="workflow_node_checkbox_group" class="form-group Form-formGroup Form-formGroup--singleColumn" >
+        <label class="Form-inputLabelContainer" for="checkbox_group">
+            <span translate class="Form-inputLabel">Options</span>
+        </label>
+        <div>
+            <div id="workflow_node_checkbox_group_chbox_group" class="checkbox-group">
+                <div class="form-check">
+                    <label for="all_parents_must_converge" class="form-check-label">
+                        <input
+                            ng-disabled="readOnly"
+                            id="workflow_node_all_parents_must_converge_checkbox"
+                            class="form-check-input"
+                            type="checkbox"
+                            name="all_parents_must_converge"
+                            ng-model="all_parents_must_converge"
+                        />
+                        <span class="Form-inputLabel">{{:: strings.get('workflow_maker.ALL_PARENTS_MUST_CONVERGE') }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
     <div ng-show="readOnly">
         <div
             class="WorkflowMaker-readOnlyPromptText"
