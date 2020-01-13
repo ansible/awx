@@ -2594,7 +2594,7 @@ class rhv(PluginFileInjector):
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
     ini_env_reference = 'FOREMAN_INI_PATH'
-    # initial_version = '2.8'  # FIXME: turn on after plugin is validated
+    initial_version = 2.10
     # No base injector, because this does not work in playbooks. Bug??
     namespace = 'theforeman'
     collection = 'foreman'
