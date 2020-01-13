@@ -135,6 +135,7 @@ class Sort extends React.Component {
                 onSelect={this.handleDropdownSelect}
                 direction={up}
                 isOpen={isSortDropdownOpen}
+                style={{ width: '100%', maxWidth: '100px' }}
                 toggle={
                   <DropdownToggle
                     id="awx-sort"
