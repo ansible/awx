@@ -61,6 +61,9 @@ class Inventories extends Component {
         t`Sources`
       ),
 
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/add`]: i18n._(
+        t`Create New Host`
+      ),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
         nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
