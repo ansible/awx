@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0100_v370_projectupdate_job_tags'),
+        ('main', '0102_v370_unifiedjob_canceled'),
     ]
 
     operations = [
