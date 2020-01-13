@@ -140,7 +140,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             await self.close()
 
     @database_sync_to_async
-    def user_can_see_object_id(self, user_access):
+    def user_can_see_object_id(self, user_access, oid):
         return user_access.get_queryset().filter(pk=oid).exists()
 
     async def receive_json(self, data):
@@ -169,17 +169,16 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                         access_cls = consumer_access(group_name)
                         if access_cls is not None:
                             user_access = access_cls(user)
-                            if not self.user_can_see_object_id(user_access):
+                            if not await self.user_can_see_object_id(user_access, oid):
                                 await self.send_json({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})
                                 continue
-
                         new_groups.add(name)
                 else:
                     if group_name == BROADCAST_GROUP:
                         logger.warn("Non-priveleged client asked to join broadcast group!")
                         return
 
-                    new_groups.add(name)
+                    new_groups.add(group_name)
 
             old_groups = current_groups - new_groups
             for group_name in old_groups:
