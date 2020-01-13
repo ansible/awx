@@ -116,7 +116,7 @@ class SelectResourceStep extends React.Component {
                   name={item[displayKey]}
                   label={item[displayKey]}
                   onSelect={() => onRowClick(item)}
-                  onDeselect={() => {}}
+                  onDeselect={() => onRowClick(item)}
                 />
               )}
               renderToolbar={props => <DataListToolbar {...props} fillWidth />}

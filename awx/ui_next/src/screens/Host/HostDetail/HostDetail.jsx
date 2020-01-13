@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, useHistory, useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Host } from '@types';
@@ -14,9 +14,27 @@ import DeleteButton from '@components/DeleteButton';
 import Switch from '@components/Switch';
 import { HostsAPI } from '@api';
 
-function HostDetail({ host, history, match, i18n, onUpdateHost }) {
-  const { created, description, id, modified, name, summary_fields } = host;
+function HostDetail({ host, i18n, onUpdateHost }) {
+  const {
+    created,
+    description,
+    id,
+    modified,
+    name,
+    enabled,
+    summary_fields: {
+      inventory,
+      recent_jobs,
+      kind,
+      created_by,
+      modified_by,
+      user_capabilities,
+    },
+  } = host;
 
+  const history = useHistory();
+  const { pathname } = useLocation();
+  const { id: inventoryId, hostId: inventoryHostId } = useParams();
   const [isLoading, setIsloading] = useState(false);
   const [deletionError, setDeletionError] = useState(false);
   const [toggleLoading, setToggleLoading] = useState(false);
@@ -25,8 +43,8 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
   const handleHostToggle = async () => {
     setToggleLoading(true);
     try {
-      const { data } = await HostsAPI.update(host.id, {
-        enabled: !host.enabled,
+      const { data } = await HostsAPI.update(id, {
+        enabled: !enabled,
       });
       onUpdateHost(data);
     } catch (err) {
@@ -39,9 +57,9 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
   const handleHostDelete = async () => {
     setIsloading(true);
     try {
-      await HostsAPI.destroy(host.id);
+      await HostsAPI.destroy(id);
       setIsloading(false);
-      history.push(`/inventories/inventory/${match.params.id}/hosts`);
+      history.push(`/inventories/inventory/${inventoryId}/hosts`);
     } catch (err) {
       setDeletionError(err);
     }
@@ -68,7 +86,7 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
         title={i18n._(t`Error!`)}
         onClose={() => setDeletionError(false)}
       >
-        {i18n._(t`Failed to delete ${host.name}.`)}
+        {i18n._(t`Failed to delete ${name}.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     );
@@ -76,12 +94,12 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
   return (
     <CardBody>
       <Switch
-        css="padding-bottom: 40px; padding-top: 20px"
-        id={`host-${host.id}-toggle`}
+        css="padding-bottom: 40px"
+        id={`host-${id}-toggle`}
         label={i18n._(t`On`)}
         labelOff={i18n._(t`Off`)}
-        isChecked={host.enabled}
-        isDisabled={!host.summary_fields.user_capabilities.edit}
+        isChecked={enabled}
+        isDisabled={!user_capabilities.edit}
         onChange={() => handleHostToggle()}
         aria-label={i18n._(t`Toggle Host`)}
       />
@@ -89,22 +107,20 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail
           css="display: flex; flex: 1;"
-          value={<Sparkline jobs={host.summary_fields.recent_jobs} />}
+          value={<Sparkline jobs={recent_jobs} />}
           label={i18n._(t`Activity`)}
         />
         <Detail label={i18n._(t`Description`)} value={description} />
-        {summary_fields.inventory && (
+        {inventory && (
           <Detail
             label={i18n._(t`Inventory`)}
             value={
               <Link
                 to={`/inventories/${
-                  summary_fields.inventory.kind === 'smart'
-                    ? 'smart_inventory'
-                    : 'inventory'
-                }/${summary_fields.inventory.id}/details`}
+                  kind === 'smart' ? 'smart_inventory' : 'inventory'
+                }/${inventoryId}/details`}
               >
-                {summary_fields.inventory.name}
+                {inventory.name}
               </Link>
             }
           />
@@ -112,11 +128,11 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
         <UserDateDetail
           date={created}
           label={i18n._(t`Created`)}
-          user={summary_fields.created_by}
+          user={created_by}
         />
         <UserDateDetail
           label={i18n._(t`Last Modified`)}
-          user={summary_fields.modified_by}
+          user={modified_by}
           date={modified}
         />
         <VariablesDetail
@@ -126,28 +142,26 @@ function HostDetail({ host, history, match, i18n, onUpdateHost }) {
         />
       </DetailList>
       <CardActionsRow>
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.edit && (
-            <Button
-              aria-label={i18n._(t`edit`)}
-              component={Link}
-              to={
-                history.location.pathname.startsWith('/inventories')
-                  ? `/inventories/inventory/${match.params.id}/hosts/${match.params.hostId}/edit`
-                  : `/hosts/${id}/edit`
-              }
-            >
-              {i18n._(t`Edit`)}
-            </Button>
-          )}
-        {summary_fields.user_capabilities &&
-          summary_fields.user_capabilities.delete && (
-            <DeleteButton
-              onConfirm={() => handleHostDelete()}
-              modalTitle={i18n._(t`Delete Host`)}
-              name={host.name}
-            />
-          )}
+        {user_capabilities && user_capabilities.edit && (
+          <Button
+            aria-label={i18n._(t`edit`)}
+            component={Link}
+            to={
+              pathname.startsWith('/inventories')
+                ? `/inventories/inventory/${inventoryId}/hosts/${inventoryHostId}/edit`
+                : `/hosts/${id}/edit`
+            }
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        )}
+        {user_capabilities && user_capabilities.delete && (
+          <DeleteButton
+            onConfirm={() => handleHostDelete()}
+            modalTitle={i18n._(t`Delete Host`)}
+            name={host.name}
+          />
+        )}
       </CardActionsRow>
     </CardBody>
   );
@@ -157,4 +171,4 @@ HostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(withRouter(HostDetail));
+export default withI18n()(HostDetail);
