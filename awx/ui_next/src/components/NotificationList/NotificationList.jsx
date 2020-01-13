@@ -18,12 +18,6 @@ const QS_CONFIG = getQSConfig('notification', {
   order_by: 'name',
 });
 
-const COLUMNS = [
-  { key: 'name', name: 'Name', isSortable: true, isSearchable: true },
-  { key: 'modified', name: 'Modified', isSortable: true, isNumeric: true },
-  { key: 'created', name: 'Created', isSortable: true, isNumeric: true },
-];
-
 class NotificationList extends Component {
   constructor(props) {
     super(props);
@@ -204,7 +198,43 @@ class NotificationList extends Component {
           itemCount={itemCount}
           pluralizedItemName={i18n._(t`Notifications`)}
           qsConfig={QS_CONFIG}
-          toolbarColumns={COLUMNS}
+          toolbarSearchColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isDefault: true,
+            },
+            {
+              name: i18n._(t`Type`),
+              key: 'type',
+              options: [
+                ['email', i18n._(t`Email`)],
+                ['grafana', i18n._(t`Grafana`)],
+                ['hipchat', i18n._(t`Hipchat`)],
+                ['irc', i18n._(t`IRC`)],
+                ['mattermost', i18n._(t`Mattermost`)],
+                ['pagerduty', i18n._(t`Pagerduty`)],
+                ['rocketchat', i18n._(t`Rocket.Chat`)],
+                ['slack', i18n._(t`Slack`)],
+                ['twilio', i18n._(t`Twilio`)],
+                ['webhook', i18n._(t`Webhook`)],
+              ],
+            },
+            {
+              name: i18n._(t`Created By (Username)`),
+              key: 'created_by__username',
+            },
+            {
+              name: i18n._(t`Modified By (Username)`),
+              key: 'modified_by__username',
+            },
+          ]}
+          toolbarSortColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+            },
+          ]}
           renderItem={notification => (
             <NotificationListItem
               key={notification.id}

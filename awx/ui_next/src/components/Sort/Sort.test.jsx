@@ -12,8 +12,17 @@ describe('<Sort />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
+    const qsConfig = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      integerFields: ['page', 'page_size'],
+    };
+
     const columns = [
-      { name: 'Name', key: 'name', isSortable: true, isSearchable: true },
+      {
+        name: 'Name',
+        key: 'name',
+      },
     ];
 
     const sortBtn = 'button[aria-label="Sort"]';
@@ -21,12 +30,7 @@ describe('<Sort />', () => {
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={columns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
 
     wrapper.find(sortBtn).simulate('click');
@@ -36,22 +40,31 @@ describe('<Sort />', () => {
   });
 
   test('onSort properly passes back descending when ascending was passed as prop', () => {
-    const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true },
-      { name: 'Bar', key: 'bar', isSortable: true },
-      { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' },
+    const qsConfig = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const columns = [
+      {
+        name: 'Foo',
+        key: 'foo',
+      },
+      {
+        name: 'Bar',
+        key: 'bar',
+      },
+      {
+        name: 'Bakery',
+        key: 'bakery',
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        sortedColumnKey="foo"
-        sortOrder="ascending"
-        columns={multipleColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -60,22 +73,31 @@ describe('<Sort />', () => {
   });
 
   test('onSort properly passes back ascending when descending was passed as prop', () => {
-    const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true },
-      { name: 'Bar', key: 'bar', isSortable: true },
-      { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' },
+    const qsConfig = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: '-foo' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const columns = [
+      {
+        name: 'Foo',
+        key: 'foo',
+      },
+      {
+        name: 'Bar',
+        key: 'bar',
+      },
+      {
+        name: 'Bakery',
+        key: 'bakery',
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        sortedColumnKey="foo"
-        sortOrder="descending"
-        columns={multipleColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     const sortDropdownToggle = wrapper.find('Button');
     expect(sortDropdownToggle.length).toBe(1);
@@ -84,22 +106,31 @@ describe('<Sort />', () => {
   });
 
   test('Changing dropdown correctly passes back new sort key', () => {
-    const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true },
-      { name: 'Bar', key: 'bar', isSortable: true },
-      { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' },
+    const qsConfig = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const columns = [
+      {
+        name: 'Foo',
+        key: 'foo',
+      },
+      {
+        name: 'Bar',
+        key: 'bar',
+      },
+      {
+        name: 'Bakery',
+        key: 'bakery',
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        sortedColumnKey="foo"
-        sortOrder="ascending"
-        columns={multipleColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
 
     wrapper.instance().handleDropdownSelect({ target: { innerText: 'Bar' } });
@@ -107,22 +138,31 @@ describe('<Sort />', () => {
   });
 
   test('Opening dropdown correctly updates state', () => {
-    const multipleColumns = [
-      { name: 'Foo', key: 'foo', isSortable: true },
-      { name: 'Bar', key: 'bar', isSortable: true },
-      { name: 'Bakery', key: 'bakery', isSortable: true },
-      { name: 'Baz', key: 'baz' },
+    const qsConfig = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'foo' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const columns = [
+      {
+        name: 'Foo',
+        key: 'foo',
+      },
+      {
+        name: 'Bar',
+        key: 'bar',
+      },
+      {
+        name: 'Bakery',
+        key: 'bakery',
+      },
     ];
 
     const onSort = jest.fn();
 
     const wrapper = mountWithContexts(
-      <Sort
-        sortedColumnKey="foo"
-        sortOrder="ascending"
-        columns={multipleColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfig} columns={columns} onSort={onSort} />
     ).find('Sort');
     expect(wrapper.state('isSortDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -130,65 +170,70 @@ describe('<Sort />', () => {
   });
 
   test('It displays correct sort icon', () => {
-    const downNumericIconSelector = 'SortNumericDownIcon';
-    const upNumericIconSelector = 'SortNumericUpIcon';
-    const downAlphaIconSelector = 'SortAlphaDownIcon';
-    const upAlphaIconSelector = 'SortAlphaUpIcon';
+    const forwardNumericIconSelector = 'SortNumericDownIcon';
+    const reverseNumericIconSelector = 'SortNumericDownAltIcon';
+    const forwardAlphaIconSelector = 'SortAlphaDownIcon';
+    const reverseAlphaIconSelector = 'SortAlphaDownAltIcon';
 
-    const numericColumns = [
-      { name: 'ID', key: 'id', isSortable: true, isNumeric: true },
-    ];
-    const alphaColumns = [
-      { name: 'Name', key: 'name', isSortable: true, isNumeric: false },
-    ];
+    const qsConfigNumDown = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: '-id' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+    const qsConfigNumUp = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'id' },
+      integerFields: ['page', 'page_size', 'id'],
+    };
+    const qsConfigAlphaDown = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: '-name' },
+      integerFields: ['page', 'page_size'],
+    };
+    const qsConfigAlphaUp = {
+      namespace: 'item',
+      defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+      integerFields: ['page', 'page_size'],
+    };
+
+    const numericColumns = [{ name: 'ID', key: 'id' }];
+    const alphaColumns = [{ name: 'Name', key: 'name' }];
     const onSort = jest.fn();
 
     sort = mountWithContexts(
       <Sort
-        sortedColumnKey="id"
-        sortOrder="descending"
+        qsConfig={qsConfigNumDown}
         columns={numericColumns}
         onSort={onSort}
       />
     );
 
-    const downNumericIcon = sort.find(downNumericIconSelector);
-    expect(downNumericIcon.length).toBe(1);
+    const reverseNumericIcon = sort.find(reverseNumericIconSelector);
+    expect(reverseNumericIcon.length).toBe(1);
 
     sort = mountWithContexts(
-      <Sort
-        sortedColumnKey="id"
-        sortOrder="ascending"
-        columns={numericColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfigNumUp} columns={numericColumns} onSort={onSort} />
     );
 
-    const upNumericIcon = sort.find(upNumericIconSelector);
-    expect(upNumericIcon.length).toBe(1);
+    const forwardNumericIcon = sort.find(forwardNumericIconSelector);
+    expect(forwardNumericIcon.length).toBe(1);
 
     sort = mountWithContexts(
       <Sort
-        sortedColumnKey="name"
-        sortOrder="descending"
+        qsConfig={qsConfigAlphaDown}
         columns={alphaColumns}
         onSort={onSort}
       />
     );
 
-    const downAlphaIcon = sort.find(downAlphaIconSelector);
-    expect(downAlphaIcon.length).toBe(1);
+    const reverseAlphaIcon = sort.find(reverseAlphaIconSelector);
+    expect(reverseAlphaIcon.length).toBe(1);
 
     sort = mountWithContexts(
-      <Sort
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={alphaColumns}
-        onSort={onSort}
-      />
+      <Sort qsConfig={qsConfigAlphaUp} columns={alphaColumns} onSort={onSort} />
     );
 
-    const upAlphaIcon = sort.find(upAlphaIconSelector);
-    expect(upAlphaIcon.length).toBe(1);
+    const forwardAlphaIcon = sort.find(forwardAlphaIconSelector);
+    expect(forwardAlphaIcon.length).toBe(1);
   });
 });

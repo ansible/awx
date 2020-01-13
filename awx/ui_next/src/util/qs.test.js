@@ -121,6 +121,20 @@ describe('qs (qs.js)', () => {
       });
     });
 
+    test('should set order_by in defaultParams if it is not passed', () => {
+      expect(
+        getQSConfig('organization', {
+          page: 1,
+          page_size: 5,
+        })
+      ).toEqual({
+        namespace: 'organization',
+        defaultParams: { page: 1, page_size: 5, order_by: 'name' },
+        integerFields: ['page', 'page_size'],
+        dateFields: ['modified', 'created'],
+      });
+    });
+
     test('should throw if no namespace given', () => {
       expect(() => getQSConfig()).toThrow();
     });
@@ -132,7 +146,7 @@ describe('qs (qs.js)', () => {
       };
       expect(getQSConfig('inventory', defaults)).toEqual({
         namespace: 'inventory',
-        defaultParams: { page: 1, page_size: 15 },
+        defaultParams: { page: 1, page_size: 15, order_by: 'name' },
         integerFields: ['page', 'page_size'],
         dateFields: ['modified', 'created'],
       });

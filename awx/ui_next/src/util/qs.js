@@ -14,6 +14,10 @@ export function getQSConfig(
   if (!namespace) {
     throw new Error('a QS namespace is required');
   }
+  // if order_by isn't passed, default to name
+  if (!defaultParams.order_by) {
+    defaultParams.order_by = 'name';
+  }
   return {
     namespace,
     defaultParams,

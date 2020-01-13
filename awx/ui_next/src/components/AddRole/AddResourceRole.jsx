@@ -142,21 +142,57 @@ class AddResourceRole extends React.Component {
     } = this.state;
     const { onClose, roles, i18n } = this.props;
 
-    const userColumns = [
+    const userSearchColumns = [
       {
         name: i18n._(t`Username`),
         key: 'username',
-        isSortable: true,
-        isSearchable: true,
+        isDefault: true,
+      },
+      {
+        name: i18n._(t`First Name`),
+        key: 'first_name',
+      },
+      {
+        name: i18n._(t`Last Name`),
+        key: 'last_name',
       },
     ];
 
-    const teamColumns = [
+    const userSortColumns = [
+      {
+        name: i18n._(t`Username`),
+        key: 'username',
+      },
+      {
+        name: i18n._(t`First Name`),
+        key: 'first_name',
+      },
+      {
+        name: i18n._(t`Last Name`),
+        key: 'last_name',
+      },
+    ];
+
+    const teamSearchColumns = [
       {
         name: i18n._(t`Name`),
         key: 'name',
-        isSortable: true,
-        isSearchable: true,
+        isDefault: true,
+      },
+      {
+        name: i18n._(t`Created By (Username)`),
+        key: 'created_by__username',
+      },
+      {
+        name: i18n._(t`Modified By (Username)`),
+        key: 'modified_by__username',
+      },
+    ];
+
+    const teamSortColumns = [
+      {
+        name: i18n._(t`Name`),
+        key: 'name',
       },
     ];
 
@@ -207,7 +243,8 @@ class AddResourceRole extends React.Component {
           <Fragment>
             {selectedResource === 'users' && (
               <SelectResourceStep
-                columns={userColumns}
+                searchColumns={userSearchColumns}
+                sortColumns={userSortColumns}
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
                 onSearch={readUsers}
@@ -218,7 +255,8 @@ class AddResourceRole extends React.Component {
             )}
             {selectedResource === 'teams' && (
               <SelectResourceStep
-                columns={teamColumns}
+                searchColumns={teamSearchColumns}
+                sortColumns={teamSortColumns}
                 onRowClick={this.handleResourceCheckboxClick}
                 onSearch={readTeams}
                 selectedLabel={i18n._(t`Selected`)}

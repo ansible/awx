@@ -68,19 +68,25 @@ function InventoryLookup({
             value={state.selectedItems}
             options={inventories}
             optionCount={count}
-            columns={[
-              { name: i18n._(t`Name`), key: 'name', isSortable: true },
+            searchColumns={[
               {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-                isSortable: false,
-                isNumeric: true,
+                name: i18n._(t`Name`),
+                key: 'name',
+                isDefault: true,
               },
               {
-                name: i18n._(t`Created`),
-                key: 'created',
-                isSortable: false,
-                isNumeric: true,
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username',
+              },
+            ]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
               },
             ]}
             multiple={state.multiple}

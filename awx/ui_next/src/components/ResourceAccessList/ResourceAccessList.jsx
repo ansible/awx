@@ -162,24 +162,33 @@ class ResourceAccessList extends React.Component {
           itemCount={itemCount}
           pluralizedItemName="Roles"
           qsConfig={QS_CONFIG}
-          toolbarColumns={[
-            {
-              name: i18n._(t`First Name`),
-              key: 'first_name',
-              isSortable: true,
-              isSearchable: true,
-            },
+          toolbarSearchColumns={[
             {
               name: i18n._(t`Username`),
               key: 'username',
-              isSortable: true,
-              isSearchable: true,
+              isDefault: true,
+            },
+            {
+              name: i18n._(t`First Name`),
+              key: 'first_name',
             },
             {
               name: i18n._(t`Last Name`),
               key: 'last_name',
-              isSortable: true,
-              isSearchable: true,
+            },
+          ]}
+          toolbarSortColumns={[
+            {
+              name: i18n._(t`Username`),
+              key: 'username',
+            },
+            {
+              name: i18n._(t`First Name`),
+              key: 'first_name',
+            },
+            {
+              name: i18n._(t`Last Name`),
+              key: 'last_name',
             },
           ]}
           renderToolbar={props => (

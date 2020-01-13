@@ -8,19 +8,27 @@ import {
   string,
   oneOfType,
 } from 'prop-types';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import SelectedList from '../../SelectedList';
 import PaginatedDataList from '../../PaginatedDataList';
 import CheckboxListItem from '../../CheckboxListItem';
 import DataListToolbar from '../../DataListToolbar';
-import { QSConfig } from '@types';
+import { QSConfig, SearchColumns, SortColumns } from '@types';
+
+const ModalList = styled.div`
+  .pf-c-data-toolbar__content {
+    padding: 0 !important;
+  }
+`;
 
 function OptionsList({
   value,
   options,
   optionCount,
-  columns,
+  searchColumns,
+  sortColumns,
   multiple,
   header,
   name,
@@ -33,7 +41,7 @@ function OptionsList({
   i18n,
 }) {
   return (
-    <div>
+    <ModalList>
       {value.length > 0 && (
         <SelectedList
           label={i18n._(t`Selected`)}
@@ -49,7 +57,8 @@ function OptionsList({
         itemCount={optionCount}
         pluralizedItemName={header}
         qsConfig={qsConfig}
-        toolbarColumns={columns}
+        toolbarSearchColumns={searchColumns}
+        toolbarSortColumns={sortColumns}
         hasContentLoading={isLoading}
         onRowClick={selectItem}
         renderItem={item => (
@@ -67,7 +76,7 @@ function OptionsList({
         renderToolbar={props => <DataListToolbar {...props} fillWidth />}
         showPageSizeOptions={false}
       />
-    </div>
+    </ModalList>
   );
 }
 
@@ -80,7 +89,8 @@ OptionsList.propTypes = {
   value: arrayOf(Item).isRequired,
   options: arrayOf(Item).isRequired,
   optionCount: number.isRequired,
-  columns: arrayOf(shape({})),
+  searchColumns: SearchColumns,
+  sortColumns: SortColumns,
   multiple: bool,
   qsConfig: QSConfig.isRequired,
   selectItem: func.isRequired,
@@ -90,7 +100,8 @@ OptionsList.propTypes = {
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
-  columns: [],
+  searchColumns: [],
+  sortColumns: [],
 };
 
 export default withI18n()(OptionsList);

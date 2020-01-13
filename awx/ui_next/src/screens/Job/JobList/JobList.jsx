@@ -23,12 +23,16 @@ import { getQSConfig, parseQueryString } from '@util/qs';
 
 import JobListItem from './JobListItem';
 
-const QS_CONFIG = getQSConfig('job', {
-  page: 1,
-  page_size: 20,
-  order_by: '-finished',
-  not__launch_type: 'sync',
-});
+const QS_CONFIG = getQSConfig(
+  'job',
+  {
+    page: 1,
+    page_size: 20,
+    order_by: '-finished',
+    not__launch_type: 'sync',
+  },
+  ['page', 'page_size', 'id']
+);
 
 class JobList extends Component {
   constructor(props) {
@@ -163,18 +167,67 @@ class JobList extends Component {
             pluralizedItemName="Jobs"
             qsConfig={QS_CONFIG}
             onRowClick={this.handleSelect}
-            toolbarColumns={[
+            toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isSortable: true,
-                isSearchable: true,
+                isDefault: true,
+              },
+              {
+                name: i18n._(t`ID`),
+                key: 'id',
+              },
+              {
+                name: i18n._(t`Label Name`),
+                key: 'labels__name',
+              },
+              {
+                name: i18n._(t`Job Type`),
+                key: `type`,
+                options: [
+                  [`project_update`, i18n._(t`SCM Update`)],
+                  [`inventory_update`, i18n._(t`Inventory Sync`)],
+                  [`job`, i18n._(t`Playbook Run`)],
+                  [`ad_hoc_command`, i18n._(t`Command`)],
+                  [`system_job`, i18n._(t`Management Job`)],
+                  [`workflow_job`, i18n._(t`Workflow Job`)],
+                ],
+              },
+              {
+                name: i18n._(t`Launched By (Username)`),
+                key: 'created_by__username',
+              },
+              {
+                name: i18n._(t`Status`),
+                key: 'status',
+                options: [
+                  [`new`, i18n._(t`New`)],
+                  [`pending`, i18n._(t`Pending`)],
+                  [`waiting`, i18n._(t`Waiting`)],
+                  [`running`, i18n._(t`Running`)],
+                  [`successful`, i18n._(t`Successful`)],
+                  [`failed`, i18n._(t`Failed`)],
+                  [`error`, i18n._(t`Error`)],
+                  [`canceled`, i18n._(t`Canceled`)],
+                ],
+              },
+              {
+                name: i18n._(t`Limit`),
+                key: 'job__limit',
+              },
+            ]}
+            toolbarSortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+              {
+                name: i18n._(t`ID`),
+                key: 'id',
               },
               {
                 name: i18n._(t`Finished`),
                 key: 'finished',
-                isSortable: true,
-                isNumeric: true,
               },
             ]}
             renderToolbar={props => (

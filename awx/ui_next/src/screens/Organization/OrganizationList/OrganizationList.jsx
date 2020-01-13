@@ -119,24 +119,25 @@ function OrganizationsList({ i18n }) {
             pluralizedItemName="Organizations"
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
-            toolbarColumns={[
+            toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
-                isSortable: true,
-                isSearchable: true,
+                isDefault: true,
               },
               {
-                name: i18n._(t`Modified`),
-                key: 'modified',
-                isSortable: true,
-                isNumeric: true,
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username',
               },
               {
-                name: i18n._(t`Created`),
-                key: 'created',
-                isSortable: true,
-                isNumeric: true,
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username',
+              },
+            ]}
+            toolbarSortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
               },
             ]}
             renderToolbar={props => (

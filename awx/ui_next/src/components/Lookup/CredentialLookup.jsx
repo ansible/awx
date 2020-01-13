@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { bool, func, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { CredentialsAPI } from '@api';
 import { Credential } from '@types';
 import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
@@ -26,6 +27,7 @@ function CredentialLookup({
   credentialTypeId,
   value,
   history,
+  i18n,
 }) {
   const [credentials, setCredentials] = useState([]);
   const [count, setCount] = useState(0);
@@ -47,6 +49,8 @@ function CredentialLookup({
       }
     })();
   }, [credentialTypeId, history.location.search]);
+
+  // TODO: replace credential type search with REST-based grabbing of cred types
 
   return (
     <FormGroup
@@ -71,6 +75,27 @@ function CredentialLookup({
             optionCount={count}
             header={label}
             qsConfig={QS_CONFIG}
+            searchColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isDefault: true,
+              },
+              {
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username',
+              },
+            ]}
+            sortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
             readOnly={!canDelete}
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
