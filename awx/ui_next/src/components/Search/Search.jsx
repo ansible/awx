@@ -222,10 +222,6 @@ class Search extends React.Component {
           >
             {(options && (
               <Fragment>
-                {/* TODO: update value to being object
-                    { actualValue: optionKey, toString: () => label }
-                    currently a pf bug that makes the checked logic
-                    not work with object-based values */}
                 <Select
                   variant={SelectVariant.checkbox}
                   aria-label={name}
@@ -256,10 +252,6 @@ class Search extends React.Component {
                   isExpanded={isFilterDropdownOpen}
                   placeholderText={`Filter By ${name}`}
                 >
-                  {/* TODO: update value to being object
-                  { actualValue: optionKey, toString: () => label }
-                  currently a pf bug that makes the checked logic
-                  not work with object-based values */}
                   <SelectOption key="true" value="true">
                     {booleanLabels.true || i18n._(t`Yes`)}
                   </SelectOption>
