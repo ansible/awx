@@ -5,3 +5,5 @@ export { default as VisualizerStartScreen } from './VisualizerStartScreen';
 export { default as VisualizerStartNode } from './VisualizerStartNode';
 export { default as VisualizerLink } from './VisualizerLink';
 export { default as VisualizerNode } from './VisualizerNode';
+export { default as VisualizerKey } from './VisualizerKey';
+export { default as VisualizerTools } from './VisualizerTools';

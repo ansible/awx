@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PencilAltIcon, PlusIcon, TrashAltIcon } from '@patternfly/react-icons';
@@ -12,6 +13,10 @@ import {
   WorkflowActionTooltipItem,
 } from '@components/Workflow';
 
+const LinkG = styled.g`
+  pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
+`;
+
 function VisualizerLink({
   link,
   nodePositions,
@@ -19,6 +24,10 @@ function VisualizerLink({
   updateHelpText,
   updateLinkHelp,
   i18n,
+  onLinkEditClick,
+  onDeleteLinkClick,
+  addingLink,
+  onAddNodeClick,
 }) {
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
@@ -30,6 +39,11 @@ function VisualizerLink({
     <WorkflowActionTooltipItem
       id="link-add-node"
       key="add"
+      onClick={() => {
+        updateHelpText(null);
+        setHovering(false);
+        onAddNodeClick(link.source.id, link.target.id);
+      }}
       onMouseEnter={() =>
         updateHelpText(i18n._(t`Add a new node between these two nodes`))
       }
@@ -49,6 +63,7 @@ function VisualizerLink({
             key="edit"
             onMouseEnter={() => updateHelpText(i18n._(t`Edit this link`))}
             onMouseLeave={() => updateHelpText(null)}
+            onClick={() => onLinkEditClick(link)}
           >
             <PencilAltIcon />
           </WorkflowActionTooltipItem>,
@@ -57,6 +72,7 @@ function VisualizerLink({
             key="delete"
             onMouseEnter={() => updateHelpText(i18n._(t`Delete this link`))}
             onMouseLeave={() => updateHelpText(null)}
+            onClick={() => onDeleteLinkClick(link)}
           >
             <TrashAltIcon />
           </WorkflowActionTooltipItem>,
@@ -98,11 +114,12 @@ function VisualizerLink({
   }, [link, nodePositions]);
 
   return (
-    <g
+    <LinkG
       className="WorkflowGraph-link"
       id={`link-${link.source.id}-${link.target.id}`}
       onMouseEnter={handleLinkMouseEnter}
       onMouseLeave={handleLinkMouseLeave}
+      ignorePointerEvents={addingLink}
     >
       <polygon
         id={`link-${link.source.id}-${link.target.id}-overlay`}
@@ -129,7 +146,7 @@ function VisualizerLink({
           actions={tooltipActions}
         />
       )}
-    </g>
+    </LinkG>
   );
 }
 

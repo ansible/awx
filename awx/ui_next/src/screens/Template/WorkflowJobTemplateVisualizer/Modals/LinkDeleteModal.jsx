@@ -4,18 +4,18 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '@components/AlertModal';
 
-function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
+function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
   return (
     <AlertModal
       variant="danger"
-      title={i18n._(t`Remove Node`)}
-      isOpen={nodeToDelete}
+      title="Remove Link"
+      isOpen={linkToDelete}
       onClose={onCancel}
       actions={[
         <Button
           key="remove"
           variant="danger"
-          aria-label={i18n._(t`Confirm node removal`)}
+          aria-label={i18n._(t`Confirm link removal`)}
           onClick={() => onConfirm()}
         >
           {i18n._(t`Remove`)}
@@ -23,26 +23,26 @@ function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
         <Button
           key="cancel"
           variant="secondary"
-          aria-label={i18n._(t`Cancel node removal`)}
+          aria-label={i18n._(t`Cancel link removal`)}
           onClick={onCancel}
         >
           {i18n._(t`Cancel`)}
         </Button>,
       ]}
     >
-      {nodeToDelete && nodeToDelete.unifiedJobTemplate ? (
+      <p>{i18n._(t`Are you sure you want to remove this link?`)}</p>
+      {!linkToDelete.isConvergenceLink && (
         <Fragment>
-          <p>{i18n._(t`Are you sure you want to remove the node below:`)}</p>
           <br />
-          <strong css="color: var(--pf-global--danger-color--100)">
-            {nodeToDelete.unifiedJobTemplate.name}
-          </strong>
+          <p>
+            {i18n._(
+              t`Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch.`
+            )}
+          </p>
         </Fragment>
-      ) : (
-        <p>{i18n._(t`Are you sure you want to remove this node?`)}</p>
       )}
     </AlertModal>
   );
 }
 
-export default withI18n()(NodeDeleteModal);
+export default withI18n()(LinkDeleteModal);

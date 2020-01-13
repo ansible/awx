@@ -22,7 +22,9 @@ import Teams from './models/Teams';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
 import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
+import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobs from './models/WorkflowJobs';
+import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 
 const AdHocCommandsAPI = new AdHocCommands();
@@ -49,7 +51,9 @@ const TeamsAPI = new Teams();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
 const UnifiedJobsAPI = new UnifiedJobs();
 const UsersAPI = new Users();
+const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobsAPI = new WorkflowJobs();
+const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 
 export {
@@ -77,6 +81,8 @@ export {
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,
+  WorkflowApprovalTemplatesAPI,
   WorkflowJobsAPI,
+  WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
 };

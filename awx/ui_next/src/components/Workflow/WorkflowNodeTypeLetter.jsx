@@ -13,43 +13,30 @@ const NodeTypeLetter = styled.foreignObject`
 
 function WorkflowNodeTypeLetter({ node }) {
   let nodeTypeLetter;
-  if (node.unifiedJobTemplate && node.unifiedJobTemplate.type) {
-    switch (node.unifiedJobTemplate.type) {
-      case 'job_template':
-        nodeTypeLetter = 'JT';
-        break;
-      case 'project':
-        nodeTypeLetter = 'P';
-        break;
-      case 'inventory_source':
-        nodeTypeLetter = 'I';
-        break;
-      case 'workflow_job_template':
-        nodeTypeLetter = 'W';
-        break;
-      case 'workflow_approval_template':
-        nodeTypeLetter = <PauseIcon />;
-        break;
-      default:
-        nodeTypeLetter = '';
-    }
-  } else if (
+  if (
     node.unifiedJobTemplate &&
-    node.unifiedJobTemplate.unified_job_type
+    (node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type)
   ) {
-    switch (node.unifiedJobTemplate.unified_job_type) {
+    const ujtType =
+      node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type;
+    switch (ujtType) {
+      case 'job_template':
       case 'job':
         nodeTypeLetter = 'JT';
         break;
+      case 'project':
       case 'project_update':
         nodeTypeLetter = 'P';
         break;
+      case 'inventory_source':
       case 'inventory_update':
         nodeTypeLetter = 'I';
         break;
+      case 'workflow_job_template':
       case 'workflow_job':
         nodeTypeLetter = 'W';
         break;
+      case 'workflow_approval_template':
       case 'workflow_approval':
         nodeTypeLetter = <PauseIcon />;
         break;

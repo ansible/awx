@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Wizard } from '@patternfly/react-core';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
-import SelectableCard from './SelectableCard';
+import { SelectableCard } from '@components/SelectableCard';
 import { TeamsAPI, UsersAPI } from '../../api';
 
 const readUsers = async queryParams =>

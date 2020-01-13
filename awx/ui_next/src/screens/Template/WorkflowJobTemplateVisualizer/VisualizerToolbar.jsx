@@ -1,8 +1,7 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Badge as PFBadge, Button } from '@patternfly/react-core';
+import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import {
   BookIcon,
   CompassIcon,
@@ -22,10 +21,34 @@ const Badge = styled(PFBadge)`
   margin-left: 10px;
 `;
 
-function Toolbar({ history, i18n, template }) {
-  const handleVisualizerCancel = () => {
-    history.push(`/templates/workflow_job_template/${template.id}/details`);
-  };
+const ActionButton = styled(Button)`
+  padding: 6px 10px;
+  margin: 0px 6px;
+  border: none;
+  &:hover {
+    background-color: #0066cc;
+    color: white;
+  }
+
+  &.pf-m-active {
+    background-color: #0066cc;
+    color: white;
+  }
+`;
+
+function Toolbar({
+  i18n,
+  template,
+  onClose,
+  onSave,
+  nodes = [],
+  onDeleteAllClick,
+  onKeyToggle,
+  keyShown,
+  onToolsToggle,
+  toolsShown,
+}) {
+  const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
     <div>
@@ -52,35 +75,54 @@ function Toolbar({ history, i18n, template }) {
           }}
         >
           <div>{i18n._(t`Total Nodes`)}</div>
-          <Badge isRead>0</Badge>
+          <Badge isRead>{totalNodes}</Badge>
           <VerticalSeparator />
-          <Button variant="plain">
-            <CompassIcon />
-          </Button>
-          <Button variant="plain">
-            <WrenchIcon />
-          </Button>
-          <Button variant="plain">
+          <Tooltip content={i18n._(t`Toggle Key`)} position="bottom">
+            <ActionButton
+              variant="plain"
+              onClick={onKeyToggle}
+              isActive={keyShown}
+            >
+              <CompassIcon />
+            </ActionButton>
+          </Tooltip>
+          <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
+            <ActionButton
+              variant="plain"
+              onClick={onToolsToggle}
+              isActive={toolsShown}
+            >
+              <WrenchIcon />
+            </ActionButton>
+          </Tooltip>
+          <ActionButton variant="plain" isDisabled>
             <DownloadIcon />
-          </Button>
-          <Button variant="plain">
+          </ActionButton>
+          <ActionButton variant="plain" isDisabled>
             <BookIcon />
-          </Button>
-          <Button variant="plain">
+          </ActionButton>
+          <ActionButton variant="plain" isDisabled>
             <RocketIcon />
-          </Button>
-          <Button variant="plain">
-            <TrashAltIcon />
-          </Button>
+          </ActionButton>
+          <Tooltip content={i18n._(t`Delete All Nodes`)} position="bottom">
+            <ActionButton
+              variant="plain"
+              isDisabled={totalNodes === 0}
+              aria-label={i18n._(t`Delete all nodes`)}
+              onClick={onDeleteAllClick}
+            >
+              <TrashAltIcon />
+            </ActionButton>
+          </Tooltip>
           <VerticalSeparator />
-          <Button variant="primary" onClick={handleVisualizerCancel}>
+          <Button variant="primary" onClick={onSave}>
             {i18n._(t`Save`)}
           </Button>
           <VerticalSeparator />
           <Button
             variant="plain"
             aria-label={i18n._(t`Close`)}
-            onClick={handleVisualizerCancel}
+            onClick={onClose}
           >
             <TimesIcon />
           </Button>
@@ -90,4 +132,4 @@ function Toolbar({ history, i18n, template }) {
   );
 }
 
-export default withI18n()(withRouter(Toolbar));
+export default withI18n()(Toolbar);

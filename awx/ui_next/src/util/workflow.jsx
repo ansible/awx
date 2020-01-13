@@ -11,11 +11,15 @@ export const constants = {
   rootH: 40,
 };
 
-export function calcZoomAndFit(gRef) {
+export function calcZoomAndFit(gRef, svgRef) {
+  const { k: currentScale } = d3.zoomTransform(d3.select(svgRef).node());
   const gBoundingClientRect = d3
     .select(gRef)
     .node()
     .getBoundingClientRect();
+
+  gBoundingClientRect.height = gBoundingClientRect.height / currentScale;
+  gBoundingClientRect.width = gBoundingClientRect.width / currentScale;
 
   const gBBoxDimensions = d3
     .select(gRef)
@@ -45,7 +49,7 @@ export function calcZoomAndFit(gRef) {
     yTranslate =
       (svgBoundingClientRect.height - gBoundingClientRect.height * scaleToFit) /
         2 -
-      gBBoxDimensions.y * scaleToFit;
+      (gBBoxDimensions.y / currentScale) * scaleToFit;
   }
 
   return [scaleToFit, yTranslate];
@@ -171,4 +175,30 @@ export function layoutGraph(nodes, links) {
   dagre.layout(g);
 
   return g;
+}
+
+export function getZoomTranslate(svgRef, newScale) {
+  const svgElement = document.getElementById('workflow-svg');
+  const svgBoundingClientRect = svgElement.getBoundingClientRect();
+  const current = d3.zoomTransform(d3.select(svgRef).node());
+  const origScale = current.k;
+  const unscaledOffsetX =
+    (current.x +
+      (svgBoundingClientRect.width * origScale - svgBoundingClientRect.width) /
+        2) /
+    origScale;
+  const unscaledOffsetY =
+    (current.y +
+      (svgBoundingClientRect.height * origScale -
+        svgBoundingClientRect.height) /
+        2) /
+    origScale;
+  const translateX =
+    unscaledOffsetX * newScale -
+    (newScale * svgBoundingClientRect.width - svgBoundingClientRect.width) / 2;
+  const translateY =
+    unscaledOffsetY * newScale -
+    (newScale * svgBoundingClientRect.height - svgBoundingClientRect.height) /
+      2;
+  return [translateX, translateY];
 }

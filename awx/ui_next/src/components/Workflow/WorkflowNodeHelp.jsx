@@ -20,19 +20,26 @@ const GridDL = styled.dl`
 function WorkflowNodeHelp({ node, i18n }) {
   let nodeType;
   if (node.unifiedJobTemplate) {
-    switch (node.unifiedJobTemplate.unified_job_type) {
+    const type =
+      node.unifiedJobTemplate.unified_job_type || node.unifiedJobTemplate.type;
+    switch (type) {
+      case 'job_template':
       case 'job':
         nodeType = i18n._(t`Job Template`);
         break;
+      case 'workflow_job_template':
       case 'workflow_job':
         nodeType = i18n._(t`Workflow Job Template`);
         break;
+      case 'project':
       case 'project_update':
         nodeType = i18n._(t`Project Update`);
         break;
+      case 'inventory_source':
       case 'inventory_update':
         nodeType = i18n._(t`Inventory Update`);
         break;
+      case 'workflow_approval_template':
       case 'workflow_approval':
         nodeType = i18n._(t`Workflow Approval`);
         break;

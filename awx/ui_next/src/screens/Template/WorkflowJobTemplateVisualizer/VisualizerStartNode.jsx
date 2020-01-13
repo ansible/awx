@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { PlusIcon } from '@patternfly/react-icons';
 import { constants as wfConstants } from '@util/workflow';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
 } from '@components/Workflow';
 
+const StartG = styled.g`
+  pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
+`;
+
 function VisualizerStartNode({
   updateHelpText,
   nodePositions,
   readOnly,
   i18n,
+  addingLink,
+  onAddNodeClick,
 }) {
   const [hovering, setHovering] = useState(false);
 
@@ -22,11 +30,12 @@ function VisualizerStartNode({
   };
 
   return (
-    <g
+    <StartG
       id="node-1"
       transform={`translate(${nodePositions[1].x},0)`}
       onMouseEnter={handleNodeMouseEnter}
       onMouseLeave={() => setHovering(false)}
+      ignorePointerEvents={addingLink}
     >
       <rect
         width={wfConstants.rootW}
@@ -50,13 +59,18 @@ function VisualizerStartNode({
               key="add"
               onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
               onMouseLeave={() => updateHelpText(null)}
+              onClick={() => {
+                updateHelpText(null);
+                setHovering(false);
+                onAddNodeClick(1);
+              }}
             >
-              <i className="pf-icon pf-icon-add-circle-o" />
+              <PlusIcon />
             </WorkflowActionTooltipItem>,
           ]}
         />
       )}
-    </g>
+    </StartG>
   );
 }
 
