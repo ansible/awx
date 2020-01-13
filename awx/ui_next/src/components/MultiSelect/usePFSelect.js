@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 
 /*
-  Hook for using PatternFly's <Select> component. Guarantees object equality
+  Hook for using PatternFly's <Select> component when a pre-existing value
+  is loaded from somewhere other than the options. Guarantees object equality
   between objects in `value` and the corresponding objects loaded as
   `options` (based on matched id value).
  */
@@ -11,7 +12,6 @@ export default function usePFSelect(value, onChange) {
 
   useEffect(() => {
     if (value !== selections && options.length) {
-      console.log(value, typeof value);
       const syncedValue = value.map(item =>
         options.find(i => i.id === item.id)
       );
@@ -48,5 +48,5 @@ function addToStringToObjects(items = []) {
 }
 
 function toString() {
-  return this.id;
+  return String(this.id);
 }
