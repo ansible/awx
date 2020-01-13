@@ -58,4 +58,3 @@
     regexp: "server.crt|server.key"
     dest: "{{ rmq_cert_tempdir.path }}/server-combined.pem"
     mode: "0600"
-
