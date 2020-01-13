@@ -3,4 +3,3 @@
   file:
     state: absent
     path: "{{ rmq_cert_tempdir.path }}"
-

@@ -101,6 +101,7 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
         [o.auditor_role.members.remove(user) for o in
             Organization.objects.filter(Q(auditor_role__members=user) & ~Q(id__in=org_ids))]
 
+
 def update_user_orgs(backend, details, user=None, *args, **kwargs):
     '''
     Update organization memberships for the given user based on mapping rules
