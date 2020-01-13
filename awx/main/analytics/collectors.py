@@ -52,7 +52,7 @@ def config(since):
         'tower_version': get_awx_version(),
         'ansible_version': get_ansible_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
-        'free_instances': license_info.get('free instances', 0),
+        'free_instances': license_info.get('free_instances', 0),
         'license_expiry': license_info.get('time_remaining', 0),
         'pendo_tracking': settings.PENDO_TRACKING_STATE,
         'authentication_backends': settings.AUTHENTICATION_BACKENDS,
