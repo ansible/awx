@@ -19,12 +19,16 @@ describe('<LabelSelect />', () => {
     });
     let wrapper;
     await act(async () => {
-      wrapper = mount(<LabelSelect value={[]} onError={() => {}} />);
+      wrapper = mount(
+        <LabelSelect value={[]} onError={() => {}} onChange={() => {}} />
+      );
     });
-    wrapper.update();
-
     expect(LabelsAPI.read).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('MultiSelect').prop('options')).toEqual(options);
+    wrapper.find('input').simulate('focus');
+    const selectOptions = wrapper.find('SelectOption');
+    expect(selectOptions).toHaveLength(2);
+    expect(selectOptions.at(0).prop('value')).toEqual(options[0]);
+    expect(selectOptions.at(1).prop('value')).toEqual(options[1]);
   });
 
   test('should fetch two pages labels if present', async () => {
@@ -36,19 +40,20 @@ describe('<LabelSelect />', () => {
     });
     LabelsAPI.read.mockReturnValueOnce({
       data: {
-        results: options,
+        results: [{ id: 3, name: 'three' }, { id: 4, name: 'four' }],
       },
     });
     let wrapper;
     await act(async () => {
-      wrapper = mount(<LabelSelect value={[]} onError={() => {}} />);
+      wrapper = mount(
+        <LabelSelect value={[]} onError={() => {}} onChange={() => {}} />
+      );
     });
     wrapper.update();
 
     expect(LabelsAPI.read).toHaveBeenCalledTimes(2);
-    expect(wrapper.find('MultiSelect').prop('options')).toEqual([
-      ...options,
-      ...options,
-    ]);
+    wrapper.find('input').simulate('focus');
+    const selectOptions = wrapper.find('SelectOption');
+    expect(selectOptions).toHaveLength(4);
   });
 });

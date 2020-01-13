@@ -3,19 +3,22 @@ import { mount } from 'enzyme';
 import TagMultiSelect from './TagMultiSelect';
 
 describe('<TagMultiSelect />', () => {
-  it('should render MultiSelect', () => {
+  it('should render Select', () => {
     const wrapper = mount(
       <TagMultiSelect value="foo,bar" onChange={jest.fn()} />
     );
-    expect(wrapper.find('MultiSelect').prop('options')).toEqual([
-      { id: 'foo', name: 'foo' },
-      { id: 'bar', name: 'bar' },
-    ]);
+    wrapper.find('input').simulate('focus');
+    const options = wrapper.find('SelectOption');
+    expect(options).toHaveLength(2);
+    expect(options.at(0).prop('value')).toEqual('foo');
+    expect(options.at(1).prop('value')).toEqual('bar');
   });
 
   it('should not treat empty string as an option', () => {
     const wrapper = mount(<TagMultiSelect value="" onChange={jest.fn()} />);
-    expect(wrapper.find('MultiSelect').prop('options')).toEqual([]);
+    wrapper.find('input').simulate('focus');
+    expect(wrapper.find('Select').prop('isExpanded')).toEqual(true);
+    expect(wrapper.find('SelectOption')).toHaveLength(0);
   });
 
   it('should trigger onChange', () => {
@@ -23,13 +26,9 @@ describe('<TagMultiSelect />', () => {
     const wrapper = mount(
       <TagMultiSelect value="foo,bar" onChange={onChange} />
     );
+    wrapper.find('input').simulate('focus');
 
-    const select = wrapper.find('MultiSelect');
-    select.invoke('onChange')([
-      { name: 'foo' },
-      { name: 'bar' },
-      { name: 'baz' },
-    ]);
+    wrapper.find('Select').invoke('onSelect')(null, 'baz');
     expect(onChange).toHaveBeenCalledWith('foo,bar,baz');
   });
 });
