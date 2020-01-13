@@ -1883,7 +1883,7 @@ class azure_rm(PluginFileInjector):
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
     # blocked by https://github.com/ansible/ansible/issues/54059
-    # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
+    initial_version = '2.9'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
     base_injector = 'managed'
     namespace = 'ansible'
