@@ -137,6 +137,13 @@
     mode: '0700'
   delegate_to: localhost
 
+- name: Stage rsyslog.repo
+  copy:
+    src: rsyslog.repo
+    dest: "{{ docker_base_path }}/rsyslog.repo"
+    mode: '0700'
+  delegate_to: localhost
+
 - name: Stage supervisor.conf
   copy:
     src: supervisor.conf
