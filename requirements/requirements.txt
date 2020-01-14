@@ -7,7 +7,7 @@ ansiconv==1.0.0
 asgiref==3.2.3            # via channels, channels-redis, daphne
 async-timeout==3.0.1      # via aiohttp, aioredis
 attrs==19.3.0             # via aiohttp, automat, jsonschema, service-identity, twisted
-autobahn==20.1.1          # via daphne
+autobahn==20.1.2          # via daphne
 automat==0.8.0            # via twisted
 azure-common==1.1.24      # via azure-keyvault
 azure-keyvault==1.1.0
