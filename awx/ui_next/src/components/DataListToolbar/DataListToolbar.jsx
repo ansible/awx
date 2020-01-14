@@ -67,7 +67,7 @@ class DataListToolbar extends React.Component {
       <DataToolbar
         id={`${qsConfig.namespace}-list-toolbar`}
         clearAllFilters={clearAllFilters}
-        collapseListedFiltersBreakpoint="xl"
+        collapseListedFiltersBreakpoint="lg"
       >
         <DataToolbarContent>
           {showSelectAll && (
@@ -83,7 +83,7 @@ class DataListToolbar extends React.Component {
               <DataToolbarSeparator variant="separator" />
             </DataToolbarGroup>
           )}
-          <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="xl">
+          <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
             <DataToolbarItem>
               <Search
                 qsConfig={qsConfig}
