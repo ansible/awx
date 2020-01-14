@@ -27,6 +27,7 @@ describe('<JobTemplateForm />', () => {
       project: {
         id: 3,
         name: 'qux',
+        allow_override: true,
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
       credentials: [

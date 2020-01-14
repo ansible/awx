@@ -196,7 +196,12 @@ class JobTemplateDetail extends Component {
             ) : (
               renderMissingDataDetail(i18n._(t`Project`))
             )}
-            <Detail label={i18n._(t`SCM Branch`)} value={template.scm_branch} />
+            {template.scm_branch && (
+              <Detail
+                label={i18n._(t`SCM Branch`)}
+                value={template.scm_branch}
+              />
+            )}
             <Detail label={i18n._(t`Playbook`)} value={playbook} />
             <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
             <Detail label={i18n._(t`Limit`)} value={limit} />
