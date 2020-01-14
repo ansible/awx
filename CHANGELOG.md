@@ -2,13 +2,28 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 9.1.1 (Dec 17, 2019)
+## 9.1.1 (Jan 14, 2020)
 
-- Fixed bug that caused database migrations on Kubernetes installs to hang https://github.com/ansible/awx/pull/5579
-- Upgrade Python-level app dependencies in AWX virtual environment https://github.com/ansible/awx/pull/5407
-- Prevent running jobs from blocking inventory updates https://github.com/ansible/awx/pull/5519
+- Fixed a bug that caused database migrations on Kubernetes installs to hang https://github.com/ansible/awx/pull/5579
+- Upgraded Python-level app dependencies in AWX virtual environment https://github.com/ansible/awx/pull/5407
+- Running jobs no longer block associated inventory updates https://github.com/ansible/awx/pull/5519
 - Fixed invalid_response SAML error https://github.com/ansible/awx/pull/5577
+- Optimized the callback receiver to drastically improve the write speed of stdout for parallel jobs (https://github.com/ansible/awx/pull/5618)
+
+## 9.1.0 (Dec 17, 2019)
+- Added a command to generate a new SECRET_KEY and rekey the secrets in the database
+- Removed project update locking when jobs using it are running
+- Fixed slow queries for /api/v2/instances and /api/v2/instance_groups when smart inventories are used
+- Fixed a partial password disclosure when special characters existed in the RabbitMQ password (CVE-2019-19342)
+- Fixed hang in error handling for source control checkouts
+- Fixed an error on subsequent job runs that override the branch of a project on an instance that did not have a prior project checkout
+- Fixed an issue where jobs launched in isolated or container groups would incorrectly timeout
+- Fixed an incorrect link to instance groups documentation in the user interface
+- Fixed editing of inventory on Workflow templates
+- Fixed multiple issues with OAuth2 token cleanup system jobs
 - Fixed a bug that broke email notifications for workflow approval/deny https://github.com/ansible/awx/issues/5401
+- Updated SAML implementation to automatically login if authorization already exists
+- Updated AngularJS to 1.7.9 for CVE-2019-10768
 
 ## 9.0.1 (Nov 4, 2019)
 
