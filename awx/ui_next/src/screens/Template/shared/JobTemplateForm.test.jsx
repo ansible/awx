@@ -17,6 +17,7 @@ describe('<JobTemplateForm />', () => {
     project: 3,
     playbook: 'Baz',
     type: 'job_template',
+    scm_branch: 'Foo',
     summary_fields: {
       inventory: {
         id: 2,
@@ -26,6 +27,7 @@ describe('<JobTemplateForm />', () => {
       project: {
         id: 3,
         name: 'qux',
+        allow_override: true,
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
       credentials: [
@@ -145,6 +147,7 @@ describe('<JobTemplateForm />', () => {
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 4,
         name: 'project',
+        allow_override: true,
       });
       wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
         target: { value: 'new baz type', name: 'playbook' },

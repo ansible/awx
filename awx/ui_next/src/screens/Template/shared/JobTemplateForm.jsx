@@ -124,6 +124,9 @@ class JobTemplateForm extends Component {
   handleProjectUpdate(project) {
     const { setFieldValue } = this.props;
     setFieldValue('project', project.id);
+    if (!project.allow_override) {
+      setFieldValue('scm_branch', null);
+    }
     this.setState({ project });
   }
 
@@ -269,6 +272,14 @@ class JobTemplateForm extends Component {
               />
             )}
           </Field>
+          {project && project.allow_override && (
+            <FormField
+              id="scm_branch"
+              name="scm_branch"
+              type="text"
+              label={i18n._(t`SCM Branch`)}
+            />
+          )}
           <Field
             name="playbook"
             validate={required(i18n._(t`Select a value for this field`), i18n)}
@@ -583,6 +594,7 @@ const FormikApp = withFormik({
       job_type: template.job_type || 'run',
       inventory: template.inventory || '',
       project: template.project || '',
+      scm_branch: template.scm_branch || '',
       playbook: template.playbook || '',
       labels: summary_fields.labels.results || [],
       forks: template.forks || 0,
