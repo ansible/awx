@@ -27,7 +27,6 @@ describe('<JobTemplateForm />', () => {
       project: {
         id: 3,
         name: 'qux',
-        allow_override: true,
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
       credentials: [
@@ -89,6 +88,11 @@ describe('<JobTemplateForm />', () => {
     });
     ProjectsAPI.readPlaybooks.mockReturnValue({
       data: ['debug.yml'],
+    });
+    ProjectsAPI.readDetail.mockReturnValue({
+      name: 'foo',
+      id: 1,
+      allow_override: true,
     });
   });
 

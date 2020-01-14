@@ -161,6 +161,11 @@ describe('<JobTemplateEdit />', () => {
     JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
     });
+    ProjectsAPI.readDetail.mockReturnValue({
+      id: 1,
+      allow_override: true,
+      name: 'foo',
+    });
   });
 
   afterEach(() => {

@@ -28,7 +28,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '@components/Lookup';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 
@@ -81,16 +81,31 @@ class JobTemplateForm extends Component {
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
     this.handleProjectUpdate = this.handleProjectUpdate.bind(this);
     this.setContentError = this.setContentError.bind(this);
+    this.fetchProject = this.fetchProject.bind(this);
   }
 
   componentDidMount() {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
     // TODO: determine when LabelSelect has finished loading labels
-    Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
-      this.setState({ hasContentLoading: false });
-      validateField('project');
-    });
+    Promise.all([this.loadRelatedInstanceGroups(), this.fetchProject()]).then(
+      () => {
+        this.setState({ hasContentLoading: false });
+        validateField('project');
+      }
+    );
+  }
+
+  async fetchProject() {
+    const { project } = this.state;
+    if (project && project.id) {
+      try {
+        const { data } = await ProjectsAPI.readDetail(project.id);
+        this.setState({ project: data });
+      } catch (err) {
+        this.setState({ contentError: err });
+      }
+    }
   }
 
   async loadRelatedInstanceGroups() {
