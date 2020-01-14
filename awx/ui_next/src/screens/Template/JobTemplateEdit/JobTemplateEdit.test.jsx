@@ -29,6 +29,7 @@ const mockJobTemplate = {
   allow_simultaneous: false,
   use_fact_cache: false,
   host_config_key: '',
+  scm_branch: '',
   summary_fields: {
     user_capabilities: {
       edit: true,

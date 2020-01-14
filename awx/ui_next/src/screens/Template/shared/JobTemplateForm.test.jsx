@@ -27,7 +27,6 @@ describe('<JobTemplateForm />', () => {
       project: {
         id: 3,
         name: 'qux',
-        allow_override: true,
       },
       labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
       credentials: [
@@ -133,7 +132,6 @@ describe('<JobTemplateForm />', () => {
         />
       );
     });
-
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     await act(async () => {
       wrapper.find('input#template-name').simulate('change', {
@@ -154,15 +152,25 @@ describe('<JobTemplateForm />', () => {
         name: 'project',
         allow_override: true,
       });
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('input#scm_branch').simulate('change', {
+        target: { value: 'devel', name: 'scm_branch' },
+      });
       wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
         target: { value: 'new baz type', name: 'playbook' },
       });
+    });
+
+    await act(async () => {
       wrapper
         .find('CredentialChip')
         .at(0)
         .prop('onClick')();
     });
     wrapper.update();
+
     expect(wrapper.find('input#template-name').prop('value')).toEqual(
       'new foo'
     );
@@ -179,7 +187,9 @@ describe('<JobTemplateForm />', () => {
     expect(wrapper.find('ProjectLookup').prop('value')).toEqual({
       id: 4,
       name: 'project',
+      allow_override: true,
     });
+    expect(wrapper.find('input#scm_branch').prop('value')).toEqual('devel');
     expect(
       wrapper.find('AnsibleSelect[name="playbook"]').prop('value')
     ).toEqual('new baz type');

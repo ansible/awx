@@ -26,6 +26,7 @@ const jobTemplateData = {
   allow_simultaneous: false,
   use_fact_cache: false,
   host_config_key: '',
+  scm_branch: '',
 };
 
 describe('<JobTemplateAdd />', () => {

@@ -139,7 +139,7 @@ class JobTemplateForm extends Component {
   handleProjectUpdate(project) {
     const { setFieldValue } = this.props;
     setFieldValue('project', project.id);
-    setFieldValue('playbook', undefined);
+    setFieldValue('playbook', 0);
     setFieldValue('scm_branch', '');
     this.setState({ project });
   }
