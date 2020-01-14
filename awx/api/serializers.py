@@ -3874,26 +3874,6 @@ class JobEventSerializer(BaseSerializer):
         return data
 
 
-class JobEventWebSocketSerializer(JobEventSerializer):
-    created = serializers.SerializerMethodField()
-    modified = serializers.SerializerMethodField()
-    event_name = serializers.CharField(source='event')
-    group_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = JobEvent
-        fields = ('*', 'event_name', 'group_name',)
-
-    def get_created(self, obj):
-        return obj.created.isoformat()
-
-    def get_modified(self, obj):
-        return obj.modified.isoformat()
-
-    def get_group_name(self, obj):
-        return 'job_events'
-
-
 class ProjectUpdateEventSerializer(JobEventSerializer):
     stdout = serializers.SerializerMethodField()
     event_data = serializers.SerializerMethodField()
@@ -3923,26 +3903,6 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         except Exception:
             logger.exception("Failed to sanitize event_data")
             return {}
-
-
-class ProjectUpdateEventWebSocketSerializer(ProjectUpdateEventSerializer):
-    created = serializers.SerializerMethodField()
-    modified = serializers.SerializerMethodField()
-    event_name = serializers.CharField(source='event')
-    group_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ProjectUpdateEvent
-        fields = ('*', 'event_name', 'group_name',)
-
-    def get_created(self, obj):
-        return obj.created.isoformat()
-
-    def get_modified(self, obj):
-        return obj.modified.isoformat()
-
-    def get_group_name(self, obj):
-        return 'project_update_events'
 
 
 class AdHocCommandEventSerializer(BaseSerializer):
@@ -3976,26 +3936,6 @@ class AdHocCommandEventSerializer(BaseSerializer):
         return data
 
 
-class AdHocCommandEventWebSocketSerializer(AdHocCommandEventSerializer):
-    created = serializers.SerializerMethodField()
-    modified = serializers.SerializerMethodField()
-    event_name = serializers.CharField(source='event')
-    group_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = AdHocCommandEvent
-        fields = ('*', 'event_name', 'group_name',)
-
-    def get_created(self, obj):
-        return obj.created.isoformat()
-
-    def get_modified(self, obj):
-        return obj.modified.isoformat()
-
-    def get_group_name(self, obj):
-        return 'ad_hoc_command_events'
-
-
 class InventoryUpdateEventSerializer(AdHocCommandEventSerializer):
 
     class Meta:
@@ -4011,26 +3951,6 @@ class InventoryUpdateEventSerializer(AdHocCommandEventSerializer):
         return res
 
 
-class InventoryUpdateEventWebSocketSerializer(InventoryUpdateEventSerializer):
-    created = serializers.SerializerMethodField()
-    modified = serializers.SerializerMethodField()
-    event_name = serializers.CharField(source='event')
-    group_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = InventoryUpdateEvent
-        fields = ('*', 'event_name', 'group_name',)
-
-    def get_created(self, obj):
-        return obj.created.isoformat()
-
-    def get_modified(self, obj):
-        return obj.modified.isoformat()
-
-    def get_group_name(self, obj):
-        return 'inventory_update_events'
-
-
 class SystemJobEventSerializer(AdHocCommandEventSerializer):
 
     class Meta:
@@ -4044,26 +3964,6 @@ class SystemJobEventSerializer(AdHocCommandEventSerializer):
             'api:system_job_detail', kwargs={'pk': obj.system_job_id}
         )
         return res
-
-
-class SystemJobEventWebSocketSerializer(SystemJobEventSerializer):
-    created = serializers.SerializerMethodField()
-    modified = serializers.SerializerMethodField()
-    event_name = serializers.CharField(source='event')
-    group_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = SystemJobEvent
-        fields = ('*', 'event_name', 'group_name',)
-
-    def get_created(self, obj):
-        return obj.created.isoformat()
-
-    def get_modified(self, obj):
-        return obj.modified.isoformat()
-
-    def get_group_name(self, obj):
-        return 'system_job_events'
 
 
 class JobLaunchSerializer(BaseSerializer):

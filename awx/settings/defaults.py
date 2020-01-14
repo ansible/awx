@@ -576,9 +576,6 @@ ANSIBLE_INVENTORY_UNPARSED_FAILED = True
 # Additional environment variables to be passed to the ansible subprocesses
 AWX_TASK_ENV = {}
 
-# Flag to enable/disable updating hosts M2M when saving job events.
-CAPTURE_JOB_EVENT_HOSTS = False
-
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
 

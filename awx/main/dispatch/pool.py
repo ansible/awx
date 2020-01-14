@@ -277,7 +277,7 @@ class WorkerPool(object):
                 logger.warn("could not write to queue %s" % preferred_queue)
                 logger.warn("detail: {}".format(tb))
             write_attempt_order.append(preferred_queue)
-        logger.warn("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
+        logger.error("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
 
     def stop(self, signum):

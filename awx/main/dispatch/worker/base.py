@@ -119,6 +119,9 @@ class AWXConsumer(ConsumerMixin):
 
 class BaseWorker(object):
 
+    def read(self, queue):
+        return queue.get(block=True, timeout=1)
+
     def work_loop(self, queue, finished, idx, *args):
         ppid = os.getppid()
         signal_handler = WorkerSignalHandler()
@@ -128,7 +131,7 @@ class BaseWorker(object):
             if os.getppid() != ppid:
                 break
             try:
-                body = queue.get(block=True, timeout=1)
+                body = self.read(queue)
                 if body == 'QUIT':
                     break
             except QueueEmpty:

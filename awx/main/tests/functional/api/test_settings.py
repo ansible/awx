@@ -5,6 +5,7 @@
 # Python
 import pytest
 import os
+import time
 
 from django.conf import settings
 from kombu.utils.url import parse_url
@@ -276,6 +277,7 @@ def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
 def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch, post, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
     patch(url, user=admin, data={'LOG_AGGREGATOR_PASSWORD': 'password123'}, expect=200)
+    time.sleep(1)  # log settings are cached slightly
 
     with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
         url = reverse('api:setting_logging_test')

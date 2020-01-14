@@ -30,12 +30,11 @@ from crum.signals import current_user_getter
 
 # AWX
 from awx.main.models import (
-    ActivityStream, AdHocCommandEvent, Group, Host, InstanceGroup, Inventory,
-    InventorySource, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
-    JobTemplate, OAuth2AccessToken, Organization, Project, ProjectUpdateEvent,
-    Role, SystemJob, SystemJobEvent, SystemJobTemplate, UnifiedJob,
-    UnifiedJobTemplate, User, UserSessionMembership, WorkflowJobTemplateNode,
-    WorkflowApproval, WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+    ActivityStream, Group, Host, InstanceGroup, Inventory, InventorySource,
+    Job, JobHostSummary, JobTemplate, OAuth2AccessToken, Organization, Project,
+    Role, SystemJob, SystemJobTemplate, UnifiedJob, UnifiedJobTemplate, User,
+    UserSessionMembership, WorkflowJobTemplateNode, WorkflowApproval,
+    WorkflowApprovalTemplate, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 )
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
@@ -70,42 +69,6 @@ def get_current_user_or_none():
     if not isinstance(u, User):
         return None
     return u
-
-
-def emit_event_detail(serializer, relation, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        event_serializer = serializer(instance)
-        consumers.emit_channel_notification(
-            '-'.join([event_serializer.get_group_name(instance), str(getattr(instance, relation))]),
-            event_serializer.data
-        )
-
-
-def emit_job_event_detail(sender, **kwargs):
-    from awx.api import serializers
-    emit_event_detail(serializers.JobEventWebSocketSerializer, 'job_id', **kwargs)
-
-
-def emit_ad_hoc_command_event_detail(sender, **kwargs):
-    from awx.api import serializers
-    emit_event_detail(serializers.AdHocCommandEventWebSocketSerializer, 'ad_hoc_command_id', **kwargs)
-
-
-def emit_project_update_event_detail(sender, **kwargs):
-    from awx.api import serializers
-    emit_event_detail(serializers.ProjectUpdateEventWebSocketSerializer, 'project_update_id', **kwargs)
-
-
-def emit_inventory_update_event_detail(sender, **kwargs):
-    from awx.api import serializers
-    emit_event_detail(serializers.InventoryUpdateEventWebSocketSerializer, 'inventory_update_id', **kwargs)
-
-
-def emit_system_job_event_detail(sender, **kwargs):
-    from awx.api import serializers
-    emit_event_detail(serializers.SystemJobEventWebSocketSerializer, 'system_job_id', **kwargs)
 
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
@@ -258,11 +221,6 @@ connect_computed_field_signals()
 
 post_save.connect(save_related_job_templates, sender=Project)
 post_save.connect(save_related_job_templates, sender=Inventory)
-post_save.connect(emit_job_event_detail, sender=JobEvent)
-post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
-post_save.connect(emit_project_update_event_detail, sender=ProjectUpdateEvent)
-post_save.connect(emit_inventory_update_event_detail, sender=InventoryUpdateEvent)
-post_save.connect(emit_system_job_event_detail, sender=SystemJobEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
