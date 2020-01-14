@@ -258,8 +258,8 @@ export const SearchColumns = arrayOf(
     isDefault: bool,
     isBoolean: bool,
     booleanLabels: shape({
-      "true": string.isRequired,
-      "false": string.isRequired
+      true: string.isRequired,
+      false: string.isRequired,
     }),
     options: arrayOf(arrayOf(string, string)),
   })

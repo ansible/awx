@@ -188,9 +188,9 @@ function InventoryGroupsList({ i18n, location, match }) {
             key: 'parents__isnull',
             isBoolean: true,
             booleanLabels: {
-              "true": i18n._(t`Show Only Root Groups`),
-              "false": i18n._(t`Show All Groups`)
-            }
+              true: i18n._(t`Show Only Root Groups`),
+              false: i18n._(t`Show All Groups`),
+            },
           },
           {
             name: i18n._(t`Created By (Username)`),
