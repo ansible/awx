@@ -3814,6 +3814,12 @@ class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
     relationship = 'hosts'
     name = _('Job Event Hosts List')
 
+    def get_queryset(self):
+        parent_event = self.get_parent_object()
+        self.check_parent_access(parent_event)
+        qs = self.request.user.get_queryset(self.model).filter(job_events_as_primary_host=parent_event)
+        return qs
+
 
 class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
 
@@ -3836,8 +3842,7 @@ class HostJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         parent_obj = self.get_parent_object()
         self.check_parent_access(parent_obj)
-        qs = self.request.user.get_queryset(self.model).filter(
-            Q(host=parent_obj) | Q(hosts=parent_obj)).distinct()
+        qs = self.request.user.get_queryset(self.model).filter(host=parent_obj)
         return qs
 
 
@@ -3855,7 +3860,6 @@ class JobJobEventsList(BaseJobEventsList):
         self.check_parent_access(job)
         qs = job.job_events
         qs = qs.select_related('host')
-        qs = qs.prefetch_related('hosts', 'children')
         return qs.all()
 
 
