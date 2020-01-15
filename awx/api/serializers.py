@@ -98,21 +98,14 @@ SUMMARIZABLE_FK_FIELDS = {
                                            'total_hosts',
                                            'hosts_with_active_failures',
                                            'total_groups',
-                                           'groups_with_active_failures',
                                            'has_inventory_sources',
                                            'total_inventory_sources',
                                            'inventory_sources_with_failures',
                                            'organization_id',
                                            'kind',
                                            'insights_credential_id',),
-    'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
-                                      'has_inventory_sources'),
-    'group': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
-                                       'total_hosts',
-                                       'hosts_with_active_failures',
-                                       'total_groups',
-                                       'groups_with_active_failures',
-                                       'has_inventory_sources'),
+    'host': DEFAULT_SUMMARY_FIELDS,
+    'group': DEFAULT_SUMMARY_FIELDS,
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
@@ -1549,20 +1542,15 @@ class InventorySerializer(BaseSerializerWithVariables):
         'admin', 'adhoc',
         {'copy': 'organization.inventory_admin'}
     ]
-    groups_with_active_failures = serializers.IntegerField(
-        read_only=True,
-        min_value=0,
-        help_text=_('This field has been deprecated and will be removed in a future release')
-    )
 
 
     class Meta:
         model = Inventory
         fields = ('*', 'organization', 'kind', 'host_filter', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
-                  'groups_with_active_failures', 'has_inventory_sources',
-                  'total_inventory_sources', 'inventory_sources_with_failures',
-                  'insights_credential', 'pending_deletion',)
+                  'has_inventory_sources', 'total_inventory_sources',
+                  'inventory_sources_with_failures', 'insights_credential',
+                  'pending_deletion',)
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
@@ -1643,6 +1631,9 @@ class InventoryScriptSerializer(InventorySerializer):
 class HostSerializer(BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
     capabilities_prefetch = ['inventory.admin']
+
+    has_active_failures = serializers.SerializerMethodField()
+    has_inventory_sources = serializers.SerializerMethodField()
 
     class Meta:
         model = Host
@@ -1757,6 +1748,14 @@ class HostSerializer(BaseSerializerWithVariables):
             ret['last_job_host_summary'] = None
         return ret
 
+    def get_has_active_failures(self, obj):
+        return bool(
+            obj.last_job_host_summary and obj.last_job_host_summary.failed
+        )
+
+    def get_has_inventory_sources(self, obj):
+        return obj.inventory_sources.exists()
+
 
 class AnsibleFactsSerializer(BaseSerializer):
     class Meta:
@@ -1769,17 +1768,10 @@ class AnsibleFactsSerializer(BaseSerializer):
 class GroupSerializer(BaseSerializerWithVariables):
     show_capabilities = ['copy', 'edit', 'delete']
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
-    groups_with_active_failures = serializers.IntegerField(
-        read_only=True,
-        min_value=0,
-        help_text=_('This field has been deprecated and will be removed in a future release')
-    )
 
     class Meta:
         model = Group
-        fields = ('*', 'inventory', 'variables', 'has_active_failures',
-                  'total_hosts', 'hosts_with_active_failures', 'total_groups',
-                  'groups_with_active_failures', 'has_inventory_sources')
+        fields = ('*', 'inventory', 'variables')
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(GroupSerializer, self).build_relational_field(field_name, relation_info)

@@ -6,10 +6,10 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'HostNestedGroupListDefinition', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'ProcessErrors', 'host',
+    'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'ProcessErrors', 'host',
     function($scope, $rootScope, $state, $stateParams, HostNestedGroupListDefinition, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, ProcessErrors, host){
+        Dataset, Find, qs, inventoryData, canAdd, ProcessErrors, host){
 
         let list = HostNestedGroupListDefinition;
 
@@ -25,10 +25,6 @@
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-
-            $scope.$watchCollection(list.name, function(){
-                _.forEach($scope[list.name], buildStatusIndicators);
-            });
 
             $scope.$on('selectedOrDeselected', function(e, value) {
                 let item = value.value;
@@ -46,24 +42,6 @@
                 }
             });
 
-        }
-
-        function buildStatusIndicators(group){
-            if (group === undefined || group === null) {
-                group = {};
-            }
-
-            let hosts_status;
-
-            hosts_status = GetHostsStatusMsg({
-                active_failures: group.hosts_with_active_failures,
-                total_hosts: group.total_hosts,
-                inventory_id: $scope.inventory_id,
-                group_id: group.id
-            });
-            _.assign(group,
-                {hosts_status_tip: hosts_status.tooltip},
-                {hosts_status_class: hosts_status.class});
         }
 
         $scope.associateGroup = function() {

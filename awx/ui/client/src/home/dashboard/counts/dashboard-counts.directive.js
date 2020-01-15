@@ -39,7 +39,7 @@ export default
                                 label: i18n._("Hosts")
                             },
                             {
-                                url: "/#/hosts?host_search=has_active_failures:true",
+                                url: "/#/hosts?host_search=last_job_host_summary__failed:true",
                                 number: scope.data.hosts.failed,
                                 label: i18n._("Failed Hosts"),
                                 isFailureCount: true

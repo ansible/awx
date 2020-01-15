@@ -204,20 +204,15 @@ class DashboardView(APIView):
                                             'failed': ec2_inventory_failed.count()}
 
         user_groups = get_user_queryset(request.user, models.Group)
-        groups_job_failed = (
-            models.Group.objects.filter(hosts_with_active_failures__gt=0) | models.Group.objects.filter(groups_with_active_failures__gt=0)
-        ).count()
         groups_inventory_failed = models.Group.objects.filter(inventory_sources__last_job_failed=True).count()
         data['groups'] = {'url': reverse('api:group_list', request=request),
-                          'failures_url': reverse('api:group_list', request=request) + "?has_active_failures=True",
                           'total': user_groups.count(),
-                          'job_failed': groups_job_failed,
                           'inventory_failed': groups_inventory_failed}
 
         user_hosts = get_user_queryset(request.user, models.Host)
-        user_hosts_failed = user_hosts.filter(has_active_failures=True)
+        user_hosts_failed = user_hosts.filter(last_job_host_summary__failed=True)
         data['hosts'] = {'url': reverse('api:host_list', request=request),
-                         'failures_url': reverse('api:host_list', request=request) + "?has_active_failures=True",
+                         'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
                          'total': user_hosts.count(),
                          'failed': user_hosts_failed.count()}
 

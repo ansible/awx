@@ -9,7 +9,6 @@ import groupAdd from './add/main';
 import groupEdit from './edit/main';
 import groupFormDefinition from './groups.form';
 import groupListDefinition from './groups.list';
-import GetHostsStatusMsg from './factories/get-hosts-status-msg.factory';
 import nestedGroups from './related/nested-groups/main';
 import nestedHosts from './related/nested-hosts/main';
 
@@ -22,5 +21,4 @@ export default
         nestedHosts.name
     ])
     .factory('GroupForm', groupFormDefinition)
-    .factory('GroupList', groupListDefinition)
-    .factory('GetHostsStatusMsg', GetHostsStatusMsg);
+    .factory('GroupList', groupListDefinition);

@@ -125,9 +125,9 @@ def project_playbooks():
 @pytest.fixture
 def run_computed_fields_right_away(request):
 
-    def run_me(inventory_id, should_update_hosts=True):
+    def run_me(inventory_id):
         i = Inventory.objects.get(id=inventory_id)
-        i.update_computed_fields(update_hosts=should_update_hosts)
+        i.update_computed_fields()
 
     mocked = mock.patch(
         'awx.main.signals.update_inventory_computed_fields.delay',

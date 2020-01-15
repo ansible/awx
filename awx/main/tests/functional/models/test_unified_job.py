@@ -283,13 +283,13 @@ class TestTaskImpact:
 
     def test_limit_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(5, 2)
-        job.inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
+        job.inventory.update_computed_fields()
         assert job.inventory.total_hosts == 5
         assert job.task_impact == 2 + 1  # forks becomes constraint
 
     def test_host_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(3, 5)
-        job.inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
+        job.inventory.update_computed_fields()
         assert job.task_impact == 3 + 1  # hosts becomes constraint
 
     def test_shard_task_impact(self, slice_job_factory, run_computed_fields_right_away):
@@ -304,6 +304,7 @@ class TestTaskImpact:
             len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts'])
             for i in range(3)
         ] == [1, 1, 1]
+        jobs[0].inventory.update_computed_fields()
         assert [job.task_impact for job in jobs] == [2, 2, 2]  # plus one base task impact
         # Uneven distribution - first job takes the extra host
         jobs[0].inventory.hosts.create(name='remainder_foo')
@@ -311,5 +312,5 @@ class TestTaskImpact:
             len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts'])
             for i in range(3)
         ] == [2, 1, 1]
-        jobs[0].inventory.refresh_from_db()  # FIXME: computed fields operates on reloaded inventory
+        jobs[0].inventory.update_computed_fields()
         assert [job.task_impact for job in jobs] == [3, 2, 2]

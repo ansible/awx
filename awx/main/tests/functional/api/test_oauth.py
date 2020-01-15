@@ -1,8 +1,6 @@
 import pytest
 import base64
-import contextlib
 import json
-from unittest import mock
 
 from django.db import connection
 from django.test.utils import override_settings
@@ -12,20 +10,9 @@ from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
                                    OAuth2AccessToken as AccessToken)
+from awx.main.tests.functional import immediate_on_commit
 from awx.sso.models import UserEnterpriseAuth
 from oauth2_provider.models import RefreshToken
-
-
-@contextlib.contextmanager
-def immediate_on_commit():
-    """
-    Context manager executing transaction.on_commit() hooks immediately as
-    if the connection was in auto-commit mode.
-    """
-    def on_commit(func):
-        func()
-    with mock.patch('django.db.connection.on_commit', side_effect=on_commit) as patch:
-        yield patch
 
 
 @pytest.mark.django_db

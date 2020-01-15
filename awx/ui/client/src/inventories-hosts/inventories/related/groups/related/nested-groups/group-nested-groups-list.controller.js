@@ -6,11 +6,11 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'NestedGroupListDefinition', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'groupData', 'ProcessErrors',
+    'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'groupData', 'ProcessErrors',
     '$transitions',
     function($scope, $rootScope, $state, $stateParams, NestedGroupListDefinition, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors,
+        Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors,
         $transitions){
 
         let list = NestedGroupListDefinition;
@@ -35,10 +35,6 @@
 
             $scope.inventory_id = $stateParams.inventory_id;
 
-            $scope.$watchCollection(list.name, function(){
-                _.forEach($scope[list.name], processRow);
-            });
-
             $scope.$on('selectedOrDeselected', function(e, value) {
                 let item = value.value;
 
@@ -55,30 +51,6 @@
                 }
             });
 
-        }
-
-        function processRow(group){
-            if (group === undefined || group === null) {
-                group = {};
-            }
-
-            angular.forEach($scope.groupsSelected, function(selectedGroup){
-                if(selectedGroup.id === group.id) {
-                    group.isSelected = true;
-                }
-            });
-
-            let hosts_status;
-
-            hosts_status = GetHostsStatusMsg({
-                active_failures: group.hosts_with_active_failures,
-                total_hosts: group.total_hosts,
-                inventory_id: $scope.inventory_id,
-                group_id: group.id
-            });
-            _.assign(group,
-                {hosts_status_tip: hosts_status.tooltip},
-                {hosts_status_class: hosts_status.class});
         }
 
         $scope.disassociateGroup = function(group){

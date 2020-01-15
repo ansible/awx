@@ -11,6 +11,7 @@ from awx.main.signals import (
 # AWX models
 from awx.main.models.organization import Organization
 from awx.main.models import ActivityStream, Job
+from awx.main.tests.functional import immediate_on_commit
 
 
 @pytest.mark.django_db
@@ -34,9 +35,10 @@ class TestComputedFields:
 
     def test_computed_fields_normal_use(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)
-        with mocker.patch.object(update_inventory_computed_fields, 'delay'):
-            job.delete()
-            update_inventory_computed_fields.delay.assert_called_once_with(inventory.id, True)
+        with immediate_on_commit():
+            with mocker.patch.object(update_inventory_computed_fields, 'delay'):
+                job.delete()
+                update_inventory_computed_fields.delay.assert_called_once_with(inventory.id)
 
     def test_disable_computed_fields(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)

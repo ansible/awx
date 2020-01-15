@@ -5,13 +5,11 @@
  *************************************************/
  export default
     ['$scope', '$state', '$stateParams', 'listDefinition', 'InventoryUpdate',
-    'GroupsService', 'CancelSourceUpdate',
-    'GetHostsStatusMsg', 'Dataset', 'inventoryData', 'canAdd',
-    'InventoryHostsStrings', '$transitions',
+    'GroupsService', 'CancelSourceUpdate', 'Dataset', 'inventoryData', 'canAdd',
+    'InventoryHostsStrings', '$transitions', 'GetBasePath', 'Rest',
     function($scope, $state, $stateParams, listDefinition, InventoryUpdate,
-        GroupsService, CancelSourceUpdate,
-        GetHostsStatusMsg, Dataset, inventoryData, canAdd,
-        InventoryHostsStrings, $transitions){
+        GroupsService, CancelSourceUpdate, Dataset, inventoryData, canAdd,
+        InventoryHostsStrings, $transitions, GetBasePath, Rest){
 
         let list = listDefinition;
 
@@ -70,18 +68,6 @@
                     group.isSelected = true;
                 }
             });
-
-            let hosts_status;
-
-            hosts_status = GetHostsStatusMsg({
-                active_failures: group.hosts_with_active_failures,
-                total_hosts: group.total_hosts,
-                inventory_id: $scope.inventory_id,
-                group_id: group.id
-            });
-            _.assign(group,
-                {hosts_status_tip: hosts_status.tooltip},
-                {hosts_status_class: hosts_status.class});
         }
 
         $scope.createGroup = function(){
@@ -102,35 +88,51 @@
             $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
         };
         $scope.deleteGroup = function(group){
-            $scope.toDelete = {};
-            $scope.strings.deleteModal = {};
-            angular.extend($scope.toDelete, group);
-            if($scope.toDelete.total_groups === 0 && $scope.toDelete.total_hosts === 0) {
-                // This group doesn't have any child groups or hosts - the user is just trying to delete
-                // the group
-                $scope.deleteOption = "delete";
-            }
-            else {
-                $scope.strings.deleteModal.group = InventoryHostsStrings.get('deletegroup.GROUP', $scope.toDelete.total_groups);
-                $scope.strings.deleteModal.host = InventoryHostsStrings.get('deletegroup.HOST', $scope.toDelete.total_hosts);
+            const promises = [];
 
-                if($scope.toDelete.total_groups === 0 || $scope.toDelete.total_hosts === 0) {
-                    if($scope.toDelete.total_groups === 0) {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_HOST', $scope.toDelete.total_hosts);
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_HOST', $scope.toDelete.total_hosts);
-                    }
-                    else if($scope.toDelete.total_hosts === 0) {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUP', $scope.toDelete.total_groups);
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUP', $scope.toDelete.total_groups);
-                    }
-                }
-                else {
-                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
-                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
-                }
-            }
+            Rest.setUrl(group.related.hosts);
+            promises.push(Rest.get());
 
-            $('#group-delete-modal').modal('show');
+            Rest.setUrl(group.related.children);
+            promises.push(Rest.get());
+
+            Promise.all(promises)
+                .then(([hostResponse, groupResponse]) => {
+                    $scope.toDelete = {};
+                    $scope.strings.deleteModal = {};
+                    $scope.toDelete.hostCount = _.get(hostResponse, ['data', 'count'], 0);
+                    $scope.toDelete.groupCount = _.get(groupResponse, ['data', 'count'], 0);
+                    angular.extend($scope.toDelete, group);
+
+                    if($scope.toDelete.groupCount === 0 && $scope.toDelete.hostCount === 0) {
+                        // This group doesn't have any child groups or hosts - the user is just trying to delete
+                        // the group
+                        $scope.deleteOption = "delete";
+                    }
+                    else {
+                        $scope.strings.deleteModal.group = InventoryHostsStrings.get('deletegroup.GROUP', $scope.toDelete.groupCount);
+                        $scope.strings.deleteModal.host = InventoryHostsStrings.get('deletegroup.HOST', $scope.toDelete.hostCount);
+
+                        if($scope.toDelete.groupCount === 0 || $scope.toDelete.groupCount === 0) {
+                            if($scope.toDelete.groupCount === 0) {
+                                $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_HOST', $scope.toDelete.hostCount);
+                                $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_HOST', $scope.toDelete.hostCount);
+                            }
+                            else if($scope.toDelete.hostCount === 0) {
+                                $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUP', $scope.toDelete.groupCount);
+                                $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUP', $scope.toDelete.groupCount);
+                            }
+                        }
+                        else {
+                            $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.groupCount, hosts: $scope.toDelete.hostCount});
+                            $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.groupCount, hosts: $scope.toDelete.hostCount});
+                        }
+                    }
+
+                    $('#group-delete-modal').modal('show');
+                });
+
+
         };
         $scope.confirmDelete = function(){
             let reloadListStateParams = null;
