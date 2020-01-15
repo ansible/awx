@@ -37,7 +37,6 @@ from awx.main.utils import decrypt_field
 
 logger = logging.getLogger('awx.main.scheduler')
 
-
 class TaskManager():
 
     def __init__(self):
@@ -364,10 +363,6 @@ class TaskManager():
     def should_update_inventory_source(self, job, latest_inventory_update):
         now = tz_now()
 
-        # Already processed dependencies for this job
-        if job.dependent_jobs.all():
-            return False
-
         if latest_inventory_update is None:
             return True
         '''
@@ -393,8 +388,6 @@ class TaskManager():
 
     def should_update_related_project(self, job, latest_project_update):
         now = tz_now()
-        if job.dependent_jobs.all():
-            return False
 
         if latest_project_update is None:
             return True
@@ -434,6 +427,7 @@ class TaskManager():
                 latest_project_update = self.get_latest_project_update(task)
                 if self.should_update_related_project(task, latest_project_update):
                     project_task = self.create_project_update(task)
+                    self.process_pending_tasks([project_task])
                     dependencies.append(project_task)
                 else:
                     if latest_project_update.status in ['waiting', 'pending', 'running']:
@@ -452,6 +446,7 @@ class TaskManager():
                 latest_inventory_update = self.get_latest_inventory_update(inventory_source)
                 if self.should_update_inventory_source(task, latest_inventory_update):
                     inventory_task = self.create_inventory_update(task, inventory_source)
+                    self.process_pending_tasks([inventory_task])
                     dependencies.append(inventory_task)
                 else:
                     if latest_inventory_update.status in ['waiting', 'pending', 'running']:
@@ -459,52 +454,16 @@ class TaskManager():
 
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)
-        return dependencies
-
-    def process_dependencies(self, dependent_task, dependency_tasks):
-        for task in dependency_tasks:
-            if self.is_job_blocked(task):
-                logger.debug("Dependent {} is blocked from running".format(task.log_format))
-                continue
-            preferred_instance_groups = task.preferred_instance_groups
-            found_acceptable_queue = False
-            idle_instance_that_fits = None
-            for rampart_group in preferred_instance_groups:
-                if idle_instance_that_fits is None:
-                    idle_instance_that_fits = rampart_group.find_largest_idle_instance()
-                if not rampart_group.is_containerized and self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
-                    continue
-
-                execution_instance = rampart_group.fit_task_to_most_remaining_capacity_instance(task)
-                if execution_instance:
-                    logger.debug("Starting dependent {} in group {} instance {}".format(
-                                 task.log_format, rampart_group.name, execution_instance.hostname))
-                elif not execution_instance and idle_instance_that_fits:
-                    if not rampart_group.is_containerized:
-                        execution_instance = idle_instance_that_fits
-                        logger.debug("Starting dependent {} in group {} on idle instance {}".format(
-                                     task.log_format, rampart_group.name, execution_instance.hostname))
-                if execution_instance or rampart_group.is_containerized:
-                    self.graph[rampart_group.name]['graph'].add_job(task)
-                    tasks_to_fail = [t for t in dependency_tasks if t != task]
-                    tasks_to_fail += [dependent_task]
-                    self.start_task(task, rampart_group, tasks_to_fail, execution_instance)
-                    found_acceptable_queue = True
-                    break
-                else:
-                    logger.debug("No instance available in group {} to run job {} w/ capacity requirement {}".format(
-                                 rampart_group.name, task.log_format, task.task_impact))
-            if not found_acceptable_queue:
-                logger.debug("Dependent {} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
         for task in pending_tasks:
-            self.process_dependencies(task, self.generate_dependencies(task))
+            if not task.dependent_jobs.exists():
+                self.generate_dependencies(task)
             if self.is_job_blocked(task):
                 logger.debug("{} is blocked from running".format(task.log_format))
                 continue
+
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             idle_instance_that_fits = None
