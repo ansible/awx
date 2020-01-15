@@ -420,47 +420,45 @@ class TaskManager():
             return True
         return False
 
-    def generate_dependencies(self, task):
+    def generate_dependencies(self, pending_tasks):
         dependencies = []
-        if type(task) is Job:
-            # TODO: Can remove task.project None check after scan-job-default-playbook is removed
-            if task.project is not None and task.project.scm_update_on_launch is True:
-                latest_project_update = self.get_latest_project_update(task)
-                if self.should_update_related_project(task, latest_project_update):
-                    project_task = self.create_project_update(task)
-                    self.process_pending_tasks([project_task])
-                    dependencies.append(project_task)
-                else:
-                    if latest_project_update.status in ['waiting', 'pending', 'running']:
-                        dependencies.append(latest_project_update)
+        for task in pending_tasks:
+            if type(task) is Job and not task.dependent_jobs.exists():
+                # TODO: Can remove task.project None check after scan-job-default-playbook is removed
+                if task.project is not None and task.project.scm_update_on_launch is True:
+                    latest_project_update = self.get_latest_project_update(task)
+                    if self.should_update_related_project(task, latest_project_update):
+                        project_task = self.create_project_update(task)
+                        dependencies.append(project_task)
+                    else:
+                        if latest_project_update.status in ['waiting', 'pending', 'running']:
+                            dependencies.append(latest_project_update)
 
-            # Inventory created 2 seconds behind job
-            try:
-                start_args = json.loads(decrypt_field(task, field_name="start_args"))
-            except ValueError:
-                start_args = dict()
-            for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
-                if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
-                    continue
-                if not inventory_source.update_on_launch:
-                    continue
-                latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-                if self.should_update_inventory_source(task, latest_inventory_update):
-                    inventory_task = self.create_inventory_update(task, inventory_source)
-                    self.process_pending_tasks([inventory_task])
-                    dependencies.append(inventory_task)
-                else:
-                    if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-                        dependencies.append(latest_inventory_update)
+                # Inventory created 2 seconds behind job
+                try:
+                    start_args = json.loads(decrypt_field(task, field_name="start_args"))
+                except ValueError:
+                    start_args = dict()
+                for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
+                    if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
+                        continue
+                    if not inventory_source.update_on_launch:
+                        continue
+                    latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                    if self.should_update_inventory_source(task, latest_inventory_update):
+                        inventory_task = self.create_inventory_update(task, inventory_source)
+                        dependencies.append(inventory_task)
+                    else:
+                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+                            dependencies.append(latest_inventory_update)
 
-            if len(dependencies) > 0:
-                self.capture_chain_failure_dependencies(task, dependencies)
+                if len(dependencies) > 0:
+                    self.capture_chain_failure_dependencies(task, dependencies)
+        return dependencies
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
         for task in pending_tasks:
-            if not task.dependent_jobs.exists():
-                self.generate_dependencies(task)
             if self.is_job_blocked(task):
                 logger.debug("{} is blocked from running".format(task.log_format))
                 continue
@@ -555,8 +553,11 @@ class TaskManager():
         self.calculate_capacity_consumed(running_tasks)
 
         self.process_running_tasks(running_tasks)
-
+        # import sdb
+        # sdb.set_trace()
         pending_tasks = [t for t in all_sorted_tasks if t.status == 'pending']
+        dependencies = self.generate_dependencies(pending_tasks)
+        self.process_pending_tasks(dependencies)
         self.process_pending_tasks(pending_tasks)
 
     def _schedule(self):
