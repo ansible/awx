@@ -32,3 +32,45 @@
 - name: Add privileged SCC to service account
   shell: |
     {{ openshift_oc_bin }} adm policy add-scc-to-user privileged system:serviceaccount:{{ openshift_project }}:awx
+
+# https://github.com/openshift/origin/issues/19182#issuecomment-378233606
+# If oc version ever grows a -o json option, remove the following tasks
+# and go with the approach in kubernetes.yml.
+- name: Get Kubernetes Config
+  command: |
+    {{ openshift_oc_bin }} config view -o json
+  register: kube_config_cmd
+  no_log: true
+
+- name: Convert kube config to dictionary
+  set_fact:
+    kube_config: "{{ kube_config_cmd.stdout | from_json }}"
+  no_log: true
+
+- name: Extract current context from kube config
+  set_fact:
+    current_kube_context: "{{ kube_config['current-context'] }}"
+
+- name: Find cluster for current context
+  set_fact:
+    kube_cluster: |
+      {{ (kube_config.contexts |
+          selectattr("name", "equalto", current_kube_context) |
+          list)[0].context.cluster }}
+
+- name: Find server for current context
+  set_fact:
+    kube_server: |
+      {{ (kube_config.clusters |
+          selectattr("name", "equalto", kube_cluster|trim) |
+          list)[0].cluster.server }}
+
+- name: Get kube version from api server
+  uri:
+    url: "{{ kube_server | trim }}/version"
+    validate_certs: false
+  register: kube_version
+
+- name: Extract server version from command output
+  set_fact:
+    kube_api_version: "{{ kube_version.json.gitVersion[1:] }}"
