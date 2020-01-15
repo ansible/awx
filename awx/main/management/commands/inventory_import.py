@@ -921,11 +921,14 @@ class Command(BaseCommand):
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)
+        hard_error = license_info.get('trial', False) is True or license_info['instance_count'] == 10
         new_count = Host.objects.active_count()
-        if time_remaining <= 0 and not license_info.get('demo', False):
-            logger.error(LICENSE_EXPIRED_MESSAGE)
-            if license_info.get('trial', False) is True:
+        if time_remaining <= 0:
+            if hard_error:
+                logger.error(LICENSE_EXPIRED_MESSAGE)
                 raise CommandError("License has expired!")
+            else:
+                logger.warning(LICENSE_EXPIRED_MESSAGE)
         # special check for tower-type inventory sources
         # but only if running the plugin
         TOWER_SOURCE_FILES = ['tower.yml', 'tower.yaml']
@@ -938,15 +941,11 @@ class Command(BaseCommand):
                 'new_count': new_count,
                 'available_instances': available_instances,
             }
-            if license_info.get('demo', False):
-                logger.error(DEMO_LICENSE_MESSAGE % d)
-            else:
+            if hard_error:
                 logger.error(LICENSE_MESSAGE % d)
-            if (
-                license_info.get('trial', False) is True or
-                license_info['instance_count'] == 10  # basic 10 license
-            ):
                 raise CommandError('License count exceeded!')
+            else:
+                logger.warning(LICENSE_MESSAGE % d)
 
     def check_org_host_limit(self):
         license_info = get_licenser().validate()
