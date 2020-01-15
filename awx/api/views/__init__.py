@@ -3860,7 +3860,7 @@ class JobJobEventsList(BaseJobEventsList):
         self.check_parent_access(job)
         qs = job.job_events
         qs = qs.select_related('host')
-        qs = qs.prefetch_related('hosts', 'children')
+        qs = qs.prefetch_related('hosts')
         return qs.all()
 
 

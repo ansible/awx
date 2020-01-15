@@ -3833,7 +3833,7 @@ class JobEventSerializer(BaseSerializer):
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'uuid', 'parent_uuid', 'host', 'host_name', 'parent',
+                  'changed', 'uuid', 'parent_uuid', 'host', 'host_name',
                   'playbook', 'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
                   'verbosity')
 
@@ -3842,8 +3842,6 @@ class JobEventSerializer(BaseSerializer):
         res.update(dict(
             job = self.reverse('api:job_detail', kwargs={'pk': obj.job_id}),
         ))
-        if obj.parent_id:
-            res['parent'] = self.reverse('api:job_event_detail', kwargs={'pk': obj.parent_id})
         res['children'] = self.reverse('api:job_event_children_list', kwargs={'pk': obj.pk})
         if obj.host_id:
             res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host_id})
