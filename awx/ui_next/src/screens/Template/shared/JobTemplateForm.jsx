@@ -100,8 +100,8 @@ class JobTemplateForm extends Component {
     const { project } = this.state;
     if (project && project.id) {
       try {
-        const { data } = await ProjectsAPI.readDetail(project.id);
-        this.setState({ project: data });
+        const { data: projectData } = await ProjectsAPI.readDetail(project.id);
+        this.setState({ project: projectData });
       } catch (err) {
         this.setState({ contentError: err });
       }
@@ -139,9 +139,8 @@ class JobTemplateForm extends Component {
   handleProjectUpdate(project) {
     const { setFieldValue } = this.props;
     setFieldValue('project', project.id);
-    if (!project.allow_override) {
-      setFieldValue('scm_branch', null);
-    }
+    setFieldValue('playbook', undefined);
+    setFieldValue('scm_branch', '');
     this.setState({ project });
   }
 
@@ -165,6 +164,7 @@ class JobTemplateForm extends Component {
       i18n,
       template,
     } = this.props;
+
     const jobTypeOptions = [
       {
         value: '',
