@@ -29,7 +29,7 @@ from awx.api.versioning import reverse
 from awx.main.models.base import (
     BaseModel, CreatedModifiedModel,
     prevent_search, accepts_json,
-    JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
+    JOB_TYPE_CHOICES, NEW_JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
     VarsDictProperty
 )
 from awx.main.models.events import JobEvent, SystemJobEvent
@@ -205,6 +205,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         app_label = 'main'
         ordering = ('name',)
 
+    job_type = models.CharField(
+        max_length=64,
+        choices=NEW_JOB_TYPE_CHOICES,
+        default='run',
+    )
     host_config_key = prevent_search(models.CharField(
         max_length=1024,
         blank=True,
