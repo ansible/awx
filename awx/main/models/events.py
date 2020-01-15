@@ -617,6 +617,7 @@ class BaseCommandEvent(CreatedModifiedModel):
             kwargs.pop('created', None)
 
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        kwargs.pop('workflow_job_id', None)
         event = cls(**kwargs)
         event._update_from_event_data()
         return event
