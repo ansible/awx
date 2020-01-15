@@ -37,6 +37,7 @@ from awx.main.utils import decrypt_field
 
 logger = logging.getLogger('awx.main.scheduler')
 
+
 class TaskManager():
 
     def __init__(self):
@@ -463,7 +464,6 @@ class TaskManager():
             if self.is_job_blocked(task):
                 logger.debug("{} is blocked from running".format(task.log_format))
                 continue
-
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             idle_instance_that_fits = None
