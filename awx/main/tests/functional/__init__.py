@@ -2,6 +2,9 @@ from django.db import connection
 from django.db.models.signals import post_migrate
 from django.apps import apps
 from django.conf import settings
+from unittest import mock
+
+import contextlib
 
 
 def app_post_migration(sender, app_config, **kwargs):
@@ -23,3 +26,13 @@ if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
 
 
 
+@contextlib.contextmanager
+def immediate_on_commit():
+    """
+    Context manager executing transaction.on_commit() hooks immediately as
+    if the connection was in auto-commit mode.
+    """
+    def on_commit(func):
+        func()
+    with mock.patch('django.db.connection.on_commit', side_effect=on_commit) as patch:
+        yield patch
