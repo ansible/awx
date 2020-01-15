@@ -553,8 +553,7 @@ class TaskManager():
         self.calculate_capacity_consumed(running_tasks)
 
         self.process_running_tasks(running_tasks)
-        # import sdb
-        # sdb.set_trace()
+
         pending_tasks = [t for t in all_sorted_tasks if t.status == 'pending']
         dependencies = self.generate_dependencies(pending_tasks)
         self.process_pending_tasks(dependencies)
