@@ -1656,8 +1656,12 @@ class RunJob(BaseTask):
                     args.append('--vault-id')
                     args.append('{}@prompt'.format(vault_id))
 
-        if job.forks:  # FIXME: Max limit?
-            args.append('--forks=%d' % job.forks)
+        if job.forks:
+            if settings.MAX_FORKS > 0 and job.forks > settings.MAX_FORKS:
+                logger.warning(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.')
+                args.append('--forks=%d' % settings.MAX_FORKS)
+            else: 
+                args.append('--forks=%d' % job.forks)
         if job.force_handlers:
             args.append('--force-handlers')
         if job.limit:

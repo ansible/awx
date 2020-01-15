@@ -233,7 +233,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         addApiErrors(form.fields[field], field);
                     }
                 }
-                if (defaultMsg) {
+                if (!fieldErrors && defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
             } else if (typeof data === 'object' && data !== null) {

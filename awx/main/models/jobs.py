@@ -13,6 +13,7 @@ from urllib.parse import urljoin
 
 # Django
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 #from django.core.cache import cache
 from django.utils.encoding import smart_str
@@ -292,6 +293,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @property
     def resources_needed_to_start(self):
         return [fd for fd in ['project', 'inventory'] if not getattr(self, '{}_id'.format(fd))]
+
+    def clean_forks(self):
+        if settings.MAX_FORKS > 0 and self.forks > settings.MAX_FORKS:
+            raise ValidationError(_(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.'))
+        return self.forks
 
     def create_job(self, **kwargs):
         '''
