@@ -617,6 +617,18 @@ register(
 )
 
 register(
+    'MAX_FORKS',
+    field_class=fields.IntegerField,
+    allow_null=False,
+    default=100,
+    label=_('Maximum number of forks per job.'),
+    help_text=_('Saving a Job Template with more than this number of forks will result in an error. '
+                'When set to 0, no limit is applied.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,
