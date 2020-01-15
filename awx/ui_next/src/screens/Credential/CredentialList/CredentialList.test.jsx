@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { CredentialsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { CredentialList } from '.';
-import mockCredentials from '../shared';
+import { mockCredentials } from '../shared';
 
 jest.mock('@api');
 

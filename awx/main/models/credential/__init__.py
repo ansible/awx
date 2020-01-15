@@ -1136,7 +1136,7 @@ ManagedCredentialType(
             'help_text': ugettext_noop('The OpenShift or Kubernetes API Endpoint to authenticate with.')
         },{
             'id': 'bearer_token',
-            'label': ugettext_noop('API authentication bearer token.'),
+            'label': ugettext_noop('API authentication bearer token'),
             'type': 'string',
             'secret': True,
         },{
