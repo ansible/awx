@@ -33,6 +33,7 @@ function CredentialDetail({ i18n, credential }) {
   } = credential;
 
   const [fields, setFields] = useState([]);
+  const [managedByTower, setManagedByTower] = useState([]);
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -44,17 +45,18 @@ function CredentialDetail({ i18n, credential }) {
       setHasContentLoading(true);
       try {
         const {
-          data: { inputs: credentialTypeInputs },
+          data: { inputs: credentialTypeInputs, managed_by_tower },
         } = await CredentialTypesAPI.readDetail(credential_type.id);
 
-        setFields(credentialTypeInputs.fields);
+        setFields(credentialTypeInputs.fields || []);
+        setManagedByTower(managed_by_tower);
       } catch (error) {
         setContentError(error);
       } finally {
         setHasContentLoading(false);
       }
     })();
-  }, [credential_type.id]);
+  }, [credential_type]);
 
   const handleDelete = async () => {
     setHasContentLoading(true);
@@ -114,9 +116,13 @@ function CredentialDetail({ i18n, credential }) {
         <Detail
           label={i18n._(t`Credential Type`)}
           value={
-            <Link to={`/credential_types/${credential_type.id}/details`}>
-              {credential_type.name}
-            </Link>
+            managedByTower ? (
+              credential_type.name
+            ) : (
+              <Link to={`/credential_types/${credential_type.id}/details`}>
+                {credential_type.name}
+              </Link>
+            )
           }
         />
 
