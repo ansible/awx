@@ -32,17 +32,6 @@ describe('<TeamAdd />', () => {
     expect(history.location.pathname).toEqual('/teams');
   });
 
-  test('should navigate to teams list when close (x) is clicked', async () => {
-    const history = createMemoryHistory({});
-    const wrapper = mountWithContexts(<TeamAdd />, {
-      context: { router: { history } },
-    });
-    await act(async () => {
-      wrapper.find('button[aria-label="Close"]').invoke('onClick')();
-    });
-    expect(history.location.pathname).toEqual('/teams');
-  });
-
   test('successful form submission should trigger redirect', async () => {
     const history = createMemoryHistory({});
     const teamData = {

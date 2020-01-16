@@ -141,19 +141,6 @@ describe('<ProjectAdd />', () => {
     expect(wrapper.find('ProjectAdd .formSubmitError').length).toBe(1);
   });
 
-  test('CardHeader close button should navigate to projects list', async () => {
-    const history = createMemoryHistory();
-    await act(async () => {
-      wrapper = mountWithContexts(<ProjectAdd />, {
-        context: { router: { history } },
-      }).find('ProjectAdd CardHeader');
-    });
-    await act(async () => {
-      wrapper.find('CardCloseButton').simulate('click');
-    });
-    expect(history.location.pathname).toEqual('/projects');
-  });
-
   test('CardBody cancel button should navigate to projects list', async () => {
     const history = createMemoryHistory();
     await act(async () => {

@@ -36,18 +36,6 @@ describe('<OrganizationAdd />', () => {
     expect(history.location.pathname).toEqual('/organizations');
   });
 
-  test('should navigate to organizations list when close (x) is clicked', async () => {
-    const history = createMemoryHistory({});
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(<OrganizationAdd />, {
-        context: { router: { history } },
-      });
-      wrapper.find('button[aria-label="Close"]').invoke('onClick')();
-    });
-    expect(history.location.pathname).toEqual('/organizations');
-  });
-
   test('successful form submission should trigger redirect', async () => {
     const history = createMemoryHistory({});
     const orgData = {

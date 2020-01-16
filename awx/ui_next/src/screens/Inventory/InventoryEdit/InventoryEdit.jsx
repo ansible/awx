@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
-import { t } from '@lingui/macro';
-import { CardHeader, Tooltip } from '@patternfly/react-core';
+import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
 import { CardBody } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
 import ContentLoading from '@components/ContentLoading';
 import ContentError from '@components/ContentError';
 import InventoryForm from '../shared/InventoryForm';
 import { getAddedAndRemoved } from '../../../util/lists';
 
-function InventoryEdit({ history, i18n, inventory }) {
+function InventoryEdit({ inventory }) {
   const [error, setError] = useState(null);
   const [associatedInstanceGroups, setInstanceGroups] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [credentialTypeId, setCredentialTypeId] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,7 +44,12 @@ function InventoryEdit({ history, i18n, inventory }) {
   }, [inventory.id, contentLoading, inventory, credentialTypeId]);
 
   const handleCancel = () => {
-    history.push('/inventories');
+    const url =
+      inventory.kind === 'smart'
+        ? `/inventories/smart_inventory/${inventory.id}/details`
+        : `/inventories/inventory/${inventory.id}/details`;
+
+    history.push(`${url}`);
   };
 
   const handleSubmit = async values => {
@@ -95,29 +97,15 @@ function InventoryEdit({ history, i18n, inventory }) {
     return <ContentError />;
   }
   return (
-    <>
-      <CardHeader
-        style={{
-          paddingRight: '10px',
-          paddingTop: '10px',
-          paddingBottom: '0',
-          textAlign: 'right',
-        }}
-      >
-        <Tooltip content={i18n._(t`Close`)} position="top">
-          <CardCloseButton onClick={handleCancel} />
-        </Tooltip>
-      </CardHeader>
-      <CardBody>
-        <InventoryForm
-          onCancel={handleCancel}
-          onSubmit={handleSubmit}
-          inventory={inventory}
-          instanceGroups={associatedInstanceGroups}
-          credentialTypeId={credentialTypeId}
-        />
-      </CardBody>
-    </>
+    <CardBody>
+      <InventoryForm
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+        inventory={inventory}
+        instanceGroups={associatedInstanceGroups}
+        credentialTypeId={credentialTypeId}
+      />
+    </CardBody>
   );
 }
 
@@ -126,4 +114,4 @@ InventoryEdit.proptype = {
 };
 
 export { InventoryEdit as _InventoryEdit };
-export default withI18n()(withRouter(InventoryEdit));
+export default InventoryEdit;

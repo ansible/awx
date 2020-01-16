@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-import { PageSection, Card, CardHeader, Tooltip } from '@patternfly/react-core';
+import { PageSection, Card } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import { Config } from '@contexts/Config';
 import { CardBody } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
 import OrganizationForm from '../shared/OrganizationForm';
 
-function OrganizationAdd({ i18n }) {
+function OrganizationAdd() {
   const history = useHistory();
   const [formError, setFormError] = useState(null);
 
@@ -36,11 +33,6 @@ function OrganizationAdd({ i18n }) {
   return (
     <PageSection>
       <Card>
-        <CardHeader className="at-u-textRight">
-          <Tooltip content={i18n._(t`Close`)} position="top">
-            <CardCloseButton onClick={handleCancel} />
-          </Tooltip>
-        </CardHeader>
         <CardBody>
           <Config>
             {({ me }) => (
@@ -63,4 +55,4 @@ OrganizationAdd.contextTypes = {
 };
 
 export { OrganizationAdd as _OrganizationAdd };
-export default withI18n()(OrganizationAdd);
+export default OrganizationAdd;

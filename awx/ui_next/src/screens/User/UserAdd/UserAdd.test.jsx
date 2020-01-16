@@ -42,19 +42,6 @@ describe('<UserAdd />', () => {
     expect(history.location.pathname).toEqual('/users');
   });
 
-  test('should navigate to users list when close (x) is clicked', async () => {
-    const history = createMemoryHistory({});
-    await act(async () => {
-      wrapper = mountWithContexts(<UserAdd />, {
-        context: { router: { history } },
-      });
-    });
-    await act(async () => {
-      wrapper.find('button[aria-label="Close"]').prop('onClick')();
-    });
-    expect(history.location.pathname).toEqual('/users');
-  });
-
   test('successful form submission should trigger redirect', async () => {
     const history = createMemoryHistory({});
     const userData = {
