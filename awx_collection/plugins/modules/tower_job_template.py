@@ -68,7 +68,7 @@ options:
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
-        - Deprecated, mutually exclusive with 'credential'.
+        - Deprecated, mutually exclusive with 'credentials'.
       version_added: 2.7
       type: str
     forks:
