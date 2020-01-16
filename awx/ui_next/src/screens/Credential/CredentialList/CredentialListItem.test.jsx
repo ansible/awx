@@ -1,7 +1,7 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { CredentialListItem } from '.';
-import mockCredentials from '../shared';
+import { mockCredentials } from '../shared';
 
 describe('<CredentialListItem />', () => {
   let wrapper;
