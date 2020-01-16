@@ -548,6 +548,15 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         })
         return d
 
+    def get_queryset(self):
+        if hasattr(self, 'parent_key'):
+            # Prefer this filtering because ForeignKey allows us more assumptions
+            parent = self.get_parent_object()
+            self.check_parent_access(parent)
+            qs = self.request.user.get_queryset(self.model)
+            return qs.filter(**{self.parent_key: parent})
+        return super(SubListCreateAPIView, self).get_queryset()
+
     def create(self, request, *args, **kwargs):
         # If the object ID was not specified, it probably doesn't exist in the
         # DB yet. We want to see if we can create it.  The URL may choose to

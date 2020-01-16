@@ -61,7 +61,7 @@ class TestJobTemplateCopyEdit:
     def jt_copy_edit(self, job_template_factory, project):
         objects = job_template_factory(
             'copy-edit-job-template',
-            project=project)
+            project=project, organization=project.organization)
         return objects.job_template
 
     def fake_context(self, user):
@@ -129,9 +129,8 @@ class TestJobTemplateCopyEdit:
 
         # random user given JT and project admin abilities
         jt_copy_edit.admin_role.members.add(rando)
-        jt_copy_edit.save()
         jt_copy_edit.project.admin_role.members.add(rando)
-        jt_copy_edit.project.save()
+        jt_copy_edit.organization.job_template_admin_role.members.add(rando)
 
         serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(rando))
         response = serializer.to_representation(jt_copy_edit)

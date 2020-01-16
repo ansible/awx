@@ -157,6 +157,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default='ok',
         editable=False,
     )
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The organization used to determine access to this template.'),
+    )
     credentials = models.ManyToManyField(
         'Credential',
         related_name='%(class)ss',
@@ -699,6 +707,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         on_delete=polymorphic.SET_NULL,
         help_text=_('The Rampart/Instance group the job was run under'),
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The organization used to determine access to this unified job.'),
     )
     credentials = models.ManyToManyField(
         'Credential',

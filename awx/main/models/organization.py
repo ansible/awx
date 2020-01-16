@@ -6,7 +6,6 @@
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
@@ -106,12 +105,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     RelatedJobsMixin
     '''
     def _get_related_jobs(self):
-        project_ids = self.projects.all().values_list('id')
-        return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___project__in=project_ids) |
-            Q(ProjectUpdate___project__in=project_ids) |
-            Q(InventoryUpdate___inventory_source__inventory__organization=self)
-        )
+        return UnifiedJob.objects.non_polymorphic().filter(organization=self)
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):

@@ -89,8 +89,8 @@ def test_slice_job(slice_job_factory, rando):
 @pytest.mark.django_db
 class TestJobRelaunchAccess:
     @pytest.fixture
-    def job_no_prompts(self, machine_credential, inventory):
-        jt = JobTemplate.objects.create(name='test-job_template', inventory=inventory)
+    def job_no_prompts(self, machine_credential, inventory, organization):
+        jt = JobTemplate.objects.create(name='test-job_template', inventory=inventory, organization=organization)
         jt.credentials.add(machine_credential)
         return jt.create_unified_job()
 
@@ -117,6 +117,13 @@ class TestJobRelaunchAccess:
     def test_normal_relaunch_via_job_template(self, job_no_prompts, rando):
         "Has JT execute_role, job unchanged relative to JT"
         job_no_prompts.job_template.execute_role.members.add(rando)
+        assert rando.can_access(Job, 'start', job_no_prompts)
+
+    def test_orphan_relaunch_via_organization(self, job_no_prompts, rando, organization):
+        "JT for job has been deleted, relevant organization roles will allow management"
+        organization.execute_role.members.add(rando)
+        job_no_prompts.job_template.delete()
+        job_no_prompts.job_template = None  # Django should do this for us, but it does not
         assert rando.can_access(Job, 'start', job_no_prompts)
 
     def test_no_relaunch_without_prompted_fields_access(self, job_with_prompts, rando):

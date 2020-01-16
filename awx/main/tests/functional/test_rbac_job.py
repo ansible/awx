@@ -29,7 +29,8 @@ def normal_job(deploy_jobtemplate):
     return Job.objects.create(
         job_template=deploy_jobtemplate,
         project=deploy_jobtemplate.project,
-        inventory=deploy_jobtemplate.inventory
+        inventory=deploy_jobtemplate.inventory,
+        organization=deploy_jobtemplate.organization
     )
 
 

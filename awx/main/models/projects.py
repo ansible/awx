@@ -254,13 +254,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         app_label = 'main'
         ordering = ('id',)
 
-    organization = models.ForeignKey(
-        'Organization',
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='projects',
-    )
     scm_update_on_launch = models.BooleanField(
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
@@ -329,7 +322,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in ProjectOptions._meta.fields) | set(
-            ['name', 'description']
+            ['name', 'description', 'organization']
         )
 
     def save(self, *args, **kwargs):
@@ -450,8 +443,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            models.Q(Job___project=self) |
-            models.Q(ProjectUpdate___project=self)
+            models.Q(job__project=self) |
+            models.Q(projectupdate__project=self)
         )
 
     def delete(self, *args, **kwargs):

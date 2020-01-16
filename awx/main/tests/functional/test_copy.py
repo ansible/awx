@@ -11,10 +11,11 @@ from awx.main.tasks import deep_copy_model_obj
 
 
 @pytest.mark.django_db
-def test_job_template_copy(post, get, project, inventory, machine_credential, vault_credential,
+def test_job_template_copy(post, get, project, inventory, organization, machine_credential, vault_credential,
                            credential, alice, job_template_with_survey_passwords, admin):
     job_template_with_survey_passwords.project = project
     job_template_with_survey_passwords.inventory = inventory
+    job_template_with_survey_passwords.organization = organization
     job_template_with_survey_passwords.save()
     job_template_with_survey_passwords.credentials.add(credential)
     job_template_with_survey_passwords.credentials.add(machine_credential)
@@ -22,6 +23,7 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
     job_template_with_survey_passwords.admin_role.members.add(alice)
     project.admin_role.members.add(alice)
     inventory.admin_role.members.add(alice)
+    organization.job_template_admin_role.members.add(alice)
     assert get(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         alice, expect=200

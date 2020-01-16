@@ -4,10 +4,7 @@
 import dateutil
 import logging
 
-from django.db.models import (
-    Count,
-    F,
-)
+from django.db.models import Count
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -175,28 +172,18 @@ class OrganizationCountsMixin(object):
 
         inv_qs = Inventory.accessible_objects(self.request.user, 'read_role')
         project_qs = Project.accessible_objects(self.request.user, 'read_role')
+        jt_qs = JobTemplate.accessible_objects(self.request.user, 'read_role')
 
         # Produce counts of Foreign Key relationships
-        db_results['inventories'] = inv_qs\
-            .values('organization').annotate(Count('organization')).order_by('organization')
+        db_results['inventories'] = inv_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['teams'] = Team.accessible_objects(
             self.request.user, 'read_role').values('organization').annotate(
             Count('organization')).order_by('organization')
 
-        JT_project_reference = 'project__organization'
-        JT_inventory_reference = 'inventory__organization'
-        db_results['job_templates_project'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').exclude(
-            project__organization=F(JT_inventory_reference)).values(JT_project_reference).annotate(
-            Count(JT_project_reference)).order_by(JT_project_reference)
+        db_results['job_templates'] = jt_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        db_results['job_templates_inventory'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').values(JT_inventory_reference).annotate(
-            Count(JT_inventory_reference)).order_by(JT_inventory_reference)
-
-        db_results['projects'] = project_qs\
-            .values('organization').annotate(Count('organization')).order_by('organization')
+        db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
         # Other members and admins of organization are always viewable
         db_results['users'] = org_qs.annotate(
@@ -212,11 +199,7 @@ class OrganizationCountsMixin(object):
                 'admins': 0, 'projects': 0}
 
         for res, count_qs in db_results.items():
-            if res == 'job_templates_project':
-                org_reference = JT_project_reference
-            elif res == 'job_templates_inventory':
-                org_reference = JT_inventory_reference
-            elif res == 'users':
+            if res == 'users':
                 org_reference = 'id'
             else:
                 org_reference = 'organization'
@@ -228,14 +211,6 @@ class OrganizationCountsMixin(object):
                         count_context[org_id]['users'] = entry['users']
                         continue
                     count_context[org_id][res] = entry['%s__count' % org_reference]
-
-        # Combine the counts for job templates by project and inventory
-        for org in org_id_list:
-            org_id = org['id']
-            count_context[org_id]['job_templates'] = 0
-            for related_path in ['job_templates_project', 'job_templates_inventory']:
-                if related_path in count_context[org_id]:
-                    count_context[org_id]['job_templates'] += count_context[org_id].pop(related_path)
 
         full_context['related_field_counts'] = count_context
 

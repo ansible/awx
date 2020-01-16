@@ -335,7 +335,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     @classmethod
     def _get_unified_job_field_names(cls):
         r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'survey_passwords', 'labels', 'limit', 'scm_branch']
+            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch']
         )
         r.remove('char_prompts')  # needed due to copying launch config to launch config
         return r
@@ -382,13 +382,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     class Meta:
         app_label = 'main'
 
-    organization = models.ForeignKey(
-        'Organization',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='workflows',
-    )
     ask_inventory_on_launch = AskForField(
         blank=True,
         default=False,

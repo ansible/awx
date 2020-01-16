@@ -426,9 +426,9 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___inventory=self) |
-            Q(InventoryUpdate___inventory_source__inventory=self) |
-            Q(AdHocCommand___inventory=self)
+            Q(job__inventory=self) |
+            Q(inventoryupdate__inventory=self) |
+            Q(adhoccommand__inventory=self)
         )
 
 
@@ -808,8 +808,8 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(Job___inventory=self.inventory) |
-            Q(InventoryUpdate___inventory_source__groups=self)
+            Q(job__inventory=self.inventory) |
+            Q(inventoryupdate__inventory_source__groups=self)
         )
 
 
@@ -1277,10 +1277,14 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in InventorySourceOptions._meta.fields) | set(
-            ['name', 'description', 'credentials', 'inventory']
+            ['name', 'description', 'organization', 'credentials', 'inventory']
         )
 
     def save(self, *args, **kwargs):
+        # if this is a new object, inherit organization from its inventory
+        if not self.pk and self.inventory and self.inventory.organization_id and not self.organization_id:
+            self.organization_id = self.inventory.organization_id
+
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])

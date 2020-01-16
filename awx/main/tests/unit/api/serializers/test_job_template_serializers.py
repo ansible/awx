@@ -30,6 +30,7 @@ def job_template(mocker):
     mock_jt.host_config_key = '9283920492'
     mock_jt.validation_errors = mock_JT_resource_data
     mock_jt.webhook_service = ''
+    mock_jt.organization_id = None
     return mock_jt
 
 

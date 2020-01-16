@@ -183,7 +183,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_save.connect(save_related_job_templates, sender=Project)
 post_save.connect(save_related_job_templates, sender=Inventory)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)

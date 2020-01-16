@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pytest
 
 from django.core.exceptions import ImproperlyConfigured
@@ -26,7 +27,7 @@ def setup_module(module):
 
 
 def teardown_module(module):
-    # settings_registry will be persistent states unless we explicitly clean them up. 
+    # settings_registry will be persistent states unless we explicitly clean them up.
     settings_registry.unregister('NAMED_URL_FORMATS')
     settings_registry.unregister('NAMED_URL_GRAPH_NODES')
 
@@ -58,10 +59,25 @@ def test_organization(get, admin_user):
 
 @pytest.mark.django_db
 def test_job_template(get, admin_user):
-    test_jt = JobTemplate.objects.create(name='test_jt')
+    test_org = Organization.objects.create(name='test_org')
+    test_jt = JobTemplate.objects.create(name='test_jt', organization=test_org)
     url = reverse('api:job_template_detail', kwargs={'pk': test_jt.pk})
     response = get(url, user=admin_user, expect=200)
-    assert response.data['related']['named_url'].endswith('/test_jt/')
+    assert response.data['related']['named_url'].endswith('/test_jt++test_org/')
+
+
+@pytest.mark.django_db
+def test_job_template_old_way(get, admin_user, mocker):
+    test_org = Organization.objects.create(name='test_org')
+    test_jt = JobTemplate.objects.create(name='test_jt ♥', organization=test_org)
+    url = reverse('api:job_template_detail', kwargs={'pk': test_jt.pk})
+
+    response = get(url, user=admin_user, expect=200)
+    new_url = response.data['related']['named_url']
+    old_url = '/'.join([url.rsplit('/', 2)[0], test_jt.name, ''])
+
+    assert URLModificationMiddleware._convert_named_url(new_url) == url
+    assert URLModificationMiddleware._convert_named_url(old_url) == url
 
 
 @pytest.mark.django_db

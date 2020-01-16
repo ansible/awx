@@ -6,7 +6,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate
+from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -30,14 +30,53 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         project.use_role.members.add(alice)
     if grant_inventory:
         inventory.use_role.members.add(alice)
+    project.organization.job_template_admin_role.members.add(alice)
 
     r = post(reverse('api:job_template_list'), {
         'name': 'Some name',
         'project': project.id,
         'inventory': inventory.id,
         'playbook': 'helloworld.yml',
+        'organization': project.organization_id
     }, alice)
     assert r.status_code == expect
+
+
+@pytest.mark.django_db
+def test_creation_uniqueness_rules(post, project, inventory, admin_user):
+    orgA = Organization.objects.create(name='orga')
+    orgB = Organization.objects.create(name='orgb')
+    create_data = {
+        'name': 'this_unique_name',
+        'project': project.pk,
+        'inventory': inventory.pk,
+        'playbook': 'helloworld.yml',
+        'organization': orgA.pk
+    }
+    post(
+        url=reverse('api:job_template_list'),
+        data=create_data,
+        user=admin_user,
+        expect=201
+    )
+    r = post(
+        url=reverse('api:job_template_list'),
+        data=create_data,
+        user=admin_user,
+        expect=400
+    )
+    msg = str(r.data['__all__'][0])
+    assert "JobTemplate with this (" in msg
+    assert ") combination already exists" in msg
+
+    # can create JT with same name, only if it is in different org
+    create_data['organization'] = orgB.pk
+    post(
+        url=reverse('api:job_template_list'),
+        data=create_data,
+        user=admin_user,
+        expect=201
+    )
 
 
 @pytest.mark.django_db
@@ -524,13 +563,14 @@ def test_callback_disallowed_null_inventory(project):
 
 
 @pytest.mark.django_db
-def test_job_template_branch_error(project, inventory, post, admin_user):
+def test_job_template_branch_error(project, inventory, organization, post, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
+            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "scm_branch": "foobar"
         },
@@ -541,13 +581,14 @@ def test_job_template_branch_error(project, inventory, post, admin_user):
 
 
 @pytest.mark.django_db
-def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
+def test_job_template_branch_prompt_error(project, inventory, post, organization, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
+            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "ask_scm_branch_on_launch": True
         },

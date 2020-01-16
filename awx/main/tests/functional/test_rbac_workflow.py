@@ -62,10 +62,11 @@ class TestWorkflowJobTemplateAccess:
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
 
-    def test_no_jt_access_to_edit(self, wfjt_node, org_admin):
+    def test_no_jt_access_to_edit(self, wfjt_node, rando):
         # without access to the related job template, admin to the WFJT can
         # not change the prompted parameters
-        access = WorkflowJobTemplateNodeAccess(org_admin)
+        wfjt_node.workflow_job_template.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
         assert not access.can_change(wfjt_node, {'job_type': 'check'})
 
     def test_node_edit_allowed(self, wfjt_node, org_admin):
