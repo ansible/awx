@@ -3,8 +3,9 @@ import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import InventoryHostAdd from './InventoryHostAdd';
+import { sleep } from '@testUtils/testUtils';
 import { InventoriesAPI } from '@api';
+import InventoryHostAdd from './InventoryHostAdd';
 
 jest.mock('@api');
 
@@ -49,45 +50,42 @@ describe('<InventoryHostAdd />', () => {
       data: { ...mockHostData },
     });
 
-    const formik = wrapper.find('Formik').instance();
     await act(async () => {
-      const changeState = new Promise(resolve => {
-        formik.setState(
-          {
-            values: {
-              ...mockHostData,
-            },
-          },
-          () => resolve()
-        );
+      wrapper.find('FormField[id="host-name"] input').simulate('change', {
+        target: { value: 'new name', name: 'name' },
       });
-      await changeState;
-    });
-    await act(async () => {
-      wrapper.find('form').simulate('submit');
+      wrapper
+        .find('FormField[id="host-description"] input')
+        .simulate('change', {
+          target: { value: 'new description', name: 'description' },
+        });
+      wrapper.update();
+      await sleep(0);
+      wrapper.find('FormActionGroup').invoke('onSubmit')();
     });
     wrapper.update();
-    expect(InventoriesAPI.createHost).toHaveBeenCalledWith('1', mockHostData);
+    expect(InventoriesAPI.createHost).toHaveBeenCalledWith('1', {
+      name: 'new name',
+      description: 'new description',
+      variables: '---\n',
+    });
   });
 
   test('handleSubmit should throw an error', async () => {
     InventoriesAPI.createHost.mockImplementationOnce(() =>
       Promise.reject(new Error())
     );
-    const formik = wrapper.find('Formik').instance();
     await act(async () => {
-      const changeState = new Promise(resolve => {
-        formik.setState(
-          {
-            values: {
-              ...mockHostData,
-            },
-          },
-          () => resolve()
-        );
+      wrapper.find('FormField[id="host-name"] input').simulate('change', {
+        target: { value: 'new name', name: 'name' },
       });
-      await changeState;
+      wrapper
+        .find('FormField[id="host-description"] input')
+        .simulate('change', {
+          target: { value: 'new description', name: 'description' },
+        });
     });
+    wrapper.update();
     await act(async () => {
       wrapper.find('form').simulate('submit');
     });

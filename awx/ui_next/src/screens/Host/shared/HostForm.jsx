@@ -19,6 +19,7 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
+  console.log('render');
 
   return (
     <Formik

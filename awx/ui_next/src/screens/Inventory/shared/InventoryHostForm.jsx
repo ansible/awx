@@ -46,7 +46,9 @@ function InventoryHostForm({ handleSubmit, handleCancel, host, i18n }) {
           </FormRow>
           <FormActionGroup
             onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
+            onSubmit={() => {
+              formik.handleSubmit();
+            }}
           />
         </Form>
       )}

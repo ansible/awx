@@ -22,10 +22,8 @@ function FormField(props) {
   } = props;
 
   return (
-    <Field
-      name={name}
-      validate={validate}
-      render={({ field, form }) => {
+    <Field name={name} validate={validate}>
+      {({ field, form }) => {
         const isValid =
           form && (!form.touched[field.name] || !form.errors[field.name]);
 
@@ -59,7 +57,7 @@ function FormField(props) {
           </FormGroup>
         );
       }}
-    />
+    </Field>
   );
 }
 

@@ -130,19 +130,11 @@ describe('<ProjectForm />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
     await act(async () => {
-      const changeState = new Promise(resolve => {
-        formik.setState(
-          {
-            values: {
-              ...mockData,
-            },
-          },
-          () => resolve()
-        );
-      });
-      await changeState;
+      await wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
+        null,
+        'git'
+      );
     });
     wrapper.update();
     expect(wrapper.find('FormGroup[label="SCM URL"]').length).toBe(1);
@@ -166,59 +158,58 @@ describe('<ProjectForm />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const form = wrapper.find('Formik');
     act(() => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 1,
         name: 'organization',
       });
-    });
-    expect(form.state('values').organization).toEqual(1);
-    act(() => {
       wrapper.find('CredentialLookup').invoke('onBlur')();
       wrapper.find('CredentialLookup').invoke('onChange')({
         id: 10,
         name: 'credential',
       });
     });
-    expect(form.state('values').credential).toEqual(10);
+    wrapper.update();
+    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
+      id: 1,
+      name: 'organization',
+    });
+    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
+      id: 10,
+      name: 'credential',
+    });
   });
 
-  test('should display insights credential lookup when scm type is "Insights"', async () => {
+  test('should display insights credential lookup when scm type is "insights"', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
     await act(async () => {
-      const changeState = new Promise(resolve => {
-        formik.setState(
-          {
-            values: {
-              ...mockData,
-              scm_type: 'insights',
-            },
-          },
-          () => resolve()
-        );
-      });
-      await changeState;
+      await wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
+        null,
+        'insights'
+      );
     });
     wrapper.update();
     expect(wrapper.find('FormGroup[label="Insights Credential"]').length).toBe(
       1
     );
-    act(() => {
+    await act(async () => {
       wrapper.find('CredentialLookup').invoke('onBlur')();
       wrapper.find('CredentialLookup').invoke('onChange')({
         id: 123,
         name: 'credential',
       });
     });
-    expect(formik.state.values.credential).toEqual(123);
+    wrapper.update();
+    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
+      id: 123,
+      name: 'credential',
+    });
   });
 
   test('manual subform should display expected fields', async () => {
@@ -289,10 +280,8 @@ describe('<ProjectForm />', () => {
     const scmTypeSelect = wrapper.find(
       'FormGroup[label="SCM Type"] FormSelect'
     );
-    const formik = wrapper.find('Formik').instance();
-    expect(formik.state.values.scm_url).toEqual('');
     await act(async () => {
-      scmTypeSelect.props().onChange('hg', { target: { name: 'Mercurial' } });
+      scmTypeSelect.invoke('onChange')('hg', { target: { name: 'Mercurial' } });
     });
     wrapper.update();
     await act(async () => {
@@ -300,7 +289,8 @@ describe('<ProjectForm />', () => {
         target: { value: 'baz', name: 'scm_url' },
       });
     });
-    expect(formik.state.values.scm_url).toEqual('baz');
+    wrapper.update();
+    expect(wrapper.find('input#project-scm-url').prop('value')).toEqual('baz');
     await act(async () => {
       scmTypeSelect
         .props()
@@ -311,7 +301,7 @@ describe('<ProjectForm />', () => {
       scmTypeSelect.props().onChange('svn', { target: { name: 'Subversion' } });
     });
     wrapper.update();
-    expect(formik.state.values.scm_url).toEqual('');
+    expect(wrapper.find('input#project-scm-url').prop('value')).toEqual('');
   });
 
   test('should call handleSubmit when Submit button is clicked', async () => {
@@ -327,8 +317,9 @@ describe('<ProjectForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     expect(handleSubmit).toBeCalled();
   });
 

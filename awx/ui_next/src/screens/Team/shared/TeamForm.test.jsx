@@ -42,23 +42,28 @@ describe('<TeamForm />', () => {
       );
     });
 
-    const form = wrapper.find('Formik');
-    wrapper.find('input#team-name').simulate('change', {
-      target: { value: 'new foo', name: 'name' },
-    });
-    expect(form.state('values').name).toEqual('new foo');
-    wrapper.find('input#team-description').simulate('change', {
-      target: { value: 'new bar', name: 'description' },
-    });
-    expect(form.state('values').description).toEqual('new bar');
     act(() => {
+      wrapper.find('input#team-name').simulate('change', {
+        target: { value: 'new foo', name: 'name' },
+      });
+      wrapper.find('input#team-description').simulate('change', {
+        target: { value: 'new bar', name: 'description' },
+      });
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 2,
         name: 'Other Org',
       });
     });
-    expect(form.state('values').organization).toEqual(2);
+    wrapper.update();
+    expect(wrapper.find('input#team-name').prop('value')).toEqual('new foo');
+    expect(wrapper.find('input#team-description').prop('value')).toEqual(
+      'new bar'
+    );
+    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
+      id: 2,
+      name: 'Other Org',
+    });
   });
 
   test('should call handleSubmit when Submit button is clicked', async () => {
@@ -75,8 +80,9 @@ describe('<TeamForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     expect(handleSubmit).toBeCalled();
   });
 

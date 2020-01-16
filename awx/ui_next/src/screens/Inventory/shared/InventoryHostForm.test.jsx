@@ -43,8 +43,9 @@ describe('<InventoryHostform />', () => {
 
   test('should call handleSubmit when Submit button is clicked', async () => {
     expect(handleSubmit).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     expect(handleSubmit).toHaveBeenCalled();
   });
 
