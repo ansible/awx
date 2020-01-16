@@ -421,8 +421,9 @@ class TaskManager():
         return False
 
     def generate_dependencies(self, pending_tasks):
-        dependencies = []
+        all_task_dependencies = []
         for task in pending_tasks:
+            dependencies = []
             if type(task) is Job and not task.dependent_jobs.exists():
                 # TODO: Can remove task.project None check after scan-job-default-playbook is removed
                 if task.project is not None and task.project.scm_update_on_launch is True:
@@ -454,7 +455,8 @@ class TaskManager():
 
                 if len(dependencies) > 0:
                     self.capture_chain_failure_dependencies(task, dependencies)
-        return dependencies
+                    all_task_dependencies.append(dependencies)
+        return all_task_dependencies
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
