@@ -63,7 +63,7 @@ class Command(BaseCommand):
         # https://bugs.python.org/issue37429
         AWXProxyHandler.disable()
         try:
-            queues = ['tower_broadcast_all'] + settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()]
+            queues = ['tower_broadcast_all', get_local_queuename()]
             consumer = AWXConsumerPG(
                 'dispatcher',
                 None,

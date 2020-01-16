@@ -8,7 +8,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.db import connection
 
-from . import pg_bus_conn
+from . import pg_bus_conn, get_local_queuename
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -73,9 +73,12 @@ class task:
                 kwargs = kwargs or {}
                 queue = (
                     queue or
-                    getattr(cls.queue, 'im_func', cls.queue) or
-                    settings.CELERY_DEFAULT_QUEUE
+                    getattr(cls.queue, 'im_func', cls.queue)
                 )
+                if not queue:
+                    msg = f'{cls.name}: Queue value required and may not me None'
+                    logger.error(msg)
+                    raise ValueError(msg)
                 obj = {
                     'uuid': task_id,
                     'args': args,

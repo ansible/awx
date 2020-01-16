@@ -423,7 +423,6 @@ BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
 BROKER_URL = 'redis://localhost:6379'
 BROKER_TRANSPORT_OPTIONS = {}
-CELERY_DEFAULT_QUEUE = 'awx_private_queue'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
@@ -451,14 +450,6 @@ CELERYBEAT_SCHEDULE = {
     },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
-
-AWX_CELERY_QUEUES_STATIC = [
-    CELERY_DEFAULT_QUEUE,
-]
-
-AWX_CELERY_BCAST_QUEUES_STATIC = [
-    'tower_broadcast_all',
-]
 
 ASGI_AMQP = {
     'INIT_FUNC': 'awx.prepare_env',
