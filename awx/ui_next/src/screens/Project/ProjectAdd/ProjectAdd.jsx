@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Card as _Card,
-  CardHeader,
-  PageSection,
-  Tooltip,
-} from '@patternfly/react-core';
-import CardCloseButton from '@components/CardCloseButton';
+import { Card as _Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
 import ProjectForm from '../shared/ProjectForm';
 import { ProjectsAPI } from '@api';
@@ -19,8 +11,9 @@ const Card = styled(_Card)`
   --pf-c-card--child--PaddingRight: 0;
 `;
 
-function ProjectAdd({ history, i18n }) {
+function ProjectAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
+  const history = useHistory();
 
   const handleSubmit = async values => {
     if (values.scm_type === 'manual') {
@@ -44,11 +37,6 @@ function ProjectAdd({ history, i18n }) {
   return (
     <PageSection>
       <Card>
-        <CardHeader className="at-u-textRight">
-          <Tooltip content={i18n._(t`Close`)} position="top">
-            <CardCloseButton onClick={handleCancel} />
-          </Tooltip>
-        </CardHeader>
         <CardBody>
           <ProjectForm
             handleCancel={handleCancel}
@@ -65,4 +53,4 @@ function ProjectAdd({ history, i18n }) {
   );
 }
 
-export default withI18n()(withRouter(ProjectAdd));
+export default ProjectAdd;

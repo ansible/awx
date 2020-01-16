@@ -75,6 +75,7 @@ InventoriesAPI.readInstanceGroups.mockResolvedValue({
 describe('<InventoryEdit />', () => {
   let wrapper;
   let history;
+
   beforeEach(async () => {
     history = createMemoryHistory({ initialEntries: ['/inventories'] });
     await act(async () => {
@@ -83,6 +84,7 @@ describe('<InventoryEdit />', () => {
       });
     });
   });
+
   afterEach(() => {
     wrapper.unmount();
   });
@@ -95,10 +97,12 @@ describe('<InventoryEdit />', () => {
     expect(InventoriesAPI.readInstanceGroups).toBeCalledWith(1);
   });
 
-  test('handleCancel returns the user to the inventories list', async () => {
+  test('handleCancel returns the user to inventory detail', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    wrapper.find('CardCloseButton').simulate('click');
-    expect(history.location.pathname).toEqual('/inventories');
+    wrapper.find('Button[aria-label="Cancel"]').simulate('click');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/1/details'
+    );
   });
 
   test('handleSubmit should post to the api', async () => {

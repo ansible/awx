@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-import { Card, CardHeader, PageSection, Tooltip } from '@patternfly/react-core';
+import { useHistory } from 'react-router-dom';
+import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
 import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 
-function JobTemplateAdd({ history, i18n }) {
+function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
+  const history = useHistory();
 
   async function handleSubmit(values) {
     const {
@@ -71,11 +69,6 @@ function JobTemplateAdd({ history, i18n }) {
   return (
     <PageSection>
       <Card>
-        <CardHeader className="at-u-textRight">
-          <Tooltip content={i18n._(t`Close`)} position="top">
-            <CardCloseButton onClick={handleCancel} />
-          </Tooltip>
-        </CardHeader>
         <CardBody>
           <JobTemplateForm
             handleCancel={handleCancel}
@@ -88,4 +81,4 @@ function JobTemplateAdd({ history, i18n }) {
   );
 }
 
-export default withI18n()(withRouter(JobTemplateAdd));
+export default JobTemplateAdd;

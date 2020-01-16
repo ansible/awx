@@ -1,14 +1,10 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-import { PageSection, Card, CardHeader, Tooltip } from '@patternfly/react-core';
+import { PageSection, Card } from '@patternfly/react-core';
 
 import { TeamsAPI } from '@api';
 import { Config } from '@contexts/Config';
 import { CardBody } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-
 import TeamForm from '../shared/TeamForm';
 
 class TeamAdd extends React.Component {
@@ -36,16 +32,10 @@ class TeamAdd extends React.Component {
 
   render() {
     const { error } = this.state;
-    const { i18n } = this.props;
 
     return (
       <PageSection>
         <Card>
-          <CardHeader className="at-u-textRight">
-            <Tooltip content={i18n._(t`Close`)} position="top">
-              <CardCloseButton onClick={this.handleCancel} />
-            </Tooltip>
-          </CardHeader>
           <CardBody>
             <Config>
               {({ me }) => (
@@ -65,4 +55,4 @@ class TeamAdd extends React.Component {
 }
 
 export { TeamAdd as _TeamAdd };
-export default withI18n()(withRouter(TeamAdd));
+export default withRouter(TeamAdd);
