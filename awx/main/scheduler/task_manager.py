@@ -421,7 +421,7 @@ class TaskManager():
         return False
 
     def generate_dependencies(self, pending_tasks):
-        all_task_dependencies = []
+        created_dependencies = []
         for task in pending_tasks:
             dependencies = []
             if type(task) is Job and not task.dependent_jobs.exists():
@@ -430,10 +430,10 @@ class TaskManager():
                     latest_project_update = self.get_latest_project_update(task)
                     if self.should_update_related_project(task, latest_project_update):
                         project_task = self.create_project_update(task)
+                        created_dependencies.append(project_task)
                         dependencies.append(project_task)
                     else:
-                        if latest_project_update.status in ['waiting', 'pending', 'running']:
-                            dependencies.append(latest_project_update)
+                        dependencies.append(latest_project_update)
 
                 # Inventory created 2 seconds behind job
                 try:
@@ -448,15 +448,14 @@ class TaskManager():
                     latest_inventory_update = self.get_latest_inventory_update(inventory_source)
                     if self.should_update_inventory_source(task, latest_inventory_update):
                         inventory_task = self.create_inventory_update(task, inventory_source)
+                        created_dependencies.append(inventory_task)
                         dependencies.append(inventory_task)
                     else:
-                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-                            dependencies.append(latest_inventory_update)
+                        dependencies.append(latest_inventory_update)
 
                 if len(dependencies) > 0:
                     self.capture_chain_failure_dependencies(task, dependencies)
-                    all_task_dependencies.append(dependencies)
-        return all_task_dependencies
+        return created_dependencies
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
