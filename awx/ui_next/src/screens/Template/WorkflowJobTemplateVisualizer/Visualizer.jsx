@@ -16,6 +16,7 @@ import VisualizerGraph from './VisualizerGraph';
 import VisualizerStartScreen from './VisualizerStartScreen';
 import VisualizerToolbar from './VisualizerToolbar';
 import UnsavedChangesModal from './Modals/UnsavedChangesModal';
+import NodeViewModal from './Modals/NodeViewModal/NodeViewModal';
 import {
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplatesAPI,
@@ -69,6 +70,7 @@ function Visualizer({ history, template, i18n }) {
   const [nodePositions, setNodePositions] = useState(null);
   const [nodeToDelete, setNodeToDelete] = useState(null);
   const [nodeToEdit, setNodeToEdit] = useState(null);
+  const [nodeToView, setNodeToView] = useState(null);
   const [addingLink, setAddingLink] = useState(false);
   const [addLinkSourceNode, setAddLinkSourceNode] = useState(null);
   const [addLinkTargetNode, setAddLinkTargetNode] = useState(null);
@@ -825,6 +827,7 @@ function Visualizer({ history, template, i18n }) {
             onStartAddLinkClick={selectSourceNodeForLinking}
             onConfirmAddLinkClick={selectTargetNodeForLinking}
             onCancelAddLinkClick={cancelNodeLink}
+            onViewNodeClick={setNodeToView}
             addingLink={addingLink}
             addLinkSourceNode={addLinkSourceNode}
             showKey={showKey}
@@ -904,6 +907,9 @@ function Visualizer({ history, template, i18n }) {
           onCancel={() => setShowDeleteAllNodesModal(false)}
           onConfirm={() => deleteAllNodes()}
         />
+      )}
+      {nodeToView && (
+        <NodeViewModal node={nodeToView} onClose={() => setNodeToView(null)} />
       )}
     </Fragment>
   );

@@ -3,7 +3,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 
-function NodeNextButton({ i18n, activeStep, onNext, triggerNext, onClick }) {
+function NodeNextButton({
+  i18n,
+  activeStep,
+  onNext,
+  triggerNext,
+  onClick,
+  buttonText,
+}) {
   useEffect(() => {
     if (!triggerNext) {
       return;
@@ -18,7 +25,7 @@ function NodeNextButton({ i18n, activeStep, onNext, triggerNext, onClick }) {
       onClick={() => onClick(activeStep)}
       isDisabled={!activeStep.enableNext}
     >
-      {activeStep.key === 'preview' ? i18n._(t`Save`) : i18n._(t`Next`)}
+      {buttonText}
     </Button>
   );
 }

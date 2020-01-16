@@ -51,6 +51,7 @@ function VisualizerNode({
   isAddLinkSourceNode,
   onAddNodeClick,
   onEditNodeClick,
+  onViewNodeClick,
 }) {
   const [hovering, setHovering] = useState(false);
 
@@ -89,6 +90,11 @@ function VisualizerNode({
       key="details"
       onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
       onMouseLeave={() => updateHelpText(null)}
+      onClick={() => {
+        updateHelpText(null);
+        setHovering(false);
+        onViewNodeClick(node);
+      }}
     >
       <InfoIcon />
     </WorkflowActionTooltipItem>

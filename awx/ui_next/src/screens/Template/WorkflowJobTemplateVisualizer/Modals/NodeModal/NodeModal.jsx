@@ -1,38 +1,26 @@
 import React, { useState } from 'react';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
-  Wizard,
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import NodeResourceStep from './NodeResourceStep';
-import NodeTypeStep from './NodeTypeStep';
+import NodeTypeStep from './NodeTypeStep/NodeTypeStep';
+import RunStep from './RunStep';
 import NodeNextButton from './NodeNextButton';
-import NodeApprovalStep from './NodeApprovalStep';
-import ApprovalPreviewStep from './ApprovalPreviewStep';
-import JobTemplatePreviewStep from './JobTemplatePreviewStep';
-import InventorySyncPreviewStep from './InventorySyncPreviewStep';
-import ProjectSyncPreviewStep from './ProjectSyncPreviewStep';
-import WorkflowJobTemplatePreviewStep from './WorkflowJobTemplatePreviewStep';
+import { Wizard } from '@components/Wizard';
 
-import {
-  JobTemplatesAPI,
-  ProjectsAPI,
-  InventorySourcesAPI,
-  WorkflowJobTemplatesAPI,
-} from '@api';
-
-const readInventorySources = async queryParams =>
-  InventorySourcesAPI.read(queryParams);
-const readJobTemplates = async queryParams =>
-  JobTemplatesAPI.read(queryParams, { role_level: 'execute_role' });
-const readProjects = async queryParams => ProjectsAPI.read(queryParams);
-const readWorkflowJobTemplates = async queryParams =>
-  WorkflowJobTemplatesAPI.read(queryParams, { role_level: 'execute_role' });
-
-function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
+function NodeModal({
+  history,
+  i18n,
+  title,
+  onClose,
+  onSave,
+  node,
+  askLinkType,
+}) {
   let defaultNodeType = 'job_template';
   let defaultNodeResource = null;
   let defaultApprovalName = '';
@@ -82,15 +70,6 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
   const [nodeType, setNodeType] = useState(defaultNodeType);
   const [linkType, setLinkType] = useState('success');
   const [nodeResource, setNodeResource] = useState(defaultNodeResource);
-  const [showApprovalStep, setShowApprovalStep] = useState(
-    defaultNodeType === 'approval'
-  );
-  const [showResourceStep, setShowResourceStep] = useState(
-    defaultNodeResource ? true : false
-  );
-  const [showPreviewStep, setShowPreviewStep] = useState(
-    defaultNodeType === 'approval' || defaultNodeResource ? true : false
-  );
   const [triggerNext, setTriggerNext] = useState(0);
   const [approvalName, setApprovalName] = useState(defaultApprovalName);
   const [approvalDescription, setApprovalDescription] = useState(
@@ -100,7 +79,19 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
     defaultApprovalTimeout
   );
 
+  const clearQueryParams = () => {
+    const parts = history.location.search.replace(/^\?/, '').split('&');
+    const otherParts = parts.filter(param =>
+      /^!(job_templates\.|projects\.|inventory_sources\.|workflow_job_templates\.)/.test(
+        param
+      )
+    );
+    history.push(`${history.location.pathname}?${otherParts.join('&')}`);
+  };
+
   const handleSaveNode = () => {
+    clearQueryParams();
+
     const resource =
       nodeType === 'approval'
         ? {
@@ -120,47 +111,13 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
     });
   };
 
-  const resourceSearch = queryParams => {
-    switch (nodeType) {
-      case 'inventory_source_sync':
-        return readInventorySources(queryParams);
-      case 'job_template':
-        return readJobTemplates(queryParams);
-      case 'project_sync':
-        return readProjects(queryParams);
-      case 'workflow_job_template':
-        return readWorkflowJobTemplates(queryParams);
-      default:
-        throw new Error(i18n._(t`Missing node type`));
-    }
-  };
-
-  const handleNextClick = activeStep => {
-    if (activeStep.key === 'node_type') {
-      if (
-        [
-          'inventory_source_sync',
-          'job_template',
-          'project_sync',
-          'workflow_job_template',
-        ].includes(nodeType)
-      ) {
-        setShowApprovalStep(false);
-        setShowResourceStep(true);
-      } else if (nodeType === 'approval') {
-        setShowResourceStep(false);
-        setShowApprovalStep(true);
-      }
-      setShowPreviewStep(true);
-    }
-    setTriggerNext(triggerNext + 1);
+  const handleCancel = () => {
+    clearQueryParams();
+    onClose();
   };
 
   const handleNodeTypeChange = newNodeType => {
     setNodeType(newNodeType);
-    setShowResourceStep(false);
-    setShowApprovalStep(false);
-    setShowPreviewStep(false);
     setNodeResource(null);
     setApprovalName('');
     setApprovalDescription('');
@@ -168,101 +125,39 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
   };
 
   const steps = [
+    ...(askLinkType
+      ? [
+          {
+            name: i18n._(t`Run Type`),
+            key: 'run_type',
+            component: (
+              <RunStep linkType={linkType} updateLinkType={setLinkType} />
+            ),
+            enableNext: linkType !== null,
+          },
+        ]
+      : []),
     {
-      name: node ? i18n._(t`Node Type`) : i18n._(t`Run/Node Type`),
-      key: 'node_type',
+      name: i18n._(t`Node Type`),
+      key: 'node_resource',
+      enableNext:
+        (nodeType !== 'approval' && nodeResource !== null) ||
+        (nodeType === 'approval' && approvalName !== ''),
       component: (
         <NodeTypeStep
           nodeType={nodeType}
           updateNodeType={handleNodeTypeChange}
-          askLinkType={askLinkType}
-          linkType={linkType}
-          updateLinkType={setLinkType}
+          nodeResource={nodeResource}
+          updateNodeResource={setNodeResource}
+          name={approvalName}
+          updateName={setApprovalName}
+          description={approvalDescription}
+          updateDescription={setApprovalDescription}
+          timeout={approvalTimeout}
+          updateTimeout={setApprovalTimeout}
         />
       ),
-      enableNext: nodeType !== null,
     },
-    ...(showResourceStep
-      ? [
-          {
-            name: i18n._(t`Select Node Resource`),
-            key: 'node_resource',
-            enableNext: nodeResource !== null,
-            component: (
-              <NodeResourceStep
-                nodeType={nodeType}
-                search={resourceSearch}
-                nodeResource={nodeResource}
-                updateNodeResource={setNodeResource}
-              />
-            ),
-          },
-        ]
-      : []),
-    ...(showApprovalStep
-      ? [
-          {
-            name: i18n._(t`Configure Approval`),
-            key: 'approval',
-            component: (
-              <NodeApprovalStep
-                name={approvalName}
-                updateName={setApprovalName}
-                description={approvalDescription}
-                updateDescription={setApprovalDescription}
-                timeout={approvalTimeout}
-                updateTimeout={setApprovalTimeout}
-              />
-            ),
-            enableNext: approvalName !== '',
-          },
-        ]
-      : []),
-    ...(showPreviewStep
-      ? [
-          {
-            name: i18n._(t`Preview`),
-            key: 'preview',
-            component: (
-              <>
-                {nodeType === 'approval' && (
-                  <ApprovalPreviewStep
-                    name={approvalName}
-                    description={approvalDescription}
-                    timeout={approvalTimeout}
-                    linkType={linkType}
-                  />
-                )}
-                {nodeType === 'job_template' && (
-                  <JobTemplatePreviewStep
-                    jobTemplate={nodeResource}
-                    linkType={linkType}
-                  />
-                )}
-                {nodeType === 'inventory_source_sync' && (
-                  <InventorySyncPreviewStep
-                    inventorySource={nodeResource}
-                    linkType={linkType}
-                  />
-                )}
-                {nodeType === 'project_sync' && (
-                  <ProjectSyncPreviewStep
-                    project={nodeResource}
-                    linkType={linkType}
-                  />
-                )}
-                {nodeType === 'workflow_job_template' && (
-                  <WorkflowJobTemplatePreviewStep
-                    workflowJobTemplate={nodeResource}
-                    linkType={linkType}
-                  />
-                )}
-              </>
-            ),
-            enableNext: true,
-          },
-        ]
-      : []),
   ];
 
   steps.forEach((step, n) => {
@@ -272,20 +167,25 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
   const CustomFooter = (
     <WizardFooter>
       <WizardContextConsumer>
-        {({ activeStep, onNext, onBack, onClose }) => (
+        {({ activeStep, onNext, onBack }) => (
           <>
             <NodeNextButton
               triggerNext={triggerNext}
               activeStep={activeStep}
               onNext={onNext}
-              onClick={handleNextClick}
+              onClick={() => setTriggerNext(triggerNext + 1)}
+              buttonText={
+                activeStep.key === 'node_resource'
+                  ? i18n._(t`Save`)
+                  : i18n._(t`Next`)
+              }
             />
             {activeStep && activeStep.id !== 1 && (
               <Button variant="secondary" onClick={onBack}>
                 {i18n._(t`Back`)}
               </Button>
             )}
-            <Button variant="link" onClick={onClose}>
+            <Button variant="link" onClick={handleCancel}>
               {i18n._(t`Cancel`)}
             </Button>
           </>
@@ -294,17 +194,19 @@ function NodeModal({ i18n, title, onClose, onSave, node, askLinkType }) {
     </WizardFooter>
   );
 
+  const wizardTitle = nodeResource ? `${title} | ${nodeResource.name}` : title;
+
   return (
     <Wizard
       style={{ overflow: 'scroll' }}
       isOpen
       steps={steps}
-      title={title}
-      onClose={onClose}
+      title={wizardTitle}
+      onClose={handleCancel}
       onSave={handleSaveNode}
       footer={CustomFooter}
     />
   );
 }
 
-export default withI18n()(NodeModal);
+export default withI18n()(withRouter(NodeModal));

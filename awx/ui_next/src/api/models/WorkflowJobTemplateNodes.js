@@ -51,6 +51,10 @@ class WorkflowJobTemplateNodes extends Base {
       disassociate: true,
     });
   }
+
+  readCredentials(id) {
+    return this.http.get(`${this.baseUrl}${id}/credentials/`);
+  }
 }
 
 export default WorkflowJobTemplateNodes;

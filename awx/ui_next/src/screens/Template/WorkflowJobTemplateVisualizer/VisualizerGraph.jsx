@@ -31,18 +31,6 @@ const WorkflowSVG = styled.svg`
   background-color: #f6f6f6;
 `;
 
-// const KeyWrapper = styled.div`
-//   position: absolute;
-//   right: 20px;
-//   top: 76px;
-// `;
-
-// const ToolsWrapper = styled.div`
-//   position: absolute;
-//   right: 200px;
-//   top: 76px;
-// `;
-
 function VisualizerGraph({
   links,
   nodes,
@@ -56,6 +44,7 @@ function VisualizerGraph({
   onStartAddLinkClick,
   onConfirmAddLinkClick,
   onCancelAddLinkClick,
+  onViewNodeClick,
   addingLink,
   addLinkSourceNode,
   showKey,
@@ -310,6 +299,7 @@ function VisualizerGraph({
                     onDeleteNodeClick={onDeleteNodeClick}
                     onStartAddLinkClick={onStartAddLinkClick}
                     onConfirmAddLinkClick={onConfirmAddLinkClick}
+                    onViewNodeClick={onViewNodeClick}
                     addingLink={addingLink}
                     isAddLinkSourceNode={
                       addLinkSourceNode && addLinkSourceNode.id === node.id

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { string, number } from 'prop-types';
+import { string, node, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
@@ -21,7 +21,7 @@ function getValueAsMode(value, mode) {
   return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
 }
 
-function VariablesDetail({ value, label, rows }) {
+function VariablesDetail({ value = '---', label, rows }) {
   const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
   const [currentValue, setCurrentValue] = useState(value || '---');
   const [error, setError] = useState(null);
@@ -90,7 +90,7 @@ function VariablesDetail({ value, label, rows }) {
 }
 VariablesDetail.propTypes = {
   value: string.isRequired,
-  label: string.isRequired,
+  label: node.isRequired,
   rows: number,
 };
 VariablesDetail.defaultProps = {
