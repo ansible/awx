@@ -74,21 +74,6 @@ class TaskManager():
                            key=lambda task: task.created)
         return all_tasks
 
-
-    def get_latest_project_update_tasks(self, all_sorted_tasks):
-        project_ids = set()
-        for task in all_sorted_tasks:
-            if isinstance(task, Job):
-                project_ids.add(task.project_id)
-        return ProjectUpdate.objects.filter(id__in=project_ids)
-
-    def get_latest_inventory_update_tasks(self, all_sorted_tasks):
-        inventory_ids = set()
-        for task in all_sorted_tasks:
-            if isinstance(task, Job):
-                inventory_ids.add(task.inventory_id)
-        return InventoryUpdate.objects.filter(id__in=inventory_ids)
-
     def get_running_workflow_jobs(self):
         graph_workflow_jobs = [wf for wf in
                                WorkflowJob.objects.filter(status='running')]
@@ -199,9 +184,6 @@ class TaskManager():
                 if workflow_job.spawned_by_workflow:
                     schedule_task_manager()
         return result
-
-    def get_dependent_jobs_for_inv_and_proj_update(self, job_obj):
-        return [{'type': j.model_to_str(), 'id': j.id} for j in job_obj.dependent_jobs.all()]
 
     def start_task(self, task, rampart_group, dependent_tasks=None, instance=None):
         from awx.main.tasks import handle_work_error, handle_work_success
@@ -531,13 +513,6 @@ class TaskManager():
 
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
-
-    def would_exceed_capacity(self, task, instance_group):
-        current_capacity = self.graph[instance_group]['consumed_capacity']
-        capacity_total = self.graph[instance_group]['capacity_total']
-        if current_capacity == 0:
-            return False
-        return (task.task_impact + current_capacity > capacity_total)
 
     def consume_capacity(self, task, instance_group):
         logger.debug('{} consumed {} capacity units from {} with prior total of {}'.format(
