@@ -122,10 +122,19 @@ def update_fields(module, p):
     params = p.copy()
 
     params_update = {}
+    job_template = params.get('job_template')
     extra_vars = params.get('extra_vars')
+    try:
+        ask_extra_vars = tower_cli.get_resource('job_template').get(name=job_template)['ask_variables_on_launch']
+        survey_enabled = tower_cli.get_resource('job_template').get(name=job_template)['survey_enabled']
+    except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
+        module.fail_json(msg='Failed to get ask_extra_vars parameter, job template not found: {0}'.format(excinfo), changed=False)
 
-    if extra_vars:
+    if extra_vars and (ask_extra_vars or survey_enabled):
         params_update['extra_vars'] = [json.dumps(extra_vars)]
+
+    elif extra_vars:
+        module.fail_json(msg="extra_vars is set on launch but the Job Template does not have ask_extra_vars or survey_enabled set to True.")
 
     params.update(params_update)
     return params
