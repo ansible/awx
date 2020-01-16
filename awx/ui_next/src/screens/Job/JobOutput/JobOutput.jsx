@@ -121,18 +121,31 @@ class JobOutput extends Component {
         currentlyLoading: currentlyLoading.concat(loadRange),
       }));
     try {
-      const {
-        data: { results: newResults = [], count },
-      } = await JobsAPI.readEvents(job.id, type, {
-        page_size: 50,
-        order_by: 'start_line',
-      });
+      const [
+        {
+          data: { results: newResults },
+        },
+        {
+          data: {
+            results: [{ counter: lastEventCounter }],
+          },
+        },
+      ] = await Promise.all([
+        JobsAPI.readEvents(job.id, type, {
+          page_size: 50,
+          order_by: 'start_line',
+        }),
+        JobsAPI.readEvents(job.id, type, {
+          page_size: 1,
+          order_by: '-counter',
+        }),
+      ]);
       this._isMounted &&
         this.setState(({ results }) => {
           newResults.forEach(jobEvent => {
             results[jobEvent.counter] = jobEvent;
           });
-          return { results, remoteRowCount: count + 1 };
+          return { results, remoteRowCount: lastEventCounter + 1 };
         });
     } catch (err) {
       this.setState({ contentError: err });
@@ -269,9 +282,18 @@ class JobOutput extends Component {
     this.scrollToRow(0);
   }
 
-  handleScrollLast() {
-    const { remoteRowCount } = this.state;
-    this.scrollToRow(remoteRowCount - 1);
+  async handleScrollLast() {
+    const { job, type } = this.props;
+    const {
+      data: {
+        results: [{ counter }],
+      },
+    } = await JobsAPI.readEvents(job.id, type, {
+      page_size: 1,
+      order_by: '-counter',
+    });
+    this.setState({ remoteRowCount: counter + 1 });
+    this.scrollToRow(counter);
   }
 
   handleResize({ width }) {
