@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { LabelsAPI } from '@api';
-import usePFSelect from '@components/MultiSelect/usePFSelect';
+import { useSyncedSelectValue } from '@components/MultiSelect';
 
 async function loadLabelOptions(setLabels, onError) {
   let labels;
@@ -30,7 +30,7 @@ async function loadLabelOptions(setLabels, onError) {
 }
 
 function LabelSelect({ value, placeholder, onChange, onError }) {
-  const { selections, onSelect, options, setOptions } = usePFSelect(
+  const { selections, onSelect, options, setOptions } = useSyncedSelectValue(
     value,
     onChange
   );

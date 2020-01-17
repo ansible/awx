@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
   between objects in `value` and the corresponding objects loaded as
   `options` (based on matched id value).
  */
-export default function usePFSelect(value, onChange) {
+export default function useSyncedSelectValue(value, onChange) {
   const [options, setOptions] = useState([]);
   const [selections, setSelections] = useState([]);
 
