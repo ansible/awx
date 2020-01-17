@@ -162,6 +162,9 @@ class EncryptedCacheProxy(object):
 
     def get(self, key, **kwargs):
         value = self.cache.get(key, **kwargs)
+        for server in getattr(self.cache._cache, 'servers', []):
+            if server.socket is None:
+                logger.error(f'could not reach {server}; is memcached running?')
         value = self._handle_encryption(self.decrypter, key, value)
         logger.debug('cache get(%r, %r) -> %r', key, empty, filter_sensitive(self.registry, key, value))
         return value
