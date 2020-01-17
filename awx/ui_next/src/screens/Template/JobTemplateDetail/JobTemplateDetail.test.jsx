@@ -143,4 +143,19 @@ describe('<JobTemplateDetail />', () => {
       template.summary_fields.credentials[0]
     );
   });
+  test('should render SCM_Branch', async () => {
+    const mockTemplate = { ...template };
+    mockTemplate.scm_branch = 'Foo branch';
+
+    const wrapper = mountWithContexts(
+      <JobTemplateDetail template={mockTemplate} />
+    );
+    await waitForElement(
+      wrapper,
+      'JobTemplateDetail',
+      el => el.state('hasContentLoading') === false
+    );
+    const SCMBranch = wrapper.find('Detail[label="SCM Branch"]');
+    expect(SCMBranch.prop('value')).toBe('Foo branch');
+  });
 });

@@ -57,7 +57,9 @@ function InventoryAdd() {
         );
         await Promise.all(associatePromises);
       }
-      const url = history.location.pathname.search('smart')
+      const url = history.location.pathname.startsWith(
+        '/inventories/smart_inventory'
+      )
         ? `/inventories/smart_inventory/${inventoryId}/details`
         : `/inventories/inventory/${inventoryId}/details`;
 

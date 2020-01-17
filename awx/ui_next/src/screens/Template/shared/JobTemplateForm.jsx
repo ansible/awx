@@ -28,7 +28,7 @@ import {
   ProjectLookup,
   MultiCredentialsLookup,
 } from '@components/Lookup';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 
@@ -81,16 +81,31 @@ class JobTemplateForm extends Component {
     this.loadRelatedInstanceGroups = this.loadRelatedInstanceGroups.bind(this);
     this.handleProjectUpdate = this.handleProjectUpdate.bind(this);
     this.setContentError = this.setContentError.bind(this);
+    this.fetchProject = this.fetchProject.bind(this);
   }
 
   componentDidMount() {
     const { validateField } = this.props;
     this.setState({ contentError: null, hasContentLoading: true });
     // TODO: determine when LabelSelect has finished loading labels
-    Promise.all([this.loadRelatedInstanceGroups()]).then(() => {
-      this.setState({ hasContentLoading: false });
-      validateField('project');
-    });
+    Promise.all([this.loadRelatedInstanceGroups(), this.fetchProject()]).then(
+      () => {
+        this.setState({ hasContentLoading: false });
+        validateField('project');
+      }
+    );
+  }
+
+  async fetchProject() {
+    const { project } = this.state;
+    if (project && project.id) {
+      try {
+        const { data: projectData } = await ProjectsAPI.readDetail(project.id);
+        this.setState({ project: projectData });
+      } catch (err) {
+        this.setState({ contentError: err });
+      }
+    }
   }
 
   async loadRelatedInstanceGroups() {
@@ -124,6 +139,8 @@ class JobTemplateForm extends Component {
   handleProjectUpdate(project) {
     const { setFieldValue } = this.props;
     setFieldValue('project', project.id);
+    setFieldValue('playbook', 0);
+    setFieldValue('scm_branch', '');
     this.setState({ project });
   }
 
@@ -147,6 +164,7 @@ class JobTemplateForm extends Component {
       i18n,
       template,
     } = this.props;
+
     const jobTypeOptions = [
       {
         value: '',
@@ -269,6 +287,14 @@ class JobTemplateForm extends Component {
               />
             )}
           </Field>
+          {project && project.allow_override && (
+            <FormField
+              id="scm_branch"
+              name="scm_branch"
+              type="text"
+              label={i18n._(t`SCM Branch`)}
+            />
+          )}
           <Field
             name="playbook"
             validate={required(i18n._(t`Select a value for this field`), i18n)}
@@ -583,6 +609,7 @@ const FormikApp = withFormik({
       job_type: template.job_type || 'run',
       inventory: template.inventory || '',
       project: template.project || '',
+      scm_branch: template.scm_branch || '',
       playbook: template.playbook || '',
       labels: summary_fields.labels.results || [],
       forks: template.forks || 0,

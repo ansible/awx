@@ -15,6 +15,7 @@ function PlaybookSelect({
   i18n,
 }) {
   const [options, setOptions] = useState([]);
+
   useEffect(() => {
     if (!projectId) {
       return;
@@ -28,6 +29,7 @@ function PlaybookSelect({
           label: playbook,
           isDisabled: false,
         }));
+
         opts.unshift({
           value: '',
           key: '',
@@ -40,7 +42,6 @@ function PlaybookSelect({
       }
     })();
   }, [projectId, i18n, onError]);
-
   return (
     <AnsibleSelect
       id="template-playbook"
