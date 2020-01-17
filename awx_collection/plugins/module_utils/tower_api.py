@@ -331,7 +331,7 @@ class TowerModule(AnsibleModule):
                 self.authenticated = False
             except(Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
-                super().fail_json(msg='Failed to release token: {0}'.format(e))
+                self.warn('Failed to release tower token {0}: {1}'.format(self.oauth_token_id, e))
 
     def fail_json(self, **kwargs):
         # Try to logout if we are authenticated
