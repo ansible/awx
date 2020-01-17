@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
@@ -46,31 +47,31 @@ class Hosts extends Component {
   };
 
   render() {
-    const { match, history, location } = this.props;
+    const { match } = this.props;
     const { breadcrumbConfig } = this.state;
 
     return (
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-        <Switch>
-          <Route path={`${match.path}/add`} render={() => <HostAdd />} />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <Host
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <HostList />} />
-        </Switch>
+        <PageSection>
+          <Switch>
+            <Route path={`${match.path}/add`} render={() => <HostAdd />} />
+            <Route
+              path={`${match.path}/:id`}
+              render={() => (
+                <Config>
+                  {({ me }) => (
+                    <Host
+                      setBreadcrumb={this.setBreadcrumbConfig}
+                      me={me || {}}
+                    />
+                  )}
+                </Config>
+              )}
+            />
+            <Route path={`${match.path}`} render={() => <HostList />} />
+          </Switch>
+        </PageSection>
       </Fragment>
     );
   }

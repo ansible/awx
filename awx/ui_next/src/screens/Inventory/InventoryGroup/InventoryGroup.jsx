@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-
 import { Switch, Route, withRouter, Link, Redirect } from 'react-router-dom';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+
 import { GroupsAPI } from '@api';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
@@ -40,10 +41,14 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
 
   const tabsArray = [
     {
-      name: i18n._(t`Return to Groups`),
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Groups`)}
+        </>
+      ),
       link: `/inventories/inventory/${inventory.id}/groups`,
       id: 99,
-      isNestedTabs: true,
     },
     {
       name: i18n._(t`Details`),
@@ -65,9 +70,10 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
     },
   ];
 
-  // In cases where a user manipulates the url such that they try to navigate to a Inventory Group
-  // that is not associated with the Inventory Id in the Url this Content Error is thrown.
-  // Inventory Groups have a 1: 1 relationship to Inventories thus their Ids must corrolate.
+  // In cases where a user manipulates the url such that they try to navigate to a
+  // Inventory Group that is not associated with the Inventory Id in the Url this
+  // Content Error is thrown. Inventory Groups have a 1:1 relationship to Inventories
+  // thus their Ids must corrolate.
 
   if (contentLoading) {
     return <ContentLoading />;

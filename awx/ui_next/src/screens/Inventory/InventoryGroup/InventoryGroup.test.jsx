@@ -62,10 +62,10 @@ describe('<InventoryGroup />', () => {
   test('renders successfully', async () => {
     expect(wrapper.length).toBe(1);
   });
-  test('expect all tabs to exist, including Return to Groups', async () => {
-    expect(wrapper.find('button[aria-label="Return to Groups"]').length).toBe(
-      1
-    );
+  test('expect all tabs to exist, including Back to Groups', async () => {
+    expect(
+      wrapper.find('button[link="/inventories/inventory/1/groups"]').length
+    ).toBe(1);
     expect(wrapper.find('button[aria-label="Details"]').length).toBe(1);
     expect(wrapper.find('button[aria-label="Related Groups"]').length).toBe(1);
     expect(wrapper.find('button[aria-label="Hosts"]').length).toBe(1);

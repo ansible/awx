@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { InventoriesAPI, HostsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import InventoryHosts from './InventoryHosts';
+import InventoryHostList from './InventoryHostList';
 import mockInventory from '../shared/data.inventory.json';
 
 jest.mock('@api');
@@ -62,7 +62,7 @@ const mockHosts = [
   },
 ];
 
-describe('<InventoryHosts />', () => {
+describe('<InventoryHostList />', () => {
   let wrapper;
 
   beforeEach(async () => {
@@ -81,7 +81,7 @@ describe('<InventoryHosts />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryHosts />);
+      wrapper = mountWithContexts(<InventoryHostList />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
@@ -91,7 +91,7 @@ describe('<InventoryHosts />', () => {
   });
 
   test('initially renders successfully', () => {
-    expect(wrapper.find('InventoryHosts').length).toBe(1);
+    expect(wrapper.find('InventoryHostList').length).toBe(1);
   });
 
   test('should fetch hosts from api and render them in the list', async () => {
@@ -261,7 +261,9 @@ describe('<InventoryHosts />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryHosts inventory={mockInventory} />);
+      wrapper = mountWithContexts(
+        <InventoryHostList inventory={mockInventory} />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
@@ -272,7 +274,9 @@ describe('<InventoryHosts />', () => {
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper = mountWithContexts(<InventoryHosts inventory={mockInventory} />);
+      wrapper = mountWithContexts(
+        <InventoryHostList inventory={mockInventory} />
+      );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });

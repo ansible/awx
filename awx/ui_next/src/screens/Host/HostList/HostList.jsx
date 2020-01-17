@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 
 import { HostsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -180,76 +180,74 @@ class HostsList extends Component {
 
     return (
       <Fragment>
-        <PageSection>
-          <Card>
-            <PaginatedDataList
-              contentError={contentError}
-              hasContentLoading={hasContentLoading}
-              items={hosts}
-              itemCount={itemCount}
-              pluralizedItemName={i18n._(t`Hosts`)}
-              qsConfig={QS_CONFIG}
-              onRowClick={this.handleSelect}
-              toolbarSearchColumns={[
-                {
-                  name: i18n._(t`Name`),
-                  key: 'name',
-                  isDefault: true,
-                },
-                {
-                  name: i18n._(t`Created By (Username)`),
-                  key: 'created_by__username',
-                },
-                {
-                  name: i18n._(t`Modified By (Username)`),
-                  key: 'modified_by__username',
-                },
-              ]}
-              toolbarSortColumns={[
-                {
-                  name: i18n._(t`Name`),
-                  key: 'name',
-                },
-              ]}
-              renderToolbar={props => (
-                <DataListToolbar
-                  {...props}
-                  showSelectAll
-                  isAllSelected={isAllSelected}
-                  onSelectAll={this.handleSelectAll}
-                  qsConfig={QS_CONFIG}
-                  additionalControls={[
-                    <ToolbarDeleteButton
-                      key="delete"
-                      onDelete={this.handleHostDelete}
-                      itemsToDelete={selected}
-                      pluralizedItemName={i18n._(t`Hosts`)}
-                    />,
-                    canAdd ? (
-                      <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                    ) : null,
-                  ]}
-                />
-              )}
-              renderItem={o => (
-                <HostListItem
-                  key={o.id}
-                  host={o}
-                  detailUrl={`${match.url}/${o.id}`}
-                  isSelected={selected.some(row => row.id === o.id)}
-                  onSelect={() => this.handleSelect(o)}
-                  toggleHost={this.handleHostToggle}
-                  toggleLoading={toggleLoading === o.id}
-                />
-              )}
-              emptyStateControls={
-                canAdd ? (
-                  <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                ) : null
-              }
-            />
-          </Card>
-        </PageSection>
+        <Card>
+          <PaginatedDataList
+            contentError={contentError}
+            hasContentLoading={hasContentLoading}
+            items={hosts}
+            itemCount={itemCount}
+            pluralizedItemName={i18n._(t`Hosts`)}
+            qsConfig={QS_CONFIG}
+            onRowClick={this.handleSelect}
+            toolbarSearchColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+                isDefault: true,
+              },
+              {
+                name: i18n._(t`Created By (Username)`),
+                key: 'created_by__username',
+              },
+              {
+                name: i18n._(t`Modified By (Username)`),
+                key: 'modified_by__username',
+              },
+            ]}
+            toolbarSortColumns={[
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+            ]}
+            renderToolbar={props => (
+              <DataListToolbar
+                {...props}
+                showSelectAll
+                isAllSelected={isAllSelected}
+                onSelectAll={this.handleSelectAll}
+                qsConfig={QS_CONFIG}
+                additionalControls={[
+                  <ToolbarDeleteButton
+                    key="delete"
+                    onDelete={this.handleHostDelete}
+                    itemsToDelete={selected}
+                    pluralizedItemName={i18n._(t`Hosts`)}
+                  />,
+                  canAdd ? (
+                    <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+                  ) : null,
+                ]}
+              />
+            )}
+            renderItem={o => (
+              <HostListItem
+                key={o.id}
+                host={o}
+                detailUrl={`${match.url}/${o.id}/details`}
+                isSelected={selected.some(row => row.id === o.id)}
+                onSelect={() => this.handleSelect(o)}
+                onToggleHost={this.handleHostToggle}
+                toggleLoading={toggleLoading === o.id}
+              />
+            )}
+            emptyStateControls={
+              canAdd ? (
+                <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
+              ) : null
+            }
+          />
+        </Card>
         {toggleError && !toggleLoading && (
           <AlertModal
             variant="danger"
