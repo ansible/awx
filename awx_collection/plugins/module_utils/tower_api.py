@@ -102,9 +102,19 @@ class TowerModule(AnsibleModule):
         return self.make_request('GET', endpoint, **kwargs)
 
     def patch_endpoint(self, endpoint, *args, **kwargs):
+        # Handle check mode
+        if self.check_mode:
+            self.json_output['changed'] = True
+            self.exit_json(**self.json_output)
+
         return self.make_request('PATCH', endpoint, **kwargs)
 
     def post_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
+        # Handle check mode
+        if self.check_mode:
+            self.json_output['changed'] = True
+            self.exit_json(**self.json_output)
+          
         response = self.make_request('POST', endpoint, **kwargs)
         if response['status_code'] == 201:
             self.json_output['changed'] = True
@@ -117,6 +127,11 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']))
 
     def delete_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
+        # Handle check mode
+        if self.check_mode:
+            self.json_output['changed'] = True
+            self.exit_json(**self.json_output)
+
         response = self.make_request('DELETE', endpoint, **kwargs)
         if not handle_return:
             return response
@@ -298,6 +313,12 @@ class TowerModule(AnsibleModule):
             # If the two items don't match and we are not comparing '' to None
             if existing_item.get(field, None) != new_item.get(field, None) and not (existing_item.get(field, None) is None and new_item.get(field, None) == ''):
                 # something dosent match so lets do it
+
+                # Handle check mode
+                if self.check_mode:
+                    existing_return['changed'] = True
+                    self.exit_json(**existing_return)
+
                 response = self.patch_endpoint(existing_item['url'], **{'data': new_item})
                 if not handle_response:
                     return response
