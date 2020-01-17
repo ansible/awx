@@ -57,7 +57,7 @@ def test_empty_in(empty_value):
 @pytest.mark.parametrize(u"valid_value", [u'foo', u'foo,'])
 def test_valid_in(valid_value):
     field_lookup = FieldLookupBackend()
-    value, new_lookup = field_lookup.value_to_python(JobTemplate, 'project__name__in', valid_value)
+    value, new_lookup, _ = field_lookup.value_to_python(JobTemplate, 'project__name__in', valid_value)
     assert 'foo' in value
 
 
