@@ -1,42 +1,67 @@
 import React, { useState } from 'react';
 import { func, string } from 'prop-types';
-import MultiSelect from './MultiSelect';
+import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 
 function arrayToString(tags) {
-  return tags.map(v => v.name).join(',');
+  return tags.join(',');
 }
 
 function stringToArray(value) {
-  return value
-    .split(',')
-    .filter(val => !!val)
-    .map(val => ({
-      id: val,
-      name: val,
-    }));
+  return value.split(',').filter(val => !!val);
 }
 
-/*
- * Adapter providing a simplified API to a MultiSelect. The value
- * is a comma-separated string.
- */
 function TagMultiSelect({ onChange, value }) {
-  const [options, setOptions] = useState(stringToArray(value));
+  const selections = stringToArray(value);
+  const [options, setOptions] = useState(selections);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const onSelect = (event, item) => {
+    let newValue;
+    if (selections.includes(item)) {
+      newValue = selections.filter(i => i !== item);
+    } else {
+      newValue = selections.concat(item);
+    }
+    onChange(arrayToString(newValue));
+  };
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const renderOptions = opts => {
+    return opts.map(option => (
+      <SelectOption key={option} value={option}>
+        {option}
+      </SelectOption>
+    ));
+  };
 
   return (
-    <MultiSelect
-      onChange={val => {
-        onChange(arrayToString(val));
+    <Select
+      variant={SelectVariant.typeaheadMulti}
+      onToggle={toggleExpanded}
+      onSelect={onSelect}
+      onClear={() => onChange('')}
+      onFilter={event => {
+        const str = event.target.value.toLowerCase();
+        const matches = options.filter(o => o.toLowerCase().includes(str));
+        return renderOptions(matches);
       }}
-      onAddNewItem={newItem => {
-        if (!options.find(o => o.name === newItem.name)) {
-          setOptions(options.concat(newItem));
+      isCreatable
+      onCreateOption={name => {
+        name = name.trim();
+        if (!options.includes(name)) {
+          setOptions(options.concat(name));
         }
+        return name;
       }}
-      value={stringToArray(value)}
-      options={options}
-      createNewItem={name => ({ id: name, name })}
-    />
+      selections={selections}
+      isExpanded={isExpanded}
+      ariaLabelledBy="tag-select"
+    >
+      {renderOptions(options)}
+    </Select>
   );
 }
 

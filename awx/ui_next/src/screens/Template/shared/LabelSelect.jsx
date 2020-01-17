@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
-import MultiSelect from '@components/MultiSelect';
+import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { LabelsAPI } from '@api';
+import { useSyncedSelectValue } from '@components/MultiSelect';
 
 async function loadLabelOptions(setLabels, onError) {
   let labels;
@@ -21,31 +22,55 @@ async function loadLabelOptions(setLabels, onError) {
         page_size: 200,
         order_by: 'name',
       });
-      labels = labels.concat(results);
+      setLabels(labels.concat(results));
     }
-    setLabels(labels);
   } catch (err) {
     onError(err);
   }
 }
 
-function LabelSelect({ value, onChange, onError }) {
-  const [options, setOptions] = useState([]);
+function LabelSelect({ value, placeholder, onChange, onError }) {
+  const { selections, onSelect, options, setOptions } = useSyncedSelectValue(
+    value,
+    onChange
+  );
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   useEffect(() => {
     loadLabelOptions(setOptions, onError);
-  }, [onError]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
+  const renderOptions = opts => {
+    return opts.map(option => (
+      <SelectOption key={option.id} value={option}>
+        {option.name}
+      </SelectOption>
+    ));
+  };
 
   return (
-    <MultiSelect
-      onChange={onChange}
-      value={value}
-      options={options}
-      createNewItem={name => ({
-        id: name,
-        name,
-        isNew: true,
-      })}
-    />
+    <Select
+      variant={SelectVariant.typeaheadMulti}
+      onToggle={toggleExpanded}
+      onSelect={onSelect}
+      onClear={() => onChange([])}
+      onFilter={event => {
+        const str = event.target.value.toLowerCase();
+        const matches = options.filter(o => o.name.toLowerCase().includes(str));
+        return renderOptions(matches);
+      }}
+      selections={selections}
+      isExpanded={isExpanded}
+      ariaLabelledBy="label-select"
+      placeholderText={placeholder}
+    >
+      {renderOptions(options)}
+    </Select>
   );
 }
 LabelSelect.propTypes = {
@@ -55,7 +80,12 @@ LabelSelect.propTypes = {
       name: string.isRequired,
     })
   ).isRequired,
+  placeholder: string,
+  onChange: func.isRequired,
   onError: func.isRequired,
+};
+LabelSelect.defaultProps = {
+  placeholder: '',
 };
 
 export default LabelSelect;
