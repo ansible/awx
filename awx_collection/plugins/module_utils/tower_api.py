@@ -316,12 +316,22 @@ class TowerModule(AnsibleModule):
         self.exit_json(**existing_return)
 
     def logout(self):
-        if self.oauth_token_id:
+        if self.oauth_token_id != None and self.username and self.password:
+            # Attempt to delete our current token from /api/v2/tokens/
+            # Post to the tokens endpoint with baisc auth to try and get a token
+            api_token_url = (self.url._replace(path='/api/v2/tokens/{0}/'.format(self.oauth_token_id))).geturl()
+
             try:
-                self.delete_endpoint('tokens/{0}/'.format(self.oauth_token_id), handle_return=False)
+                response = self.session.open(
+                    'DELETE', api_token_url,
+                    validate_certs=self.verify_ssl, follow_redirects=True,
+                    force_basic_auth=True, url_username=self.username, url_password=self.password
+                )
+                self.oauth_token_id = None
                 self.authenticated = False
-            except Exception as e:
-                self.fail_json(msg="Failed to logut: {0}".format(e))
+            except(Exception) as e:
+                # Sanity check: Did the server send back some kind of internal error?
+                super().fail_json(msg='Failed to release token: {0}'.format(e))
 
     def fail_json(self, **kwargs):
         # Try to logout if we are authenticated
@@ -332,3 +342,4 @@ class TowerModule(AnsibleModule):
         # Try to logout if we are authenticated
         self.logout()
         super().exit_json(**kwargs)
+
