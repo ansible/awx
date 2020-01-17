@@ -1,7 +1,6 @@
 import React from 'react';
-
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 
 import HostForm from './HostForm';
 
@@ -31,25 +30,32 @@ describe('<HostForm />', () => {
     jest.clearAllMocks();
   });
 
-  test('changing inputs should update form values', () => {
-    const wrapper = mountWithContexts(
-      <HostForm
-        host={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
+  test('changing inputs should update form values', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <HostForm
+          host={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          me={meConfig.me}
+        />
+      );
+    });
 
-    const form = wrapper.find('Formik');
-    wrapper.find('input#host-name').simulate('change', {
-      target: { value: 'new foo', name: 'name' },
+    await act(async () => {
+      wrapper.find('input#host-name').simulate('change', {
+        target: { value: 'new foo', name: 'name' },
+      });
+      wrapper.find('input#host-description').simulate('change', {
+        target: { value: 'new bar', name: 'description' },
+      });
     });
-    expect(form.state('values').name).toEqual('new foo');
-    wrapper.find('input#host-description').simulate('change', {
-      target: { value: 'new bar', name: 'description' },
-    });
-    expect(form.state('values').description).toEqual('new bar');
+    wrapper.update();
+    expect(wrapper.find('input#host-name').prop('value')).toEqual('new foo');
+    expect(wrapper.find('input#host-description').prop('value')).toEqual(
+      'new bar'
+    );
   });
 
   test('calls handleSubmit when form submitted', async () => {
@@ -63,8 +69,9 @@ describe('<HostForm />', () => {
       />
     );
     expect(handleSubmit).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     expect(handleSubmit).toHaveBeenCalled();
   });
 

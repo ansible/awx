@@ -16,7 +16,8 @@ const InsightsSubForm = ({
     <Field
       name="credential"
       validate={required(i18n._(t`Select a value for this field`), i18n)}
-      render={({ form }) => (
+    >
+      {({ form }) => (
         <CredentialLookup
           credentialTypeId={credential.typeId}
           label={i18n._(t`Insights Credential`)}
@@ -31,7 +32,7 @@ const InsightsSubForm = ({
           required
         />
       )}
-    />
+    </Field>
     <ScmTypeOptions hideAllowOverride scmUpdateOnLaunch={scmUpdateOnLaunch} />
   </>
 );

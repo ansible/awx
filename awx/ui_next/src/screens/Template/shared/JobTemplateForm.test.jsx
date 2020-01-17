@@ -128,43 +128,59 @@ describe('<JobTemplateForm />', () => {
     });
 
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    const form = wrapper.find('Formik');
-    wrapper.find('input#template-name').simulate('change', {
-      target: { value: 'new foo', name: 'name' },
-    });
-    expect(form.state('values').name).toEqual('new foo');
-    wrapper.find('input#template-description').simulate('change', {
-      target: { value: 'new bar', name: 'description' },
-    });
-    expect(form.state('values').description).toEqual('new bar');
-    wrapper.find('AnsibleSelect[name="job_type"]').simulate('change', {
-      target: { value: 'new job type', name: 'job_type' },
-    });
-    expect(form.state('values').job_type).toEqual('new job type');
-    wrapper.find('InventoryLookup').invoke('onChange')({
-      id: 3,
-      name: 'inventory',
-    });
-    expect(form.state('values').inventory).toEqual(3);
     await act(async () => {
+      wrapper.find('input#template-name').simulate('change', {
+        target: { value: 'new foo', name: 'name' },
+      });
+      wrapper.find('input#template-description').simulate('change', {
+        target: { value: 'new bar', name: 'description' },
+      });
+      wrapper.find('AnsibleSelect[name="job_type"]').simulate('change', {
+        target: { value: 'new job type', name: 'job_type' },
+      });
+      wrapper.find('InventoryLookup').invoke('onChange')({
+        id: 3,
+        name: 'inventory',
+      });
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 4,
         name: 'project',
       });
-    });
-    expect(form.state('values').project).toEqual(4);
-    wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
-      target: { value: 'new baz type', name: 'playbook' },
-    });
-    expect(form.state('values').playbook).toEqual('new baz type');
-    await act(async () => {
+      wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
+        target: { value: 'new baz type', name: 'playbook' },
+      });
       wrapper
         .find('CredentialChip')
         .at(0)
         .prop('onClick')();
     });
-    expect(form.state('values').credentials).toEqual([
-      { id: 2, kind: 'ssh', name: 'Bar' },
+    wrapper.update();
+    expect(wrapper.find('input#template-name').prop('value')).toEqual(
+      'new foo'
+    );
+    expect(wrapper.find('input#template-description').prop('value')).toEqual(
+      'new bar'
+    );
+    expect(
+      wrapper.find('AnsibleSelect[name="job_type"]').prop('value')
+    ).toEqual('new job type');
+    expect(wrapper.find('InventoryLookup').prop('value')).toEqual({
+      id: 3,
+      name: 'inventory',
+    });
+    expect(wrapper.find('ProjectLookup').prop('value')).toEqual({
+      id: 4,
+      name: 'project',
+    });
+    expect(
+      wrapper.find('AnsibleSelect[name="playbook"]').prop('value')
+    ).toEqual('new baz type');
+    expect(wrapper.find('MultiCredentialsLookup').prop('value')).toEqual([
+      {
+        id: 2,
+        kind: 'ssh',
+        name: 'Bar',
+      },
     ]);
   });
 

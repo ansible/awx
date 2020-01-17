@@ -11,10 +11,11 @@ describe('PasswordField', () => {
         initialValues={{
           password: '',
         }}
-        render={() => (
+      >
+        {() => (
           <PasswordField id="test-password" name="password" label="Password" />
         )}
-      />
+      </Formik>
     );
     expect(wrapper).toHaveLength(1);
   });
@@ -25,10 +26,11 @@ describe('PasswordField', () => {
         initialValues={{
           password: '',
         }}
-        render={() => (
+      >
+        {() => (
           <PasswordField id="test-password" name="password" label="Password" />
         )}
-      />
+      </Formik>
     );
     expect(wrapper.find('input').prop('type')).toBe('password');
     expect(wrapper.find('EyeSlashIcon').length).toBe(1);

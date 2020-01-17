@@ -11,10 +11,8 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
 
 function CheckboxField({ id, name, label, tooltip, validate, ...rest }) {
   return (
-    <Field
-      name={name}
-      validate={validate}
-      render={({ field }) => (
+    <Field name={name} validate={validate}>
+      {({ field }) => (
         <Checkbox
           aria-label={label}
           label={
@@ -37,7 +35,7 @@ function CheckboxField({ id, name, label, tooltip, validate, ...rest }) {
           }}
         />
       )}
-    />
+    </Field>
   );
 }
 CheckboxField.propTypes = {

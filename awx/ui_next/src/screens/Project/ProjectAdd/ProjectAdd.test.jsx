@@ -97,24 +97,7 @@ describe('<ProjectAdd />', () => {
       wrapper = mountWithContexts(<ProjectAdd />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const formik = wrapper.find('Formik').instance();
-    await act(async () => {
-      const changeState = new Promise(resolve => {
-        formik.setState(
-          {
-            values: {
-              ...projectData,
-            },
-          },
-          () => resolve()
-        );
-      });
-      await changeState;
-    });
-    await act(async () => {
-      wrapper.find('form').simulate('submit');
-    });
-    wrapper.update();
+    wrapper.find('ProjectForm').invoke('handleSubmit')(projectData);
     expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
   });
 

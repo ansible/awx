@@ -13,9 +13,8 @@ function VariablesField({ id, name, label, readOnly }) {
   const [mode, setMode] = useState(YAML_MODE);
 
   return (
-    <Field
-      name={name}
-      render={({ field, form }) => (
+    <Field name={name}>
+      {({ field, form }) => (
         <div className="pf-c-form__group">
           <Split gutter="sm">
             <SplitItem>
@@ -60,7 +59,7 @@ function VariablesField({ id, name, label, readOnly }) {
           ) : null}
         </div>
       )}
-    />
+    </Field>
   );
 }
 VariablesField.propTypes = {

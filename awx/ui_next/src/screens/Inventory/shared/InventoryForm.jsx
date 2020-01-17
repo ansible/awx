@@ -41,7 +41,8 @@ function InventoryForm({
       onSubmit={values => {
         onSubmit(values);
       }}
-      render={formik => (
+    >
+      {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormField
@@ -66,7 +67,8 @@ function InventoryForm({
                 i18n._(t`Select a value for this field`),
                 i18n
               )}
-              render={({ form, field }) => (
+            >
+              {({ form, field }) => (
                 <OrganizationLookup
                   helperTextInvalid={form.errors.organization}
                   isValid={
@@ -82,12 +84,13 @@ function InventoryForm({
                   required
                 />
               )}
-            />
+            </Field>
             <Field
               id="inventory-insights_credential"
               label={i18n._(t`Insights Credential`)}
               name="insights_credential"
-              render={({ field, form }) => (
+            >
+              {({ field, form }) => (
                 <CredentialLookup
                   label={i18n._(t`Insights Credential`)}
                   credentialTypeId={credentialTypeId}
@@ -97,14 +100,15 @@ function InventoryForm({
                   value={field.value}
                 />
               )}
-            />
+            </Field>
           </FormRow>
           <FormRow>
             <Field
               id="inventory-instanceGroups"
               label={i18n._(t`Instance Groups`)}
               name="instanceGroups"
-              render={({ field, form }) => (
+            >
+              {({ field, form }) => (
                 <InstanceGroupsLookup
                   value={field.value}
                   onChange={value => {
@@ -112,7 +116,7 @@ function InventoryForm({
                   }}
                 />
               )}
-            />
+            </Field>
           </FormRow>
           <FormRow>
             <VariablesField
@@ -132,7 +136,7 @@ function InventoryForm({
           </FormRow>
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 

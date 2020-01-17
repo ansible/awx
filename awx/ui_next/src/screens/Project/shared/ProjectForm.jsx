@@ -201,7 +201,8 @@ function ProjectForm({ project, ...props }) {
             scm_url: project.scm_url || '',
           }}
           onSubmit={handleSubmit}
-          render={formik => (
+        >
+          {formik => (
             <Form
               autoComplete="off"
               onSubmit={formik.handleSubmit}
@@ -228,7 +229,8 @@ function ProjectForm({ project, ...props }) {
                     i18n._(t`Select a value for this field`),
                     i18n
                   )}
-                  render={({ form }) => (
+                >
+                  {({ form }) => (
                     <OrganizationLookup
                       helperTextInvalid={form.errors.organization}
                       isValid={
@@ -243,14 +245,15 @@ function ProjectForm({ project, ...props }) {
                       required
                     />
                   )}
-                />
+                </Field>
                 <Field
                   name="scm_type"
                   validate={required(
                     i18n._(t`Select a value for this field`),
                     i18n
                   )}
-                  render={({ field, form }) => (
+                >
+                  {({ field, form }) => (
                     <FormGroup
                       fieldId="project-scm-type"
                       helperTextInvalid={form.errors.scm_type}
@@ -286,7 +289,7 @@ function ProjectForm({ project, ...props }) {
                       />
                     </FormGroup>
                   )}
-                />
+                </Field>
                 {formik.values.scm_type !== '' && (
                   <ScmTypeFormRow>
                     <SubFormTitle size="md">
@@ -345,9 +348,8 @@ function ProjectForm({ project, ...props }) {
                   {({ custom_virtualenvs }) =>
                     custom_virtualenvs &&
                     custom_virtualenvs.length > 1 && (
-                      <Field
-                        name="custom_virtualenv"
-                        render={({ field }) => (
+                      <Field name="custom_virtualenv">
+                        {({ field }) => (
                           <FormGroup
                             fieldId="project-custom-virtualenv"
                             label={i18n._(t`Ansible Environment`)}
@@ -378,7 +380,7 @@ function ProjectForm({ project, ...props }) {
                             />
                           </FormGroup>
                         )}
-                      />
+                      </Field>
                     )
                   }
                 </Config>
@@ -389,7 +391,7 @@ function ProjectForm({ project, ...props }) {
               />
             </Form>
           )}
-        />
+        </Formik>
       )}
     </Config>
   );

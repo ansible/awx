@@ -1,7 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 
 import InventoryForm from './InventoryForm';
 
@@ -64,12 +63,15 @@ describe('<InventoryForm />', () => {
       />
     );
   });
+
   afterEach(() => {
     wrapper.unmount();
   });
+
   test('Initially renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
+
   test('should display form fields properly', () => {
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
@@ -80,44 +82,36 @@ describe('<InventoryForm />', () => {
     );
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
   });
-  test('should update from values onChange', async () => {
-    const form = wrapper.find('Formik');
+
+  test('should update form values', async () => {
     act(() => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 3,
         name: 'organization',
       });
-    });
-    expect(form.state('values').organization).toEqual({
-      id: 3,
-      name: 'organization',
-    });
-    wrapper.find('input#inventory-name').simulate('change', {
-      target: { value: 'new Foo', name: 'name' },
-    });
-    expect(form.state('values').name).toEqual('new Foo');
-    act(() => {
+
+      wrapper.find('input#inventory-name').simulate('change', {
+        target: { value: 'new Foo', name: 'name' },
+      });
+
       wrapper.find('CredentialLookup').invoke('onBlur')();
       wrapper.find('CredentialLookup').invoke('onChange')({
         id: 10,
         name: 'credential',
       });
     });
-    expect(form.state('values').insights_credential).toEqual({
+    wrapper.update();
+    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
+      id: 3,
+      name: 'organization',
+    });
+    expect(wrapper.find('input#inventory-name').prop('value')).toEqual(
+      'new Foo'
+    );
+    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
       id: 10,
       name: 'credential',
-    });
-
-    form.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
-    expect(onSubmit).toHaveBeenCalledWith({
-      description: '',
-      insights_credential: { id: 10, name: 'credential' },
-      instanceGroups: [{ id: 1, name: 'Foo' }, { id: 2, name: 'Bar' }],
-      name: 'new Foo',
-      organization: { id: 3, name: 'organization' },
-      variables: '---',
     });
   });
 

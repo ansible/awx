@@ -19,7 +19,8 @@ function InventoryHostForm({ handleSubmit, handleCancel, host, i18n }) {
         variables: host.variables,
       }}
       onSubmit={handleSubmit}
-      render={formik => (
+    >
+      {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormField
@@ -46,11 +47,13 @@ function InventoryHostForm({ handleSubmit, handleCancel, host, i18n }) {
           </FormRow>
           <FormActionGroup
             onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
+            onSubmit={() => {
+              formik.handleSubmit();
+            }}
           />
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 

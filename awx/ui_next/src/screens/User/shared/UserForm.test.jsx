@@ -1,7 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 import UserForm from './UserForm';
 import { UsersAPI } from '@api';
 import mockData from '../data.user.json';
@@ -77,15 +76,18 @@ describe('<UserForm />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    const form = wrapper.find('Formik');
-    act(() => {
+    await act(async () => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({
         id: 1,
         name: 'organization',
       });
     });
-    expect(form.state('values').organization).toEqual(1);
+    wrapper.update();
+    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
+      id: 1,
+      name: 'organization',
+    });
   });
 
   test('password fields are required on add', async () => {
@@ -133,8 +135,9 @@ describe('<UserForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(handleSubmit).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Save"]').simulate('click');
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
     expect(handleSubmit).toBeCalled();
   });
 

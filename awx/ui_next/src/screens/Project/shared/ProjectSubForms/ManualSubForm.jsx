@@ -76,7 +76,8 @@ const ManualSubForm = ({
         <Field
           name="local_path"
           validate={required(i18n._(t`Select a value for this field`), i18n)}
-          render={({ field, form }) => (
+        >
+          {({ field, form }) => (
             <FormGroup
               fieldId="project-local-path"
               helperTextInvalid={form.errors.local_path}
@@ -99,7 +100,7 @@ const ManualSubForm = ({
               />
             </FormGroup>
           )}
-        />
+        </Field>
       )}
     </>
   );
