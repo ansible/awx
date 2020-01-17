@@ -60,9 +60,11 @@ def main():
 
     if json_output['old_license'] != new_license:
         json_output['changed'] = True
+
+        # Deal with check mode
         if module.check_mode:
-            module.logout()
             module.exit_json(**json_output)
+
         # We need to add in the EULA
         new_license['eula_accepted'] = True
         module.post_endpoint('config', data=new_license)
@@ -72,3 +74,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
