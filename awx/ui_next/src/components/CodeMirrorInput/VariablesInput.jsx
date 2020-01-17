@@ -5,9 +5,7 @@ import styled from 'styled-components';
 import ButtonGroup from '@components/ButtonGroup';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
-
-const YAML_MODE = 'yaml';
-const JSON_MODE = 'javascript';
+import { JSON_MODE, YAML_MODE } from './constants';
 
 function formatJson(jsonString) {
   return JSON.stringify(JSON.parse(jsonString), null, 2);

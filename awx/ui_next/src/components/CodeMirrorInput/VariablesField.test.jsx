@@ -97,4 +97,22 @@ describe('VariablesField', () => {
       variables: '---\nnewval: changed',
     });
   });
+
+  it('should initialize to JSON if value is JSON', async () => {
+    const value = '{"foo": "bar"}';
+    const wrapper = mount(
+      <Formik initialValues={{ variables: value }} onSubmit={jest.fn()}>
+        {formik => (
+          <form onSubmit={formik.handleSubmit}>
+            <VariablesField id="the-field" name="variables" label="Variables" />
+            <button type="submit" id="submit">
+              Submit
+            </button>
+          </form>
+        )}
+      </Formik>
+    );
+
+    expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('javascript');
+  });
 });
