@@ -2,7 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, PageSection } from '@patternfly/react-core';
-import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
+import {
+  Switch,
+  Route,
+  Redirect,
+  Link,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+} from 'react-router-dom';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
@@ -17,10 +25,15 @@ import InventorySources from './InventorySources';
 import { InventoriesAPI } from '@api';
 import InventoryEdit from './InventoryEdit';
 
-function Inventory({ history, i18n, location, match, setBreadcrumb }) {
+function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [inventory, setInventory] = useState(null);
+  const history = useHistory();
+  const location = useLocation();
+  const match = useRouteMatch({
+    path: '/inventories/inventory/:id',
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -36,7 +49,7 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
     }
 
     fetchData();
-  }, [match.params.id, setBreadcrumb]);
+  }, [match.params.id, location.pathname, setBreadcrumb]);
 
   const tabsArray = [
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
@@ -132,7 +145,6 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
                 <InventoryGroups
                   location={location}
                   match={match}
-                  history={history}
                   setBreadcrumb={setBreadcrumb}
                   inventory={inventory}
                 />
@@ -178,4 +190,4 @@ function Inventory({ history, i18n, location, match, setBreadcrumb }) {
 }
 
 export { Inventory as _Inventory };
-export default withI18n()(withRouter(Inventory));
+export default withI18n()(Inventory);

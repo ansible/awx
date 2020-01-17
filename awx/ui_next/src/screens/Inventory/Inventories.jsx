@@ -85,22 +85,16 @@ class Inventories extends Component {
             path={`${match.path}/smart_inventory/add`}
             render={() => <SmartInventoryAdd />}
           />
-          <Route
-            path={`${match.path}/inventory/:id`}
-            render={({ match: newRouteMatch }) => (
-              <Config>
-                {({ me }) => (
-                  <Inventory
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadCrumbConfig}
-                    me={me || {}}
-                    match={newRouteMatch}
-                  />
-                )}
-              </Config>
-            )}
-          />
+          <Route path={`${match.path}/inventory/:id`}>
+            <Config>
+              {({ me }) => (
+                <Inventory
+                  setBreadcrumb={this.setBreadCrumbConfig}
+                  me={me || {}}
+                />
+              )}
+            </Config>
+          </Route>
           <Route
             path={`${match.path}/smart_inventory/:id`}
             render={({ match: newRouteMatch }) => (
