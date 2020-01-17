@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { Formik } from 'formik';
 import { sleep } from '../../../testUtils/testUtils';
@@ -23,7 +24,7 @@ describe('VariablesField', () => {
     expect(codemirror.prop('value')).toEqual(value);
   });
 
-  it('should render yaml/json toggles', () => {
+  it('should render yaml/json toggles', async () => {
     const value = '---\n';
     const wrapper = mount(
       <Formik
@@ -37,19 +38,22 @@ describe('VariablesField', () => {
     expect(buttons).toHaveLength(2);
     expect(buttons.at(0).prop('variant')).toEqual('primary');
     expect(buttons.at(1).prop('variant')).toEqual('secondary');
-
-    buttons.at(1).simulate('click');
-    wrapper.update(0);
+    await act(async () => {
+      buttons.at(1).simulate('click');
+    });
+    wrapper.update();
     expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('javascript');
     const buttons2 = wrapper.find('Button');
     expect(buttons2.at(0).prop('variant')).toEqual('secondary');
     expect(buttons2.at(1).prop('variant')).toEqual('primary');
-    buttons2.at(0).simulate('click');
-    wrapper.update(0);
+    await act(async () => {
+      buttons2.at(0).simulate('click');
+    });
+    wrapper.update();
     expect(wrapper.find('CodeMirrorInput').prop('mode')).toEqual('yaml');
   });
 
-  it('should set Formik error if yaml is invalid', () => {
+  it('should set Formik error if yaml is invalid', async () => {
     const value = '---\nfoo bar\n';
     const wrapper = mount(
       <Formik
@@ -87,10 +91,12 @@ describe('VariablesField', () => {
         )}
       />
     );
-    wrapper.find('CodeMirrorInput').prop('onChange')('---\nnewval: changed');
-    wrapper.find('form').simulate('submit');
-    await sleep(1);
-    await sleep(1);
+    await act(async () => {
+      wrapper.find('CodeMirrorInput').invoke('onChange')(
+        '---\nnewval: changed'
+      );
+      wrapper.find('form').simulate('submit');
+    });
 
     expect(handleSubmit).toHaveBeenCalled();
     expect(handleSubmit.mock.calls[0][0]).toEqual({

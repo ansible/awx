@@ -146,6 +146,7 @@ class JobTemplateForm extends Component {
       setFieldValue,
       i18n,
       template,
+      values,
     } = this.props;
     const jobTypeOptions = [
       {
