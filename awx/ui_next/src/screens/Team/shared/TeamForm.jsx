@@ -24,7 +24,8 @@ function TeamForm(props) {
         organization: team.organization || '',
       }}
       onSubmit={handleSubmit}
-      render={formik => (
+    >
+      {formik => (
         <Form
           autoComplete="off"
           onSubmit={formik.handleSubmit}
@@ -51,7 +52,8 @@ function TeamForm(props) {
                 i18n._(t`Select a value for this field`),
                 i18n
               )}
-              render={({ form }) => (
+            >
+              {({ form }) => (
                 <OrganizationLookup
                   helperTextInvalid={form.errors.organization}
                   isValid={
@@ -66,7 +68,7 @@ function TeamForm(props) {
                   required
                 />
               )}
-            />
+            </Field>
           </FormRow>
           <FormActionGroup
             onCancel={handleCancel}
@@ -74,7 +76,7 @@ function TeamForm(props) {
           />
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 

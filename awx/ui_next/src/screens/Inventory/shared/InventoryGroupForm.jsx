@@ -28,10 +28,8 @@ function InventoryGroupForm({
   return (
     <Card className="awx-c-card">
       <CardBody>
-        <Formik
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          render={formik => (
+        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+          {formik => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormRow css="grid-template-columns: repeat(auto-fit, minmax(300px, 500px));">
                 <FormField
@@ -63,7 +61,7 @@ function InventoryGroupForm({
               {error ? <div>error</div> : null}
             </Form>
           )}
-        />
+        </Formik>
       </CardBody>
     </Card>
   );

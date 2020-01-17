@@ -19,7 +19,6 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
-  console.log('render');
 
   return (
     <Formik
@@ -30,7 +29,8 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
         variables: host.variables,
       }}
       onSubmit={handleSubmit}
-      render={formik => (
+    >
+      {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormField
@@ -54,7 +54,8 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
                   i18n._(t`Select a value for this field`),
                   i18n
                 )}
-                render={({ form }) => (
+              >
+                {({ form }) => (
                   <InventoryLookup
                     value={inventory}
                     onBlur={() => form.setFieldTouched('inventory')}
@@ -72,7 +73,7 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
                     error={form.errors.inventory}
                   />
                 )}
-              />
+              </Field>
             )}
           </FormRow>
           <FormRow>
@@ -88,7 +89,7 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
           />
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 

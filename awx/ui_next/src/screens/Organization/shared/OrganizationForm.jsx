@@ -91,7 +91,8 @@ function OrganizationForm({ organization, i18n, me, onCancel, onSubmit }) {
         max_hosts: organization.max_hosts || '0',
       }}
       onSubmit={handleSubmit}
-      render={formik => (
+    >
+      {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormField
@@ -132,9 +133,8 @@ function OrganizationForm({ organization, i18n, me, onCancel, onSubmit }) {
               isDisabled={!me.is_superuser}
             />
             {custom_virtualenvs && custom_virtualenvs.length > 1 && (
-              <Field
-                name="custom_virtualenv"
-                render={({ field }) => (
+              <Field name="custom_virtualenv">
+                {({ field }) => (
                   <FormGroup
                     fieldId="org-custom-virtualenv"
                     label={i18n._(t`Ansible Environment`)}
@@ -151,7 +151,7 @@ function OrganizationForm({ organization, i18n, me, onCancel, onSubmit }) {
                     />
                   </FormGroup>
                 )}
-              />
+              </Field>
             )}
           </FormRow>
           <InstanceGroupsLookup
@@ -167,7 +167,7 @@ function OrganizationForm({ organization, i18n, me, onCancel, onSubmit }) {
           />
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 

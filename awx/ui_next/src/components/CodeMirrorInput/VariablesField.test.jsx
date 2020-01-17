@@ -2,7 +2,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { Formik } from 'formik';
-import { sleep } from '../../../testUtils/testUtils';
 import VariablesField from './VariablesField';
 
 describe('VariablesField', () => {
@@ -13,12 +12,11 @@ describe('VariablesField', () => {
   it('should render code mirror input', () => {
     const value = '---\n';
     const wrapper = mount(
-      <Formik
-        initialValues={{ variables: value }}
-        render={() => (
+      <Formik initialValues={{ variables: value }}>
+        {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
         )}
-      />
+      </Formik>
     );
     const codemirror = wrapper.find('Controlled');
     expect(codemirror.prop('value')).toEqual(value);
@@ -27,12 +25,11 @@ describe('VariablesField', () => {
   it('should render yaml/json toggles', async () => {
     const value = '---\n';
     const wrapper = mount(
-      <Formik
-        initialValues={{ variables: value }}
-        render={() => (
+      <Formik initialValues={{ variables: value }}>
+        {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
         )}
-      />
+      </Formik>
     );
     const buttons = wrapper.find('Button');
     expect(buttons).toHaveLength(2);
@@ -56,12 +53,11 @@ describe('VariablesField', () => {
   it('should set Formik error if yaml is invalid', async () => {
     const value = '---\nfoo bar\n';
     const wrapper = mount(
-      <Formik
-        initialValues={{ variables: value }}
-        render={() => (
+      <Formik initialValues={{ variables: value }}>
+        {() => (
           <VariablesField id="the-field" name="variables" label="Variables" />
         )}
-      />
+      </Formik>
     );
     wrapper
       .find('Button')
@@ -78,10 +74,8 @@ describe('VariablesField', () => {
     const value = '---\nfoo: bar\n';
     const handleSubmit = jest.fn();
     const wrapper = mount(
-      <Formik
-        initialValues={{ variables: value }}
-        onSubmit={handleSubmit}
-        render={formik => (
+      <Formik initialValues={{ variables: value }} onSubmit={handleSubmit}>
+        {formik => (
           <form onSubmit={formik.handleSubmit}>
             <VariablesField id="the-field" name="variables" label="Variables" />
             <button type="submit" id="submit">
@@ -89,7 +83,7 @@ describe('VariablesField', () => {
             </button>
           </form>
         )}
-      />
+      </Formik>
     );
     await act(async () => {
       wrapper.find('CodeMirrorInput').invoke('onChange')(

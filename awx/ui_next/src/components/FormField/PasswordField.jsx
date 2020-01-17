@@ -22,10 +22,8 @@ function PasswordField(props) {
   };
 
   return (
-    <Field
-      name={name}
-      validate={validate}
-      render={({ field, form }) => {
+    <Field name={name} validate={validate}>
+      {({ field, form }) => {
         const isValid =
           form && (!form.touched[field.name] || !form.errors[field.name]);
         return (
@@ -65,7 +63,7 @@ function PasswordField(props) {
           </FormGroup>
         );
       }}
-    />
+    </Field>
   );
 }
 

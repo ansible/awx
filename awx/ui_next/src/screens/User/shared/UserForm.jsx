@@ -76,7 +76,8 @@ function UserForm(props) {
         user_type: userType,
       }}
       onSubmit={handleValidateAndSubmit}
-      render={formik => (
+    >
+      {formik => (
         <Form
           autoComplete="off"
           onSubmit={formik.handleSubmit}
@@ -141,7 +142,8 @@ function UserForm(props) {
                   i18n._(t`Select a value for this field`),
                   i18n
                 )}
-                render={({ form }) => (
+              >
+                {({ form }) => (
                   <OrganizationLookup
                     helperTextInvalid={form.errors.organization}
                     isValid={
@@ -156,11 +158,10 @@ function UserForm(props) {
                     required
                   />
                 )}
-              />
+              </Field>
             )}
-            <Field
-              name="user_type"
-              render={({ form, field }) => {
+            <Field name="user_type">
+              {({ form, field }) => {
                 const isValid =
                   !form.touched.user_type || !form.errors.user_type;
                 return (
@@ -180,7 +181,7 @@ function UserForm(props) {
                   </FormGroup>
                 );
               }}
-            />
+            </Field>
           </FormRow>
           <FormActionGroup
             onCancel={handleCancel}
@@ -188,7 +189,7 @@ function UserForm(props) {
           />
         </Form>
       )}
-    />
+    </Formik>
   );
 }
 
