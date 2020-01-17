@@ -78,8 +78,6 @@ class WorkflowDAG(SimpleDAG):
             if obj.id in node_ids_visited:
                 continue
             node_ids_visited.add(obj.id)
-            # import sdb
-            # sdb.set_trace()
             if obj.do_not_run is True:
                 continue
             elif obj.job:
@@ -213,21 +211,32 @@ class WorkflowDAG(SimpleDAG):
         for node in self.sort_nodes_topological():
             obj = node['node_object']
 
-            if obj.do_not_run is False and not obj.job and node not in root_nodes:
+            if obj.do_not_run is False and not obj.job and node not in root_nodes and not obj.all_parents_must_converge:
                 parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
                 if self._are_all_nodes_dnr_decided(parent_nodes):
                     if self._should_mark_node_dnr(node, parent_nodes):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
-            if not obj.do_not_run and obj.all_parents_must_converge:
+            if obj.do_not_run is False and obj.all_parents_must_converge:
                 if self._are_relevant_parents_finished(node):
                     # if the current node is a convergence node and all the 
                     # parents are finished then check to see if all parents
                     # met the needed criteria to run the convergence child
                     # (i.e. parent must fail, parent must succeed)
                     parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
-                    if any(p.do_not_run for p in parent_nodes) or not all(obj in self.get_children(p, p.job.status)for p in parent_nodes):
+                    if any(p.do_not_run for p in parent_nodes):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
+                    else:
+                        for p in parent_nodes:
+                            if p.job.status == "successful":
+                                child_nodes = (c['node_object'] for c in self.get_children(p, "success_nodes"))
+                            elif p.job.status == "failure":
+                                child_nodes = (c['node_object'] for c in self.get_children(p, "failure_nodes"))
+                            else:
+                                child_nodes = (c['node_object'] for c in self.get_children(p, "always_nodes"))
+                            if not any(obj == x for x in child_nodes):
+                                obj.do_not_run = True
+                                nodes_marked_do_not_run.append(node)    
 
         return [n['node_object'] for n in nodes_marked_do_not_run]
