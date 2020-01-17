@@ -52,13 +52,13 @@ azure_keyvault_inputs = {
         'type': 'string',
         'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
     }],
-    'required': ['url', 'client', 'secret', 'tenant', 'cloud', 'secret_field'],
+    'required': ['url', 'client', 'secret', 'tenant', 'secret_field'],
 }
 
 
 def azure_keyvault_backend(**kwargs):
     url = kwargs['url']
-    [cloud] = [c for c in clouds if c.name == kwargs['cloud_name']]
+    [cloud] = [c for c in clouds if c.name == kwargs.get('cloud_name', default_cloud.name)]
 
     def auth_callback(server, resource, scope):
         credentials = ServicePrincipalCredentials(
