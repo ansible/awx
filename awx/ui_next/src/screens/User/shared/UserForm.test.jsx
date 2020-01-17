@@ -1,7 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 import UserForm from './UserForm';
 import { UsersAPI } from '@api';
 import mockData from '../data.user.json';
