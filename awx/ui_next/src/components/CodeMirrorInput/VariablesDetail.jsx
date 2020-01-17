@@ -14,10 +14,6 @@ function VariablesDetail({ value, label, rows }) {
   const [currentValue, setCurrentValue] = useState(value);
   const [error, setError] = useState(null);
 
-  if (!value) {
-    return null;
-  }
-
   return (
     <>
       <DetailName
@@ -62,7 +58,7 @@ function VariablesDetail({ value, label, rows }) {
       >
         <CodeMirrorInput
           mode={mode}
-          value={currentValue}
+          value={currentValue || '---'} // When github issue https://github.com/ansible/awx/issues/5502 gets resolved this line of code should be revisited and refactored if possible.
           readOnly
           rows={rows}
           css="margin-top: 10px"
