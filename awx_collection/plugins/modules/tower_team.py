@@ -57,57 +57,68 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
-
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(required=False),
         description=dict(),
         organization=dict(required=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
     description = module.params.get('description')
     organization = module.params.get('organization')
     state = module.params.get('state')
 
-    json_output = {'team': name, 'state': state}
+    # We can either use the default check mode option or we can customize our own
+    module.default_check_mode()
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        team = tower_cli.get_resource('team')
+    # Attempt to lookup the org the user specified
+    org_id = module.resolve_name_to_id('organizations', organization)
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Attempt to lookup team based on the provided name and org ID
+    team = module.get_one('teams', **{
+        'data': {
+            'name': name,
+            'organization': org_id
+        }
+    })
 
-            if state == 'present':
-                result = team.modify(name=name, organization=org['id'],
-                                     description=description, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = team.delete(name=name, organization=org['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update team, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update team: {0}'.format(excinfo), changed=False)
+    if state == 'absent' and not team:
+        # If the state was absent and we had no team, we can just return
+        module.exit_json(**module.json_output)
+    elif state == 'absent' and team:
+        # If the state was absent and we had a team, we can try to delete it, the module will handle exiting from this
+        module.delete_endpoint('teams/{0}'.format(team['id']), item_type='team', item_name=name, **{})
+    elif state == 'present' and not team:
+        # if the state was present and we couldn't find a team we can build one, the module wikl handle exiting from this
+        module.post_endpoint('teams', item_type='team', item_name=name, **{
+            'data': {
+                'name': name,
+                'description': description,
+                'organization': org_id
+            }
+        })
+    else:
+        # If the state was present and we had a team we can see if we need to update it
+        # This will return on its own
+        team_fields = {
+            'name': new_name if new_name else name,
+            'description': description,
+            'organization': org_id,
+        }
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+        module.update_if_needed(team, team_fields)
 
 
 if __name__ == '__main__':
