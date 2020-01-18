@@ -80,7 +80,7 @@ def main():
     organization = module.params.get('organization')
     state = module.params.get('state')
 
-    # Attempt to lookup the org the user specified
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to lookup team based on the provided name and org ID
