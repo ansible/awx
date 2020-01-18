@@ -314,11 +314,6 @@ class TowerModule(AnsibleModule):
             if existing_item.get(field, None) != new_item.get(field, None) and not (existing_item.get(field, None) is None and new_item.get(field, None) == ''):
                 # something dosent match so lets do it
 
-                # Handle check mode
-                if self.check_mode:
-                    existing_return['changed'] = True
-                    self.exit_json(**existing_return)
-
                 response = self.patch_endpoint(existing_item['url'], **{'data': new_item})
                 if not handle_response:
                     return response
@@ -329,7 +324,7 @@ class TowerModule(AnsibleModule):
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
-                    self.fail_json({'msg': "Unable to update object, see response", 'response': response})
+                    self.fail_json(**{'msg': "Unable to update object, see response", 'response': response})
 
         # Since we made it here, we don't need to update, status ok
         existing_return['changed'] = False
