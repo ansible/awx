@@ -10,6 +10,11 @@ spec:
       image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
       command: ["sleep", "infinity"]
       volumeMounts:
+{% if ca_trust_dir is defined %}
+        - name: {{ kubernetes_deployment_name }}-ca-trust-dir
+          mountPath: "/etc/pki/ca-trust/source/anchors/"
+          readOnly: true
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-application-config
           mountPath: "/etc/tower/settings.py"
           subPath: settings.py
@@ -46,6 +51,12 @@ spec:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
 {% endif %}
   volumes:
+  {% if ca_trust_dir is defined %}
+    - name: {{ kubernetes_deployment_name }}-ca-trust-dir
+      hostPath:
+        path: "{{ ca_trust_dir }}"
+        type: Directory
+{% endif %}
     - name: {{ kubernetes_deployment_name }}-application-config
       configMap:
         name: {{ kubernetes_deployment_name }}-config
