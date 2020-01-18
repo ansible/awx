@@ -62,9 +62,6 @@ options:
       choices: ["present", "absent"]
       type: str
 
-requirements:
-  - ansible-tower-cli >= 3.2.0
-
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -106,18 +103,10 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
+from ..module_utils.tower_api import TowerModule
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         username=dict(required=True),
         first_name=dict(),
@@ -129,37 +118,43 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    username = module.params.get('username')
-    first_name = module.params.get('first_name')
-    last_name = module.params.get('last_name')
-    password = module.params.get('password')
-    email = module.params.get('email')
-    superuser = module.params.get('superuser')
-    auditor = module.params.get('auditor')
+    # Extract our parameters
     state = module.params.get('state')
+    user_fields = {
+        'username': module.params.get('username'),
+        'first_name': module.params.get('first_name'),
+        'last_name': module.params.get('last_name'),
+        'password': module.params.get('password'),
+        'email': module.params.get('email'),
+        'superuser': module.params.get('superuser'),
+        'auditor': module.params.get('auditor'),
+    }
 
-    json_output = {'username': username, 'state': state}
+    # Attempt to lookup team based on the provided name and org ID
+    user = module.get_one('users', **{
+        'data': {
+            'username': user_fields['username'],
+        }
+    })
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        user = tower_cli.get_resource('user')
-        try:
-            if state == 'present':
-                result = user.modify(username=username, first_name=first_name, last_name=last_name,
-                                     email=email, password=password, is_superuser=superuser,
-                                     is_system_auditor=auditor, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = user.delete(username=username)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update the user: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
-
+    if state == 'absent' and not user:
+        # If the state was absent and we had no user, we can just return
+        module.exit_json(**module.json_output)
+    elif state == 'absent' and user:
+        # If the state was absent and we had a user, we can try to delete it, the module will handle exiting from this
+        module.delete_endpoint('users/{0}'.format(user['id']), item_type='user', item_name=user_fields['username'], **{})
+    elif state == 'present' and not user:
+        # if the state was present and we couldn't find a user we can build one, the module wikl handle exiting from this
+        module.post_endpoint('users', item_type='user', item_name=user_fields['username'], **{
+            'data': user_fields
+        })
+    else:
+        # If the state was present and we had a user we can see if we need to update it
+        # This will return on its own
+        module.update_if_needed(user, user_fields)
 
 if __name__ == '__main__':
     main()
