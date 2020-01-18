@@ -80,9 +80,6 @@ def main():
     organization = module.params.get('organization')
     state = module.params.get('state')
 
-    # We can either use the default check mode option or we can customize our own
-    module.default_check_mode()
-
     # Attempt to lookup the org the user specified
     org_id = module.resolve_name_to_id('organizations', organization)
 
