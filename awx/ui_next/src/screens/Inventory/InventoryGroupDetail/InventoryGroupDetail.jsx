@@ -46,7 +46,11 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} />
+        <Detail
+          label={i18n._(t`Name`)}
+          value={name}
+          dataCy="inventory-group-detail-name"
+        />
         <Detail label={i18n._(t`Description`)} value={description} />
         <VariablesDetail
           label={i18n._(t`Variables`)}
