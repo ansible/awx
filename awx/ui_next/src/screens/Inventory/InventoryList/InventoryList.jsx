@@ -221,8 +221,8 @@ class InventoriesList extends Component {
                 inventory={inventory}
                 detailUrl={
                   inventory.kind === 'smart'
-                    ? `${match.url}/smart_inventory/${inventory.id}`
-                    : `${match.url}/inventory/${inventory.id}`
+                    ? `${match.url}/smart_inventory/${inventory.id}/details`
+                    : `${match.url}/inventory/${inventory.id}/details`
                 }
                 onSelect={() => this.handleSelect(inventory)}
                 isSelected={selected.some(row => row.id === inventory.id)}

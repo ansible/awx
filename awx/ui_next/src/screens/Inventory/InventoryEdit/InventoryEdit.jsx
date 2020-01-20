@@ -90,12 +90,15 @@ function InventoryEdit({ inventory }) {
       setError(err);
     }
   };
+
   if (contentLoading) {
     return <ContentLoading />;
   }
+
   if (error) {
     return <ContentError />;
   }
+
   return (
     <CardBody>
       <InventoryForm
