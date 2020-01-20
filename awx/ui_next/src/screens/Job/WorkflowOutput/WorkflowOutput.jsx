@@ -30,11 +30,7 @@ const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
     page: pageNo,
   });
   if (data.next) {
-    return fetchWorkflowNodes(
-      jobId,
-      pageNo + 1,
-      nodes.concat(data.results)
-    );
+    return fetchWorkflowNodes(jobId, pageNo + 1, nodes.concat(data.results));
   }
   return nodes.concat(data.results);
 };
