@@ -1,5 +1,5 @@
 import Organizations from './Organizations';
-import { describeNotificationMixin } from '../../../testUtils/apiReusable';
+import { describeNotificationMixin } from '@testUtils/apiReusable';
 
 describe('OrganizationsAPI', () => {
   const orgId = 1;
