@@ -56,7 +56,7 @@ class Job extends Component {
   }
 
   render() {
-    const { history, match, i18n, lookup } = this.props;
+    const { match, i18n, lookup } = this.props;
 
     const { job, contentError, hasContentLoading, isInitialized } = this.state;
     let jobType;
@@ -71,16 +71,12 @@ class Job extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs match={match} history={history} tabsArray={tabsArray} />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/jobs" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 

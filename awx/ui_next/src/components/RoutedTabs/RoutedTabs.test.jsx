@@ -1,10 +1,9 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { Tab } from '@patternfly/react-core';
-import RoutedTabs, { _RoutedTabs } from './RoutedTabs';
+import RoutedTabs from './RoutedTabs';
 
 let wrapper;
 let history;
@@ -21,32 +20,24 @@ describe('<RoutedTabs />', () => {
     history = createMemoryHistory({
       initialEntries: ['/organizations/19/teams'],
     });
-  });
-
-  test('RoutedTabs renders successfully', () => {
-    wrapper = shallow(<_RoutedTabs tabsArray={tabs} history={history} />);
-    expect(wrapper.find(Tab)).toHaveLength(4);
-  });
-
-  test('Given a URL the correct tab is active', async () => {
     wrapper = mount(
       <Router history={history}>
         <RoutedTabs tabsArray={tabs} />
       </Router>
     );
+  });
 
+  test('RoutedTabs renders successfully', () => {
+    expect(wrapper.find('Tabs li')).toHaveLength(4);
+  });
+
+  test('Given a URL the correct tab is active', async () => {
     expect(history.location.pathname).toEqual('/organizations/19/teams');
     expect(wrapper.find('Tabs').prop('activeKey')).toBe(3);
   });
 
   test('should update history when new tab selected', async () => {
-    wrapper = mount(
-      <Router history={history}>
-        <RoutedTabs tabsArray={tabs} />
-      </Router>
-    );
-
-    wrapper.find('Tabs').prop('onSelect')({}, 2);
+    wrapper.find('Tabs').invoke('onSelect')({}, 2);
     wrapper.update();
 
     expect(history.location.pathname).toEqual('/organizations/19/access');

@@ -62,7 +62,7 @@ class User extends Component {
   }
 
   render() {
-    const { location, match, history, i18n } = this.props;
+    const { location, match, i18n } = this.props;
 
     const { user, contentError, hasContentLoading, isInitialized } = this.state;
 
@@ -80,21 +80,12 @@ class User extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          labeltext={i18n._(t`User detail tabs`)}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/users" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 
@@ -128,7 +119,7 @@ class User extends Component {
             {user && (
               <Route
                 path="/users/:id/edit"
-                render={() => <UserEdit match={match} user={user} />}
+                render={() => <UserEdit user={user} />}
               />
             )}
             {user && (

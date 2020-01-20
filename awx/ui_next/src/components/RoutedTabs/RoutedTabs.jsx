@@ -1,7 +1,7 @@
 import React from 'react';
 import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
 import { Tab, Tabs as PFTabs } from '@patternfly/react-core';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Tabs = styled(PFTabs)`
@@ -37,7 +37,8 @@ const Tabs = styled(PFTabs)`
 `;
 
 function RoutedTabs(props) {
-  const { history, tabsArray } = props;
+  const { tabsArray } = props;
+  const history = useHistory();
 
   const getActiveTabId = () => {
     const match = tabsArray.find(tab => tab.link === history.location.pathname);
@@ -68,12 +69,8 @@ function RoutedTabs(props) {
     </Tabs>
   );
 }
+
 RoutedTabs.propTypes = {
-  history: shape({
-    location: shape({
-      pathname: string.isRequired,
-    }).isRequired,
-  }).isRequired,
   tabsArray: arrayOf(
     shape({
       id: number.isRequired,
@@ -83,5 +80,4 @@ RoutedTabs.propTypes = {
   ).isRequired,
 };
 
-export { RoutedTabs as _RoutedTabs };
-export default withRouter(RoutedTabs);
+export default RoutedTabs;
