@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.fields import (  # noqa
-    BooleanField, CharField, ChoiceField, DictField, EmailField,
+    BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField,
     IntegerField, ListField, NullBooleanField
 )
 

@@ -339,15 +339,23 @@ def send_notifications(notification_list, job_id=None):
 def gather_analytics():
     if not settings.INSIGHTS_TRACKING_STATE:
         return
-    try:
-        tgz = analytics.gather()
-        if not tgz:
-            return
-        logger.debug('gathered analytics: {}'.format(tgz))
-        analytics.ship(tgz)
-    finally:
-        if os.path.exists(tgz):
-            os.remove(tgz)
+    last_time = settings.AUTOMATION_ANALYTICS_LAST_GATHER
+    gather_time = now()
+    if not last_time or ((gather_time - last_time).seconds > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+        with advisory_lock('gather_analytics_lock', wait=False) as acquired:
+            if acquired is False:
+                logger.debug('Not gathering analytics, another task holds lock')
+                return
+            try:
+                tgz = analytics.gather()
+                if not tgz:
+                    return
+                logger.info('gathered analytics: {}'.format(tgz))
+                analytics.ship(tgz)
+                settings.AUTOMATION_ANALYTICS_LAST_GATHER = gather_time
+            finally:
+                if os.path.exists(tgz):
+                    os.remove(tgz)
 
 
 @task(queue=get_local_queuename)

@@ -79,6 +79,12 @@ export default ['i18n', function(i18n) {
             AUTOMATION_ANALYTICS_URL: {
                 type: 'text',
                 reset: 'AUTOMATION_ANALYTICS_URL',
+            },
+            AUTOMATION_ANALYTICS_GATHER_INTERVAL: {
+                type: 'number',
+                integer: true,
+                min: 1800,
+                reset: 'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
             }
         },
 
