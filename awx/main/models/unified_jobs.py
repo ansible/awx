@@ -842,7 +842,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 update_fields.append('unified_job_template')
         
         if self.cancel_flag and not self.canceled_on:
-        # Record the 'canceled' time. 
+            # Record the 'canceled' time.
             self.canceled_on = now()
             if 'canceled_on' not in update_fields:
                 update_fields.append('canceled_on')
