@@ -2,6 +2,7 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { func, number } from 'prop-types';
 import { Tooltip } from '@patternfly/react-core';
 import {
   CaretDownIcon,
@@ -15,19 +16,19 @@ import {
 } from '@patternfly/react-icons';
 
 const Wrapper = styled.div`
-  border: 1px solid #c7c7c7;
   background-color: white;
+  border: 1px solid #c7c7c7;
   height: 135px;
 `;
 
 const Header = styled.div`
-  padding: 10px;
   border-bottom: 1px solid #c7c7c7;
+  padding: 10px;
 `;
 
 const Pan = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
 `;
 
 const PanCenter = styled.div`
@@ -36,18 +37,18 @@ const PanCenter = styled.div`
 `;
 
 const Tools = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
   padding: 20px;
 `;
 
-function VisualizerTools({
+function WorkflowTools({
   i18n,
-  zoomPercentage,
-  onZoomChange,
   onFitGraph,
   onPan,
   onPanToMiddle,
+  onZoomChange,
+  zoomPercentage,
 }) {
   const zoomIn = () => {
     const newScale =
@@ -81,14 +82,16 @@ function VisualizerTools({
           <MinusIcon onClick={() => zoomOut()} css="margin-right: 10px;" />
         </Tooltip>
         <input
-          type="range"
           id="zoom-slider"
-          value={zoomPercentage}
-          min="10"
           max="200"
+          min="10"
+          onChange={event =>
+            onZoomChange(parseInt(event.target.value, 10) / 100)
+          }
           step="10"
-          onChange={event => onZoomChange(parseInt(event.target.value) / 100)}
-        ></input>
+          type="range"
+          value={zoomPercentage}
+        />
         <Tooltip content={i18n._(t`Zoom In`)} position="bottom">
           <PlusIcon onClick={() => zoomIn()} css="margin: 0px 25px 0px 10px;" />
         </Tooltip>
@@ -119,4 +122,12 @@ function VisualizerTools({
   );
 }
 
-export default withI18n()(VisualizerTools);
+WorkflowTools.propTypes = {
+  onFitGraph: func.isRequired,
+  onPan: func.isRequired,
+  onPanToMiddle: func.isRequired,
+  onZoomChange: func.isRequired,
+  zoomPercentage: number.isRequired,
+};
+
+export default withI18n()(WorkflowTools);

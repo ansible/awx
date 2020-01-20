@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { bool, func, shape } from 'prop-types';
 import {
   InfoIcon,
   LinkIcon,
@@ -30,28 +31,28 @@ const NodeContents = styled.foreignObject`
 
 const NodeDefaultLabel = styled.p`
   margin-top: 20px;
-  text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 function VisualizerNode({
+  addingLink,
+  i18n,
+  isAddLinkSourceNode,
   node,
   nodePositions,
+  onAddNodeClick,
+  onConfirmAddLinkClick,
+  onDeleteNodeClick,
+  onEditNodeClick,
+  onMouseOver,
+  onStartAddLinkClick,
+  onViewNodeClick,
+  readOnly,
   updateHelpText,
   updateNodeHelp,
-  readOnly,
-  i18n,
-  onDeleteNodeClick,
-  onStartAddLinkClick,
-  onConfirmAddLinkClick,
-  addingLink,
-  onMouseOver,
-  isAddLinkSourceNode,
-  onAddNodeClick,
-  onEditNodeClick,
-  onViewNodeClick,
 }) {
   const [hovering, setHovering] = useState(false);
 
@@ -88,13 +89,13 @@ function VisualizerNode({
     <WorkflowActionTooltipItem
       id="node-details"
       key="details"
-      onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
-      onMouseLeave={() => updateHelpText(null)}
       onClick={() => {
         updateHelpText(null);
         setHovering(false);
         onViewNodeClick(node);
       }}
+      onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
+      onMouseLeave={() => updateHelpText(null)}
     >
       <InfoIcon />
     </WorkflowActionTooltipItem>
@@ -106,13 +107,13 @@ function VisualizerNode({
         <WorkflowActionTooltipItem
           id="node-add"
           key="add"
-          onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
-          onMouseLeave={() => updateHelpText(null)}
           onClick={() => {
             updateHelpText(null);
             setHovering(false);
             onAddNodeClick(node.id);
           }}
+          onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <PlusIcon />
         </WorkflowActionTooltipItem>,
@@ -120,41 +121,41 @@ function VisualizerNode({
         <WorkflowActionTooltipItem
           id="node-edit"
           key="edit"
-          onMouseEnter={() => updateHelpText(i18n._(t`Edit this node`))}
-          onMouseLeave={() => updateHelpText(null)}
           onClick={() => {
             updateHelpText(null);
             setHovering(false);
             onEditNodeClick(node);
           }}
+          onMouseEnter={() => updateHelpText(i18n._(t`Edit this node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <PencilAltIcon />
         </WorkflowActionTooltipItem>,
         <WorkflowActionTooltipItem
           id="node-link"
           key="link"
-          onMouseEnter={() =>
-            updateHelpText(i18n._(t`Link to an available node`))
-          }
-          onMouseLeave={() => updateHelpText(null)}
           onClick={() => {
             updateHelpText(null);
             setHovering(false);
             onStartAddLinkClick(node);
           }}
+          onMouseEnter={() =>
+            updateHelpText(i18n._(t`Link to an available node`))
+          }
+          onMouseLeave={() => updateHelpText(null)}
         >
           <LinkIcon />
         </WorkflowActionTooltipItem>,
         <WorkflowActionTooltipItem
           id="node-delete"
           key="delete"
-          onMouseEnter={() => updateHelpText(i18n._(t`Delete this node`))}
-          onMouseLeave={() => updateHelpText(null)}
           onClick={() => {
             updateHelpText(null);
             setHovering(false);
             onDeleteNodeClick(node);
           }}
+          onMouseEnter={() => updateHelpText(i18n._(t`Delete this node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <TrashAltIcon />
         </WorkflowActionTooltipItem>,
@@ -163,15 +164,15 @@ function VisualizerNode({
   return (
     <NodeG
       id={`node-${node.id}`}
-      transform={`translate(${nodePositions[node.id].x},${nodePositions[node.id]
-        .y - nodePositions[1].y})`}
       job={node.job}
       noPointerEvents={isAddLinkSourceNode}
       onMouseEnter={handleNodeMouseEnter}
       onMouseLeave={handleNodeMouseLeave}
+      transform={`translate(${nodePositions[node.id].x},${nodePositions[node.id]
+        .y - nodePositions[1].y})`}
     >
       <rect
-        width={wfConstants.nodeW}
+        fill="#FFFFFF"
         height={wfConstants.nodeH}
         rx="2"
         ry="2"
@@ -181,17 +182,17 @@ function VisualizerNode({
             : '#93969A'
         }
         strokeWidth="4px"
-        fill="#FFFFFF"
+        width={wfConstants.nodeW}
       />
       <NodeContents
         height="60"
-        width="180"
         isInvalidLinkTarget={node.isInvalidLinkTarget}
         {...(!addingLink && {
           onMouseEnter: () => updateNodeHelp(node),
           onMouseLeave: () => updateNodeHelp(null),
         })}
         onClick={() => handleNodeClick()}
+        width="180"
       >
         <NodeDefaultLabel>
           {node.unifiedJobTemplate
@@ -210,5 +211,27 @@ function VisualizerNode({
     </NodeG>
   );
 }
+
+VisualizerNode.propTypes = {
+  addingLink: bool.isRequired,
+  isAddLinkSourceNode: bool,
+  node: shape().isRequired,
+  nodePositions: shape().isRequired,
+  onAddNodeClick: func.isRequired,
+  onConfirmAddLinkClick: func.isRequired,
+  onDeleteNodeClick: func.isRequired,
+  onEditNodeClick: func.isRequired,
+  onMouseOver: func,
+  onStartAddLinkClick: func.isRequired,
+  onViewNodeClick: func.isRequired,
+  readOnly: bool.isRequired,
+  updateHelpText: func.isRequired,
+  updateNodeHelp: func.isRequired,
+};
+
+VisualizerNode.defaultProps = {
+  isAddLinkSourceNode: false,
+  onMouseOver: () => {},
+};
 
 export default withI18n()(VisualizerNode);

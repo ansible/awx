@@ -5,50 +5,50 @@ import styled from 'styled-components';
 import { ExclamationTriangleIcon, PauseIcon } from '@patternfly/react-icons';
 
 const Wrapper = styled.div`
-  border: 1px solid #c7c7c7;
   background-color: white;
-  min-width: 100px;
+  border: 1px solid #c7c7c7;
   margin-left: 20px;
+  min-width: 100px;
 `;
 
 const Header = styled.div`
-  padding: 10px;
   border-bottom: 1px solid #c7c7c7;
+  padding: 10px;
 `;
 
 const Key = styled.ul`
   padding: 5px 10px;
 
   li {
-    padding: 5px 0px;
-    display: flex;
     align-items: center;
+    display: flex;
+    padding: 5px 0px;
   }
 `;
 
 const NodeTypeLetter = styled.div`
-  font-size: 10px;
-  color: white;
-  text-align: center;
-  line-height: 20px;
   background-color: #393f43;
   border-radius: 50%;
+  color: white;
+  font-size: 10px;
   height: 20px;
-  width: 20px;
+  line-height: 20px;
   margin-right: 10px;
+  text-align: center;
+  width: 20px;
 `;
 
 const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`
   color: #f0ad4d;
-  margin-right: 10px;
   height: 20px;
+  margin-right: 10px;
   width: 20px;
 `;
 
 const Link = styled.div`
   height: 5px;
-  width: 20px;
   margin-right: 10px;
+  width: 20px;
 `;
 
 const SuccessLink = styled(Link)`
@@ -63,7 +63,7 @@ const AlwaysLink = styled(Link)`
   background-color: #337ab7;
 `;
 
-function VisualizerKey({ i18n }) {
+function WorkflowKey({ i18n }) {
   return (
     <Wrapper>
       <Header>
@@ -113,4 +113,4 @@ function VisualizerKey({ i18n }) {
   );
 }
 
-export default withI18n()(VisualizerKey);
+export default withI18n()(WorkflowKey);

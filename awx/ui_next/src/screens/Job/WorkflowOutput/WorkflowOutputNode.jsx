@@ -1,11 +1,12 @@
 import React, { Fragment } from 'react';
+import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { func, shape } from 'prop-types';
 import { StatusIcon } from '@components/Sparkline';
 import { WorkflowNodeTypeLetter } from '@components/Workflow';
 import { secondsToHHMMSS } from '@util/dates';
-import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 import { constants as wfConstants } from '@util/workflow';
 
 const NodeG = styled.g`
@@ -13,12 +14,12 @@ const NodeG = styled.g`
 `;
 
 const JobTopLine = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
   margin-top: 5px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   p {
     margin-left: 10px;
@@ -29,8 +30,8 @@ const JobTopLine = styled.div`
 `;
 
 const Elapsed = styled.div`
-  text-align: center;
   margin-top: 5px;
+  text-align: center;
 
   span {
     font-size: 12px;
@@ -48,18 +49,19 @@ const NodeContents = styled.foreignObject`
 
 const NodeDefaultLabel = styled.p`
   margin-top: 20px;
-  text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 function WorkflowOutputNode({
-  node,
-  nodePositions,
+  history,
+  i18n,
   mouseEnter,
   mouseLeave,
-  i18n,
+  node,
+  nodePositions,
 }) {
   let borderColor = '#93969A';
 
@@ -78,10 +80,7 @@ function WorkflowOutputNode({
 
   const handleNodeClick = () => {
     if (node.job) {
-      window.open(
-        `/#/jobs/${JOB_TYPE_URL_SEGMENTS[node.job.type]}/${node.job.id}`,
-        '_blank'
-      );
+      history.push(`/jobs/${node.job.id}/details`);
     }
   };
 
@@ -96,13 +95,13 @@ function WorkflowOutputNode({
       onMouseLeave={mouseLeave}
     >
       <rect
-        width={wfConstants.nodeW}
+        fill="#FFFFFF"
         height={wfConstants.nodeH}
         rx="2"
         ry="2"
         stroke={borderColor}
         strokeWidth="2px"
-        fill="#FFFFFF"
+        width={wfConstants.nodeW}
       />
       <NodeContents height="60" width="180">
         {node.job ? (
@@ -133,4 +132,11 @@ function WorkflowOutputNode({
   );
 }
 
-export default withI18n()(WorkflowOutputNode);
+WorkflowOutputNode.propTypes = {
+  mouseEnter: func.isRequired,
+  mouseLeave: func.isRequired,
+  node: shape().isRequired,
+  nodePositions: shape().isRequired,
+};
+
+export default withI18n()(withRouter(WorkflowOutputNode));

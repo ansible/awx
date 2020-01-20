@@ -1,15 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
+import { func } from 'prop-types';
 
 const TooltipItem = styled.div`
-  height: 25px;
-  width: 25px;
-  font-size: 12px;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
   border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  height: 25px;
+  justify-content: center;
+  width: 25px;
 
   &:hover {
     color: white;
@@ -21,21 +22,33 @@ const TooltipItem = styled.div`
   }
 `;
 
-function WorkflowActionTooltip({
+function WorkflowActionTooltipItem({
   children,
+  onClick,
   onMouseEnter,
   onMouseLeave,
-  onClick,
 }) {
   return (
     <TooltipItem
+      onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={onClick}
     >
       {children}
     </TooltipItem>
   );
 }
 
-export default WorkflowActionTooltip;
+WorkflowActionTooltipItem.propTypes = {
+  onClick: func,
+  onMouseEnter: func,
+  onMouseLeave: func,
+};
+
+WorkflowActionTooltipItem.defaultProps = {
+  onClick: () => {},
+  onMouseEnter: () => {},
+  onMouseLeave: () => {},
+};
+
+export default WorkflowActionTooltipItem;

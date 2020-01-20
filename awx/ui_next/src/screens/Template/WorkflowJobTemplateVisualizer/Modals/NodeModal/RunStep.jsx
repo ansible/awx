@@ -2,17 +2,18 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { func, string } from 'prop-types';
 import { Title } from '@patternfly/react-core';
-import { SelectableCard } from '@components/SelectableCard';
+import SelectableCard from '@components/SelectableCard';
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: 33% 33% 33%;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-auto-rows: 100px;
-  width: 100%;
+  grid-gap: 20px;
+  grid-template-columns: 33% 33% 33%;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   margin: 20px 0px;
+  width: 100%;
 `;
 
 function RunStep({ i18n, linkType, updateLinkType }) {
@@ -55,5 +56,10 @@ function RunStep({ i18n, linkType, updateLinkType }) {
     </>
   );
 }
+
+RunStep.propTypes = {
+  linkType: string.isRequired,
+  updateLinkType: func.isRequired,
+};
 
 export default withI18n()(RunStep);

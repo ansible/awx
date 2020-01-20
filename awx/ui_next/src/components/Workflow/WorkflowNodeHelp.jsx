@@ -2,12 +2,13 @@ import React, { Fragment } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { shape } from 'prop-types';
 import { secondsToHHMMSS } from '@util/dates';
 
 const GridDL = styled.dl`
+  column-gap: 15px;
   display: grid;
   grid-template-columns: max-content;
-  column-gap: 15px;
   row-gap: 0px;
   dt {
     grid-column-start: 1;
@@ -133,5 +134,9 @@ function WorkflowNodeHelp({ node, i18n }) {
     </Fragment>
   );
 }
+
+WorkflowNodeHelp.propTypes = {
+  node: shape().isRequired,
+};
 
 export default withI18n()(WorkflowNodeHelp);

@@ -2,82 +2,84 @@ import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { bool, func, node, shape } from 'prop-types';
 import {
   Button,
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import NodeTypeStep from './NodeTypeStep/NodeTypeStep';
-import RunStep from './RunStep';
-import NodeNextButton from './NodeNextButton';
-import { Wizard } from '@components/Wizard';
+import Wizard from '@components/Wizard';
+import { NodeTypeStep } from './NodeTypeStep';
+import { RunStep, NodeNextButton } from '.';
 
 function NodeModal({
+  askLinkType,
   history,
   i18n,
-  title,
+  nodeToEdit,
   onClose,
   onSave,
-  node,
-  askLinkType,
+  title,
 }) {
-  let defaultNodeType = 'job_template';
-  let defaultNodeResource = null;
-  let defaultApprovalName = '';
   let defaultApprovalDescription = '';
+  let defaultApprovalName = '';
   let defaultApprovalTimeout = 0;
-  if (node && node.unifiedJobTemplate) {
+  let defaultNodeResource = null;
+  let defaultNodeType = 'job_template';
+  if (nodeToEdit && nodeToEdit.unifiedJobTemplate) {
     if (
-      node &&
-      node.unifiedJobTemplate &&
-      (node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type)
+      nodeToEdit &&
+      nodeToEdit.unifiedJobTemplate &&
+      (nodeToEdit.unifiedJobTemplate.type ||
+        nodeToEdit.unifiedJobTemplate.unified_job_type)
     ) {
       const ujtType =
-        node.unifiedJobTemplate.type ||
-        node.unifiedJobTemplate.unified_job_type;
+        nodeToEdit.unifiedJobTemplate.type ||
+        nodeToEdit.unifiedJobTemplate.unified_job_type;
       switch (ujtType) {
         case 'job_template':
         case 'job':
           defaultNodeType = 'job_template';
-          defaultNodeResource = node.unifiedJobTemplate;
+          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
           break;
         case 'project':
         case 'project_update':
           defaultNodeType = 'project_sync';
-          defaultNodeResource = node.unifiedJobTemplate;
+          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
           break;
         case 'inventory_source':
         case 'inventory_update':
           defaultNodeType = 'inventory_source_sync';
-          defaultNodeResource = node.unifiedJobTemplate;
+          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
           break;
         case 'workflow_job_template':
         case 'workflow_job':
           defaultNodeType = 'workflow_job_template';
-          defaultNodeResource = node.unifiedJobTemplate;
+          defaultNodeResource = nodeToEdit.unifiedJobTemplate;
           break;
         case 'workflow_approval_template':
         case 'workflow_approval':
           defaultNodeType = 'approval';
-          defaultApprovalName = node.unifiedJobTemplate.name;
-          defaultApprovalDescription = node.unifiedJobTemplate.description;
-          defaultApprovalTimeout = node.unifiedJobTemplate.timeout;
+          defaultApprovalName = nodeToEdit.unifiedJobTemplate.name;
+          defaultApprovalDescription =
+            nodeToEdit.unifiedJobTemplate.description;
+          defaultApprovalTimeout = nodeToEdit.unifiedJobTemplate.timeout;
           break;
         default:
       }
     }
   }
-  const [nodeType, setNodeType] = useState(defaultNodeType);
-  const [linkType, setLinkType] = useState('success');
-  const [nodeResource, setNodeResource] = useState(defaultNodeResource);
-  const [triggerNext, setTriggerNext] = useState(0);
-  const [approvalName, setApprovalName] = useState(defaultApprovalName);
   const [approvalDescription, setApprovalDescription] = useState(
     defaultApprovalDescription
   );
+  const [approvalName, setApprovalName] = useState(defaultApprovalName);
   const [approvalTimeout, setApprovalTimeout] = useState(
     defaultApprovalTimeout
   );
+  const [linkType, setLinkType] = useState('success');
+  const [nodeResource, setNodeResource] = useState(defaultNodeResource);
+  const [nodeType, setNodeType] = useState(defaultNodeType);
+  const [triggerNext, setTriggerNext] = useState(0);
 
   const clearQueryParams = () => {
     const parts = history.location.search.replace(/^\?/, '').split('&');
@@ -95,19 +97,17 @@ function NodeModal({
     const resource =
       nodeType === 'approval'
         ? {
-            name: approvalName,
             description: approvalDescription,
+            name: approvalName,
             timeout: approvalTimeout,
             type: 'workflow_approval_template',
           }
         : nodeResource;
 
-    // TODO: pick edgeType or linkType and be consistent across all files.
-
     onSave({
-      nodeType,
-      edgeType: linkType,
+      linkType,
       nodeResource: resource,
+      nodeType,
     });
   };
 
@@ -145,15 +145,15 @@ function NodeModal({
         (nodeType === 'approval' && approvalName !== ''),
       component: (
         <NodeTypeStep
-          nodeType={nodeType}
-          updateNodeType={handleNodeTypeChange}
-          nodeResource={nodeResource}
-          updateNodeResource={setNodeResource}
-          name={approvalName}
-          updateName={setApprovalName}
           description={approvalDescription}
-          updateDescription={setApprovalDescription}
+          name={approvalName}
+          nodeResource={nodeResource}
+          nodeType={nodeType}
           timeout={approvalTimeout}
+          updateDescription={setApprovalDescription}
+          updateName={setApprovalName}
+          updateNodeResource={setNodeResource}
+          updateNodeType={handleNodeTypeChange}
           updateTimeout={setApprovalTimeout}
         />
       ),
@@ -198,15 +198,27 @@ function NodeModal({
 
   return (
     <Wizard
-      style={{ overflow: 'scroll' }}
+      footer={CustomFooter}
       isOpen
-      steps={steps}
-      title={wizardTitle}
       onClose={handleCancel}
       onSave={handleSaveNode}
-      footer={CustomFooter}
+      steps={steps}
+      css="overflow: scroll"
+      title={wizardTitle}
     />
   );
 }
+
+NodeModal.propTypes = {
+  askLinkType: bool.isRequired,
+  nodeToEdit: shape(),
+  onClose: func.isRequired,
+  onSave: func.isRequired,
+  title: node.isRequired,
+};
+
+NodeModal.defaultProps = {
+  nodeToEdit: null,
+};
 
 export default withI18n()(withRouter(NodeModal));

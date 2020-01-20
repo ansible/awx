@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func, shape } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
 function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
@@ -44,5 +45,11 @@ function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
+
+NodeDeleteModal.propTypes = {
+  nodeToDelete: shape().isRequired,
+  onCancel: func.isRequired,
+  onConfirm: func.isRequired,
+};
 
 export default withI18n()(NodeDeleteModal);

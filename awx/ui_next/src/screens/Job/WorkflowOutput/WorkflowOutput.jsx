@@ -2,64 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { shape } from 'prop-types';
 import { CardBody as PFCardBody } from '@patternfly/react-core';
 import { layoutGraph } from '@util/workflow';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobsAPI } from '@api';
 import WorkflowOutputGraph from './WorkflowOutputGraph';
+import WorkflowOutputToolbar from './WorkflowOutputToolbar';
 
 const CardBody = styled(PFCardBody)`
-  height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;
-`;
-
-const Toolbar = styled.div`
-  height: 50px;
-  background-color: grey;
+  height: calc(100vh - 240px);
 `;
 
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column;
   height: 100%;
+  position: relative;
 `;
 
 const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
-  try {
-    const { data } = await WorkflowJobsAPI.readNodes(jobId, {
-      page_size: 200,
-      page: pageNo,
-    });
-    if (data.next) {
-      return await fetchWorkflowNodes(
-        jobId,
-        pageNo + 1,
-        nodes.concat(data.results)
-      );
-    }
-    return nodes.concat(data.results);
-  } catch (error) {
-    throw error;
+  const { data } = await WorkflowJobsAPI.readNodes(jobId, {
+    page_size: 200,
+    page: pageNo,
+  });
+  if (data.next) {
+    return fetchWorkflowNodes(
+      jobId,
+      pageNo + 1,
+      nodes.concat(data.results)
+    );
   }
+  return nodes.concat(data.results);
 };
 
 function WorkflowOutput({ job, i18n }) {
   const [contentError, setContentError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [graphLinks, setGraphLinks] = useState([]);
   const [graphNodes, setGraphNodes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [nodePositions, setNodePositions] = useState(null);
+  const [showKey, setShowKey] = useState(false);
+  const [showTools, setShowTools] = useState(false);
 
   useEffect(() => {
     const buildGraphArrays = nodes => {
-      const nonRootNodeIds = [];
       const allNodeIds = [];
       const arrayOfLinksForChart = [];
-      const nodeIdToChartNodeIdMapping = {};
       const chartNodeIdToIndexMapping = {};
+      const nodeIdToChartNodeIdMapping = {};
       const nodeRef = {};
+      const nonRootNodeIds = [];
       let nodeIdCounter = 1;
       const arrayOfNodesForChart = [
         {
@@ -110,7 +106,7 @@ function WorkflowOutput({ job, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'success',
+            linkType: 'success',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -121,7 +117,7 @@ function WorkflowOutput({ job, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'failure',
+            linkType: 'failure',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -132,7 +128,7 @@ function WorkflowOutput({ job, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'always',
+            linkType: 'always',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -151,7 +147,7 @@ function WorkflowOutput({ job, i18n }) {
         arrayOfLinksForChart.push({
           source: arrayOfNodesForChart[0],
           target: arrayOfNodesForChart[targetIndex],
-          edgeType: 'always',
+          linkType: 'always',
           type: 'link',
         });
       });
@@ -206,17 +202,30 @@ function WorkflowOutput({ job, i18n }) {
   return (
     <CardBody>
       <Wrapper>
-        <Toolbar>Toolbar</Toolbar>
+        <WorkflowOutputToolbar
+          job={job}
+          keyShown={showKey}
+          nodes={graphNodes}
+          onKeyToggle={() => setShowKey(!showKey)}
+          onToolsToggle={() => setShowTools(!showTools)}
+          toolsShown={showTools}
+        />
         {nodePositions && (
           <WorkflowOutputGraph
             links={graphLinks}
-            nodes={graphNodes}
             nodePositions={nodePositions}
+            nodes={graphNodes}
+            showKey={showKey}
+            showTools={showTools}
           />
         )}
       </Wrapper>
     </CardBody>
   );
 }
+
+WorkflowOutput.propTypes = {
+  job: shape().isRequired,
+};
 
 export default withI18n()(WorkflowOutput);

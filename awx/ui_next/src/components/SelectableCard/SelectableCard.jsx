@@ -52,6 +52,7 @@ function SelectableCard({ label, description, onClick, isSelected, dataCy }) {
 
 SelectableCard.propTypes = {
   label: PropTypes.string,
+  description: PropTypes.string,
   onClick: PropTypes.func.isRequired,
   isSelected: PropTypes.bool,
 };

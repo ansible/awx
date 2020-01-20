@@ -1,1 +1,1 @@
-export { default as SelectableCard } from './SelectableCard';
+export { default } from './SelectableCard';

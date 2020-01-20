@@ -1,11 +1,11 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { arrayOf, bool, func, shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import {
   BookIcon,
   CompassIcon,
-  DownloadIcon,
   RocketIcon,
   TimesIcon,
   TrashAltIcon,
@@ -36,68 +36,50 @@ const ActionButton = styled(Button)`
   }
 `;
 
-function Toolbar({
+function VisualizerToolbar({
   i18n,
-  template,
+  keyShown,
+  nodes,
   onClose,
-  onSave,
-  nodes = [],
   onDeleteAllClick,
   onKeyToggle,
-  keyShown,
+  onSave,
   onToolsToggle,
+  template,
   toolsShown,
 }) {
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
     <div>
-      <div
-        style={{
-          borderBottom: '1px solid grey',
-          height: '56px',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0px 20px',
-        }}
-      >
-        <div style={{ display: 'flex' }}>
+      <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
+        <div css="display: flex;">
           <b>{i18n._(t`Workflow Visualizer`)}</b>
           <VerticalSeparator />
           <b>{template.name}</b>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            flex: '1',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}
-        >
+        <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
           <div>{i18n._(t`Total Nodes`)}</div>
           <Badge isRead>{totalNodes}</Badge>
           <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Key`)} position="bottom">
             <ActionButton
-              variant="plain"
-              onClick={onKeyToggle}
               isActive={keyShown}
+              onClick={onKeyToggle}
+              variant="plain"
             >
               <CompassIcon />
             </ActionButton>
           </Tooltip>
           <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
             <ActionButton
-              variant="plain"
-              onClick={onToolsToggle}
               isActive={toolsShown}
+              onClick={onToolsToggle}
+              variant="plain"
             >
               <WrenchIcon />
             </ActionButton>
           </Tooltip>
-          <ActionButton variant="plain" isDisabled>
-            <DownloadIcon />
-          </ActionButton>
           <ActionButton variant="plain" isDisabled>
             <BookIcon />
           </ActionButton>
@@ -106,10 +88,10 @@ function Toolbar({
           </ActionButton>
           <Tooltip content={i18n._(t`Delete All Nodes`)} position="bottom">
             <ActionButton
-              variant="plain"
-              isDisabled={totalNodes === 0}
               aria-label={i18n._(t`Delete all nodes`)}
+              isDisabled={totalNodes === 0}
               onClick={onDeleteAllClick}
+              variant="plain"
             >
               <TrashAltIcon />
             </ActionButton>
@@ -120,9 +102,9 @@ function Toolbar({
           </Button>
           <VerticalSeparator />
           <Button
-            variant="plain"
             aria-label={i18n._(t`Close`)}
             onClick={onClose}
+            variant="plain"
           >
             <TimesIcon />
           </Button>
@@ -132,4 +114,20 @@ function Toolbar({
   );
 }
 
-export default withI18n()(Toolbar);
+VisualizerToolbar.propTypes = {
+  keyShown: bool.isRequired,
+  nodes: arrayOf(shape()),
+  onClose: func.isRequired,
+  onDeleteAllClick: func.isRequired,
+  onKeyToggle: func.isRequired,
+  onSave: func.isRequired,
+  onToolsToggle: func.isRequired,
+  template: shape().isRequired,
+  toolsShown: bool.isRequired,
+};
+
+VisualizerToolbar.defaultProps = {
+  nodes: [],
+};
+
+export default withI18n()(VisualizerToolbar);

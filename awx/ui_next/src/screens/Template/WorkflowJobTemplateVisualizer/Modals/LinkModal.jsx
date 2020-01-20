@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
-import { Button, Modal } from '@patternfly/react-core';
+import { Button, FormGroup, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { FormGroup } from '@patternfly/react-core';
+import { func, node, string } from 'prop-types';
 import AnsibleSelect from '@components/AnsibleSelect';
 
-function LinkModal({
-  i18n,
-  header,
-  onCancel,
-  onConfirm,
-  edgeType = 'success',
-}) {
-  const [newEdgeType, setNewEdgeType] = useState(edgeType);
+function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
+  const [newLinkType, setNewLinkType] = useState(linkType);
   return (
     <Modal
       width={600}
       header={header}
-      isOpen={true}
+      isOpen
       title={i18n._(t`Workflow Link`)}
       onClose={onCancel}
       actions={[
@@ -25,7 +19,7 @@ function LinkModal({
           key="save"
           variant="primary"
           aria-label={i18n._(t`Save link changes`)}
-          onClick={() => onConfirm(newEdgeType)}
+          onClick={() => onConfirm(newLinkType)}
         >
           {i18n._(t`Save`)}
         </Button>,
@@ -42,7 +36,7 @@ function LinkModal({
       <FormGroup fieldId="link-select" label={i18n._(t`Run`)}>
         <AnsibleSelect
           id="link-select"
-          value={newEdgeType}
+          value={newLinkType}
           data={[
             {
               value: 'always',
@@ -61,12 +55,23 @@ function LinkModal({
             },
           ]}
           onChange={(event, value) => {
-            setNewEdgeType(value);
+            setNewLinkType(value);
           }}
         />
       </FormGroup>
     </Modal>
   );
 }
+
+LinkModal.propTypes = {
+  linkType: string,
+  header: node.isRequired,
+  onCancel: func.isRequired,
+  onConfirm: func.isRequired,
+};
+
+LinkModal.defaultProps = {
+  linkType: 'success',
+};
 
 export default withI18n()(LinkModal);

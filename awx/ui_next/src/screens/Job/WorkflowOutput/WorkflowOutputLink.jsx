@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { shape } from 'prop-types';
 import { generateLine, getLinePoints } from '@util/workflow';
 
 function WorkflowOutputLink({ link, nodePositions }) {
@@ -6,16 +7,16 @@ function WorkflowOutputLink({ link, nodePositions }) {
   const [pathStroke, setPathStroke] = useState('#CCCCCC');
 
   useEffect(() => {
-    if (link.edgeType === 'failure') {
+    if (link.linkType === 'failure') {
       setPathStroke('#d9534f');
     }
-    if (link.edgeType === 'success') {
+    if (link.linkType === 'success') {
       setPathStroke('#5cb85c');
     }
-    if (link.edgeType === 'always') {
+    if (link.linkType === 'always') {
       setPathStroke('#337ab7');
     }
-  }, [link.edgeType]);
+  }, [link.linkType]);
 
   useEffect(() => {
     const linePoints = getLinePoints(link, nodePositions);
@@ -36,5 +37,10 @@ function WorkflowOutputLink({ link, nodePositions }) {
     </g>
   );
 }
+
+WorkflowOutputLink.propTypes = {
+  link: shape().isRequired,
+  nodePositions: shape().isRequired,
+};
 
 export default WorkflowOutputLink;

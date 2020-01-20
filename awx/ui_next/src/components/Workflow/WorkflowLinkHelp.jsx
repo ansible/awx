@@ -2,11 +2,12 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { shape } from 'prop-types';
 
 const GridDL = styled.dl`
+  column-gap: 15px;
   display: grid;
   grid-template-columns: max-content;
-  column-gap: 15px;
   row-gap: 0px;
   dt {
     grid-column-start: 1;
@@ -18,7 +19,7 @@ const GridDL = styled.dl`
 
 function WorkflowLinkHelp({ link, i18n }) {
   let linkType;
-  switch (link.edgeType) {
+  switch (link.linkType) {
     case 'always':
       linkType = i18n._(t`Always`);
       break;
@@ -41,5 +42,9 @@ function WorkflowLinkHelp({ link, i18n }) {
     </GridDL>
   );
 }
+
+WorkflowLinkHelp.propTypes = {
+  link: shape().isRequired,
+};
 
 export default withI18n()(WorkflowLinkHelp);

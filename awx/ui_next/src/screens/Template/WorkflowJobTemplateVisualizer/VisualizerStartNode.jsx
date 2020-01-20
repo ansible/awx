@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { bool, func, shape } from 'prop-types';
 import { PlusIcon } from '@patternfly/react-icons';
 import { constants as wfConstants } from '@util/workflow';
 import {
@@ -14,12 +15,12 @@ const StartG = styled.g`
 `;
 
 function VisualizerStartNode({
-  updateHelpText,
-  nodePositions,
-  readOnly,
-  i18n,
   addingLink,
+  i18n,
+  nodePositions,
   onAddNodeClick,
+  readOnly,
+  updateHelpText,
 }) {
   const [hovering, setHovering] = useState(false);
 
@@ -32,18 +33,18 @@ function VisualizerStartNode({
   return (
     <StartG
       id="node-1"
-      transform={`translate(${nodePositions[1].x},0)`}
+      ignorePointerEvents={addingLink}
       onMouseEnter={handleNodeMouseEnter}
       onMouseLeave={() => setHovering(false)}
-      ignorePointerEvents={addingLink}
+      transform={`translate(${nodePositions[1].x},0)`}
     >
       <rect
-        width={wfConstants.rootW}
+        fill="#0279BC"
         height={wfConstants.rootH}
-        y="10"
         rx="2"
         ry="2"
-        fill="#0279BC"
+        width={wfConstants.rootW}
+        y="10"
       />
       {/* TODO: We need to be able to handle translated text here */}
       <text x="13" y="30" dy=".35em" fill="white">
@@ -51,8 +52,6 @@ function VisualizerStartNode({
       </text>
       {!readOnly && hovering && (
         <WorkflowActionTooltip
-          pointX={wfConstants.rootW}
-          pointY={wfConstants.rootH / 2 + 10}
           actions={[
             <WorkflowActionTooltipItem
               id="node-add"
@@ -68,10 +67,20 @@ function VisualizerStartNode({
               <PlusIcon />
             </WorkflowActionTooltipItem>,
           ]}
+          pointX={wfConstants.rootW}
+          pointY={wfConstants.rootH / 2 + 10}
         />
       )}
     </StartG>
   );
 }
+
+VisualizerStartNode.propTypes = {
+  addingLink: bool.isRequired,
+  nodePositions: shape().isRequired,
+  onAddNodeClick: func.isRequired,
+  readOnly: bool.isRequired,
+  updateHelpText: func.isRequired,
+};
 
 export default withI18n()(VisualizerStartNode);

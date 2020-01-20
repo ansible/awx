@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func, shape } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
 function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
@@ -13,18 +14,18 @@ function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
       onClose={onCancel}
       actions={[
         <Button
-          key="remove"
-          variant="danger"
           aria-label={i18n._(t`Confirm link removal`)}
+          key="remove"
           onClick={() => onConfirm()}
+          variant="danger"
         >
           {i18n._(t`Remove`)}
         </Button>,
         <Button
-          key="cancel"
-          variant="secondary"
           aria-label={i18n._(t`Cancel link removal`)}
+          key="cancel"
           onClick={onCancel}
+          variant="secondary"
         >
           {i18n._(t`Cancel`)}
         </Button>,
@@ -44,5 +45,11 @@ function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
+
+LinkDeleteModal.propTypes = {
+  linkToDelete: shape().isRequired,
+  onCancel: func.isRequired,
+  onConfirm: func.isRequired,
+};
 
 export default withI18n()(LinkDeleteModal);

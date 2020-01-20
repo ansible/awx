@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { bool, func, shape } from 'prop-types';
 import { PencilAltIcon, PlusIcon, TrashAltIcon } from '@patternfly/react-icons';
 import {
   generateLine,
-  getLinkOverlayPoints,
   getLinePoints,
+  getLinkOverlayPoints,
 } from '@util/workflow';
 import {
   WorkflowActionTooltip,
@@ -18,16 +19,16 @@ const LinkG = styled.g`
 `;
 
 function VisualizerLink({
+  addingLink,
+  i18n,
   link,
   nodePositions,
+  onAddNodeClick,
+  onDeleteLinkClick,
+  onLinkEditClick,
   readOnly,
   updateHelpText,
   updateLinkHelp,
-  i18n,
-  onLinkEditClick,
-  onDeleteLinkClick,
-  addingLink,
-  onAddNodeClick,
 }) {
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
@@ -61,18 +62,18 @@ function VisualizerLink({
           <WorkflowActionTooltipItem
             id="link-edit"
             key="edit"
+            onClick={() => onLinkEditClick(link)}
             onMouseEnter={() => updateHelpText(i18n._(t`Edit this link`))}
             onMouseLeave={() => updateHelpText(null)}
-            onClick={() => onLinkEditClick(link)}
           >
             <PencilAltIcon />
           </WorkflowActionTooltipItem>,
           <WorkflowActionTooltipItem
             id="link-delete"
             key="delete"
+            onClick={() => onDeleteLinkClick(link)}
             onMouseEnter={() => updateHelpText(i18n._(t`Delete this link`))}
             onMouseLeave={() => updateHelpText(null)}
-            onClick={() => onDeleteLinkClick(link)}
           >
             <TrashAltIcon />
           </WorkflowActionTooltipItem>,
@@ -95,16 +96,16 @@ function VisualizerLink({
   };
 
   useEffect(() => {
-    if (link.edgeType === 'failure') {
+    if (link.linkType === 'failure') {
       setPathStroke('#d9534f');
     }
-    if (link.edgeType === 'success') {
+    if (link.linkType === 'success') {
       setPathStroke('#5cb85c');
     }
-    if (link.edgeType === 'always') {
+    if (link.linkType === 'always') {
       setPathStroke('#337ab7');
     }
-  }, [link.edgeType]);
+  }, [link.linkType]);
 
   useEffect(() => {
     const linePoints = getLinePoints(link, nodePositions);
@@ -117,13 +118,13 @@ function VisualizerLink({
     <LinkG
       className="WorkflowGraph-link"
       id={`link-${link.source.id}-${link.target.id}`}
+      ignorePointerEvents={addingLink}
       onMouseEnter={handleLinkMouseEnter}
       onMouseLeave={handleLinkMouseLeave}
-      ignorePointerEvents={addingLink}
     >
       <polygon
-        id={`link-${link.source.id}-${link.target.id}-overlay`}
         fill="#E1E1E1"
+        id={`link-${link.source.id}-${link.target.id}-overlay`}
         opacity={hovering ? '1' : '0'}
         points={getLinkOverlayPoints(link, nodePositions)}
       />
@@ -134,20 +135,32 @@ function VisualizerLink({
         strokeWidth="2px"
       />
       <polygon
-        opacity="0"
-        points={getLinkOverlayPoints(link, nodePositions)}
         onMouseEnter={() => updateLinkHelp(link)}
         onMouseLeave={() => updateLinkHelp(null)}
+        opacity="0"
+        points={getLinkOverlayPoints(link, nodePositions)}
       />
       {!readOnly && hovering && (
         <WorkflowActionTooltip
+          actions={tooltipActions}
           pointX={tooltipX}
           pointY={tooltipY}
-          actions={tooltipActions}
         />
       )}
     </LinkG>
   );
 }
+
+VisualizerLink.propTypes = {
+  addingLink: bool.isRequired,
+  link: shape().isRequired,
+  nodePositions: shape().isRequired,
+  onAddNodeClick: func.isRequired,
+  onDeleteLinkClick: func.isRequired,
+  onLinkEditClick: func.isRequired,
+  readOnly: bool.isRequired,
+  updateHelpText: func.isRequired,
+  updateLinkHelp: func.isRequired,
+};
 
 export default withI18n()(VisualizerLink);

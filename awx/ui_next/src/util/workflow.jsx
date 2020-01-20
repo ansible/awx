@@ -18,8 +18,8 @@ export function calcZoomAndFit(gRef, svgRef) {
     .node()
     .getBoundingClientRect();
 
-  gBoundingClientRect.height = gBoundingClientRect.height / currentScale;
-  gBoundingClientRect.width = gBoundingClientRect.width / currentScale;
+  gBoundingClientRect.height /= currentScale;
+  gBoundingClientRect.width /= currentScale;
 
   const gBBoxDimensions = d3
     .select(gRef)

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func, shape } from 'prop-types';
 import { WorkflowJobTemplatesAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import PaginatedDataList from '@components/PaginatedDataList';
@@ -15,15 +16,15 @@ const QS_CONFIG = getQSConfig('workflow_job_templates', {
 });
 
 function WorkflowJobTemplatesList({
-  i18n,
   history,
+  i18n,
   nodeResource,
   updateNodeResource,
 }) {
-  const [workflowJobTemplates, setWorkflowJobTemplates] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [workflowJobTemplates, setWorkflowJobTemplates] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -49,9 +50,24 @@ function WorkflowJobTemplatesList({
     <PaginatedDataList
       contentError={error}
       hasContentLoading={isLoading}
-      items={workflowJobTemplates}
       itemCount={count}
+      items={workflowJobTemplates}
+      onRowClick={row => updateNodeResource(row)}
       qsConfig={QS_CONFIG}
+      renderItem={item => (
+        <CheckboxListItem
+          isSelected={!!(nodeResource && nodeResource.id === item.id)}
+          itemId={item.id}
+          key={item.id}
+          name={item.name}
+          label={item.name}
+          onSelect={() => updateNodeResource(item)}
+          onDeselect={() => updateNodeResource(null)}
+          isRadio
+        />
+      )}
+      renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+      showPageSizeOptions={false}
       toolbarColumns={[
         {
           name: i18n._(t`Name`),
@@ -60,24 +76,17 @@ function WorkflowJobTemplatesList({
           isSearchable: true,
         },
       ]}
-      renderItem={item => (
-        <CheckboxListItem
-          isSelected={
-            nodeResource && nodeResource.id === item.id ? true : false
-          }
-          itemId={item.id}
-          key={item.id}
-          name={item.name}
-          label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
-          isRadio={true}
-        />
-      )}
-      renderToolbar={props => <DataListToolbar {...props} fillWidth />}
-      showPageSizeOptions={false}
     />
   );
 }
+
+WorkflowJobTemplatesList.propTypes = {
+  nodeResource: shape(),
+  updateNodeResource: func.isRequired,
+};
+
+WorkflowJobTemplatesList.defaultProps = {
+  nodeResource: null,
+};
 
 export default withI18n()(withRouter(WorkflowJobTemplatesList));

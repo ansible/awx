@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { node, number } from 'prop-types';
 
 const TooltipContents = styled.div`
   display: flex;
@@ -10,32 +11,32 @@ const TooltipArrows = styled.div`
 `;
 
 const TooltipArrowOuter = styled.div`
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid #c4c4c4;
+  border-top: 10px solid transparent;
+  height: 0;
+  margin: auto;
   position: absolute;
   top: calc(50% - 10px);
   width: 0;
-  height: 0;
-  border-right: 10px solid #c4c4c4;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  margin: auto;
 `;
 
 const TooltipArrowInner = styled.div`
-  position: absolute;
-  top: calc(50% - 10px);
-  left: 2px;
-  width: 0;
-  height: 0;
+  border-bottom: 10px solid transparent;
   border-right: 10px solid white;
   border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
+  height: 0;
+  left: 2px;
   margin: auto;
+  position: absolute;
+  top: calc(50% - 10px);
+  width: 0;
 `;
 
 const TooltipActions = styled.div`
   background-color: white;
-  border: 1px solid #c4c4c4;
   border-radius: 2px;
+  border: 1px solid #c4c4c4;
   padding: 5px;
 `;
 
@@ -58,5 +59,11 @@ function WorkflowActionTooltip({ actions, pointX, pointY }) {
     </foreignObject>
   );
 }
+
+WorkflowActionTooltip.propTypes = {
+  actions: node.isRequired,
+  pointX: number.isRequired,
+  pointY: number.isRequired,
+};
 
 export default WorkflowActionTooltip;

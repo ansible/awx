@@ -1,15 +1,28 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { WorkflowHelp, WorkflowNodeHelp } from '@components/Workflow';
-import { calcZoomAndFit } from '@util/workflow';
+import { arrayOf, bool, shape } from 'prop-types';
+import { calcZoomAndFit, getZoomTranslate } from '@util/workflow';
 import {
   WorkflowOutputLink,
   WorkflowOutputNode,
   WorkflowOutputStartNode,
 } from '@screens/Job/WorkflowOutput';
+import {
+  WorkflowHelp,
+  WorkflowKey,
+  WorkflowNodeHelp,
+  WorkflowTools,
+} from '@components/Workflow';
 
-function WorkflowOutputGraph({ links, nodes, nodePositions }) {
+function WorkflowOutputGraph({
+  links,
+  nodePositions,
+  nodes,
+  showKey,
+  showTools,
+}) {
   const [nodeHelp, setNodeHelp] = useState();
+  const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
   const gRef = useRef(null);
 
@@ -20,6 +33,75 @@ function WorkflowOutputGraph({ links, nodes, nodePositions }) {
       'transform',
       `translate(${translation}) scale(${d3.event.transform.k})`
     );
+
+    setZoomPercentage(d3.event.transform.k * 100);
+  };
+
+  const handlePan = direction => {
+    const transform = d3.zoomTransform(d3.select(svgRef.current).node());
+
+    let { x: xPos, y: yPos } = transform;
+    const { k: currentScale } = transform;
+
+    switch (direction) {
+      case 'up':
+        yPos -= 50;
+        break;
+      case 'down':
+        yPos += 50;
+        break;
+      case 'left':
+        xPos -= 50;
+        break;
+      case 'right':
+        xPos += 50;
+        break;
+      default:
+        // Throw an error?
+        break;
+    }
+
+    d3.select(svgRef.current).call(
+      zoomRef.transform,
+      d3.zoomIdentity.translate(xPos, yPos).scale(currentScale)
+    );
+  };
+
+  const handlePanToMiddle = () => {
+    const svgElement = document.getElementById('workflow-svg');
+    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    d3.select(svgRef.current).call(
+      zoomRef.transform,
+      d3.zoomIdentity
+        .translate(0, svgBoundingClientRect.height / 2 - 30)
+        .scale(1)
+    );
+
+    setZoomPercentage(100);
+  };
+
+  const handleZoomChange = newScale => {
+    const [translateX, translateY] = getZoomTranslate(svgRef.current, newScale);
+
+    d3.select(svgRef.current).call(
+      zoomRef.transform,
+      d3.zoomIdentity.translate(translateX, translateY).scale(newScale)
+    );
+    setZoomPercentage(newScale * 100);
+  };
+
+  const handleFitGraph = () => {
+    const [scaleToFit, yTranslate] = calcZoomAndFit(
+      gRef.current,
+      svgRef.current
+    );
+
+    d3.select(svgRef.current).call(
+      zoomRef.transform,
+      d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
+    );
+
+    setZoomPercentage(scaleToFit * 100);
   };
 
   const zoomRef = d3
@@ -34,12 +116,17 @@ function WorkflowOutputGraph({ links, nodes, nodePositions }) {
 
   // Attempt to zoom the graph to fit the available screen space
   useEffect(() => {
-    const [scaleToFit, yTranslate] = calcZoomAndFit(gRef.current);
+    const [scaleToFit, yTranslate] = calcZoomAndFit(
+      gRef.current,
+      svgRef.current
+    );
 
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
     );
+
+    setZoomPercentage(scaleToFit * 100);
     // We only want this to run once (when the component mounts)
     // Including zoomRef.transform in the deps array will cause this to
     // run very frequently.
@@ -78,10 +165,10 @@ function WorkflowOutputGraph({ links, nodes, nodePositions }) {
                 return (
                   <WorkflowOutputNode
                     key={`node-${node.id}`}
-                    node={node}
-                    nodePositions={nodePositions}
                     mouseEnter={() => setNodeHelp(node)}
                     mouseLeave={() => setNodeHelp(null)}
+                    node={node}
+                    nodePositions={nodePositions}
                   />
                 );
               }
@@ -90,8 +177,28 @@ function WorkflowOutputGraph({ links, nodes, nodePositions }) {
           ]}
         </g>
       </svg>
+      <div css="position: absolute; top: 75px;right: 20px;display: flex;">
+        {showTools && (
+          <WorkflowTools
+            onFitGraph={handleFitGraph}
+            onPan={handlePan}
+            onPanToMiddle={handlePanToMiddle}
+            onZoomChange={handleZoomChange}
+            zoomPercentage={zoomPercentage}
+          />
+        )}
+        {showKey && <WorkflowKey />}
+      </div>
     </Fragment>
   );
 }
+
+WorkflowOutputGraph.propTypes = {
+  links: arrayOf(shape()).isRequired,
+  nodePositions: shape().isRequired,
+  nodes: arrayOf(shape()).isRequired,
+  showKey: bool.isRequired,
+  showTools: bool.isRequired,
+};
 
 export default WorkflowOutputGraph;

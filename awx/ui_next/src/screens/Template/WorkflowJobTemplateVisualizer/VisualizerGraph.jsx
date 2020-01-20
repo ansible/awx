@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { arrayOf, bool, func, shape } from 'prop-types';
 import * as d3 from 'd3';
 import {
   calcZoomAndFit,
@@ -10,15 +11,15 @@ import {
 } from '@util/workflow';
 import {
   WorkflowHelp,
+  WorkflowKey,
   WorkflowLinkHelp,
   WorkflowNodeHelp,
+  WorkflowTools,
 } from '@components/Workflow';
 import {
   VisualizerLink,
   VisualizerNode,
   VisualizerStartNode,
-  VisualizerKey,
-  VisualizerTools,
 } from '@screens/Template/WorkflowJobTemplateVisualizer';
 
 const PotentialLink = styled.polyline`
@@ -26,34 +27,34 @@ const PotentialLink = styled.polyline`
 `;
 
 const WorkflowSVG = styled.svg`
+  background-color: #f6f6f6;
   display: flex;
   height: 100%;
-  background-color: #f6f6f6;
 `;
 
 function VisualizerGraph({
+  addLinkSourceNode,
+  addingLink,
+  i18n,
   links,
-  nodes,
-  readOnly,
   nodePositions,
-  onDeleteNodeClick,
+  nodes,
   onAddNodeClick,
+  onCancelAddLinkClick,
+  onConfirmAddLinkClick,
+  onDeleteLinkClick,
+  onDeleteNodeClick,
   onEditNodeClick,
   onLinkEditClick,
-  onDeleteLinkClick,
   onStartAddLinkClick,
-  onConfirmAddLinkClick,
-  onCancelAddLinkClick,
   onViewNodeClick,
-  addingLink,
-  addLinkSourceNode,
+  readOnly,
   showKey,
   showTools,
-  i18n,
 }) {
   const [helpText, setHelpText] = useState(null);
-  const [nodeHelp, setNodeHelp] = useState();
   const [linkHelp, setLinkHelp] = useState();
+  const [nodeHelp, setNodeHelp] = useState();
   const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
   const gRef = useRef(null);
@@ -115,9 +116,10 @@ function VisualizerGraph({
   };
 
   const handlePan = direction => {
-    let { x: xPos, y: yPos, k: currentScale } = d3.zoomTransform(
-      d3.select(svgRef.current).node()
-    );
+    const transform = d3.zoomTransform(d3.select(svgRef.current).node());
+
+    let { x: xPos, y: yPos } = transform;
+    const { k: currentScale } = transform;
 
     switch (direction) {
       case 'up':
@@ -223,23 +225,23 @@ function VisualizerGraph({
       <WorkflowSVG id="workflow-svg" ref={svgRef} css="">
         <defs>
           <marker
-            id="workflow-triangle"
             className="WorkflowChart-noPointerEvents"
-            viewBox="0 -5 10 10"
-            refX="10"
+            id="workflow-triangle"
+            markerHeight="6"
             markerUnits="strokeWidth"
             markerWidth="6"
-            markerHeight="6"
             orient="auto"
+            refX="10"
+            viewBox="0 -5 10 10"
           >
             <path d="M0,-5L10,0L0,5" fill="#93969A" />
           </marker>
         </defs>
         <rect
-          width="100%"
           height="100%"
-          opacity="0"
           id="workflow-backround"
+          opacity="0"
+          width="100%"
           {...(addingLink && {
             onMouseMove: e => drawPotentialLinkToCursor(e),
             onMouseOver: () =>
@@ -255,12 +257,12 @@ function VisualizerGraph({
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
             <VisualizerStartNode
+              addingLink={addingLink}
               key="start"
               nodePositions={nodePositions}
+              onAddNodeClick={onAddNodeClick}
               readOnly={readOnly}
               updateHelpText={setHelpText}
-              addingLink={addingLink}
-              onAddNodeClick={onAddNodeClick}
             />,
             links.map(link => {
               if (
@@ -269,16 +271,16 @@ function VisualizerGraph({
               ) {
                 return (
                   <VisualizerLink
+                    addingLink={addingLink}
                     key={`link-${link.source.id}-${link.target.id}`}
                     link={link}
                     nodePositions={nodePositions}
+                    onAddNodeClick={onAddNodeClick}
+                    onDeleteLinkClick={onDeleteLinkClick}
+                    onLinkEditClick={onLinkEditClick}
+                    readOnly={readOnly}
                     updateHelpText={setHelpText}
                     updateLinkHelp={setLinkHelp}
-                    readOnly={readOnly}
-                    onLinkEditClick={onLinkEditClick}
-                    onDeleteLinkClick={onDeleteLinkClick}
-                    addingLink={addingLink}
-                    onAddNodeClick={onAddNodeClick}
                   />
                 );
               }
@@ -288,22 +290,22 @@ function VisualizerGraph({
               if (node.id > 1 && nodePositions[node.id] && !node.isDeleted) {
                 return (
                   <VisualizerNode
-                    key={`node-${node.id}`}
-                    node={node}
-                    nodePositions={nodePositions}
-                    updateHelpText={setHelpText}
-                    updateNodeHelp={setNodeHelp}
-                    readOnly={readOnly}
-                    onAddNodeClick={onAddNodeClick}
-                    onEditNodeClick={onEditNodeClick}
-                    onDeleteNodeClick={onDeleteNodeClick}
-                    onStartAddLinkClick={onStartAddLinkClick}
-                    onConfirmAddLinkClick={onConfirmAddLinkClick}
-                    onViewNodeClick={onViewNodeClick}
                     addingLink={addingLink}
                     isAddLinkSourceNode={
                       addLinkSourceNode && addLinkSourceNode.id === node.id
                     }
+                    key={`node-${node.id}`}
+                    node={node}
+                    nodePositions={nodePositions}
+                    onAddNodeClick={onAddNodeClick}
+                    onConfirmAddLinkClick={onConfirmAddLinkClick}
+                    onDeleteNodeClick={onDeleteNodeClick}
+                    onEditNodeClick={onEditNodeClick}
+                    onStartAddLinkClick={onStartAddLinkClick}
+                    onViewNodeClick={onViewNodeClick}
+                    readOnly={readOnly}
+                    updateHelpText={setHelpText}
+                    updateNodeHelp={setNodeHelp}
                     {...(addingLink && {
                       onMouseOver: () => drawPotentialLinkToNode(node),
                     })}
@@ -316,28 +318,52 @@ function VisualizerGraph({
           {addingLink && (
             <PotentialLink
               id="workflow-potentialLink"
+              markerEnd="url(#workflow-triangle)"
+              stroke="#93969A"
               strokeDasharray="5,5"
               strokeWidth="2"
-              stroke="#93969A"
-              markerEnd="url(#workflow-triangle)"
             />
           )}
         </g>
       </WorkflowSVG>
       <div css="position: absolute; top: 75px;right: 20px;display: flex;">
         {showTools && (
-          <VisualizerTools
-            zoomPercentage={zoomPercentage}
-            onZoomChange={handleZoomChange}
+          <WorkflowTools
             onFitGraph={handleFitGraph}
             onPan={handlePan}
             onPanToMiddle={handlePanToMiddle}
+            onZoomChange={handleZoomChange}
+            zoomPercentage={zoomPercentage}
           />
         )}
-        {showKey && <VisualizerKey />}
+        {showKey && <WorkflowKey />}
       </div>
     </>
   );
 }
+
+VisualizerGraph.propTypes = {
+  addLinkSourceNode: shape(),
+  addingLink: bool.isRequired,
+  links: arrayOf(shape()).isRequired,
+  nodePositions: shape().isRequired,
+  nodes: arrayOf(shape()).isRequired,
+  onAddNodeClick: func.isRequired,
+  onCancelAddLinkClick: func.isRequired,
+  onConfirmAddLinkClick: func.isRequired,
+  onDeleteLinkClick: func.isRequired,
+  onDeleteNodeClick: func.isRequired,
+  onEditNodeClick: func.isRequired,
+  onLinkEditClick: func.isRequired,
+  onStartAddLinkClick: func.isRequired,
+  onViewNodeClick: func.isRequired,
+  readOnly: bool.isRequired,
+  showKey: bool.isRequired,
+  showTools: bool.isRequired,
+};
+
+VisualizerGraph.defaultProps = {
+  addLinkSourceNode: {},
+};
 
 export default withI18n()(VisualizerGraph);

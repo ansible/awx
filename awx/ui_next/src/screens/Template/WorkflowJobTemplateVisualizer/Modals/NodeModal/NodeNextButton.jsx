@@ -1,22 +1,20 @@
 import React, { useEffect } from 'react';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { func, number, shape, string } from 'prop-types';
 import { Button } from '@patternfly/react-core';
 
 function NodeNextButton({
-  i18n,
   activeStep,
+  buttonText,
+  onClick,
   onNext,
   triggerNext,
-  onClick,
-  buttonText,
 }) {
   useEffect(() => {
     if (!triggerNext) {
       return;
     }
     onNext();
-  }, [triggerNext]);
+  }, [onNext, triggerNext]);
 
   return (
     <Button
@@ -30,4 +28,12 @@ function NodeNextButton({
   );
 }
 
-export default withI18n()(NodeNextButton);
+NodeNextButton.propTypes = {
+  activeStep: shape().isRequired,
+  buttonText: string.isRequired,
+  onClick: func.isRequired,
+  onNext: func.isRequired,
+  triggerNext: number.isRequired,
+};
+
+export default NodeNextButton;

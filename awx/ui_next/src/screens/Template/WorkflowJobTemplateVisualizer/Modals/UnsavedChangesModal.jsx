@@ -1,14 +1,14 @@
 import React from 'react';
 import { Button, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
-import { Trans } from '@lingui/macro';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
+import { func } from 'prop-types';
 
 function UnsavedChangesModal({ i18n, onCancel, onSaveAndExit, onExit }) {
   return (
     <Modal
       width={600}
-      isOpen={true}
+      isOpen
       title={i18n._(t`Warning: Unsaved Changes`)}
       onClose={onCancel}
       actions={[
@@ -39,5 +39,11 @@ function UnsavedChangesModal({ i18n, onCancel, onSaveAndExit, onExit }) {
     </Modal>
   );
 }
+
+UnsavedChangesModal.propTypes = {
+  onCancel: func.isRequired,
+  onExit: func.isRequired,
+  onSaveAndExit: func.isRequired,
+};
 
 export default withI18n()(UnsavedChangesModal);

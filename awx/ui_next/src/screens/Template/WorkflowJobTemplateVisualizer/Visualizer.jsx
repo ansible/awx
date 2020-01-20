@@ -3,31 +3,34 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import { shape } from 'prop-types';
 import { BaseSizes, Title, TitleLevel } from '@patternfly/react-core';
 import { layoutGraph } from '@util/workflow';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import DeleteAllNodesModal from './Modals/DeleteAllNodesModal';
-import LinkModal from './Modals/LinkModal';
-import LinkDeleteModal from './Modals/LinkDeleteModal';
-import NodeModal from './Modals/NodeModal/NodeModal';
-import NodeDeleteModal from './Modals/NodeDeleteModal';
+import {
+  DeleteAllNodesModal,
+  LinkModal,
+  LinkDeleteModal,
+  NodeDeleteModal,
+  NodeViewModal,
+  UnsavedChangesModal,
+} from './Modals';
+import { NodeModal } from './Modals/NodeModal';
 import VisualizerGraph from './VisualizerGraph';
 import VisualizerStartScreen from './VisualizerStartScreen';
 import VisualizerToolbar from './VisualizerToolbar';
-import UnsavedChangesModal from './Modals/UnsavedChangesModal';
-import NodeViewModal from './Modals/NodeViewModal/NodeViewModal';
 import {
   WorkflowApprovalTemplatesAPI,
-  WorkflowJobTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
+  WorkflowJobTemplatesAPI,
 } from '@api';
 
 const CenteredContent = styled.div`
+  align-items: center;
   display: flex;
   flex-flow: column;
   height: 100%;
-  align-items: center;
   justify-content: center;
 `;
 
@@ -42,46 +45,42 @@ const fetchWorkflowNodes = async (
   pageNo = 1,
   workflowNodes = []
 ) => {
-  try {
-    const { data } = await WorkflowJobTemplatesAPI.readNodes(templateId, {
-      page_size: 200,
-      page: pageNo,
-    });
-    if (data.next) {
-      return await fetchWorkflowNodes(
-        templateId,
-        pageNo + 1,
-        workflowNodes.concat(data.results)
-      );
-    }
-    return workflowNodes.concat(data.results);
-  } catch (error) {
-    throw error;
+  const { data } = await WorkflowJobTemplatesAPI.readNodes(templateId, {
+    page_size: 200,
+    page: pageNo,
+  });
+  if (data.next) {
+    return fetchWorkflowNodes(
+      templateId,
+      pageNo + 1,
+      workflowNodes.concat(data.results)
+    );
   }
+  return workflowNodes.concat(data.results);
 };
 
 function Visualizer({ history, template, i18n }) {
-  const [contentError, setContentError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [links, setLinks] = useState([]);
-  const [nodes, setNodes] = useState([]);
-  const [linkToDelete, setLinkToDelete] = useState(null);
-  const [linkToEdit, setLinkToEdit] = useState(null);
-  const [nodePositions, setNodePositions] = useState(null);
-  const [nodeToDelete, setNodeToDelete] = useState(null);
-  const [nodeToEdit, setNodeToEdit] = useState(null);
-  const [nodeToView, setNodeToView] = useState(null);
-  const [addingLink, setAddingLink] = useState(false);
   const [addLinkSourceNode, setAddLinkSourceNode] = useState(null);
   const [addLinkTargetNode, setAddLinkTargetNode] = useState(null);
   const [addNodeSource, setAddNodeSource] = useState(null);
   const [addNodeTarget, setAddNodeTarget] = useState(null);
+  const [addingLink, setAddingLink] = useState(false);
+  const [contentError, setContentError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [linkToDelete, setLinkToDelete] = useState(null);
+  const [linkToEdit, setLinkToEdit] = useState(null);
+  const [links, setLinks] = useState([]);
   const [nextNodeId, setNextNodeId] = useState(0);
-  const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const [nodePositions, setNodePositions] = useState(null);
+  const [nodeToDelete, setNodeToDelete] = useState(null);
+  const [nodeToEdit, setNodeToEdit] = useState(null);
+  const [nodeToView, setNodeToView] = useState(null);
+  const [nodes, setNodes] = useState([]);
   const [showDeleteAllNodesModal, setShowDeleteAllNodesModal] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [showTools, setShowTools] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   const startAddNode = (sourceNodeId, targetNodeId = null) => {
     setAddNodeSource(sourceNodeId);
@@ -100,13 +99,13 @@ function Visualizer({ history, template, i18n }) {
     // Ensures that root nodes appear to always run
     // after "START"
     if (addNodeSource === 1) {
-      newNode.edgeType = 'always';
+      newNode.linkType = 'always';
     }
 
     newLinks.push({
       source: { id: addNodeSource },
       target: { id: nextNodeId },
-      edgeType: newNode.edgeType,
+      linkType: newNode.linkType,
       type: 'link',
     });
     if (addNodeTarget) {
@@ -129,8 +128,8 @@ function Visualizer({ history, template, i18n }) {
     setLinks(newLinks);
   };
 
-  const startEditNode = nodeToEdit => {
-    setNodeToEdit(nodeToEdit);
+  const startEditNode = node => {
+    setNodeToEdit(node);
   };
 
   const finishEditingNode = editedNode => {
@@ -175,7 +174,7 @@ function Visualizer({ history, template, i18n }) {
 
       if (link.source.id === nodeId || link.target.id === nodeId) {
         if (link.source.id === nodeId) {
-          children.push({ id: link.target.id, edgeType: link.edgeType });
+          children.push({ id: link.target.id, linkType: link.linkType });
         } else if (link.target.id === nodeId) {
           parents.push(link.source.id);
         }
@@ -193,7 +192,7 @@ function Visualizer({ history, template, i18n }) {
             newLinks.push({
               source: { id: parentId },
               target: { id: child.id },
-              edgeType: 'always',
+              linkType: 'always',
               type: 'link',
             });
           }
@@ -201,7 +200,7 @@ function Visualizer({ history, template, i18n }) {
           newLinks.push({
             source: { id: parentId },
             target: { id: child.id },
-            edgeType: child.edgeType,
+            linkType: child.linkType,
             type: 'link',
           });
         }
@@ -217,14 +216,14 @@ function Visualizer({ history, template, i18n }) {
     setLinks(newLinks);
   };
 
-  const updateLink = edgeType => {
+  const updateLink = linkType => {
     const newLinks = [...links];
     newLinks.forEach(link => {
       if (
         link.source.id === linkToEdit.source.id &&
         link.target.id === linkToEdit.target.id
       ) {
-        link.edgeType = edgeType;
+        link.linkType = linkType;
       }
     });
 
@@ -236,12 +235,12 @@ function Visualizer({ history, template, i18n }) {
   };
 
   const startDeleteLink = link => {
-    let parentMap = {};
-    links.forEach(link => {
-      if (!parentMap[link.target.id]) {
-        parentMap[link.target.id] = [];
+    const parentMap = {};
+    links.forEach(existingLink => {
+      if (!parentMap[existingLink.target.id]) {
+        parentMap[existingLink.target.id] = [];
       }
-      parentMap[link.target.id].push(link.source.id);
+      parentMap[existingLink.target.id].push(existingLink.source.id);
     });
 
     link.isConvergenceLink = parentMap[link.target.id].length > 1;
@@ -272,7 +271,7 @@ function Visualizer({ history, template, i18n }) {
         target: {
           id: linkToDelete.target.id,
         },
-        edgeType: 'always',
+        linkType: 'always',
         type: 'link',
       });
     }
@@ -286,8 +285,8 @@ function Visualizer({ history, template, i18n }) {
 
   const selectSourceNodeForLinking = sourceNode => {
     const newNodes = [...nodes];
-    let parentMap = {};
-    let invalidLinkTargetIds = [];
+    const parentMap = {};
+    const invalidLinkTargetIds = [];
     // Find and mark any ancestors as disabled to prevent cycles
     links.forEach(link => {
       // id=1 is our artificial root node so we don't care about that
@@ -303,7 +302,7 @@ function Visualizer({ history, template, i18n }) {
       }
     });
 
-    let getAncestors = id => {
+    const getAncestors = id => {
       if (parentMap[id]) {
         parentMap[id].forEach(parentId => {
           invalidLinkTargetIds.push(parentId);
@@ -334,7 +333,7 @@ function Visualizer({ history, template, i18n }) {
     setAddLinkTargetNode(targetNode);
   };
 
-  const addLink = edgeType => {
+  const addLink = linkType => {
     const newLinks = [...links];
     const newNodes = [...nodes];
 
@@ -345,7 +344,7 @@ function Visualizer({ history, template, i18n }) {
     newLinks.push({
       source: { id: addLinkSourceNode.id },
       target: { id: addLinkTargetNode.id },
-      edgeType,
+      linkType,
       type: 'link',
     });
 
@@ -513,7 +512,6 @@ function Visualizer({ history, template, i18n }) {
       }
     });
 
-    // TODO: error handling?
     await Promise.all(nodeRequests);
     await Promise.all(approvalTemplateRequests);
 
@@ -529,8 +527,8 @@ function Visualizer({ history, template, i18n }) {
         if (!linkMap[realLinkSourceId]) {
           linkMap[realLinkSourceId] = {};
         }
-        linkMap[realLinkSourceId][realLinkTargetId] = link.edgeType;
-        switch (link.edgeType) {
+        linkMap[realLinkSourceId][realLinkTargetId] = link.linkType;
+        switch (link.linkType) {
           case 'success':
             if (
               !originalLinkMap[link.source.id].success_nodes.includes(
@@ -563,7 +561,8 @@ function Visualizer({ history, template, i18n }) {
       }
     });
 
-    for (const [nodeId, node] of Object.entries(originalLinkMap)) {
+    Object.keys(originalLinkMap).forEach(key => {
+      const node = originalLinkMap[key];
       node.success_nodes.forEach(successNodeId => {
         if (
           !deletedNodeIds.includes(successNodeId) &&
@@ -609,13 +608,12 @@ function Visualizer({ history, template, i18n }) {
           );
         }
       });
-    }
+    });
 
-    // TODO: error handling?
     await Promise.all(disassociateRequests);
 
     newLinks.forEach(link => {
-      switch (link.edgeType) {
+      switch (link.linkType) {
         case 'success':
           associateRequests.push(
             WorkflowJobTemplateNodesAPI.associateSuccessNode(
@@ -644,7 +642,6 @@ function Visualizer({ history, template, i18n }) {
       }
     });
 
-    // TODO: error handling?
     await Promise.all(associateRequests);
 
     // Some nodes (both new and edited) are going to need a followup request to
@@ -655,11 +652,8 @@ function Visualizer({ history, template, i18n }) {
 
   useEffect(() => {
     const buildGraphArrays = workflowNodes => {
-      const nonRootNodeIds = [];
       const allNodeIds = [];
       const arrayOfLinksForChart = [];
-      const nodeIdToChartNodeIdMapping = {};
-      const chartNodeIdToIndexMapping = {};
       const arrayOfNodesForChart = [
         {
           id: 1,
@@ -669,6 +663,9 @@ function Visualizer({ history, template, i18n }) {
           type: 'node',
         },
       ];
+      const chartNodeIdToIndexMapping = {};
+      const nodeIdToChartNodeIdMapping = {};
+      const nonRootNodeIds = [];
       let nodeIdCounter = 2;
       // Assign each node an ID - 1 is reserved for the start node.  We need to
       // make sure that we have an ID on every node including new nodes so the
@@ -704,7 +701,7 @@ function Visualizer({ history, template, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'success',
+            linkType: 'success',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -715,7 +712,7 @@ function Visualizer({ history, template, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'failure',
+            linkType: 'failure',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -726,7 +723,7 @@ function Visualizer({ history, template, i18n }) {
           arrayOfLinksForChart.push({
             source: arrayOfNodesForChart[sourceIndex],
             target: arrayOfNodesForChart[targetIndex],
-            edgeType: 'always',
+            linkType: 'always',
             type: 'link',
           });
           nonRootNodeIds.push(nodeId);
@@ -745,7 +742,7 @@ function Visualizer({ history, template, i18n }) {
         arrayOfLinksForChart.push({
           source: arrayOfNodesForChart[0],
           target: arrayOfNodesForChart[targetIndex],
-          edgeType: 'always',
+          linkType: 'always',
           type: 'link',
         });
       });
@@ -803,33 +800,33 @@ function Visualizer({ history, template, i18n }) {
     <Fragment>
       <Wrapper>
         <VisualizerToolbar
+          keyShown={showKey}
           nodes={nodes}
-          template={template}
           onClose={handleVisualizerClose}
-          onSave={handleVisualizerSave}
           onDeleteAllClick={() => setShowDeleteAllNodesModal(true)}
           onKeyToggle={() => setShowKey(!showKey)}
-          keyShown={showKey}
+          onSave={handleVisualizerSave}
           onToolsToggle={() => setShowTools(!showTools)}
+          template={template}
           toolsShown={showTools}
         />
         {links.length > 0 ? (
           <VisualizerGraph
-            links={links}
-            nodes={nodes}
-            nodePositions={nodePositions}
-            readOnly={!template.summary_fields.user_capabilities.edit}
-            onAddNodeClick={startAddNode}
-            onEditNodeClick={startEditNode}
-            onDeleteNodeClick={setNodeToDelete}
-            onLinkEditClick={setLinkToEdit}
-            onDeleteLinkClick={startDeleteLink}
-            onStartAddLinkClick={selectSourceNodeForLinking}
-            onConfirmAddLinkClick={selectTargetNodeForLinking}
-            onCancelAddLinkClick={cancelNodeLink}
-            onViewNodeClick={setNodeToView}
-            addingLink={addingLink}
             addLinkSourceNode={addLinkSourceNode}
+            addingLink={addingLink}
+            links={links}
+            nodePositions={nodePositions}
+            nodes={nodes}
+            onAddNodeClick={startAddNode}
+            onCancelAddLinkClick={cancelNodeLink}
+            onConfirmAddLinkClick={selectTargetNodeForLinking}
+            onDeleteLinkClick={startDeleteLink}
+            onDeleteNodeClick={setNodeToDelete}
+            onEditNodeClick={startEditNode}
+            onLinkEditClick={setLinkToEdit}
+            onStartAddLinkClick={selectSourceNodeForLinking}
+            onViewNodeClick={setNodeToView}
+            readOnly={!template.summary_fields.user_capabilities.edit}
             showKey={showKey}
             showTools={showTools}
           />
@@ -837,58 +834,58 @@ function Visualizer({ history, template, i18n }) {
           <VisualizerStartScreen onStartClick={startAddNode} />
         )}
       </Wrapper>
-      <NodeDeleteModal
-        nodeToDelete={nodeToDelete}
-        onConfirm={deleteNode}
-        onCancel={() => setNodeToDelete(null)}
-      />
+      {nodeToDelete && (
+        <NodeDeleteModal
+          nodeToDelete={nodeToDelete}
+          onCancel={() => setNodeToDelete(null)}
+          onConfirm={deleteNode}
+        />
+      )}
       {linkToDelete && (
         <LinkDeleteModal
           linkToDelete={linkToDelete}
-          onConfirm={deleteLink}
           onCancel={() => setLinkToDelete(null)}
+          onConfirm={deleteLink}
         />
       )}
       {linkToEdit && (
         <LinkModal
+          linkType={linkToEdit.linkType}
           header={
             <Title headingLevel={TitleLevel.h1} size={BaseSizes['2xl']}>
-              {/* todo: make title match mockups (display: flex) */}
               {i18n._(t`Edit Link`)}
             </Title>
           }
-          onConfirm={updateLink}
           onCancel={() => setLinkToEdit(null)}
-          edgeType={linkToEdit.edgeType}
+          onConfirm={updateLink}
         />
       )}
       {addLinkSourceNode && addLinkTargetNode && (
         <LinkModal
           header={
             <Title headingLevel={TitleLevel.h1} size={BaseSizes['2xl']}>
-              {/* todo: make title match mockups (display: flex) */}
               {i18n._(t`Add Link`)}
             </Title>
           }
-          onConfirm={addLink}
           onCancel={cancelNodeLink}
+          onConfirm={addLink}
         />
       )}
       {addNodeSource && (
         <NodeModal
           askLinkType={addNodeSource !== 1}
-          title={i18n._(t`Add Node`)}
           onClose={() => cancelNodeForm()}
           onSave={finishAddingNode}
+          title={i18n._(t`Add Node`)}
         />
       )}
       {nodeToEdit && (
         <NodeModal
           askLinkType={false}
-          node={nodeToEdit}
-          title={i18n._(t`Edit Node`)}
+          nodeToEdit={nodeToEdit}
           onClose={() => cancelNodeForm()}
           onSave={finishEditingNode}
+          title={i18n._(t`Edit Node`)}
         />
       )}
       {showUnsavedChangesModal && (
@@ -914,5 +911,9 @@ function Visualizer({ history, template, i18n }) {
     </Fragment>
   );
 }
+
+Visualizer.propTypes = {
+  template: shape().isRequired,
+};
 
 export default withI18n()(withRouter(Visualizer));

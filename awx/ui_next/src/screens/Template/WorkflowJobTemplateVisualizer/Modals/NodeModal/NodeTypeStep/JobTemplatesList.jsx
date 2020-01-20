@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func, shape } from 'prop-types';
 import { JobTemplatesAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import PaginatedDataList from '@components/PaginatedDataList';
@@ -15,10 +16,10 @@ const QS_CONFIG = getQSConfig('job_templates', {
 });
 
 function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
-  const [jobTemplates, setJobTemplates] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [jobTemplates, setJobTemplates] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -44,9 +45,24 @@ function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
     <PaginatedDataList
       contentError={error}
       hasContentLoading={isLoading}
-      items={jobTemplates}
       itemCount={count}
+      items={jobTemplates}
+      onRowClick={row => updateNodeResource(row)}
       qsConfig={QS_CONFIG}
+      renderItem={item => (
+        <CheckboxListItem
+          isSelected={!!(nodeResource && nodeResource.id === item.id)}
+          itemId={item.id}
+          key={item.id}
+          name={item.name}
+          label={item.name}
+          onSelect={() => updateNodeResource(item)}
+          onDeselect={() => updateNodeResource(null)}
+          isRadio
+        />
+      )}
+      renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+      showPageSizeOptions={false}
       toolbarColumns={[
         {
           name: i18n._(t`Name`),
@@ -55,24 +71,17 @@ function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
           isSearchable: true,
         },
       ]}
-      renderItem={item => (
-        <CheckboxListItem
-          isSelected={
-            nodeResource && nodeResource.id === item.id ? true : false
-          }
-          itemId={item.id}
-          key={item.id}
-          name={item.name}
-          label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
-          isRadio={true}
-        />
-      )}
-      renderToolbar={props => <DataListToolbar {...props} fillWidth />}
-      showPageSizeOptions={false}
     />
   );
 }
+
+JobTemplatesList.propTypes = {
+  nodeResource: shape(),
+  updateNodeResource: func.isRequired,
+};
+
+JobTemplatesList.defaultProps = {
+  nodeResource: null,
+};
 
 export default withI18n()(withRouter(JobTemplatesList));

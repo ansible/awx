@@ -2,15 +2,12 @@ import React from 'react';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
 function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
   return (
     <AlertModal
-      variant="danger"
-      title={i18n._(t`Remove All Nodes`)}
-      isOpen={true}
-      onClose={onCancel}
       actions={[
         <Button
           key="remove"
@@ -29,6 +26,10 @@ function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
           {i18n._(t`Cancel`)}
         </Button>,
       ]}
+      isOpen
+      onClose={onCancel}
+      title={i18n._(t`Remove All Nodes`)}
+      variant="danger"
     >
       <p>
         {i18n._(
@@ -38,5 +39,10 @@ function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
+
+DeleteAllNodesModal.propTypes = {
+  onCancel: func.isRequired,
+  onConfirm: func.isRequired,
+};
 
 export default withI18n()(DeleteAllNodesModal);

@@ -1,18 +1,24 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { func, number, shape, string } from 'prop-types';
 import styled from 'styled-components';
 import { Formik, Field } from 'formik';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
-import { Divider } from '@patternfly/react-core/dist/esm/experimental';
 import FormRow from '@components/FormRow';
 import AnsibleSelect from '@components/AnsibleSelect';
 import VerticalSeperator from '@components/VerticalSeparator';
-
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
+
+const Divider = styled.div`
+  height: 1px;
+  background-color: var(--pf-global--Color--light-300);
+  border: 0;
+  flex-shrink: 0;
+`;
 
 const TimeoutInput = styled(TextInput)`
   width: 200px;
@@ -26,16 +32,16 @@ const TimeoutLabel = styled.p`
 `;
 
 function NodeTypeStep({
-  i18n,
-  nodeType = 'job_template',
-  updateNodeType,
-  nodeResource,
-  updateNodeResource,
-  name,
-  updateName,
   description,
+  i18n,
+  name,
+  nodeResource,
+  nodeType,
+  timeout,
   updateDescription,
-  timeout = 0,
+  updateName,
+  updateNodeResource,
+  updateNodeType,
   updateTimeout,
 }) {
   return (
@@ -132,21 +138,21 @@ function NodeTypeStep({
                     return (
                       <FormGroup
                         fieldId="approval-name"
-                        isRequired={true}
+                        isRequired
                         isValid={isValid}
                         label={i18n._(t`Name`)}
                       >
                         <TextInput
+                          autoFocus
                           id="approval-name"
-                          isRequired={true}
+                          isRequired
                           isValid={isValid}
                           type="text"
                           {...field}
-                          onChange={(value, event) => {
+                          onChange={(value, evt) => {
                             updateName(value);
-                            field.onChange(event);
+                            field.onChange(evt);
                           }}
-                          autoFocus
                         />
                       </FormGroup>
                     );
@@ -165,9 +171,9 @@ function NodeTypeStep({
                         id="approval-description"
                         type="text"
                         {...field}
-                        onChange={value => {
+                        onChange={(value, evt) => {
                           updateDescription(value);
-                          field.onChange(event);
+                          field.onChange(evt);
                         }}
                       />
                     </FormGroup>
@@ -190,7 +196,7 @@ function NodeTypeStep({
                             min="0"
                             step="1"
                             {...field}
-                            onChange={value => {
+                            onChange={(value, evt) => {
                               if (!value || value === '') {
                                 value = 0;
                               }
@@ -198,7 +204,7 @@ function NodeTypeStep({
                                 Number(value) * 60 +
                                   Number(form.values.timeoutSeconds)
                               );
-                              field.onChange(event);
+                              field.onChange(evt);
                             }}
                           />
                           <TimeoutLabel>min</TimeoutLabel>
@@ -215,7 +221,7 @@ function NodeTypeStep({
                             min="0"
                             step="1"
                             {...field}
-                            onChange={value => {
+                            onChange={(value, evt) => {
                               if (!value || value === '') {
                                 value = 0;
                               }
@@ -223,7 +229,7 @@ function NodeTypeStep({
                                 Number(value) +
                                   Number(form.values.timeoutMinutes) * 60
                               );
-                              field.onChange(event);
+                              field.onChange(evt);
                             }}
                           />
                           <TimeoutLabel>sec</TimeoutLabel>
@@ -240,5 +246,26 @@ function NodeTypeStep({
     </>
   );
 }
+
+NodeTypeStep.propTypes = {
+  description: string,
+  name: string,
+  nodeResource: shape(),
+  nodeType: string,
+  timeout: number,
+  updateDescription: func.isRequired,
+  updateName: func.isRequired,
+  updateNodeResource: func.isRequired,
+  updateNodeType: func.isRequired,
+  updateTimeout: func.isRequired,
+};
+
+NodeTypeStep.defaultProps = {
+  description: '',
+  name: '',
+  nodeResource: null,
+  nodeType: 'job_template',
+  timeout: 0,
+};
 
 export default withI18n()(NodeTypeStep);

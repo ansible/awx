@@ -2,10 +2,10 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import SelectableCard from '@components/SelectableCard';
+import Wizard from '@components/Wizard';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
-import { SelectableCard } from '@components/SelectableCard';
-import { Wizard } from '@components/Wizard';
 import { TeamsAPI, UsersAPI } from '../../api';
 
 const readUsers = async queryParams =>
