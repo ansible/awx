@@ -4,7 +4,6 @@ import traceback
 from queue import Empty as QueueEmpty
 
 from django.utils.timezone import now as tz_now
-from django.conf import settings
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError, IntegrityError
 
