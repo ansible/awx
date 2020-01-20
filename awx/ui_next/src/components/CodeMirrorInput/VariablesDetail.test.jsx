@@ -40,4 +40,9 @@ describe('<VariablesDetail>', () => {
     expect(input2.prop('mode')).toEqual('yaml');
     expect(input2.prop('value')).toEqual('foo: bar\n');
   });
+  test('should render label and value= --- when there are no values', () => {
+    const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
+    expect(wrapper.find('Styled(CodeMirrorInput)').length).toBe(1);
+    expect(wrapper.find('div.pf-c-form__label').text()).toBe('Variables');
+  });
 });
