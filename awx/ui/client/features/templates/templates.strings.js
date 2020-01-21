@@ -154,7 +154,9 @@ function TemplatesStrings (BaseString) {
         TIMEOUT: t.s('Timeout'),
         APPROVED: t.s('APPROVED'),
         DENIED: t.s('DENIED'),
-        ALL_PARENTS_MUST_CONVERGE: t.s('All parents must converge before running'),
+        CONVERGENCE: t.s('Convergence'),
+        ALL: t.s('All'),
+        ANY: t.s('Any'),
     };
 }
 

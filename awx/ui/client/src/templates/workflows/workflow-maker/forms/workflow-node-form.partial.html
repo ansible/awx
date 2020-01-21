@@ -183,26 +183,22 @@
             </select>
         </div>
     </div>
-    <div id="workflow_node_checkbox_group" class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="!(nodeConfig.editNodeIsRoot || nodeConfig.newNodeIsRoot)">
-        <label class="Form-inputLabelContainer" for="checkbox_group">
-            <span translate class="Form-inputLabel">Options</span>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="!(nodeConfig.editNodeIsRoot || nodeConfig.newNodeIsRoot)">
+        <label for="edgeType" class="Form-inputLabelContainer">
+            <span class="Form-requiredAsterisk">*</span>
+            <span class="Form-inputLabel">{{:: strings.get('workflow_maker.CONVERGENCE') }}</span>
         </label>
         <div>
-            <div id="workflow_node_checkbox_group_chbox_group" class="checkbox-group">
-                <div class="form-check">
-                    <label for="all_parents_must_converge" class="form-check-label">
-                        <input
-                            ng-disabled="readOnly"
-                            id="workflow_node_all_parents_must_converge_checkbox"
-                            class="form-check-input"
-                            type="checkbox"
-                            name="all_parents_must_converge"
-                            ng-model="all_parents_must_converge"
-                        />
-                        <span class="Form-inputLabel">{{:: strings.get('workflow_maker.ALL_PARENTS_MUST_CONVERGE') }}</span>
-                    </label>
-                </div>
-            </div>
+            <select
+                id="workflow_node_convergence"
+                ng-options="v as v.label for v in convergenceOptions track by v.value"
+                ng-model="convergenceChoice"
+                class="form-control Form-dropDown"
+                name="convergenceChoice"
+                tabindex="-1"
+                ng-disabled="readOnly"
+                aria-hidden="true">
+            </select>
         </div>
     </div>
     <div ng-show="readOnly">
