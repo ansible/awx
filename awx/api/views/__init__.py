@@ -3858,8 +3858,7 @@ class JobJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.job_events
-        qs = qs.select_related('host')
+        qs = job.job_events.select_related('host').order_by('start_line')
         return qs.all()
 
 
