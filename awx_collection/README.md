@@ -80,8 +80,12 @@ A new set of integration tests as a monolithic demo is available as
 "demo" and "remove" in the `tests/integration/targets` folder. This is intended to
 server a dual-purpose as a tl;dr summary of how to use the modules.
 
-Inside the development container `dnf install ansible-test` is needed.
-Authentication setup is needed, `tower-cli login <username>`.
+Inside the development container these installs are needed:
+
+ - `dnf install ansible-test`
+ - `pip install junit-xml`
+
+Authentication setup with your server is needed, `tower-cli login <username>`.
 Then run `make test_collection_integration`.
 
 ## Building
