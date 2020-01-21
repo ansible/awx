@@ -51,14 +51,13 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
-#    instance_groups:
-#      description:
-#        - The name of instance groups to tie to this organization
-#      type: list
-#      default: []
-#      required: False
 
 
 EXAMPLES = '''
@@ -88,9 +87,20 @@ def main():
         description=dict(type='str', required=False),
         custom_virtualenv=dict(type='str', required=False),
         max_hosts=dict(type='str', required=False, default="0"),
-        # instance_groups=dict(type='list', required=False, default=[]),
         state=dict(type='str', choices=['present', 'absent'], default='present', required=False),
     )
+
+# instance_groups=dict(type='list', required=False, default=[]),
+# The above argument_spec fragment is being left in for reference since we may need
+# it later when finalizing the changes.
+
+#    instance_groups:
+#      description:
+#        - The name of instance groups to tie to this organization
+#      default: []
+#      required: False
+# The above docstring fragment is being left in for reference since we may need
+# it later when finalizing the changes.
 
     # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
@@ -115,7 +125,7 @@ def main():
         }
     })
 
-    new_org_data = { 'name': name }
+    new_org_data = {'name': name}
     if description:
         new_org_data['description'] = description
     if custom_virtualenv:
@@ -137,7 +147,7 @@ def main():
         # If the state was absent and we had a organization, we can try to delete it, the module will handle exiting from this
         module.delete_endpoint('organizations/{0}'.format(organization['id']), item_type='organization', item_name=name, **{})
     elif state == 'present' and not organization:
-        # if the state was present and we couldn't find a organization we can build one, the module wikl handle exiting from this
+        # if the state was present and we couldn't find a organization we can build one, the module will handle exiting from this
         module.post_endpoint('organizations', item_type='organization', item_name=name, **{
             'data': new_org_data,
         })
@@ -145,6 +155,7 @@ def main():
         # If the state was present and we had a organization we can see if we need to update it
         # This will return on its own
         module.update_if_needed(organization, new_org_data)
+
 
 if __name__ == '__main__':
     main()

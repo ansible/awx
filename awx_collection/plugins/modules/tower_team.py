@@ -28,6 +28,11 @@ options:
         - Name to use for the team.
       required: True
       type: str
+    new_name:
+      description:
+        - To use when changing a team's name.
+      required: True
+      type: str
     description:
       description:
         - The description to use for the team.
@@ -42,6 +47,11 @@ options:
         - Desired state of the resource.
       choices: ["present", "absent"]
       default: "present"
+      type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -91,6 +101,13 @@ def main():
         }
     })
 
+    # Create data to sent to create and update
+    team_fields = {
+        'name': name,
+        'description': description,
+        'organization': org_id
+    }
+
     if state == 'absent' and not team:
         # If the state was absent and we had no team, we can just return
         module.exit_json(**module.json_output)
@@ -98,23 +115,11 @@ def main():
         # If the state was absent and we had a team, we can try to delete it, the module will handle exiting from this
         module.delete_endpoint('teams/{0}'.format(team['id']), item_type='team', item_name=name, **{})
     elif state == 'present' and not team:
-        # if the state was present and we couldn't find a team we can build one, the module wikl handle exiting from this
-        module.post_endpoint('teams', item_type='team', item_name=name, **{
-            'data': {
-                'name': name,
-                'description': description,
-                'organization': org_id
-            }
-        })
+        # if the state was present and we couldn't find a team we can build one, the module will handle exiting from this
+        module.post_endpoint('teams', item_type='team', item_name=name, **{'data': team_fields})
     else:
         # If the state was present and we had a team we can see if we need to update it
         # This will return on its own
-        team_fields = {
-            'name': new_name if new_name else name,
-            'description': description,
-            'organization': org_id,
-        }
-
         module.update_if_needed(team, team_fields)
 
 

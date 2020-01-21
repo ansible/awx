@@ -14,7 +14,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: license
+module: tower_license
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.9"
 short_description: Set the license for Ansible Tower
@@ -26,6 +26,17 @@ options:
       description:
         - The contents of the license file
       required: True
+      type: dict
+    eula_accepted:
+      description:
+        - Whether or not the EULA is accepted.
+      required: True
+      type: bool
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -35,6 +46,7 @@ EXAMPLES = '''
 - name: Set the license using a file
   license:
     data: "{{ lookup('file', '/tmp/my_tower.license') }}"
+    eula_accepted: True
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -74,4 +86,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

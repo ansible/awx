@@ -61,7 +61,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -105,6 +109,7 @@ EXAMPLES = '''
 
 from ..module_utils.tower_api import TowerModule
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
@@ -147,7 +152,7 @@ def main():
         # If the state was absent and we had a user, we can try to delete it, the module will handle exiting from this
         module.delete_endpoint('users/{0}'.format(user['id']), item_type='user', item_name=user_fields['username'], **{})
     elif state == 'present' and not user:
-        # if the state was present and we couldn't find a user we can build one, the module wikl handle exiting from this
+        # if the state was present and we couldn't find a user we can build one, the module will handle exiting from this
         module.post_endpoint('users', item_type='user', item_name=user_fields['username'], **{
             'data': user_fields
         })
@@ -155,6 +160,7 @@ def main():
         # If the state was present and we had a user we can see if we need to update it
         # This will return on its own
         module.update_if_needed(user, user_fields)
+
 
 if __name__ == '__main__':
     main()

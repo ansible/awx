@@ -36,7 +36,7 @@ class TowerModule(AnsibleModule):
             tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
             tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
             validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
-            tower_oauthtoken=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
+            tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
             tower_config_file=dict(type='path', required=False, default=None),
         )
         args.update(argument_spec)
@@ -114,7 +114,7 @@ class TowerModule(AnsibleModule):
         if self.check_mode:
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
-          
+
         response = self.make_request('POST', endpoint, **kwargs)
         if response['status_code'] == 201:
             self.json_output['changed'] = True
@@ -135,14 +135,24 @@ class TowerModule(AnsibleModule):
         response = self.make_request('DELETE', endpoint, **kwargs)
         if not handle_return:
             return response
-        elif response['status_code'] == 204:
+        elif response['status_code'] in [202, 204]:
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
         else:
             self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
 
     def get_all_endpoint(self, endpoint, *args, **kwargs):
-        raise Exception("This is not implemented")
+        response = self.get_endpoint(endpoint, *args, **kwargs)
+        next_page = response['json']['next']
+
+        if response['json']['count'] > 10000:
+            self.fail_json(msg='The number of items being queried for is higher than 10,000.')
+
+        while next_page is not None:
+            next_response = self.get_endpoint(next_page)
+            response['json']['results'] = response['json']['results'] + next_response['json']['results']
+            next_page = next_response['json']['next']
+        return response
 
     def get_one(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
@@ -165,9 +175,9 @@ class TowerModule(AnsibleModule):
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
-            self.fail_json(msg="The {} {} was not found on the Tower server".format(endpoint, name_or_id))
+            self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
         else:
-            self.fail_json(msg="Found too many names {} at endpoint {}".format(name_or_id, endpoint))
+            self.fail_json(msg="Found too many names {0} at endpoint {1}".format(name_or_id, endpoint))
 
     def make_request(self, method, endpoint, *args, **kwargs):
         # Incase someone is calling us directly; make sure we were given a method, lets not just assume a GET
@@ -179,8 +189,8 @@ class TowerModule(AnsibleModule):
             endpoint = "/{0}".format(endpoint)
         if not endpoint.startswith("/api/"):
             endpoint = "/api/v2{0}".format(endpoint)
-        if not endpoint.endswith('/'):
-            endpoint = "{}/".format(endpoint)
+        if not endpoint.endswith('/') and '?' not in endpoint:
+            endpoint = "{0}/".format(endpoint)
 
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
@@ -191,7 +201,7 @@ class TowerModule(AnsibleModule):
             self.authenticate(**kwargs)
         if self.oauth_token:
             # If we have a oauth toekn we just use a bearer header
-            headers['Authorization'] = 'Bearer {}'.format(self.oauth_token)
+            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
 
         # Update the URL path with the endpoint
         self.url = self.url._replace(path=endpoint)
@@ -310,8 +320,10 @@ class TowerModule(AnsibleModule):
 
     def update_if_needed(self, existing_item, new_item, handle_response=True, **existing_return):
         for field in new_item:
+            existing_field = existing_item.get(field, None)
+            new_field = new_item.get(field, None)
             # If the two items don't match and we are not comparing '' to None
-            if existing_item.get(field, None) != new_item.get(field, None) and not (existing_item.get(field, None) is None and new_item.get(field, None) == ''):
+            if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
                 # something dosent match so lets do it
 
                 response = self.patch_endpoint(existing_item['url'], **{'data': new_item})
@@ -332,7 +344,7 @@ class TowerModule(AnsibleModule):
         self.exit_json(**existing_return)
 
     def logout(self):
-        if self.oauth_token_id != None and self.username and self.password:
+        if self.oauth_token_id is not None and self.username and self.password:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (self.url._replace(path='/api/v2/tokens/{0}/'.format(self.oauth_token_id))).geturl()
@@ -358,4 +370,3 @@ class TowerModule(AnsibleModule):
         # Try to logout if we are authenticated
         self.logout()
         super().exit_json(**kwargs)
-

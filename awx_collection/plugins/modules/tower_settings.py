@@ -38,6 +38,11 @@ options:
         - A data structure to be sent into the settings endpoint
       required: False
       type: dict
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -66,11 +71,10 @@ EXAMPLES = '''
   tower_settings:
     settings:
       AUTH_LDAP_BIND_PASSWORD: "password"
-      AUTH_LDAP_USER_ATTR_MAP: 
+      AUTH_LDAP_USER_ATTR_MAP:
         email: "mail"
         first_name: "givenName"
         last_name: "surname"
-    ...
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -78,20 +82,21 @@ from json import loads
 from json.decoder import JSONDecodeError
 import re
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=False),
         value=dict(required=False),
-        settings=dict(required=False,type='dict'),
+        settings=dict(required=False, type='dict'),
     )
 
     # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
-        required_one_of=[['name','settings']],
-        mutually_exclusive=[['name','settings']],
+        required_one_of=[['name', 'settings']],
+        mutually_exclusive=[['name', 'settings']],
         required_if=[['name', 'present', ['value']]]
     )
 
@@ -101,22 +106,22 @@ def main():
     new_settings = module.params.get('settings')
 
     # If we were given a name/value pair we will just make settings out of that and proceed normally
-    if new_settings == None:
+    if new_settings is None:
         new_value = value
         try:
             new_value = loads(value)
         except JSONDecodeError as e:
             # Attempt to deal with old tower_cli array types
             if ',' in value:
-                new_value = re.split(",\s+", new_value)
-               
-        new_settings = { name: new_value }
+                new_value = re.split(r",\s+", new_value)
+
+        new_settings = {name: new_value}
 
     # Load the existing settings
     existing_settings = module.get_endpoint('settings/all')['json']
 
     # Begin a json response
-    json_response = { 'changed': False, 'old_values': {} }
+    json_response = {'changed': False, 'old_values': {}}
 
     # Check any of the settings to see if anything needs to be updated
     needs_update = False
@@ -124,7 +129,7 @@ def main():
         if a_setting not in existing_settings or existing_settings[a_setting] != new_settings[a_setting]:
             # At least one thing is different so we need to patch
             needs_update = True
-            json_response['old_values'][ a_setting ] = existing_settings[a_setting]
+            json_response['old_values'][a_setting] = existing_settings[a_setting]
 
     # If nothing needs an update we can simply exit with the response (as not changed)
     if not needs_update:
@@ -143,7 +148,7 @@ def main():
             new_values[a_setting] = response['json'][a_setting]
 
         # If we were using a name we will just add a value of a string, otherwise we will return an array in values
-        if name != None:
+        if name is not None:
             json_response['value'] = new_values[name]
         else:
             json_response['values'] = new_values
@@ -153,6 +158,7 @@ def main():
         module.fail_json(msg=response['json']['__all__'])
     else:
         module.fail_json(**{'msg': "Unable to update settings, see response", 'response': response})
+
 
 if __name__ == '__main__':
     main()

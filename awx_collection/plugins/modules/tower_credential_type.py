@@ -64,6 +64,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -100,19 +105,20 @@ KIND_CHOICES = {
 
 
 def main():
-
-    module = TowerModule(
-        argument_spec = dict(
-            name=dict(required=True),
-            description=dict(required=False),
-            kind=dict(required=False, choices=KIND_CHOICES.keys()),
-            inputs=dict(type='dict', required=False),
-            injectors=dict(type='dict', required=False),
-            state=dict(choices=['present', 'absent'], default='present'),
-        ),
-        supports_check_mode=True
+    # Any additional arguments that are not fields of the item can be added here
+    argument_spec = dict(
+        name=dict(required=True),
+        description=dict(required=False),
+        kind=dict(required=False, choices=KIND_CHOICES.keys()),
+        inputs=dict(type='dict', required=False),
+        injectors=dict(type='dict', required=False),
+        state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+
+    # Extract our parameters
     name = module.params.get('name')
     new_name = None
     kind = module.params.get('kind')
@@ -159,6 +165,7 @@ def main():
         # If the state was present and we had a credential_type we can see if we need to update it
         # This will handle existing on its own
         module.update_if_needed(credential_type, credental_type_params)
+
 
 if __name__ == '__main__':
     main()
