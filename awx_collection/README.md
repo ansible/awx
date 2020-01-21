@@ -73,7 +73,7 @@ PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
 
 ### Integration
 
-The old integration tests are kept passing, but not being expanded on.
+The old integration tests are maintained, but not being expanded on.
 A master copy is hosted at: https://github.com/ansible/test-playbooks/tree/master/tower_modules
 
 A new set of integration tests as a monolithic demo is available as
