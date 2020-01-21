@@ -60,7 +60,7 @@ class SmartInventory extends Component {
   }
 
   render() {
-    const { history, i18n, location, match } = this.props;
+    const { i18n, location, match } = this.props;
     const { contentError, hasContentLoading, inventory } = this.state;
 
     const tabsArray = [
@@ -76,7 +76,7 @@ class SmartInventory extends Component {
 
     let cardHeader = hasContentLoading ? null : (
       <TabbedCardHeader>
-        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/inventories" />
       </TabbedCardHeader>
     );
@@ -119,7 +119,6 @@ class SmartInventory extends Component {
                 path="/inventories/smart_inventory/:id/details"
                 render={() => (
                   <SmartInventoryDetail
-                    match={match}
                     hasSmartInventoryLoading={hasContentLoading}
                     inventory={inventory}
                   />

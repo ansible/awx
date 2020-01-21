@@ -7,7 +7,6 @@ import {
   Route,
   Redirect,
   Link,
-  useHistory,
   useLocation,
   useRouteMatch,
 } from 'react-router-dom';
@@ -30,7 +29,6 @@ function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [inventory, setInventory] = useState(null);
-  const history = useHistory();
   const location = useLocation();
   const match = useRouteMatch({
     path: '/inventories/inventory/:id',
@@ -67,7 +65,7 @@ function Inventory({ i18n, setBreadcrumb }) {
 
   let cardHeader = hasContentLoading ? null : (
     <TabbedCardHeader>
-      <RoutedTabs history={history} tabsArray={tabsArray} />
+      <RoutedTabs tabsArray={tabsArray} />
       <CardCloseButton linkTo="/inventories" />
     </TabbedCardHeader>
   );
@@ -80,6 +78,7 @@ function Inventory({ i18n, setBreadcrumb }) {
   ) {
     cardHeader = null;
   }
+
   if (hasContentLoading) {
     return <ContentLoading />;
   }
@@ -117,7 +116,6 @@ function Inventory({ i18n, setBreadcrumb }) {
               path="/inventories/inventory/:id/details"
               render={() => (
                 <InventoryDetail
-                  match={match}
                   hasInventoryLoading={hasContentLoading}
                   inventory={inventory}
                 />
@@ -133,9 +131,7 @@ function Inventory({ i18n, setBreadcrumb }) {
               path="/inventories/inventory/:id/hosts"
               render={() => (
                 <InventoryHosts
-                  match={match}
                   setBreadcrumb={setBreadcrumb}
-                  i18n={i18n}
                   inventory={inventory}
                 />
               )}
@@ -155,8 +151,6 @@ function Inventory({ i18n, setBreadcrumb }) {
               path="/inventories/inventory/:id/groups"
               render={() => (
                 <InventoryGroups
-                  location={location}
-                  match={match}
                   setBreadcrumb={setBreadcrumb}
                   inventory={inventory}
                 />

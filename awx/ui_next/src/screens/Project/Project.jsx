@@ -104,7 +104,7 @@ class Project extends Component {
   }
 
   render() {
-    const { location, match, me, history, i18n } = this.props;
+    const { location, match, me, i18n } = this.props;
 
     const {
       project,
@@ -151,21 +151,12 @@ class Project extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          labeltext={i18n._(t`Project detail tabs`)}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/projects" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 
@@ -199,7 +190,7 @@ class Project extends Component {
             {project && (
               <Route
                 path="/projects/:id/edit"
-                render={() => <ProjectEdit match={match} project={project} />}
+                render={() => <ProjectEdit project={project} />}
               />
             )}
             {project && (

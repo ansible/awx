@@ -97,7 +97,7 @@ class Organization extends Component {
   }
 
   render() {
-    const { location, match, me, history, i18n } = this.props;
+    const { location, match, me, i18n } = this.props;
 
     const {
       organization,
@@ -131,21 +131,12 @@ class Organization extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          labeltext={i18n._(t`Organization detail tabs`)}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/organizations" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 
@@ -185,19 +176,14 @@ class Organization extends Component {
             {organization && (
               <Route
                 path="/organizations/:id/edit"
-                render={() => (
-                  <OrganizationEdit match={match} organization={organization} />
-                )}
+                render={() => <OrganizationEdit organization={organization} />}
               />
             )}
             {organization && (
               <Route
                 path="/organizations/:id/details"
                 render={() => (
-                  <OrganizationDetail
-                    match={match}
-                    organization={organization}
-                  />
+                  <OrganizationDetail organization={organization} />
                 )}
               />
             )}

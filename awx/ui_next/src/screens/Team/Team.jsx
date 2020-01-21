@@ -59,7 +59,7 @@ class Team extends Component {
   }
 
   render() {
-    const { location, match, history, i18n } = this.props;
+    const { location, match, i18n } = this.props;
 
     const { team, contentError, hasContentLoading, isInitialized } = this.state;
 
@@ -71,21 +71,12 @@ class Team extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          labeltext={i18n._(t`Team detail tabs`)}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/teams" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 
@@ -119,7 +110,7 @@ class Team extends Component {
             {team && (
               <Route
                 path="/teams/:id/edit"
-                render={() => <TeamEdit match={match} team={team} />}
+                render={() => <TeamEdit team={team} />}
               />
             )}
             {team && (

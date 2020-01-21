@@ -74,6 +74,7 @@ class Host extends Component {
   render() {
     const { location, match, history, i18n } = this.props;
     const { host, hasContentLoading, isInitialized, contentError } = this.state;
+
     const tabsArray = [
       {
         name: i18n._(t`Details`),
@@ -96,6 +97,7 @@ class Host extends Component {
         id: 3,
       },
     ];
+
     if (!history.location.pathname.startsWith('/hosts')) {
       tabsArray.unshift({
         name: (
@@ -108,23 +110,15 @@ class Host extends Component {
         id: 99,
       });
     }
+
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs
-          match={match}
-          history={history}
-          labeltext={i18n._(t`Host detail tabs`)}
-          tabsArray={tabsArray}
-        />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/hosts" />
       </TabbedCardHeader>
     );
 
     if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (!match) {
       cardHeader = null;
     }
 
@@ -150,6 +144,7 @@ class Host extends Component {
         </Card>
       );
     }
+
     const redirect = location.pathname.startsWith('/hosts') ? (
       <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
     ) : (
@@ -159,6 +154,7 @@ class Host extends Component {
         exact
       />
     );
+
     return (
       <Card className="awx-c-card">
         {cardHeader}
@@ -185,7 +181,7 @@ class Host extends Component {
                 '/hosts/:id/edit',
                 '/inventories/inventory/:id/hosts/:hostId/edit',
               ]}
-              render={() => <HostEdit match={match} host={host} />}
+              render={() => <HostEdit host={host} />}
             />
           )}
           {host && (

@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Switch, Route, withRouter, Link, Redirect } from 'react-router-dom';
-import { CaretLeftIcon } from '@patternfly/react-icons';
 
+import {
+  Switch,
+  Route,
+  Link,
+  Redirect,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
+import { CaretLeftIcon } from '@patternfly/react-icons';
 import { GroupsAPI } from '@api';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
@@ -13,15 +20,17 @@ import { TabbedCardHeader } from '@components/Card';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 
-function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
+function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
+  const { id: inventoryId, groupId } = useParams();
+  const location = useLocation();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data } = await GroupsAPI.readDetail(match.params.groupId);
+        const { data } = await GroupsAPI.readDetail(groupId);
         setInventoryGroup(data);
         setBreadcrumb(inventory, data);
       } catch (err) {
@@ -32,12 +41,7 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
     };
 
     loadData();
-  }, [
-    history.location.pathname,
-    match.params.groupId,
-    inventory,
-    setBreadcrumb,
-  ]);
+  }, [location.pathname, groupId, inventory, setBreadcrumb]);
 
   const tabsArray = [
     {
@@ -80,7 +84,7 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
   }
 
   if (
-    inventoryGroup.summary_fields.inventory.id !== parseInt(match.params.id, 10)
+    inventoryGroup.summary_fields.inventory.id !== parseInt(inventoryId, 10)
   ) {
     return (
       <ContentError>
@@ -99,12 +103,12 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
 
   let cardHeader = null;
   if (
-    history.location.pathname.includes('groups/') &&
-    !history.location.pathname.endsWith('edit')
+    location.pathname.includes('groups/') &&
+    !location.pathname.endsWith('edit')
   ) {
     cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton
           linkTo={`/inventories/inventory/${inventory.id}/groups`}
         />
@@ -124,15 +128,9 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
           <Route
             key="edit"
             path="/inventories/inventory/:id/groups/:groupId/edit"
-            render={() => {
-              return (
-                <InventoryGroupEdit
-                  inventory={inventory}
-                  inventoryGroup={inventoryGroup}
-                />
-              );
-            }}
-          />,
+          >
+            <InventoryGroupEdit inventoryGroup={inventoryGroup} />
+          </Route>,
           <Route
             key="details"
             path="/inventories/inventory/:id/groups/:groupId/details"
@@ -161,5 +159,5 @@ function InventoryGroups({ i18n, match, setBreadcrumb, inventory, history }) {
   );
 }
 
-export { InventoryGroups as _InventoryGroups };
-export default withI18n()(withRouter(InventoryGroups));
+export { InventoryGroup as _InventoryGroup };
+export default withI18n()(InventoryGroup);

@@ -80,7 +80,7 @@ class Template extends Component {
   }
 
   render() {
-    const { history, i18n, location, match, me } = this.props;
+    const { i18n, location, match, me } = this.props;
     const {
       contentError,
       hasContentLoading,
@@ -123,7 +123,7 @@ class Template extends Component {
 
     let cardHeader = (
       <TabbedCardHeader>
-        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/templates" />
       </TabbedCardHeader>
     );
@@ -165,7 +165,6 @@ class Template extends Component {
                 path="/templates/:templateType/:id/details"
                 render={() => (
                   <JobTemplateDetail
-                    match={match}
                     hasTemplateLoading={hasContentLoading}
                     template={template}
                   />

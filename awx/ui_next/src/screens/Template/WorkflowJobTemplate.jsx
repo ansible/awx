@@ -53,7 +53,7 @@ class WorkflowJobTemplate extends Component {
   }
 
   render() {
-    const { history, i18n, location, match } = this.props;
+    const { i18n, location, match } = this.props;
     const { contentError, hasContentLoading, template } = this.state;
 
     const tabsArray = [
@@ -67,7 +67,7 @@ class WorkflowJobTemplate extends Component {
 
     let cardHeader = hasContentLoading ? null : (
       <TabbedCardHeader>
-        <RoutedTabs history={history} tabsArray={tabsArray} />
+        <RoutedTabs tabsArray={tabsArray} />
         <CardCloseButton linkTo="/templates" />
       </TabbedCardHeader>
     );
@@ -109,7 +109,6 @@ class WorkflowJobTemplate extends Component {
                 path="/templates/workflow_job_template/:id/details"
                 render={() => (
                   <WorkflowJobTemplateDetail
-                    match={match}
                     hasTemplateLoading={hasContentLoading}
                     template={template}
                   />

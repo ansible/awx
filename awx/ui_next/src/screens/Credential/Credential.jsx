@@ -5,7 +5,6 @@ import { Card, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   useParams,
-  useHistory,
   useLocation,
   Route,
   Redirect,
@@ -22,7 +21,6 @@ function Credential({ i18n, setBreadcrumb }) {
   const [credential, setCredential] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
-  const history = useHistory();
   const location = useLocation();
   const { id } = useParams();
 
@@ -53,7 +51,7 @@ function Credential({ i18n, setBreadcrumb }) {
 
   let cardHeader = hasContentLoading ? null : (
     <TabbedCardHeader>
-      <RoutedTabs history={history} tabsArray={tabsArray} />
+      <RoutedTabs tabsArray={tabsArray} />
       <CardCloseButton linkTo="/credentials" />
     </TabbedCardHeader>
   );
