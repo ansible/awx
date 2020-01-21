@@ -103,7 +103,7 @@ def main():
     # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
 
-    # Attempt to lookup the org the user specified
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
     # instance_group_objects = []
     # for instance_name in instance_group_names:
     #     instance_group_objects.append(module.resolve_name_to_id('instance_groups', instance_name))
