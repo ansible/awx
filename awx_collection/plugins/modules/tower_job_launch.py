@@ -31,7 +31,7 @@ options:
     job_type:
       description:
         - Job_type to use for the job, only used if prompt for job_type is set.
-      choices: ["run", "check", "scan"]
+      choices: ["run", "check"]
       type: str
     inventory:
       description:
@@ -145,7 +145,7 @@ def update_fields(module, p):
 def main():
     argument_spec = dict(
         job_template=dict(required=True, type='str'),
-        job_type=dict(choices=['run', 'check', 'scan']),
+        job_type=dict(choices=['run', 'check']),
         inventory=dict(type='str', default=None),
         credential=dict(type='str', default=None),
         limit=dict(),
