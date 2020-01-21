@@ -54,7 +54,11 @@ function InventoryDetail({ inventory, i18n }) {
   return (
     <CardBody>
       <DetailList>
-        <Detail label={i18n._(t`Name`)} value={inventory.name} />
+        <Detail
+          label={i18n._(t`Name`)}
+          value={inventory.name}
+          dataCy="inventory-detail-name"
+        />
         <Detail label={i18n._(t`Activity`)} value="Coming soon" />
         <Detail label={i18n._(t`Description`)} value={inventory.description} />
         <Detail label={i18n._(t`Type`)} value={i18n._(t`Inventory`)} />
