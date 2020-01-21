@@ -63,7 +63,6 @@ class Resources(object):
     _inventory_related_root_groups = r'inventories/\d+/root_groups/'
     _inventory_related_script = r'inventories/\d+/script/'
     _inventory_related_update_inventory_sources = r'inventories/\d+/update_inventory_sources/'
-    _inventory_scan_job_templates = r'inventories/\d+/scan_job_templates/'
     _inventory_script = r'inventory_scripts/\d+/'
     _inventory_script_copy = r'inventory_scripts/\d+/copy/'
     _inventory_scripts = 'inventory_scripts/'

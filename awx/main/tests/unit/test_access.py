@@ -197,36 +197,6 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     })
 
 
-def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
-    "Assure that permissions to add scan jobs work correctly"
-
-    access = JobTemplateAccess(user_unit)
-    project = job_template_with_ids.project
-    inventory = job_template_with_ids.inventory
-    project.use_role = Role()
-    inventory.use_role = Role()
-    organization = Organization(name='test-org')
-    inventory.organization = organization
-    organization.admin_role = Role()
-
-    def mock_get_object(Class, **kwargs):
-        if Class == Project:
-            return project
-        elif Class == Inventory:
-            return inventory
-        else:
-            raise Exception('Item requested has not been mocked')
-
-
-    with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
-        with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
-            assert access.can_add({
-                'project': project.pk,
-                'inventory': inventory.pk,
-                'job_type': 'scan'
-            })
-
-
 def mock_raise_none(self, add_host=False, feature=None, check_expiration=True):
     return None
 
