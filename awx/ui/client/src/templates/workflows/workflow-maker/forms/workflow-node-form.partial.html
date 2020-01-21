@@ -183,7 +183,7 @@
             </select>
         </div>
     </div>
-    <div id="workflow_node_checkbox_group" class="form-group Form-formGroup Form-formGroup--singleColumn" >
+    <div id="workflow_node_checkbox_group" class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="!(nodeConfig.editNodeIsRoot || nodeConfig.newNodeIsRoot)">
         <label class="Form-inputLabelContainer" for="checkbox_group">
             <span translate class="Form-inputLabel">Options</span>
         </label>
