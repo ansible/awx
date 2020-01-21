@@ -341,7 +341,7 @@ def gather_analytics():
         return
     last_time = settings.AUTOMATION_ANALYTICS_LAST_GATHER
     gather_time = now()
-    if not last_time or ((gather_time - last_time).seconds > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         with advisory_lock('gather_analytics_lock', wait=False) as acquired:
             if acquired is False:
                 logger.debug('Not gathering analytics, another task holds lock')
