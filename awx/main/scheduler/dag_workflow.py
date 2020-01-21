@@ -228,15 +228,18 @@ class WorkflowDAG(SimpleDAG):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
                     else:
+                        # import sdb
+                        # sdb.set_trace()
                         for p in parent_nodes:
+                            child_nodes = []
                             if p.job.status == "successful":
-                                child_nodes = (c['node_object'] for c in self.get_children(p, "success_nodes"))
-                            elif p.job.status == "failure":
-                                child_nodes = (c['node_object'] for c in self.get_children(p, "failure_nodes"))
-                            else:
-                                child_nodes = (c['node_object'] for c in self.get_children(p, "always_nodes"))
-                            if not any(obj == x for x in child_nodes):
+                                child_nodes = [x for x in self.get_children(p, "success_nodes")]
+                            elif p.job.status == "failed":
+                                child_nodes = [x for x in self.get_children(p, "failure_nodes")]
+                            child_nodes.extend(x for x in self.get_children(p, "always_nodes"))
+                            if node not in child_nodes:
                                 obj.do_not_run = True
-                                nodes_marked_do_not_run.append(node)    
+                                nodes_marked_do_not_run.append(node)
+                                break 
 
         return [n['node_object'] for n in nodes_marked_do_not_run]
