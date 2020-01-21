@@ -91,6 +91,13 @@ def main():
         }
     })
 
+    # Create data to sent to create and update
+    team_fields = {
+        'name': name,
+        'description': description,
+        'organization': org_id
+    }
+
     if state == 'absent' and not team:
         # If the state was absent and we had no team, we can just return
         module.exit_json(**module.json_output)
@@ -99,22 +106,10 @@ def main():
         module.delete_endpoint('teams/{0}'.format(team['id']), item_type='team', item_name=name, **{})
     elif state == 'present' and not team:
         # if the state was present and we couldn't find a team we can build one, the module wikl handle exiting from this
-        module.post_endpoint('teams', item_type='team', item_name=name, **{
-            'data': {
-                'name': name,
-                'description': description,
-                'organization': org_id
-            }
-        })
+        module.post_endpoint('teams', item_type='team', item_name=name, **{ 'data': team_fields })
     else:
         # If the state was present and we had a team we can see if we need to update it
         # This will return on its own
-        team_fields = {
-            'name': new_name if new_name else name,
-            'description': description,
-            'organization': org_id,
-        }
-
         module.update_if_needed(team, team_fields)
 
 
