@@ -323,6 +323,41 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         else:
             return self.job_slice_count
 
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields', [])
+        # if project is deleted for some reason, then keep the old organization
+        # to retain ownership for organization admins
+        if self.project and self.project.organization_id != self.organization_id:
+            self.organization_id = self.project.organization_id
+            if 'organization' not in update_fields and 'organization_id' not in update_fields:
+                update_fields.append('organization_id')
+        return super(JobTemplate, self).save(*args, **kwargs)
+
+    def validate_unique(self, exclude=None):
+        """Custom over-ride for JT specifically
+        because organization is inferred from project after full_clean is finished
+        thus the organization field is not yet set when validation happens
+        """
+        errors = []
+        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
+            kwargs = {'name': self.name}
+            if self.project:
+                kwargs['organization'] = self.project.organization_id
+            else:
+                kwargs['organization'] = None
+            qs = JobTemplate.objects.filter(**kwargs)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                errors.append(
+                    '%s with this (%s) combination already exists.' % (
+                        JobTemplate.__name__,
+                        ', '.join(set(ut) - {'polymorphic_ctype'})
+                    )
+                )
+        if errors:
+            raise ValidationError(errors)
+
     def create_unified_job(self, **kwargs):
         prevent_slicing = kwargs.pop('_prevent_slicing', False)
         slice_ct = self.get_effective_slice_ct(kwargs)

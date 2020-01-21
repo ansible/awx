@@ -257,7 +257,7 @@ def copy_tables(since, full_path):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
                                  django_content_type.model,
-                                 main_project.organization_id,
+                                 main_unifiedjob.organization_id,
                                  main_organization.name as organization_name,
                                  main_unifiedjob.created,  
                                  main_unifiedjob.name,  
@@ -275,10 +275,8 @@ def copy_tables(since, full_path):
                                  main_unifiedjob.job_explanation, 
                                  main_unifiedjob.instance_group_id
                                  FROM main_unifiedjob
-                                 JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
                                  JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
-                                 JOIN main_project ON main_project.unifiedjobtemplate_ptr_id = main_job.project_id
-                                 JOIN main_organization ON main_organization.id = main_project.organization_id
+                                 JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
                                  WHERE main_unifiedjob.created > {} 
                                  AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    

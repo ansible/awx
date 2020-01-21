@@ -72,6 +72,7 @@ from awx.main.utils import (
     prefetch_page_capabilities, get_external_account, truncate_stdout,
 )
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.named_url_graph import reset_counters
 from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
@@ -347,6 +348,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
 
     def _generate_named_url(self, url_path, obj, node):
         url_units = url_path.split('/')
+        reset_counters()
         named_url = node.generate_named_url(obj)
         url_units[4] = named_url
         return '/'.join(url_units)
@@ -699,18 +701,6 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
-
-    def validate(self, attrs):
-        if 'organization' in self.fields:
-            # Do not allow setting template organization to null
-            # otherwise be as non-restrictive as possible for PATCH or PUT, even with orphans
-            # does not correspond with any REST framework field construct
-            if self.instance is None and attrs.get('organization', None) is None:
-                raise serializers.ValidationError({'organization': _('Organization required for new object.')})
-            if self.instance and self.instance.organization_id and attrs.get('organization', 'blank') is None:
-                raise serializers.ValidationError({'organization': _('Organization can not be set to null.')})
-
-        return super(UnifiedJobTemplateSerializer, self).validate(attrs)
 
 
 class UnifiedJobSerializer(BaseSerializer):
@@ -2741,6 +2731,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                   'forks', 'limit', 'verbosity', 'extra_vars', 'job_tags',
                   'force_handlers', 'skip_tags', 'start_at_task', 'timeout',
                   'use_fact_cache', 'organization',)
+        read_only_fields = ('organization',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)

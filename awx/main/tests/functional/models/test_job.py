@@ -1,6 +1,9 @@
 import pytest
 
-from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory
+from awx.main.models import (
+    JobTemplate, Job, JobHostSummary,
+    WorkflowJob, Inventory, Project, Organization
+)
 
 
 @pytest.mark.django_db
@@ -77,6 +80,22 @@ def test_job_host_summary_representation(host):
     jhs = JobHostSummary.objects.get(pk=jhs.id)
     host.delete()
     assert 'N/A changed=1 dark=2 failures=3 ignored=4 ok=5 processed=6 rescued=7 skipped=8' == str(jhs)
+
+
+@pytest.mark.django_db
+def test_jt_organization_follows_project():
+    org1 = Organization.objects.create(name='foo1')
+    org2 = Organization.objects.create(name='foo2')
+    project1 = Project.objects.create(name='proj1', organization=org1)
+    project2 = Project.objects.create(name='proj2', organization=org2)
+    jt = JobTemplate.objects.create(
+        name='foo', playbook='helloworld.yml',
+        project=project1
+    )
+    assert jt.organization == org1
+    jt.project = project2
+    jt.save()
+    assert JobTemplate.objects.get(pk=jt.id).organization == org2
 
 
 @pytest.mark.django_db

@@ -1,5 +1,7 @@
 import pytest
 
+from rest_framework.exceptions import PermissionDenied
+
 from awx.main.access import (
     JobAccess,
     JobLaunchConfigAccess,
@@ -171,9 +173,11 @@ class TestJobRelaunchAccess:
             machine_credential.use_role.members.add(u)
 
         access = JobAccess(u)
-        assert access.can_start(job_with_links, validate_license=False) == can_start, (
-            "Inventory access: {}\nCredential access: {}\n Expected access: {}".format(inv_access, cred_access, can_start)
-        )
+        if can_start:
+            assert access.can_start(job_with_links, validate_license=False)
+        else:
+            with pytest.raises(PermissionDenied):
+                access.can_start(job_with_links, validate_license=False)
 
     def test_job_relaunch_credential_access(
             self, inventory, project, credential, net_credential):
@@ -188,7 +192,8 @@ class TestJobRelaunchAccess:
 
         # Job has prompted net credential, launch denied w/ message
         job = jt.create_unified_job(credentials=[net_credential])
-        assert not jt_user.can_access(Job, 'start', job, validate_license=False)
+        with pytest.raises(PermissionDenied):
+            jt_user.can_access(Job, 'start', job, validate_license=False)
 
     def test_prompted_credential_relaunch_denied(
             self, inventory, project, net_credential, rando):
@@ -201,7 +206,8 @@ class TestJobRelaunchAccess:
 
         # Job has prompted net credential, rando lacks permission to use it
         job = jt.create_unified_job(credentials=[net_credential])
-        assert not rando.can_access(Job, 'start', job, validate_license=False)
+        with pytest.raises(PermissionDenied):
+            rando.can_access(Job, 'start', job, validate_license=False)
 
     def test_prompted_credential_relaunch_allowed(
             self, inventory, project, net_credential, rando):

@@ -1,5 +1,7 @@
 import pytest
 
+from rest_framework.exceptions import PermissionDenied
+
 from awx.main.models.inventory import Inventory
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate, Job
@@ -121,6 +123,7 @@ class TestJobRelaunchAccess:
 
     def test_orphan_relaunch_via_organization(self, job_no_prompts, rando, organization):
         "JT for job has been deleted, relevant organization roles will allow management"
+        assert job_no_prompts.organization == organization
         organization.execute_role.members.add(rando)
         job_no_prompts.job_template.delete()
         job_no_prompts.job_template = None  # Django should do this for us, but it does not
@@ -129,7 +132,9 @@ class TestJobRelaunchAccess:
     def test_no_relaunch_without_prompted_fields_access(self, job_with_prompts, rando):
         "Has JT execute_role but no use_role on inventory & credential - deny relaunch"
         job_with_prompts.job_template.execute_role.members.add(rando)
-        assert not rando.can_access(Job, 'start', job_with_prompts)
+        with pytest.raises(PermissionDenied) as exc:
+            rando.can_access(Job, 'start', job_with_prompts)
+        assert 'Job was launched with prompted fields you do not have access to' in str(exc)
 
     def test_can_relaunch_with_prompted_fields_access(self, job_with_prompts, rando):
         "Has use_role on the prompted inventory & credential - allow relaunch"
@@ -148,11 +153,15 @@ class TestJobRelaunchAccess:
         jt.ask_limit_on_launch = False
         jt.save()
         jt.execute_role.members.add(rando)
-        assert not rando.can_access(Job, 'start', job_with_prompts)
+        with pytest.raises(PermissionDenied):
+            rando.can_access(Job, 'start', job_with_prompts)
 
     def test_can_relaunch_if_limit_was_prompt(self, job_with_prompts, rando):
         "Job state differs from JT, but only on prompted fields - allow relaunch"
         job_with_prompts.job_template.execute_role.members.add(rando)
         job_with_prompts.limit = 'webservers'
         job_with_prompts.save()
-        assert not rando.can_access(Job, 'start', job_with_prompts)
+        job_with_prompts.inventory.use_role.members.add(rando)
+        for cred in job_with_prompts.credentials.all():
+            cred.use_role.members.add(rando)
+        assert rando.can_access(Job, 'start', job_with_prompts)

@@ -376,7 +376,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
-        'labels', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec'
+        'labels', 'organization', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec'
     ]
 
     class Meta:

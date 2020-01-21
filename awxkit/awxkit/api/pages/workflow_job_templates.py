@@ -12,7 +12,7 @@ from . import page
 
 class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, UnifiedJobTemplate):
 
-    dependencies = [Organization]
+    optional_dependencies = [Organization]
 
     def launch(self, payload={}):
         """Launch using related->launch endpoint."""
@@ -71,14 +71,14 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
 
         return payload
 
-    def create_payload(self, name='', description='', organization=Organization, **kwargs):
+    def create_payload(self, name='', description='', organization=None, **kwargs):
         self.create_and_update_dependencies(*filter_by_class((organization, Organization)))
         organization = self.ds.organization if organization else None
         payload = self.payload(name=name, description=description, organization=organization, **kwargs)
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
 
-    def create(self, name='', description='', organization=Organization, **kwargs):
+    def create(self, name='', description='', organization=None, **kwargs):
         payload = self.create_payload(name=name, description=description, organization=organization, **kwargs)
         return self.update_identity(WorkflowJobTemplates(self.connection).post(payload))
 

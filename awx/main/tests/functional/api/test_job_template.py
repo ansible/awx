@@ -6,7 +6,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization
+from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization, Project
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -32,50 +32,16 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         inventory.use_role.members.add(alice)
     project.organization.job_template_admin_role.members.add(alice)
 
-    r = post(reverse('api:job_template_list'), {
-        'name': 'Some name',
-        'project': project.id,
-        'inventory': inventory.id,
-        'playbook': 'helloworld.yml',
-        'organization': project.organization_id
-    }, alice)
-    assert r.status_code == expect
-
-
-@pytest.mark.django_db
-def test_creation_uniqueness_rules(post, project, inventory, admin_user):
-    orgA = Organization.objects.create(name='orga')
-    orgB = Organization.objects.create(name='orgb')
-    create_data = {
-        'name': 'this_unique_name',
-        'project': project.pk,
-        'inventory': inventory.pk,
-        'playbook': 'helloworld.yml',
-        'organization': orgA.pk
-    }
     post(
         url=reverse('api:job_template_list'),
-        data=create_data,
-        user=admin_user,
-        expect=201
-    )
-    r = post(
-        url=reverse('api:job_template_list'),
-        data=create_data,
-        user=admin_user,
-        expect=400
-    )
-    msg = str(r.data['__all__'][0])
-    assert "JobTemplate with this (" in msg
-    assert ") combination already exists" in msg
-
-    # can create JT with same name, only if it is in different org
-    create_data['organization'] = orgB.pk
-    post(
-        url=reverse('api:job_template_list'),
-        data=create_data,
-        user=admin_user,
-        expect=201
+        data={
+            'name': 'Some name',
+            'project': project.id,
+            'inventory': inventory.id,
+            'playbook': 'helloworld.yml'
+        },
+        user=alice,
+        expect=expect
     )
 
 
@@ -162,14 +128,18 @@ def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, invento
     project.use_role.members.add(alice)
     inventory.use_role.members.add(alice)
     settings.MAX_FORKS = 10
-    response = post(reverse('api:job_template_list'), {
-        'name': 'Some name',
-        'project': project.id,
-        'inventory': inventory.id,
-        'playbook': 'helloworld.yml',
-        'forks': 11,
-    }, alice)
-    assert response.status_code == 400
+    response = post(
+        url=reverse('api:job_template_list'),
+        data={
+            'name': 'Some name',
+            'project': project.id,
+            'inventory': inventory.id,
+            'playbook': 'helloworld.yml',
+            'forks': 11,
+        },
+        user=alice,
+        expect=400
+    )
     assert 'Maximum number of forks (10) exceeded' in str(response.data)
 
 
@@ -550,6 +520,72 @@ def test_job_template_unset_custom_virtualenv(get, patch, organization_factory,
 
 
 @pytest.mark.django_db
+def test_jt_organization_follows_project(post, patch, admin_user):
+    org1 = Organization.objects.create(name='foo1')
+    org2 = Organization.objects.create(name='foo2')
+    project_common = dict(scm_type='git', playbook_files=['helloworld.yml'])
+    project1 = Project.objects.create(name='proj1', organization=org1, **project_common)
+    project2 = Project.objects.create(name='proj2', organization=org2, **project_common)
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            "name": "fooo",
+            "ask_inventory_on_launch": True,
+            "project": project1.pk,
+            "playbook": "helloworld.yml"
+        },
+        user=admin_user,
+        expect=201
+    )
+    data = r.data
+    assert data['organization'] == project1.organization_id
+    data['project'] = project2.id
+    jt = JobTemplate.objects.get(pk=data['id'])
+    r = patch(
+        url=jt.get_absolute_url(),
+        data=data,
+        user=admin_user,
+        expect=200
+    )
+    assert r.data['organization'] == project2.organization_id
+
+
+@pytest.mark.django_db
+def test_jt_organization_field_is_read_only(patch, post, project, admin_user):
+    org = project.organization
+    jt = JobTemplate.objects.create(
+        name='foo_jt',
+        ask_inventory_on_launch=True,
+        project=project, playbook='helloworld.yml'
+    )
+    org2 = Organization.objects.create(name='foo2')
+    r = patch(
+        url=jt.get_absolute_url(),
+        data={'organization': org2.id},
+        user=admin_user,
+        expect=200
+    )
+    assert r.data['organization'] == org.id
+    assert JobTemplate.objects.get(pk=jt.pk).organization == org
+
+    # similar test, but on creation
+    r = post(
+        url=reverse('api:job_template_list'),
+        data={
+            'name': 'foobar',
+            'project': project.id,
+            'organization': org2.id,
+            'ask_inventory_on_launch': True,
+            'playbook': 'helloworld.yml'
+        },
+        user=admin_user,
+        expect=201
+    )
+    assert r.data['organization'] == org.id
+    assert JobTemplate.objects.get(pk=r.data['id']).organization == org
+
+
+@pytest.mark.django_db
 def test_callback_disallowed_null_inventory(project):
     jt = JobTemplate.objects.create(
         name='test-jt', inventory=None,
@@ -563,14 +599,13 @@ def test_callback_disallowed_null_inventory(project):
 
 
 @pytest.mark.django_db
-def test_job_template_branch_error(project, inventory, organization, post, admin_user):
+def test_job_template_branch_error(project, inventory, post, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
-            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "scm_branch": "foobar"
         },
@@ -581,14 +616,13 @@ def test_job_template_branch_error(project, inventory, organization, post, admin
 
 
 @pytest.mark.django_db
-def test_job_template_branch_prompt_error(project, inventory, post, organization, admin_user):
+def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
     r = post(
         url=reverse('api:job_template_list'),
         data={
             "name": "fooo",
             "inventory": inventory.pk,
             "project": project.pk,
-            "organization": organization.pk,
             "playbook": "helloworld.yml",
             "ask_scm_branch_on_launch": True
         },

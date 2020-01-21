@@ -1,7 +1,7 @@
 import logging
 from time import time
 
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, F
 
 from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
@@ -115,7 +115,7 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
         if backward and UNIFIED_ORG_LOOKUPS.get(cls_name, 'not-found') is not None:
             logger.debug('Not reverse migrating {}, existing data should remain valid'.format(cls_name))
             continue
-        logger.debug('Migrating {} to new organization field'.format(cls_name))
+        logger.debug('{}Migrating {} to new organization field'.format('Reverse ' if backward else '', cls_name))
 
         sub_qs = implicit_org_subquery(UnifiedClass, cls, backward=backward)
         if sub_qs is None:
@@ -129,7 +129,7 @@ def _migrate_unified_organization(apps, unified_cls_name, backward=False):
             r = UnifiedClass.objects.order_by().filter(polymorphic_ctype=this_ct).update(tmp_organization=sub_qs)
         if r:
             logger.info('Organization migration on {} affected {} rows.'.format(cls_name, r))
-    logger.info('Unified organization migration completed in %f seconds' % (time() - start))
+    logger.info('Unified organization migration completed in {:.4f} seconds'.format(time() - start))
 
 
 def migrate_ujt_organization(apps, schema_editor):
@@ -142,6 +142,74 @@ def migrate_ujt_organization_backward(apps, schema_editor):
     '''Move organization field from UJT and UJ models back to their original places'''
     _migrate_unified_organization(apps, 'UnifiedJobTemplate', backward=True)
     _migrate_unified_organization(apps, 'UnifiedJob', backward=True)
+
+
+def _restore_inventory_admins(apps, schema_editor, backward=False):
+    """With the JT.organization changes, admins of organizations connected to
+    job templates via inventory will have their permissions demoted.
+    This maintains current permissions over the migration by granting the
+    permissions they used to have explicitly on the JT itself.
+    """
+    start = time()
+    JobTemplate = apps.get_model('main', 'JobTemplate')
+    User = apps.get_model('auth', 'User')
+    changed_ct = 0
+    jt_qs = JobTemplate.objects.filter(inventory__isnull=False)
+    jt_qs = jt_qs.exclude(inventory__organization=F('project__organization'))
+    jt_qs = jt_qs.only('id', 'admin_role_id', 'execute_role_id', 'inventory_id')
+    for jt in jt_qs.iterator():
+        org = jt.inventory.organization
+        for role_name in ('admin_role', 'execute_role'):
+            role_id = getattr(jt, '{}_id'.format(role_name))
+
+            user_qs = User.objects
+            if not backward:
+                # In this specific case, the name for the org role and JT roles were the same
+                org_role_id = getattr(org, '{}_id'.format(role_name))
+                user_qs = user_qs.filter(roles=org_role_id)
+                # bizarre migration behavior - ancestors / descendents of
+                # migration version of Role model is reversed, using current model briefly
+                ancestor_ids = list(
+                    Role.objects.filter(descendents=role_id).values_list('id', flat=True)
+                )
+                # same as Role.__contains__, filter for "user in jt.admin_role"
+                user_qs = user_qs.exclude(roles__in=ancestor_ids)
+            else:
+                # use the database to filter intersection of users without access
+                # to the JT role and either organization role
+                user_qs = user_qs.filter(roles__in=[org.admin_role_id, org.execute_role_id])
+                # in reverse, intersection of users who have both
+                user_qs = user_qs.filter(roles=role_id)
+
+            user_ids = list(user_qs.values_list('id', flat=True))
+            if not user_ids:
+                continue
+
+            role = getattr(jt, role_name)
+            logger.debug('{} {} on jt {} for users {} via inventory.organization {}'.format(
+                'Removing' if backward else 'Setting',
+                role_name, jt.pk, user_ids, org.pk
+            ))
+            if not backward:
+                # in reverse, explit role becomes redundant
+                role.members.add(*user_ids)
+            else:
+                role.members.remove(*user_ids)
+            changed_ct += len(user_ids)
+
+    if changed_ct:
+        logger.info('{} explicit JT permission for {} users in {:.4f} seconds'.format(
+            'Removed' if backward else 'Added',
+            changed_ct, time() - start
+        ))
+
+
+def restore_inventory_admins(apps, schema_editor):
+    _restore_inventory_admins(apps, schema_editor)
+
+
+def restore_inventory_admins_backward(apps, schema_editor):
+    _restore_inventory_admins(apps, schema_editor, backward=True)
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
@@ -164,7 +232,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
     logger.info('Done.')
 
 
-def rebuild_role_parentage(apps, schema_editor):
+def rebuild_role_parentage(apps, schema_editor, models=None):
     '''
     This should be called in any migration when any parent_role entry
     is modified so that the cached parent fields will be updated. Ex:
@@ -177,13 +245,23 @@ def rebuild_role_parentage(apps, schema_editor):
     '''
     start = time()
     seen_models = set()
-    updated_ct = 0
     model_ct = 0
     noop_ct = 0
-    Role = apps.get_model('main', "Role")
-    for role in Role.objects.iterator():
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    additions = set()
+    removals = set()
+
+    role_qs = Role.objects
+    if models:
+        # update_role_parentage_for_instance is expensive
+        # if the models have been downselected, ignore those which are not in the list
+        ct_ids = list(ContentType.objects.filter(
+            model__in=[name.lower() for name in models]
+        ).values_list('id', flat=True))
+        role_qs = role_qs.filter(content_type__in=ct_ids)
+
+    for role in role_qs.iterator():
         if not role.object_id:
-            noop_ct += 1
             continue
         model_tuple = (role.content_type_id, role.object_id)
         if model_tuple in seen_models:
@@ -198,19 +276,26 @@ def rebuild_role_parentage(apps, schema_editor):
         ct_model = apps.get_model(app, ct.model)
         content_object = ct_model.objects.get(pk=role.object_id)
 
-        updated = update_role_parentage_for_instance(content_object)
-        if updated:
+        parents_added, parents_removed = update_role_parentage_for_instance(content_object)
+        additions.update(parents_added)
+        removals.update(parents_removed)
+        if parents_added:
             model_ct += 1
-            logger.debug('Updated parents of {} roles of {}'.format(updated, content_object))
+            logger.debug('Added to parents of roles {} of {}'.format(parents_added, content_object))
+        if parents_removed:
+            model_ct += 1
+            logger.debug('Removed from parents of roles {} of {}'.format(parents_removed, content_object))
         else:
             noop_ct += 1
-        updated_ct += updated
 
-    logger.debug('No changes to role parents for {} roles'.format(noop_ct))
-    if updated_ct:
-        logger.info('Updated parentage for {} roles of {} resources'.format(updated_ct, model_ct))
+    logger.debug('No changes to role parents for {} resources'.format(noop_ct))
+    logger.debug('Added parents to {} roles'.format(len(additions)))
+    logger.debug('Removed parents from {} roles'.format(len(removals)))
+    if model_ct:
+        logger.info('Updated implicit parents of {} resources'.format(model_ct))
 
     logger.info('Rebuild parentage completed in %f seconds' % (time() - start))
 
-    if updated_ct:
-        rebuild_role_hierarchy(apps, schema_editor)
+    # this is ran because the ordinary signals for
+    # Role.parents.add and Role.parents.remove not called in migration
+    Role.rebuild_role_ancestor_list(list(additions), list(removals))

@@ -6,6 +6,7 @@ from awx.main.models import (
     UnifiedJobTemplate,
     WorkflowJob,
     WorkflowJobNode,
+    WorkflowApprovalTemplate,
     Job,
     User,
     Project,
@@ -70,7 +71,9 @@ def test_organization_copy_to_jobs():
     All unified job types should infer their organization from their template organization
     '''
     for cls in UnifiedJobTemplate.__subclasses__():
-        assert 'organization' in cls._get_unified_job_field_names()
+        if cls is WorkflowApprovalTemplate:
+            continue  # these do not track organization
+        assert 'organization' in cls._get_unified_job_field_names(), cls
 
 
 def test_log_representation():

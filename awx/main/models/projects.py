@@ -325,6 +325,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             ['name', 'description', 'organization']
         )
 
+    def clean_organization(self):
+        if self.pk:
+            old_org_id = getattr(self, '_prior_values_store', {}).get('organization_id', None)
+            if self.organization_id != old_org_id and self.jobtemplates.exists():
+                raise ValidationError({'organization': _('Organization cannot be changed when in use by job templates.')})
+        return self.organization
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         pre_save_vals = getattr(self, '_prior_values_store', {})

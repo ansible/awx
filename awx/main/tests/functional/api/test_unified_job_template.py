@@ -39,29 +39,6 @@ class TestUnifiedOrganization:
             data['ask_inventory_on_launch'] = True
         return data
 
-    def test_organization_required_on_creation(self, model, admin_user, post):
-        cls = getattr(models, model)
-        data = self.data_for_model(model)
-        r = post(
-            url=reverse('api:{}_list'.format(get_type_for_model(cls))),
-            data=data,
-            user=admin_user,
-            expect=400
-        )
-        assert 'organization' in r.data
-        assert 'required for new object' in r.data['organization'][0]
-        # Surprising behavior - not providing the key can often give
-        # different behavior from giving it as null on create
-        data.pop('organization')
-        r = post(
-            url=reverse('api:{}_list'.format(get_type_for_model(cls))),
-            data=data,
-            user=admin_user,
-            expect=400
-        )
-        assert 'organization' in r.data
-        assert 'required' in r.data['organization'][0]
-
     def test_organization_blank_on_edit_of_orphan(self, model, admin_user, patch):
         cls = getattr(models, model)
         data = self.data_for_model(model, orm_style=True)
@@ -107,15 +84,3 @@ class TestUnifiedOrganization:
         )
         obj.refresh_from_db()
         assert obj.name == 'foooooo'
-
-    def test_organization_cannot_change_to_null(self, model, admin_user, patch, organization):
-        cls = getattr(models, model)
-        data = self.data_for_model(model, orm_style=True)
-        data['organization'] = organization
-        obj = cls.objects.create(**data)
-        patch(
-            url=obj.get_absolute_url(),
-            data={'organization': None},
-            user=admin_user,
-            expect=400
-        )

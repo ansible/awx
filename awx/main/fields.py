@@ -200,29 +200,27 @@ def update_role_parentage_for_instance(instance):
     of a given instance if they have changed
     '''
     changed_ct = 0
+    parents_removed = set()
+    parents_added = set()
     for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-        changed = False
         cur_role = getattr(instance, implicit_role_field.name)
         original_parents = set(json.loads(cur_role.implicit_parents))
         new_parents = implicit_role_field._resolve_parent_roles(instance)
         removals = original_parents - new_parents
         if removals:
-            changed = True
             cur_role.parents.remove(*list(removals))
+            parents_removed.add(cur_role.pk)
         additions = new_parents - original_parents
         if additions:
-            changed = True
             cur_role.parents.add(*list(additions))
+            parents_added.add(cur_role.pk)
         new_parents_list = list(new_parents)
         new_parents_list.sort()
         new_parents_json = json.dumps(new_parents_list)
         if cur_role.implicit_parents != new_parents_json:
-            changed = True
             cur_role.implicit_parents = new_parents_json
-            cur_role.save()
-        if changed:
-            changed_ct += 1
-    return changed_ct
+            cur_role.save(update_fields=['implicit_parents'])
+    return (parents_added, parents_removed)
 
 
 class ImplicitRoleDescriptor(ForwardManyToOneDescriptor):

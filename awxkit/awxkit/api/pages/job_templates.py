@@ -7,7 +7,7 @@ from awxkit.utils import (
     suppress,
     update_payload,
     PseudoNamespace)
-from awxkit.api.pages import Credential, Inventory, Project, UnifiedJobTemplate, Organization
+from awxkit.api.pages import Credential, Inventory, Project, UnifiedJobTemplate
 from awxkit.api.mixins import HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, HasCopy, DSAdapter
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
@@ -23,7 +23,7 @@ class JobTemplate(
         HasSurvey,
         UnifiedJobTemplate):
 
-    optional_dependencies = [Organization, Inventory, Credential, Project]
+    optional_dependencies = [Inventory, Credential, Project]
 
     def launch(self, payload={}):
         """Launch the job_template using related->launch endpoint."""
@@ -129,7 +129,6 @@ class JobTemplate(
             playbook='ping.yml',
             credential=Credential,
             inventory=Inventory,
-            organization=Organization,
             project=None,
             **kwargs):
         if not project:
@@ -149,18 +148,12 @@ class JobTemplate(
         project = self.ds.project if project else None
         inventory = self.ds.inventory if inventory else None
         credential = self.ds.credential if credential else None
-        # if the created project has an organization, and the parameters
-        # specified no organization, then borrow the one from the project
-        if hasattr(project.ds, 'organization') and organization is Organization:
-            self.ds.organization = project.ds.organization
-            organization = self.ds.organization
 
         payload = self.payload(
             name=name,
             description=description,
             job_type=job_type,
             playbook=playbook,
-            organization=organization,
             credential=credential,
             inventory=inventory,
             project=project,
@@ -176,12 +169,11 @@ class JobTemplate(
             playbook='ping.yml',
             credential=Credential,
             inventory=Inventory,
-            organization=Organization,
             project=None,
             **kwargs):
         payload, credential = self.create_payload(name=name, description=description, job_type=job_type,
                                                   playbook=playbook, credential=credential, inventory=inventory,
-                                                  project=project, organization=organization, **kwargs)
+                                                  project=project, **kwargs)
         ret = self.update_identity(
             JobTemplates(
                 self.connection).post(payload))
