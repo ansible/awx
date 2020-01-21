@@ -799,6 +799,27 @@ register(
 )
 
 
+register(
+    'AUTOMATION_ANALYTICS_LAST_GATHER',
+    field_class=fields.DateTimeField,
+    label=_('Last gather date for Automation Analytics'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system'
+)
+
+
+register(
+    'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
+    field_class=fields.IntegerField,
+    label=_('Interval (in seconds) between data gathering'),
+    default=14400,	# every 4 hours
+    min_value=1800,	# every 30 minutes
+    category=_('System'),
+    category_slug='system'
+)
+
+
 def logging_validate(serializer, attrs):
     if not serializer.instance or \
             not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or \
