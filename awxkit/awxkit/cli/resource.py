@@ -123,6 +123,41 @@ class Config(CustomCommand):
         }
 
 
+class Export(CustomCommand):
+    name = 'export'
+    help_text = 'export resources from Tower as yaml'
+
+    def extend_parser(self, parser):
+        resources = parser.add_argument_group('resources')
+        resources.add_argument('--users', nargs='?', const='')
+
+    def handle(self, client, parser):
+        self.extend_parser(parser)
+
+        if client.help:
+            parser.print_help()
+            raise SystemExit()
+
+        parsed = parser.parse_known_args()[0]
+
+        data = {}
+        for resource in ('users',):
+            value = getattr(parsed, resource, None)
+            if value is None:
+                print("Pulling no users.")
+                continue
+            if value:
+                print("Pulling users: {}".format(value))
+                pass
+            else:
+                print("Pulling all users.")
+                pass
+
+            data[resource] = {}
+
+        return data
+
+
 def parse_resource(client, skip_deprecated=False):
     subparsers = client.parser.add_subparsers(
         dest='resource',
