@@ -131,6 +131,8 @@ class JobTemplate(
             inventory=Inventory,
             project=None,
             **kwargs):
+        if not project:
+            project = Project
         if not inventory and not kwargs.get('ask_inventory_on_launch', False):
             inventory = Inventory
 
