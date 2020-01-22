@@ -59,6 +59,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -74,30 +79,25 @@ EXAMPLES = '''
 '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(),
+        description=dict(default=''),
         organization=dict(required=True),
-        variables=dict(),
+        variables=dict(default=''),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
     description = module.params.get('description')
     organization = module.params.get('organization')
@@ -106,31 +106,43 @@ def main():
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
 
-    json_output = {'inventory': name, 'state': state}
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    org_id = module.resolve_name_to_id('organizations', organization)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        inventory = tower_cli.get_resource('inventory')
+    # Attempt to lookup inventory based on the provided name and org ID
+    inventory = module.get_one('inventories', **{
+        'data': {
+            'name': name,
+            'organization': org_id
+        }
+    })
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Create data to sent to create and update
+    inventory_fields = {
+        'name': name,
+        'description': description,
+        'organization': org_id,
+        'variables': variables,
+        'kind': kind,
+        'host_filter': host_filter,
+    }
 
-            if state == 'present':
-                result = inventory.modify(name=name, organization=org['id'], variables=variables,
-                                          description=description, kind=kind, host_filter=host_filter,
-                                          create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = inventory.delete(name=name, organization=org['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update inventory, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update inventory: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent' and not inventory:
+        # If the state was absent and we had no inventory, we can just return
+        module.exit_json(**module.json_output)
+    elif state == 'absent' and inventory:
+        # If the state was absent and we had a inventory, we can try to delete it, the module will handle exiting from this
+        module.delete_endpoint('inventories/{0}'.format(inventory['id']), item_type='inventory', item_name=name, **{})
+    elif state == 'present' and not inventory:
+        # If the state was present and we couldn't find a inventory we can build one, the module will handle exiting from this
+        module.post_endpoint('inventories', item_type='inventory', item_name=name, **{'data': inventory_fields})
+    else:
+        # Throw a more specific error message than what the API page provides.
+        if inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+            module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
+        # If the state was present and we had a inventory, we can see if we need to update it
+        # This will return on its own
+        module.update_if_needed(inventory, inventory_fields)
 
 
 if __name__ == '__main__':

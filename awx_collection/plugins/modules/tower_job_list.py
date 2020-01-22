@@ -41,6 +41,11 @@ options:
       description:
         - Query used to further filter the list of jobs. C({"foo":"bar"}) will be passed at C(?foo=bar)
       type: dict
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -81,18 +86,11 @@ results:
 '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         status=dict(choices=['pending', 'waiting', 'running', 'error', 'failed', 'canceled', 'successful']),
         page=dict(type='int'),
@@ -100,31 +98,35 @@ def main():
         query=dict(type='dict'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
-        supports_check_mode=True
+        supports_check_mode=True,
+        mutually_exclusive=[
+            ('page', 'all_pages'),
+        ]
     )
 
-    json_output = {}
-
+    # Extract our parameters
     query = module.params.get('query')
     status = module.params.get('status')
     page = module.params.get('page')
     all_pages = module.params.get('all_pages')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        try:
-            job = tower_cli.get_resource('job')
-            params = {'status': status, 'page': page, 'all_pages': all_pages}
-            if query:
-                params['query'] = query.items()
-            json_output = job.list(**params)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to list jobs: {0}'.format(excinfo), changed=False)
+    job_search_data = {}
+    if page:
+        job_search_data['page'] = page
+    if status:
+        job_search_data['status'] = status
+    if query:
+        job_search_data.update(query)
+    if all_pages:
+        job_list = module.get_all_endpoint('jobs', **{'data': job_search_data})
+    else:
+        job_list = module.get_endpoint('jobs', **{'data': job_search_data})
 
-    module.exit_json(**json_output)
+    # Attempt to lookup jobs based on the status
+    module.exit_json(**job_list['json'])
 
 
 if __name__ == '__main__':
