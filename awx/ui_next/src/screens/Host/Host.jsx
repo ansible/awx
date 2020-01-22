@@ -39,30 +39,29 @@ function Host({ inventory, i18n, setBreadcrumb }) {
     ? '/hosts'
     : `/inventories/inventory/${inventoriesMatch.params.id}/hosts`;
 
-  const loadHost = async () => {
-    setContentError(null);
-    setHasContentLoading(true);
-    try {
-      const hostId = hostsMatch
-        ? hostsMatch.params.id
-        : inventoriesMatch.params.hostId;
-      const { data } = await HostsAPI.readDetail(hostId);
-      setHost(data);
-
-      if (hostsMatch) {
-        setBreadcrumb(data);
-      } else if (inventoriesMatch) {
-        setBreadcrumb(inventory, data);
-      }
-    } catch (error) {
-      setContentError(error);
-    } finally {
-      setHasContentLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadHost();
+    (async () => {
+      setContentError(null);
+      setHasContentLoading(true);
+
+      try {
+        const hostId = hostsMatch
+          ? hostsMatch.params.id
+          : inventoriesMatch.params.hostId;
+        const { data } = await HostsAPI.readDetail(hostId);
+        setHost(data);
+
+        if (hostsMatch) {
+          setBreadcrumb(data);
+        } else if (inventoriesMatch) {
+          setBreadcrumb(inventory, data);
+        }
+      } catch (error) {
+        setContentError(error);
+      } finally {
+        setHasContentLoading(false);
+      }
+    })();
   }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabsArray = [
