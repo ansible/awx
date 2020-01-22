@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { HostsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
@@ -7,39 +8,70 @@ import Host from './Host';
 
 jest.mock('@api');
 
-const mockMe = {
-  is_super_user: true,
-  is_system_auditor: false,
-};
-
 describe('<Host />', () => {
-  test('initially renders succesfully', () => {
-    HostsAPI.readDetail.mockResolvedValue({ data: mockDetails });
-    mountWithContexts(<Host setBreadcrumb={() => {}} me={mockMe} />);
+  let wrapper;
+  let history;
+
+  HostsAPI.readDetail.mockResolvedValue({
+    data: { ...mockDetails },
+  });
+
+  afterEach(() => {
+    wrapper.unmount();
+  });
+
+  test('initially renders succesfully', async () => {
+    history = createMemoryHistory({
+      initialEntries: ['/hosts/1/edit'],
+    });
+
+    await act(async () => {
+      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
+        context: { router: { history } },
+      });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('Host').length).toBe(1);
+  });
+
+  test('should render "Back to Hosts" tab when navigating from inventories', async () => {
+    history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/1/hosts/1'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
+        context: { router: { history } },
+      });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(
+      wrapper
+        .find('RoutedTabs li')
+        .first()
+        .text()
+    ).toBe('Back to Hosts');
+  });
+
+  test('should show content error when api throws error on initial render', async () => {
+    HostsAPI.readDetail.mockRejectedValueOnce(new Error());
+    await act(async () => {
+      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
+        context: { router: { history } },
+      });
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {
-    const history = createMemoryHistory({
+    history = createMemoryHistory({
       initialEntries: ['/hosts/1/foobar'],
     });
-    const wrapper = mountWithContexts(
-      <Host setBreadcrumb={() => {}} me={mockMe} />,
-      {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/hosts/1/foobar',
-                path: '/host/1/foobar',
-              },
-            },
-          },
-        },
-      }
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
+        context: { router: { history } },
+      });
+    });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 });
