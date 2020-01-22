@@ -19,8 +19,8 @@ function VisualizerStartNode({
   i18n,
   nodePositions,
   onAddNodeClick,
+  onUpdateHelpText,
   readOnly,
-  updateHelpText,
 }) {
   const [hovering, setHovering] = useState(false);
 
@@ -56,10 +56,10 @@ function VisualizerStartNode({
             <WorkflowActionTooltipItem
               id="node-add"
               key="add"
-              onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
-              onMouseLeave={() => updateHelpText(null)}
+              onMouseEnter={() => onUpdateHelpText(i18n._(t`Add a new node`))}
+              onMouseLeave={() => onUpdateHelpText(null)}
               onClick={() => {
-                updateHelpText(null);
+                onUpdateHelpText(null);
                 setHovering(false);
                 onAddNodeClick(1);
               }}
@@ -80,7 +80,7 @@ VisualizerStartNode.propTypes = {
   nodePositions: shape().isRequired,
   onAddNodeClick: func.isRequired,
   readOnly: bool.isRequired,
-  updateHelpText: func.isRequired,
+  onUpdateHelpText: func.isRequired,
 };
 
 export default withI18n()(VisualizerStartNode);

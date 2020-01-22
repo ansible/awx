@@ -6,7 +6,7 @@ const TooltipContents = styled.div`
   display: flex;
 `;
 
-const TooltipArrows = styled.div`
+const TooltipArrow = styled.div`
   width: 10px;
 `;
 
@@ -50,10 +50,10 @@ function WorkflowActionTooltip({ actions, pointX, pointY }) {
       height={tipHeight}
     >
       <TooltipContents>
-        <TooltipArrows>
+        <TooltipArrow>
           <TooltipArrowOuter />
           <TooltipArrowInner />
-        </TooltipArrows>
+        </TooltipArrow>
         <TooltipActions>{actions}</TooltipActions>
       </TooltipContents>
     </foreignObject>

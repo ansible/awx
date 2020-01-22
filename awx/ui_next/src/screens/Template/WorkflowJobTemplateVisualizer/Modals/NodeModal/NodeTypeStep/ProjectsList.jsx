@@ -15,7 +15,7 @@ const QS_CONFIG = getQSConfig('projects', {
   order_by: 'name',
 });
 
-function ProjectsList({ history, i18n, nodeResource, updateNodeResource }) {
+function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +45,7 @@ function ProjectsList({ history, i18n, nodeResource, updateNodeResource }) {
       hasContentLoading={isLoading}
       itemCount={count}
       items={projects}
-      onRowClick={row => updateNodeResource(row)}
+      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
       renderItem={item => (
         <CheckboxListItem
@@ -54,8 +54,8 @@ function ProjectsList({ history, i18n, nodeResource, updateNodeResource }) {
           key={item.id}
           name={item.name}
           label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
+          onSelect={() => onUpdateNodeResource(item)}
+          onDeselect={() => onUpdateNodeResource(null)}
           isRadio
         />
       )}
@@ -75,7 +75,7 @@ function ProjectsList({ history, i18n, nodeResource, updateNodeResource }) {
 
 ProjectsList.propTypes = {
   nodeResource: shape(),
-  updateNodeResource: func.isRequired,
+  onUpdateNodeResource: func.isRequired,
 };
 
 ProjectsList.defaultProps = {

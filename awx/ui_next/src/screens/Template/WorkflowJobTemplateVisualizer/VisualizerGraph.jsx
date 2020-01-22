@@ -262,7 +262,7 @@ function VisualizerGraph({
               nodePositions={nodePositions}
               onAddNodeClick={onAddNodeClick}
               readOnly={readOnly}
-              updateHelpText={setHelpText}
+              onUpdateHelpText={setHelpText}
             />,
             links.map(link => {
               if (
@@ -279,8 +279,8 @@ function VisualizerGraph({
                     onDeleteLinkClick={onDeleteLinkClick}
                     onLinkEditClick={onLinkEditClick}
                     readOnly={readOnly}
-                    updateHelpText={setHelpText}
-                    updateLinkHelp={setLinkHelp}
+                    onUpdateHelpText={setHelpText}
+                    onUpdateLinkHelp={setLinkHelp}
                   />
                 );
               }
@@ -304,7 +304,7 @@ function VisualizerGraph({
                     onStartAddLinkClick={onStartAddLinkClick}
                     onViewNodeClick={onViewNodeClick}
                     readOnly={readOnly}
-                    updateHelpText={setHelpText}
+                    onUpdateHelpText={setHelpText}
                     updateNodeHelp={setNodeHelp}
                     {...(addingLink && {
                       onMouseOver: () => drawPotentialLinkToNode(node),

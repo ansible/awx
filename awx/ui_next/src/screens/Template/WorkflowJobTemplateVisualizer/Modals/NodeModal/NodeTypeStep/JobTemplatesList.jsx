@@ -15,7 +15,12 @@ const QS_CONFIG = getQSConfig('job_templates', {
   order_by: 'name',
 });
 
-function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
+function JobTemplatesList({
+  i18n,
+  history,
+  nodeResource,
+  onUpdateNodeResource,
+}) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +52,7 @@ function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
       hasContentLoading={isLoading}
       itemCount={count}
       items={jobTemplates}
-      onRowClick={row => updateNodeResource(row)}
+      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
       renderItem={item => (
         <CheckboxListItem
@@ -56,8 +61,8 @@ function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
           key={item.id}
           name={item.name}
           label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
+          onSelect={() => onUpdateNodeResource(item)}
+          onDeselect={() => onUpdateNodeResource(null)}
           isRadio
         />
       )}
@@ -77,7 +82,7 @@ function JobTemplatesList({ i18n, history, nodeResource, updateNodeResource }) {
 
 JobTemplatesList.propTypes = {
   nodeResource: shape(),
-  updateNodeResource: func.isRequired,
+  onUpdateNodeResource: func.isRequired,
 };
 
 JobTemplatesList.defaultProps = {

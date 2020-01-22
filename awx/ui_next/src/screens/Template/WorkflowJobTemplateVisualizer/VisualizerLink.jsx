@@ -26,9 +26,9 @@ function VisualizerLink({
   onAddNodeClick,
   onDeleteLinkClick,
   onLinkEditClick,
+  onUpdateHelpText,
+  onUpdateLinkHelp,
   readOnly,
-  updateHelpText,
-  updateLinkHelp,
 }) {
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
@@ -41,14 +41,14 @@ function VisualizerLink({
       id="link-add-node"
       key="add"
       onClick={() => {
-        updateHelpText(null);
+        onUpdateHelpText(null);
         setHovering(false);
         onAddNodeClick(link.source.id, link.target.id);
       }}
       onMouseEnter={() =>
-        updateHelpText(i18n._(t`Add a new node between these two nodes`))
+        onUpdateHelpText(i18n._(t`Add a new node between these two nodes`))
       }
-      onMouseLeave={() => updateHelpText(null)}
+      onMouseLeave={() => onUpdateHelpText(null)}
     >
       <PlusIcon />
     </WorkflowActionTooltipItem>
@@ -63,8 +63,8 @@ function VisualizerLink({
             id="link-edit"
             key="edit"
             onClick={() => onLinkEditClick(link)}
-            onMouseEnter={() => updateHelpText(i18n._(t`Edit this link`))}
-            onMouseLeave={() => updateHelpText(null)}
+            onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this link`))}
+            onMouseLeave={() => onUpdateHelpText(null)}
           >
             <PencilAltIcon />
           </WorkflowActionTooltipItem>,
@@ -72,8 +72,8 @@ function VisualizerLink({
             id="link-delete"
             key="delete"
             onClick={() => onDeleteLinkClick(link)}
-            onMouseEnter={() => updateHelpText(i18n._(t`Delete this link`))}
-            onMouseLeave={() => updateHelpText(null)}
+            onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this link`))}
+            onMouseLeave={() => onUpdateHelpText(null)}
           >
             <TrashAltIcon />
           </WorkflowActionTooltipItem>,
@@ -135,8 +135,8 @@ function VisualizerLink({
         strokeWidth="2px"
       />
       <polygon
-        onMouseEnter={() => updateLinkHelp(link)}
-        onMouseLeave={() => updateLinkHelp(null)}
+        onMouseEnter={() => onUpdateLinkHelp(link)}
+        onMouseLeave={() => onUpdateLinkHelp(null)}
         opacity="0"
         points={getLinkOverlayPoints(link, nodePositions)}
       />
@@ -159,8 +159,8 @@ VisualizerLink.propTypes = {
   onDeleteLinkClick: func.isRequired,
   onLinkEditClick: func.isRequired,
   readOnly: bool.isRequired,
-  updateHelpText: func.isRequired,
-  updateLinkHelp: func.isRequired,
+  onUpdateHelpText: func.isRequired,
+  onUpdateLinkHelp: func.isRequired,
 };
 
 export default withI18n()(VisualizerLink);

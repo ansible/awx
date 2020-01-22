@@ -19,7 +19,7 @@ function InventorySourcesList({
   history,
   i18n,
   nodeResource,
-  updateNodeResource,
+  onUpdateNodeResource,
 }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
@@ -50,7 +50,7 @@ function InventorySourcesList({
       hasContentLoading={isLoading}
       itemCount={count}
       items={inventorySources}
-      onRowClick={row => updateNodeResource(row)}
+      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
       showPageSizeOptions={false}
       renderItem={item => (
@@ -60,8 +60,8 @@ function InventorySourcesList({
           key={item.id}
           name={item.name}
           label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
+          onSelect={() => onUpdateNodeResource(item)}
+          onDeselect={() => onUpdateNodeResource(null)}
           isRadio
         />
       )}
@@ -80,7 +80,7 @@ function InventorySourcesList({
 
 InventorySourcesList.propTypes = {
   nodeResource: shape(),
-  updateNodeResource: func.isRequired,
+  onUpdateNodeResource: func.isRequired,
 };
 
 InventorySourcesList.defaultProps = {

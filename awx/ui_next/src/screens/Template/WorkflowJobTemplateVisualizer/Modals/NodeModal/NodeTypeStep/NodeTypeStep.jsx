@@ -38,11 +38,11 @@ function NodeTypeStep({
   nodeResource,
   nodeType,
   timeout,
-  updateDescription,
-  updateName,
-  updateNodeResource,
-  updateNodeType,
-  updateTimeout,
+  onUpdateDescription,
+  onUpdateName,
+  onUpdateNodeResource,
+  onUpdateNodeType,
+  onUpdateTimeout,
 }) {
   return (
     <>
@@ -87,7 +87,7 @@ function NodeTypeStep({
             ]}
             value={nodeType}
             onChange={(e, val) => {
-              updateNodeType(val);
+              onUpdateNodeType(val);
             }}
           />
         </div>
@@ -96,25 +96,25 @@ function NodeTypeStep({
       {nodeType === 'job_template' && (
         <JobTemplatesList
           nodeResource={nodeResource}
-          updateNodeResource={updateNodeResource}
+          onUpdateNodeResource={onUpdateNodeResource}
         />
       )}
       {nodeType === 'project_sync' && (
         <ProjectsList
           nodeResource={nodeResource}
-          updateNodeResource={updateNodeResource}
+          onUpdateNodeResource={onUpdateNodeResource}
         />
       )}
       {nodeType === 'inventory_source_sync' && (
         <InventorySourcesList
           nodeResource={nodeResource}
-          updateNodeResource={updateNodeResource}
+          onUpdateNodeResource={onUpdateNodeResource}
         />
       )}
       {nodeType === 'workflow_job_template' && (
         <WorkflowJobTemplatesList
           nodeResource={nodeResource}
-          updateNodeResource={updateNodeResource}
+          onUpdateNodeResource={onUpdateNodeResource}
         />
       )}
       {nodeType === 'approval' && (
@@ -150,7 +150,7 @@ function NodeTypeStep({
                           type="text"
                           {...field}
                           onChange={(value, evt) => {
-                            updateName(value);
+                            onUpdateName(value);
                             field.onChange(evt);
                           }}
                         />
@@ -172,7 +172,7 @@ function NodeTypeStep({
                         type="text"
                         {...field}
                         onChange={(value, evt) => {
-                          updateDescription(value);
+                          onUpdateDescription(value);
                           field.onChange(evt);
                         }}
                       />
@@ -200,7 +200,7 @@ function NodeTypeStep({
                               if (!value || value === '') {
                                 value = 0;
                               }
-                              updateTimeout(
+                              onUpdateTimeout(
                                 Number(value) * 60 +
                                   Number(form.values.timeoutSeconds)
                               );
@@ -225,7 +225,7 @@ function NodeTypeStep({
                               if (!value || value === '') {
                                 value = 0;
                               }
-                              updateTimeout(
+                              onUpdateTimeout(
                                 Number(value) +
                                   Number(form.values.timeoutMinutes) * 60
                               );
@@ -253,11 +253,11 @@ NodeTypeStep.propTypes = {
   nodeResource: shape(),
   nodeType: string,
   timeout: number,
-  updateDescription: func.isRequired,
-  updateName: func.isRequired,
-  updateNodeResource: func.isRequired,
-  updateNodeType: func.isRequired,
-  updateTimeout: func.isRequired,
+  onUpdateDescription: func.isRequired,
+  onUpdateName: func.isRequired,
+  onUpdateNodeResource: func.isRequired,
+  onUpdateNodeType: func.isRequired,
+  onUpdateTimeout: func.isRequired,
 };
 
 NodeTypeStep.defaultProps = {

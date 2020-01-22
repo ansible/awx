@@ -16,7 +16,7 @@ const Grid = styled.div`
   width: 100%;
 `;
 
-function RunStep({ i18n, linkType, updateLinkType }) {
+function RunStep({ i18n, linkType, onUpdateLinkType }) {
   return (
     <>
       <Title headingLevel="h1" size="xl">
@@ -34,7 +34,7 @@ function RunStep({ i18n, linkType, updateLinkType }) {
           description={i18n._(
             t`Execute when the parent node results in a successful state.`
           )}
-          onClick={() => updateLinkType('success')}
+          onClick={() => onUpdateLinkType('success')}
         />
         <SelectableCard
           isSelected={linkType === 'failure'}
@@ -42,7 +42,7 @@ function RunStep({ i18n, linkType, updateLinkType }) {
           description={i18n._(
             t`Execute when the parent node results in a failure state.`
           )}
-          onClick={() => updateLinkType('failure')}
+          onClick={() => onUpdateLinkType('failure')}
         />
         <SelectableCard
           isSelected={linkType === 'always'}
@@ -50,7 +50,7 @@ function RunStep({ i18n, linkType, updateLinkType }) {
           description={i18n._(
             t`Execute regardless of the parent node's final state.`
           )}
-          onClick={() => updateLinkType('always')}
+          onClick={() => onUpdateLinkType('always')}
         />
       </Grid>
     </>
@@ -59,7 +59,7 @@ function RunStep({ i18n, linkType, updateLinkType }) {
 
 RunStep.propTypes = {
   linkType: string.isRequired,
-  updateLinkType: func.isRequired,
+  onUpdateLinkType: func.isRequired,
 };
 
 export default withI18n()(RunStep);

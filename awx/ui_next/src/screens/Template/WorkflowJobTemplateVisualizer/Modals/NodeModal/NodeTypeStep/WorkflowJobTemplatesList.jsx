@@ -19,7 +19,7 @@ function WorkflowJobTemplatesList({
   history,
   i18n,
   nodeResource,
-  updateNodeResource,
+  onUpdateNodeResource,
 }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
@@ -52,7 +52,7 @@ function WorkflowJobTemplatesList({
       hasContentLoading={isLoading}
       itemCount={count}
       items={workflowJobTemplates}
-      onRowClick={row => updateNodeResource(row)}
+      onRowClick={row => onUpdateNodeResource(row)}
       qsConfig={QS_CONFIG}
       renderItem={item => (
         <CheckboxListItem
@@ -61,8 +61,8 @@ function WorkflowJobTemplatesList({
           key={item.id}
           name={item.name}
           label={item.name}
-          onSelect={() => updateNodeResource(item)}
-          onDeselect={() => updateNodeResource(null)}
+          onSelect={() => onUpdateNodeResource(item)}
+          onDeselect={() => onUpdateNodeResource(null)}
           isRadio
         />
       )}
@@ -82,7 +82,7 @@ function WorkflowJobTemplatesList({
 
 WorkflowJobTemplatesList.propTypes = {
   nodeResource: shape(),
-  updateNodeResource: func.isRequired,
+  onUpdateNodeResource: func.isRequired,
 };
 
 WorkflowJobTemplatesList.defaultProps = {

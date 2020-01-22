@@ -51,7 +51,7 @@ function VisualizerNode({
   onStartAddLinkClick,
   onViewNodeClick,
   readOnly,
-  updateHelpText,
+  onUpdateHelpText,
   updateNodeHelp,
 }) {
   const [hovering, setHovering] = useState(false);
@@ -61,7 +61,7 @@ function VisualizerNode({
     nodeEl.parentNode.appendChild(nodeEl);
     setHovering(true);
     if (addingLink) {
-      updateHelpText(
+      onUpdateHelpText(
         node.isInvalidLinkTarget
           ? i18n._(
               t`Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported.`
@@ -75,7 +75,7 @@ function VisualizerNode({
   const handleNodeMouseLeave = () => {
     setHovering(false);
     if (addingLink) {
-      updateHelpText(null);
+      onUpdateHelpText(null);
     }
   };
 
@@ -90,12 +90,12 @@ function VisualizerNode({
       id="node-details"
       key="details"
       onClick={() => {
-        updateHelpText(null);
+        onUpdateHelpText(null);
         setHovering(false);
         onViewNodeClick(node);
       }}
-      onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
-      onMouseLeave={() => updateHelpText(null)}
+      onMouseEnter={() => onUpdateHelpText(i18n._(t`View node details`))}
+      onMouseLeave={() => onUpdateHelpText(null)}
     >
       <InfoIcon />
     </WorkflowActionTooltipItem>
@@ -108,12 +108,12 @@ function VisualizerNode({
           id="node-add"
           key="add"
           onClick={() => {
-            updateHelpText(null);
+            onUpdateHelpText(null);
             setHovering(false);
             onAddNodeClick(node.id);
           }}
-          onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
-          onMouseLeave={() => updateHelpText(null)}
+          onMouseEnter={() => onUpdateHelpText(i18n._(t`Add a new node`))}
+          onMouseLeave={() => onUpdateHelpText(null)}
         >
           <PlusIcon />
         </WorkflowActionTooltipItem>,
@@ -122,12 +122,12 @@ function VisualizerNode({
           id="node-edit"
           key="edit"
           onClick={() => {
-            updateHelpText(null);
+            onUpdateHelpText(null);
             setHovering(false);
             onEditNodeClick(node);
           }}
-          onMouseEnter={() => updateHelpText(i18n._(t`Edit this node`))}
-          onMouseLeave={() => updateHelpText(null)}
+          onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this node`))}
+          onMouseLeave={() => onUpdateHelpText(null)}
         >
           <PencilAltIcon />
         </WorkflowActionTooltipItem>,
@@ -135,14 +135,14 @@ function VisualizerNode({
           id="node-link"
           key="link"
           onClick={() => {
-            updateHelpText(null);
+            onUpdateHelpText(null);
             setHovering(false);
             onStartAddLinkClick(node);
           }}
           onMouseEnter={() =>
-            updateHelpText(i18n._(t`Link to an available node`))
+            onUpdateHelpText(i18n._(t`Link to an available node`))
           }
-          onMouseLeave={() => updateHelpText(null)}
+          onMouseLeave={() => onUpdateHelpText(null)}
         >
           <LinkIcon />
         </WorkflowActionTooltipItem>,
@@ -150,12 +150,12 @@ function VisualizerNode({
           id="node-delete"
           key="delete"
           onClick={() => {
-            updateHelpText(null);
+            onUpdateHelpText(null);
             setHovering(false);
             onDeleteNodeClick(node);
           }}
-          onMouseEnter={() => updateHelpText(i18n._(t`Delete this node`))}
-          onMouseLeave={() => updateHelpText(null)}
+          onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this node`))}
+          onMouseLeave={() => onUpdateHelpText(null)}
         >
           <TrashAltIcon />
         </WorkflowActionTooltipItem>,
@@ -225,7 +225,7 @@ VisualizerNode.propTypes = {
   onStartAddLinkClick: func.isRequired,
   onViewNodeClick: func.isRequired,
   readOnly: bool.isRequired,
-  updateHelpText: func.isRequired,
+  onUpdateHelpText: func.isRequired,
   updateNodeHelp: func.isRequired,
 };
 

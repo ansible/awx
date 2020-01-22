@@ -131,7 +131,7 @@ function NodeModal({
             name: i18n._(t`Run Type`),
             key: 'run_type',
             component: (
-              <RunStep linkType={linkType} updateLinkType={setLinkType} />
+              <RunStep linkType={linkType} onUpdateLinkType={setLinkType} />
             ),
             enableNext: linkType !== null,
           },
@@ -149,12 +149,12 @@ function NodeModal({
           name={approvalName}
           nodeResource={nodeResource}
           nodeType={nodeType}
+          onUpdateDescription={setApprovalDescription}
+          onUpdateName={setApprovalName}
+          onUpdateNodeResource={setNodeResource}
+          onUpdateNodeType={handleNodeTypeChange}
+          onUpdateTimeout={setApprovalTimeout}
           timeout={approvalTimeout}
-          updateDescription={setApprovalDescription}
-          updateName={setApprovalName}
-          updateNodeResource={setNodeResource}
-          updateNodeType={handleNodeTypeChange}
-          updateTimeout={setApprovalTimeout}
         />
       ),
     },
