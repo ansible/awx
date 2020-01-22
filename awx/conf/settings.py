@@ -1,5 +1,4 @@
 # Python
-from collections import namedtuple
 import contextlib
 import logging
 import re
@@ -136,6 +135,15 @@ def filter_sensitive(registry, key, value):
     return value
 
 
+class TransientSetting(object):
+
+    __slots__ = ('pk', 'value')
+
+    def __init__(self, pk, value):
+        self.pk = pk
+        self.value = value
+
+
 class EncryptedCacheProxy(object):
 
     def __init__(self, cache, registry, encrypter=None, decrypter=None):
@@ -186,8 +194,6 @@ class EncryptedCacheProxy(object):
             self.set(key, value, log=False, **kwargs)
 
     def _handle_encryption(self, method, key, value):
-        TransientSetting = namedtuple('TransientSetting', ['pk', 'value'])
-
         if value is not empty and self.registry.is_setting_encrypted(key):
             # If the setting exists in the database, we'll use its primary key
             # as part of the AES key when encrypting/decrypting
