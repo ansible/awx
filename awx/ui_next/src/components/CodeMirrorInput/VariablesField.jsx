@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { string, bool } from 'prop-types';
-import { Field } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import { Split, SplitItem } from '@patternfly/react-core';
+import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
-import { yamlToJson, jsonToYaml } from '../../util/yaml';
-
-const YAML_MODE = 'yaml';
+import { JSON_MODE, YAML_MODE } from './constants';
 
 function VariablesField({ id, name, label, readOnly }) {
-  // TODO: detect initial mode
-  const [mode, setMode] = useState(YAML_MODE);
+  const { values } = useFormikContext();
+  const value = values[name];
+  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
 
   return (
     <Field name={name}>
@@ -44,8 +44,8 @@ function VariablesField({ id, name, label, readOnly }) {
             mode={mode}
             readOnly={readOnly}
             {...field}
-            onChange={value => {
-              form.setFieldValue(name, value);
+            onChange={newVal => {
+              form.setFieldValue(name, newVal);
             }}
             hasErrors={!!form.errors[field.name]}
           />

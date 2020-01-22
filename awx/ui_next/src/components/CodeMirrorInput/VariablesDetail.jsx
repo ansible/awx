@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { string, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
+import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
-import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
-
-const YAML_MODE = 'yaml';
-const JSON_MODE = 'javascript';
+import { JSON_MODE, YAML_MODE } from './constants';
 
 function VariablesDetail({ value, label, rows }) {
   const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
