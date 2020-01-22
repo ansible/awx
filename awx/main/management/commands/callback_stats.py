@@ -9,6 +9,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with connection.cursor() as cursor:
+            start = {}
+            for relation in (
+                'main_jobevent', 'main_inventoryupdateevent',
+                'main_projectupdateevent', 'main_adhoccommandevent'
+            ):
+                cursor.execute(f"SELECT MAX(id) FROM {relation};")
+                start[relation] = cursor.fetchone()[0] or 0
             clear = False
             while True:
                 lines = []
@@ -17,19 +24,15 @@ class Command(BaseCommand):
                     'main_projectupdateevent', 'main_adhoccommandevent'
                 ):
                     lines.append(relation)
-                    for label, interval in (
-                        ('last minute:   ', '1 minute'),
-                        ('last 5 minutes:', '5 minutes'),
-                        ('last hour:     ', '1 hour'),
-                    ):
-                        cursor.execute(
-                            f"SELECT MAX(id) - MIN(id) FROM {relation} WHERE modified > now() - '{interval}'::interval;"
-                        )
-                        events = cursor.fetchone()[0] or 0
-                        lines.append(f'↳  {label} {events}')
+                    minimum = start[relation]
+                    cursor.execute(
+                        f"SELECT MAX(id) - MIN(id) FROM {relation} WHERE id > {minimum} AND modified > now() - '1 minute'::interval;"
+                    )
+                    events = cursor.fetchone()[0] or 0
+                    lines.append(f'↳  last minute {events}')
                     lines.append('')
                 if clear:
-                    for i in range(20):
+                    for i in range(12):
                         sys.stdout.write('\x1b[1A\x1b[2K')
                 for l in lines:
                     print(l)
