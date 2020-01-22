@@ -38,7 +38,7 @@ function WorkflowLinkHelp({ link, i18n }) {
       <dt>
         <b>{i18n._(t`Run`)}</b>
       </dt>
-      <dd>{linkType}</dd>
+      <dd id="workflow-link-help-type">{linkType}</dd>
     </GridDL>
   );
 }

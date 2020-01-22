@@ -104,11 +104,11 @@ function WorkflowNodeHelp({ node, i18n }) {
             <dt>
               <b>{i18n._(t`Name`)}</b>
             </dt>
-            <dd>{node.unifiedJobTemplate.name}</dd>
+            <dd id="workflow-node-help-name">{node.unifiedJobTemplate.name}</dd>
             <dt>
               <b>{i18n._(t`Type`)}</b>
             </dt>
-            <dd>{nodeType}</dd>
+            <dd id="workflow-node-help-type">{nodeType}</dd>
           </Fragment>
         )}
         {node.job && (
@@ -116,13 +116,15 @@ function WorkflowNodeHelp({ node, i18n }) {
             <dt>
               <b>{i18n._(t`Job Status`)}</b>
             </dt>
-            <dd>{jobStatus}</dd>
+            <dd id="workflow-node-help-status">{jobStatus}</dd>
             {node.job.elapsed && (
               <Fragment>
                 <dt>
                   <b>{i18n._(t`Elapsed`)}</b>
                 </dt>
-                <dd>{secondsToHHMMSS(node.job.elapsed)}</dd>
+                <dd id="workflow-node-help-elapsed">
+                  {secondsToHHMMSS(node.job.elapsed)}
+                </dd>
               </Fragment>
             )}
           </Fragment>
