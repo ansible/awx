@@ -107,6 +107,17 @@ class LogstashFormatterBase(logging.Formatter):
 
 class LogstashFormatter(LogstashFormatterBase):
 
+    def __init__(self, *args, **kwargs):
+        self.cluster_host_id = settings.CLUSTER_HOST_ID
+        self.tower_uuid = None
+        uuid = (
+            getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or
+            getattr(settings, 'INSTALL_UUID', None)
+        )
+        if uuid:
+            self.tower_uuid = uuid
+        super(LogstashFormatter, self).__init__(*args, **kwargs)
+
     def reformat_data_for_log(self, raw_data, kind=None):
         '''
         Process dictionaries from various contexts (job events, activity stream
@@ -231,21 +242,8 @@ class LogstashFormatter(LogstashFormatterBase):
             log_kind = record.name[len('awx.analytics.'):]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
         # General AWX metadata
-        for log_name, setting_name in [
-                ('type', 'LOG_AGGREGATOR_TYPE'),
-                ('cluster_host_id', 'CLUSTER_HOST_ID'),
-                ('tower_uuid', 'LOG_AGGREGATOR_TOWER_UUID')]:
-            if hasattr(settings, setting_name):
-                fields[log_name] = getattr(settings, setting_name, None)
-            elif log_name == 'type':
-                fields[log_name] = 'other'
-
-        uuid = (
-            getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or
-            getattr(settings, 'INSTALL_UUID', None)
-        )
-        if uuid:
-            fields['tower_uuid'] = uuid
+        fields['cluster_host_id'] = self.cluster_host_id
+        fields['tower_uuid'] = self.tower_uuid
         return fields
 
     def format(self, record):
