@@ -1,8 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { shallow } from 'enzyme';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../testUtils/testUtils';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { sleep } from '@testUtils/testUtils';
 import SelectResourceStep from './SelectResourceStep';
 
 describe('<SelectResourceStep />', () => {

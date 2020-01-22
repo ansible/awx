@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import Sparkline from './Sparkline';
 

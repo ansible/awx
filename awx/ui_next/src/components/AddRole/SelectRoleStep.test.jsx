@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import SelectRoleStep from './SelectRoleStep';
 
 describe('<SelectRoleStep />', () => {

@@ -3,7 +3,7 @@ import {
   DataToolbar,
   DataToolbarContent,
 } from '@patternfly/react-core/dist/umd/experimental';
-import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import Search from './Search';
 
 describe('<Search />', () => {
