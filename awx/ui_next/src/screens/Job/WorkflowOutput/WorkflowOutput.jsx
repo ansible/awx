@@ -211,6 +211,8 @@ function WorkflowOutput({ job, i18n }) {
             links={graphLinks}
             nodePositions={nodePositions}
             nodes={graphNodes}
+            onUpdateShowKey={setShowKey}
+            onUpdateShowTools={setShowTools}
             showKey={showKey}
             showTools={showTools}
           />

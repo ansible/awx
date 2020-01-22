@@ -2,18 +2,25 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { ExclamationTriangleIcon, PauseIcon } from '@patternfly/react-icons';
+import { func } from 'prop-types';
+import {
+  ExclamationTriangleIcon,
+  PauseIcon,
+  TimesIcon,
+} from '@patternfly/react-icons';
 
 const Wrapper = styled.div`
   background-color: white;
   border: 1px solid #c7c7c7;
   margin-left: 20px;
   min-width: 100px;
+  position: relative;
 `;
 
 const Header = styled.div`
   border-bottom: 1px solid #c7c7c7;
   padding: 10px;
+  position: relative;
 `;
 
 const Key = styled.ul`
@@ -63,11 +70,19 @@ const AlwaysLink = styled(Link)`
   background-color: #337ab7;
 `;
 
-function WorkflowKey({ i18n }) {
+const Close = styled(TimesIcon)`
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 15px;
+`;
+
+function WorkflowKey({ i18n, onClose }) {
   return (
     <Wrapper>
       <Header>
         <b>{i18n._(t`Key`)}</b>
+        <Close onClick={onClose} />
       </Header>
       <Key>
         <li>
@@ -112,5 +127,9 @@ function WorkflowKey({ i18n }) {
     </Wrapper>
   );
 }
+
+WorkflowKey.propTypes = {
+  onClose: func.isRequired,
+};
 
 export default withI18n()(WorkflowKey);

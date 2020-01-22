@@ -6,6 +6,7 @@ describe('WorkflowTools', () => {
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
       <WorkflowTools
+        onClose={() => {}}
         onFitGraph={() => {}}
         onPan={() => {}}
         onPanToMiddle={() => {}}
@@ -15,12 +16,14 @@ describe('WorkflowTools', () => {
     );
     expect(wrapper).toHaveLength(1);
   });
-  test('clicking zoom buttons passes callback correctly updated scale', () => {
+  test('clicking zoom/pan buttons passes callback correct values', () => {
+    const pan = jest.fn();
     const zoomChange = jest.fn();
     const wrapper = mountWithContexts(
       <WorkflowTools
+        onClose={() => {}}
         onFitGraph={() => {}}
-        onPan={() => {}}
+        onPan={pan}
         onPanToMiddle={() => {}}
         onZoomChange={zoomChange}
         zoomPercentage={95.7}
@@ -30,18 +33,6 @@ describe('WorkflowTools', () => {
     expect(zoomChange).toHaveBeenCalledWith(1.1);
     wrapper.find('MinusIcon').simulate('click');
     expect(zoomChange).toHaveBeenCalledWith(0.8);
-  });
-  test('clicking pan buttons passes callback correct string direction', () => {
-    const pan = jest.fn();
-    const wrapper = mountWithContexts(
-      <WorkflowTools
-        onFitGraph={() => {}}
-        onPan={pan}
-        onPanToMiddle={() => {}}
-        onZoomChange={() => {}}
-        zoomPercentage={100}
-      />
-    );
     wrapper.find('CaretLeftIcon').simulate('click');
     expect(pan).toHaveBeenCalledWith('left');
     wrapper.find('CaretUpIcon').simulate('click');

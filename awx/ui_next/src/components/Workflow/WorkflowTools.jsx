@@ -13,12 +13,14 @@ import {
   HomeIcon,
   MinusIcon,
   PlusIcon,
+  TimesIcon,
 } from '@patternfly/react-icons';
 
 const Wrapper = styled.div`
   background-color: white;
   border: 1px solid #c7c7c7;
   height: 135px;
+  position: relative;
 `;
 
 const Header = styled.div`
@@ -42,8 +44,16 @@ const Tools = styled.div`
   padding: 20px;
 `;
 
+const Close = styled(TimesIcon)`
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 15px;
+`;
+
 function WorkflowTools({
   i18n,
+  onClose,
   onFitGraph,
   onPan,
   onPanToMiddle,
@@ -70,6 +80,7 @@ function WorkflowTools({
     <Wrapper>
       <Header>
         <b>{i18n._(t`Tools`)}</b>
+        <Close onClick={onClose} />
       </Header>
       <Tools>
         <Tooltip
@@ -123,6 +134,7 @@ function WorkflowTools({
 }
 
 WorkflowTools.propTypes = {
+  onClose: func.isRequired,
   onFitGraph: func.isRequired,
   onPan: func.isRequired,
   onPanToMiddle: func.isRequired,

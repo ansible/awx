@@ -47,6 +47,8 @@ function VisualizerGraph({
   onEditNodeClick,
   onLinkEditClick,
   onStartAddLinkClick,
+  onUpdateShowKey,
+  onUpdateShowTools,
   onViewNodeClick,
   readOnly,
   showKey,
@@ -329,6 +331,7 @@ function VisualizerGraph({
       <div css="position: absolute; top: 75px;right: 20px;display: flex;">
         {showTools && (
           <WorkflowTools
+            onClose={() => onUpdateShowTools(false)}
             onFitGraph={handleFitGraph}
             onPan={handlePan}
             onPanToMiddle={handlePanToMiddle}
@@ -336,7 +339,7 @@ function VisualizerGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showKey && <WorkflowKey />}
+        {showKey && <WorkflowKey onClose={() => onUpdateShowKey(false)} />}
       </div>
     </>
   );
@@ -356,6 +359,8 @@ VisualizerGraph.propTypes = {
   onEditNodeClick: func.isRequired,
   onLinkEditClick: func.isRequired,
   onStartAddLinkClick: func.isRequired,
+  onUpdateShowKey: func.isRequired,
+  onUpdateShowTools: func.isRequired,
   onViewNodeClick: func.isRequired,
   readOnly: bool.isRequired,
   showKey: bool.isRequired,

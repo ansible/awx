@@ -825,6 +825,8 @@ function Visualizer({ history, template, i18n }) {
             onEditNodeClick={startEditNode}
             onLinkEditClick={setLinkToEdit}
             onStartAddLinkClick={selectSourceNodeForLinking}
+            onUpdateShowKey={setShowKey}
+            onUpdateShowTools={setShowTools}
             onViewNodeClick={setNodeToView}
             readOnly={!template.summary_fields.user_capabilities.edit}
             showKey={showKey}

@@ -4,7 +4,7 @@ import WorkflowKey from './WorkflowKey';
 
 describe('WorkflowKey', () => {
   test('renders the expected content', () => {
-    const wrapper = mountWithContexts(<WorkflowKey />);
+    const wrapper = mountWithContexts(<WorkflowKey onClose={() => {}} />);
     expect(wrapper).toHaveLength(1);
   });
 });

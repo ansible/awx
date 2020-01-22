@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { arrayOf, bool, shape } from 'prop-types';
+import { arrayOf, bool, shape, func } from 'prop-types';
 import { calcZoomAndFit, getZoomTranslate } from '@util/workflow';
 import {
   WorkflowOutputLink,
@@ -18,6 +18,8 @@ function WorkflowOutputGraph({
   links,
   nodePositions,
   nodes,
+  onUpdateShowKey,
+  onUpdateShowTools,
   showKey,
   showTools,
 }) {
@@ -180,6 +182,7 @@ function WorkflowOutputGraph({
       <div css="position: absolute; top: 75px;right: 20px;display: flex;">
         {showTools && (
           <WorkflowTools
+            onClose={() => onUpdateShowTools(false)}
             onFitGraph={handleFitGraph}
             onPan={handlePan}
             onPanToMiddle={handlePanToMiddle}
@@ -187,7 +190,7 @@ function WorkflowOutputGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showKey && <WorkflowKey />}
+        {showKey && <WorkflowKey onClose={() => onUpdateShowKey(false)} />}
       </div>
     </Fragment>
   );
@@ -197,6 +200,8 @@ WorkflowOutputGraph.propTypes = {
   links: arrayOf(shape()).isRequired,
   nodePositions: shape().isRequired,
   nodes: arrayOf(shape()).isRequired,
+  onUpdateShowKey: func.isRequired,
+  onUpdateShowTools: func.isRequired,
   showKey: bool.isRequired,
   showTools: bool.isRequired,
 };
