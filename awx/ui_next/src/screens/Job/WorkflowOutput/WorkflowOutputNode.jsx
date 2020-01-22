@@ -114,9 +114,7 @@ function WorkflowOutputNode({
                   : i18n._(t`DELETED`)}
               </p>
             </JobTopLine>
-            <Elapsed>
-              <span>{secondsToHHMMSS(node.job.elapsed)}</span>
-            </Elapsed>
+            <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
           </Fragment>
         ) : (
           <NodeDefaultLabel>

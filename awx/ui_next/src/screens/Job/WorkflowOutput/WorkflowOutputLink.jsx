@@ -1,10 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { shape } from 'prop-types';
-import { generateLine, getLinePoints } from '@util/workflow';
+import {
+  generateLine,
+  getLinePoints,
+  getLinkOverlayPoints,
+} from '@util/workflow';
 
-function WorkflowOutputLink({ link, nodePositions }) {
+function WorkflowOutputLink({ link, nodePositions, onUpdateLinkHelp }) {
+  const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
   const [pathStroke, setPathStroke] = useState('#CCCCCC');
+
+  const handleLinkMouseEnter = () => {
+    const linkEl = document.getElementById(
+      `link-${link.source.id}-${link.target.id}`
+    );
+    linkEl.parentNode.appendChild(linkEl);
+    setHovering(true);
+  };
+
+  const handleLinkMouseLeave = () => {
+    const linkEl = document.getElementById(
+      `link-${link.source.id}-${link.target.id}`
+    );
+    linkEl.parentNode.prepend(linkEl);
+    setHovering(null);
+  };
 
   useEffect(() => {
     if (link.linkType === 'failure') {
@@ -25,14 +46,22 @@ function WorkflowOutputLink({ link, nodePositions }) {
 
   return (
     <g
-      className="WorkflowGraph-link"
       id={`link-${link.source.id}-${link.target.id}`}
+      onMouseEnter={handleLinkMouseEnter}
+      onMouseLeave={handleLinkMouseLeave}
     >
-      <path
-        className="WorkflowGraph-linkPath"
-        d={pathD}
-        stroke={pathStroke}
-        strokeWidth="2px"
+      <polygon
+        fill="#E1E1E1"
+        id={`link-${link.source.id}-${link.target.id}-overlay`}
+        opacity={hovering ? '1' : '0'}
+        points={getLinkOverlayPoints(link, nodePositions)}
+      />
+      <path d={pathD} stroke={pathStroke} strokeWidth="2px" />
+      <polygon
+        onMouseEnter={() => onUpdateLinkHelp(link)}
+        onMouseLeave={() => onUpdateLinkHelp(null)}
+        opacity="0"
+        points={getLinkOverlayPoints(link, nodePositions)}
       />
     </g>
   );

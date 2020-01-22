@@ -116,7 +116,6 @@ function VisualizerLink({
 
   return (
     <LinkG
-      className="WorkflowGraph-link"
       id={`link-${link.source.id}-${link.target.id}`}
       ignorePointerEvents={addingLink}
       onMouseEnter={handleLinkMouseEnter}
@@ -128,12 +127,7 @@ function VisualizerLink({
         opacity={hovering ? '1' : '0'}
         points={getLinkOverlayPoints(link, nodePositions)}
       />
-      <path
-        className="WorkflowGraph-linkPath"
-        d={pathD}
-        stroke={pathStroke}
-        strokeWidth="2px"
-      />
+      <path d={pathD} stroke={pathStroke} strokeWidth="2px" />
       <polygon
         onMouseEnter={() => onUpdateLinkHelp(link)}
         onMouseLeave={() => onUpdateLinkHelp(null)}

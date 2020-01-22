@@ -5,9 +5,9 @@ import styled from 'styled-components';
 import { arrayOf, bool, func, shape } from 'prop-types';
 import * as d3 from 'd3';
 import {
-  calcZoomAndFit,
+  getScaleAndOffsetToFit,
   constants as wfConstants,
-  getZoomTranslate,
+  getTranslatePointsForZoom,
 } from '@util/workflow';
 import {
   WorkflowHelp,
@@ -161,7 +161,17 @@ function VisualizerGraph({
   };
 
   const handleZoomChange = newScale => {
-    const [translateX, translateY] = getZoomTranslate(svgRef.current, newScale);
+    const svgElement = document.getElementById('workflow-svg');
+    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const currentScaleAndOffset = d3.zoomTransform(
+      d3.select(svgRef.current).node()
+    );
+
+    const [translateX, translateY] = getTranslatePointsForZoom(
+      svgBoundingClientRect,
+      currentScaleAndOffset,
+      newScale
+    );
 
     d3.select(svgRef.current).call(
       zoomRef.transform,
@@ -171,9 +181,27 @@ function VisualizerGraph({
   };
 
   const handleFitGraph = () => {
-    const [scaleToFit, yTranslate] = calcZoomAndFit(
-      gRef.current,
-      svgRef.current
+    const { k: currentScale } = d3.zoomTransform(
+      d3.select(svgRef.current).node()
+    );
+    const gBoundingClientRect = d3
+      .select(gRef.current)
+      .node()
+      .getBoundingClientRect();
+
+    const gBBoxDimensions = d3
+      .select(gRef.current)
+      .node()
+      .getBBox();
+
+    const svgElement = document.getElementById('workflow-svg');
+    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+
+    const [scaleToFit, yTranslate] = getScaleAndOffsetToFit(
+      gBoundingClientRect,
+      svgBoundingClientRect,
+      gBBoxDimensions,
+      currentScale
     );
 
     d3.select(svgRef.current).call(
@@ -196,19 +224,9 @@ function VisualizerGraph({
 
   // Attempt to zoom the graph to fit the available screen space
   useEffect(() => {
-    const [scaleToFit, yTranslate] = calcZoomAndFit(
-      gRef.current,
-      svgRef.current
-    );
-
-    d3.select(svgRef.current).call(
-      zoomRef.transform,
-      d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
-    );
-
-    setZoomPercentage(scaleToFit * 100);
+    handleFitGraph();
     // We only want this to run once (when the component mounts)
-    // Including zoomRef.transform in the deps array will cause this to
+    // Including handleFitGraph in the deps array will cause this to
     // run very frequently.
     // Discussion: https://github.com/facebook/create-react-app/issues/6880
     // and https://github.com/facebook/react/issues/15865 amongst others

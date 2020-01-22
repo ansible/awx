@@ -11,23 +11,14 @@ export const constants = {
   rootH: 40,
 };
 
-export function calcZoomAndFit(gRef, svgRef) {
-  const { k: currentScale } = d3.zoomTransform(d3.select(svgRef).node());
-  const gBoundingClientRect = d3
-    .select(gRef)
-    .node()
-    .getBoundingClientRect();
-
+export function getScaleAndOffsetToFit(
+  gBoundingClientRect,
+  svgBoundingClientRect,
+  gBBoxDimensions,
+  currentScale
+) {
   gBoundingClientRect.height /= currentScale;
   gBoundingClientRect.width /= currentScale;
-
-  const gBBoxDimensions = d3
-    .select(gRef)
-    .node()
-    .getBBox();
-
-  const svgElement = document.getElementById('workflow-svg');
-  const svgBoundingClientRect = svgElement.getBoundingClientRect();
 
   // For some reason the root width needs to be added?
   gBoundingClientRect.width += constants.rootW;
@@ -96,19 +87,19 @@ export function getLinePoints(link, nodePositions) {
   ];
 }
 
-export function getLinkOverlayPoints(d, nodePositions) {
+export function getLinkOverlayPoints(link, nodePositions) {
   const sourceX =
-    nodePositions[d.source.id].x + nodePositions[d.source.id].width + 1;
+    nodePositions[link.source.id].x + nodePositions[link.source.id].width + 1;
   let sourceY =
-    normalizeY(nodePositions, nodePositions[d.source.id].y) +
-    nodePositions[d.source.id].height / 2;
-  const targetX = nodePositions[d.target.id].x - 1;
+    normalizeY(nodePositions, nodePositions[link.source.id].y) +
+    nodePositions[link.source.id].height / 2;
+  const targetX = nodePositions[link.target.id].x - 1;
   const targetY =
-    normalizeY(nodePositions, nodePositions[d.target.id].y) +
-    nodePositions[d.target.id].height / 2;
+    normalizeY(nodePositions, nodePositions[link.target.id].y) +
+    nodePositions[link.target.id].height / 2;
 
   // There's something off with the math on the root node...
-  if (d.source.id === 1) {
+  if (link.source.id === 1) {
     sourceY += 10;
   }
   const slope = (targetY - sourceY) / (targetX - sourceX);
@@ -177,18 +168,19 @@ export function layoutGraph(nodes, links) {
   return g;
 }
 
-export function getZoomTranslate(svgRef, newScale) {
-  const svgElement = document.getElementById('workflow-svg');
-  const svgBoundingClientRect = svgElement.getBoundingClientRect();
-  const current = d3.zoomTransform(d3.select(svgRef).node());
-  const origScale = current.k;
+export function getTranslatePointsForZoom(
+  svgBoundingClientRect,
+  currentScaleAndOffset,
+  newScale
+) {
+  const origScale = currentScaleAndOffset.k;
   const unscaledOffsetX =
-    (current.x +
+    (currentScaleAndOffset.x +
       (svgBoundingClientRect.width * origScale - svgBoundingClientRect.width) /
         2) /
     origScale;
   const unscaledOffsetY =
-    (current.y +
+    (currentScaleAndOffset.y +
       (svgBoundingClientRect.height * origScale -
         svgBoundingClientRect.height) /
         2) /

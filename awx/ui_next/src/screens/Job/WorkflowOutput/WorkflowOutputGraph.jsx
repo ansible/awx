@@ -1,7 +1,10 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { arrayOf, bool, shape, func } from 'prop-types';
-import { calcZoomAndFit, getZoomTranslate } from '@util/workflow';
+import {
+  getScaleAndOffsetToFit,
+  getTranslatePointsForZoom,
+} from '@util/workflow';
 import {
   WorkflowOutputLink,
   WorkflowOutputNode,
@@ -10,6 +13,7 @@ import {
 import {
   WorkflowHelp,
   WorkflowKey,
+  WorkflowLinkHelp,
   WorkflowNodeHelp,
   WorkflowTools,
 } from '@components/Workflow';
@@ -23,6 +27,7 @@ function WorkflowOutputGraph({
   showKey,
   showTools,
 }) {
+  const [linkHelp, setLinkHelp] = useState();
   const [nodeHelp, setNodeHelp] = useState();
   const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
@@ -83,7 +88,17 @@ function WorkflowOutputGraph({
   };
 
   const handleZoomChange = newScale => {
-    const [translateX, translateY] = getZoomTranslate(svgRef.current, newScale);
+    const svgElement = document.getElementById('workflow-svg');
+    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const currentScaleAndOffset = d3.zoomTransform(
+      d3.select(svgRef.current).node()
+    );
+
+    const [translateX, translateY] = getTranslatePointsForZoom(
+      svgBoundingClientRect,
+      currentScaleAndOffset,
+      newScale
+    );
 
     d3.select(svgRef.current).call(
       zoomRef.transform,
@@ -93,9 +108,27 @@ function WorkflowOutputGraph({
   };
 
   const handleFitGraph = () => {
-    const [scaleToFit, yTranslate] = calcZoomAndFit(
-      gRef.current,
-      svgRef.current
+    const { k: currentScale } = d3.zoomTransform(
+      d3.select(svgRef.current).node()
+    );
+    const gBoundingClientRect = d3
+      .select(gRef.current)
+      .node()
+      .getBoundingClientRect();
+
+    const gBBoxDimensions = d3
+      .select(gRef.current)
+      .node()
+      .getBBox();
+
+    const svgElement = document.getElementById('workflow-svg');
+    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+
+    const [scaleToFit, yTranslate] = getScaleAndOffsetToFit(
+      gBoundingClientRect,
+      svgBoundingClientRect,
+      gBBoxDimensions,
+      currentScale
     );
 
     d3.select(svgRef.current).call(
@@ -118,19 +151,9 @@ function WorkflowOutputGraph({
 
   // Attempt to zoom the graph to fit the available screen space
   useEffect(() => {
-    const [scaleToFit, yTranslate] = calcZoomAndFit(
-      gRef.current,
-      svgRef.current
-    );
-
-    d3.select(svgRef.current).call(
-      zoomRef.transform,
-      d3.zoomIdentity.translate(0, yTranslate).scale(scaleToFit)
-    );
-
-    setZoomPercentage(scaleToFit * 100);
+    handleFitGraph();
     // We only want this to run once (when the component mounts)
-    // Including zoomRef.transform in the deps array will cause this to
+    // Including handleFitGraph in the deps array will cause this to
     // run very frequently.
     // Discussion: https://github.com/facebook/create-react-app/issues/6880
     // and https://github.com/facebook/react/issues/15865 amongst others
@@ -139,9 +162,10 @@ function WorkflowOutputGraph({
 
   return (
     <Fragment>
-      {nodeHelp && (
+      {(nodeHelp || linkHelp) && (
         <WorkflowHelp>
-          <WorkflowNodeHelp node={nodeHelp} />
+          {nodeHelp && <WorkflowNodeHelp node={nodeHelp} />}
+          {linkHelp && <WorkflowLinkHelp link={linkHelp} />}
         </WorkflowHelp>
       )}
       <svg
@@ -160,6 +184,7 @@ function WorkflowOutputGraph({
                 key={`link-${link.source.id}-${link.target.id}`}
                 link={link}
                 nodePositions={nodePositions}
+                onUpdateLinkHelp={setLinkHelp}
               />
             )),
             nodes.map(node => {
