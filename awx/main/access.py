@@ -307,7 +307,7 @@ class BaseAccess(object):
 
         return True  # User has access to both, permission check passed
 
-    def check_license(self, add_host_name=None, feature=None, check_expiration=True):
+    def check_license(self, add_host_name=None, feature=None, check_expiration=True, quiet=False):
         validation_info = get_licenser().validate()
         if validation_info.get('license_type', 'UNLICENSED') == 'open':
             return
@@ -317,8 +317,10 @@ class BaseAccess(object):
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
 
-        report_violation = lambda message: logger.error(message)
-
+        if quiet:
+            report_violation = lambda message: None
+        else:
+            report_violation = lambda message: logger.warning(message)
         if (
             validation_info.get('trial', False) is True or
             validation_info['instance_count'] == 10  # basic 10 license
