@@ -80,7 +80,13 @@ function Inventory({ i18n, setBreadcrumb }) {
   }
 
   if (hasContentLoading) {
-    return <ContentLoading />;
+    return (
+      <PageSection>
+        <Card>
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
   }
 
   if (!hasContentLoading && contentError) {

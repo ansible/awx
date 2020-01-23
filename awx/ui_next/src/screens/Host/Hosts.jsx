@@ -2,9 +2,9 @@ import React, { Component, Fragment } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '@contexts/Config';
+import { PageSection, Card } from '@patternfly/react-core';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 
 import HostList from './HostList';
@@ -54,11 +54,10 @@ class Hosts extends Component {
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <PageSection>
-          <Switch>
-            <Route path={`${match.path}/add`} render={() => <HostAdd />} />
-            <Route
-              path={`${match.path}/:id`}
-              render={() => (
+          <Card>
+            <Switch>
+              <Route path={`${match.path}/add`} render={() => <HostAdd />} />
+              <Route path={`${match.path}/:id`}>
                 <Config>
                   {({ me }) => (
                     <Host
@@ -67,10 +66,10 @@ class Hosts extends Component {
                     />
                   )}
                 </Config>
-              )}
-            />
-            <Route path={`${match.path}`} render={() => <HostList />} />
-          </Switch>
+              </Route>
+              <Route path={`${match.path}`} render={() => <HostList />} />
+            </Switch>
+          </Card>
         </PageSection>
       </Fragment>
     );

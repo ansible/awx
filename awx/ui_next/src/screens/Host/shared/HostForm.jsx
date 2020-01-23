@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
 
-import { withRouter } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 import { Formik, Field } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -19,6 +19,8 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
+
+  const hostAddMatch = useRouteMatch('/hosts/add');
 
   return (
     <Formik
@@ -47,7 +49,7 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
               type="text"
               label={i18n._(t`Description`)}
             />
-            {!host.id && (
+            {hostAddMatch && (
               <Field
                 name="inventory"
                 validate={required(
@@ -112,4 +114,4 @@ HostForm.defaultProps = {
 };
 
 export { HostForm as _HostForm };
-export default withI18n()(withRouter(HostForm));
+export default withI18n()(HostForm);

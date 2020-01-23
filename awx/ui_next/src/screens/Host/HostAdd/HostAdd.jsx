@@ -1,58 +1,42 @@
-import React from 'react';
-import { withRouter } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { PageSection, Card } from '@patternfly/react-core';
+import React, { useState } from 'react';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CardBody } from '@components/Card';
 import { HostsAPI } from '@api';
-import { Config } from '@contexts/Config';
 import HostForm from '../shared';
 
-class HostAdd extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleCancel = this.handleCancel.bind(this);
-    this.state = { error: '' };
-  }
+function HostAdd() {
+  const [formError, setFormError] = useState(null);
+  const history = useHistory();
+  const hostsMatch = useRouteMatch('/hosts');
+  const inventoriesMatch = useRouteMatch('/inventories/inventory/:id/hosts');
+  const url = hostsMatch ? hostsMatch.url : inventoriesMatch.url;
 
-  async handleSubmit(values) {
-    const { history } = this.props;
+  const handleSubmit = async formData => {
+    const values = {
+      ...formData,
+      inventory: inventoriesMatch
+        ? inventoriesMatch.params.id
+        : formData.inventory,
+    };
+
     try {
       const { data: response } = await HostsAPI.create(values);
-      history.push(`/hosts/${response.id}`);
+      history.push(`${url}/${response.id}/details`);
     } catch (error) {
-      this.setState({ error });
+      setFormError(error);
     }
-  }
+  };
 
-  handleCancel() {
-    const { history } = this.props;
-    history.push('/hosts');
-  }
+  const handleCancel = () => {
+    history.push(`${url}`);
+  };
 
-  render() {
-    const { error } = this.state;
-
-    return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <Config>
-              {({ me }) => (
-                <HostForm
-                  handleSubmit={this.handleSubmit}
-                  handleCancel={this.handleCancel}
-                  me={me || {}}
-                />
-              )}
-            </Config>
-            {error ? <div>error</div> : ''}
-          </CardBody>
-        </Card>
-      </PageSection>
-    );
-  }
+  return (
+    <CardBody>
+      <HostForm handleSubmit={handleSubmit} handleCancel={handleCancel} />
+      {formError ? <div>error</div> : ''}
+    </CardBody>
+  );
 }
 
-export { HostAdd as _HostAdd };
-export default withI18n()(withRouter(HostAdd));
+export default HostAdd;

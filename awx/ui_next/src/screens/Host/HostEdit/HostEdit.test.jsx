@@ -35,7 +35,9 @@ describe('<HostEdit />', () => {
   });
 
   test('should navigate to host detail when cancel is clicked', () => {
-    const history = createMemoryHistory({});
+    const history = createMemoryHistory({
+      initialEntries: ['/hosts/1/edit'],
+    });
     const wrapper = mountWithContexts(<HostEdit host={mockData} />, {
       context: { router: { history } },
     });
