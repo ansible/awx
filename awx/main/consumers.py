@@ -13,6 +13,7 @@ from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.utils.encoding import force_bytes
+from django.contrib.auth.models import User
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
@@ -142,7 +143,14 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def user_can_see_object_id(self, user_access, oid):
-        return user_access.get_queryset().filter(pk=oid).exists()
+        # At this point user is a channels.auth.UserLazyObject object
+        # This causes problems with our generic role permissions checking.
+        # Specifically, type(user) != User
+        # Therefore, get the "real" User objects from the database before
+        # calling the access permission methods
+        user_access.user = User.objects.get(id=user_access.user.id)
+        res = user_access.get_queryset().filter(pk=oid).exists()
+        return res
 
     async def receive_json(self, data):
         from awx.main.access import consumer_access
