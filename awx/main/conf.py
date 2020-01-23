@@ -802,7 +802,7 @@ register(
 register(
     'AUTOMATION_ANALYTICS_LAST_GATHER',
     field_class=fields.DateTimeField,
-    label=_('Last gather date for Automation Analytics'),
+    label=_('Last gather date for Automation Analytics.'),
     allow_null=True,
     category=_('System'),
     category_slug='system'
@@ -812,7 +812,8 @@ register(
 register(
     'AUTOMATION_ANALYTICS_GATHER_INTERVAL',
     field_class=fields.IntegerField,
-    label=_('Interval (in seconds) between data gathering'),
+    label=_('Automation Analytics Gather Interval'),
+    help_text=_('Interval (in seconds) between data gathering.'),
     default=14400,	# every 4 hours
     min_value=1800,	# every 30 minutes
     category=_('System'),
