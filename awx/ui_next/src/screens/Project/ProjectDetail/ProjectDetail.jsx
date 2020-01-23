@@ -1,13 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Project } from '@types';
 import { Config } from '@contexts/Config';
+
 import { Button, List, ListItem } from '@patternfly/react-core';
+import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
+import ContentLoading from '@components/ContentLoading';
+import DeleteButton from '@components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import ErrorDetail from '@components/ErrorDetail';
 import { CredentialChip } from '@components/Chip';
+import { ProjectsAPI } from '@api';
 import { toTitleCase } from '@util/strings';
 
 function ProjectDetail({ project, i18n }) {
@@ -30,6 +36,20 @@ function ProjectDetail({ project, i18n }) {
     scm_url,
     summary_fields,
   } = project;
+  const [deletionError, setDeletionError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const history = useHistory();
+
+  const handleDelete = async () => {
+    setHasContentLoading(true);
+    try {
+      await ProjectsAPI.destroy(id);
+      history.push(`/projects`);
+    } catch (error) {
+      setDeletionError(error);
+    }
+    setHasContentLoading(false);
+  };
 
   let optionsList = '';
   if (
@@ -52,6 +72,10 @@ function ProjectDetail({ project, i18n }) {
         )}
       </List>
     );
+  }
+
+  if (hasContentLoading) {
+    return <ContentLoading />;
   }
 
   return (
@@ -138,7 +162,29 @@ function ProjectDetail({ project, i18n }) {
               {i18n._(t`Edit`)}
             </Button>
           )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              name={name}
+              modalTitle={i18n._(t`Delete Project`)}
+              onConfirm={handleDelete}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
       </CardActionsRow>
+      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={() => setDeletionError(null)}
+        >
+          {i18n._(t`Failed to delete project.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }
