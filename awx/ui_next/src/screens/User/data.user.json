@@ -18,7 +18,7 @@
   "summary_fields": {
       "user_capabilities": {
           "edit": true,
-          "delete": false
+          "delete": true
       }
   },
   "created": "2019-10-28T15:01:07.218634Z",
