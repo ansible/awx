@@ -101,9 +101,14 @@
           "copy": true
       },
       "labels": {
-          "count": 0,
-          "results": []
-      },
+        "count": 1,
+        "results": [
+            {
+                "id": 91,
+                "name": "L_91o2"
+            }
+        ]
+    },
       "survey": {
           "title": "",
           "description": ""
@@ -117,7 +122,14 @@
           }
       ],
       "extra_credentials": [],
-      "credentials": []
+      "credentials": [
+        {
+          "id": 1, "kind": "ssh" , "name": "Credential 1"
+        },
+        {
+          "id": 2, "kind": "awx" , "name": "Credential 2"
+        }
+      ]
   },
   "created": "2019-09-30T16:18:34.564820Z",
   "modified": "2019-10-01T14:47:31.818431Z",
@@ -127,17 +139,17 @@
   "inventory": 1,
   "project": 6,
   "playbook": "ping.yml",
-  "scm_branch": "",
+  "scm_branch": "Foo branch",
   "forks": 0,
   "limit": "",
   "verbosity": 0,
   "extra_vars": "",
-  "job_tags": "",
+  "job_tags": "T_100,T_200",
   "force_handlers": false,
-  "skip_tags": "",
+  "skip_tags": "S_100,S_200",
   "start_at_task": "",
   "timeout": 0,
-  "use_fact_cache": false,
+  "use_fact_cache": true,
   "last_job_run": "2019-10-01T14:34:35.142483Z",
   "last_job_failed": false,
   "next_job_run": null,
