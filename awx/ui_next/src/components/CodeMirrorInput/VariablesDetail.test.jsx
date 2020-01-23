@@ -63,4 +63,20 @@ describe('<VariablesDetail>', () => {
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "bar": "baz"\n}');
   });
+
+  test('should default yaml value to "---"', () => {
+    const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
+    const input = wrapper.find('Styled(CodeMirrorInput)');
+    expect(input.prop('value')).toEqual('---');
+  });
+
+  test('should default empty json to "{}"', () => {
+    const wrapper = mount(<VariablesDetail value="" label="Variables" />);
+    act(() => {
+      wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+    });
+    wrapper.setProps({ value: '' });
+    const input = wrapper.find('Styled(CodeMirrorInput)');
+    expect(input.prop('value')).toEqual('{}');
+  });
 });
