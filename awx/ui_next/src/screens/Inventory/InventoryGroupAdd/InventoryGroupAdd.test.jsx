@@ -21,9 +21,7 @@ describe('<InventoryGroupAdd />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/inventories/inventory/:id/groups/add"
-          component={() => (
-            <InventoryGroupAdd setBreadcrumb={() => {}} inventory={{ id: 1 }} />
-          )}
+          component={() => <InventoryGroupAdd />}
         />,
         {
           context: {
