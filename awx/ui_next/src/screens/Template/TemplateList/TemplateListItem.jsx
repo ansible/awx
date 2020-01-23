@@ -63,9 +63,11 @@ class TemplateListItem extends Component {
     const { i18n, template, isSelected, onSelect } = this.props;
     const canLaunch = template.summary_fields.user_capabilities.start;
     const missingResourceIcon =
-      (!template.summary_fields.inventory &&
-        !template.ask_inventory_on_launch) ||
-      !template.summary_fields.project;
+      template.type === 'job_template' &&
+      (!template.summary_fields.project ||
+        (!template.summary_fields.inventory &&
+          !template.ask_inventory_on_launch));
+
     return (
       <DataListItem
         aria-labelledby={`check-action-${template.id}`}
