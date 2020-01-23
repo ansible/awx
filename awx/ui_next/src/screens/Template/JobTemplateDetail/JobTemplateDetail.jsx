@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
   Button,
@@ -11,11 +11,14 @@ import {
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
+import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import DeleteButton from '@components/DeleteButton';
+import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
 import { JobTemplatesAPI } from '@api';
 
@@ -50,9 +53,11 @@ function JobTemplateDetail({ i18n, template }) {
     verbosity,
   } = template;
   const [contentError, setContentError] = useState(null);
+  const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const { id: templateId } = useParams();
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -70,6 +75,17 @@ function JobTemplateDetail({ i18n, template }) {
       }
     })();
   }, [templateId]);
+
+  const handleDelete = async () => {
+    setHasContentLoading(true);
+    try {
+      await JobTemplatesAPI.destroy(templateId);
+      history.push(`/templates`);
+    } catch (error) {
+      setDeletionError(error);
+    }
+    setHasContentLoading(false);
+  };
 
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
@@ -305,7 +321,29 @@ function JobTemplateDetail({ i18n, template }) {
             )}
           </LaunchButton>
         )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              name={name}
+              modalTitle={i18n._(t`Delete Job Template`)}
+              onConfirm={handleDelete}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
       </CardActionsRow>
+      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={() => setDeletionError(null)}
+        >
+          {i18n._(t`Failed to delete job template.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }
