@@ -19,6 +19,7 @@ describe('<OrganizationDetail />', () => {
     summary_fields: {
       user_capabilities: {
         edit: true,
+        delete: true,
       },
     },
   };
@@ -98,7 +99,7 @@ describe('<OrganizationDetail />', () => {
     });
     const editButton = await waitForElement(
       wrapper,
-      'OrganizationDetail Button'
+      'OrganizationDetail Button[aria-label="Edit"]'
     );
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/organizations/undefined/edit');
@@ -115,6 +116,74 @@ describe('<OrganizationDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'OrganizationDetail');
-    expect(wrapper.find('OrganizationDetail Button').length).toBe(0);
+    expect(
+      wrapper.find('OrganizationDetail Button[aria-label="Edit"]').length
+    ).toBe(0);
+  });
+
+  test('expected api calls are made for delete', async () => {
+    OrganizationsAPI.readInstanceGroups.mockResolvedValue({ data: {} });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    await waitForElement(
+      wrapper,
+      'OrganizationDetail Button[aria-label="Delete"]'
+    );
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    expect(OrganizationsAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('should show content error for failed instance group fetch', async () => {
+    OrganizationsAPI.readInstanceGroups.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('Error dialog shown for failed deletion', async () => {
+    OrganizationsAPI.destroy.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    await waitForElement(
+      wrapper,
+      'OrganizationDetail Button[aria-label="Delete"]'
+    );
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
   });
 });
