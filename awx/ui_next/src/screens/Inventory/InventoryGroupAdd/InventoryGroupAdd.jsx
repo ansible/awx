@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { GroupsAPI } from '@api';
 import { Card } from '@patternfly/react-core';
 
 import InventoryGroupForm from '../shared/InventoryGroupForm';
 
-function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
+function InventoryGroupsAdd() {
   const [error, setError] = useState(null);
-
-  useEffect(() => setBreadcrumb(inventory), [inventory, setBreadcrumb]);
+  const { id } = useParams();
+  const history = useHistory();
 
   const handleSubmit = async values => {
-    values.inventory = inventory.id;
+    values.inventory = id;
     try {
       const { data } = await GroupsAPI.create(values);
-      history.push(`/inventories/inventory/${inventory.id}/groups/${data.id}`);
+      history.push(`/inventories/inventory/${id}/groups/${data.id}`);
     } catch (err) {
       setError(err);
     }
   };
 
   const handleCancel = () => {
-    history.push(`/inventories/inventory/${inventory.id}/groups`);
+    history.push(`/inventories/inventory/${id}/groups`);
   };
 
   return (
@@ -35,5 +35,5 @@ function InventoryGroupsAdd({ history, inventory, setBreadcrumb }) {
     </Card>
   );
 }
-export default withI18n()(withRouter(InventoryGroupsAdd));
+export default withI18n()(InventoryGroupsAdd);
 export { InventoryGroupsAdd as _InventoryGroupsAdd };

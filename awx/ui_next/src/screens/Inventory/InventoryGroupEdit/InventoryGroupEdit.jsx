@@ -1,28 +1,26 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { GroupsAPI } from '@api';
 
 import InventoryGroupForm from '../shared/InventoryGroupForm';
 
-function InventoryGroupEdit({ history, inventoryGroup, inventory, match }) {
+function InventoryGroupEdit({ inventoryGroup }) {
   const [error, setError] = useState(null);
+  const { id, groupId } = useParams();
+  const history = useHistory();
 
   const handleSubmit = async values => {
     try {
-      await GroupsAPI.update(match.params.groupId, values);
-      history.push(
-        `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}`
-      );
+      await GroupsAPI.update(groupId, values);
+      history.push(`/inventories/inventory/${id}/groups/${groupId}`);
     } catch (err) {
       setError(err);
     }
   };
 
   const handleCancel = () => {
-    history.push(
-      `/inventories/inventory/${inventory.id}/groups/${inventoryGroup.id}`
-    );
+    history.push(`/inventories/inventory/${id}/groups/${groupId}`);
   };
 
   return (
@@ -34,5 +32,5 @@ function InventoryGroupEdit({ history, inventoryGroup, inventory, match }) {
     />
   );
 }
-export default withI18n()(withRouter(InventoryGroupEdit));
+export default withI18n()(InventoryGroupEdit);
 export { InventoryGroupEdit as _InventoryGroupEdit };

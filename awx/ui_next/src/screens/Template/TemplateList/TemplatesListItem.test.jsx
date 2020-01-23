@@ -142,4 +142,23 @@ describe('<TemplatesListItem />', () => {
     );
     expect(wrapper.find('ExclamationTriangleIcon').exists()).toBe(false);
   });
+  test('missing resource icon is not shown type is workflow_job_template', () => {
+    const wrapper = mountWithContexts(
+      <TemplatesListItem
+        isSelected={false}
+        template={{
+          id: 1,
+          name: 'Template 1',
+          url: '/templates/job_template/1',
+          type: 'workflow_job_template',
+          summary_fields: {
+            user_capabilities: {
+              edit: false,
+            },
+          },
+        }}
+      />
+    );
+    expect(wrapper.find('ExclamationTriangleIcon').exists()).toBe(false);
+  });
 });

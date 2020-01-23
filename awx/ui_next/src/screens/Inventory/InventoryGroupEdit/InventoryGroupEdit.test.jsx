@@ -26,24 +26,12 @@ describe('<InventoryGroupEdit />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/inventories/inventory/:id/groups/:groupId/edit"
-          component={() => (
-            <InventoryGroupEdit
-              setBreadcrumb={() => {}}
-              inventory={{ id: 1 }}
-              inventoryGroup={{ id: 2 }}
-            />
-          )}
+          component={() => <InventoryGroupEdit inventoryGroup={{ id: 2 }} />}
         />,
         {
           context: {
             router: {
               history,
-              route: {
-                match: {
-                  params: { groupId: 13 },
-                },
-                location: history.location,
-              },
             },
           },
         }
