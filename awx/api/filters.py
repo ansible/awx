@@ -283,6 +283,9 @@ class FieldLookupBackend(BaseFilterBackend):
                         search_value, new_keys, _ = self.value_to_python(queryset.model, key, force_text(value))
                         assert isinstance(new_keys, list)
                         search_filters[search_value] = new_keys
+                    # by definition, search *only* joins across relations,
+                    # so it _always_ needs a .distinct()
+                    needs_distinct = True
                     continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
