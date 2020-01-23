@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -18,19 +18,29 @@ function InventoryDetail({ inventory, i18n }) {
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
   const history = useHistory();
+  const isMounted = useRef(null);
 
   useEffect(() => {
+    isMounted.current = true;
     (async () => {
       setHasContentLoading(true);
       try {
         const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
+        if (!isMounted.current) {
+          return;
+        }
         setInstanceGroups(data.results);
       } catch (err) {
         setContentError(err);
       } finally {
-        setHasContentLoading(false);
+        if (isMounted.current) {
+          setHasContentLoading(false);
+        }
       }
     })();
+    return () => {
+      isMounted.current = false;
+    };
   }, [inventory.id]);
 
   const deleteInventory = async () => {
