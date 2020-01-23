@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0101_v370_generate_new_uuids_for_iso_nodes'),
+        ('main', '0105_v370_remove_jobevent_parent_and_hosts'),
     ]
 
     operations = [
