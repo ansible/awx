@@ -12,6 +12,10 @@ const NodeTypeLetter = styled.foreignObject`
   text-align: center;
 `;
 
+const CenteredPauseIcon = styled(PauseIcon)`
+  vertical-align: middle !important;
+`;
+
 function WorkflowNodeTypeLetter({ node }) {
   let nodeTypeLetter;
   if (
@@ -39,7 +43,7 @@ function WorkflowNodeTypeLetter({ node }) {
         break;
       case 'workflow_approval_template':
       case 'workflow_approval':
-        nodeTypeLetter = <PauseIcon />;
+        nodeTypeLetter = <CenteredPauseIcon />;
         break;
       default:
         nodeTypeLetter = '';
