@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { string, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
@@ -7,10 +7,29 @@ import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
 
+function getValueAsMode(value, mode) {
+  if (!value) {
+    if (mode === JSON_MODE) {
+      return '{}';
+    }
+    return '---';
+  }
+  const modeMatches = isJson(value) === (mode === JSON_MODE);
+  if (modeMatches) {
+    return value;
+  }
+  return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
+}
+
 function VariablesDetail({ value, label, rows }) {
   const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
-  const [currentValue, setCurrentValue] = useState(value);
+  const [currentValue, setCurrentValue] = useState(value || '---');
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setCurrentValue(getValueAsMode(value, mode));
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [value]);
 
   return (
     <>
@@ -35,11 +54,7 @@ function VariablesDetail({ value, label, rows }) {
               mode={mode}
               onChange={newMode => {
                 try {
-                  const newVal =
-                    newMode === YAML_MODE
-                      ? jsonToYaml(currentValue)
-                      : yamlToJson(currentValue);
-                  setCurrentValue(newVal);
+                  setCurrentValue(getValueAsMode(currentValue, newMode));
                   setMode(newMode);
                 } catch (err) {
                   setError(err);
@@ -56,7 +71,7 @@ function VariablesDetail({ value, label, rows }) {
       >
         <CodeMirrorInput
           mode={mode}
-          value={currentValue || '---'} // When github issue https://github.com/ansible/awx/issues/5502 gets resolved this line of code should be revisited and refactored if possible.
+          value={currentValue}
           readOnly
           rows={rows}
           css="margin-top: 10px"

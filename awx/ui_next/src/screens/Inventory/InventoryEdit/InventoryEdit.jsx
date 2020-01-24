@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
@@ -15,8 +15,10 @@ function InventoryEdit({ inventory }) {
   const [contentLoading, setContentLoading] = useState(true);
   const [credentialTypeId, setCredentialTypeId] = useState(null);
   const history = useHistory();
+  const isMounted = useRef(null);
 
   useEffect(() => {
+    isMounted.current = true;
     const loadData = async () => {
       try {
         const [
@@ -32,15 +34,23 @@ function InventoryEdit({ inventory }) {
             kind: 'insights',
           }),
         ]);
+        if (!isMounted.current) {
+          return;
+        }
         setInstanceGroups(loadedInstanceGroups);
         setCredentialTypeId(loadedCredentialTypeId[0].id);
       } catch (err) {
         setError(err);
       } finally {
-        setContentLoading(false);
+        if (isMounted.current) {
+          setContentLoading(false);
+        }
       }
     };
     loadData();
+    return () => {
+      isMounted.current = false;
+    };
   }, [inventory.id, contentLoading, inventory, credentialTypeId]);
 
   const handleCancel = () => {

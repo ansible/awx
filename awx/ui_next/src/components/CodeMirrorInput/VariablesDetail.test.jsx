@@ -1,5 +1,6 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 import VariablesDetail from './VariablesDetail';
 
 jest.mock('@api');
@@ -40,9 +41,42 @@ describe('<VariablesDetail>', () => {
     expect(input2.prop('mode')).toEqual('yaml');
     expect(input2.prop('value')).toEqual('foo: bar\n');
   });
+
   test('should render label and value= --- when there are no values', () => {
     const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
     expect(wrapper.find('Styled(CodeMirrorInput)').length).toBe(1);
     expect(wrapper.find('div.pf-c-form__label').text()).toBe('Variables');
+  });
+
+  test('should update value if prop changes', () => {
+    const wrapper = mount(
+      <VariablesDetail value="---foo: bar" label="Variables" />
+    );
+    act(() => {
+      wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+    });
+    wrapper.setProps({
+      value: '---bar: baz',
+    });
+    wrapper.update();
+    const input = wrapper.find('Styled(CodeMirrorInput)');
+    expect(input.prop('mode')).toEqual('javascript');
+    expect(input.prop('value')).toEqual('{\n  "bar": "baz"\n}');
+  });
+
+  test('should default yaml value to "---"', () => {
+    const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
+    const input = wrapper.find('Styled(CodeMirrorInput)');
+    expect(input.prop('value')).toEqual('---');
+  });
+
+  test('should default empty json to "{}"', () => {
+    const wrapper = mount(<VariablesDetail value="" label="Variables" />);
+    act(() => {
+      wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+    });
+    wrapper.setProps({ value: '' });
+    const input = wrapper.find('Styled(CodeMirrorInput)');
+    expect(input.prop('value')).toEqual('{}');
   });
 });

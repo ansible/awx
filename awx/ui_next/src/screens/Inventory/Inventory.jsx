@@ -37,6 +37,7 @@ function Inventory({ i18n, setBreadcrumb }) {
   useEffect(() => {
     async function fetchData() {
       try {
+        setHasContentLoading(true);
         const { data } = await InventoriesAPI.readDetail(match.params.id);
         setBreadcrumb(data);
         setInventory(data);
