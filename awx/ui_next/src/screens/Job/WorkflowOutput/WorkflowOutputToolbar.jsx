@@ -56,9 +56,9 @@ const StatusIconWithMargin = styled(StatusIcon)`
 function WorkflowOutputToolbar({
   i18n,
   job,
-  keyShown,
+  legendShown,
   nodes,
-  onKeyToggle,
+  onLegendToggle,
   onToolsToggle,
   toolsShown,
 }) {
@@ -74,10 +74,10 @@ function WorkflowOutputToolbar({
         <div>{i18n._(t`Total Nodes`)}</div>
         <Badge isRead>{totalNodes}</Badge>
         <VerticalSeparator />
-        <Tooltip content={i18n._(t`Toggle Key`)} position="bottom">
+        <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
           <ActionButton
-            isActive={keyShown}
-            onClick={onKeyToggle}
+            isActive={legendShown}
+            onClick={onLegendToggle}
             variant="plain"
           >
             <CompassIcon />
@@ -99,9 +99,9 @@ function WorkflowOutputToolbar({
 
 WorkflowOutputToolbar.propTypes = {
   job: shape().isRequired,
-  keyShown: bool.isRequired,
+  legendShown: bool.isRequired,
   nodes: arrayOf(shape()),
-  onKeyToggle: func.isRequired,
+  onLegendToggle: func.isRequired,
   onToolsToggle: func.isRequired,
   toolsShown: bool.isRequired,
 };

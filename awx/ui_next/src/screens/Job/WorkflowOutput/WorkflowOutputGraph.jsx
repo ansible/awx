@@ -11,7 +11,7 @@ import {
 } from '@screens/Job/WorkflowOutput';
 import {
   WorkflowHelp,
-  WorkflowKey,
+  WorkflowLegend,
   WorkflowLinkHelp,
   WorkflowNodeHelp,
   WorkflowStartNode,
@@ -22,9 +22,9 @@ function WorkflowOutputGraph({
   links,
   nodePositions,
   nodes,
-  onUpdateShowKey,
+  onUpdateShowLegend,
   onUpdateShowTools,
-  showKey,
+  showLegend,
   showTools,
 }) {
   const [linkHelp, setLinkHelp] = useState();
@@ -213,7 +213,7 @@ function WorkflowOutputGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showKey && <WorkflowKey onClose={() => onUpdateShowKey(false)} />}
+        {showLegend && <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />}
       </div>
     </Fragment>
   );
@@ -223,9 +223,9 @@ WorkflowOutputGraph.propTypes = {
   links: arrayOf(shape()).isRequired,
   nodePositions: shape().isRequired,
   nodes: arrayOf(shape()).isRequired,
-  onUpdateShowKey: func.isRequired,
+  onUpdateShowLegend: func.isRequired,
   onUpdateShowTools: func.isRequired,
-  showKey: bool.isRequired,
+  showLegend: bool.isRequired,
   showTools: bool.isRequired,
 };
 

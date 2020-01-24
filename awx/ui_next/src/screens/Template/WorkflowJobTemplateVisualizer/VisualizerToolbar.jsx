@@ -38,11 +38,11 @@ const ActionButton = styled(Button)`
 
 function VisualizerToolbar({
   i18n,
-  keyShown,
+  legendShown,
   nodes,
   onClose,
   onDeleteAllClick,
-  onKeyToggle,
+  onLegendToggle,
   onSave,
   onToolsToggle,
   template,
@@ -62,10 +62,10 @@ function VisualizerToolbar({
           <div>{i18n._(t`Total Nodes`)}</div>
           <Badge isRead>{totalNodes}</Badge>
           <VerticalSeparator />
-          <Tooltip content={i18n._(t`Toggle Key`)} position="bottom">
+          <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
-              isActive={keyShown}
-              onClick={onKeyToggle}
+              isActive={legendShown}
+              onClick={onLegendToggle}
               variant="plain"
             >
               <CompassIcon />
@@ -115,11 +115,11 @@ function VisualizerToolbar({
 }
 
 VisualizerToolbar.propTypes = {
-  keyShown: bool.isRequired,
+  legendShown: bool.isRequired,
   nodes: arrayOf(shape()),
   onClose: func.isRequired,
   onDeleteAllClick: func.isRequired,
-  onKeyToggle: func.isRequired,
+  onLegendToggle: func.isRequired,
   onSave: func.isRequired,
   onToolsToggle: func.isRequired,
   template: shape().isRequired,

@@ -11,7 +11,7 @@ import {
 } from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowHelp,
-  WorkflowKey,
+  WorkflowLegend,
   WorkflowLinkHelp,
   WorkflowNodeHelp,
   WorkflowStartNode,
@@ -47,11 +47,11 @@ function VisualizerGraph({
   onEditNodeClick,
   onLinkEditClick,
   onStartAddLinkClick,
-  onUpdateShowKey,
+  onUpdateShowLegend,
   onUpdateShowTools,
   onViewNodeClick,
   readOnly,
-  showKey,
+  showLegend,
   showTools,
 }) {
   const [helpText, setHelpText] = useState(null);
@@ -354,7 +354,7 @@ function VisualizerGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showKey && <WorkflowKey onClose={() => onUpdateShowKey(false)} />}
+        {showLegend && <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />}
       </div>
     </>
   );
@@ -374,11 +374,11 @@ VisualizerGraph.propTypes = {
   onEditNodeClick: func.isRequired,
   onLinkEditClick: func.isRequired,
   onStartAddLinkClick: func.isRequired,
-  onUpdateShowKey: func.isRequired,
+  onUpdateShowLegend: func.isRequired,
   onUpdateShowTools: func.isRequired,
   onViewNodeClick: func.isRequired,
   readOnly: bool.isRequired,
-  showKey: bool.isRequired,
+  showLegend: bool.isRequired,
   showTools: bool.isRequired,
 };
 

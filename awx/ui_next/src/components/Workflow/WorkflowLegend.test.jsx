@@ -1,10 +1,10 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import WorkflowKey from './WorkflowKey';
+import WorkflowLegend from './WorkflowLegend';
 
-describe('WorkflowKey', () => {
+describe('WorkflowLegend', () => {
   test('renders the expected content', () => {
-    const wrapper = mountWithContexts(<WorkflowKey onClose={() => {}} />);
+    const wrapper = mountWithContexts(<WorkflowLegend onClose={() => {}} />);
     expect(wrapper).toHaveLength(1);
   });
 });

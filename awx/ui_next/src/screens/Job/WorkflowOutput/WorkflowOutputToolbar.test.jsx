@@ -12,9 +12,9 @@ describe('WorkflowOutputToolbar', () => {
     const wrapper = mountWithContexts(
       <WorkflowOutputToolbar
         job={job}
-        keyShown={false}
+        legendShown={false}
         nodes={[]}
-        onKeyToggle={() => {}}
+        onLegendToggle={() => {}}
         onToolsToggle={() => {}}
         toolsShown={false}
       />
@@ -38,9 +38,9 @@ describe('WorkflowOutputToolbar', () => {
     const wrapper = mountWithContexts(
       <WorkflowOutputToolbar
         job={job}
-        keyShown={false}
+        legendShown={false}
         nodes={nodes}
-        onKeyToggle={() => {}}
+        onLegendToggle={() => {}}
         onToolsToggle={() => {}}
         toolsShown={false}
       />

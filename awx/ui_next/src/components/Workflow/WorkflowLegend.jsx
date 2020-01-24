@@ -23,7 +23,7 @@ const Header = styled.div`
   position: relative;
 `;
 
-const Key = styled.ul`
+const Legend = styled.ul`
   padding: 5px 10px;
 
   li {
@@ -77,14 +77,14 @@ const Close = styled(TimesIcon)`
   top: 15px;
 `;
 
-function WorkflowKey({ i18n, onClose }) {
+function WorkflowLegend({ i18n, onClose }) {
   return (
     <Wrapper>
       <Header>
-        <b>{i18n._(t`Key`)}</b>
+        <b>{i18n._(t`Legend`)}</b>
         <Close onClick={onClose} />
       </Header>
-      <Key>
+      <Legend>
         <li>
           <NodeTypeLetter>JT</NodeTypeLetter>
           <span>{i18n._(t`Job Template`)}</span>
@@ -123,13 +123,13 @@ function WorkflowKey({ i18n, onClose }) {
           <AlwaysLink />
           <span>{i18n._(t`Always`)}</span>
         </li>
-      </Key>
+      </Legend>
     </Wrapper>
   );
 }
 
-WorkflowKey.propTypes = {
+WorkflowLegend.propTypes = {
   onClose: func.isRequired,
 };
 
-export default withI18n()(WorkflowKey);
+export default withI18n()(WorkflowLegend);

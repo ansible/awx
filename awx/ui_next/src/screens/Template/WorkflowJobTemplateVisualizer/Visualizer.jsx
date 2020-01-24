@@ -77,7 +77,7 @@ function Visualizer({ history, template, i18n }) {
   const [nodeToView, setNodeToView] = useState(null);
   const [nodes, setNodes] = useState([]);
   const [showDeleteAllNodesModal, setShowDeleteAllNodesModal] = useState(false);
-  const [showKey, setShowKey] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
   const [showTools, setShowTools] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -800,11 +800,11 @@ function Visualizer({ history, template, i18n }) {
     <Fragment>
       <Wrapper>
         <VisualizerToolbar
-          keyShown={showKey}
+          legendShown={showLegend}
           nodes={nodes}
           onClose={handleVisualizerClose}
           onDeleteAllClick={() => setShowDeleteAllNodesModal(true)}
-          onKeyToggle={() => setShowKey(!showKey)}
+          onLegendToggle={() => setShowLegend(!showLegend)}
           onSave={handleVisualizerSave}
           onToolsToggle={() => setShowTools(!showTools)}
           template={template}
@@ -825,11 +825,11 @@ function Visualizer({ history, template, i18n }) {
             onEditNodeClick={startEditNode}
             onLinkEditClick={setLinkToEdit}
             onStartAddLinkClick={selectSourceNodeForLinking}
-            onUpdateShowKey={setShowKey}
+            onUpdateShowLegend={setShowLegend}
             onUpdateShowTools={setShowTools}
             onViewNodeClick={setNodeToView}
             readOnly={!template.summary_fields.user_capabilities.edit}
-            showKey={showKey}
+            showLegend={showLegend}
             showTools={showTools}
           />
         ) : (

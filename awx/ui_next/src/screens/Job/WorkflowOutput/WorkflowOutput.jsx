@@ -41,7 +41,7 @@ function WorkflowOutput({ job, i18n }) {
   const [graphNodes, setGraphNodes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [nodePositions, setNodePositions] = useState(null);
-  const [showKey, setShowKey] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
   const [showTools, setShowTools] = useState(false);
 
   useEffect(() => {
@@ -200,9 +200,9 @@ function WorkflowOutput({ job, i18n }) {
       <Wrapper>
         <WorkflowOutputToolbar
           job={job}
-          keyShown={showKey}
+          legendShown={showLegend}
           nodes={graphNodes}
-          onKeyToggle={() => setShowKey(!showKey)}
+          onLegendToggle={() => setShowLegend(!showLegend)}
           onToolsToggle={() => setShowTools(!showTools)}
           toolsShown={showTools}
         />
@@ -211,9 +211,9 @@ function WorkflowOutput({ job, i18n }) {
             links={graphLinks}
             nodePositions={nodePositions}
             nodes={graphNodes}
-            onUpdateShowKey={setShowKey}
+            onUpdateShowLegend={setShowLegend}
             onUpdateShowTools={setShowTools}
-            showKey={showKey}
+            showLegend={showLegend}
             showTools={showTools}
           />
         )}
