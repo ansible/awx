@@ -8,6 +8,25 @@ import { StatusIcon } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
 import styled from 'styled-components';
 
+const Toolbar = styled.div`
+  align-items: center
+  border-bottom: 1px solid grey;
+  display: flex;
+  height: 56px;
+`;
+
+const ToolbarJob = styled.div`
+  align-items: center;
+  display: flex;
+`;
+
+const ToolbarActions = styled.div`
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+`;
+
 const Badge = styled(PFBadge)`
   align-items: center;
   display: flex;
@@ -30,6 +49,10 @@ const ActionButton = styled(Button)`
   }
 `;
 
+const StatusIconWithMargin = styled(StatusIcon)`
+  margin-right: 20px;
+`;
+
 function WorkflowOutputToolbar({
   i18n,
   job,
@@ -42,12 +65,12 @@ function WorkflowOutputToolbar({
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
-    <div css="border-bottom: 1px solid grey; height: 56px; display: flex; alignItems: center">
-      <div css="display: flex; align-items: center;">
-        <StatusIcon status={job.status} css="margin-right: 20px" />
+    <Toolbar>
+      <ToolbarJob>
+        <StatusIconWithMargin status={job.status} />
         <b>{job.name}</b>
-      </div>
-      <div css="display: flex; flex: 1; justify-content: flex-end; align-items: center;">
+      </ToolbarJob>
+      <ToolbarActions>
         <div>{i18n._(t`Total Nodes`)}</div>
         <Badge isRead>{totalNodes}</Badge>
         <VerticalSeparator />
@@ -69,8 +92,8 @@ function WorkflowOutputToolbar({
             <WrenchIcon />
           </ActionButton>
         </Tooltip>
-      </div>
-    </div>
+      </ToolbarActions>
+    </Toolbar>
   );
 }
 
