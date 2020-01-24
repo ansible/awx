@@ -110,7 +110,7 @@ def main():
         new_value = value
         try:
             new_value = loads(value)
-        except JSONDecodeError as e:
+        except JSONDecodeError:
             # Attempt to deal with old tower_cli array types
             if ',' in value:
                 new_value = re.split(r",\s+", new_value)

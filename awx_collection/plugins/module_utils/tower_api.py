@@ -117,8 +117,9 @@ class TowerModule(AnsibleModule):
 
         response = self.make_request('POST', endpoint, **kwargs)
         if response['status_code'] == 201:
-            self.json_output['changed'] = True
+            self.json_output['name'] = response['json']['name']
             self.json_output['id'] = response['json']['id']
+            self.json_output['changed'] = True
             self.exit_json(**self.json_output)
         else:
             if 'json' in response and '__all__' in response['json']:
@@ -360,6 +361,13 @@ class TowerModule(AnsibleModule):
             except(Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.warn('Failed to release tower token {0}: {1}'.format(self.oauth_token_id, e))
+
+            try:
+                response_json = loads(response.read())
+                self.oauth_token_id = response_json['id']
+                self.authenticated = False
+            except(Exception) as e:
+                self.fail_json(msg="Failed to extract token information from response: {0}".format(e))
 
     def fail_json(self, **kwargs):
         # Try to logout if we are authenticated
