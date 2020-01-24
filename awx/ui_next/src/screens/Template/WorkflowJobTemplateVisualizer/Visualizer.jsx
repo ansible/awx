@@ -907,9 +907,7 @@ function Visualizer({ history, template, i18n }) {
           onConfirm={() => deleteAllNodes()}
         />
       )}
-      {nodeToView && (
-        <NodeViewModal node={nodeToView} onClose={() => setNodeToView(null)} />
-      )}
+      {nodeToView && <NodeViewModal onClose={() => setNodeToView(null)} />}
     </Fragment>
   );
 }

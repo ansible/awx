@@ -2,23 +2,17 @@ import React from 'react';
 import { Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape } from 'prop-types';
+import { func } from 'prop-types';
 
-function NodeViewModal({ i18n, onClose, node }) {
+function NodeViewModal({ i18n, onClose }) {
   return (
-    <Modal
-      isLarge
-      isOpen
-      title={i18n._(t`Node Details | ${node.unifiedJobTemplate.name}`)}
-      onClose={onClose}
-    >
+    <Modal isLarge isOpen title={i18n._(t`Node Details`)} onClose={onClose}>
       Coming soon :)
     </Modal>
   );
 }
 
 NodeViewModal.propTypes = {
-  node: shape().isRequired,
   onClose: func.isRequired,
 };
 
