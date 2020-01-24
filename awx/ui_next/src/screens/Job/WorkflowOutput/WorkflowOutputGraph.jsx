@@ -213,7 +213,9 @@ function WorkflowOutputGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showLegend && <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />}
+        {showLegend && (
+          <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />
+        )}
       </div>
     </Fragment>
   );

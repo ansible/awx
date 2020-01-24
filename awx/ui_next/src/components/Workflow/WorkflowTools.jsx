@@ -87,12 +87,20 @@ function WorkflowTools({
           content={i18n._(t`Fit the graph to the available screen size`)}
           position="bottom"
         >
-          <Button variant="tertiary" css="margin-right: 30px;" onClick={() => onFitGraph()}>
+          <Button
+            variant="tertiary"
+            css="margin-right: 30px;"
+            onClick={() => onFitGraph()}
+          >
             <DesktopIcon />
           </Button>
         </Tooltip>
         <Tooltip content={i18n._(t`Zoom Out`)} position="bottom">
-          <Button variant="tertiary" css="margin-right: 10px;" onClick={() => zoomOut()}>
+          <Button
+            variant="tertiary"
+            css="margin-right: 10px;"
+            onClick={() => zoomOut()}
+          >
             <MinusIcon />
           </Button>
         </Tooltip>
@@ -108,19 +116,31 @@ function WorkflowTools({
           value={zoomPercentage}
         />
         <Tooltip content={i18n._(t`Zoom In`)} position="bottom">
-          <Button variant="tertiary" css="margin: 0px 25px 0px 10px;" onClick={() => zoomIn()}>
+          <Button
+            variant="tertiary"
+            css="margin: 0px 25px 0px 10px;"
+            onClick={() => zoomIn()}
+          >
             <PlusIcon />
           </Button>
         </Tooltip>
         <Pan>
           <Tooltip content={i18n._(t`Pan Left`)} position="left">
-            <Button variant="tertiary" css="margin-right: 10px;" onClick={() => onPan('left')}>
+            <Button
+              variant="tertiary"
+              css="margin-right: 10px;"
+              onClick={() => onPan('left')}
+            >
               <CaretLeftIcon />
             </Button>
           </Tooltip>
           <PanCenter>
             <Tooltip content={i18n._(t`Pan Up`)} position="top">
-              <Button variant="tertiary" css="margin-bottom: 10px;" onClick={() => onPan('up')}>
+              <Button
+                variant="tertiary"
+                css="margin-bottom: 10px;"
+                onClick={() => onPan('up')}
+              >
                 <CaretUpIcon />
               </Button>
             </Tooltip>
@@ -133,13 +153,21 @@ function WorkflowTools({
               </Button>
             </Tooltip>
             <Tooltip content={i18n._(t`Pan Down`)} position="bottom">
-              <Button variant="tertiary" css="margin-top: 10px;" onClick={() => onPan('down')}>
+              <Button
+                variant="tertiary"
+                css="margin-top: 10px;"
+                onClick={() => onPan('down')}
+              >
                 <CaretDownIcon />
               </Button>
             </Tooltip>
           </PanCenter>
           <Tooltip content={i18n._(t`Pan Right`)} position="right">
-            <Button variant="tertiary" css="margin-left: 10px;" onClick={() => onPan('right')}>
+            <Button
+              variant="tertiary"
+              css="margin-left: 10px;"
+              onClick={() => onPan('right')}
+            >
               <CaretRightIcon />
             </Button>
           </Tooltip>

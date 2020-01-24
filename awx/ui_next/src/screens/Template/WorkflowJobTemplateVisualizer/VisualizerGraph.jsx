@@ -354,7 +354,9 @@ function VisualizerGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showLegend && <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />}
+        {showLegend && (
+          <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />
+        )}
       </div>
     </>
   );
