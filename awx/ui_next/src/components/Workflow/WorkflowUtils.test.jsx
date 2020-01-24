@@ -5,7 +5,7 @@ import {
   getLinkOverlayPoints,
   layoutGraph,
   getTranslatePointsForZoom,
-} from './workflow';
+} from './WorkflowUtils';
 
 describe('getScaleAndOffsetToFit', () => {
   const gBoundingClientRect = {

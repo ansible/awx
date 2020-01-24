@@ -8,7 +8,7 @@ import {
   getScaleAndOffsetToFit,
   constants as wfConstants,
   getTranslatePointsForZoom,
-} from '@util/workflow';
+} from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowHelp,
   WorkflowKey,

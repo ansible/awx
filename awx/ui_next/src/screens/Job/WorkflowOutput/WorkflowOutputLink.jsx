@@ -4,7 +4,7 @@ import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
-} from '@util/workflow';
+} from '@components/Workflow/WorkflowUtils';
 
 function WorkflowOutputLink({ link, nodePositions, onUpdateLinkHelp }) {
   const ref = useRef(null);

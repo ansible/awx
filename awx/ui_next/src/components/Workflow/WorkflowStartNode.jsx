@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
 import { PlusIcon } from '@patternfly/react-icons';
-import { constants as wfConstants } from '@util/workflow';
+import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,

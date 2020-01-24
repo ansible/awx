@@ -4,7 +4,7 @@ import { arrayOf, bool, shape, func } from 'prop-types';
 import {
   getScaleAndOffsetToFit,
   getTranslatePointsForZoom,
-} from '@util/workflow';
+} from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowOutputLink,
   WorkflowOutputNode,

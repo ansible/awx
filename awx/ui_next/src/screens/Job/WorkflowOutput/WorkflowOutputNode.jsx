@@ -7,7 +7,7 @@ import { func, shape } from 'prop-types';
 import { StatusIcon } from '@components/Sparkline';
 import { WorkflowNodeTypeLetter } from '@components/Workflow';
 import { secondsToHHMMSS } from '@util/dates';
-import { constants as wfConstants } from '@util/workflow';
+import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
 
 const NodeG = styled.g`
   cursor: ${props => (props.job ? 'pointer' : 'default')};

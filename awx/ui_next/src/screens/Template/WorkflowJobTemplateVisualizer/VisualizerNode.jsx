@@ -10,7 +10,7 @@ import {
   PlusIcon,
   TrashAltIcon,
 } from '@patternfly/react-icons';
-import { constants as wfConstants } from '@util/workflow';
+import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,

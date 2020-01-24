@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { shape } from 'prop-types';
 import { CardBody as PFCardBody } from '@patternfly/react-core';
-import { layoutGraph } from '@util/workflow';
+import { layoutGraph } from '@components/Workflow/WorkflowUtils';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobsAPI } from '@api';

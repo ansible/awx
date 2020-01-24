@@ -8,7 +8,7 @@ import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
-} from '@util/workflow';
+} from '@components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
