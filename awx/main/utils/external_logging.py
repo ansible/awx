@@ -22,7 +22,7 @@ def reconfigure_rsyslog():
 
             host = parsed.hostname
             try:
-                port = parsed.port or settings.LOG_AGGREGATOR_PORT
+                port = parsed.port
             except ValueError:
                 port = settings.LOG_AGGREGATOR_PORT
 
@@ -36,6 +36,9 @@ def reconfigure_rsyslog():
             # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
             ssl = "on" if parsed.scheme == 'https' else "off"
             skip_verify = "off" if settings.LOG_AGGREGATOR_VERIFY_CERT else "on"
+            if not port:
+                port = 443 if parsed.scheme == 'https' else 80
+
             params = [
                 'type="omhttp"',
                 f'server="{host}"',
@@ -45,7 +48,10 @@ def reconfigure_rsyslog():
                 'action.resumeRetryCount="-1"',
                 'template="awx"',
                 'errorfile="/var/log/tower/external.err"',
+                'healthchecktimeout="20000"',
             ]
+            if parsed.path:
+                params.append(f'restpath="{parsed.path[1:]}"')
             username = getattr(settings, 'LOG_AGGREGATOR_USERNAME', '')
             password = getattr(settings, 'LOG_AGGREGATOR_PASSWORD', '')
             if username:
