@@ -204,6 +204,11 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                 )
             logger.debug(f"Channel {self.channel_name} left groups {old_groups} and joined {new_groups_exclusive}")
             self.scope['session']['groups'] = new_groups
+            await self.send_json({
+                "groups_current": list(new_groups),
+                "groups_left": list(old_groups),
+                "groups_joined": list(new_groups_exclusive)
+            })
 
     async def internal_message(self, event):
         await self.send(event['text'])
