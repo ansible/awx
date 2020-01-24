@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -14,19 +14,19 @@ const StartG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
-function VisualizerStartNode({
+function WorkflowStartNode({
   addingLink,
   i18n,
   nodePositions,
   onAddNodeClick,
   onUpdateHelpText,
-  readOnly,
+  showActionTooltip,
 }) {
+  const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
 
   const handleNodeMouseEnter = () => {
-    const nodeEl = document.getElementById('node-1');
-    nodeEl.parentNode.appendChild(nodeEl);
+    ref.current.parentNode.appendChild(ref.current);
     setHovering(true);
   };
 
@@ -36,6 +36,7 @@ function VisualizerStartNode({
       ignorePointerEvents={addingLink}
       onMouseEnter={handleNodeMouseEnter}
       onMouseLeave={() => setHovering(false)}
+      ref={ref}
       transform={`translate(${nodePositions[1].x},0)`}
     >
       <rect
@@ -50,7 +51,7 @@ function VisualizerStartNode({
       <text x="13" y="30" dy=".35em" fill="white">
         START
       </text>
-      {!readOnly && hovering && (
+      {showActionTooltip && hovering && (
         <WorkflowActionTooltip
           actions={[
             <WorkflowActionTooltipItem
@@ -75,12 +76,18 @@ function VisualizerStartNode({
   );
 }
 
-VisualizerStartNode.propTypes = {
-  addingLink: bool.isRequired,
+WorkflowStartNode.propTypes = {
+  addingLink: bool,
   nodePositions: shape().isRequired,
-  onAddNodeClick: func.isRequired,
-  readOnly: bool.isRequired,
-  onUpdateHelpText: func.isRequired,
+  onAddNodeClick: func,
+  showActionTooltip: bool.isRequired,
+  onUpdateHelpText: func,
 };
 
-export default withI18n()(VisualizerStartNode);
+WorkflowStartNode.defaultProps = {
+  addingLink: false,
+  onAddNodeClick: () => {},
+  onUpdateHelpText: () => {},
+};
+
+export default withI18n()(WorkflowStartNode);

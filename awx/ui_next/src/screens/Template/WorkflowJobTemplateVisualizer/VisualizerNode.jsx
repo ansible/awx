@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -54,11 +54,11 @@ function VisualizerNode({
   onUpdateHelpText,
   updateNodeHelp,
 }) {
+  const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
 
   const handleNodeMouseEnter = () => {
-    const nodeEl = document.getElementById(`node-${node.id}`);
-    nodeEl.parentNode.appendChild(nodeEl);
+    ref.current.parentNode.appendChild(ref.current);
     setHovering(true);
     if (addingLink) {
       onUpdateHelpText(
@@ -168,6 +168,7 @@ function VisualizerNode({
       noPointerEvents={isAddLinkSourceNode}
       onMouseEnter={handleNodeMouseEnter}
       onMouseLeave={handleNodeMouseLeave}
+      ref={ref}
       transform={`translate(${nodePositions[node.id].x},${nodePositions[node.id]
         .y - nodePositions[1].y})`}
     >

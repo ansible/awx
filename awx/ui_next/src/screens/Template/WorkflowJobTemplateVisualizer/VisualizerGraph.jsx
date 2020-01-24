@@ -14,12 +14,12 @@ import {
   WorkflowKey,
   WorkflowLinkHelp,
   WorkflowNodeHelp,
+  WorkflowStartNode,
   WorkflowTools,
 } from '@components/Workflow';
 import {
   VisualizerLink,
   VisualizerNode,
-  VisualizerStartNode,
 } from '@screens/Template/WorkflowJobTemplateVisualizer';
 
 const PotentialLink = styled.polyline`
@@ -148,8 +148,7 @@ function VisualizerGraph({
   };
 
   const handlePanToMiddle = () => {
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity
@@ -161,8 +160,7 @@ function VisualizerGraph({
   };
 
   const handleZoomChange = newScale => {
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
     const currentScaleAndOffset = d3.zoomTransform(
       d3.select(svgRef.current).node()
     );
@@ -194,8 +192,7 @@ function VisualizerGraph({
       .node()
       .getBBox();
 
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
 
     const [scaleToFit, yTranslate] = getScaleAndOffsetToFit(
       gBoundingClientRect,
@@ -276,12 +273,12 @@ function VisualizerGraph({
         />
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
-            <VisualizerStartNode
+            <WorkflowStartNode
               addingLink={addingLink}
               key="start"
               nodePositions={nodePositions}
               onAddNodeClick={onAddNodeClick}
-              readOnly={readOnly}
+              showActionTooltip={!readOnly}
               onUpdateHelpText={setHelpText}
             />,
             links.map(link => {

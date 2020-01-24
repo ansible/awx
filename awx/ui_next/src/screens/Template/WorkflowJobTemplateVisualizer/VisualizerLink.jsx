@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -30,6 +30,7 @@ function VisualizerLink({
   onUpdateLinkHelp,
   readOnly,
 }) {
+  const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
   const [pathStroke, setPathStroke] = useState('#CCCCCC');
@@ -80,18 +81,12 @@ function VisualizerLink({
         ];
 
   const handleLinkMouseEnter = () => {
-    const linkEl = document.getElementById(
-      `link-${link.source.id}-${link.target.id}`
-    );
-    linkEl.parentNode.appendChild(linkEl);
+    ref.current.parentNode.appendChild(ref.current);
     setHovering(true);
   };
 
   const handleLinkMouseLeave = () => {
-    const linkEl = document.getElementById(
-      `link-${link.source.id}-${link.target.id}`
-    );
-    linkEl.parentNode.prepend(linkEl);
+    ref.current.parentNode.prepend(ref.current);
     setHovering(null);
   };
 
@@ -120,6 +115,7 @@ function VisualizerLink({
       ignorePointerEvents={addingLink}
       onMouseEnter={handleLinkMouseEnter}
       onMouseLeave={handleLinkMouseLeave}
+      ref={ref}
     >
       <polygon
         fill="#E1E1E1"

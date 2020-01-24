@@ -8,13 +8,13 @@ import {
 import {
   WorkflowOutputLink,
   WorkflowOutputNode,
-  WorkflowOutputStartNode,
 } from '@screens/Job/WorkflowOutput';
 import {
   WorkflowHelp,
   WorkflowKey,
   WorkflowLinkHelp,
   WorkflowNodeHelp,
+  WorkflowStartNode,
   WorkflowTools,
 } from '@components/Workflow';
 
@@ -75,8 +75,7 @@ function WorkflowOutputGraph({
   };
 
   const handlePanToMiddle = () => {
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
     d3.select(svgRef.current).call(
       zoomRef.transform,
       d3.zoomIdentity
@@ -88,8 +87,7 @@ function WorkflowOutputGraph({
   };
 
   const handleZoomChange = newScale => {
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
     const currentScaleAndOffset = d3.zoomTransform(
       d3.select(svgRef.current).node()
     );
@@ -121,8 +119,7 @@ function WorkflowOutputGraph({
       .node()
       .getBBox();
 
-    const svgElement = document.getElementById('workflow-svg');
-    const svgBoundingClientRect = svgElement.getBoundingClientRect();
+    const svgBoundingClientRect = svgRef.current.getBoundingClientRect();
 
     const [scaleToFit, yTranslate] = getScaleAndOffsetToFit(
       gBoundingClientRect,
@@ -175,9 +172,10 @@ function WorkflowOutputGraph({
       >
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
-            <WorkflowOutputStartNode
+            <WorkflowStartNode
               key="start"
               nodePositions={nodePositions}
+              showActionTooltip={false}
             />,
             links.map(link => (
               <WorkflowOutputLink
