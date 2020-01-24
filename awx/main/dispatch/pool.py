@@ -72,9 +72,6 @@ class PoolWorker(object):
             if not body.get('uuid'):
                 body['uuid'] = str(uuid4())
             uuid = body['uuid']
-        logger.debug('delivered {} to worker[{}] qsize {}'.format(
-            uuid, self.pid, self.qsize
-        ))
         self.managed_tasks[uuid] = body
         self.queue.put(body, block=True, timeout=5)
         self.messages_sent += 1
