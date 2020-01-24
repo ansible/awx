@@ -68,12 +68,33 @@ function WorkflowJobTemplatesList({
       )}
       renderToolbar={props => <DataListToolbar {...props} fillWidth />}
       showPageSizeOptions={false}
-      toolbarColumns={[
+      toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
           key: 'name',
-          isSortable: true,
-          isSearchable: true,
+          isDefault: true,
+        },
+        {
+          name: i18n._(t`Organization (Name)`),
+          key: 'organization__name',
+        },
+        {
+          name: i18n._(t`Inventory (Name)`),
+          key: 'inventory__name',
+        },
+        {
+          name: i18n._(t`Created By (Username)`),
+          key: 'created_by__username',
+        },
+        {
+          name: i18n._(t`Modified By (Username)`),
+          key: 'modified_by__username',
+        },
+      ]}
+      toolbarSortColumns={[
+        {
+          name: i18n._(t`Name`),
+          key: 'name',
         },
       ]}
     />

@@ -61,12 +61,40 @@ function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
       )}
       renderToolbar={props => <DataListToolbar {...props} fillWidth />}
       showPageSizeOptions={false}
-      toolbarColumns={[
+      toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
           key: 'name',
-          isSortable: true,
-          isSearchable: true,
+          isDefault: true,
+        },
+        {
+          name: i18n._(t`Type`),
+          key: 'type',
+          options: [
+            [``, i18n._(t`Manual`)],
+            [`git`, i18n._(t`Git`)],
+            [`hg`, i18n._(t`Mercurial`)],
+            [`svn`, i18n._(t`Subversion`)],
+            [`insights`, i18n._(t`Red Hat Insights`)],
+          ],
+        },
+        {
+          name: i18n._(t`SCM URL`),
+          key: 'scm_url',
+        },
+        {
+          name: i18n._(t`Modified By (Username)`),
+          key: 'modified_by__username',
+        },
+        {
+          name: i18n._(t`Created By (Username)`),
+          key: 'created_by__username',
+        },
+      ]}
+      toolbarSortColumns={[
+        {
+          name: i18n._(t`Name`),
+          key: 'name',
         },
       ]}
     />

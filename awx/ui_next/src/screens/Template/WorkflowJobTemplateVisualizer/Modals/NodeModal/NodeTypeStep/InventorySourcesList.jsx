@@ -66,12 +66,36 @@ function InventorySourcesList({
         />
       )}
       renderToolbar={props => <DataListToolbar {...props} fillWidth />}
-      toolbarColumns={[
+      toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
           key: 'name',
-          isSortable: true,
-          isSearchable: true,
+          isDefault: true,
+        },
+        {
+          name: i18n._(t`Source`),
+          key: 'source',
+          options: [
+            [``, i18n._(t`Manual`)],
+            [`file`, i18n._(t`File, Directory or Script`)],
+            [`scm`, i18n._(t`Sourced from a Project`)],
+            [`ec2`, i18n._(t`Amazon EC2`)],
+            [`gce`, i18n._(t`Google Compute Engine`)],
+            [`azure_rm`, i18n._(t`Microsoft Azure Resource Manager`)],
+            [`vmware`, i18n._(t`VMware vCenter`)],
+            [`satellite6`, i18n._(t`Red Hat Satellite 6`)],
+            [`cloudforms`, i18n._(t`Red Hat CloudForms`)],
+            [`openstack`, i18n._(t`OpenStack`)],
+            [`rhv`, i18n._(t`Red Hat Virtualization`)],
+            [`tower`, i18n._(t`Ansible Tower`)],
+            [`custom`, i18n._(t`Custom Script`)],
+          ],
+        },
+      ]}
+      toolbarSortColumns={[
+        {
+          name: i18n._(t`Name`),
+          key: 'name',
         },
       ]}
     />
