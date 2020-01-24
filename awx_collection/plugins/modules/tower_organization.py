@@ -90,18 +90,6 @@ def main():
         state=dict(type='str', choices=['present', 'absent'], default='present', required=False),
     )
 
-# instance_groups=dict(type='list', required=False, default=[]),
-# The above argument_spec fragment is being left in for reference since we may need
-# it later when finalizing the changes.
-
-#    instance_groups:
-#      description:
-#        - The name of instance groups to tie to this organization
-#      default: []
-#      required: False
-# The above docstring fragment is being left in for reference since we may need
-# it later when finalizing the changes.
-
     # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
@@ -134,11 +122,9 @@ def main():
         int_max_hosts = 0
         try:
             int_max_hosts = int(max_hosts)
-        except Exception as e:
+        except Exception:
             module.fail_json(msg="Unable to convert max_hosts to an integer")
         new_org_data['max_hosts'] = int_max_hosts
-    # if instance_group_objects:
-    #     new_org_data['instance_groups'] = instance_group_objects
 
     if state == 'absent' and not organization:
         # If the state was absent and we had no organization, we can just return

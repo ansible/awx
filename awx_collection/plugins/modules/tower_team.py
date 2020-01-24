@@ -103,7 +103,7 @@ def main():
 
     # Create data to sent to create and update
     team_fields = {
-        'name': name,
+        'name': new_name if new_name else name,
         'description': description,
         'organization': org_id
     }

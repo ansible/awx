@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 
-# (c) 20189, John Westcott IV <john.westcott.iv@redhat.com>
+# (c) 2019, John Westcott IV <john.westcott.iv@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
@@ -65,7 +65,7 @@ def main():
     json_output = {'changed': False}
 
     if not module.params.get('eula_accepted'):
-        module.fail_json(msg='You must accept the EULA by passing in the param eula_acepte as True')
+        module.fail_json(msg='You must accept the EULA by passing in the param eula_accepted as True')
 
     json_output['old_license'] = module.get_endpoint('settings/system/')['json']['LICENSE']
     new_license = module.params.get('data')

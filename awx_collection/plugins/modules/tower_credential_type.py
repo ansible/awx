@@ -130,17 +130,17 @@ def main():
     module.default_check_mode()
 
     # These will be passed into the create/updates
-    credental_type_params = {
+    credential_type_params = {
         'name': new_name if new_name else name,
         'kind': kind,
         'managed_by_tower': False,
     }
     if module.params.get('description'):
-        credental_type_params['description'] = module.params.get('description')
+        credential_type_params['description'] = module.params.get('description')
     if module.params.get('inputs'):
-        credental_type_params['inputs'] = module.params.get('inputs')
+        credential_type_params['inputs'] = module.params.get('inputs')
     if module.params.get('injectors'):
-        credental_type_params['injectors'] = module.params.get('injectors')
+        credential_type_params['injectors'] = module.params.get('injectors')
 
     # Attempt to lookup credential_type based on the provided name and org ID
     credential_type = module.get_one('credential_types', **{
@@ -159,12 +159,12 @@ def main():
     elif state == 'present' and not credential_type:
         # if the state was present and we couldn't find a credential_type we can build one, the module will handle exiting on its own
         module.post_endpoint('credential_types', item_type='credential type', item_name=name, **{
-            'data': credental_type_params
+            'data': credential_type_params
         })
     else:
         # If the state was present and we had a credential_type we can see if we need to update it
         # This will handle existing on its own
-        module.update_if_needed(credential_type, credental_type_params)
+        module.update_if_needed(credential_type, credential_type_params)
 
 
 if __name__ == '__main__':
