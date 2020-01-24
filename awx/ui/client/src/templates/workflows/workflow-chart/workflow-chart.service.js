@@ -28,7 +28,8 @@ export default [function(){
 
                 const nodeObj = {
                     index: nodeIdCounter-1,
-                    id: nodeIdCounter
+                    id: nodeIdCounter,
+                    all_parents_must_converge: node.all_parents_must_converge,
                 };
 
                 if(node.summary_fields.job) {

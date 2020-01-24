@@ -642,6 +642,7 @@ export default ['$scope', 'TemplatesService',
 
             $scope.graphState.arrayOfNodesForChart.map( (node) => {
                 if (node.id === nodeId) {
+                    node.all_parents_must_converge = nodeFormData.all_parents_must_converge;
                     if (isPauseNode) {
                         node.unifiedJobTemplate = {
                             unified_job_type: 'workflow_approval',
@@ -652,7 +653,6 @@ export default ['$scope', 'TemplatesService',
                     } else {
                         node.unifiedJobTemplate = selectedTemplate;
                     }
-                    
                 }
             });
 
