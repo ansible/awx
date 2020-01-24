@@ -15,10 +15,10 @@ function UnsavedChangesModal({ i18n, onCancel, onSaveAndExit, onExit }) {
         <Button
           key="exit"
           variant="danger"
-          aria-label={i18n._(t`Exit`)}
+          aria-label={i18n._(t`Exit Without Saving`)}
           onClick={onExit}
         >
-          {i18n._(t`Exit`)}
+          {i18n._(t`Exit Without Saving`)}
         </Button>,
         <Button
           key="save"
