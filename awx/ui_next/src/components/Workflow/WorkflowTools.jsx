@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { func, number } from 'prop-types';
-import { Tooltip } from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import {
   CaretDownIcon,
   CaretLeftIcon,
@@ -19,7 +19,7 @@ import {
 const Wrapper = styled.div`
   background-color: white;
   border: 1px solid #c7c7c7;
-  height: 135px;
+  height: 215px;
   position: relative;
 `;
 
@@ -87,10 +87,14 @@ function WorkflowTools({
           content={i18n._(t`Fit the graph to the available screen size`)}
           position="bottom"
         >
-          <DesktopIcon onClick={() => onFitGraph()} css="margin-right: 30px;" />
+          <Button variant="tertiary" css="margin-right: 30px;" onClick={() => onFitGraph()}>
+            <DesktopIcon />
+          </Button>
         </Tooltip>
         <Tooltip content={i18n._(t`Zoom Out`)} position="bottom">
-          <MinusIcon onClick={() => zoomOut()} css="margin-right: 10px;" />
+          <Button variant="tertiary" css="margin-right: 10px;" onClick={() => zoomOut()}>
+            <MinusIcon />
+          </Button>
         </Tooltip>
         <input
           id="zoom-slider"
@@ -104,28 +108,40 @@ function WorkflowTools({
           value={zoomPercentage}
         />
         <Tooltip content={i18n._(t`Zoom In`)} position="bottom">
-          <PlusIcon onClick={() => zoomIn()} css="margin: 0px 25px 0px 10px;" />
+          <Button variant="tertiary" css="margin: 0px 25px 0px 10px;" onClick={() => zoomIn()}>
+            <PlusIcon />
+          </Button>
         </Tooltip>
         <Pan>
           <Tooltip content={i18n._(t`Pan Left`)} position="left">
-            <CaretLeftIcon onClick={() => onPan('left')} />
+            <Button variant="tertiary" css="margin-right: 10px;" onClick={() => onPan('left')}>
+              <CaretLeftIcon />
+            </Button>
           </Tooltip>
           <PanCenter>
             <Tooltip content={i18n._(t`Pan Up`)} position="top">
-              <CaretUpIcon onClick={() => onPan('up')} />
+              <Button variant="tertiary" css="margin-bottom: 10px;" onClick={() => onPan('up')}>
+                <CaretUpIcon />
+              </Button>
             </Tooltip>
             <Tooltip
               content={i18n._(t`Set zoom to 100% and center graph`)}
               position="top"
             >
-              <HomeIcon onClick={() => onPanToMiddle()} />
+              <Button variant="tertiary" onClick={() => onPanToMiddle()}>
+                <HomeIcon />
+              </Button>
             </Tooltip>
             <Tooltip content={i18n._(t`Pan Down`)} position="bottom">
-              <CaretDownIcon onClick={() => onPan('down')} />
+              <Button variant="tertiary" css="margin-top: 10px;" onClick={() => onPan('down')}>
+                <CaretDownIcon />
+              </Button>
             </Tooltip>
           </PanCenter>
           <Tooltip content={i18n._(t`Pan Right`)} position="right">
-            <CaretRightIcon onClick={() => onPan('right')} />
+            <Button variant="tertiary" css="margin-left: 10px;" onClick={() => onPan('right')}>
+              <CaretRightIcon />
+            </Button>
           </Tooltip>
         </Pan>
       </Tools>
