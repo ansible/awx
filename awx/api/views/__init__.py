@@ -71,6 +71,7 @@ from awx.api.generics import (
     SubListCreateAPIView, SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView
 )
+from awx.api.pagination import LargeScalePagination
 from awx.api.versioning import reverse
 from awx.main import models
 from awx.main.utils import (
@@ -3777,6 +3778,7 @@ class JobEventList(NoTruncateMixin, ListAPIView):
     model = models.JobEvent
     serializer_class = serializers.JobEventSerializer
     search_fields = ('stdout',)
+    pagination_class = LargeScalePagination
 
 
 class JobEventDetail(RetrieveAPIView):
@@ -3854,11 +3856,12 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = models.Job
+    pagination_class = LargeScalePagination
 
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        qs = job.job_events.select_related('host').order_by('start_line')
+        qs = job.job_events.select_related('host')
         return qs.all()
 
 
