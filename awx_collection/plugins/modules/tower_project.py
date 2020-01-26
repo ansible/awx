@@ -35,7 +35,7 @@ options:
     scm_type:
       description:
         - Type of SCM resource.
-      choices: ["manual", "git", "hg", "svn"]
+      choices: ["manual", "git", "hg", "svn", "insights"]
       default: "manual"
       type: str
     scm_url:
@@ -50,6 +50,12 @@ options:
       description:
         - The branch to use for the SCM resource.
       type: str
+      default: ''
+    scm_refspec:
+      description:
+        - The refspec to use for the SCM resource.
+      type: str
+      default: ''
     scm_credential:
       description:
         - Name of the credential to use with this SCM resource.
@@ -74,8 +80,12 @@ options:
       description:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
-      default: 0
       type: int
+      default: 0
+    scm_allow_override:
+      description:
+        - Allow changing the SCM branch or revision in a job template that uses this project.
+      type: bool
     job_timeout:
       version_added: "2.8"
       description:
@@ -91,8 +101,9 @@ options:
       default: ''
     organization:
       description:
-        - Primary key of organization for project.
+        - Name of organization for project.
       type: str
+      required: True
     state:
       description:
         - Desired state of the resource.
@@ -105,7 +116,6 @@ options:
           before returning
         - Can assure playbook files are populated so that job templates that rely
           on the project may be successfully created
-
       type: bool
       default: True
 extends_documentation_fragment: awx.awx.auth
@@ -133,107 +143,129 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ..module_utils.tower_api import TowerModule
 
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
 
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+def wait_for_project_update(module, last_request):
+    # The current running job for the udpate is in last_request['summary_fields']['current_update']['id']
 
+    if 'current_update' in last_request['summary_fields']:
+        running = True
+        while running:
+            result = module.get_endpoint('/project_updates/{}/'.format(last_request['summary_fields']['current_update']['id']))['json']
+
+            if module.is_job_done(result['status']):
+                running = False
+
+        if result['status'] != 'successful':
+            module.fail_json(msg="Project update failed")
+
+    module.exit_json(**module.json_output)
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(),
-        organization=dict(),
-        scm_type=dict(choices=['manual', 'git', 'hg', 'svn'], default='manual'),
-        scm_url=dict(),
-        scm_branch=dict(),
-        scm_credential=dict(),
-        scm_clean=dict(type='bool', default=False),
-        scm_delete_on_update=dict(type='bool', default=False),
-        scm_update_on_launch=dict(type='bool', default=False),
-        scm_update_cache_timeout=dict(type='int'),
-        job_timeout=dict(type='int', default=0),
-        custom_virtualenv=dict(type='str', required=False),
-        local_path=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
-        wait=dict(type='bool', default=True),
+        description=dict(required=False, default=''),
+        scm_type=dict(required=False, choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
+        scm_url=dict(required=False),
+        local_path=dict(required=False),
+        scm_branch=dict(required=False, default=''),
+        scm_refspec=dict(required=False, default=''),
+        scm_credential=dict(required=False),
+        scm_clean=dict(required=False, type='bool', default=False),
+        scm_delete_on_update=dict(required=False, type='bool', default=False),
+        scm_update_on_launch=dict(required=False, type='bool', default=False),
+        scm_update_cache_timeout=dict(required=False, type='int', default=0),
+        scm_allow_override=dict(required=False, type='bool'),
+        job_timeout=dict(required=False, type='int', default=0),
+        custom_virtualenv=dict(required=False, type='str'),
+        organization=dict(required=True),
+        state=dict(required=False, choices=['present', 'absent'], default='present'),
+        wait=dict(required=False, type='bool', default=True),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
     description = module.params.get('description')
-    organization = module.params.get('organization')
     scm_type = module.params.get('scm_type')
     if scm_type == "manual":
         scm_type = ""
     scm_url = module.params.get('scm_url')
     local_path = module.params.get('local_path')
     scm_branch = module.params.get('scm_branch')
+    scm_refspec = module.params.get('scm_refspec')
     scm_credential = module.params.get('scm_credential')
     scm_clean = module.params.get('scm_clean')
     scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
+    scm_allow_override = module.params.get('scm_allow_override')
     job_timeout = module.params.get('job_timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
+    organization = module.params.get('organization')
     state = module.params.get('state')
     wait = module.params.get('wait')
 
-    json_output = {'project': name, 'state': state}
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    org_id = module.resolve_name_to_id('organizations', organization)
+    if scm_credential != None:
+        scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        project = tower_cli.get_resource('project')
-        try:
-            if state == 'present':
-                try:
-                    org_res = tower_cli.get_resource('organization')
-                    org = org_res.get(name=organization)
-                except exc.NotFound:
-                    module.fail_json(msg='Failed to update project, organization not found: {0}'.format(organization), changed=False)
+    # Attempt to lookup project based on the provided name and org ID
+    project = module.get_one('projects', **{
+        'data': {
+            'name': name,
+            'organization': org_id
+        }
+    })
 
-                if scm_credential:
-                    try:
-                        cred_res = tower_cli.get_resource('credential')
-                        try:
-                            cred = cred_res.get(name=scm_credential)
-                        except tower_cli.exceptions.MultipleResults:
-                            module.warn('Multiple credentials found for {0}, falling back looking in project organization'.format(scm_credential))
-                            cred = cred_res.get(name=scm_credential, organization=org['id'])
-                        scm_credential = cred['id']
-                    except exc.NotFound:
-                        module.fail_json(msg='Failed to update project, credential not found: {0}'.format(scm_credential), changed=False)
+    project_fields = {
+        'name': name,
+        'description': description,
+        'scm_type': scm_type,
+        'scm_url': scm_url,
+        'scm_branch': scm_branch,
+        'scm_refspec': scm_refspec,
+        'scm_clean': scm_clean,
+        'scm_delete_on_update': scm_delete_on_update,
+        'timeout': job_timeout,
+        'organization': org_id,
+        'scm_update_on_launch': scm_update_on_launch,
+        'scm_update_cache_timeout': scm_update_cache_timeout,
+        'custom_virtualenv': custom_virtualenv,
+    }
+    if scm_credential != None:
+        project_fields['credential'] = scm_credential_id
+    if scm_allow_override != None:
+        project_fields['scm_allow_override'] = scm_allow_override
+    if scm_type == '':
+        project_fields['local_path'] = local_path
 
-                if (scm_update_cache_timeout is not None) and (scm_update_on_launch is not True):
-                    module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
+    if state != 'absent' and (scm_update_cache_timeout is not None and scm_update_on_launch is not True):
+        module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
 
-                result = project.modify(name=name, description=description,
-                                        organization=org['id'],
-                                        scm_type=scm_type, scm_url=scm_url, local_path=local_path,
-                                        scm_branch=scm_branch, scm_clean=scm_clean, credential=scm_credential,
-                                        scm_delete_on_update=scm_delete_on_update,
-                                        scm_update_on_launch=scm_update_on_launch,
-                                        scm_update_cache_timeout=scm_update_cache_timeout,
-                                        job_timeout=job_timeout,
-                                        custom_virtualenv=custom_virtualenv,
-                                        create_on_missing=True)
-                json_output['id'] = result['id']
-                if wait and scm_type != '':
-                    project.wait(pk=None, parent_pk=result['id'])
-            elif state == 'absent':
-                result = project.delete(name=name)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update project: {0}'.format(excinfo), changed=False)
+    # If we are doing a not manual project, register our on_change method
+    # An on_change function, if registered, will fire after an post_endpoint or update_if_needed completes successfully
+    if wait and scm_type != '':
+        module.on_change = wait_for_project_update
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent' and not project:
+        # If the state was absent and we had no project, we can just return
+        module.exit_json(**module.json_output)
+    elif state == 'absent' and project:
+        # If the state was absent and we had a project, we can try to delete it, the module will handle exiting from this
+        module.delete_endpoint('projects/{0}'.format(project['id']), item_type='project', item_name=name, **{})
+    elif state == 'present' and not project:
+        # if the state was present and we couldn't find a project we can build one, the module wikl handle exiting from this
+        response = module.post_endpoint('projects', handle_return=False,item_type='project', item_name=name, **{'data': project_fields })
+    else:
+        # If the state was present and we had a project we can see if we need to update it
+        # This will return on its own
+        module.update_if_needed(project, project_fields)
 
 
 if __name__ == '__main__':
