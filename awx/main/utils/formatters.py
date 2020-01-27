@@ -139,37 +139,6 @@ class LogstashFormatter(LogstashFormatterBase):
             data = json.loads(data)
         data_for_log = {}
 
-        def index_by_name(alist):
-            """Takes a list of dictionaries with `name` as a key in each dict
-            and returns a dictionary indexed by those names"""
-            adict = {}
-            for item in alist:
-                subdict = copy(item)
-                if 'name' in subdict:
-                    name = subdict.get('name', None)
-                elif 'path' in subdict:
-                    name = subdict.get('path', None)
-                if name:
-                    # Logstash v2 can not accept '.' in a name
-                    name = name.replace('.', '_')
-                    adict[name] = subdict
-            return adict
-
-        def convert_to_type(t, val):
-            if t is float:
-                val = val[:-1] if val.endswith('s') else val
-                try:
-                    return float(val)
-                except ValueError:
-                    return val
-            elif t is int:
-                try:
-                    return int(val)
-                except ValueError:
-                    return val
-            elif t is str:
-                return val
-
         if kind == 'job_events':
             job_event = raw_data['python_objects']['job_event']
             for field_object in job_event._meta.fields:
@@ -209,6 +178,21 @@ class LogstashFormatter(LogstashFormatterBase):
             data_for_log['host_name'] = raw_data['host_name']
             data_for_log['job_id'] = raw_data['job_id']
         elif kind == 'performance':
+            def convert_to_type(t, val):
+                if t is float:
+                    val = val[:-1] if val.endswith('s') else val
+                    try:
+                        return float(val)
+                    except ValueError:
+                        return val
+                elif t is int:
+                    try:
+                        return int(val)
+                    except ValueError:
+                        return val
+                elif t is str:
+                    return val
+
             request = raw_data['python_objects']['request']
             response = raw_data['python_objects']['response']
 
