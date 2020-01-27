@@ -1,12 +1,13 @@
 import React from 'react';
-
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
 import TeamDetail from './TeamDetail';
+import { TeamsAPI } from '@api';
 
 jest.mock('@api');
 
 describe('<TeamDetail />', () => {
+  let wrapper;
   const mockTeam = {
     name: 'Foo',
     description: 'Bar',
@@ -19,15 +20,25 @@ describe('<TeamDetail />', () => {
       },
       user_capabilities: {
         edit: true,
+        delete: true,
       },
     },
   };
-  test('initially renders succesfully', () => {
-    mountWithContexts(<TeamDetail team={mockTeam} />);
+
+  beforeEach(async () => {
+    wrapper = mountWithContexts(<TeamDetail team={mockTeam} />);
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  test('should render Details', async done => {
-    const wrapper = mountWithContexts(<TeamDetail team={mockTeam} />);
+  afterEach(() => {
+    wrapper.unmount();
+  });
+
+  test('initially renders succesfully', async () => {
+    await waitForElement(wrapper, 'TeamDetail');
+  });
+
+  test('should render Details', async () => {
     const testParams = [
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
@@ -42,23 +53,52 @@ describe('<TeamDetail />', () => {
       expect(detail.find('dt').text()).toBe(label);
       expect(detail.find('dd').text()).toBe(value);
     }
-    done();
   });
 
-  test('should show edit button for users with edit permission', async done => {
-    const wrapper = mountWithContexts(<TeamDetail team={mockTeam} />);
-    const editButton = await waitForElement(wrapper, 'TeamDetail Button');
+  test('should show edit button for users with edit permission', async () => {
+    const editButton = await waitForElement(
+      wrapper,
+      'TeamDetail Button[aria-label="Edit"]'
+    );
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe('/teams/undefined/edit');
-    done();
   });
 
-  test('should hide edit button for users without edit permission', async done => {
+  test('should hide edit button for users without edit permission', async () => {
     const readOnlyTeam = { ...mockTeam };
     readOnlyTeam.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(<TeamDetail team={readOnlyTeam} />);
+    wrapper = mountWithContexts(<TeamDetail team={readOnlyTeam} />);
     await waitForElement(wrapper, 'TeamDetail');
-    expect(wrapper.find('TeamDetail Button').length).toBe(0);
-    done();
+    expect(wrapper.find('TeamDetail Button[aria-label="Edit"]').length).toBe(0);
+  });
+
+  test('expected api call is made for delete', async () => {
+    await waitForElement(wrapper, 'TeamDetail Button[aria-label="Delete"]');
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    expect(TeamsAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('Error dialog shown for failed deletion', async () => {
+    TeamsAPI.destroy.mockImplementationOnce(() => Promise.reject(new Error()));
+    wrapper = mountWithContexts(<TeamDetail team={mockTeam} />);
+    await waitForElement(wrapper, 'TeamDetail Button[aria-label="Delete"]');
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
   });
 });

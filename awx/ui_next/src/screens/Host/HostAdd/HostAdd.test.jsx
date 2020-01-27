@@ -30,7 +30,7 @@ describe('<HostAdd />', () => {
   });
 
   test('handleSubmit should post to api', async () => {
-    act(() => {
+    await act(async () => {
       wrapper.find('HostForm').prop('handleSubmit')(hostData);
     });
     expect(HostsAPI.create).toHaveBeenCalledWith(hostData);
@@ -44,12 +44,14 @@ describe('<HostAdd />', () => {
   test('successful form submission should trigger redirect', async () => {
     HostsAPI.create.mockResolvedValueOnce({
       data: {
-        id: 5,
         ...hostData,
+        id: 5,
       },
     });
     await waitForElement(wrapper, 'button[aria-label="Save"]');
-    await wrapper.find('HostForm').invoke('handleSubmit')(hostData);
+    await act(async () => {
+      wrapper.find('HostForm').invoke('handleSubmit')(hostData);
+    });
     expect(history.location.pathname).toEqual('/hosts/5/details');
   });
 });

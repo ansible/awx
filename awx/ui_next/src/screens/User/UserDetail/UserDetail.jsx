@@ -1,12 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
 
+import AlertModal from '@components/AlertModal';
+import { Button } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '@components/Card';
+import ContentLoading from '@components/ContentLoading';
+import DeleteButton from '@components/DeleteButton';
 import { DetailList, Detail } from '@components/DetailList';
+import ErrorDetail from '@components/ErrorDetail';
 import { formatDateString } from '@util/dates';
+import { UsersAPI } from '@api';
 
 function UserDetail({ user, i18n }) {
   const {
@@ -21,6 +26,20 @@ function UserDetail({ user, i18n }) {
     is_system_auditor,
     summary_fields,
   } = user;
+  const [deletionError, setDeletionError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const history = useHistory();
+
+  const handleDelete = async () => {
+    setHasContentLoading(true);
+    try {
+      await UsersAPI.destroy(id);
+      history.push(`/users`);
+    } catch (error) {
+      setDeletionError(error);
+    }
+    setHasContentLoading(false);
+  };
 
   let user_type;
   if (is_superuser) {
@@ -29,6 +48,10 @@ function UserDetail({ user, i18n }) {
     user_type = i18n._(t`System Auditor`);
   } else {
     user_type = i18n._(t`Normal User`);
+  }
+
+  if (hasContentLoading) {
+    return <ContentLoading />;
   }
 
   return (
@@ -52,16 +75,38 @@ function UserDetail({ user, i18n }) {
         <Detail label={i18n._(t`Created`)} value={formatDateString(created)} />
       </DetailList>
       <CardActionsRow>
-        {summary_fields.user_capabilities.edit && (
-          <Button
-            aria-label={i18n._(t`edit`)}
-            component={Link}
-            to={`/users/${id}/edit`}
-          >
-            {i18n._(t`Edit`)}
-          </Button>
-        )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.edit && (
+            <Button
+              aria-label={i18n._(t`edit`)}
+              component={Link}
+              to={`/users/${id}/edit`}
+            >
+              {i18n._(t`Edit`)}
+            </Button>
+          )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              name={username}
+              modalTitle={i18n._(t`Delete User`)}
+              onConfirm={handleDelete}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
       </CardActionsRow>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={() => setDeletionError(null)}
+        >
+          {i18n._(t`Failed to delete user.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }
