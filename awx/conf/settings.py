@@ -5,9 +5,7 @@ import re
 import sys
 import threading
 import time
-import traceback
 import urllib.parse
-from io import StringIO
 
 # Django
 from django.conf import LazySettings
@@ -88,42 +86,11 @@ def _ctit_db_wrapper(trans_safe=False):
                     transaction.set_rollback(False)
         yield
     except DBError:
-        # We want the _full_ traceback with the context
-        # First we get the current call stack, which constitutes the "top",
-        # it has the context up to the point where the context manager is used
-        top_stack = StringIO()
-        traceback.print_stack(file=top_stack)
-        top_lines = top_stack.getvalue().strip('\n').split('\n')
-        top_stack.close()
-        # Get "bottom" stack from the local error that happened
-        # inside of the "with" block this wraps
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        bottom_stack = StringIO()
-        traceback.print_tb(exc_traceback, file=bottom_stack)
-        bottom_lines = bottom_stack.getvalue().strip('\n').split('\n')
-        # Glue together top and bottom where overlap is found
-        bottom_cutoff = 0
-        for i, line in enumerate(bottom_lines):
-            if line in top_lines:
-                # start of overlapping section, take overlap from bottom
-                top_lines = top_lines[:top_lines.index(line)]
-                bottom_cutoff = i
-                break
-        bottom_lines = bottom_lines[bottom_cutoff:]
-        tb_lines = top_lines + bottom_lines
-
-        tb_string = '\n'.join(
-            ['Traceback (most recent call last):'] +
-            tb_lines +
-            ['{}: {}'.format(exc_type.__name__, str(exc_value))]
-        )
-        bottom_stack.close()
-        # Log the combined stack
         if trans_safe:
             if 'check_migrations' not in sys.argv:
-                logger.debug('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
+                logger.exception('Database settings are not available, using defaults.')
         else:
-            logger.debug('Error modifying something related to database settings.\n{}'.format(tb_string))
+            logger.exception('Error modifying something related to database settings.')
     finally:
         if trans_safe and is_atomic and rollback_set:
             transaction.set_rollback(rollback_set)
