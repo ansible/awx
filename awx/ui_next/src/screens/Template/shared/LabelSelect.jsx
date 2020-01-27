@@ -57,12 +57,25 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
     <Select
       variant={SelectVariant.typeaheadMulti}
       onToggle={toggleExpanded}
-      onSelect={onSelect}
+      onSelect={(e, item) => {
+        if (typeof item === 'string') {
+          item = { id: item, name: item };
+        }
+        onSelect(e, item);
+      }}
       onClear={() => onChange([])}
       onFilter={event => {
         const str = event.target.value.toLowerCase();
         const matches = options.filter(o => o.name.toLowerCase().includes(str));
         return renderOptions(matches);
+      }}
+      isCreatable
+      onCreateOption={label => {
+        label = label.trim();
+        if (!options.includes(label)) {
+          setOptions(options.concat({ name: label, id: label }));
+        }
+        return label;
       }}
       selections={selections}
       isExpanded={isExpanded}
