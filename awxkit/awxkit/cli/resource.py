@@ -131,6 +131,14 @@ class Export(CustomCommand):
         resources = parser.add_argument_group('resources')
         resources.add_argument('--users', nargs='?', const='')
 
+    def get_resources(self, client, resource, value):
+        if value:
+            from .options import pk_or_name
+
+            print("Pulling {}: {}".format(resource, pk_or_name(client.v2, resource, value)))
+        else:
+            print("Pulling all {}.".format(resource))
+
     def handle(self, client, parser):
         self.extend_parser(parser)
 
@@ -138,20 +146,16 @@ class Export(CustomCommand):
             parser.print_help()
             raise SystemExit()
 
+        client.authenticate()
         parsed = parser.parse_known_args()[0]
 
         data = {}
         for resource in ('users',):
             value = getattr(parsed, resource, None)
             if value is None:
-                print("Pulling no users.")
+                print("Pulling no {}.".format(resource))
                 continue
-            if value:
-                print("Pulling users: {}".format(value))
-                pass
-            else:
-                print("Pulling all users.")
-                pass
+            self.get_resources(client, resource, value)
 
             data[resource] = {}
 
