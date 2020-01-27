@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect
+} from 'react';
 
 /*
   Hook for using PatternFly's <Select> component when a pre-existing value
@@ -21,6 +24,7 @@ export default function useSyncedSelectValue(value, onChange) {
   }, [value, options]);
 
   const onSelect = (event, item) => {
+
     if (selections.includes(item)) {
       onChange(selections.filter(i => i !== item));
     } else {

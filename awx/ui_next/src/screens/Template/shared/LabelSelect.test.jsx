@@ -56,4 +56,20 @@ describe('<LabelSelect />', () => {
     const selectOptions = wrapper.find('SelectOption');
     expect(selectOptions).toHaveLength(4);
   });
+  test('Generate a label  ', async () => {
+    let wrapper;
+    const onChange = jest.fn();
+    LabelsAPI.read.mockReturnValueOnce({
+      data: {
+        options,
+      },
+    });
+    await act(async () => {
+      wrapper = mount(
+        <LabelSelect value={[]} onError={() => {}} onChange={onChange} />
+      );
+    });
+    await wrapper.find('Select').invoke('onSelect')({}, 'foo');
+    expect(onChange).toBeCalledWith([{ id: 'foo', name: 'foo' }]);
+  });
 });
