@@ -48,7 +48,6 @@ class TestJobNotificationMixin(object):
                                                                    'username': str},
                                                     'instance_group': {'id': int, 'name': str},
                                                     'inventory': {'description': str,
-                                                                  'groups_with_active_failures': int,
                                                                   'has_active_failures': bool,
                                                                   'has_inventory_sources': bool,
                                                                   'hosts_with_active_failures': int,

@@ -72,41 +72,6 @@ def get_current_user_or_none():
     return u
 
 
-def emit_update_inventory_computed_fields(sender, **kwargs):
-    logger.debug("In update inventory computed fields")
-    if getattr(_inventory_updates, 'is_updating', False):
-        return
-    instance = kwargs['instance']
-    if sender == Group.hosts.through:
-        sender_name = 'group.hosts'
-    elif sender == Group.parents.through:
-        sender_name = 'group.parents'
-    elif sender == Host.inventory_sources.through:
-        sender_name = 'host.inventory_sources'
-    elif sender == Group.inventory_sources.through:
-        sender_name = 'group.inventory_sources'
-    else:
-        sender_name = str(sender._meta.verbose_name)
-    if kwargs['signal'] == post_save:
-        if sender == Job:
-            return
-        sender_action = 'saved'
-    elif kwargs['signal'] == post_delete:
-        sender_action = 'deleted'
-    elif kwargs['signal'] == m2m_changed and kwargs['action'] in ('post_add', 'post_remove', 'post_clear'):
-        sender_action = 'changed'
-    else:
-        return
-    logger.debug('%s %s, updating inventory computed fields: %r %r',
-                 sender_name, sender_action, sender, kwargs)
-    try:
-        inventory = instance.inventory
-    except Inventory.DoesNotExist:
-        pass
-    else:
-        update_inventory_computed_fields.delay(inventory.id)
-
-
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     if getattr(_inventory_updates, 'is_updating', False):
         return
@@ -210,10 +175,6 @@ def connect_computed_field_signals():
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
@@ -350,10 +311,6 @@ def disable_computed_fields():
     post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
     post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)
