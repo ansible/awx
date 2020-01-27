@@ -1,161 +1,141 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import JobTemplateDetail, { _JobTemplateDetail } from './JobTemplateDetail';
+import JobTemplateDetail from './JobTemplateDetail';
 import { JobTemplatesAPI } from '@api';
+import mockTemplate from '../shared/data.job_template.json';
 
 jest.mock('@api');
 
+const mockInstanceGroups = {
+  count: 5,
+  data: {
+    results: [{ id: 1, name: 'IG1' }, { id: 2, name: 'IG2' }],
+  },
+};
+
 describe('<JobTemplateDetail />', () => {
-  const template = {
-    forks: 1,
-    host_config_key: 'ssh',
-    name: 'Temp 1',
-    job_type: 'run',
-    inventory: 1,
-    limit: '1',
-    project: 7,
-    playbook: '',
-    id: 1,
-    verbosity: 1,
-    summary_fields: {
-      user_capabilities: { edit: true },
-      created_by: { id: 1, username: 'Joe' },
-      modified_by: { id: 1, username: 'Joe' },
-      credentials: [
-        { id: 1, kind: 'ssh', name: 'Credential 1' },
-        { id: 2, kind: 'awx', name: 'Credential 2' },
-      ],
-      inventory: { name: 'Inventory' },
-      project: { name: 'Project' },
-    },
-    created: '2020-04-25T01:23:45.678901Z',
-    modified: '2020-04-25T01:23:45.678901Z',
-  };
+  let wrapper;
 
-  const mockInstanceGroups = {
-    count: 5,
-    data: {
-      results: [{ id: 1, name: 'IG1' }, { id: 2, name: 'IG2' }],
-    },
-  };
-
-  const readInstanceGroups = jest.spyOn(
-    _JobTemplateDetail.prototype,
-    'readInstanceGroups'
-  );
-
-  beforeEach(() => {
+  beforeEach(async () => {
     JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail template={mockTemplate} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('Can load with missing summary fields', async () => {
-    const mockTemplate = { ...template };
-    mockTemplate.summary_fields = { user_capabilities: {} };
-
-    const wrapper = mountWithContexts(
-      <JobTemplateDetail template={mockTemplate} />
-    );
+  test('should render successfully with missing summary fields', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            become_enabled: true,
+            summary_fields: { user_capabilities: {} },
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     await waitForElement(
       wrapper,
-      'Detail[label="Description"]',
+      'Detail[label="Name"]',
       el => el.length === 1
     );
   });
 
-  test('When component mounts API is called to get instance groups', async done => {
-    const wrapper = mountWithContexts(
-      <JobTemplateDetail template={template} />
-    );
-    await waitForElement(
-      wrapper,
-      'JobTemplateDetail',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(readInstanceGroups).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'JobTemplateDetail',
-      el => el.state('hasContentLoading') === false
-    );
+  test('should request instance groups from api', async () => {
     expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
-    done();
   });
 
-  test('Edit button is absent when user does not have edit privilege', async done => {
-    const regularUser = {
-      forks: 1,
-      host_config_key: 'ssh',
-      name: 'Temp 1',
-      job_tags: 'cookies,pizza',
-      job_type: 'run',
-      inventory: 1,
-      limit: '1',
-      project: 7,
-      playbook: '',
-      id: 1,
-      verbosity: 0,
-      created_by: 'Alex',
-      skip_tags: 'coffe,tea',
-      summary_fields: {
-        user_capabilities: { edit: false },
-        created_by: { id: 1, username: 'Joe' },
-        modified_by: { id: 1, username: 'Joe' },
-        inventory: { name: 'Inventory' },
-        project: { name: 'Project' },
-        labels: { count: 1, results: [{ name: 'Label', id: 1 }] },
-      },
-      created: '2020-04-25T01:23:45.678901Z',
-      modified: '2020-04-25T01:23:45.678901Z',
-    };
-    const wrapper = mountWithContexts(
-      <JobTemplateDetail template={regularUser} />
-    );
-    const jobTemplateDetail = wrapper.find('JobTemplateDetail');
-    const editButton = jobTemplateDetail.find('button[aria-label="Edit"]');
-
-    jobTemplateDetail.setState({
-      instanceGroups: mockInstanceGroups,
-      hasContentLoading: false,
-      contentError: false,
+  test('should hide edit button for users without edit permission', async () => {
+    JobTemplatesAPI.readInstanceGroups.mockResolvedValue({ data: {} });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            diff_mode: true,
+            host_config_key: 'key',
+            summary_fields: { user_capabilities: { edit: false } },
+          }}
+        />
+      );
     });
-    expect(editButton.length).toBe(0);
-    done();
+    expect(wrapper.find('button[aria-label="Edit"]').length).toBe(0);
   });
 
-  test('should render CredentialChip', () => {
-    template.summary_fields.credentials = [{ id: 1, name: 'cred', kind: null }];
-    const wrapper = mountWithContexts(
-      <JobTemplateDetail template={template} />
-    );
-    wrapper.find('JobTemplateDetail').setState({
-      instanceGroups: mockInstanceGroups,
-      hasContentLoading: false,
-      contentError: false,
+  test('should render credential chips', () => {
+    const chips = wrapper.find('CredentialChip');
+    expect(chips).toHaveLength(2);
+    chips.forEach((chip, id) => {
+      expect(chip.prop('credential')).toEqual(
+        mockTemplate.summary_fields.credentials[id]
+      );
     });
-
-    const chip = wrapper.find('CredentialChip');
-    expect(chip).toHaveLength(1);
-    expect(chip.prop('credential')).toEqual(
-      template.summary_fields.credentials[0]
-    );
   });
+
   test('should render SCM_Branch', async () => {
-    const mockTemplate = { ...template };
-    mockTemplate.scm_branch = 'Foo branch';
-
-    const wrapper = mountWithContexts(
-      <JobTemplateDetail template={mockTemplate} />
-    );
-    await waitForElement(
-      wrapper,
-      'JobTemplateDetail',
-      el => el.state('hasContentLoading') === false
-    );
     const SCMBranch = wrapper.find('Detail[label="SCM Branch"]');
     expect(SCMBranch.prop('value')).toBe('Foo branch');
+  });
+
+  test('should show content error for failed instance group fetch', async () => {
+    JobTemplatesAPI.readInstanceGroups.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            allow_simultaneous: true,
+            ask_inventory_on_launch: true,
+            summary_fields: {
+              inventory: {
+                kind: 'smart',
+              },
+            },
+          }}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('expected api calls are made for delete', async () => {
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    expect(JobTemplatesAPI.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  test('Error dialog shown for failed deletion', async () => {
+    JobTemplatesAPI.destroy.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
   });
 });
