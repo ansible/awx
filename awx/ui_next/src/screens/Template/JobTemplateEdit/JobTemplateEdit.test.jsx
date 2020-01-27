@@ -195,8 +195,8 @@ describe('<JobTemplateEdit />', () => {
       inventory: 1,
     };
     const labels = [
-      { id: 3, name: 'Foo', isNew: true },
-      { id: 4, name: 'Bar', isNew: true },
+      { id: 3, name: 'Foo' },
+      { id: 4, name: 'Bar' },
       { id: 5, name: 'Maple' },
       { id: 6, name: 'Tree' },
     ];
@@ -230,8 +230,7 @@ describe('<JobTemplateEdit />', () => {
     delete expected.type;
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, expected);
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
-    expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
-    expect(JobTemplatesAPI.generateLabel).toHaveBeenCalledTimes(2);
+    expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(4);
   });
 
   test('should navigate to job template detail when cancel is clicked', async () => {

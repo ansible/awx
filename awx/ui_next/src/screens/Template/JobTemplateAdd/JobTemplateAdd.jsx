@@ -36,16 +36,10 @@ function JobTemplateAdd() {
   }
 
   function submitLabels(templateId, labels = [], organizationId) {
-    const associationPromises = labels
-      .filter(label => !label.isNew)
-      .map(label => JobTemplatesAPI.associateLabel(templateId, label));
-    const creationPromises = labels
-      .filter(label => label.isNew)
-      .map(label =>
-        JobTemplatesAPI.generateLabel(templateId, label, organizationId)
-      );
-
-    return Promise.all([...associationPromises, ...creationPromises]);
+    const associationPromises = labels.map(label =>
+      JobTemplatesAPI.associateLabel(templateId, label, organizationId)
+    );
+    return Promise.all([...associationPromises]);
   }
 
   function submitInstanceGroups(templateId, addedGroups = []) {

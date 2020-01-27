@@ -127,19 +127,13 @@ class JobTemplateEdit extends Component {
     const disassociationPromises = removed.map(label =>
       JobTemplatesAPI.disassociateLabel(template.id, label)
     );
-    const associationPromises = added
-      .filter(label => !label.isNew)
-      .map(label => JobTemplatesAPI.associateLabel(template.id, label));
-    const creationPromises = added
-      .filter(label => label.isNew)
-      .map(label =>
-        JobTemplatesAPI.generateLabel(template.id, label, organizationId)
-      );
+    const associationPromises = added.map(label => {
+      return JobTemplatesAPI.associateLabel(template.id, label, organizationId);
+    });
 
     const results = await Promise.all([
       ...disassociationPromises,
       ...associationPromises,
-      ...creationPromises,
     ]);
     return results;
   }
