@@ -1,8 +1,14 @@
+import cProfile
 import logging
+import os
+import pstats
+import signal
+import tempfile
 import time
 import traceback
 from queue import Empty as QueueEmpty
 
+from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError, IntegrityError
@@ -31,6 +37,7 @@ class CallbackBrokerWorker(BaseWorker):
     '''
 
     MAX_RETRIES = 2
+    prof = None
 
     def __init__(self):
         self.buff = {}
@@ -40,6 +47,26 @@ class CallbackBrokerWorker(BaseWorker):
             return queue.get(block=True, timeout=BUFFER_SECONDS)
         except QueueEmpty:
             return {'event': 'FLUSH'}
+
+    def toggle_profiling(self, *args):
+        if self.prof:
+            self.prof.disable()
+            filename = f'callback-{os.getpid()}.pstats'
+            filepath = os.path.join(tempfile.gettempdir(), filename)
+            with open(filepath, 'w') as f:
+                pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
+            pstats.Stats(self.prof).dump_stats(filepath + '.raw')
+            self.prof = False
+            logger.error(f'profiling is disabled, wrote {filepath}')
+        else:
+            self.prof = cProfile.Profile()
+            self.prof.enable()
+            logger.error('profiling is enabled')
+
+    def work_loop(self, *args, **kw):
+        if settings.AWX_CALLBACK_PROFILE:
+            signal.signal(signal.SIGUSR1, self.toggle_profiling)
+        return super(CallbackBrokerWorker, self).work_loop(*args, **kw)
 
     def flush(self, force=False):
         now = tz_now()

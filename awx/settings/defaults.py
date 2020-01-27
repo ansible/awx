@@ -1222,6 +1222,9 @@ AWX_REQUEST_PROFILE = False
 #
 AWX_REQUEST_PROFILE_WITH_DOT = False
 
+# Allow profiling callback workers via SIGUSR1
+AWX_CALLBACK_PROFILE = False
+
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
 
