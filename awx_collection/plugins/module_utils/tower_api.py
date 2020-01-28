@@ -5,16 +5,18 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.basic import env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
-
-from socket import gethostbyname
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError, NoSectionError
+from socket import gethostbyname
 import re
 from json import loads, dumps
-from os.path import isfile
-from os import access, R_OK
+from os.path import isfile, expanduser, split, join
+from os import access, R_OK, getcwd
 
+
+class ConfigFileException(Exception):
+    pass
 
 class TowerModule(AnsibleModule):
     url = None
@@ -30,6 +32,7 @@ class TowerModule(AnsibleModule):
     authenticated = False
     json_output = {'changed': False}
     on_change = None
+    config_name = 'tower_cli.cfg'
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -45,11 +48,9 @@ class TowerModule(AnsibleModule):
 
         super(TowerModule, self).__init__(argument_spec=args, **kwargs)
 
-        # If we have a tower config, load it
-        if self.params.get('tower_config_file'):
-            self.load_config(self.params.get('tower_config_file'))
+        self.load_config_files()
 
-        # Parameters specified on command line will override settings in config
+        # Parameters specified on command line will override settings in any config
         if self.params.get('tower_host'):
             self.host = self.params.get('tower_host')
         if self.params.get('tower_username'):
@@ -80,22 +81,48 @@ class TowerModule(AnsibleModule):
 
         self.session = Request(cookies=self.cookie_jar)
 
+    def load_config_files(self):
+        # Load configs like TowerCLI would have from least import to most
+        config_files = [ join('/etc/tower/', self.config_name), join(expanduser("~"), ".{}".format(self.config_name)) ]
+        local_dir = getcwd()
+        config_files.append(join(local_dir, self.config_name))
+        while split(local_dir)[1]:
+            local_dir, _ = split(local_dir)
+            config_files.insert(2, join(local_dir, self.config_name))
+
+        for config_file in config_files:
+            try:
+                self.load_config(config_file)
+            except ConfigFileException as cfe:
+                # Since some of these may not exist or can't be read, we really don't care
+                pass
+
+        # If we have a specified  tower config, load it
+        if self.params.get('tower_config_file'):
+            try:
+                self.load_config(self.params.get('tower_config_file'))
+            except ConfigFileException as cfe:
+                # Since we were told specifically to load this we want to fail if we have an error
+                module.fail_json(msg=cfe)
+
     def load_config(self, config_path):
         config = ConfigParser()
         # Validate the config file is an actual file
         if not isfile(config_path):
-            self.fail_json(msg='The specified config file does not exist')
+            raise ConfigFileException('The specified config file does not exist')
 
         if not access(config_path, R_OK):
-            self.fail_json(msg="The specified config file can not be read")
+            raise ConfigFileException("The specified config file can not be read")
 
         config.read(config_path)
+        if not config.has_section('general'):
+            self.warn("No general section in file, auto-appending")
+            with open(config_path, 'r') as f:
+                config.read_string('[general]\n%s' % f.read())
 
         for honorred_setting in self.honorred_settings:
             try:
                 setattr(self, honorred_setting, config.get('general', honorred_setting))
-            except (NoSectionError) as nse:
-                self.fail_json(msg="The specified config file does not contain a general section ({0})".format(nse))
             except (NoOptionError):
                 pass
 
