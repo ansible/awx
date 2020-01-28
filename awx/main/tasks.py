@@ -1989,8 +1989,9 @@ class RunProjectUpdate(BaseTask):
                     continue
                 env_key = ('ANSIBLE_GALAXY_SERVER_{}_{}'.format(server.get('id', 'unnamed'), key)).upper()
                 env[env_key] = server[key]
-        # now set the precedence of galaxy servers
-        env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
+        if galaxy_servers:
+            # now set the precedence of galaxy servers
+            env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
