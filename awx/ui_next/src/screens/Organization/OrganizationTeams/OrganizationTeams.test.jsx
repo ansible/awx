@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { OrganizationsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 
 import OrganizationTeams from './OrganizationTeams';
@@ -65,7 +65,9 @@ describe('<OrganizationTeams />', () => {
     wrapper.update();
 
     const list = wrapper.find('PaginatedDataList');
-    expect(list.prop('items')).toEqual(listData.data.results);
+    list.find('DataListCell').forEach((el, index) => {
+      expect(el.text()).toBe(listData.data.results[index].name);
+    });
     expect(list.prop('itemCount')).toEqual(listData.data.count);
     expect(list.prop('qsConfig')).toEqual({
       namespace: 'team',
@@ -77,5 +79,16 @@ describe('<OrganizationTeams />', () => {
       },
       integerFields: ['page', 'page_size'],
     });
+  });
+
+  test('should show content error for failed instance group fetch', async () => {
+    OrganizationsAPI.readTeams.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<OrganizationTeams id={1} />);
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 });

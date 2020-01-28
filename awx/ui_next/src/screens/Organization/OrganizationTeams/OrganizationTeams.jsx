@@ -30,7 +30,9 @@ function OrganizationTeams({ id, i18n }) {
           data: { count = 0, results = [] },
         } = await OrganizationsAPI.readTeams(id, params);
         setItemCount(count);
-        setTeams(results);
+        setTeams(
+          results.map(team => ({ ...team, url: `/teams/${team.id}/details` }))
+        );
       } catch (error) {
         setContentError(error);
       } finally {
