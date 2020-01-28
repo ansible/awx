@@ -88,7 +88,7 @@ class TowerModule(AnsibleModule):
         local_dir = getcwd()
         config_files.append(join(local_dir, self.config_name))
         while split(local_dir)[1]:
-            local_dir, _ = split(local_dir)
+            local_dir = split(local_dir)[0]
             config_files.insert(2, join(local_dir, self.config_name))
 
         for config_file in config_files:

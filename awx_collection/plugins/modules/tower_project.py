@@ -148,6 +148,8 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
+import time
+
 from ..module_utils.tower_api import TowerModule
 
 
@@ -160,6 +162,7 @@ def wait_for_project_update(module, last_request):
             result = module.get_endpoint('/project_updates/{0}/'.format(last_request['summary_fields']['current_update']['id']))['json']
 
             if module.is_job_done(result['status']):
+                time.sleep(1)
                 running = False
 
         if result['status'] != 'successful':
