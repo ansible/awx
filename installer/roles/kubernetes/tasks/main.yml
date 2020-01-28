@@ -79,19 +79,26 @@
 
 - name: Deploy PostgreSQL (Kubernetes)
   block:
-    - name: Template PostgreSQL Deployment (Kubernetes)
-      set_fact:
-        pg_values: "{{ lookup('template', 'postgresql-values.yml.j2') }}"
+    - name: Create Temporary Values File (Kubernetes)
+      tempfile:
+        state: file
+        suffix: .yml
+      register: values_file
+
+    - name: Populate Temporary Values File (Kubernetes)
+      template:
+        src: postgresql-values.yml.j2
+        dest: "{{ values_file.path }}"
       no_log: true
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
         helm repo update
-        echo {{ pg_values | quote }} | helm upgrade {{ postgresql_service_name }} \
+        helm upgrade {{ postgresql_service_name }} \
           --install \
           --namespace {{ kubernetes_namespace }} \
           --version="8.1.5" \
-          --values - \
+          --values {{ values_file.path }} \
           stable/postgresql
       register: kubernetes_pg_activate
       no_log: true
