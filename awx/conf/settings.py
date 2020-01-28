@@ -171,7 +171,6 @@ class EncryptedCacheProxy(object):
     def get(self, key, **kwargs):
         value = self.cache.get(key, **kwargs)
         value = self._handle_encryption(self.decrypter, key, value)
-        logger.debug('cache get(%r, %r) -> %r', key, empty, filter_sensitive(self.registry, key, value))
         return value
 
     def set(self, key, value, log=True, **kwargs):
