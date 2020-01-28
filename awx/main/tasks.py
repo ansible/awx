@@ -1706,6 +1706,9 @@ class RunJob(BaseTask):
         safe_dict = {}
         if job.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
             safe_dict = job.job_template.extra_vars_dict
+            wj = job.get_workflow_job()
+            if wj and wj.workflow_job_template:
+                safe_dict.update(wj.workflow_job_template.extra_vars_dict)
 
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
 

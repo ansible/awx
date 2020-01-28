@@ -2,6 +2,9 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+# 10.0.0 (pending)
+- Fix a bug that prevented extra vars defined on Workflow Job Templates from using Jinja by default https://github.com/ansible/awx/issues/1970
+
 ## 9.1.1 (Jan 14, 2020)
 
 - Fixed a bug that caused database migrations on Kubernetes installs to hang https://github.com/ansible/awx/pull/5579
