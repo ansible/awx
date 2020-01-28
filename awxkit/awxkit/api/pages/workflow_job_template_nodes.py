@@ -30,7 +30,8 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
             'job_type',
             'skip_tags',
             'verbosity',
-            'extra_data')
+            'extra_data',
+            'all_parents_must_converge')
 
         update_payload(payload, optional_fields, kwargs)
 
