@@ -1,4 +1,5 @@
 import React from 'react';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import WorkflowOutputToolbar from './WorkflowOutputToolbar';
 
@@ -7,17 +8,18 @@ const job = {
   status: 'successful',
 };
 
+const workflowContext = {
+  nodes: [],
+  showLegend: false,
+  showTools: false,
+};
+
 describe('WorkflowOutputToolbar', () => {
   test('mounts successfully', () => {
     const wrapper = mountWithContexts(
-      <WorkflowOutputToolbar
-        job={job}
-        legendShown={false}
-        nodes={[]}
-        onLegendToggle={() => {}}
-        onToolsToggle={() => {}}
-        toolsShown={false}
-      />
+      <WorkflowStateContext.Provider value={workflowContext}>
+        <WorkflowOutputToolbar job={job} />
+      </WorkflowStateContext.Provider>
     );
     expect(wrapper).toHaveLength(1);
   });
@@ -36,14 +38,9 @@ describe('WorkflowOutputToolbar', () => {
       },
     ];
     const wrapper = mountWithContexts(
-      <WorkflowOutputToolbar
-        job={job}
-        legendShown={false}
-        nodes={nodes}
-        onLegendToggle={() => {}}
-        onToolsToggle={() => {}}
-        toolsShown={false}
-      />
+      <WorkflowStateContext.Provider value={{ ...workflowContext, nodes }}>
+        <WorkflowOutputToolbar job={job} />
+      </WorkflowStateContext.Provider>
     );
     // The start node (id=1) and deleted nodes (isDeleted=true) should be ignored
     expect(wrapper.find('Badge').text()).toBe('1');

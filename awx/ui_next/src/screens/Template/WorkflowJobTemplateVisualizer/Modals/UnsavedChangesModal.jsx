@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { Button, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { func } from 'prop-types';
 
-function UnsavedChangesModal({ i18n, onCancel, onSaveAndExit, onExit }) {
+function UnsavedChangesModal({ i18n, onSaveAndExit, onExit }) {
+  const dispatch = useContext(WorkflowDispatchContext);
   return (
     <Modal
       width={600}
       isOpen
       title={i18n._(t`Warning: Unsaved Changes`)}
-      onClose={onCancel}
+      onClose={() => dispatch({ type: 'TOGGLE_UNSAVED_CHANGES_MODAL' })}
       actions={[
         <Button
           key="exit"
@@ -41,7 +43,6 @@ function UnsavedChangesModal({ i18n, onCancel, onSaveAndExit, onExit }) {
 }
 
 UnsavedChangesModal.propTypes = {
-  onCancel: func.isRequired,
   onExit: func.isRequired,
   onSaveAndExit: func.isRequired,
 };

@@ -1,4 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -38,24 +42,21 @@ const NodeDefaultLabel = styled.p`
 `;
 
 function VisualizerNode({
-  addingLink,
   i18n,
-  isAddLinkSourceNode,
   node,
-  nodePositions,
-  onAddNodeClick,
-  onConfirmAddLinkClick,
-  onDeleteNodeClick,
-  onEditNodeClick,
   onMouseOver,
-  onStartAddLinkClick,
-  onViewNodeClick,
   readOnly,
   onUpdateHelpText,
   updateNodeHelp,
 }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { addingLink, addLinkSourceNode, nodePositions } = useContext(
+    WorkflowStateContext
+  );
+  const isAddLinkSourceNode =
+    addLinkSourceNode && addLinkSourceNode.id === node.id;
 
   const handleNodeMouseEnter = () => {
     ref.current.parentNode.appendChild(ref.current);
@@ -81,7 +82,7 @@ function VisualizerNode({
 
   const handleNodeClick = () => {
     if (addingLink && !node.isInvalidLinkTarget && !isAddLinkSourceNode) {
-      onConfirmAddLinkClick(node);
+      dispatch({ type: 'SET_ADD_LINK_TARGET_NODE', value: node });
     }
   };
 
@@ -92,7 +93,7 @@ function VisualizerNode({
       onClick={() => {
         onUpdateHelpText(null);
         setHovering(false);
-        onViewNodeClick(node);
+        dispatch({ type: 'SET_NODE_TO_VIEW', value: node });
       }}
       onMouseEnter={() => onUpdateHelpText(i18n._(t`View node details`))}
       onMouseLeave={() => onUpdateHelpText(null)}
@@ -110,7 +111,7 @@ function VisualizerNode({
           onClick={() => {
             onUpdateHelpText(null);
             setHovering(false);
-            onAddNodeClick(node.id);
+            dispatch({ type: 'START_ADD_NODE', sourceNodeId: node.id });
           }}
           onMouseEnter={() => onUpdateHelpText(i18n._(t`Add a new node`))}
           onMouseLeave={() => onUpdateHelpText(null)}
@@ -124,7 +125,7 @@ function VisualizerNode({
           onClick={() => {
             onUpdateHelpText(null);
             setHovering(false);
-            onEditNodeClick(node);
+            dispatch({ type: 'SET_NODE_TO_EDIT', value: node });
           }}
           onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this node`))}
           onMouseLeave={() => onUpdateHelpText(null)}
@@ -137,7 +138,7 @@ function VisualizerNode({
           onClick={() => {
             onUpdateHelpText(null);
             setHovering(false);
-            onStartAddLinkClick(node);
+            dispatch({ type: 'SELECT_SOURCE_FOR_LINKING', node });
           }}
           onMouseEnter={() =>
             onUpdateHelpText(i18n._(t`Link to an available node`))
@@ -152,7 +153,7 @@ function VisualizerNode({
           onClick={() => {
             onUpdateHelpText(null);
             setHovering(false);
-            onDeleteNodeClick(node);
+            dispatch({ type: 'SET_NODE_TO_DELETE', value: node });
           }}
           onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this node`))}
           onMouseLeave={() => onUpdateHelpText(null)}
@@ -214,24 +215,14 @@ function VisualizerNode({
 }
 
 VisualizerNode.propTypes = {
-  addingLink: bool.isRequired,
-  isAddLinkSourceNode: bool,
   node: shape().isRequired,
-  nodePositions: shape().isRequired,
-  onAddNodeClick: func.isRequired,
-  onConfirmAddLinkClick: func.isRequired,
-  onDeleteNodeClick: func.isRequired,
-  onEditNodeClick: func.isRequired,
   onMouseOver: func,
-  onStartAddLinkClick: func.isRequired,
-  onViewNodeClick: func.isRequired,
   readOnly: bool.isRequired,
   onUpdateHelpText: func.isRequired,
   updateNodeHelp: func.isRequired,
 };
 
 VisualizerNode.defaultProps = {
-  isAddLinkSourceNode: false,
   onMouseOver: () => {},
 };
 

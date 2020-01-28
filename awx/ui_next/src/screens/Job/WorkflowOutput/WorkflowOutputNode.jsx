@@ -1,4 +1,5 @@
-import React, { Fragment } from 'react';
+import React, { useContext } from 'react';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -55,14 +56,8 @@ const NodeDefaultLabel = styled.p`
   white-space: nowrap;
 `;
 
-function WorkflowOutputNode({
-  history,
-  i18n,
-  mouseEnter,
-  mouseLeave,
-  node,
-  nodePositions,
-}) {
+function WorkflowOutputNode({ history, i18n, mouseEnter, mouseLeave, node }) {
+  const { nodePositions } = useContext(WorkflowStateContext);
   let borderColor = '#93969A';
 
   if (node.job) {
@@ -105,7 +100,7 @@ function WorkflowOutputNode({
       />
       <NodeContents height="60" width="180">
         {node.job ? (
-          <Fragment>
+          <>
             <JobTopLine>
               <StatusIcon status={node.job.status} />
               <p>
@@ -115,7 +110,7 @@ function WorkflowOutputNode({
               </p>
             </JobTopLine>
             <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
-          </Fragment>
+          </>
         ) : (
           <NodeDefaultLabel>
             {node.unifiedJobTemplate
@@ -134,7 +129,6 @@ WorkflowOutputNode.propTypes = {
   mouseEnter: func.isRequired,
   mouseLeave: func.isRequired,
   node: shape().isRequired,
-  nodePositions: shape().isRequired,
 };
 
 export default withI18n()(withRouter(WorkflowOutputNode));

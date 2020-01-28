@@ -1,8 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { arrayOf, bool, func, shape } from 'prop-types';
+import { bool } from 'prop-types';
 import * as d3 from 'd3';
 import {
   getScaleAndOffsetToFit,
@@ -32,34 +36,25 @@ const WorkflowSVG = styled.svg`
   height: 100%;
 `;
 
-function VisualizerGraph({
-  addLinkSourceNode,
-  addingLink,
-  i18n,
-  links,
-  nodePositions,
-  nodes,
-  onAddNodeClick,
-  onCancelAddLinkClick,
-  onConfirmAddLinkClick,
-  onDeleteLinkClick,
-  onDeleteNodeClick,
-  onEditNodeClick,
-  onLinkEditClick,
-  onStartAddLinkClick,
-  onUpdateShowLegend,
-  onUpdateShowTools,
-  onViewNodeClick,
-  readOnly,
-  showLegend,
-  showTools,
-}) {
+function VisualizerGraph({ i18n, readOnly }) {
   const [helpText, setHelpText] = useState(null);
   const [linkHelp, setLinkHelp] = useState();
   const [nodeHelp, setNodeHelp] = useState();
   const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
   const gRef = useRef(null);
+
+  const {
+    addLinkSourceNode,
+    addingLink,
+    links,
+    nodePositions,
+    nodes,
+    showLegend,
+    showTools,
+  } = useContext(WorkflowStateContext);
+
+  const dispatch = useContext(WorkflowDispatchContext);
 
   const drawPotentialLinkToNode = node => {
     if (node.id !== addLinkSourceNode.id) {
@@ -81,7 +76,7 @@ function VisualizerGraph({
 
   const handleBackgroundClick = () => {
     setHelpText(null);
-    onCancelAddLinkClick();
+    dispatch({ type: 'CANCEL_LINK' });
   };
 
   const drawPotentialLinkToCursor = e => {
@@ -274,10 +269,7 @@ function VisualizerGraph({
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
             <WorkflowStartNode
-              addingLink={addingLink}
               key="start"
-              nodePositions={nodePositions}
-              onAddNodeClick={onAddNodeClick}
               showActionTooltip={!readOnly}
               onUpdateHelpText={setHelpText}
             />,
@@ -288,13 +280,8 @@ function VisualizerGraph({
               ) {
                 return (
                   <VisualizerLink
-                    addingLink={addingLink}
                     key={`link-${link.source.id}-${link.target.id}`}
                     link={link}
-                    nodePositions={nodePositions}
-                    onAddNodeClick={onAddNodeClick}
-                    onDeleteLinkClick={onDeleteLinkClick}
-                    onLinkEditClick={onLinkEditClick}
                     readOnly={readOnly}
                     onUpdateHelpText={setHelpText}
                     onUpdateLinkHelp={setLinkHelp}
@@ -307,19 +294,8 @@ function VisualizerGraph({
               if (node.id > 1 && nodePositions[node.id] && !node.isDeleted) {
                 return (
                   <VisualizerNode
-                    addingLink={addingLink}
-                    isAddLinkSourceNode={
-                      addLinkSourceNode && addLinkSourceNode.id === node.id
-                    }
                     key={`node-${node.id}`}
                     node={node}
-                    nodePositions={nodePositions}
-                    onAddNodeClick={onAddNodeClick}
-                    onConfirmAddLinkClick={onConfirmAddLinkClick}
-                    onDeleteNodeClick={onDeleteNodeClick}
-                    onEditNodeClick={onEditNodeClick}
-                    onStartAddLinkClick={onStartAddLinkClick}
-                    onViewNodeClick={onViewNodeClick}
                     readOnly={readOnly}
                     onUpdateHelpText={setHelpText}
                     updateNodeHelp={setNodeHelp}
@@ -346,7 +322,6 @@ function VisualizerGraph({
       <div css="position: absolute; top: 75px;right: 20px;display: flex;">
         {showTools && (
           <WorkflowTools
-            onClose={() => onUpdateShowTools(false)}
             onFitGraph={handleFitGraph}
             onPan={handlePan}
             onPanToMiddle={handlePanToMiddle}
@@ -354,38 +329,14 @@ function VisualizerGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showLegend && (
-          <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />
-        )}
+        {showLegend && <WorkflowLegend />}
       </div>
     </>
   );
 }
 
 VisualizerGraph.propTypes = {
-  addLinkSourceNode: shape(),
-  addingLink: bool.isRequired,
-  links: arrayOf(shape()).isRequired,
-  nodePositions: shape().isRequired,
-  nodes: arrayOf(shape()).isRequired,
-  onAddNodeClick: func.isRequired,
-  onCancelAddLinkClick: func.isRequired,
-  onConfirmAddLinkClick: func.isRequired,
-  onDeleteLinkClick: func.isRequired,
-  onDeleteNodeClick: func.isRequired,
-  onEditNodeClick: func.isRequired,
-  onLinkEditClick: func.isRequired,
-  onStartAddLinkClick: func.isRequired,
-  onUpdateShowLegend: func.isRequired,
-  onUpdateShowTools: func.isRequired,
-  onViewNodeClick: func.isRequired,
   readOnly: bool.isRequired,
-  showLegend: bool.isRequired,
-  showTools: bool.isRequired,
-};
-
-VisualizerGraph.defaultProps = {
-  addLinkSourceNode: {},
 };
 
 export default withI18n()(VisualizerGraph);

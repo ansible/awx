@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
-function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
+function DeleteAllNodesModal({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
   return (
     <AlertModal
       actions={[
@@ -13,7 +14,7 @@ function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
           key="remove"
           variant="danger"
           aria-label={i18n._(t`Confirm removal of all nodes`)}
-          onClick={() => onConfirm()}
+          onClick={() => dispatch({ type: 'DELETE_ALL_NODES' })}
         >
           {i18n._(t`Remove`)}
         </Button>,
@@ -21,13 +22,13 @@ function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel node removal`)}
-          onClick={onCancel}
+          onClick={() => dispatch({ type: 'TOGGLE_DELETE_ALL_NODES_MODAL' })}
         >
           {i18n._(t`Cancel`)}
         </Button>,
       ]}
       isOpen
-      onClose={onCancel}
+      onClose={() => dispatch({ type: 'TOGGLE_DELETE_ALL_NODES_MODAL' })}
       title={i18n._(t`Remove All Nodes`)}
       variant="danger"
     >
@@ -39,10 +40,5 @@ function DeleteAllNodesModal({ i18n, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
-
-DeleteAllNodesModal.propTypes = {
-  onCancel: func.isRequired,
-  onConfirm: func.isRequired,
-};
 
 export default withI18n()(DeleteAllNodesModal);

@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { arrayOf, bool, func, shape } from 'prop-types';
+import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import { CompassIcon, WrenchIcon } from '@patternfly/react-icons';
 import { StatusIcon } from '@components/Sparkline';
@@ -53,15 +57,11 @@ const StatusIconWithMargin = styled(StatusIcon)`
   margin-right: 20px;
 `;
 
-function WorkflowOutputToolbar({
-  i18n,
-  job,
-  legendShown,
-  nodes,
-  onLegendToggle,
-  onToolsToggle,
-  toolsShown,
-}) {
+function WorkflowOutputToolbar({ i18n, job }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+
+  const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
+
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
@@ -76,8 +76,8 @@ function WorkflowOutputToolbar({
         <VerticalSeparator />
         <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
           <ActionButton
-            isActive={legendShown}
-            onClick={onLegendToggle}
+            isActive={showLegend}
+            onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
             variant="plain"
           >
             <CompassIcon />
@@ -85,8 +85,8 @@ function WorkflowOutputToolbar({
         </Tooltip>
         <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
           <ActionButton
-            isActive={toolsShown}
-            onClick={onToolsToggle}
+            isActive={showTools}
+            onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
             variant="plain"
           >
             <WrenchIcon />
@@ -99,15 +99,6 @@ function WorkflowOutputToolbar({
 
 WorkflowOutputToolbar.propTypes = {
   job: shape().isRequired,
-  legendShown: bool.isRequired,
-  nodes: arrayOf(shape()),
-  onLegendToggle: func.isRequired,
-  onToolsToggle: func.isRequired,
-  toolsShown: bool.isRequired,
-};
-
-WorkflowOutputToolbar.defaultProps = {
-  nodes: [],
 };
 
 export default withI18n()(WorkflowOutputToolbar);

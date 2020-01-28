@@ -1,4 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -19,13 +23,8 @@ const LinkG = styled.g`
 `;
 
 function VisualizerLink({
-  addingLink,
   i18n,
   link,
-  nodePositions,
-  onAddNodeClick,
-  onDeleteLinkClick,
-  onLinkEditClick,
   onUpdateHelpText,
   onUpdateLinkHelp,
   readOnly,
@@ -36,6 +35,8 @@ function VisualizerLink({
   const [pathStroke, setPathStroke] = useState('#CCCCCC');
   const [tooltipX, setTooltipX] = useState();
   const [tooltipY, setTooltipY] = useState();
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { addingLink, nodePositions } = useContext(WorkflowStateContext);
 
   const addNodeAction = (
     <WorkflowActionTooltipItem
@@ -44,7 +45,11 @@ function VisualizerLink({
       onClick={() => {
         onUpdateHelpText(null);
         setHovering(false);
-        onAddNodeClick(link.source.id, link.target.id);
+        dispatch({
+          type: 'START_ADD_NODE',
+          sourceNodeId: link.source.id,
+          targetNodeId: link.target.id,
+        });
       }}
       onMouseEnter={() =>
         onUpdateHelpText(i18n._(t`Add a new node between these two nodes`))
@@ -63,7 +68,7 @@ function VisualizerLink({
           <WorkflowActionTooltipItem
             id="link-edit"
             key="edit"
-            onClick={() => onLinkEditClick(link)}
+            onClick={() => dispatch({ type: 'SET_LINK_TO_EDIT', value: link })}
             onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this link`))}
             onMouseLeave={() => onUpdateHelpText(null)}
           >
@@ -72,7 +77,7 @@ function VisualizerLink({
           <WorkflowActionTooltipItem
             id="link-delete"
             key="delete"
-            onClick={() => onDeleteLinkClick(link)}
+            onClick={() => dispatch({ type: 'START_DELETE_LINK', link })}
             onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this link`))}
             onMouseLeave={() => onUpdateHelpText(null)}
           >
@@ -142,12 +147,7 @@ function VisualizerLink({
 }
 
 VisualizerLink.propTypes = {
-  addingLink: bool.isRequired,
   link: shape().isRequired,
-  nodePositions: shape().isRequired,
-  onAddNodeClick: func.isRequired,
-  onDeleteLinkClick: func.isRequired,
-  onLinkEditClick: func.isRequired,
   readOnly: bool.isRequired,
   onUpdateHelpText: func.isRequired,
   onUpdateLinkHelp: func.isRequired,

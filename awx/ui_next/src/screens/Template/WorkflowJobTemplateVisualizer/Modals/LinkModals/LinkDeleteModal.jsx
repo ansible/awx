@@ -1,22 +1,27 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
-function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
+function LinkDeleteModal({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { linkToDelete } = useContext(WorkflowStateContext);
   return (
     <AlertModal
       variant="danger"
       title="Remove Link"
       isOpen={linkToDelete}
-      onClose={onCancel}
+      onClose={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
       actions={[
         <Button
           aria-label={i18n._(t`Confirm link removal`)}
           key="remove"
-          onClick={() => onConfirm()}
+          onClick={() => dispatch({ type: 'DELETE_LINK' })}
           variant="danger"
         >
           {i18n._(t`Remove`)}
@@ -24,7 +29,7 @@ function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
         <Button
           aria-label={i18n._(t`Cancel link removal`)}
           key="cancel"
-          onClick={onCancel}
+          onClick={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
           variant="secondary"
         >
           {i18n._(t`Cancel`)}
@@ -45,11 +50,5 @@ function LinkDeleteModal({ i18n, linkToDelete, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
-
-LinkDeleteModal.propTypes = {
-  linkToDelete: shape().isRequired,
-  onCancel: func.isRequired,
-  onConfirm: func.isRequired,
-};
 
 export default withI18n()(LinkDeleteModal);

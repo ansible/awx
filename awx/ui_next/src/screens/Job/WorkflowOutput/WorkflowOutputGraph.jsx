@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import * as d3 from 'd3';
-import { arrayOf, bool, shape, func } from 'prop-types';
 import {
   getScaleAndOffsetToFit,
   getTranslatePointsForZoom,
@@ -18,20 +18,16 @@ import {
   WorkflowTools,
 } from '@components/Workflow';
 
-function WorkflowOutputGraph({
-  links,
-  nodePositions,
-  nodes,
-  onUpdateShowLegend,
-  onUpdateShowTools,
-  showLegend,
-  showTools,
-}) {
+function WorkflowOutputGraph() {
   const [linkHelp, setLinkHelp] = useState();
   const [nodeHelp, setNodeHelp] = useState();
   const [zoomPercentage, setZoomPercentage] = useState(100);
   const svgRef = useRef(null);
   const gRef = useRef(null);
+
+  const { links, nodePositions, nodes, showLegend, showTools } = useContext(
+    WorkflowStateContext
+  );
 
   // This is the zoom function called by using the mousewheel/click and drag
   const zoom = () => {
@@ -158,7 +154,7 @@ function WorkflowOutputGraph({
   }, []);
 
   return (
-    <Fragment>
+    <>
       {(nodeHelp || linkHelp) && (
         <WorkflowHelp>
           {nodeHelp && <WorkflowNodeHelp node={nodeHelp} />}
@@ -172,16 +168,11 @@ function WorkflowOutputGraph({
       >
         <g id="workflow-g" ref={gRef}>
           {nodePositions && [
-            <WorkflowStartNode
-              key="start"
-              nodePositions={nodePositions}
-              showActionTooltip={false}
-            />,
+            <WorkflowStartNode key="start" showActionTooltip={false} />,
             links.map(link => (
               <WorkflowOutputLink
                 key={`link-${link.source.id}-${link.target.id}`}
                 link={link}
-                nodePositions={nodePositions}
                 onUpdateLinkHelp={setLinkHelp}
               />
             )),
@@ -193,7 +184,6 @@ function WorkflowOutputGraph({
                     mouseEnter={() => setNodeHelp(node)}
                     mouseLeave={() => setNodeHelp(null)}
                     node={node}
-                    nodePositions={nodePositions}
                   />
                 );
               }
@@ -205,7 +195,6 @@ function WorkflowOutputGraph({
       <div css="position: absolute; top: 75px;right: 20px;display: flex;">
         {showTools && (
           <WorkflowTools
-            onClose={() => onUpdateShowTools(false)}
             onFitGraph={handleFitGraph}
             onPan={handlePan}
             onPanToMiddle={handlePanToMiddle}
@@ -213,22 +202,10 @@ function WorkflowOutputGraph({
             zoomPercentage={zoomPercentage}
           />
         )}
-        {showLegend && (
-          <WorkflowLegend onClose={() => onUpdateShowLegend(false)} />
-        )}
+        {showLegend && <WorkflowLegend />}
       </div>
-    </Fragment>
+    </>
   );
 }
-
-WorkflowOutputGraph.propTypes = {
-  links: arrayOf(shape()).isRequired,
-  nodePositions: shape().isRequired,
-  nodes: arrayOf(shape()).isRequired,
-  onUpdateShowLegend: func.isRequired,
-  onUpdateShowTools: func.isRequired,
-  showLegend: bool.isRequired,
-  showTools: bool.isRequired,
-};
 
 export default WorkflowOutputGraph;

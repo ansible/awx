@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import WorkflowStartNode from './WorkflowStartNode';
 
 const nodePositions = {
@@ -13,10 +14,12 @@ describe('WorkflowStartNode', () => {
   test('mounts successfully', () => {
     const wrapper = mount(
       <svg>
-        <WorkflowStartNode
-          nodePositions={nodePositions}
-          showActionTooltip={false}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowStartNode
+            nodePositions={nodePositions}
+            showActionTooltip={false}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper).toHaveLength(1);
@@ -24,7 +27,9 @@ describe('WorkflowStartNode', () => {
   test('tooltip shown on hover', () => {
     const wrapper = mount(
       <svg>
-        <WorkflowStartNode nodePositions={nodePositions} showActionTooltip />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowStartNode nodePositions={nodePositions} showActionTooltip />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper.find('WorkflowActionTooltip')).toHaveLength(0);

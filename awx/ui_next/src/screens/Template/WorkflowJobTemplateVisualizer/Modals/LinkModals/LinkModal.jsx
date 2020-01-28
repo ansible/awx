@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { Button, FormGroup, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, node, string } from 'prop-types';
+import { func } from 'prop-types';
 import AnsibleSelect from '@components/AnsibleSelect';
 
-function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
-  const [newLinkType, setNewLinkType] = useState(linkType);
+function LinkModal({ header, i18n, onConfirm }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { linkToEdit } = useContext(WorkflowStateContext);
+  const [linkType, setLinkType] = useState(
+    linkToEdit ? linkToEdit.linkType : 'success'
+  );
   return (
     <Modal
       width={600}
       header={header}
       isOpen
       title={i18n._(t`Workflow Link`)}
-      onClose={onCancel}
+      onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button
           key="save"
           variant="primary"
           aria-label={i18n._(t`Save link changes`)}
-          onClick={() => onConfirm(newLinkType)}
+          onClick={() => onConfirm(linkType)}
         >
           {i18n._(t`Save`)}
         </Button>,
@@ -27,7 +35,7 @@ function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel link changes`)}
-          onClick={onCancel}
+          onClick={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
         >
           {i18n._(t`Cancel`)}
         </Button>,
@@ -36,7 +44,7 @@ function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
       <FormGroup fieldId="link-select" label={i18n._(t`Run`)}>
         <AnsibleSelect
           id="link-select"
-          value={newLinkType}
+          value={linkType}
           data={[
             {
               value: 'always',
@@ -55,7 +63,7 @@ function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
             },
           ]}
           onChange={(event, value) => {
-            setNewLinkType(value);
+            setLinkType(value);
           }}
         />
       </FormGroup>
@@ -64,14 +72,7 @@ function LinkModal({ linkType, header, i18n, onCancel, onConfirm }) {
 }
 
 LinkModal.propTypes = {
-  linkType: string,
-  header: node.isRequired,
-  onCancel: func.isRequired,
   onConfirm: func.isRequired,
-};
-
-LinkModal.defaultProps = {
-  linkType: 'success',
 };
 
 export default withI18n()(LinkModal);

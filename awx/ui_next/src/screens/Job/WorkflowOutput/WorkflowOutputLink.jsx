@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import { shape } from 'prop-types';
 import {
   generateLine,
@@ -6,11 +7,12 @@ import {
   getLinkOverlayPoints,
 } from '@components/Workflow/WorkflowUtils';
 
-function WorkflowOutputLink({ link, nodePositions, onUpdateLinkHelp }) {
+function WorkflowOutputLink({ link, onUpdateLinkHelp }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
   const [pathStroke, setPathStroke] = useState('#CCCCCC');
+  const { nodePositions } = useContext(WorkflowStateContext);
 
   const handleLinkMouseEnter = () => {
     ref.current.parentNode.appendChild(ref.current);
@@ -65,7 +67,6 @@ function WorkflowOutputLink({ link, nodePositions, onUpdateLinkHelp }) {
 
 WorkflowOutputLink.propTypes = {
   link: shape().isRequired,
-  nodePositions: shape().isRequired,
 };
 
 export default WorkflowOutputLink;

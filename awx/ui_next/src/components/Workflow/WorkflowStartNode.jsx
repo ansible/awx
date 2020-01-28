@@ -1,8 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { bool, func, shape } from 'prop-types';
+import { bool, func } from 'prop-types';
 import { PlusIcon } from '@patternfly/react-icons';
 import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
 import {
@@ -14,16 +18,11 @@ const StartG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};
 `;
 
-function WorkflowStartNode({
-  addingLink,
-  i18n,
-  nodePositions,
-  onAddNodeClick,
-  onUpdateHelpText,
-  showActionTooltip,
-}) {
+function WorkflowStartNode({ i18n, onUpdateHelpText, showActionTooltip }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { addingLink, nodePositions } = useContext(WorkflowStateContext);
 
   const handleNodeMouseEnter = () => {
     ref.current.parentNode.appendChild(ref.current);
@@ -62,7 +61,7 @@ function WorkflowStartNode({
               onClick={() => {
                 onUpdateHelpText(null);
                 setHovering(false);
-                onAddNodeClick(1);
+                dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 });
               }}
             >
               <PlusIcon />
@@ -77,16 +76,11 @@ function WorkflowStartNode({
 }
 
 WorkflowStartNode.propTypes = {
-  addingLink: bool,
-  nodePositions: shape().isRequired,
-  onAddNodeClick: func,
   showActionTooltip: bool.isRequired,
   onUpdateHelpText: func,
 };
 
 WorkflowStartNode.defaultProps = {
-  addingLink: false,
-  onAddNodeClick: () => {},
   onUpdateHelpText: () => {},
 };
 

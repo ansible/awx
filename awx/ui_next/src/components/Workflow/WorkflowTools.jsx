@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -53,13 +54,13 @@ const Close = styled(TimesIcon)`
 
 function WorkflowTools({
   i18n,
-  onClose,
   onFitGraph,
   onPan,
   onPanToMiddle,
   onZoomChange,
   zoomPercentage,
 }) {
+  const dispatch = useContext(WorkflowDispatchContext);
   const zoomIn = () => {
     const newScale =
       Math.ceil((zoomPercentage + 10) / 10) * 10 < 200
@@ -80,7 +81,7 @@ function WorkflowTools({
     <Wrapper>
       <Header>
         <b>{i18n._(t`Tools`)}</b>
-        <Close onClick={onClose} />
+        <Close onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })} />
       </Header>
       <Tools>
         <Tooltip
@@ -178,7 +179,6 @@ function WorkflowTools({
 }
 
 WorkflowTools.propTypes = {
-  onClose: func.isRequired,
   onFitGraph: func.isRequired,
   onPan: func.isRequired,
   onPanToMiddle: func.isRequired,

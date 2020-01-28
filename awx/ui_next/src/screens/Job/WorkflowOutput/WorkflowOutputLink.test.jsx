@@ -1,5 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mount } from 'enzyme';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import WorkflowOutputLink from './WorkflowOutputLink';
 
 const link = {
@@ -28,13 +29,15 @@ const nodePositions = {
 
 describe('WorkflowOutputLink', () => {
   test('mounts successfully', () => {
-    const wrapper = mountWithContexts(
+    const wrapper = mount(
       <svg>
-        <WorkflowOutputLink
-          link={link}
-          nodePositions={nodePositions}
-          onUpdateLinkHelp={() => {}}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowOutputLink
+            link={link}
+            nodePositions={nodePositions}
+            onUpdateLinkHelp={() => {}}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper).toHaveLength(1);

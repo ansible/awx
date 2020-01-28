@@ -1,4 +1,5 @@
 import React from 'react';
+import { WorkflowStateContext } from '@contexts/Workflow';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import WorkflowOutputNode from './WorkflowOutputNode';
 
@@ -48,12 +49,13 @@ describe('WorkflowOutputNode', () => {
   test('mounts successfully', () => {
     const wrapper = mountWithContexts(
       <svg>
-        <WorkflowOutputNode
-          mouseEnter={() => {}}
-          mouseLeave={() => {}}
-          node={nodeWithJT}
-          nodePositions={nodePositions}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowOutputNode
+            mouseEnter={() => {}}
+            mouseLeave={() => {}}
+            node={nodeWithJT}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper).toHaveLength(1);
@@ -61,12 +63,13 @@ describe('WorkflowOutputNode', () => {
   test('node contents displayed correctly when Job and Job Template exist', () => {
     const wrapper = mountWithContexts(
       <svg>
-        <WorkflowOutputNode
-          mouseEnter={() => {}}
-          mouseLeave={() => {}}
-          node={nodeWithJT}
-          nodePositions={nodePositions}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowOutputNode
+            mouseEnter={() => {}}
+            mouseLeave={() => {}}
+            node={nodeWithJT}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper.contains(<p>Automation JT</p>)).toEqual(true);
@@ -75,12 +78,13 @@ describe('WorkflowOutputNode', () => {
   test('node contents displayed correctly when Job Template deleted', () => {
     const wrapper = mountWithContexts(
       <svg>
-        <WorkflowOutputNode
-          mouseEnter={() => {}}
-          mouseLeave={() => {}}
-          node={nodeWithoutJT}
-          nodePositions={nodePositions}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowOutputNode
+            mouseEnter={() => {}}
+            mouseLeave={() => {}}
+            node={nodeWithoutJT}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper.contains(<p>DELETED</p>)).toEqual(true);
@@ -89,12 +93,13 @@ describe('WorkflowOutputNode', () => {
   test('node contents displayed correctly when Job deleted', () => {
     const wrapper = mountWithContexts(
       <svg>
-        <WorkflowOutputNode
-          mouseEnter={() => {}}
-          mouseLeave={() => {}}
-          node={{ id: 2 }}
-          nodePositions={nodePositions}
-        />
+        <WorkflowStateContext.Provider value={{ nodePositions }}>
+          <WorkflowOutputNode
+            mouseEnter={() => {}}
+            mouseLeave={() => {}}
+            node={{ id: 2 }}
+          />
+        </WorkflowStateContext.Provider>
       </svg>
     );
     expect(wrapper.text()).toBe('DELETED');

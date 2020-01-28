@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { bool, func, node, shape } from 'prop-types';
+import { bool, node, func } from 'prop-types';
 import {
   Button,
   WizardContextConsumer,
@@ -12,15 +16,10 @@ import Wizard from '@components/Wizard';
 import { NodeTypeStep } from './NodeTypeStep';
 import { RunStep, NodeNextButton } from '.';
 
-function NodeModal({
-  askLinkType,
-  history,
-  i18n,
-  nodeToEdit,
-  onClose,
-  onSave,
-  title,
-}) {
+function NodeModal({ askLinkType, history, i18n, onSave, title }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { nodeToEdit } = useContext(WorkflowStateContext);
+
   let defaultApprovalDescription = '';
   let defaultApprovalName = '';
   let defaultApprovalTimeout = 0;
@@ -104,16 +103,12 @@ function NodeModal({
           }
         : nodeResource;
 
-    onSave({
-      linkType,
-      nodeResource: resource,
-      nodeType,
-    });
+    onSave(linkType, resource, nodeType);
   };
 
   const handleCancel = () => {
     clearQueryParams();
-    onClose();
+    dispatch({ type: 'CANCEL_NODE_MODAL' });
   };
 
   const handleNodeTypeChange = newNodeType => {
@@ -211,14 +206,8 @@ function NodeModal({
 
 NodeModal.propTypes = {
   askLinkType: bool.isRequired,
-  nodeToEdit: shape(),
-  onClose: func.isRequired,
   onSave: func.isRequired,
   title: node.isRequired,
-};
-
-NodeModal.defaultProps = {
-  nodeToEdit: null,
 };
 
 export default withI18n()(withRouter(NodeModal));

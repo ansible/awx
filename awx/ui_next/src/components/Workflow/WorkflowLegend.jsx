@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
-import { func } from 'prop-types';
 import {
   ExclamationTriangleIcon,
   PauseIcon,
@@ -77,12 +77,14 @@ const Close = styled(TimesIcon)`
   top: 15px;
 `;
 
-function WorkflowLegend({ i18n, onClose }) {
+function WorkflowLegend({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+
   return (
     <Wrapper>
       <Header>
         <b>{i18n._(t`Legend`)}</b>
-        <Close onClick={onClose} />
+        <Close onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })} />
       </Header>
       <Legend>
         <li>
@@ -127,9 +129,5 @@ function WorkflowLegend({ i18n, onClose }) {
     </Wrapper>
   );
 }
-
-WorkflowLegend.propTypes = {
-  onClose: func.isRequired,
-};
 
 export default withI18n()(WorkflowLegend);

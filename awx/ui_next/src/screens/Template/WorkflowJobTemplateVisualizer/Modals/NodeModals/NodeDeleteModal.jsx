@@ -1,23 +1,28 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape } from 'prop-types';
 import AlertModal from '@components/AlertModal';
 
-function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
+function NodeDeleteModal({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+  const { nodeToDelete } = useContext(WorkflowStateContext);
   return (
     <AlertModal
       variant="danger"
       title={i18n._(t`Remove Node`)}
       isOpen={nodeToDelete}
-      onClose={onCancel}
+      onClose={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
       actions={[
         <Button
           key="remove"
           variant="danger"
           aria-label={i18n._(t`Confirm node removal`)}
-          onClick={() => onConfirm()}
+          onClick={() => dispatch({ type: 'DELETE_NODE' })}
         >
           {i18n._(t`Remove`)}
         </Button>,
@@ -25,7 +30,7 @@ function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel node removal`)}
-          onClick={onCancel}
+          onClick={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
         >
           {i18n._(t`Cancel`)}
         </Button>,
@@ -45,11 +50,5 @@ function NodeDeleteModal({ i18n, nodeToDelete, onConfirm, onCancel }) {
     </AlertModal>
   );
 }
-
-NodeDeleteModal.propTypes = {
-  nodeToDelete: shape().isRequired,
-  onCancel: func.isRequired,
-  onConfirm: func.isRequired,
-};
 
 export default withI18n()(NodeDeleteModal);

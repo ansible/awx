@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func } from 'prop-types';
 import { Button as PFButton } from '@patternfly/react-core';
 import styled from 'styled-components';
 
@@ -29,7 +29,8 @@ const StartPanelWrapper = styled.div`
   justify-content: center;
 `;
 
-function VisualizerStartScreen({ i18n, onStartClick }) {
+function VisualizerStartScreen({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
   return (
     <div css="flex: 1">
       <StartPanelWrapper>
@@ -37,7 +38,9 @@ function VisualizerStartScreen({ i18n, onStartClick }) {
           <p>{i18n._(t`Please click the Start button to begin.`)}</p>
           <Button
             aria-label={i18n._(t`Start`)}
-            onClick={() => onStartClick(1)}
+            onClick={() =>
+              dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 })
+            }
             variant="primary"
           >
             {i18n._(t`Start`)}
@@ -47,9 +50,5 @@ function VisualizerStartScreen({ i18n, onStartClick }) {
     </div>
   );
 }
-
-VisualizerStartScreen.propTypes = {
-  onStartClick: func.isRequired,
-};
 
 export default withI18n()(VisualizerStartScreen);

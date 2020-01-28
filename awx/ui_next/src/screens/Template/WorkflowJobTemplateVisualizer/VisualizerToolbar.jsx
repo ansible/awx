@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { arrayOf, bool, func, shape } from 'prop-types';
+import { func, shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import {
   BookIcon,
@@ -36,18 +40,11 @@ const ActionButton = styled(Button)`
   }
 `;
 
-function VisualizerToolbar({
-  i18n,
-  legendShown,
-  nodes,
-  onClose,
-  onDeleteAllClick,
-  onLegendToggle,
-  onSave,
-  onToolsToggle,
-  template,
-  toolsShown,
-}) {
+function VisualizerToolbar({ i18n, onClose, onSave, template }) {
+  const dispatch = useContext(WorkflowDispatchContext);
+
+  const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
+
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
@@ -64,8 +61,8 @@ function VisualizerToolbar({
           <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
-              isActive={legendShown}
-              onClick={onLegendToggle}
+              isActive={showLegend}
+              onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
               variant="plain"
             >
               <CompassIcon />
@@ -73,8 +70,8 @@ function VisualizerToolbar({
           </Tooltip>
           <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
             <ActionButton
-              isActive={toolsShown}
-              onClick={onToolsToggle}
+              isActive={showTools}
+              onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
               variant="plain"
             >
               <WrenchIcon />
@@ -90,7 +87,12 @@ function VisualizerToolbar({
             <ActionButton
               aria-label={i18n._(t`Delete all nodes`)}
               isDisabled={totalNodes === 0}
-              onClick={onDeleteAllClick}
+              onClick={() =>
+                dispatch({
+                  type: 'SET_SHOW_DELETE_ALL_NODES_MODAL',
+                  value: true,
+                })
+              }
               variant="plain"
             >
               <TrashAltIcon />
@@ -115,19 +117,9 @@ function VisualizerToolbar({
 }
 
 VisualizerToolbar.propTypes = {
-  legendShown: bool.isRequired,
-  nodes: arrayOf(shape()),
   onClose: func.isRequired,
-  onDeleteAllClick: func.isRequired,
-  onLegendToggle: func.isRequired,
   onSave: func.isRequired,
-  onToolsToggle: func.isRequired,
   template: shape().isRequired,
-  toolsShown: bool.isRequired,
-};
-
-VisualizerToolbar.defaultProps = {
-  nodes: [],
 };
 
 export default withI18n()(VisualizerToolbar);
