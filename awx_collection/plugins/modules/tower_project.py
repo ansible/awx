@@ -118,6 +118,11 @@ options:
           on the project may be successfully created
       type: bool
       default: True
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -152,7 +157,7 @@ def wait_for_project_update(module, last_request):
     if 'current_update' in last_request['summary_fields']:
         running = True
         while running:
-            result = module.get_endpoint('/project_updates/{}/'.format(last_request['summary_fields']['current_update']['id']))['json']
+            result = module.get_endpoint('/project_updates/{0}/'.format(last_request['summary_fields']['current_update']['id']))['json']
 
             if module.is_job_done(result['status']):
                 running = False
@@ -161,6 +166,7 @@ def wait_for_project_update(module, last_request):
             module.fail_json(msg="Project update failed")
 
     module.exit_json(**module.json_output)
+
 
 def main():
     # Any additional arguments that are not fields of the item can be added here
@@ -212,7 +218,7 @@ def main():
 
     # Attempt to lookup the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
-    if scm_credential != None:
+    if scm_credential is not None:
         scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
 
     # Attempt to lookup project based on the provided name and org ID
@@ -238,9 +244,9 @@ def main():
         'scm_update_cache_timeout': scm_update_cache_timeout,
         'custom_virtualenv': custom_virtualenv,
     }
-    if scm_credential != None:
+    if scm_credential is not None:
         project_fields['credential'] = scm_credential_id
-    if scm_allow_override != None:
+    if scm_allow_override is not None:
         project_fields['scm_allow_override'] = scm_allow_override
     if scm_type == '':
         project_fields['local_path'] = local_path
@@ -261,7 +267,7 @@ def main():
         module.delete_endpoint('projects/{0}'.format(project['id']), item_type='project', item_name=name, **{})
     elif state == 'present' and not project:
         # if the state was present and we couldn't find a project we can build one, the module wikl handle exiting from this
-        response = module.post_endpoint('projects', handle_return=False,item_type='project', item_name=name, **{'data': project_fields })
+        module.post_endpoint('projects', handle_return=False, item_type='project', item_name=name, **{'data': project_fields})
     else:
         # If the state was present and we had a project we can see if we need to update it
         # This will return on its own

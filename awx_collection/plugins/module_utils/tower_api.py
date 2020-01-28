@@ -7,7 +7,7 @@ from ansible.module_utils.urls import Request, SSLValidationError, ConnectionErr
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
-from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError, NoSectionError
+from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from socket import gethostbyname
 import re
 from json import loads, dumps
@@ -17,6 +17,7 @@ from os import access, R_OK, getcwd
 
 class ConfigFileException(Exception):
     pass
+
 
 class TowerModule(AnsibleModule):
     url = None
@@ -83,7 +84,7 @@ class TowerModule(AnsibleModule):
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
-        config_files = [ join('/etc/tower/', self.config_name), join(expanduser("~"), ".{}".format(self.config_name)) ]
+        config_files = [join('/etc/tower/', self.config_name), join(expanduser("~"), ".{0}".format(self.config_name))]
         local_dir = getcwd()
         config_files.append(join(local_dir, self.config_name))
         while split(local_dir)[1]:
@@ -93,7 +94,7 @@ class TowerModule(AnsibleModule):
         for config_file in config_files:
             try:
                 self.load_config(config_file)
-            except ConfigFileException as cfe:
+            except ConfigFileException:
                 # Since some of these may not exist or can't be read, we really don't care
                 pass
 
@@ -103,7 +104,7 @@ class TowerModule(AnsibleModule):
                 self.load_config(self.params.get('tower_config_file'))
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want to fail if we have an error
-                module.fail_json(msg=cfe)
+                self.fail_json(msg=cfe)
 
     def load_config(self, config_path):
         config = ConfigParser()
@@ -151,7 +152,7 @@ class TowerModule(AnsibleModule):
             self.json_output['name'] = response['json']['name']
             self.json_output['id'] = response['json']['id']
             self.json_output['changed'] = True
-            if self.on_change == None:
+            if self.on_change is None:
                 self.exit_json(**self.json_output)
             else:
                 self.on_change(self, response['json'])
@@ -161,7 +162,7 @@ class TowerModule(AnsibleModule):
             elif 'json' in response:
                 self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
             else:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{ 'payload': kwargs['data'] })
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
 
     def delete_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
         # Handle check mode
@@ -222,7 +223,7 @@ class TowerModule(AnsibleModule):
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
             # If we got 0 items by name, maybe they gave us an ID, lets try looking it by by ID
-            response = self.head_endpoint("{}/{}".format(endpoint, name_or_id), **{'return_none_on_404': True})
+            response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
             if response is not None:
                 return name_or_id
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
@@ -386,7 +387,7 @@ class TowerModule(AnsibleModule):
                 elif response['status_code'] == 200:
                     existing_return['changed'] = True
                     existing_return['id'] = response['json'].get('id')
-                    if self.on_change == None:
+                    if self.on_change is None:
                         self.exit_json(**existing_return)
                     else:
                         self.on_change(self, response['json'])
@@ -407,7 +408,7 @@ class TowerModule(AnsibleModule):
             api_token_url = (self.url._replace(path='/api/v2/tokens/{0}/'.format(self.oauth_token_id))).geturl()
 
             try:
-                response = self.session.open(
+                self.session.open(
                     'DELETE', api_token_url,
                     validate_certs=self.verify_ssl, follow_redirects=True,
                     force_basic_auth=True, url_username=self.username, url_password=self.password
@@ -429,7 +430,6 @@ class TowerModule(AnsibleModule):
         super().exit_json(**kwargs)
 
     def is_job_done(self, job_status):
-        if job_status in [ 'new', 'pending', 'waiting', 'running', ]:
+        if job_status in ['new', 'pending', 'waiting', 'running']:
             return False
         return True
-
