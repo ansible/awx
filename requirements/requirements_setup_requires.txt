@@ -7,7 +7,7 @@ isort
 virtualenv
 m2r
 cffi>=1.1
-wheel>=0.33.6
+wheel>=0.33.6,<42.0.0
 backports.functools_lru_cache
 more-itertools==5.0.0
 poetry==0.12.17
