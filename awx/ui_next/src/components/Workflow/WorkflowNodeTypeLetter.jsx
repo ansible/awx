@@ -3,13 +3,15 @@ import styled from 'styled-components';
 import { shape } from 'prop-types';
 import { PauseIcon } from '@patternfly/react-icons';
 
-const NodeTypeLetter = styled.foreignObject`
+const NodeTypeLetter = styled.div`
   background-color: #393f43;
   border-radius: 50%;
   color: white;
   font-size: 10px;
   line-height: 20px;
   text-align: center;
+  height: 20px;
+  width: 20px;
 `;
 
 const CenteredPauseIcon = styled(PauseIcon)`
@@ -19,11 +21,14 @@ const CenteredPauseIcon = styled(PauseIcon)`
 function WorkflowNodeTypeLetter({ node }) {
   let nodeTypeLetter;
   if (
-    node.unifiedJobTemplate &&
-    (node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type)
+    (node.unifiedJobTemplate &&
+      (node.unifiedJobTemplate.type ||
+        node.unifiedJobTemplate.unified_job_type)) ||
+    (node.job && node.job.type)
   ) {
-    const ujtType =
-      node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type;
+    const ujtType = node.unifiedJobTemplate
+      ? node.unifiedJobTemplate.type || node.unifiedJobTemplate.unified_job_type
+      : node.job.type;
     switch (ujtType) {
       case 'job_template':
       case 'job':
@@ -51,9 +56,9 @@ function WorkflowNodeTypeLetter({ node }) {
   }
 
   return (
-    <NodeTypeLetter y="50" x="-10" height="20" width="20">
-      {nodeTypeLetter}
-    </NodeTypeLetter>
+    <foreignObject y="50" x="-10" height="20" width="20">
+      <NodeTypeLetter>{nodeTypeLetter}</NodeTypeLetter>
+    </foreignObject>
   );
 }
 

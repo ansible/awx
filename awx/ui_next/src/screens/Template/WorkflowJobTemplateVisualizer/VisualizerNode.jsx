@@ -26,7 +26,7 @@ const NodeG = styled.g`
   cursor: ${props => (props.job ? 'pointer' : 'default')};
 `;
 
-const NodeContents = styled.foreignObject`
+const NodeContents = styled.div`
   font-size: 13px;
   padding: 0px 10px;
   background-color: ${props =>
@@ -183,25 +183,28 @@ function VisualizerNode({
             ? '#007ABC'
             : '#93969A'
         }
-        strokeWidth="4px"
+        strokeWidth="2px"
         width={wfConstants.nodeW}
       />
-      <NodeContents
-        height="60"
-        isInvalidLinkTarget={node.isInvalidLinkTarget}
+      <foreignObject
+        height="58"
         {...(!addingLink && {
           onMouseEnter: () => updateNodeHelp(node),
           onMouseLeave: () => updateNodeHelp(null),
         })}
         onClick={() => handleNodeClick()}
-        width="180"
+        width="178"
+        x="1"
+        y="1"
       >
-        <NodeDefaultLabel>
-          {node.unifiedJobTemplate
-            ? node.unifiedJobTemplate.name
-            : i18n._(t`DELETED`)}
-        </NodeDefaultLabel>
-      </NodeContents>
+        <NodeContents isInvalidLinkTarget={node.isInvalidLinkTarget}>
+          <NodeDefaultLabel>
+            {node.unifiedJobTemplate
+              ? node.unifiedJobTemplate.name
+              : i18n._(t`DELETED`)}
+          </NodeDefaultLabel>
+        </NodeContents>
+      </foreignObject>
       {node.unifiedJobTemplate && <WorkflowNodeTypeLetter node={node} />}
       {hovering && !addingLink && (
         <WorkflowActionTooltip

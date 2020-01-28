@@ -24,7 +24,7 @@ const nodeWithoutJT = {
   job: {
     elapsed: 7,
     id: 9000,
-    name: 'Automation JT',
+    name: 'Automation JT 2',
     status: 'successful',
     type: 'job',
   },
@@ -87,7 +87,7 @@ describe('WorkflowOutputNode', () => {
         </WorkflowStateContext.Provider>
       </svg>
     );
-    expect(wrapper.contains(<p>DELETED</p>)).toEqual(true);
+    expect(wrapper.contains(<p>Automation JT 2</p>)).toEqual(true);
     expect(wrapper.find('WorkflowOutputNode__Elapsed').text()).toBe('00:00:07');
   });
   test('node contents displayed correctly when Job deleted', () => {

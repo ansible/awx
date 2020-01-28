@@ -43,7 +43,7 @@ const Elapsed = styled.div`
   }
 `;
 
-const NodeContents = styled.foreignObject`
+const NodeContents = styled.div`
   font-size: 13px;
   padding: 0px 10px;
 `;
@@ -98,29 +98,28 @@ function WorkflowOutputNode({ history, i18n, mouseEnter, mouseLeave, node }) {
         strokeWidth="2px"
         width={wfConstants.nodeW}
       />
-      <NodeContents height="60" width="180">
-        {node.job ? (
-          <>
-            <JobTopLine>
-              <StatusIcon status={node.job.status} />
-              <p>
-                {node.unifiedJobTemplate
-                  ? node.unifiedJobTemplate.name
-                  : i18n._(t`DELETED`)}
-              </p>
-            </JobTopLine>
-            <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
-          </>
-        ) : (
-          <NodeDefaultLabel>
-            {node.unifiedJobTemplate
-              ? node.unifiedJobTemplate.name
-              : i18n._(t`DELETED`)}
-          </NodeDefaultLabel>
-        )}
-      </NodeContents>
-      <circle cy="60" r="10" fill="#393F43" />
-      {node.unifiedJobTemplate && <WorkflowNodeTypeLetter node={node} />}
+      <foreignObject height="58" width="178" x="1" y="1">
+        <NodeContents>
+          {node.job ? (
+            <>
+              <JobTopLine>
+                <StatusIcon status={node.job.status} />
+                <p>{node.job.name}</p>
+              </JobTopLine>
+              <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
+            </>
+          ) : (
+            <NodeDefaultLabel>
+              {node.unifiedJobTemplate
+                ? node.unifiedJobTemplate.name
+                : i18n._(t`DELETED`)}
+            </NodeDefaultLabel>
+          )}
+        </NodeContents>
+      </foreignObject>
+      {(node.unifiedJobTemplate || node.job) && (
+        <WorkflowNodeTypeLetter node={node} />
+      )}
     </NodeG>
   );
 }

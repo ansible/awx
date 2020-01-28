@@ -1,7 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import { shape } from 'prop-types';
 import { secondsToHHMMSS } from '@util/dates';
 
@@ -18,11 +19,23 @@ const GridDL = styled.dl`
   }
 `;
 
+const ResourceDeleted = styled.p`
+  margin-bottom: ${props => (props.job ? '10px' : '0px')};
+`;
+
+const StyledExclamationTriangleIcon = styled(ExclamationTriangleIcon)`
+  color: #f0ad4d;
+  height: 20px;
+  margin-right: 10px;
+  width: 20px;
+`;
+
 function WorkflowNodeHelp({ node, i18n }) {
   let nodeType;
-  if (node.unifiedJobTemplate) {
-    const type =
-      node.unifiedJobTemplate.unified_job_type || node.unifiedJobTemplate.type;
+  if (node.unifiedJobTemplate || node.job) {
+    const type = node.unifiedJobTemplate
+      ? node.unifiedJobTemplate.unified_job_type || node.unifiedJobTemplate.type
+      : node.job.type;
     switch (type) {
       case 'job_template':
       case 'job':
@@ -97,43 +110,59 @@ function WorkflowNodeHelp({ node, i18n }) {
   }
 
   return (
-    <Fragment>
-      <GridDL>
-        {node.unifiedJobTemplate && (
-          <Fragment>
-            <dt>
-              <b>{i18n._(t`Name`)}</b>
-            </dt>
-            <dd id="workflow-node-help-name">{node.unifiedJobTemplate.name}</dd>
-            <dt>
-              <b>{i18n._(t`Type`)}</b>
-            </dt>
-            <dd id="workflow-node-help-type">{nodeType}</dd>
-          </Fragment>
-        )}
-        {node.job && (
-          <Fragment>
-            <dt>
-              <b>{i18n._(t`Job Status`)}</b>
-            </dt>
-            <dd id="workflow-node-help-status">{jobStatus}</dd>
-            {node.job.elapsed && (
-              <Fragment>
-                <dt>
-                  <b>{i18n._(t`Elapsed`)}</b>
-                </dt>
-                <dd id="workflow-node-help-elapsed">
-                  {secondsToHHMMSS(node.job.elapsed)}
-                </dd>
-              </Fragment>
-            )}
-          </Fragment>
-        )}
-      </GridDL>
+    <>
+      {!node.unifiedJobTemplate && (
+        <>
+          <ResourceDeleted job={node.job}>
+            <StyledExclamationTriangleIcon />
+            <Trans>
+              The resource associated with this node has been deleted.
+            </Trans>
+          </ResourceDeleted>
+        </>
+      )}
+      {node.job && (
+        <GridDL>
+          <dt>
+            <b>{i18n._(t`Name`)}</b>
+          </dt>
+          <dd id="workflow-node-help-name">{node.job.name}</dd>
+          <dt>
+            <b>{i18n._(t`Type`)}</b>
+          </dt>
+          <dd id="workflow-node-help-type">{nodeType}</dd>
+          <dt>
+            <b>{i18n._(t`Job Status`)}</b>
+          </dt>
+          <dd id="workflow-node-help-status">{jobStatus}</dd>
+          {node.job.elapsed && (
+            <>
+              <dt>
+                <b>{i18n._(t`Elapsed`)}</b>
+              </dt>
+              <dd id="workflow-node-help-elapsed">
+                {secondsToHHMMSS(node.job.elapsed)}
+              </dd>
+            </>
+          )}
+        </GridDL>
+      )}
+      {node.unifiedJobTemplate && !node.job && (
+        <GridDL>
+          <dt>
+            <b>{i18n._(t`Name`)}</b>
+          </dt>
+          <dd id="workflow-node-help-name">{node.unifiedJobTemplate.name}</dd>
+          <dt>
+            <b>{i18n._(t`Type`)}</b>
+          </dt>
+          <dd id="workflow-node-help-type">{nodeType}</dd>
+        </GridDL>
+      )}
       {node.job && (
         <p css="margin-top: 10px">{i18n._(t`Click to view job details`)}</p>
       )}
-    </Fragment>
+    </>
   );
 }
 
