@@ -422,12 +422,12 @@ class TowerModule(AnsibleModule):
     def fail_json(self, **kwargs):
         # Try to logout if we are authenticated
         self.logout()
-        super().fail_json(**kwargs)
+        super(TowerModule, self).fail_json(**kwargs)
 
     def exit_json(self, **kwargs):
         # Try to logout if we are authenticated
         self.logout()
-        super().exit_json(**kwargs)
+        super(TowerModule, self).exit_json(**kwargs)
 
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:
