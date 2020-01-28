@@ -38,6 +38,12 @@ class HostListItem extends React.Component {
       toggleLoading,
       i18n,
     } = this.props;
+
+    const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
+      ...job,
+      type: 'job',
+    }));
+
     const labelId = `check-action-${host.id}`;
     return (
       <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
@@ -57,7 +63,7 @@ class HostListItem extends React.Component {
                 </Link>
               </DataListCell>,
               <DataListCell key="recentJobs">
-                <Sparkline jobs={host.summary_fields.recent_jobs} />
+                <Sparkline jobs={recentPlaybookJobs} />
               </DataListCell>,
               <DataListCell key="inventory">
                 {host.summary_fields.inventory && (

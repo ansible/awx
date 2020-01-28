@@ -19,6 +19,7 @@ const mockHost = {
     user_capabilities: {
       edit: true,
     },
+    recent_jobs: [],
   },
 };
 
