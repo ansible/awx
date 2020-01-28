@@ -23,6 +23,7 @@ describe('<HostDetail />', () => {
       user_capabilities: {
         edit: true,
       },
+      recent_jobs: [],
     },
   };
 

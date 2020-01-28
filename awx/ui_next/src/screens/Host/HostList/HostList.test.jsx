@@ -22,6 +22,7 @@ const mockHosts = [
         delete: true,
         update: true,
       },
+      recent_jobs: [],
     },
   },
   {
@@ -38,6 +39,7 @@ const mockHosts = [
         delete: true,
         update: true,
       },
+      recent_jobs: [],
     },
   },
   {
@@ -50,6 +52,14 @@ const mockHosts = [
         id: 1,
         name: 'inv 1',
       },
+      recent_jobs: [
+        {
+          id: 123,
+          name: 'Bibbity Bop',
+          status: 'success',
+          finished: '2020-01-27T19:40:36.208728Z',
+        },
+      ],
       user_capabilities: {
         delete: false,
         update: false,

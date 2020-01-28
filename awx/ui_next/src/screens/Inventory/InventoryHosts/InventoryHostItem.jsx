@@ -32,6 +32,11 @@ function InventoryHostItem(props) {
     toggleLoading,
   } = props;
 
+  const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
+    ...job,
+    type: 'job',
+  }));
+
   const labelId = `check-action-${host.id}`;
 
   return (
@@ -52,7 +57,7 @@ function InventoryHostItem(props) {
               </Link>
             </DataListCell>,
             <DataListCell key="recentJobs">
-              <Sparkline jobs={host.summary_fields.recent_jobs} />
+              <Sparkline jobs={recentPlaybookJobs} />
             </DataListCell>,
             <ActionButtonCell lastcolumn="true" key="action">
               <Tooltip
@@ -69,13 +74,14 @@ function InventoryHostItem(props) {
                   labelOff={i18n._(t`Off`)}
                   isChecked={host.enabled}
                   isDisabled={
-                    toggleLoading || !host.summary_fields.user_capabilities.edit
+                    toggleLoading ||
+                    !host.summary_fields.user_capabilities?.edit
                   }
                   onChange={() => toggleHost(host)}
                   aria-label={i18n._(t`Toggle host`)}
                 />
               </Tooltip>
-              {host.summary_fields.user_capabilities.edit && (
+              {host.summary_fields.user_capabilities?.edit && (
                 <Tooltip content={i18n._(t`Edit Host`)} position="top">
                   <ListActionButton
                     variant="plain"

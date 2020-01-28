@@ -40,6 +40,8 @@ function HostDetail({ host, i18n, onUpdateHost }) {
   const [toggleLoading, setToggleLoading] = useState(false);
   const [toggleError, setToggleError] = useState(false);
 
+  const recentPlaybookJobs = recent_jobs.map(job => ({ ...job, type: 'job' }));
+
   const handleHostToggle = async () => {
     setToggleLoading(true);
     try {
@@ -107,7 +109,7 @@ function HostDetail({ host, i18n, onUpdateHost }) {
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail
           css="display: flex; flex: 1;"
-          value={<Sparkline jobs={recent_jobs} />}
+          value={<Sparkline jobs={recentPlaybookJobs} />}
           label={i18n._(t`Activity`)}
         />
         <Detail label={i18n._(t`Description`)} value={description} />

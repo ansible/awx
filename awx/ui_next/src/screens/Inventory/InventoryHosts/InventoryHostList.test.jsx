@@ -23,6 +23,7 @@ const mockHosts = [
         delete: true,
         update: true,
       },
+      recent_jobs: [],
     },
   },
   {
@@ -41,6 +42,7 @@ const mockHosts = [
         delete: true,
         update: true,
       },
+      recent_jobs: [],
     },
   },
   {
@@ -58,6 +60,7 @@ const mockHosts = [
         delete: false,
         update: false,
       },
+      recent_jobs: [],
     },
   },
 ];
