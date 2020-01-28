@@ -5,15 +5,18 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.basic import env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
-
-from socket import gethostbyname
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
-from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError, NoSectionError
+from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
+from socket import gethostbyname
 import re
 from json import loads, dumps
-from os.path import isfile
-from os import access, R_OK
+from os.path import isfile, expanduser, split, join
+from os import access, R_OK, getcwd
+
+
+class ConfigFileException(Exception):
+    pass
 
 
 class TowerModule(AnsibleModule):
@@ -30,6 +33,7 @@ class TowerModule(AnsibleModule):
     authenticated = False
     json_output = {'changed': False}
     on_change = None
+    config_name = 'tower_cli.cfg'
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -45,11 +49,9 @@ class TowerModule(AnsibleModule):
 
         super(TowerModule, self).__init__(argument_spec=args, **kwargs)
 
-        # If we have a tower config, load it
-        if self.params.get('tower_config_file'):
-            self.load_config(self.params.get('tower_config_file'))
+        self.load_config_files()
 
-        # Parameters specified on command line will override settings in config
+        # Parameters specified on command line will override settings in any config
         if self.params.get('tower_host'):
             self.host = self.params.get('tower_host')
         if self.params.get('tower_username'):
@@ -80,22 +82,48 @@ class TowerModule(AnsibleModule):
 
         self.session = Request(cookies=self.cookie_jar)
 
+    def load_config_files(self):
+        # Load configs like TowerCLI would have from least import to most
+        config_files = [join('/etc/tower/', self.config_name), join(expanduser("~"), ".{0}".format(self.config_name))]
+        local_dir = getcwd()
+        config_files.append(join(local_dir, self.config_name))
+        while split(local_dir)[1]:
+            local_dir = split(local_dir)[0]
+            config_files.insert(2, join(local_dir, self.config_name))
+
+        for config_file in config_files:
+            try:
+                self.load_config(config_file)
+            except ConfigFileException:
+                # Since some of these may not exist or can't be read, we really don't care
+                pass
+
+        # If we have a specified  tower config, load it
+        if self.params.get('tower_config_file'):
+            try:
+                self.load_config(self.params.get('tower_config_file'))
+            except ConfigFileException as cfe:
+                # Since we were told specifically to load this we want to fail if we have an error
+                self.fail_json(msg=cfe)
+
     def load_config(self, config_path):
         config = ConfigParser()
         # Validate the config file is an actual file
         if not isfile(config_path):
-            self.fail_json(msg='The specified config file does not exist')
+            raise ConfigFileException('The specified config file does not exist')
 
         if not access(config_path, R_OK):
-            self.fail_json(msg="The specified config file can not be read")
+            raise ConfigFileException("The specified config file can not be read")
 
         config.read(config_path)
+        if not config.has_section('general'):
+            self.warn("No general section in file, auto-appending")
+            with open(config_path, 'r') as f:
+                config.read_string('[general]\n%s' % f.read())
 
         for honorred_setting in self.honorred_settings:
             try:
                 setattr(self, honorred_setting, config.get('general', honorred_setting))
-            except (NoSectionError) as nse:
-                self.fail_json(msg="The specified config file does not contain a general section ({0})".format(nse))
             except (NoOptionError):
                 pass
 
@@ -124,7 +152,7 @@ class TowerModule(AnsibleModule):
             self.json_output['name'] = response['json']['name']
             self.json_output['id'] = response['json']['id']
             self.json_output['changed'] = True
-            if self.on_change == None:
+            if self.on_change is None:
                 self.exit_json(**self.json_output)
             else:
                 self.on_change(self, response['json'])
@@ -134,7 +162,7 @@ class TowerModule(AnsibleModule):
             elif 'json' in response:
                 self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
             else:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{ 'payload': kwargs['data'] })
+                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
 
     def delete_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
         # Handle check mode
@@ -195,7 +223,7 @@ class TowerModule(AnsibleModule):
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
             # If we got 0 items by name, maybe they gave us an ID, lets try looking it by by ID
-            response = self.head_endpoint("{}/{}".format(endpoint, name_or_id), **{'return_none_on_404': True})
+            response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
             if response is not None:
                 return name_or_id
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
@@ -359,7 +387,7 @@ class TowerModule(AnsibleModule):
                 elif response['status_code'] == 200:
                     existing_return['changed'] = True
                     existing_return['id'] = response['json'].get('id')
-                    if self.on_change == None:
+                    if self.on_change is None:
                         self.exit_json(**existing_return)
                     else:
                         self.on_change(self, response['json'])
@@ -380,7 +408,7 @@ class TowerModule(AnsibleModule):
             api_token_url = (self.url._replace(path='/api/v2/tokens/{0}/'.format(self.oauth_token_id))).geturl()
 
             try:
-                response = self.session.open(
+                self.session.open(
                     'DELETE', api_token_url,
                     validate_certs=self.verify_ssl, follow_redirects=True,
                     force_basic_auth=True, url_username=self.username, url_password=self.password
@@ -402,7 +430,6 @@ class TowerModule(AnsibleModule):
         super().exit_json(**kwargs)
 
     def is_job_done(self, job_status):
-        if job_status in [ 'new', 'pending', 'waiting', 'running', ]:
+        if job_status in ['new', 'pending', 'waiting', 'running']:
             return False
         return True
-
