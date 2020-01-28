@@ -132,12 +132,14 @@ class Export(CustomCommand):
         resources.add_argument('--users', nargs='?', const='')
 
     def get_resources(self, client, resource, value):
+        api_resource = getattr(client.v2, resource)
         if value:
             from .options import pk_or_name
 
-            print("Pulling {}: {}".format(resource, pk_or_name(client.v2, resource, value)))
+            pk = pk_or_name(client.v2, resource, value)
+            return api_resource.get(id=pk).json['results']
         else:
-            print("Pulling all {}.".format(resource))
+            return api_resource.get(all_pages=True).json['results']
 
     def handle(self, client, parser):
         self.extend_parser(parser)
@@ -153,11 +155,10 @@ class Export(CustomCommand):
         for resource in ('users',):
             value = getattr(parsed, resource, None)
             if value is None:
-                print("Pulling no {}.".format(resource))
                 continue
-            self.get_resources(client, resource, value)
+            resources = self.get_resources(client, resource, value) or []
 
-            data[resource] = {}
+            data[resource] = resources
 
         return data
 
