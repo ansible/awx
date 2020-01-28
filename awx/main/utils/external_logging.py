@@ -28,6 +28,7 @@ def reconfigure_rsyslog():
 
         parts = []
         parts.extend([
+            '$IncludeConfig /etc/rsyslog.conf',
             '$ModLoad imudp',
             '$UDPServerRun 51414',
             'template(name="awx" type="string" string="%msg%")',
