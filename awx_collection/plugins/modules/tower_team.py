@@ -108,19 +108,12 @@ def main():
         'organization': org_id
     }
 
-    if state == 'absent' and not team:
-        # If the state was absent and we had no team, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and team:
-        # If the state was absent and we had a team, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('teams/{0}'.format(team['id']), item_type='team', item_name=name, **{})
-    elif state == 'present' and not team:
-        # if the state was present and we couldn't find a team we can build one, the module will handle exiting from this
-        module.post_endpoint('teams', item_type='team', item_name=name, **{'data': team_fields})
-    else:
-        # If the state was present and we had a team we can see if we need to update it
-        # This will return on its own
-        module.update_if_needed(team, team_fields)
+    if state == 'absent':
+        # If the state was absent we can let the module to delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(team)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(team, team_fields, item_type='team'})
 
 
 if __name__ == '__main__':
