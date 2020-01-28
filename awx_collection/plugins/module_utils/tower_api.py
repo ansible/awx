@@ -18,6 +18,9 @@ from os import access, R_OK, getcwd
 class ConfigFileException(Exception):
     pass
 
+class ItemNotDefined(Exception):
+    pass
+
 
 class TowerModule(AnsibleModule):
     url = None
@@ -141,52 +144,21 @@ class TowerModule(AnsibleModule):
 
         return self.make_request('PATCH', endpoint, **kwargs)
 
-    def post_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
+    def post_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
 
-        response = self.make_request('POST', endpoint, **kwargs)
-        if response['status_code'] == 201:
-            self.json_output['name'] = response['json']['name']
-            self.json_output['id'] = response['json']['id']
-            self.json_output['changed'] = True
-            if self.on_change is None:
-                self.exit_json(**self.json_output)
-            else:
-                self.on_change(self, response['json'])
-        else:
-            if 'json' in response and '__all__' in response['json']:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
-            elif 'json' in response:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
-            else:
-                self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
+        return self.make_request('POST', endpoint, **kwargs)
 
-    def delete_endpoint(self, endpoint, handle_return=True, item_type='item', item_name='', *args, **kwargs):
+    def delete_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
 
-        response = self.make_request('DELETE', endpoint, **kwargs)
-        if not handle_return:
-            return response
-        elif response['status_code'] in [202, 204]:
-            self.json_output['changed'] = True
-            self.exit_json(**self.json_output)
-        else:
-            if 'json' in response and '__all__' in response['json']:
-                self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
-            elif 'json' in response:
-                # This is from a project delete if there is an active job against it
-                if 'error' in response['json']:
-                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['error']))
-                else:
-                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']))
-            else:
-                self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
+        return self.make_request('DELETE', endpoint, **kwargs)
 
     def get_all_endpoint(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
@@ -373,33 +345,160 @@ class TowerModule(AnsibleModule):
             except(Exception) as excinfo:
                 self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
-    def update_if_needed(self, existing_item, new_item, handle_response=True, **existing_return):
-        for field in new_item:
-            existing_field = existing_item.get(field, None)
-            new_field = new_item.get(field, None)
-            # If the two items don't match and we are not comparing '' to None
-            if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
-                # something dosent match so lets do it
+    def delete_if_needed(self, existing_item, handle_response=True, on_delete=None):
+        #
+        # This will exit from the module on its own unless handle_response is False.
+        # if handle response is True and the method successfully deletes an item and on_delete param is defined
+        #    the on_delete parameter will be called as a method pasing in this object and the json from the response
+        # If you pass handle_response=False it will return one of two things:
+        #    None if the existing_item is not defined (so no delete needs to happen)
+        #    The response from Tower from calling the delete on the endpont. Its up to you to process the response and exit from the module
+        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
+        #
+        if existing_item:
+            # If we have an item, we can try to delete it
+            try:
+                item_url = existing_item['url']
+                item_name = existing_item['name']
+                item_type = existing_item['url']
+                item_id = existing_item['id']
+            except KeyError as ke:
+                module.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
 
-                response = self.patch_endpoint(existing_item['url'], **{'data': new_item})
+            response = self.delete_endpoint(item_url)
+
+            if not handle_return:
+                return response
+            elif response['status_code'] in [202, 204]:
+                if on_delete:
+                    on_delete(self, response['json']))
+                self.json_output['changed'] = True
+                self.json_output['id'] = item_id
+                self.exit_json(**self.json_output)
+            else:
+                if 'json' in response and '__all__' in response['json']:
+                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
+                elif 'json' in response:
+                    # This is from a project delete if there is an active job against it
+                    if 'error' in response['json']:
+                        self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['error']))
+                    else:
+                        self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']))
+                else:
+                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
+        else:
+            if not handle_return:
+                return None
+            else:
+                self.exit_json(**self.json_output))
+
+    def create_if_needed(self, existing_item, new_item, endpoint, handle_response=True, on_create=None, item_type='unknown'):
+        #
+        # This will exit from the module on its own unless handle_response is False.
+        # if handle response is True and the method successfully creates an item and on_create param is defined
+        #    the on_create parameter will be called as a method pasing in this object and the json from the response
+        # If you pass handle_response=False it will return one of two things:
+        #    None if the existing_item is already defined (so no create needs to happen)
+        #    The response from Tower from calling the patch on the endpont. Its up to you to process the response and exit from the module
+        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
+        #
+        if existing_item:
+            if not handle_return:
+                return None
+            else:
+                self.exit_json(**self.json_output))
+        else:
+            # If we dont have an exisitng_item, we can try to create it
+
+            # We have to rely on item_type being passed in since we don't have an existing item that declares its type
+            # The item_name we will pull out from the new_item (if it exists)
+            item_name = new_item.get('name', 'unknown')
+
+            response = self.post_endpoint(item_url, **{data=new_item})
+            if not handle_return:
+                return response
+            elif response['status_code'] == 201:
+                self.json_output['name'] = response['json']['name']
+                self.json_output['id'] = response['json']['id']
+                self.json_output['changed'] = True
+                if self.on_create is None:
+                    self.exit_json(**self.json_output)
+                else:
+                    self.on_create(self, response['json'])
+            else:
+                if 'json' in response and '__all__' in response['json']:
+                    self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
+                elif 'json' in response:
+                    self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
+                else:
+                    self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
+
+            
+    def update_if_needed(self, existing_item, new_item, handle_response=True, on_update=None):
+        #
+        # This will exit from the module on its own unless handle_response is False.
+        # if handle response is True and the method successfully updates an item and on_update param is defined
+        #    the on_update parameter will be called as a method pasing in this object and the json from the response
+        # If you pass handle_response=False it will return one of three things:
+        #    None if the existing_item does not need to be updated
+        #    The response from Tower from patching to the endpoint. Its up to you to process the response and exit from the module.
+        #    an ItemNotDefined exception if the existing_item does not exist
+        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
+        #
+        if existing_item:
+            # If we have an item, we can see if needs an update
+            try:
+                item_url = existing_item['url']
+                item_name = existing_item['name']
+                item_type = existing_item['url']
+                item_id = existing_item['id']
+            except KeyError as ke:
+                module.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
+
+            needs_update = False
+            for field in new_item:
+                existing_field = existing_item.get(field, None)
+                new_field = new_item.get(field, None)
+                # If the two items don't match and we are not comparing '' to None
+                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
+                    # something dosent match so lets do it
+                    neds_update = True
+                    break
+
+            if needs_update:
+                response = self.patch_endpoint(item_url, **{'data': new_item})
                 if not handle_response:
                     return response
                 elif response['status_code'] == 200:
                     existing_return['changed'] = True
-                    existing_return['id'] = response['json'].get('id')
-                    if self.on_change is None:
+                    existing_return['id'] = item_id
+                    if on_update is None:
                         self.exit_json(**existing_return)
                     else:
-                        self.on_change(self, response['json'])
+                        on_update(self, response['json'])
                 elif 'json' in response and '__all__' in response['json']:
-                    self.fail_json(msg=response['json']['__all__'])
-                else:
-                    self.fail_json(**{'msg': "Unable to update object, see response", 'response': response})
+                     self.fail_json(msg=response['json']['__all__'])
+                 else:
+                     self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
+            else:
+                if not handle_response:
+                    return None
 
-        # Since we made it here, we don't need to update, status ok
-        existing_return['changed'] = False
-        existing_return['id'] = existing_item.get('id')
-        self.exit_json(**existing_return)
+                # Since we made it here, we don't need to update, status ok
+                existing_return['changed'] = False
+                existing_return['id'] = item_id
+                self.exit_json(**existing_return)
+        else:
+            if handle_response:
+                module.fail_json(msg="The exstiing item is not defined and thus cannot be updated")
+            else:
+                raise ItemNotDefined("Not given an existing item to update")
+
+    def create_or_update_if_needed(self, existing_item, new_item, handle_response=True, item_type='unknown', on_create=None, on_update=None):
+        if existing_item:
+            return self.update_if_needed(existing_item, new_item, handle_response=handle_response, on_update=on_update)
+        else:
+            return self.create_if_needed(existing_item, new_item, handle_response=handle_response, on_create=on_create, item_type=item_type)
 
     def logout(self):
         if self.oauth_token_id is not None and self.username and self.password:
