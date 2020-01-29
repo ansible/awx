@@ -113,34 +113,25 @@ def main():
         }
     })
 
-    new_org_data = {'name': name}
+    org_fields = {'name': name}
     if description:
-        new_org_data['description'] = description
+        org_fields['description'] = description
     if custom_virtualenv:
-        new_org_data['custom_virtualenv'] = custom_virtualenv
+        org_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts:
         int_max_hosts = 0
         try:
             int_max_hosts = int(max_hosts)
         except Exception:
             module.fail_json(msg="Unable to convert max_hosts to an integer")
-        new_org_data['max_hosts'] = int_max_hosts
+        org_fields['max_hosts'] = int_max_hosts
 
-    if state == 'absent' and not organization:
-        # If the state was absent and we had no organization, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and organization:
-        # If the state was absent and we had a organization, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('organizations/{0}'.format(organization['id']), item_type='organization', item_name=name, **{})
-    elif state == 'present' and not organization:
-        # if the state was present and we couldn't find a organization we can build one, the module will handle exiting from this
-        module.post_endpoint('organizations', item_type='organization', item_name=name, **{
-            'data': new_org_data,
-        })
-    else:
-        # If the state was present and we had a organization we can see if we need to update it
-        # This will return on its own
-        module.update_if_needed(organization, new_org_data)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(organization)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(organization, org_fields, endpoint='organizations', item_type='organization')
 
 
 if __name__ == '__main__':
