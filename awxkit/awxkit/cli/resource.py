@@ -133,13 +133,16 @@ class Export(CustomCommand):
 
     def get_resources(self, client, resource, value):
         api_resource = getattr(client.v2, resource)
+        post_fields = api_resource.options().json['actions']['POST']
         if value:
             from .options import pk_or_name
 
             pk = pk_or_name(client.v2, resource, value)
-            return api_resource.get(id=pk).json['results']
+            results = api_resource.get(id=pk).json['results']
         else:
-            return api_resource.get(all_pages=True).json['results']
+            results = api_resource.get(all_pages=True).json['results']
+
+        return [{key: r[key] for key in post_fields if key in r} for r in results]
 
     def handle(self, client, parser):
         self.extend_parser(parser)
@@ -156,7 +159,7 @@ class Export(CustomCommand):
             value = getattr(parsed, resource, None)
             if value is None:
                 continue
-            resources = self.get_resources(client, resource, value) or []
+            resources = self.get_resources(client, resource, value)
 
             data[resource] = resources
 
