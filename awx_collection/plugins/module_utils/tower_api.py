@@ -18,6 +18,7 @@ from os import access, R_OK, getcwd
 class ConfigFileException(Exception):
     pass
 
+
 class ItemNotDefined(Exception):
     pass
 
@@ -35,7 +36,6 @@ class TowerModule(AnsibleModule):
     cookie_jar = CookieJar()
     authenticated = False
     json_output = {'changed': False}
-    on_change = None
     config_name = 'tower_cli.cfg'
 
     def __init__(self, argument_spec, **kwargs):
@@ -346,15 +346,13 @@ class TowerModule(AnsibleModule):
                 self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
     def delete_if_needed(self, existing_item, handle_response=True, on_delete=None):
-        #
         # This will exit from the module on its own unless handle_response is False.
-        # if handle response is True and the method successfully deletes an item and on_delete param is defined
-        #    the on_delete parameter will be called as a method pasing in this object and the json from the response
+        #   if handle response is True and the method successfully deletes an item and on_delete param is defined
+        #   the on_delete parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of two things:
-        #    None if the existing_item is not defined (so no delete needs to happen)
-        #    The response from Tower from calling the delete on the endpont. Its up to you to process the response and exit from the module
+        #   None if the existing_item is not defined (so no delete needs to happen)
+        #   The response from Tower from calling the delete on the endpont. Its up to you to process the response and exit from the module
         # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
-        #
         if existing_item:
             # If we have an item, we can try to delete it
             try:
@@ -363,15 +361,15 @@ class TowerModule(AnsibleModule):
                 item_type = existing_item['url']
                 item_id = existing_item['id']
             except KeyError as ke:
-                module.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
+                self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
 
             response = self.delete_endpoint(item_url)
 
-            if not handle_return:
+            if not handle_response:
                 return response
             elif response['status_code'] in [202, 204]:
                 if on_delete:
-                    on_delete(self, response['json']))
+                    on_delete(self, response['json'])
                 self.json_output['changed'] = True
                 self.json_output['id'] = item_id
                 self.exit_json(**self.json_output)
@@ -387,26 +385,33 @@ class TowerModule(AnsibleModule):
                 else:
                     self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
         else:
-            if not handle_return:
+            if not handle_response:
                 return None
             else:
-                self.exit_json(**self.json_output))
+                self.exit_json(**self.json_output)
 
     def create_if_needed(self, existing_item, new_item, endpoint, handle_response=True, on_create=None, item_type='unknown'):
         #
         # This will exit from the module on its own unless handle_response is False.
-        # if handle response is True and the method successfully creates an item and on_create param is defined
+        #   if handle response is True and the method successfully creates an item and on_create param is defined
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of two things:
         #    None if the existing_item is already defined (so no create needs to happen)
         #    The response from Tower from calling the patch on the endpont. Its up to you to process the response and exit from the module
         # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
         #
+        if not endpoint:
+            self.fail_json(msg="Unable to create new {} due to missing endpoint".format(item_type))
+
         if existing_item:
-            if not handle_return:
+            try:
+                item_url = existing_item['url']
+            except KeyError as ke:
+                self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
+            if not handle_response:
                 return None
             else:
-                self.exit_json(**self.json_output))
+                self.exit_json(**self.json_output)
         else:
             # If we dont have an exisitng_item, we can try to create it
 
@@ -414,17 +419,17 @@ class TowerModule(AnsibleModule):
             # The item_name we will pull out from the new_item (if it exists)
             item_name = new_item.get('name', 'unknown')
 
-            response = self.post_endpoint(item_url, **{data=new_item})
-            if not handle_return:
+            response = self.post_endpoint(endpoint, **{'data': new_item})
+            if not handle_response:
                 return response
             elif response['status_code'] == 201:
                 self.json_output['name'] = response['json']['name']
                 self.json_output['id'] = response['json']['id']
                 self.json_output['changed'] = True
-                if self.on_create is None:
+                if on_create is None:
                     self.exit_json(**self.json_output)
                 else:
-                    self.on_create(self, response['json'])
+                    on_create(self, response['json'])
             else:
                 if 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
@@ -433,18 +438,15 @@ class TowerModule(AnsibleModule):
                 else:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
 
-            
     def update_if_needed(self, existing_item, new_item, handle_response=True, on_update=None):
-        #
         # This will exit from the module on its own unless handle_response is False.
-        # if handle response is True and the method successfully updates an item and on_update param is defined
-        #    the on_update parameter will be called as a method pasing in this object and the json from the response
+        #   if handle response is True and the method successfully updates an item and on_update param is defined
+        #   the on_update parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of three things:
         #    None if the existing_item does not need to be updated
         #    The response from Tower from patching to the endpoint. Its up to you to process the response and exit from the module.
         #    an ItemNotDefined exception if the existing_item does not exist
         # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
-        #
         if existing_item:
             # If we have an item, we can see if needs an update
             try:
@@ -453,7 +455,7 @@ class TowerModule(AnsibleModule):
                 item_type = existing_item['url']
                 item_id = existing_item['id']
             except KeyError as ke:
-                module.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
+                self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
             needs_update = False
             for field in new_item:
@@ -470,35 +472,35 @@ class TowerModule(AnsibleModule):
                 if not handle_response:
                     return response
                 elif response['status_code'] == 200:
-                    existing_return['changed'] = True
-                    existing_return['id'] = item_id
+                    self.json_output['changed'] = True
+                    self.json_output['id'] = item_id
                     if on_update is None:
-                        self.exit_json(**existing_return)
+                        self.exit_json(**self.json_output)
                     else:
                         on_update(self, response['json'])
                 elif 'json' in response and '__all__' in response['json']:
-                     self.fail_json(msg=response['json']['__all__'])
-                 else:
-                     self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
+                    self.fail_json(msg=response['json']['__all__'])
+                else:
+                    self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
             else:
                 if not handle_response:
                     return None
 
                 # Since we made it here, we don't need to update, status ok
-                existing_return['changed'] = False
-                existing_return['id'] = item_id
-                self.exit_json(**existing_return)
+                self.json_output['changed'] = False
+                self.json_output['id'] = item_id
+                self.exit_json(**self.json_output)
         else:
             if handle_response:
-                module.fail_json(msg="The exstiing item is not defined and thus cannot be updated")
+                self.fail_json(msg="The exstiing item is not defined and thus cannot be updated")
             else:
                 raise ItemNotDefined("Not given an existing item to update")
 
-    def create_or_update_if_needed(self, existing_item, new_item, handle_response=True, item_type='unknown', on_create=None, on_update=None):
+    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, handle_response=True, item_type='unknown', on_create=None, on_update=None):
         if existing_item:
             return self.update_if_needed(existing_item, new_item, handle_response=handle_response, on_update=on_update)
         else:
-            return self.create_if_needed(existing_item, new_item, handle_response=handle_response, on_create=on_create, item_type=item_type)
+            return self.create_if_needed(existing_item, new_item, endpoint, handle_response=handle_response, on_create=on_create, item_type=item_type)
 
     def logout(self):
         if self.oauth_token_id is not None and self.username and self.password:
@@ -508,9 +510,13 @@ class TowerModule(AnsibleModule):
 
             try:
                 self.session.open(
-                    'DELETE', api_token_url,
-                    validate_certs=self.verify_ssl, follow_redirects=True,
-                    force_basic_auth=True, url_username=self.username, url_password=self.password
+                    'DELETE',
+                    api_token_url,
+                    validate_certs=self.verify_ssl,
+                    follow_redirects=True,
+                    force_basic_auth=True,
+                    url_username=self.username,
+                    url_password=self.password
                 )
                 self.oauth_token_id = None
                 self.authenticated = False
