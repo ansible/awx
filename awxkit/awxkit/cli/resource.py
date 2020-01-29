@@ -157,6 +157,7 @@ class Export(CustomCommand):
     def extend_parser(self, parser):
         resources = parser.add_argument_group('resources')
         resources.add_argument('--users', nargs='?', const='')
+        resources.add_argument('--organizations', nargs='?', const='')
 
     def get_resources(self, client, resource, value):
         api_resource = getattr(client.v2, resource)
@@ -182,7 +183,7 @@ class Export(CustomCommand):
         parsed = parser.parse_known_args()[0]
 
         data = {}
-        for resource in ('users',):
+        for resource in ('users', 'organizations'):
             value = getattr(parsed, resource, None)
             if value is None:
                 continue
