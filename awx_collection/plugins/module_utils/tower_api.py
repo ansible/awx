@@ -357,11 +357,17 @@ class TowerModule(AnsibleModule):
             # If we have an item, we can try to delete it
             try:
                 item_url = existing_item['url']
-                item_name = existing_item['name']
-                item_type = existing_item['url']
+                item_type = existing_item['type']
                 item_id = existing_item['id']
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
+
+            if 'name' in existing_item:
+                item_name = existing_item['name']
+            elif 'username' in existing_item:
+                item_name = existing_item['username']
+            else:
+                self.fail_json(msg="Unable to process delete of {} due to missing name".format(item_type))
 
             response = self.delete_endpoint(item_url)
 
@@ -423,7 +429,12 @@ class TowerModule(AnsibleModule):
             if not handle_response:
                 return response
             elif response['status_code'] == 201:
-                self.json_output['name'] = response['json']['name']
+                self.json_output['name'] = 'unknown'
+                if 'name' in response['json']:
+                    self.json_output['name'] = response['json']['name']
+                elif 'username' in response['json']:
+                    # User objects return username instead of name
+                    self.json_output['name'] = response['json']['username']
                 self.json_output['id'] = response['json']['id']
                 self.json_output['changed'] = True
                 if on_create is None:
