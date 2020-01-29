@@ -1,4 +1,6 @@
+import json
 import os
+import sys
 
 from awxkit import api, config
 from awxkit.utils import to_str
@@ -123,9 +125,34 @@ class Config(CustomCommand):
         }
 
 
+class Import(CustomCommand):
+    name = 'import'
+    help_text = 'import resources into Tower'
+
+    def create_resource(self, client, resource, asset):
+        api_resource = getattr(client.v2, resource)
+        if resource == 'users' and 'password' not in asset:
+            asset['password'] = 'password'
+        api_resource.post(asset)
+
+    def handle(self, client, parser):
+        if client.help:
+            parser.print_help()
+            raise SystemExit()
+
+        data = json.load(sys.stdin)
+        client.authenticate()
+
+        for resource, assets in data.items():
+            for asset in assets:
+                self.create_resource(client, resource, asset)
+
+        return {}
+
+
 class Export(CustomCommand):
     name = 'export'
-    help_text = 'export resources from Tower as yaml'
+    help_text = 'export resources from Tower'
 
     def extend_parser(self, parser):
         resources = parser.add_argument_group('resources')
