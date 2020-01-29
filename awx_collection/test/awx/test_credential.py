@@ -63,9 +63,9 @@ def test_create_vault_credential(run_module, admin_user):
 
 
 @pytest.mark.django_db
-def test_create_custom_credential_type(run_converted_module, admin_user):
+def test_create_custom_credential_type(run_module, admin_user):
     # Example from docs
-    result = run_converted_module('tower_credential_type', dict(
+    result = run_module('tower_credential_type', dict(
         name='Nexus',
         description='Credentials type for Nexus',
         kind='cloud',
@@ -78,12 +78,14 @@ def test_create_custom_credential_type(run_converted_module, admin_user):
 
     ct = CredentialType.objects.get(name='Nexus')
     result.pop('invocation')
+    result.pop('existing_credential_type')
+    result.pop('name')
     assert result == {
-        "name": "Nexus",
+        "credential_type": "Nexus",
+        "state": "present",
         "id": ct.pk,
-        "changed": True
+        "changed": True,
     }
-
     assert ct.inputs == {"fields": [{"id": "server", "type": "string", "default": "", "label": ""}], "required": []}
     assert ct.injectors == {'extra_vars': {'nexus_credential': 'test'}}
 

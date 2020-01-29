@@ -28,6 +28,11 @@ options:
         - The name to use for the host.
       required: True
       type: str
+    new_name:
+      description:
+        - To use when changing a hosts's name.
+      required: True
+      type: str
     description:
       description:
         - The description to use for the host.
@@ -52,6 +57,11 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -71,29 +81,27 @@ EXAMPLES = '''
 
 import os
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(),
+        new_name=dict(required=False),
+        description=dict(default=''),
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
-        variables=dict(),
+        variables=dict(default=''),
         state=dict(choices=['present', 'absent'], default='present'),
     )
+
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
     description = module.params.get('description')
     inventory = module.params.get('inventory')
     enabled = module.params.get('enabled')
@@ -106,30 +114,30 @@ def main():
             with open(filename, 'r') as f:
                 variables = f.read()
 
-    json_output = {'host': name, 'state': state}
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    inventory_id = module.resolve_name_to_id('inventories', inventory)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        host = tower_cli.get_resource('host')
+    # Attempt to lookup host based on the provided name and org ID
+    host = module.get_one('hosts', **{
+        'data': {
+            'name': name,
+            'inventory': inventory_id
+        }
+    })
 
-        try:
-            inv_res = tower_cli.get_resource('inventory')
-            inv = inv_res.get(name=inventory)
+    # Create data to send to create and update
+    host_fields = {
+        'name': new_name if new_name else name,
+        'description': description,
+        'inventory': inventory_id
+    }
 
-            if state == 'present':
-                result = host.modify(name=name, inventory=inv['id'], enabled=enabled,
-                                     variables=variables, description=description, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = host.delete(name=name, inventory=inv['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update host, inventory not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update host: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(host)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing host, this will return on its own
+        module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
 
 
 if __name__ == '__main__':

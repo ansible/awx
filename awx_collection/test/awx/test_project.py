@@ -7,8 +7,8 @@ from awx.main.models import Project
 
 
 @pytest.mark.django_db
-def test_create_project(run_converted_module, admin_user, organization):
-    result = run_converted_module('tower_project', dict(
+def test_create_project(run_module, admin_user, organization):
+    result = run_module('tower_project', dict(
         name='foo',
         organization=organization.name,
         scm_type='git',
@@ -23,7 +23,10 @@ def test_create_project(run_converted_module, admin_user, organization):
     assert proj.organization == organization
 
     result.pop('invocation')
+    result.pop('existing_credential_type')
     assert result == {
+        'credential_type': 'Nexus',
+        'state': 'present',
         'name': 'foo',
         'id': proj.id,
         'warnings': warning

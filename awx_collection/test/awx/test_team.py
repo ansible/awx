@@ -7,10 +7,10 @@ from awx.main.models import Organization, Team
 
 
 @pytest.mark.django_db
-def test_create_team(run_converted_module, admin_user):
+def test_create_team(run_module, admin_user):
     org = Organization.objects.create(name='foo')
 
-    result = run_converted_module('tower_team', {
+    result = run_module('tower_team', {
         'name': 'foo_team',
         'description': 'fooin around',
         'state': 'present',
@@ -20,9 +20,12 @@ def test_create_team(run_converted_module, admin_user):
     team = Team.objects.filter(name='foo_team').first()
 
     result.pop('invocation')
+    result.pop('existing_credential_type')
     assert result == {
         "changed": True,
         "name": "foo_team",
+        "credential_type": "Nexus",
+        "state": "present",
         "id": team.id if team else None,
     }
     team = Team.objects.get(name='foo_team')
@@ -31,7 +34,7 @@ def test_create_team(run_converted_module, admin_user):
 
 
 @pytest.mark.django_db
-def test_modify_team(run_converted_module, admin_user):
+def test_modify_team(run_module, admin_user):
     org = Organization.objects.create(name='foo')
     team = Team.objects.create(
         name='foo_team',
@@ -40,27 +43,35 @@ def test_modify_team(run_converted_module, admin_user):
     )
     assert team.description == 'flat foo'
 
-    result = run_converted_module('tower_team', {
+    result = run_module('tower_team', {
         'name': 'foo_team',
         'description': 'fooin around',
         'organization': 'foo'
     }, admin_user)
     team.refresh_from_db()
     result.pop('invocation')
+    result.pop('existing_credential_type')
     assert result == {
+        "state": "present",
+        "changed": True,
+        "name": "foo_team",
+        "credential_type": "Nexus",
         "id": team.id,
-        "changed": True
     }
     assert team.description == 'fooin around'
 
     # 2nd modification, should cause no change
-    result = run_converted_module('tower_team', {
+    result = run_module('tower_team', {
         'name': 'foo_team',
         'description': 'fooin around',
         'organization': 'foo'
     }, admin_user)
     result.pop('invocation')
+    result.pop('existing_credential_type')
     assert result == {
+        "credential_type": "Nexus",
+        "name": "foo_team",
         "id": team.id,
+        "state": "present",
         "changed": False
     }
