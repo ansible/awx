@@ -475,7 +475,7 @@ class TowerModule(AnsibleModule):
                 # If the two items don't match and we are not comparing '' to None
                 if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
                     # something dosent match so lets do it
-                    neds_update = True
+                    needs_update = True
                     break
 
             if needs_update:
