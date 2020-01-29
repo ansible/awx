@@ -38,8 +38,8 @@ options:
       type: str
     email:
       description:
-        - Email address of the user.
-      required: True
+        - Email address of the user. Required if creating a new user.
+      required: False
       type: str
     password:
       description:
@@ -117,14 +117,14 @@ def main():
         first_name=dict(),
         last_name=dict(),
         password=dict(no_log=True),
-        email=dict(required=True),
+        email=dict(required=False),
         superuser=dict(type='bool', default=False),
         auditor=dict(type='bool', default=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True, required_if=[['state', 'present', ['email']]])
 
     # Extract our parameters
     state = module.params.get('state')
@@ -145,22 +145,12 @@ def main():
         }
     })
 
-    if state == 'absent' and not user:
-        # If the state was absent and we had no user, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and user:
-        # If the state was absent and we had a user, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('users/{0}'.format(user['id']), item_type='user', item_name=user_fields['username'], **{})
-    elif state == 'present' and not user:
-        # if the state was present and we couldn't find a user we can build one, the module will handle exiting from this
-        module.post_endpoint('users', item_type='user', item_name=user_fields['username'], **{
-            'data': user_fields
-        })
-    else:
-        # If the state was present and we had a user we can see if we need to update it
-        # This will return on its own
-        module.update_if_needed(user, user_fields)
-
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(user)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(user, user_fields, endpoint='users', item_type='user')
 
 if __name__ == '__main__':
     main()

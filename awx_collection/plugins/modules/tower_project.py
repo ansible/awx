@@ -259,23 +259,16 @@ def main():
 
     # If we are doing a not manual project, register our on_change method
     # An on_change function, if registered, will fire after an post_endpoint or update_if_needed completes successfully
+    on_change = None
     if wait and scm_type != '':
-        module.on_change = wait_for_project_update
+        on_change = wait_for_project_update
 
-    if state == 'absent' and not project:
-        # If the state was absent and we had no project, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and project:
-        # If the state was absent and we had a project, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('projects/{0}'.format(project['id']), item_type='project', item_name=name, **{})
-    elif state == 'present' and not project:
-        # if the state was present and we couldn't find a project we can build one, the module wikl handle exiting from this
-        module.post_endpoint('projects', handle_return=False, item_type='project', item_name=name, **{'data': project_fields})
-    else:
-        # If the state was present and we had a project we can see if we need to update it
-        # This will return on its own
-        module.update_if_needed(project, project_fields)
-
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(project)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(project, project_fields, endpoint='projects', item_type='project', on_create=on_change, on_update=on_change)
 
 if __name__ == '__main__':
     main()

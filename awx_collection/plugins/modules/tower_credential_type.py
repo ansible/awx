@@ -124,8 +124,6 @@ def main():
     kind = module.params.get('kind')
     state = module.params.get('state')
 
-    json_output = {'credential_type': name, 'state': state}
-
     # Deal with check mode
     module.default_check_mode()
 
@@ -149,23 +147,17 @@ def main():
         }
     })
 
-    json_output['existing_credential_type'] = credential_type
-    if state == 'absent' and not credential_type:
-        # If the state was absent and we had no credential_type, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and credential_type:
-        # If the state was absent and we had a team, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('credential_types/{0}'.format(credential_type['id']), item_type='credential type', item_name=name, **{})
-    elif state == 'present' and not credential_type:
-        # if the state was present and we couldn't find a credential_type we can build one, the module will handle exiting on its own
-        module.post_endpoint('credential_types', item_type='credential type', item_name=name, **{
-            'data': credential_type_params
-        })
-    else:
-        # If the state was present and we had a credential_type we can see if we need to update it
-        # This will handle existing on its own
-        module.update_if_needed(credential_type, credential_type_params)
+    # Add entries to json_output to match old module
+    module.json_output['credential_type'] = name
+    module.json_output['state'] = state
+    module.json_output['existing_credential_type'] = credential_type
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(credential_type)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
 
 if __name__ == '__main__':
     main()

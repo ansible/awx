@@ -127,23 +127,16 @@ def main():
         'host_filter': host_filter,
     }
 
-    if state == 'absent' and not inventory:
-        # If the state was absent and we had no inventory, we can just return
-        module.exit_json(**module.json_output)
-    elif state == 'absent' and inventory:
-        # If the state was absent and we had a inventory, we can try to delete it, the module will handle exiting from this
-        module.delete_endpoint('inventories/{0}'.format(inventory['id']), item_type='inventory', item_name=name, **{})
-    elif state == 'present' and not inventory:
-        # If the state was present and we couldn't find a inventory we can build one, the module will handle exiting from this
-        module.post_endpoint('inventories', item_type='inventory', item_name=name, **{'data': inventory_fields})
-    else:
-        # Throw a more specific error message than what the API page provides.
-        if inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory)
+    elif state == 'present':
+        # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
+        if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
             module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
-        # If the state was present and we had a inventory, we can see if we need to update it
-        # This will return on its own
-        module.update_if_needed(inventory, inventory_fields)
 
+        # If the state was present we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
 
 if __name__ == '__main__':
     main()
