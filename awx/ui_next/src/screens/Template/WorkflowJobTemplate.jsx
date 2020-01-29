@@ -94,60 +94,58 @@ class WorkflowJobTemplate extends Component {
     }
 
     return (
-      <PageSection>
-        <Card className="awx-c-card">
-          {cardHeader}
-          <Switch>
-            <Redirect
-              from="/templates/workflow_job_template/:id"
-              to="/templates/workflow_job_template/:id/details"
-              exact
-            />
-            {template && (
-              <Route
-                key="wfjt-details"
-                path="/templates/workflow_job_template/:id/details"
-                render={() => (
-                  <WorkflowJobTemplateDetail
-                    hasTemplateLoading={hasContentLoading}
-                    template={template}
-                  />
-                )}
-              />
-            )}
-            {template && (
-              <Route
-                key="wfjt-visualizer"
-                path="/templates/workflow_job_template/:id/visualizer"
-                render={() => (
-                  <AppendBody>
-                    <FullPage>
-                      <Visualizer template={template} />
-                    </FullPage>
-                  </AppendBody>
-                )}
-              />
-            )}
+      <Card className="awx-c-card">
+        {cardHeader}
+        <Switch>
+          <Redirect
+            from="/templates/workflow_job_template/:id"
+            to="/templates/workflow_job_template/:id/details"
+            exact
+          />
+          {template && (
             <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link
-                        to={`/templates/workflow_job_template/${match.params.id}/details`}
-                      >
-                        {i18n._(`View Template Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
+              key="wfjt-details"
+              path="/templates/workflow_job_template/:id/details"
+              render={() => (
+                <WorkflowJobTemplateDetail
+                  hasTemplateLoading={hasContentLoading}
+                  template={template}
+                />
+              )}
             />
-          </Switch>
-        </Card>
-      </PageSection>
+          )}
+          {template && (
+            <Route
+              key="wfjt-visualizer"
+              path="/templates/workflow_job_template/:id/visualizer"
+              render={() => (
+                <AppendBody>
+                  <FullPage>
+                    <Visualizer template={template} />
+                  </FullPage>
+                </AppendBody>
+              )}
+            />
+          )}
+          <Route
+            key="not-found"
+            path="*"
+            render={() =>
+              !hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link
+                      to={`/templates/workflow_job_template/${match.params.id}/details`}
+                    >
+                      {i18n._(`View Template Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )
+            }
+          />
+        </Switch>
+      </Card>
     );
   }
 }

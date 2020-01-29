@@ -1,7 +1,8 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
+import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
@@ -50,48 +51,50 @@ class Templates extends Component {
     const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
     return (
-      <Fragment>
+      <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-        <Switch>
-          <Route
-            path={`${match.path}/job_template/add`}
-            render={() => <JobTemplateAdd />}
-          />
-          <Route
-            path={`${match.path}/job_template/:id`}
-            render={({ match: newRouteMatch }) => (
-              <Config>
-                {({ me }) => (
-                  <Template
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadCrumbConfig}
-                    me={me || {}}
-                    match={newRouteMatch}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route
-            path={`${match.path}/workflow_job_template/:id`}
-            render={({ match: newRouteMatch }) => (
-              <Config>
-                {({ me }) => (
-                  <WorkflowJobTemplate
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadCrumbConfig}
-                    me={me || {}}
-                    match={newRouteMatch}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <TemplateList />} />
-        </Switch>
-      </Fragment>
+        <PageSection>
+          <Switch>
+            <Route
+              path={`${match.path}/job_template/add`}
+              render={() => <JobTemplateAdd />}
+            />
+            <Route
+              path={`${match.path}/job_template/:id`}
+              render={({ match: newRouteMatch }) => (
+                <Config>
+                  {({ me }) => (
+                    <Template
+                      history={history}
+                      location={location}
+                      setBreadcrumb={this.setBreadCrumbConfig}
+                      me={me || {}}
+                      match={newRouteMatch}
+                    />
+                  )}
+                </Config>
+              )}
+            />
+            <Route
+              path={`${match.path}/workflow_job_template/:id`}
+              render={({ match: newRouteMatch }) => (
+                <Config>
+                  {({ me }) => (
+                    <WorkflowJobTemplate
+                      history={history}
+                      location={location}
+                      setBreadcrumb={this.setBreadCrumbConfig}
+                      me={me || {}}
+                      match={newRouteMatch}
+                    />
+                  )}
+                </Config>
+              )}
+            />
+            <Route path={`${match.path}`} render={() => <TemplateList />} />
+          </Switch>
+        </PageSection>
+      </>
     );
   }
 }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 
 import {
   JobTemplatesAPI,
@@ -109,7 +109,13 @@ class TemplatesList extends Component {
   }
 
   async loadTemplates() {
-    const { location, match } = this.props;
+    const {
+      location,
+      match: {
+        params: { id: projectId },
+        url,
+      },
+    } = this.props;
     const {
       jtActions: cachedJTActions,
       wfjtActions: cachedWFJTActions,
@@ -135,8 +141,8 @@ class TemplatesList extends Component {
     } else {
       wfjtOptionsPromise = WorkflowJobTemplatesAPI.readOptions();
     }
-    if (match.url.startsWith('/projects') && match.params.id) {
-      params.jobtemplate__project = match.params.id;
+    if (url.startsWith('/projects') && projectId) {
+      params.jobtemplate__project = projectId;
     }
 
     const promises = Promise.all([
