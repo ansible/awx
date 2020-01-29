@@ -347,7 +347,7 @@ class TowerModule(AnsibleModule):
 
     def delete_if_needed(self, existing_item, handle_response=True, on_delete=None):
         # This will exit from the module on its own unless handle_response is False.
-        #   if handle response is True and the method successfully deletes an item and on_delete param is defined
+        # If handle response is True and the method successfully deletes an item and on_delete param is defined
         #   the on_delete parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of two things:
         #   None if the existing_item is not defined (so no delete needs to happen)
@@ -367,7 +367,7 @@ class TowerModule(AnsibleModule):
             elif 'username' in existing_item:
                 item_name = existing_item['username']
             else:
-                self.fail_json(msg="Unable to process delete of {} due to missing name".format(item_type))
+                self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
             response = self.delete_endpoint(item_url)
 
@@ -399,7 +399,7 @@ class TowerModule(AnsibleModule):
     def create_if_needed(self, existing_item, new_item, endpoint, handle_response=True, on_create=None, item_type='unknown'):
         #
         # This will exit from the module on its own unless handle_response is False.
-        #   if handle response is True and the method successfully creates an item and on_create param is defined
+        # If handle response is True and the method successfully creates an item and on_create param is defined
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of two things:
         #    None if the existing_item is already defined (so no create needs to happen)
@@ -407,11 +407,11 @@ class TowerModule(AnsibleModule):
         # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
         #
         if not endpoint:
-            self.fail_json(msg="Unable to create new {} due to missing endpoint".format(item_type))
+            self.fail_json(msg="Unable to create new {0} due to missing endpoint".format(item_type))
 
         if existing_item:
             try:
-                item_url = existing_item['url']
+                existing_item['url']
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
             if not handle_response:
@@ -447,11 +447,11 @@ class TowerModule(AnsibleModule):
                 elif 'json' in response:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
                 else:
-                    self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']), **{'payload': kwargs['data']})
+                    self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']))
 
     def update_if_needed(self, existing_item, new_item, handle_response=True, on_update=None):
         # This will exit from the module on its own unless handle_response is False.
-        #   if handle response is True and the method successfully updates an item and on_update param is defined
+        # If handle response is True and the method successfully updates an item and on_update param is defined
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
         # If you pass handle_response=False it will return one of three things:
         #    None if the existing_item does not need to be updated
@@ -548,4 +548,5 @@ class TowerModule(AnsibleModule):
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:
             return False
-        return True
+        else:
+            return True

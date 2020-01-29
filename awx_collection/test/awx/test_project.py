@@ -23,7 +23,10 @@ def test_create_project(run_converted_module, admin_user, organization):
     assert proj.organization == organization
 
     result.pop('invocation')
+    result.pop('existing_credential_type')
     assert result == {
+        'credential_type': 'Nexus',
+        'state': 'present',
         'name': 'foo',
         'id': proj.id,
         'warnings': warning

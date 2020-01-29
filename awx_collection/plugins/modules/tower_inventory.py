@@ -138,5 +138,6 @@ def main():
         # If the state was present we can let the module build or update the existing team, this will return on its own
         module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
 
+
 if __name__ == '__main__':
     main()

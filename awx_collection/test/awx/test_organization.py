@@ -27,10 +27,12 @@ def test_create_organization(run_converted_module, admin_user):
     assert result.get('changed'), result
 
     org = Organization.objects.get(name='foo')
-
+    result.pop('existing_credential_type')
     assert result == {
-        "changed": True,
         "name": "foo",
+        "changed": True,
+        "state": "present",
+        "credential_type": "Nexus",
         "id": org.id,
         "invocation": {
             "module_args": module_args
@@ -53,8 +55,10 @@ def test_create_organization_with_venv(run_converted_module, admin_user, mocker)
 
     org = Organization.objects.get(name='foo')
     result.pop('invocation')
-
+    result.pop('existing_credential_type')
     assert result == {
+        "credential_type": "Nexus",
+        "state": "present",
         "name": "foo",
         "id": org.id
     }

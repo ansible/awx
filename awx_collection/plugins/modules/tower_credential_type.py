@@ -159,5 +159,6 @@ def main():
         # If the state was present we can let the module build or update the existing team, this will return on its own
         module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
 
+
 if __name__ == '__main__':
     main()

@@ -78,12 +78,14 @@ def test_create_custom_credential_type(run_converted_module, admin_user):
 
     ct = CredentialType.objects.get(name='Nexus')
     result.pop('invocation')
+    result.pop('existing_credential_type')
+    result.pop('name')
     assert result == {
-        "name": "Nexus",
+        "credential_type": "Nexus",
+        "state": "present",
         "id": ct.pk,
-        "changed": True
+        "changed": True,
     }
-
     assert ct.inputs == {"fields": [{"id": "server", "type": "string", "default": "", "label": ""}], "required": []}
     assert ct.injectors == {'extra_vars': {'nexus_credential': 'test'}}
 
