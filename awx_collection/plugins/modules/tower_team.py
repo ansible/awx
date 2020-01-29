@@ -109,7 +109,7 @@ def main():
     }
 
     if state == 'absent':
-        # If the state was absent we can let the module to delete it if needed, the module will handle exiting from this
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(team)
     elif state == 'present':
         # If the state was present we can let the module build or update the existing team, this will return on its own
