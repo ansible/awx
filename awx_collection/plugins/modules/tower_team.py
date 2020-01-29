@@ -113,7 +113,7 @@ def main():
         module.delete_if_needed(team)
     elif state == 'present':
         # If the state was present we can let the module build or update the existing team, this will return on its own
-        module.create_or_update_if_needed(team, team_fields, item_type='team'})
+        module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
 
 
 if __name__ == '__main__':
