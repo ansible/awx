@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -11,19 +11,37 @@ import DeleteButton from '@components/DeleteButton';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { InventoriesAPI } from '@api';
-import useEndpoint from './useEndpoint';
+import useEndpoint, { useFetch } from './useEndpoint';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
   const history = useHistory();
 
-  const { results: instanceGroups, isLoading, error } = useEndpoint(
+  // initial approach with useEndpoint()
+  // const { results: instanceGroups, isLoading, error } = useEndpoint(
+  //   useCallback(async () => {
+  //     const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
+  //     return data.results;
+  //   }, [inventory.id])
+  // );
+
+  // more versatile approach with useFetch()
+  const {
+    result: instanceGroups,
+    isLoading,
+    error,
+    fetch: fetchInstanceGroups,
+  } = useFetch(
     useCallback(async () => {
       const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
       return data.results;
     }, [inventory.id]),
-    inventory.id
+    []
   );
+
+  useEffect(() => {
+    fetchInstanceGroups(inventory.id);
+  }, [fetchInstanceGroups, inventory.id]);
 
   const deleteInventory = async () => {
     await InventoriesAPI.destroy(inventory.id);
