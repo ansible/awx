@@ -80,14 +80,14 @@ class WorkflowDAG(SimpleDAG):
             node_ids_visited.add(obj.id)
             if obj.do_not_run is True:
                 continue
-            elif obj.job:
+            elif obj.job and not obj.all_parents_must_converge:
                 if obj.job.status in ['failed', 'error', 'canceled']:
                     nodes.extend(self.get_children(obj, 'failure_nodes') +
                                 self.get_children(obj, 'always_nodes'))
                 elif obj.job.status == 'successful':
                     nodes.extend(self.get_children(obj, 'success_nodes') +
                                 self.get_children(obj, 'always_nodes'))
-            elif obj.unified_job_template is None:
+            elif obj.unified_job_template is None and not obj.all_parents_must_converge:
                 nodes.extend(self.get_children(obj, 'failure_nodes') +
                             self.get_children(obj, 'always_nodes'))
             else:
@@ -204,6 +204,15 @@ class WorkflowDAG(SimpleDAG):
                 return False
         return True
 
+
+    r'''
+    determine if the current node is a convergence node by checking if all the 
+    parents are finished then checking to see if all parents meet the needed 
+    path criteria to run the convergence child. 
+    (i.e. parent must fail, parent must succeed, etc. to proceed)
+
+    Return a list object
+    '''
     def mark_dnr_nodes(self):
         root_nodes = self.get_root_nodes()
         nodes_marked_do_not_run = []
@@ -212,28 +221,24 @@ class WorkflowDAG(SimpleDAG):
             obj = node['node_object']
             parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
             if not obj.do_not_run and not obj.job and node not in root_nodes:
-                if self._are_all_nodes_dnr_decided(parent_nodes):
-                    # if the current node is a convergence node and all the 
-                    # parents are finished then check to see if all parents
-                    # met the needed criteria to run the convergence child
-                    # (i.e. parent must fail, parent must succeed)
-                    if obj.all_parents_must_converge:
-                        if self._are_relevant_parents_finished(node):
-                            if any(p.do_not_run for p in parent_nodes):
+                if obj.all_parents_must_converge:
+                    if any(p.do_not_run for p in parent_nodes):
+                        obj.do_not_run = True
+                        nodes_marked_do_not_run.append(node)
+                        continue
+                    for p in parent_nodes:
+                        if p.job and p.job.status in ["successful", "failed"]:
+                            if p.job and p.job.status == "successful":
+                                status = "success_nodes"
+                            elif p.job and p.job.status == "failed":
+                                status = "failure_nodes"
+                            if (p not in [node['node_object'] for node in self.get_parents(obj, status)]
+                                and p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
                                 obj.do_not_run = True
                                 nodes_marked_do_not_run.append(node)
-                            else:
-                                for p in parent_nodes:
-                                    if p.job.status == "successful":
-                                        status = "success_nodes"
-                                    elif p.job.status == "failed":
-                                        status = "failure_nodes"
-                                    if (p not in [node['node_object'] for node in self.get_parents(obj, status)]
-                                        and p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
-                                        obj.do_not_run = True
-                                        nodes_marked_do_not_run.append(node)
-                                        break 
-                    else:
+                                break 
+                else:
+                    if self._are_all_nodes_dnr_decided(parent_nodes):
                         if self._should_mark_node_dnr(node, parent_nodes):
                             obj.do_not_run = True
                             nodes_marked_do_not_run.append(node)
