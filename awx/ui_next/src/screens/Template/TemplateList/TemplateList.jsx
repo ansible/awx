@@ -109,12 +109,14 @@ class TemplatesList extends Component {
   }
 
   async loadTemplates() {
-    const { location } = this.props;
+    const { location, match } = this.props;
     const {
       jtActions: cachedJTActions,
       wfjtActions: cachedWFJTActions,
     } = this.state;
-    const params = parseQueryString(QS_CONFIG, location.search);
+    const params = {
+      ...parseQueryString(QS_CONFIG, location.search),
+    };
 
     let jtOptionsPromise;
     if (cachedJTActions) {
@@ -132,6 +134,9 @@ class TemplatesList extends Component {
       });
     } else {
       wfjtOptionsPromise = WorkflowJobTemplatesAPI.readOptions();
+    }
+    if (match.url.startsWith('/projects') && match.params.id) {
+      params.jobtemplate__project = match.params.id;
     }
 
     const promises = Promise.all([
@@ -189,13 +194,13 @@ class TemplatesList extends Component {
     if (canAddJT) {
       addButtonOptions.push({
         label: i18n._(t`Template`),
-        url: `${match.url}/job_template/add/`,
+        url: `/templates/job_template/add/`,
       });
     }
     if (canAddWFJT) {
       addButtonOptions.push({
         label: i18n._(t`Workflow Template`),
-        url: `${match.url}/workflow_job_template/add/`,
+        url: `/templates/workflow_job_template/add/`,
       });
     }
     const isAllSelected =
@@ -204,7 +209,7 @@ class TemplatesList extends Component {
       <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
     );
     return (
-      <PageSection>
+      <>
         <Card>
           <PaginatedDataList
             contentError={contentError}
@@ -292,7 +297,7 @@ class TemplatesList extends Component {
           {i18n._(t`Failed to delete one or more templates.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
-      </PageSection>
+      </>
     );
   }
 }

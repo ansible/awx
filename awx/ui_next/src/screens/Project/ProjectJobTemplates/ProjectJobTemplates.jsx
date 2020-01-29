@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
-import { CardBody } from '@components/Card';
+import React from 'react';
+import { withRouter } from 'react-router-dom';
+import TemplateList from '../../Template/TemplateList/TemplateList';
 
-class ProjectJobTemplates extends Component {
-  render() {
-    return <CardBody>Coming soon :)</CardBody>;
-  }
+function ProjectJobTemplates() {
+  return <TemplateList />;
 }
 
-export default ProjectJobTemplates;
+export default withRouter(ProjectJobTemplates);
