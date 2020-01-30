@@ -135,7 +135,7 @@ function WorkflowNodeHelp({ node, i18n }) {
             <b>{i18n._(t`Job Status`)}</b>
           </dt>
           <dd id="workflow-node-help-status">{jobStatus}</dd>
-          {node.job.elapsed && (
+          {typeof node.job.elapsed === 'number' && (
             <>
               <dt>
                 <b>{i18n._(t`Elapsed`)}</b>
@@ -159,7 +159,7 @@ function WorkflowNodeHelp({ node, i18n }) {
           <dd id="workflow-node-help-type">{nodeType}</dd>
         </GridDL>
       )}
-      {node.job && (
+      {node.job && node.job.type !== 'workflow_approval' && (
         <p css="margin-top: 10px">{i18n._(t`Click to view job details`)}</p>
       )}
     </>

@@ -1,5 +1,18 @@
 import { t } from '@lingui/macro';
 
+export function initReducer() {
+  return {
+    contentError: null,
+    isLoading: true,
+    links: [],
+    nextNodeId: 0,
+    nodePositions: null,
+    nodes: [],
+    showLegend: false,
+    showTools: false,
+  };
+}
+
 export default function visualizerReducer(state, action) {
   switch (action.type) {
     case 'CREATE_LINK':
@@ -25,6 +38,8 @@ export default function visualizerReducer(state, action) {
       return deleteNode(state);
     case 'GENERATE_NODES_AND_LINKS':
       return generateNodesAndLinks(state, action.nodes, action.i18n);
+    case 'RESET':
+      return initReducer();
     case 'SELECT_SOURCE_FOR_LINKING':
       return selectSourceForLinking(state, action.node);
     case 'SET_ADD_LINK_SOURCE_NODE':

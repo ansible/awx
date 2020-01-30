@@ -123,7 +123,7 @@ class Job extends Component {
               exact
             />
             <Route
-              key="details"
+              key="workflow-details"
               path="/jobs/workflow/:id/details"
               render={() =>
                 job &&
@@ -131,7 +131,7 @@ class Job extends Component {
               }
             />
             <Route
-              key="output"
+              key="workflow-output"
               path="/jobs/workflow/:id/output"
               render={() =>
                 job &&

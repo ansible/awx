@@ -10,7 +10,9 @@ import {
 import { layoutGraph } from '@components/Workflow/WorkflowUtils';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import workflowReducer from '@components/Workflow/workflowReducer';
+import workflowReducer, {
+  initReducer,
+} from '@components/Workflow/workflowReducer';
 import { WorkflowJobsAPI } from '@api';
 import WorkflowOutputGraph from './WorkflowOutputGraph';
 import WorkflowOutputToolbar from './WorkflowOutputToolbar';
@@ -41,17 +43,7 @@ const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
 };
 
 function WorkflowOutput({ job, i18n }) {
-  const [state, dispatch] = useReducer(workflowReducer, {
-    contentError: null,
-    isLoading: true,
-    links: [],
-    nextNodeId: 0,
-    nodePositions: null,
-    nodes: [],
-    showLegend: false,
-    showTools: false,
-  });
-
+  const [state, dispatch] = useReducer(workflowReducer, {}, initReducer);
   const { contentError, isLoading, links, nodePositions, nodes } = state;
 
   useEffect(() => {
@@ -69,6 +61,7 @@ function WorkflowOutput({ job, i18n }) {
         dispatch({ type: 'SET_IS_LOADING', value: false });
       }
     }
+    dispatch({ type: 'RESET' });
     fetchData();
   }, [job.id, i18n]);
 
@@ -84,7 +77,7 @@ function WorkflowOutput({ job, i18n }) {
 
       dispatch({ type: 'SET_NODE_POSITIONS', value: newNodePositions });
     }
-  }, [links, nodes]);
+  }, [job.id, links, nodes]);
 
   if (isLoading) {
     return (
