@@ -88,7 +88,7 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
         param
       )
     );
-    history.push(`${history.location.pathname}?${otherParts.join('&')}`);
+    history.replace(`${history.location.pathname}?${otherParts.join('&')}`);
   };
 
   const handleSaveNode = () => {
