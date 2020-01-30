@@ -76,6 +76,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
         <VerticalSeparator />
         <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
           <ActionButton
+            id="workflow-output-legend-button"
             isActive={showLegend}
             onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
             variant="plain"
@@ -85,6 +86,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
         </Tooltip>
         <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
           <ActionButton
+            id="workflow-output-tools-button"
             isActive={showTools}
             onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
             variant="plain"

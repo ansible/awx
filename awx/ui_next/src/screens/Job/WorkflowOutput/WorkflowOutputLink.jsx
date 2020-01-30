@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { WorkflowStateContext } from '@contexts/Workflow';
-import { shape } from 'prop-types';
+import { func, shape } from 'prop-types';
 import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
 } from '@components/Workflow/WorkflowUtils';
 
-function WorkflowOutputLink({ link, onUpdateLinkHelp }) {
+function WorkflowOutputLink({ link, mouseEnter, mouseLeave }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
   const [pathD, setPathD] = useState();
@@ -17,11 +17,13 @@ function WorkflowOutputLink({ link, onUpdateLinkHelp }) {
   const handleLinkMouseEnter = () => {
     ref.current.parentNode.appendChild(ref.current);
     setHovering(true);
+    mouseEnter();
   };
 
   const handleLinkMouseLeave = () => {
     ref.current.parentNode.prepend(ref.current);
     setHovering(null);
+    mouseLeave();
   };
 
   useEffect(() => {
@@ -56,8 +58,8 @@ function WorkflowOutputLink({ link, onUpdateLinkHelp }) {
       />
       <path d={pathD} stroke={pathStroke} strokeWidth="2px" />
       <polygon
-        onMouseEnter={() => onUpdateLinkHelp(link)}
-        onMouseLeave={() => onUpdateLinkHelp(null)}
+        onMouseEnter={() => mouseEnter()}
+        onMouseLeave={() => mouseLeave()}
         opacity="0"
         points={getLinkOverlayPoints(link, nodePositions)}
       />
@@ -67,6 +69,8 @@ function WorkflowOutputLink({ link, onUpdateLinkHelp }) {
 
 WorkflowOutputLink.propTypes = {
   link: shape().isRequired,
+  mouseEnter: func.isRequired,
+  mouseLeave: func.isRequired,
 };
 
 export default WorkflowOutputLink;

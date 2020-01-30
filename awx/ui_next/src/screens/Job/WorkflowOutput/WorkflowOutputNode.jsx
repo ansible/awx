@@ -103,7 +103,7 @@ function WorkflowOutputNode({ history, i18n, mouseEnter, mouseLeave, node }) {
           {node.job ? (
             <>
               <JobTopLine>
-                <StatusIcon status={node.job.status} />
+                {node.job.status && <StatusIcon status={node.job.status} />}
                 <p>{node.job.name}</p>
               </JobTopLine>
               <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>

@@ -35,7 +35,8 @@ describe('WorkflowOutputLink', () => {
           <WorkflowOutputLink
             link={link}
             nodePositions={nodePositions}
-            onUpdateLinkHelp={() => {}}
+            mouseEnter={() => {}}
+            mouseLeave={() => {}}
           />
         </WorkflowStateContext.Provider>
       </svg>

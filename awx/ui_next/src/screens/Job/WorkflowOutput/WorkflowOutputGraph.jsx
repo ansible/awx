@@ -173,7 +173,8 @@ function WorkflowOutputGraph() {
               <WorkflowOutputLink
                 key={`link-${link.source.id}-${link.target.id}`}
                 link={link}
-                onUpdateLinkHelp={setLinkHelp}
+                mouseEnter={() => setLinkHelp(link)}
+                mouseLeave={() => setLinkHelp(null)}
               />
             )),
             nodes.map(node => {

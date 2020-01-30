@@ -33,6 +33,7 @@ const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
     page_size: 200,
     page: pageNo,
   });
+
   if (data.next) {
     return fetchWorkflowNodes(jobId, pageNo + 1, nodes.concat(data.results));
   }
