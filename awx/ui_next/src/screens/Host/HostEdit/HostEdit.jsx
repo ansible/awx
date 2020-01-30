@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import { t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
 import { CardBody } from '@components/Card';
+import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '@components/AlertModal';
 import { HostsAPI } from '@api';
 import HostForm from '../shared';
 
-function HostEdit({ host }) {
+function HostEdit({ host, i18n }) {
   const [formError, setFormError] = useState(null);
   const hostsMatch = useRouteMatch('/hosts/:id/edit');
   const inventoriesMatch = useRouteMatch(
@@ -31,6 +35,9 @@ function HostEdit({ host }) {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);
     } catch (error) {
+      if (error.response && error.response.data) {
+        throw error.response.data;
+      }
       setFormError(error);
     }
   };
@@ -46,7 +53,17 @@ function HostEdit({ host }) {
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
       />
-      {formError ? <div>error</div> : null}
+      {formError && (
+        <AlertModal
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          isOpen={formError}
+          onClose={() => setFormError(null)}
+        >
+          {i18n._(t`An error occurred when saving Host`)}
+          <ErrorDetail error={formError} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }
@@ -56,4 +73,4 @@ HostEdit.propTypes = {
 };
 
 export { HostEdit as _HostEdit };
-export default HostEdit;
+export default withI18n()(HostEdit);
