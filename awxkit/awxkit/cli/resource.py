@@ -44,6 +44,20 @@ DEPRECATED_RESOURCES_REVERSE = dict(
     (v, k) for k, v in DEPRECATED_RESOURCES.items()
 )
 
+EXPORTABLE_RESOURCES = [
+    'users',
+    'organizations',
+    'teams',
+    # 'credential_types',
+    # 'credentials',
+    # 'notification_templates',
+    # 'inventory_scripts',
+    # 'projects',
+    # 'inventory',
+    # 'job_templates',
+    # 'workflow_job_templates',
+]
+
 
 class CustomCommand(metaclass=CustomRegistryMeta):
     """Base class for implementing custom commands.
@@ -156,12 +170,17 @@ class Export(CustomCommand):
 
     def extend_parser(self, parser):
         resources = parser.add_argument_group('resources')
-        resources.add_argument('--users', nargs='?', const='')
-        resources.add_argument('--organizations', nargs='?', const='')
+
+        for resource in EXPORTABLE_RESOURCES:
+            # This parsing pattern will result in 3 different possible outcomes:
+            # 1) the resource flag is not used at all, which will result in the attr being None
+            # 2) the resource flag is used with no argument, which will result in the attr being ''
+            # 3) the resource flag is used with an argument, and the attr will be that argument's value
+            resources.add_argument('--{}'.format(resource), nargs='?', const='')
 
     def get_resources(self, client, resource, value):
         api_resource = getattr(client.v2, resource)
-        post_fields = api_resource.options().json['actions']['POST']
+        post_options = api_resource.options().json['actions']['POST']
         if value:
             from .options import pk_or_name
 
@@ -170,7 +189,7 @@ class Export(CustomCommand):
         else:
             results = api_resource.get(all_pages=True).json['results']
 
-        return [{key: r[key] for key in post_fields if key in r} for r in results]
+        return [{key: r[key] for key in post_options if key in r} for r in results]
 
     def handle(self, client, parser):
         self.extend_parser(parser)
@@ -182,10 +201,13 @@ class Export(CustomCommand):
         client.authenticate()
         parsed = parser.parse_known_args()[0]
 
+        # If no resource flags are explicitly used, export everything.
+        all_resources = all(getattr(parsed, resource, None) is None for resource in EXPORTABLE_RESOURCES)
+
         data = {}
-        for resource in ('users', 'organizations'):
+        for resource in EXPORTABLE_RESOURCES:
             value = getattr(parsed, resource, None)
-            if value is None:
+            if value is None and not all_resources:
                 continue
             resources = self.get_resources(client, resource, value)
 
