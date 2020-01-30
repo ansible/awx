@@ -1,6 +1,6 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { func, number, shape, string } from 'prop-types';
 import styled from 'styled-components';
 import { Formik, Field } from 'formik';
@@ -207,7 +207,9 @@ function NodeTypeStep({
                               field.onChange(evt);
                             }}
                           />
-                          <TimeoutLabel>min</TimeoutLabel>
+                          <TimeoutLabel>
+                            <Trans>min</Trans>
+                          </TimeoutLabel>
                         </>
                       )}
                     />
@@ -232,7 +234,9 @@ function NodeTypeStep({
                               field.onChange(evt);
                             }}
                           />
-                          <TimeoutLabel>sec</TimeoutLabel>
+                          <TimeoutLabel>
+                            <Trans>sec</Trans>
+                          </TimeoutLabel>
                         </>
                       )}
                     />
