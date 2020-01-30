@@ -20,6 +20,7 @@ from rest_framework import status
 import requests
 
 from awx.api.generics import APIView
+from awx.conf.registry import settings_registry
 from awx.main.ha import is_ha_environment
 from awx.main.utils import (
     get_awx_version,
@@ -302,7 +303,8 @@ class ApiV2ConfigView(APIView):
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
             settings.LICENSE = license_data
-            settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
+            if not settings_registry.is_setting_read_only('TOWER_URL_BASE'):
+                settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
         logger.warning(smart_text(u"Invalid license submitted."),
