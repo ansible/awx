@@ -3,7 +3,7 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '@contexts/Workflow';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 import { shape } from 'prop-types';
@@ -65,7 +65,8 @@ const fetchWorkflowNodes = async (
   return workflowNodes.concat(data.results);
 };
 
-function Visualizer({ history, template, i18n }) {
+function Visualizer({ template, i18n }) {
+  const history = useHistory();
   const [state, dispatch] = useReducer(workflowReducer, {
     addLinkSourceNode: null,
     addLinkTargetNode: null,
@@ -467,4 +468,4 @@ Visualizer.propTypes = {
   template: shape().isRequired,
 };
 
-export default withI18n()(withRouter(Visualizer));
+export default withI18n()(Visualizer);

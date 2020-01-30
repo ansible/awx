@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { WorkflowStateContext } from '@contexts/Workflow';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -56,7 +56,8 @@ const NodeDefaultLabel = styled.p`
   white-space: nowrap;
 `;
 
-function WorkflowOutputNode({ history, i18n, mouseEnter, mouseLeave, node }) {
+function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
+  const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);
   let borderColor = '#93969A';
 
@@ -130,4 +131,4 @@ WorkflowOutputNode.propTypes = {
   node: shape().isRequired,
 };
 
-export default withI18n()(withRouter(WorkflowOutputNode));
+export default withI18n()(WorkflowOutputNode);

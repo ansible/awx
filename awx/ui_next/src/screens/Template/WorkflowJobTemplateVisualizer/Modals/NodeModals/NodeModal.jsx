@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -16,7 +16,8 @@ import Wizard from '@components/Wizard';
 import { NodeTypeStep } from './NodeTypeStep';
 import { RunStep, NodeNextButton } from '.';
 
-function NodeModal({ askLinkType, history, i18n, onSave, title }) {
+function NodeModal({ askLinkType, i18n, onSave, title }) {
+  const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
   const { nodeToEdit } = useContext(WorkflowStateContext);
 
@@ -210,4 +211,4 @@ NodeModal.propTypes = {
   title: node.isRequired,
 };
 
-export default withI18n()(withRouter(NodeModal));
+export default withI18n()(NodeModal);
