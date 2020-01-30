@@ -30,7 +30,13 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
         inventory: host.inventory || '',
         variables: host.variables,
       }}
-      onSubmit={handleSubmit}
+      onSubmit={async (values, formik) => {
+        try {
+          await handleSubmit(values);
+        } catch (errors) {
+          formik.setErrors(errors);
+        }
+      }}
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
