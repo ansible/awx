@@ -47,6 +47,7 @@
   file:
     path: "{{ postgres_data_dir + '/pgdata' }}"
     state: absent
+  when: compose_start_containers|bool
 
 - import_tasks: set_image.yml
 - import_tasks: compose.yml
