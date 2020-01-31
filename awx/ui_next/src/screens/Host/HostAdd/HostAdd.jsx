@@ -27,7 +27,8 @@ function HostAdd({ i18n }) {
       const { data: response } = await HostsAPI.create(values);
       history.push(`${url}/${response.id}/details`);
     } catch (error) {
-      if (error.response?.data) {
+      // check for field-specific errors from API
+      if (error.response?.data && typeof error.response.data === 'object') {
         throw error.response.data;
       }
       setFormError(error);

@@ -35,7 +35,8 @@ function HostEdit({ host, i18n }) {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);
     } catch (error) {
-      if (error.response?.data) {
+      // check for field-specific errors from API
+      if (error.response?.data && typeof error.response.data === 'object') {
         throw error.response.data;
       }
       setFormError(error);
