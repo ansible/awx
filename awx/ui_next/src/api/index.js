@@ -24,6 +24,7 @@ import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
 import WorkflowJobs from './models/WorkflowJobs';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
+import useRequest from './useRequest';
 
 const AdHocCommandsAPI = new AdHocCommands();
 const ConfigAPI = new Config();
@@ -79,4 +80,5 @@ export {
   UsersAPI,
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
+  useRequest,
 };

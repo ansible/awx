@@ -10,28 +10,18 @@ import { VariablesDetail } from '@components/CodeMirrorInput';
 import DeleteButton from '@components/DeleteButton';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import { InventoriesAPI } from '@api';
-import useEndpoint, { useFetch } from './useEndpoint';
+import { InventoriesAPI, useRequest } from '@api';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
   const history = useHistory();
 
-  // initial approach with useEndpoint()
-  // const { results: instanceGroups, isLoading, error } = useEndpoint(
-  //   useCallback(async () => {
-  //     const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
-  //     return data.results;
-  //   }, [inventory.id])
-  // );
-
-  // more versatile approach with useFetch()
   const {
     result: instanceGroups,
     isLoading,
     error,
-    fetch: fetchInstanceGroups,
-  } = useFetch(
+    request: fetchInstanceGroups,
+  } = useRequest(
     useCallback(async () => {
       const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
       return data.results;

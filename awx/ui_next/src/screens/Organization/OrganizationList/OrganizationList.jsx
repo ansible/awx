@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI, useRequest } from '@api';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -13,10 +13,6 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
-// TODO: move useEndpoint to better location
-import useEndpoint, {
-  useFetch,
-} from '../../Inventory/InventoryDetail/useEndpoint';
 
 import OrganizationListItem from './OrganizationListItem';
 
@@ -35,38 +31,12 @@ function OrganizationsList({ i18n }) {
 
   const addUrl = `${match.url}/add`;
 
-  // const {
-  //   results: organizations,
-  //   error: contentError,
-  //   isLoading: isOrgsLoading,
-  // } = useEndpoint(
-  //   useCallback(async () => {
-  //     const params = parseQueryString(QS_CONFIG, location.search);
-  //     const [
-  //       {
-  //         data: { count, results },
-  //       },
-  //       {
-  //         data: { actions },
-  //       },
-  //     ] = await Promise.all([
-  //       OrganizationsAPI.read(params),
-  //       loadOrganizationActions(),
-  //     ]);
-  //     return {
-  //       organizations: results,
-  //       count,
-  //       actions,
-  //     };
-  //   }, [location])
-  // );
-
   const {
     result: { organizations = {}, organizationCount, actions },
     error: contentError,
     isLoading: isOrgsLoading,
-    fetch: fetchOrganizations,
-  } = useFetch(
+    request: fetchOrganizations,
+  } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
       const [orgs, orgActions] = await Promise.all([
@@ -89,8 +59,8 @@ function OrganizationsList({ i18n }) {
   const {
     isLoading: isDeleteLoading,
     // error: deletionError,
-    fetch: deleteOrganizations,
-  } = useFetch(
+    request: deleteOrganizations,
+  } = useRequest(
     useCallback(async () => {
       return Promise.all(
         selected.map(({ id }) => OrganizationsAPI.destroy(id))
