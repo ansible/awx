@@ -13,7 +13,6 @@ const workflowContext = {
         id: 4,
       },
       linkType: 'success',
-      type: 'link',
     },
     {
       source: {
@@ -23,7 +22,6 @@ const workflowContext = {
         id: 3,
       },
       linkType: 'always',
-      type: 'link',
     },
     {
       source: {
@@ -33,7 +31,6 @@ const workflowContext = {
         id: 3,
       },
       linkType: 'success',
-      type: 'link',
     },
     {
       source: {
@@ -43,7 +40,6 @@ const workflowContext = {
         id: 2,
       },
       linkType: 'always',
-      type: 'link',
     },
     {
       source: {
@@ -53,7 +49,6 @@ const workflowContext = {
         id: 5,
       },
       linkType: 'success',
-      type: 'link',
     },
   ],
   nodePositions: {
@@ -66,11 +61,9 @@ const workflowContext = {
   nodes: [
     {
       id: 1,
-      type: 'node',
     },
     {
       id: 2,
-      type: 'node',
       job: {
         name: 'Foo JT',
         type: 'job',
@@ -80,15 +73,12 @@ const workflowContext = {
     },
     {
       id: 3,
-      type: 'node',
     },
     {
       id: 4,
-      type: 'node',
     },
     {
       id: 5,
-      type: 'node',
     },
   ],
   showLegend: false,

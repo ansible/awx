@@ -122,7 +122,6 @@ function createLink(state, linkType) {
     source: { id: addLinkSourceNode.id },
     target: { id: addLinkTargetNode.id },
     linkType,
-    type: 'link',
   });
 
   newLinks.forEach((link, index) => {
@@ -150,7 +149,6 @@ function createNode(state, node) {
 
   newNodes.push({
     id: nextNodeId,
-    type: 'node',
     unifiedJobTemplate: node.nodeResource,
   });
 
@@ -164,7 +162,6 @@ function createNode(state, node) {
     source: { id: addNodeSource },
     target: { id: nextNodeId },
     linkType: node.linkType,
-    type: 'link',
   });
 
   if (addNodeTarget) {
@@ -268,7 +265,6 @@ function deleteLink(state) {
         id: linkToDelete.target.id,
       },
       linkType: 'always',
-      type: 'link',
     });
   }
 
@@ -296,7 +292,6 @@ function addLinksFromParentsToChildren(
             source: { id: parentId },
             target: { id: child.id },
             linkType: 'always',
-            type: 'link',
           });
         }
       } else if (!linkParentMapping[child.id].includes(parentId)) {
@@ -304,7 +299,6 @@ function addLinksFromParentsToChildren(
           source: { id: parentId },
           target: { id: child.id },
           linkType: child.linkType,
-          type: 'link',
         });
       }
     });
@@ -382,7 +376,6 @@ function generateNodes(workflowNodes, i18n) {
       unifiedJobTemplate: {
         name: i18n._(t`START`),
       },
-      type: 'node',
     },
   ];
   workflowNodes.forEach(node => {
@@ -390,7 +383,6 @@ function generateNodes(workflowNodes, i18n) {
 
     const nodeObj = {
       id: nodeIdCounter,
-      type: 'node',
       originalNodeObject: node,
     };
 
@@ -434,7 +426,6 @@ function generateLinks(
         source: arrayOfNodesForChart[sourceIndex],
         target: arrayOfNodesForChart[targetIndex],
         linkType: 'success',
-        type: 'link',
       });
       nonRootNodeIds.push(nodeId);
     });
@@ -445,7 +436,6 @@ function generateLinks(
         source: arrayOfNodesForChart[sourceIndex],
         target: arrayOfNodesForChart[targetIndex],
         linkType: 'failure',
-        type: 'link',
       });
       nonRootNodeIds.push(nodeId);
     });
@@ -456,7 +446,6 @@ function generateLinks(
         source: arrayOfNodesForChart[sourceIndex],
         target: arrayOfNodesForChart[targetIndex],
         linkType: 'always',
-        type: 'link',
       });
       nonRootNodeIds.push(nodeId);
     });
@@ -496,7 +485,6 @@ function generateNodesAndLinks(state, workflowNodes, i18n) {
       source: arrayOfNodesForChart[0],
       target: arrayOfNodesForChart[targetIndex],
       linkType: 'always',
-      type: 'link',
     });
   });
 
