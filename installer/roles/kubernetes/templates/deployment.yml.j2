@@ -169,6 +169,10 @@ spec:
             - name: https_proxy
               value: {{ https_proxy }}
 {% endif %}
+{% if no_proxy is defined %}
+            - name: no_proxy
+              value: {{ no_proxy }}
+{% endif %}
 {% endif %}
           command:
             - sh
