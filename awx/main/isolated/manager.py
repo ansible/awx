@@ -370,33 +370,32 @@ class IsolatedManager(object):
                 private_data_dir
             )
 
-            if runner_obj.status == 'successful':
-                for instance in instance_qs:
-                    task_result = {}
-                    try:
-                        task_result = runner_obj.get_fact_cache(instance.hostname)
-                    except Exception:
-                        logger.exception('Failed to read status from isolated instances')
-                    if 'awx_capacity_cpu' in task_result and 'awx_capacity_mem' in task_result:
-                        task_result = {
-                            'cpu': task_result['awx_cpu'],
-                            'mem': task_result['awx_mem'],
-                            'capacity_cpu': task_result['awx_capacity_cpu'],
-                            'capacity_mem': task_result['awx_capacity_mem'],
-                            'version': task_result['awx_capacity_version']
-                        }
-                        IsolatedManager.update_capacity(instance, task_result)
-                        logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
-                    elif instance.capacity == 0:
-                        logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
-                            instance.hostname))
-                    else:
-                        logger.warning('Could not update status of isolated instance {}'.format(instance.hostname))
-                        if instance.is_lost(isolated=True):
-                            instance.capacity = 0
-                            instance.save(update_fields=['capacity'])
-                            logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
-                                instance.hostname, instance.modified))
+            for instance in instance_qs:
+                task_result = {}
+                try:
+                    task_result = runner_obj.get_fact_cache(instance.hostname)
+                except Exception:
+                    logger.exception('Failed to read status from isolated instances')
+                if 'awx_capacity_cpu' in task_result and 'awx_capacity_mem' in task_result:
+                    task_result = {
+                        'cpu': task_result['awx_cpu'],
+                        'mem': task_result['awx_mem'],
+                        'capacity_cpu': task_result['awx_capacity_cpu'],
+                        'capacity_mem': task_result['awx_capacity_mem'],
+                        'version': task_result['awx_capacity_version']
+                    }
+                    IsolatedManager.update_capacity(instance, task_result)
+                    logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
+                elif instance.capacity == 0:
+                    logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
+                        instance.hostname))
+                else:
+                    logger.warning('Could not update status of isolated instance {}'.format(instance.hostname))
+                    if instance.is_lost(isolated=True):
+                        instance.capacity = 0
+                        instance.save(update_fields=['capacity'])
+                        logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
+                            instance.hostname, instance.modified))
         finally:
             if os.path.exists(private_data_dir):
                 shutil.rmtree(private_data_dir)
