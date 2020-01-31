@@ -17,7 +17,7 @@ function TeamEdit({ team }) {
       await TeamsAPI.update(team.id, values);
       history.push(`/teams/${team.id}/details`);
     } catch (err) {
-      setError(error);
+      setError(err);
     }
   };
 
