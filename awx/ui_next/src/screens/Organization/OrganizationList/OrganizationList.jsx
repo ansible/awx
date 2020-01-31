@@ -4,7 +4,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { OrganizationsAPI, useRequest } from '@api';
+import { OrganizationsAPI } from '@api';
+import useRequest from '@util/useRequest';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -58,7 +59,7 @@ function OrganizationsList({ i18n }) {
 
   const {
     isLoading: isDeleteLoading,
-    // error: deletionError,
+    error: dError,
     request: deleteOrganizations,
   } = useRequest(
     useCallback(async () => {
@@ -67,6 +68,12 @@ function OrganizationsList({ i18n }) {
       );
     }, [selected])
   );
+
+  useEffect(() => {
+    if (dError) {
+      setDeletionError(dError);
+    }
+  }, [dError]);
 
   useEffect(() => {
     fetchOrganizations();
