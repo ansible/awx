@@ -20,8 +20,12 @@ describe('<TeamEdit />', () => {
     },
   };
 
-  test('handleSubmit should call api update', async () => {
-    const wrapper = mountWithContexts(<TeamEdit team={mockData} />);
+  test('handleSubmit should call api update and then navigate to the details page', async () => {
+    const history = createMemoryHistory({});
+
+    const wrapper = mountWithContexts(<TeamEdit team={mockData} />, {
+      context: { router: { history } },
+    });
 
     const updatedTeamData = {
       name: 'new name',
@@ -32,6 +36,7 @@ describe('<TeamEdit />', () => {
     });
 
     expect(TeamsAPI.update).toHaveBeenCalledWith(1, updatedTeamData);
+    expect(history.location.pathname).toEqual('/teams/1/details');
   });
 
   test('should navigate to team detail when cancel is clicked', async () => {
