@@ -2390,6 +2390,9 @@ class satellite6(PluginFileInjector):
         group_patterns = '[]'
         group_prefix = 'foreman_'
         want_hostcollections = 'False'
+        want_ansible_ssh_host = 'False'
+        rich_params = 'False'
+        want_facts = 'True'
         foreman_opts = dict(inventory_update.source_vars_dict.items())
         foreman_opts.setdefault('ssl_verify', 'False')
         for k, v in foreman_opts.items():
@@ -2399,6 +2402,12 @@ class satellite6(PluginFileInjector):
                 group_prefix = v
             elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
                 want_hostcollections = v
+            elif k == 'satellite6_want_ansible_ssh_host' and isinstance(v, bool):
+                want_ansible_ssh_host = v
+            elif k == 'satellite6_rich_params' and isinstance(v, bool):
+                rich_params = v
+            elif k == 'satellite6_want_facts' and isinstance(v, bool):
+                want_facts = v
             else:
                 cp.set(section, k, str(v))
 
@@ -2410,9 +2419,11 @@ class satellite6(PluginFileInjector):
         section = 'ansible'
         cp.add_section(section)
         cp.set(section, 'group_patterns', group_patterns)
-        cp.set(section, 'want_facts', 'True')
+        cp.set(section, 'want_facts', str(want_facts))
         cp.set(section, 'want_hostcollections', str(want_hostcollections))
         cp.set(section, 'group_prefix', group_prefix)
+        cp.set(section, 'want_ansible_ssh_host', str(want_ansible_ssh_host))
+        cp.set(section, 'rich_params', str(rich_params))
 
         section = 'cache'
         cp.add_section(section)

@@ -2146,7 +2146,14 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        inventory_update.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
+        inventory_update.source_vars = {
+            'satellite6_group_patterns': '[a,b,c]',
+            'satellite6_group_prefix': 'hey_',
+            'satellite6_want_hostcollections': True,
+            'satellite6_want_ansible_ssh_host': True,
+            'satellite6_rich_params': True,
+            'satellite6_want_facts': False
+        }
 
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
@@ -2159,6 +2166,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert config.get('ansible', 'group_patterns') == '[a,b,c]'
         assert config.get('ansible', 'group_prefix') == 'hey_'
         assert config.get('ansible', 'want_hostcollections') == 'True'
+        assert config.get('ansible', 'want_ansible_ssh_host') == 'True'
+        assert config.get('ansible', 'rich_params') == 'True'
+        assert config.get('ansible', 'want_facts') == 'False'
 
     def test_cloudforms_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()

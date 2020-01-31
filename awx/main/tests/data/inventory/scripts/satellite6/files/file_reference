@@ -10,6 +10,8 @@ group_patterns = foo_group_patterns
 want_facts = True
 want_hostcollections = True
 group_prefix = foo_group_prefix
+want_ansible_ssh_host = True
+rich_params = True
 
 [cache]
 path = /tmp
