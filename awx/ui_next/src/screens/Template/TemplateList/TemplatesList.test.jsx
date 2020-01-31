@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { Route } from 'react-router-dom';
 import {
@@ -8,7 +9,7 @@ import {
 } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
-import TemplatesList, { _TemplatesList } from './TemplateList';
+import TemplatesList from './TemplateList';
 
 jest.mock('@api');
 
@@ -90,119 +91,181 @@ describe('<TemplatesList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    mountWithContexts(
-      <TemplatesList
-        match={{ path: '/templates', url: '/templates' }}
-        location={{ search: '', pathname: '/templates' }}
-      />
-    );
-  });
-
-  test('Templates are retrieved from the api and the components finishes loading', async done => {
-    const loadTemplates = jest.spyOn(_TemplatesList.prototype, 'loadTemplates');
-    const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(loadTemplates).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('hasContentLoading') === false
-    );
-    done();
-  });
-
-  test('handleSelect is called when a template list item is selected', async done => {
-    const handleSelect = jest.spyOn(_TemplatesList.prototype, 'handleSelect');
-    const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('hasContentLoading') === false
-    );
-    await wrapper
-      .find('input#select-jobTemplate-1')
-      .closest('DataListCheck')
-      .props()
-      .onChange();
-    expect(handleSelect).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('selected').length === 1
-    );
-    done();
-  });
-
-  test('handleSelectAll is called when a template list item is selected', async done => {
-    const handleSelectAll = jest.spyOn(
-      _TemplatesList.prototype,
-      'handleSelectAll'
-    );
-    const wrapper = mountWithContexts(<TemplatesList />);
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('hasContentLoading') === false
-    );
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(true);
-    expect(handleSelectAll).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('selected').length === 5
-    );
-    done();
-  });
-
-  test('delete button is disabled if user does not have delete capabilities on a selected template', async done => {
-    const wrapper = mountWithContexts(<TemplatesList />);
-    wrapper.find('TemplatesList').setState({
-      templates: mockTemplates,
-      itemCount: 5,
-      isInitialized: true,
-      selected: mockTemplates.slice(0, 4),
+  test('initially renders successfully', async () => {
+    await act(async () => {
+      mountWithContexts(
+        <TemplatesList
+          match={{ path: '/templates', url: '/templates' }}
+          location={{ search: '', pathname: '/templates' }}
+        />
+      );
     });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === false
-    );
-    wrapper.find('TemplatesList').setState({
-      selected: mockTemplates,
-    });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === true
-    );
-    done();
   });
 
-  test('api is called to delete templates for each selected template.', () => {
-    JobTemplatesAPI.destroy = jest.fn();
-    WorkflowJobTemplatesAPI.destroy = jest.fn();
+  test('Templates are retrieved from the api and the components finishes loading', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TemplatesList />);
+    });
+    expect(UnifiedJobTemplatesAPI.read).toBeCalled();
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    expect(wrapper.find('TemplateListItem').length).toEqual(5);
+  });
+
+  test('handleSelect is called when a template list item is selected', async () => {
     const wrapper = mountWithContexts(<TemplatesList />);
-    wrapper.find('TemplatesList').setState({
-      templates: mockTemplates,
-      itemCount: 5,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockTemplates.slice(0, 4),
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    expect(JobTemplatesAPI.destroy).toHaveBeenCalledTimes(3);
-    expect(WorkflowJobTemplatesAPI.destroy).toHaveBeenCalledTimes(1);
+    const checkBox = wrapper
+      .find('TemplateListItem')
+      .at(1)
+      .find('input');
+
+    checkBox.simulate('change', {
+      target: {
+        id: 2,
+        name: 'Job Template 2',
+        url: '/templates/job_template/2',
+        type: 'job_template',
+        summary_fields: { user_capabilities: { delete: true } },
+      },
+    });
+
+    expect(
+      wrapper
+        .find('TemplateListItem')
+        .at(1)
+        .prop('isSelected')
+    ).toBe(true);
   });
 
-  test('error is shown when template not successfully deleted from api', async done => {
+  test('handleSelectAll is called when a template list item is selected', async () => {
+    const wrapper = mountWithContexts(<TemplatesList />);
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    expect(wrapper.find('Checkbox#select-all').prop('isChecked')).toBe(false);
+
+    const toolBarCheckBox = wrapper.find('Checkbox#select-all');
+    act(() => {
+      toolBarCheckBox.prop('onChange')(true);
+    });
+    wrapper.update();
+    expect(wrapper.find('Checkbox#select-all').prop('isChecked')).toBe(true);
+  });
+
+  test('delete button is disabled if user does not have delete capabilities on a selected template', async () => {
+    const wrapper = mountWithContexts(<TemplatesList />);
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    const deleteableItem = wrapper
+      .find('TemplateListItem')
+      .at(0)
+      .find('input');
+    const nonDeleteableItem = wrapper
+      .find('TemplateListItem')
+      .at(4)
+      .find('input');
+
+    deleteableItem.simulate('change', {
+      id: 1,
+      name: 'Job Template 1',
+      url: '/templates/job_template/1',
+      type: 'job_template',
+      summary_fields: {
+        user_capabilities: {
+          delete: true,
+        },
+      },
+    });
+
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      false
+    );
+    deleteableItem.simulate('change', {
+      id: 1,
+      name: 'Job Template 1',
+      url: '/templates/job_template/1',
+      type: 'job_template',
+      summary_fields: {
+        user_capabilities: {
+          delete: true,
+        },
+      },
+    });
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+    nonDeleteableItem.simulate('change', {
+      id: 5,
+      name: 'Workflow Job Template 2',
+      url: '/templates/workflow_job_template/5',
+      type: 'workflow_job_template',
+      summary_fields: {
+        user_capabilities: {
+          delete: false,
+        },
+      },
+    });
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+  });
+
+  test('api is called to delete templates for each selected template.', async () => {
+    const wrapper = mountWithContexts(<TemplatesList />);
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    const jobTemplate = wrapper
+      .find('TemplateListItem')
+      .at(1)
+      .find('input');
+    const workflowJobTemplate = wrapper
+      .find('TemplateListItem')
+      .at(3)
+      .find('input');
+
+    jobTemplate.simulate('change', {
+      target: {
+        id: 2,
+        name: 'Job Template 2',
+        url: '/templates/job_template/2',
+        type: 'job_template',
+        summary_fields: { user_capabilities: { delete: true } },
+      },
+    });
+
+    workflowJobTemplate.simulate('change', {
+      target: {
+        id: 4,
+        name: 'Workflow Job Template 1',
+        url: '/templates/workflow_job_template/4',
+        type: 'workflow_job_template',
+        summary_fields: {
+          user_capabilities: {
+            delete: true,
+          },
+        },
+      },
+    });
+
+    wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    wrapper.update();
+    await act(async () => {
+      await wrapper
+        .find('button[aria-label="confirm delete"]')
+        .prop('onClick')();
+    });
+    expect(JobTemplatesAPI.destroy).toBeCalledWith(2);
+    expect(WorkflowJobTemplatesAPI.destroy).toBeCalledWith(4);
+  });
+
+  test('error is shown when template not successfully deleted from api', async () => {
     JobTemplatesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -215,21 +278,35 @@ describe('<TemplatesList />', () => {
       })
     );
     const wrapper = mountWithContexts(<TemplatesList />);
-    wrapper.find('TemplatesList').setState({
-      templates: mockTemplates,
-      itemCount: 1,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockTemplates.slice(0, 1),
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    const checkBox = wrapper
+      .find('TemplateListItem')
+      .at(1)
+      .find('input');
+
+    checkBox.simulate('change', {
+      target: {
+        id: 'a',
+        name: 'Job Template 2',
+        url: '/templates/job_template/2',
+        type: 'job_template',
+        summary_fields: { user_capabilities: { delete: true } },
+      },
+    });
+    wrapper.find('button[aria-label="Delete"]').prop('onClick')();
+    wrapper.update();
+    await act(async () => {
+      await wrapper
+        .find('button[aria-label="confirm delete"]')
+        .prop('onClick')();
+    });
     await waitForElement(
       wrapper,
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
-
-    done();
   });
   test('Calls API with jobtemplate__project id', async () => {
     const history = createMemoryHistory({
@@ -252,11 +329,9 @@ describe('<TemplatesList />', () => {
         },
       }
     );
-    await waitForElement(
-      wrapper,
-      'TemplatesList',
-      el => el.state('hasContentLoading') === true
-    );
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 1);
+    });
     expect(UnifiedJobTemplatesAPI.read).toBeCalledWith({
       jobtemplate__project: '6',
       order_by: 'name',
