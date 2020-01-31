@@ -53,8 +53,13 @@ class ErrorDetail extends Component {
     const { error } = this.props;
     const { response } = error;
 
-    const message =
-      typeof response.data === 'string' ? response.data : response.data.detail;
+    let message = '';
+    if (response.data) {
+      message =
+        typeof response.data === 'string'
+          ? response.data
+          : response.data?.detail;
+    }
 
     return (
       <Fragment>
