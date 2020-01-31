@@ -35,7 +35,7 @@ function HostEdit({ host, i18n }) {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);
     } catch (error) {
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
         throw error.response.data;
       }
       setFormError(error);
