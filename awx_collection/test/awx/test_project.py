@@ -7,8 +7,8 @@ from awx.main.models import Project
 
 
 @pytest.mark.django_db
-def test_create_project(run_converted_module, admin_user, organization):
-    result = run_converted_module('tower_project', dict(
+def test_create_project(run_module, admin_user, organization):
+    result = run_module('tower_project', dict(
         name='foo',
         organization=organization.name,
         scm_type='git',

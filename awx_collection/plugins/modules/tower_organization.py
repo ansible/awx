@@ -101,12 +101,12 @@ def main():
     # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     # instance_group_objects = []
     # for instance_name in instance_group_names:
     #     instance_group_objects.append(module.resolve_name_to_id('instance_groups', instance_name))
 
-    # Attempt to lookup organization based on the provided name and org ID
+    # Attempt to look up organization based on the provided name
     organization = module.get_one('organizations', **{
         'data': {
             'name': name,
@@ -130,7 +130,7 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(organization)
     elif state == 'present':
-        # If the state was present we can let the module build or update the existing team, this will return on its own
+        # If the state was present and we can let the module build or update the existing organization, this will return on its own
         module.create_or_update_if_needed(organization, org_fields, endpoint='organizations', item_type='organization')
 
 

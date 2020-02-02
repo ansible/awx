@@ -125,7 +125,7 @@ def main():
     else:
         job_list = module.get_endpoint('jobs', **{'data': job_search_data})
 
-    # Attempt to lookup jobs based on the status
+    # Attempt to look up jobs based on the status
     module.exit_json(**job_list['json'])
 
 

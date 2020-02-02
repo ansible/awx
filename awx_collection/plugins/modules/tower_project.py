@@ -219,12 +219,12 @@ def main():
     state = module.params.get('state')
     wait = module.params.get('wait')
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
     if scm_credential is not None:
         scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
 
-    # Attempt to lookup project based on the provided name and org ID
+    # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', **{
         'data': {
             'name': name,
@@ -267,7 +267,7 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
     elif state == 'present':
-        # If the state was present we can let the module build or update the existing team, this will return on its own
+        # If the state was present and we can let the module build or update the existing project, this will return on its own
         module.create_or_update_if_needed(project, project_fields, endpoint='projects', item_type='project', on_create=on_change, on_update=on_change)
 
 

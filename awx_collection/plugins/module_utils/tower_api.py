@@ -203,7 +203,7 @@ class TowerModule(AnsibleModule):
             self.fail_json(msg="Found too many names {0} at endpoint {1} try using an ID instead of a name".format(name_or_id, endpoint))
 
     def make_request(self, method, endpoint, *args, **kwargs):
-        # Incase someone is calling us directly; make sure we were given a method, lets not just assume a GET
+        # In case someone is calling us directly; make sure we were given a method, lets not just assume a GET
         if not method:
             raise Exception("The HTTP method must be defined")
 

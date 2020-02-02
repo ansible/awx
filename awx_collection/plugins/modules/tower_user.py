@@ -138,7 +138,7 @@ def main():
         'auditor': module.params.get('auditor'),
     }
 
-    # Attempt to lookup team based on the provided name and org ID
+    # Attempt to look up user based on the provided username
     user = module.get_one('users', **{
         'data': {
             'username': user_fields['username'],
@@ -149,7 +149,7 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(user)
     elif state == 'present':
-        # If the state was present we can let the module build or update the existing team, this will return on its own
+        # If the state was present and we can let the module build or update the existing user, this will return on its own
         module.create_or_update_if_needed(user, user_fields, endpoint='users', item_type='user')
 
 

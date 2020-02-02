@@ -90,10 +90,10 @@ def main():
     organization = module.params.get('organization')
     state = module.params.get('state')
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
-    # Attempt to lookup team based on the provided name and org ID
+    # Attempt to look up team based on the provided name and org ID
     team = module.get_one('teams', **{
         'data': {
             'name': name,
@@ -112,7 +112,7 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(team)
     elif state == 'present':
-        # If the state was present we can let the module build or update the existing team, this will return on its own
+        # If the state was present and we can let the module build or update the existing team, this will return on its own
         module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
 
 
