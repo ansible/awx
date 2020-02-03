@@ -31,8 +31,8 @@ function InventoryDetail({ inventory, i18n }) {
   );
 
   useEffect(() => {
-    fetchInstanceGroups(inventory.id);
-  }, [fetchInstanceGroups, inventory.id]);
+    fetchInstanceGroups();
+  }, [fetchInstanceGroups]);
 
   const deleteInventory = async () => {
     await InventoriesAPI.destroy(inventory.id);
