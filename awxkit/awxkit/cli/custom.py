@@ -1,7 +1,7 @@
 import functools
 import json
 
-from six import with_metaclass
+from six import with_metaclass, PY3
 
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
@@ -547,8 +547,11 @@ class SettingsModify(CustomAction):
         return resp.from_json({'key': key, 'value': resp[key]})
 
     def is_json(self, data):
+        err = ValueError
+        if PY3:
+            err = json.decoder.JSONDecodeError
         try:
             json.loads(data)
-        except json.decoder.JSONDecodeError:
+        except err:
             return False
         return True
