@@ -79,7 +79,6 @@ EXAMPLES = '''
 
 from ..module_utils.tower_api import TowerModule
 from json import loads
-from json.decoder import JSONDecodeError
 import re
 
 
@@ -110,7 +109,8 @@ def main():
         new_value = value
         try:
             new_value = loads(value)
-        except JSONDecodeError:
+        except ValueError:
+            # JSONDecodeError only available on Python 3.5+
             # Attempt to deal with old tower_cli array types
             if ',' in value:
                 new_value = re.split(r",\s+", new_value)
