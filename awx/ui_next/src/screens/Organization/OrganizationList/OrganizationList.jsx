@@ -33,7 +33,7 @@ function OrganizationsList({ i18n }) {
   const addUrl = `${match.url}/add`;
 
   const {
-    result: { organizations = {}, organizationCount, actions },
+    result: { organizations, organizationCount, actions },
     error: contentError,
     isLoading: isOrgsLoading,
     request: fetchOrganizations,
