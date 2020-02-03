@@ -114,10 +114,10 @@ def main():
             with open(filename, 'r') as f:
                 variables = f.read()
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
-    # Attempt to lookup host based on the provided name and org ID
+    # Attempt to look up host based on the provided name and inventory ID
     host = module.get_one('hosts', **{
         'data': {
             'name': name,
@@ -129,14 +129,15 @@ def main():
     host_fields = {
         'name': new_name if new_name else name,
         'description': description,
-        'inventory': inventory_id
+        'inventory': inventory_id,
+        'enabled': enabled
     }
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(host)
     elif state == 'present':
-        # If the state was present we can let the module build or update the existing host, this will return on its own
+        # If the state was present and we can let the module build or update the existing host, this will return on its own
         module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
 
 
