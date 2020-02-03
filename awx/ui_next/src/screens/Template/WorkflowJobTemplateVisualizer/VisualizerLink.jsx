@@ -25,9 +25,9 @@ const LinkG = styled.g`
 function VisualizerLink({
   i18n,
   link,
-  onUpdateHelpText,
-  onUpdateLinkHelp,
+  updateLinkHelp,
   readOnly,
+  updateHelpText,
 }) {
   const ref = useRef(null);
   const [hovering, setHovering] = useState(false);
@@ -43,7 +43,7 @@ function VisualizerLink({
       id="link-add-node"
       key="add"
       onClick={() => {
-        onUpdateHelpText(null);
+        updateHelpText(null);
         setHovering(false);
         dispatch({
           type: 'START_ADD_NODE',
@@ -52,9 +52,9 @@ function VisualizerLink({
         });
       }}
       onMouseEnter={() =>
-        onUpdateHelpText(i18n._(t`Add a new node between these two nodes`))
+        updateHelpText(i18n._(t`Add a new node between these two nodes`))
       }
-      onMouseLeave={() => onUpdateHelpText(null)}
+      onMouseLeave={() => updateHelpText(null)}
     >
       <PlusIcon />
     </WorkflowActionTooltipItem>
@@ -68,18 +68,26 @@ function VisualizerLink({
           <WorkflowActionTooltipItem
             id="link-edit"
             key="edit"
-            onClick={() => dispatch({ type: 'SET_LINK_TO_EDIT', value: link })}
-            onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this link`))}
-            onMouseLeave={() => onUpdateHelpText(null)}
+            onClick={() => {
+              updateHelpText(null);
+              setHovering(false);
+              dispatch({ type: 'SET_LINK_TO_EDIT', value: link });
+            }}
+            onMouseEnter={() => updateHelpText(i18n._(t`Edit this link`))}
+            onMouseLeave={() => updateHelpText(null)}
           >
             <PencilAltIcon />
           </WorkflowActionTooltipItem>,
           <WorkflowActionTooltipItem
             id="link-delete"
             key="delete"
-            onClick={() => dispatch({ type: 'START_DELETE_LINK', link })}
-            onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this link`))}
-            onMouseLeave={() => onUpdateHelpText(null)}
+            onClick={() => {
+              updateHelpText(null);
+              setHovering(false);
+              dispatch({ type: 'START_DELETE_LINK', link });
+            }}
+            onMouseEnter={() => updateHelpText(i18n._(t`Delete this link`))}
+            onMouseLeave={() => updateHelpText(null)}
           >
             <TrashAltIcon />
           </WorkflowActionTooltipItem>,
@@ -124,14 +132,15 @@ function VisualizerLink({
     >
       <polygon
         fill="#E1E1E1"
-        id={`link-${link.source.id}-${link.target.id}-overlay`}
+        id={`link-${link.source.id}-${link.target.id}-background`}
         opacity={hovering ? '1' : '0'}
         points={getLinkOverlayPoints(link, nodePositions)}
       />
       <path d={pathD} stroke={pathStroke} strokeWidth="2px" />
       <polygon
-        onMouseEnter={() => onUpdateLinkHelp(link)}
-        onMouseLeave={() => onUpdateLinkHelp(null)}
+        id={`link-${link.source.id}-${link.target.id}-overlay`}
+        onMouseEnter={() => updateLinkHelp(link)}
+        onMouseLeave={() => updateLinkHelp(null)}
         opacity="0"
         points={getLinkOverlayPoints(link, nodePositions)}
       />
@@ -149,8 +158,8 @@ function VisualizerLink({
 VisualizerLink.propTypes = {
   link: shape().isRequired,
   readOnly: bool.isRequired,
-  onUpdateHelpText: func.isRequired,
-  onUpdateLinkHelp: func.isRequired,
+  updateHelpText: func.isRequired,
+  updateLinkHelp: func.isRequired,
 };
 
 export default withI18n()(VisualizerLink);

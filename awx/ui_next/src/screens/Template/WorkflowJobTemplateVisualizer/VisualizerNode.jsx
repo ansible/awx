@@ -33,20 +33,21 @@ const NodeContents = styled.div`
     props.isInvalidLinkTarget ? '#D7D7D7' : '#FFFFFF'};
 `;
 
-const NodeDefaultLabel = styled.p`
+const NodeResourceName = styled.p`
   margin-top: 20px;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+NodeResourceName.displayName = 'NodeResourceName';
 
 function VisualizerNode({
   i18n,
   node,
   onMouseOver,
   readOnly,
-  onUpdateHelpText,
+  updateHelpText,
   updateNodeHelp,
 }) {
   const ref = useRef(null);
@@ -62,7 +63,7 @@ function VisualizerNode({
     ref.current.parentNode.appendChild(ref.current);
     setHovering(true);
     if (addingLink) {
-      onUpdateHelpText(
+      updateHelpText(
         node.isInvalidLinkTarget
           ? i18n._(
               t`Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported.`
@@ -76,7 +77,7 @@ function VisualizerNode({
   const handleNodeMouseLeave = () => {
     setHovering(false);
     if (addingLink) {
-      onUpdateHelpText(null);
+      updateHelpText(null);
     }
   };
 
@@ -91,12 +92,12 @@ function VisualizerNode({
       id="node-details"
       key="details"
       onClick={() => {
-        onUpdateHelpText(null);
+        updateHelpText(null);
         setHovering(false);
         dispatch({ type: 'SET_NODE_TO_VIEW', value: node });
       }}
-      onMouseEnter={() => onUpdateHelpText(i18n._(t`View node details`))}
-      onMouseLeave={() => onUpdateHelpText(null)}
+      onMouseEnter={() => updateHelpText(i18n._(t`View node details`))}
+      onMouseLeave={() => updateHelpText(null)}
     >
       <InfoIcon />
     </WorkflowActionTooltipItem>
@@ -109,12 +110,12 @@ function VisualizerNode({
           id="node-add"
           key="add"
           onClick={() => {
-            onUpdateHelpText(null);
+            updateHelpText(null);
             setHovering(false);
             dispatch({ type: 'START_ADD_NODE', sourceNodeId: node.id });
           }}
-          onMouseEnter={() => onUpdateHelpText(i18n._(t`Add a new node`))}
-          onMouseLeave={() => onUpdateHelpText(null)}
+          onMouseEnter={() => updateHelpText(i18n._(t`Add a new node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <PlusIcon />
         </WorkflowActionTooltipItem>,
@@ -123,12 +124,12 @@ function VisualizerNode({
           id="node-edit"
           key="edit"
           onClick={() => {
-            onUpdateHelpText(null);
+            updateHelpText(null);
             setHovering(false);
             dispatch({ type: 'SET_NODE_TO_EDIT', value: node });
           }}
-          onMouseEnter={() => onUpdateHelpText(i18n._(t`Edit this node`))}
-          onMouseLeave={() => onUpdateHelpText(null)}
+          onMouseEnter={() => updateHelpText(i18n._(t`Edit this node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <PencilAltIcon />
         </WorkflowActionTooltipItem>,
@@ -136,14 +137,14 @@ function VisualizerNode({
           id="node-link"
           key="link"
           onClick={() => {
-            onUpdateHelpText(null);
+            updateHelpText(null);
             setHovering(false);
             dispatch({ type: 'SELECT_SOURCE_FOR_LINKING', node });
           }}
           onMouseEnter={() =>
-            onUpdateHelpText(i18n._(t`Link to an available node`))
+            updateHelpText(i18n._(t`Link to an available node`))
           }
-          onMouseLeave={() => onUpdateHelpText(null)}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <LinkIcon />
         </WorkflowActionTooltipItem>,
@@ -151,12 +152,12 @@ function VisualizerNode({
           id="node-delete"
           key="delete"
           onClick={() => {
-            onUpdateHelpText(null);
+            updateHelpText(null);
             setHovering(false);
             dispatch({ type: 'SET_NODE_TO_DELETE', value: node });
           }}
-          onMouseEnter={() => onUpdateHelpText(i18n._(t`Delete this node`))}
-          onMouseLeave={() => onUpdateHelpText(null)}
+          onMouseEnter={() => updateHelpText(i18n._(t`Delete this node`))}
+          onMouseLeave={() => updateHelpText(null)}
         >
           <TrashAltIcon />
         </WorkflowActionTooltipItem>,
@@ -198,11 +199,11 @@ function VisualizerNode({
         y="1"
       >
         <NodeContents isInvalidLinkTarget={node.isInvalidLinkTarget}>
-          <NodeDefaultLabel>
+          <NodeResourceName>
             {node.unifiedJobTemplate
               ? node.unifiedJobTemplate.name
               : i18n._(t`DELETED`)}
-          </NodeDefaultLabel>
+          </NodeResourceName>
         </NodeContents>
       </foreignObject>
       {node.unifiedJobTemplate && <WorkflowNodeTypeLetter node={node} />}
@@ -221,7 +222,7 @@ VisualizerNode.propTypes = {
   node: shape().isRequired,
   onMouseOver: func,
   readOnly: bool.isRequired,
-  onUpdateHelpText: func.isRequired,
+  updateHelpText: func.isRequired,
   updateNodeHelp: func.isRequired,
 };
 

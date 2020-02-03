@@ -11,6 +11,7 @@ function DeleteAllNodesModal({ i18n }) {
     <AlertModal
       actions={[
         <Button
+          id="confirm-delete-all-nodes"
           key="remove"
           variant="danger"
           aria-label={i18n._(t`Confirm removal of all nodes`)}
@@ -19,6 +20,7 @@ function DeleteAllNodesModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
+          id="cancel-delete-all-nodes"
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel node removal`)}

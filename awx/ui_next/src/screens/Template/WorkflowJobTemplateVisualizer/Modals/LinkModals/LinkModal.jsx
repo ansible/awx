@@ -24,6 +24,7 @@ function LinkModal({ header, i18n, onConfirm }) {
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button
+          id="link-confirm"
           key="save"
           variant="primary"
           aria-label={i18n._(t`Save link changes`)}
@@ -32,6 +33,7 @@ function LinkModal({ header, i18n, onConfirm }) {
           {i18n._(t`Save`)}
         </Button>,
         <Button
+          id="link-cancel"
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel link changes`)}
@@ -44,6 +46,7 @@ function LinkModal({ header, i18n, onConfirm }) {
       <FormGroup fieldId="link-select" label={i18n._(t`Run`)}>
         <AnsibleSelect
           id="link-select"
+          name="linkType"
           value={linkType}
           data={[
             {

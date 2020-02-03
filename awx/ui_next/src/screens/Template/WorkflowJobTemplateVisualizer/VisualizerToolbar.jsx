@@ -99,7 +99,11 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
             </ActionButton>
           </Tooltip>
           <VerticalSeparator />
-          <Button variant="primary" onClick={onSave}>
+          <Button
+            aria-label={i18n._(t`Save`)}
+            variant="primary"
+            onClick={onSave}
+          >
             {i18n._(t`Save`)}
           </Button>
           <VerticalSeparator />

@@ -283,8 +283,8 @@ function VisualizerGraph({ i18n, readOnly }) {
                     key={`link-${link.source.id}-${link.target.id}`}
                     link={link}
                     readOnly={readOnly}
-                    onUpdateHelpText={setHelpText}
-                    onUpdateLinkHelp={setLinkHelp}
+                    updateLinkHelp={newLinkHelp => setLinkHelp(newLinkHelp)}
+                    updateHelpText={newHelpText => setHelpText(newHelpText)}
                   />
                 );
               }
@@ -297,8 +297,8 @@ function VisualizerGraph({ i18n, readOnly }) {
                     key={`node-${node.id}`}
                     node={node}
                     readOnly={readOnly}
-                    onUpdateHelpText={setHelpText}
-                    updateNodeHelp={setNodeHelp}
+                    updateHelpText={newHelpText => setHelpText(newHelpText)}
+                    updateNodeHelp={newNodeHelp => setNodeHelp(newNodeHelp)}
                     {...(addingLink && {
                       onMouseOver: () => drawPotentialLinkToNode(node),
                     })}

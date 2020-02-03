@@ -4,13 +4,15 @@ import {
   WorkflowStateContext,
 } from '@contexts/Workflow';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import WorkflowOutputToolbar from './WorkflowOutputToolbar';
+import VisualizerToolbar from './VisualizerToolbar';
 
 let wrapper;
+const close = jest.fn();
 const dispatch = jest.fn();
-const job = {
+const save = jest.fn();
+const template = {
   id: 1,
-  status: 'successful',
+  name: 'Test JT',
 };
 const workflowContext = {
   nodes: [],
@@ -18,7 +20,7 @@ const workflowContext = {
   showTools: false,
 };
 
-describe('WorkflowOutputToolbar', () => {
+describe('VisualizerToolbar', () => {
   beforeAll(() => {
     const nodes = [
       {
@@ -35,7 +37,11 @@ describe('WorkflowOutputToolbar', () => {
     wrapper = mountWithContexts(
       <WorkflowDispatchContext.Provider value={dispatch}>
         <WorkflowStateContext.Provider value={{ ...workflowContext, nodes }}>
-          <WorkflowOutputToolbar job={job} />
+          <VisualizerToolbar
+            onClose={close}
+            onSave={save}
+            template={template}
+          />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
     );
@@ -58,5 +64,31 @@ describe('WorkflowOutputToolbar', () => {
   test('Toggle Tools button dispatches as expected', () => {
     wrapper.find('WrenchIcon').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({ type: 'TOGGLE_TOOLS' });
+  });
+
+  test('Delete All button dispatches as expected', () => {
+    wrapper.find('TrashAltIcon').simulate('click');
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_SHOW_DELETE_ALL_NODES_MODAL',
+      value: true,
+    });
+  });
+
+  test('Delete All button dispatches as expected', () => {
+    wrapper.find('TrashAltIcon').simulate('click');
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_SHOW_DELETE_ALL_NODES_MODAL',
+      value: true,
+    });
+  });
+
+  test('Save button calls expected function', () => {
+    wrapper.find('button[aria-label="Save"]').simulate('click');
+    expect(save).toHaveBeenCalled();
+  });
+
+  test('Close button calls expected function', () => {
+    wrapper.find('TimesIcon').simulate('click');
+    expect(close).toHaveBeenCalled();
   });
 });
