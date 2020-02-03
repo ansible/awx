@@ -178,18 +178,25 @@ class Export(CustomCommand):
             # 3) the resource flag is used with an argument, and the attr will be that argument's value
             resources.add_argument('--{}'.format(resource), nargs='?', const='')
 
-    def get_resources(self, client, resource, value):
-        api_resource = getattr(client.v2, resource)
-        post_options = api_resource.options().json['actions']['POST']
+    def get_resource_options(self, endpoint):
+        return endpoint.options().json['actions']['POST']
+
+    def get_assets(self, endpoint, value):
         if value:
             from .options import pk_or_name
 
             pk = pk_or_name(client.v2, resource, value)
-            results = api_resource.get(id=pk).json['results']
+            results = endpoint.get(id=pk).json['results']
         else:
-            results = api_resource.get(all_pages=True).json['results']
+            results = endpoint.get(all_pages=True).json['results']
 
-        return [{key: r[key] for key in post_options if key in r} for r in results]
+        return results
+
+    def enhance_asset(self, endpoint, asset, options):
+        fields = {key: asset[key] for key in options if key in asset}
+        fk_fields = {}
+        related_fields = {}
+        return dict(**fields, **fk_fields, **related_fields)
 
     def handle(self, client, parser):
         self.extend_parser(parser)
@@ -209,9 +216,11 @@ class Export(CustomCommand):
             value = getattr(parsed, resource, None)
             if value is None and not all_resources:
                 continue
-            resources = self.get_resources(client, resource, value)
+            endpoint = getattr(client.v2, resource)
+            options = self.get_resource_options(endpoint)
+            assets = self.get_assets(endpoint, value)
 
-            data[resource] = resources
+            data[resource] = [self.enhance_asset(endpoint, asset, options) for asset in assets]
 
         return data
 
