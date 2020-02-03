@@ -2,14 +2,26 @@ import { t } from '@lingui/macro';
 
 export function initReducer() {
   return {
+    addLinkSourceNode: null,
+    addLinkTargetNode: null,
+    addNodeSource: null,
+    addNodeTarget: null,
+    addingLink: false,
     contentError: null,
     isLoading: true,
+    linkToDelete: null,
+    linkToEdit: null,
     links: [],
     nextNodeId: 0,
     nodePositions: null,
     nodes: [],
+    nodeToDelete: null,
+    nodeToEdit: null,
+    showDeleteAllNodesModal: false,
     showLegend: false,
     showTools: false,
+    showUnsavedChangesModal: false,
+    unsavedChanges: false,
   };
 }
 
@@ -20,9 +32,8 @@ export default function visualizerReducer(state, action) {
     case 'CREATE_NODE':
       return createNode(state, action.node);
     case 'CANCEL_LINK':
-      return cancelLink(state);
     case 'CANCEL_LINK_MODAL':
-      return cancelLinkModal(state);
+      return cancelLink(state);
     case 'CANCEL_NODE_MODAL':
       return {
         ...state,
@@ -42,16 +53,8 @@ export default function visualizerReducer(state, action) {
       return initReducer();
     case 'SELECT_SOURCE_FOR_LINKING':
       return selectSourceForLinking(state, action.node);
-    case 'SET_ADD_LINK_SOURCE_NODE':
-      return { ...state, addLinkSourceNode: action.value };
     case 'SET_ADD_LINK_TARGET_NODE':
       return { ...state, addLinkTargetNode: action.value };
-    case 'SET_ADD_NODE_SOURCE':
-      return { ...state, addNodeSource: action.value };
-    case 'SET_ADD_NODE_TARGET':
-      return { ...state, addNodeTarget: action.value };
-    case 'SET_ADDING_LINK':
-      return { ...state, addingLink: action.value };
     case 'SET_CONTENT_ERROR':
       return { ...state, contentError: action.value };
     case 'SET_IS_LOADING':
@@ -60,10 +63,6 @@ export default function visualizerReducer(state, action) {
       return { ...state, linkToDelete: action.value };
     case 'SET_LINK_TO_EDIT':
       return { ...state, linkToEdit: action.value };
-    case 'SET_LINKS':
-      return { ...state, links: action.value };
-    case 'SET_NEXT_NODE_ID':
-      return { ...state, nextNodeId: action.value };
     case 'SET_NODE_POSITIONS':
       return { ...state, nodePositions: action.value };
     case 'SET_NODE_TO_DELETE':
@@ -72,18 +71,8 @@ export default function visualizerReducer(state, action) {
       return { ...state, nodeToEdit: action.value };
     case 'SET_NODE_TO_VIEW':
       return { ...state, nodeToView: action.value };
-    case 'SET_NODES':
-      return { ...state, nodes: action.value };
     case 'SET_SHOW_DELETE_ALL_NODES_MODAL':
       return { ...state, showDeleteAllNodesModal: action.value };
-    case 'SET_SHOW_LEGEND':
-      return { ...state, showLegend: action.value };
-    case 'SET_SHOW_TOOLS':
-      return { ...state, showTools: action.value };
-    case 'SET_SHOW_UNSAVED_CHANGES_MODAL':
-      return { ...state, showUnsavedChangesModal: action.value };
-    case 'SET_UNSAVED_CHANGES':
-      return { ...state, unsavedChanges: action.value };
     case 'START_ADD_NODE':
       return {
         ...state,
@@ -150,6 +139,7 @@ function createNode(state, node) {
   newNodes.push({
     id: nextNodeId,
     unifiedJobTemplate: node.nodeResource,
+    isInvalidLinkTarget: false,
   });
 
   // Ensures that root nodes appear to always run
@@ -199,23 +189,6 @@ function cancelLink(state) {
     addLinkSourceNode: null,
     addLinkTargetNode: null,
     addingLink: false,
-    nodes: newNodes,
-  };
-}
-
-function cancelLinkModal(state) {
-  const { nodes } = state;
-  const newNodes = [...nodes];
-
-  newNodes.forEach(node => {
-    node.isInvalidLinkTarget = false;
-  });
-
-  return {
-    ...state,
-    addLinkSourceNode: null,
-    addLinkTargetNode: null,
-    addingLink: false,
     linkToEdit: null,
     nodes: newNodes,
   };
@@ -237,6 +210,7 @@ function deleteAllNodes(state) {
       return node;
     }),
     showDeleteAllNodesModal: false,
+    unsavedChanges: true,
   };
 }
 
