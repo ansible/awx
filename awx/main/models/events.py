@@ -360,11 +360,10 @@ class BasePlaybookEvent(CreatedModifiedModel):
             value = force_text(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
-        if isinstance(self, JobEvent):
-            analytics_logger.info(
-                'Event data saved.',
-                extra=dict(python_objects=dict(job_event=self))
-            )
+        analytics_logger.info(
+            'Event data saved.',
+            extra=dict(python_objects=dict(job_event=self))
+        )
 
     @classmethod
     def create_from_data(cls, **kwargs):

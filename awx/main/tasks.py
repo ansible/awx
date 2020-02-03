@@ -52,6 +52,7 @@ import ansible_runner
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, GALAXY_SERVER_FIELDS
 from awx.main.access import access_registry
+from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule, TowerScheduleState, Instance, InstanceGroup,
     UnifiedJob, Notification,
@@ -1138,6 +1139,23 @@ class BaseTask(object):
             else:
                 event_data['host_name'] = ''
                 event_data['host_id'] = ''
+
+        if isinstance(self, RunProjectUpdate):
+            # it's common for Ansible's SCM modules to print
+            # error messages on failure that contain the plaintext
+            # basic auth credentials (username + password)
+            # it's also common for the nested event data itself (['res']['...'])
+            # to contain unredacted text on failure
+            # this is a _little_ expensive to filter
+            # with regex, but project updates don't have many events,
+            # so it *should* have a negligible performance impact
+            try:
+                event_data_json = json.dumps(event_data)
+                event_data_json = UriCleaner.remove_sensitive(event_data_json)
+                event_data = json.loads(event_data_json)
+            except json.JSONDecodeError:
+                pass
+
         should_write_event = False
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
