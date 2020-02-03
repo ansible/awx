@@ -37,7 +37,7 @@ function Team({ i18n, setBreadcrumb }) {
         setHasContentLoading(false);
       }
     })();
-  }, [id, setBreadcrumb]);
+  }, [id, setBreadcrumb, location]);
 
   const tabsArray = [
     { name: i18n._(t`Details`), link: `/teams/${id}/details`, id: 0 },
