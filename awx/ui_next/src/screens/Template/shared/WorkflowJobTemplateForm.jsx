@@ -206,7 +206,7 @@ function WorkflowJobTemplateForm({
         inventory: template?.summary_fields?.inventory?.id || null,
         organization: template?.summary_fields?.organization?.id || null,
         labels: template.summary_fields?.labels?.results || [],
-        extra_vars: template.variables || '---',
+        extra_vars: template.extra_vars || '---',
         limit: template.limit || '',
         scm_branch: template.scm_branch || '',
         allow_simultaneous: template.allow_simultaneous || false,
