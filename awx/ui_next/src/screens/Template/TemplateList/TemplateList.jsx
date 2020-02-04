@@ -33,7 +33,7 @@ function TemplatesList({ i18n }) {
   const { id: projectId } = useParams();
   const { pathname, search } = useLocation();
 
-  const [deletionError, setDelectionError] = useState(null);
+  const [deletionError, setDeletionError] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [jtActions, setJTActions] = useState(null);
@@ -75,7 +75,7 @@ function TemplatesList({ i18n }) {
           jtOptionsPromise,
           wfjtOptionsPromise,
         ]);
-        setDelectionError(null);
+        setDeletionError(null);
 
         try {
           const [
@@ -133,7 +133,7 @@ function TemplatesList({ i18n }) {
       );
       setCount(count - selected.length);
     } catch (err) {
-      setDelectionError(err);
+      setDeletionError(err);
     }
   };
 
@@ -243,7 +243,7 @@ function TemplatesList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setDelectionError(null)}
+        onClose={() => setDeletionError(null)}
       >
         {i18n._(t`Failed to delete one or more templates.`)}
         <ErrorDetail error={deletionError} />
