@@ -59,7 +59,7 @@ const RightActionButtonCell = styled(ActionButtonCell)`
   ${rightStyle}
 `;
 
-function TemplateListItem({ i18n, template, isSelected, onSelect }) {
+function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
   const canLaunch = template.summary_fields.user_capabilities.start;
 
   const missingResourceIcon =
@@ -86,7 +86,7 @@ function TemplateListItem({ i18n, template, isSelected, onSelect }) {
             <LeftDataListCell key="divider">
               <VerticalSeparator />
               <span>
-                <Link to={`/templates/${template.type}/${template.id}`}>
+                <Link to={`${detailUrl}`}>
                   <b>{template.name}</b>
                 </Link>
               </span>
