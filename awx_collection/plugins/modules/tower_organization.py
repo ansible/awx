@@ -43,7 +43,7 @@ options:
       description:
         - The max hosts allowed in this organizations
       default: "0"
-      type: str
+      type: int
       required: False
     state:
       description:
@@ -86,7 +86,7 @@ def main():
         name=dict(type='str', required=True),
         description=dict(type='str', required=False),
         custom_virtualenv=dict(type='str', required=False),
-        max_hosts=dict(type='str', required=False, default="0"),
+        max_hosts=dict(type='int', required=False, default="0"),
         state=dict(type='str', choices=['present', 'absent'], default='present', required=False),
     )
 
@@ -119,12 +119,7 @@ def main():
     if custom_virtualenv:
         org_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts:
-        int_max_hosts = 0
-        try:
-            int_max_hosts = int(max_hosts)
-        except Exception:
-            module.fail_json(msg="Unable to convert max_hosts to an integer")
-        org_fields['max_hosts'] = int_max_hosts
+        org_fields['max_hosts'] = max_hosts
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

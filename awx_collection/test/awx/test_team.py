@@ -20,7 +20,6 @@ def test_create_team(run_module, admin_user):
     team = Team.objects.filter(name='foo_team').first()
 
     result.pop('invocation')
-    result.pop('existing_credential_type')
     assert result == {
         "changed": True,
         "name": "foo_team",
@@ -50,7 +49,6 @@ def test_modify_team(run_module, admin_user):
     }, admin_user)
     team.refresh_from_db()
     result.pop('invocation')
-    result.pop('existing_credential_type')
     assert result == {
         "state": "present",
         "changed": True,
@@ -67,7 +65,6 @@ def test_modify_team(run_module, admin_user):
         'organization': 'foo'
     }, admin_user)
     result.pop('invocation')
-    result.pop('existing_credential_type')
     assert result == {
         "credential_type": "Nexus",
         "name": "foo_team",

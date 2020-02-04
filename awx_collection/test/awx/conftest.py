@@ -42,7 +42,6 @@ def sanitize_dict(din):
 
 @pytest.fixture
 def run_module(request):
-    # A placeholder to use while modules get converted
     def rf(module_name, module_params, request_user):
 
         def new_request(self, method, url, **kwargs):
