@@ -1,13 +1,9 @@
 /* eslint react/no-unused-state: 0 */
 import React, { Component } from 'react';
 import { withRouter, Redirect } from 'react-router-dom';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import ErrorDetail from '@components/ErrorDetail';
-import AlertModal from '@components/AlertModal';
 import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import { JobTemplate } from '@types';
 import { getAddedAndRemoved } from '@util/lists';
@@ -118,10 +114,6 @@ class JobTemplateEdit extends Component {
       ]);
       history.push(this.detailsUrl);
     } catch (error) {
-      // check for field-specific errors from API
-      if (error.response?.data && typeof error.response.data === 'object') {
-        throw error.response.data;
-      }
       this.setState({ formSubmitError: error });
     }
   }
@@ -181,7 +173,7 @@ class JobTemplateEdit extends Component {
   }
 
   render() {
-    const { template, i18n } = this.props;
+    const { template } = this.props;
     const {
       contentError,
       formSubmitError,
@@ -217,21 +209,11 @@ class JobTemplateEdit extends Component {
           handleCancel={this.handleCancel}
           handleSubmit={this.handleSubmit}
           relatedProjectPlaybooks={relatedProjectPlaybooks}
+          submitError={formSubmitError}
         />
-        {formSubmitError && (
-          <AlertModal
-            variant="danger"
-            title={i18n._(t`Error!`)}
-            isOpen={formSubmitError}
-            onClose={() => this.setState({ formSubmitError: null })}
-          >
-            {i18n._(t`An error occurred when saving`)}
-            <ErrorDetail error={formSubmitError} />
-          </AlertModal>
-        )}
       </CardBody>
     );
   }
 }
 
-export default withI18n()(withRouter(JobTemplateEdit));
+export default withRouter(JobTemplateEdit);
