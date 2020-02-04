@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
-import { PageSection } from '@patternfly/react-core';
 
 import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
@@ -10,6 +9,7 @@ import { TemplateList } from './TemplateList';
 import Template from './Template';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
 import JobTemplateAdd from './JobTemplateAdd';
+import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
 class Templates extends Component {
   constructor(props) {
@@ -20,6 +20,9 @@ class Templates extends Component {
       breadcrumbConfig: {
         '/templates': i18n._(t`Templates`),
         '/templates/job_template/add': i18n._(t`Create New Job Template`),
+        '/templates/workflow_job_template/add': i18n._(
+          t`Create New Workflow Job Template`
+        ),
       },
     };
   }
@@ -56,47 +59,49 @@ class Templates extends Component {
     return (
       <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-        <PageSection>
-          <Switch>
-            <Route
-              path={`${match.path}/job_template/add`}
-              render={() => <JobTemplateAdd />}
-            />
-            <Route
-              path={`${match.path}/job_template/:id`}
-              render={({ match: newRouteMatch }) => (
-                <Config>
-                  {({ me }) => (
-                    <Template
-                      history={history}
-                      location={location}
-                      setBreadcrumb={this.setBreadCrumbConfig}
-                      me={me || {}}
-                      match={newRouteMatch}
-                    />
-                  )}
-                </Config>
-              )}
-            />
-            <Route
-              path={`${match.path}/workflow_job_template/:id`}
-              render={({ match: newRouteMatch }) => (
-                <Config>
-                  {({ me }) => (
-                    <WorkflowJobTemplate
-                      history={history}
-                      location={location}
-                      setBreadcrumb={this.setBreadCrumbConfig}
-                      me={me || {}}
-                      match={newRouteMatch}
-                    />
-                  )}
-                </Config>
-              )}
-            />
-            <Route path={`${match.path}`} render={() => <TemplateList />} />
-          </Switch>
-        </PageSection>
+        <Switch>
+          <Route
+            path={`${match.path}/job_template/add`}
+            render={() => <JobTemplateAdd />}
+          />
+          <Route
+            path={`${match.path}/workflow_job_template/add`}
+            render={() => <WorkflowJobTemplateAdd />}
+          />
+          <Route
+            path={`${match.path}/job_template/:id`}
+            render={({ match: newRouteMatch }) => (
+              <Config>
+                {({ me }) => (
+                  <Template
+                    history={history}
+                    location={location}
+                    setBreadcrumb={this.setBreadCrumbConfig}
+                    me={me || {}}
+                    match={newRouteMatch}
+                  />
+                )}
+              </Config>
+            )}
+          />
+          <Route
+            path={`${match.path}/workflow_job_template/:id`}
+            render={({ match: newRouteMatch }) => (
+              <Config>
+                {({ me }) => (
+                  <WorkflowJobTemplate
+                    history={history}
+                    location={location}
+                    setBreadcrumb={this.setBreadCrumbConfig}
+                    me={me || {}}
+                    match={newRouteMatch}
+                  />
+                )}
+              </Config>
+            )}
+          />
+          <Route path={`${match.path}`} render={() => <TemplateList />} />
+        </Switch>
       </>
     );
   }

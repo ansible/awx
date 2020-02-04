@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import {
   JobTemplatesAPI,
@@ -141,7 +141,7 @@ function TemplateList({ i18n }) {
   );
 
   return (
-    <>
+    <PageSection>
       <Card>
         <PaginatedDataList
           contentError={contentError}
@@ -245,7 +245,7 @@ function TemplateList({ i18n }) {
         {i18n._(t`Failed to delete one or more templates.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-    </>
+    </PageSection>
   );
 }
 

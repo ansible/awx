@@ -13,6 +13,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ScheduleList from '@components/ScheduleList';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
+import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
 class WorkflowJobTemplate extends Component {
@@ -134,73 +135,99 @@ class WorkflowJobTemplate extends Component {
     }
 
     return (
-      <Card>
-        {cardHeader}
-        <Switch>
-          <Redirect
-            from="/templates/workflow_job_template/:id"
-            to="/templates/workflow_job_template/:id/details"
-            exact
-          />
-          {template && (
-            <Route
-              key="wfjt-details"
-              path="/templates/workflow_job_template/:id/details"
-              render={() => (
-                <WorkflowJobTemplateDetail
-                  template={template}
-                  webHookKey={webHookKey}
-                />
-              )}
+      <PageSection>
+        <Card className="awx-c-card">
+          {cardHeader}
+          <Switch>
+            <Redirect
+              from="/templates/workflow_job_template/:id"
+              to="/templates/workflow_job_template/:id/details"
+              exact
             />
-          )}
-          {template && (
-            <Route
-              key="wfjt-visualizer"
-              path="/templates/workflow_job_template/:id/visualizer"
-              render={() => (
-                <AppendBody>
-                  <FullPage>
-                    <Visualizer template={template} />
-                  </FullPage>
-                </AppendBody>
-              )}
-            />
-          )}
-          {template?.id && (
-            <Route path="/templates/workflow_job_template/:id/completed_jobs">
-              <JobList
-                defaultParams={{
-                  workflow_job__workflow_job_template: template.id,
-                }}
+            {template && (
+              <Route
+                key="wfjt-details"
+                path="/templates/workflow_job_template/:id/details"
+                render={() => (
+                  <WorkflowJobTemplateDetail
+                    template={template}
+                    webHookKey={webHookKey}
+                  />
+                )}
               />
-            </Route>
-          )}
-          {template && (
+            )}
+            {template && (
+              <Route
+                key="wfjt-edit"
+                path="/templates/workflow_job_template/:id/edit"
+                render={() => (
+                  <WorkflowJobTemplateEdit
+                    template={template}
+                    webHookKey={webHookKey}
+                  />
+                )}
+              />
+            )}
+            {template && (
+              <Route
+                key="wfjt-visualizer"
+                path="/templates/workflow_job_template/:id/visualizer"
+                render={() => (
+                  <AppendBody>
+                    <FullPage>
+                      <Visualizer template={template} />
+                    </FullPage>
+                  </AppendBody>
+                )}
+              />
+            )}
+            {template?.id && (
+              <Route path="/templates/workflow_job_template/:id/completed_jobs">
+                <JobList
+                  defaultParams={{
+                    workflow_job__workflow_job_template: template.id,
+                  }}
+                />
+              </Route>
+            )}
+
+            {template?.id && (
+              <Route path="/templates/workflow_job_template/:id/completed_jobs">
+                <JobList
+                  defaultParams={{
+                    workflow_job__workflow_job_template: template.id,
+                  }}
+                />
+              </Route>
+            )}
+            {template && (
+              <Route
+                path="/templates/:templateType/:id/schedules"
+                render={() => (
+                  <ScheduleList loadSchedules={this.loadSchedules} />
+                )}
+              />
+            )}
             <Route
-              path="/templates/:templateType/:id/schedules"
-              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link
+                        to={`/templates/workflow_job_template/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Template Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
             />
-          )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/workflow_job_template/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
-        </Switch>
-      </Card>
+          </Switch>
+        </Card>
+      </PageSection>
     );
   }
 }
