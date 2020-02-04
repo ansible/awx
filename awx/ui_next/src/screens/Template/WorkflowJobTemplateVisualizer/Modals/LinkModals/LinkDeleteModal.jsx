@@ -19,6 +19,7 @@ function LinkDeleteModal({ i18n }) {
       onClose={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
       actions={[
         <Button
+          id="confirm-link-removal"
           aria-label={i18n._(t`Confirm link removal`)}
           key="remove"
           onClick={() => dispatch({ type: 'DELETE_LINK' })}
@@ -27,6 +28,7 @@ function LinkDeleteModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
+        id="cancel-link-removal"
           aria-label={i18n._(t`Cancel link removal`)}
           key="cancel"
           onClick={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
