@@ -28,6 +28,11 @@ options:
         - The name to use for the group.
       required: True
       type: str
+    new_name:
+      description:
+        - A new name for this group (for renaming)
+      required: False
+      type: str
     description:
       description:
         - The description to use for the group.
@@ -41,49 +46,6 @@ options:
       description:
         - Variables to use for the group, use C(@) for a file.
       type: str
-    credential:
-      description:
-        - Credential to use for the group.
-      type: str
-    source:
-      description:
-        - The source to use for this group.
-      choices: ["manual", "file", "ec2", "rax", "vmware", "gce", "azure", "azure_rm", "openstack", "satellite6" , "cloudforms", "custom"]
-      type: str
-    source_regions:
-      description:
-        - Regions for cloud provider.
-      type: str
-    source_vars:
-      description:
-        - Override variables from source with variables from this field.
-      type: str
-    instance_filters:
-      description:
-        - Comma-separated list of filter expressions for matching hosts.
-      type: str
-    group_by:
-      description:
-        - Limit groups automatically created from inventory source.
-      type: str
-    source_script:
-      description:
-        - Inventory script to be used when group type is C(custom).
-      type: str
-    overwrite:
-      description:
-        - Delete child groups and hosts not found in source.
-      type: bool
-      default: 'no'
-    overwrite_vars:
-      description:
-        - Override vars in child groups and hosts with those from external source.
-      type: bool
-    update_on_launch:
-      description:
-        - Refresh inventory data from its source each time a job is run.
-      type: bool
-      default: 'no'
     state:
       description:
         - Desired state of the resource.
@@ -104,87 +66,62 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-import os
-
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(required=False),
         description=dict(),
         inventory=dict(required=True),
         variables=dict(),
-        credential=dict(),
-        source=dict(choices=["manual", "file", "ec2", "rax", "vmware",
-                             "gce", "azure", "azure_rm", "openstack",
-                             "satellite6", "cloudforms", "custom"]),
-        source_regions=dict(),
-        source_vars=dict(),
-        instance_filters=dict(),
-        group_by=dict(),
-        source_script=dict(),
-        overwrite=dict(type='bool'),
-        overwrite_vars=dict(type='bool'),
-        update_on_launch=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
     inventory = module.params.get('inventory')
-    credential = module.params.get('credential')
+    description = module.params.get('description')
     state = module.params.pop('state')
-
     variables = module.params.get('variables')
+
+    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    inventory_id = module.resolve_name_to_id('inventories', inventory)
+
+    # Attempt to lookup team based on the provided name and org ID
+    group = module.get_one('groups', **{
+        'data': {
+            'name': name,
+            'inventory': inventory_id
+        }
+    })
+
+    # If the variables were spacified as a file, load them
     if variables:
-        if variables.startswith('@'):
-            filename = os.path.expanduser(variables[1:])
-            with open(filename, 'r') as f:
-                variables = f.read()
+        variables = module.load_variables_if_file_specified(variables, 'variables')
 
-    json_output = {'group': name, 'state': state}
+    # Create data to sent to create and update
+    group_fields = {
+        'name': new_name if new_name else name,
+        'inventory': inventory_id,
+    }
+    if description:
+        group_fields['description'] = description
+    if variables:
+        group_fields['variables'] = variables
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        group = tower_cli.get_resource('group')
-        try:
-            params = module.params.copy()
-            params['create_on_missing'] = True
-            params['variables'] = variables
-
-            inv_res = tower_cli.get_resource('inventory')
-            inv = inv_res.get(name=inventory)
-            params['inventory'] = inv['id']
-
-            if credential:
-                cred_res = tower_cli.get_resource('credential')
-                cred = cred_res.get(name=credential)
-                params['credential'] = cred['id']
-
-            if state == 'present':
-                result = group.modify(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = group.delete(**params)
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update the group, inventory not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update the group: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
-
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(group)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing group, this will return on its own
+        module.create_or_update_if_needed(group, group_fields, endpoint='groups', item_type='group')
 
 if __name__ == '__main__':
     main()
