@@ -22,6 +22,7 @@ The following notes are changes that may require changes to playbooks.
  - Creating a "scan" type job template is no longer supported.
  - `extra_vars` in the `tower_job_launch` module worked with a list previously, but is now configured to work solely in a `dict` format.
  - When the `extra_vars` parameter is used with the `tower_job_launch` module, the Job Template launch will fail unless `add_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
+ - tower_group used to also service inventory sources. tower_inventory_source has been split out into its own module.
 
 ## Running
 

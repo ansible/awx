@@ -94,7 +94,7 @@ def main():
     # Attempt to lookup the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
-    # Attempt to lookup team based on the provided name and org ID
+    # Attempt to lookup the object based on the provided name and org ID
     group = module.get_one('groups', **{
         'data': {
             'name': name,
