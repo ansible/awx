@@ -4,6 +4,7 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.basic import env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
+from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
@@ -11,7 +12,7 @@ from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionEr
 from socket import gethostbyname
 import re
 from json import loads, dumps
-from os.path import isfile, expanduser, split, join
+from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
 
 
@@ -87,19 +88,20 @@ class TowerModule(AnsibleModule):
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
-        config_files = [join('/etc/tower/', self.config_name), join(expanduser("~"), ".{0}".format(self.config_name))]
+        config_files = ['/etc/tower/tower_cli.cfg', join(expanduser("~"), ".{0}".format(self.config_name))]
         local_dir = getcwd()
         config_files.append(join(local_dir, self.config_name))
         while split(local_dir)[1]:
             local_dir = split(local_dir)[0]
-            config_files.insert(2, join(local_dir, self.config_name))
+            config_files.insert(2, join(local_dir, ".{0}".format(self.config_name)))
 
         for config_file in config_files:
-            try:
-                self.load_config(config_file)
-            except ConfigFileException:
-                # Since some of these may not exist or can't be read, we really don't care
-                pass
+            if exists(config_file) and not isdir(config_file):
+                # Only throw a formatting error if the file exists and is not a directory
+                try:
+                    self.load_config(config_file)
+                except ConfigFileException:
+                    self.fail_json('The config file {0} is not properly formatted'.format(config_file))
 
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
@@ -299,7 +301,11 @@ class TowerModule(AnsibleModule):
             except(Exception) as e:
                 self.fail_json(msg="Failed to parse the response json: {0}".format(e))
 
-        return {'status_code': response.status, 'json': response_json}
+        if PY2:
+            status_code = response.getcode()
+        else:
+            status_code = response.status
+        return {'status_code': status_code, 'json': response_json}
 
     def authenticate(self, **kwargs):
         if self.username and self.password:
