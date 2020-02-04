@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { t } from '@lingui/macro';
+import { withI18n } from '@lingui/react';
 import { Card } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
+import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '@components/AlertModal';
 import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
 
-function JobTemplateAdd() {
+function JobTemplateAdd({ i18n }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
@@ -31,6 +35,10 @@ function JobTemplateAdd() {
       ]);
       history.push(`/templates/${type}/${id}/details`);
     } catch (error) {
+      // check for field-specific errors from API
+      if (error.response?.data && typeof error.response.data === 'object') {
+        throw error.response.data;
+      }
       setFormSubmitError(error);
     }
   }
@@ -68,9 +76,19 @@ function JobTemplateAdd() {
           handleSubmit={handleSubmit}
         />
       </CardBody>
-      {formSubmitError ? <div>formSubmitError</div> : ''}
+      {formSubmitError && (
+        <AlertModal
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          isOpen={formSubmitError}
+          onClose={() => setFormSubmitError(null)}
+        >
+          {i18n._(t`An error occurred when saving`)}
+          <ErrorDetail error={formSubmitError} />
+        </AlertModal>
+      )}
     </Card>
   );
 }
 
-export default JobTemplateAdd;
+export default withI18n()(JobTemplateAdd);

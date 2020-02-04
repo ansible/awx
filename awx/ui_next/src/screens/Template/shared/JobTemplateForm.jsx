@@ -163,6 +163,7 @@ class JobTemplateForm extends Component {
       setFieldValue,
       i18n,
       template,
+      formik,
     } = this.props;
 
     const jobTypeOptions = [
@@ -631,7 +632,13 @@ const FormikApp = withFormik({
       credentials: summary_fields.credentials || [],
     };
   },
-  handleSubmit: (values, { props }) => props.handleSubmit(values),
+  handleSubmit: async (values, { props, setErrors }) => {
+    try {
+      await props.handleSubmit(values);
+    } catch (errors) {
+      setErrors(errors);
+    }
+  },
 })(JobTemplateForm);
 
 export { JobTemplateForm as _JobTemplateForm };
