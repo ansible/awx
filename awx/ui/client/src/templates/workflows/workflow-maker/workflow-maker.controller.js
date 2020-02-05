@@ -720,15 +720,6 @@ export default ['$scope', 'TemplatesService',
         /* EDIT NODE FUNCTIONS */
 
         $scope.startEditNode = (nodeToEdit) => {
-            // Determine if this is a root node
-            let editNodeIsRoot = false;
-            $scope.graphState.arrayOfLinksForChart.forEach((link) => {
-                if (link.source.id === 1 && link.target.id === nodeIdToChartNodeIdMapping[nodeToEdit.id]) {
-                    editNodeIsRoot = true;
-                    return;
-                }
-            });
-
             $scope.workflowChangesStarted = true;
             if ($scope.linkConfig) {
                 $scope.cancelLinkForm();
@@ -742,8 +733,7 @@ export default ['$scope', 'TemplatesService',
                 $scope.nodeConfig = {
                     mode: "edit",
                     nodeId: nodeToEdit.id,
-                    node: nodeRef[nodeToEdit.id],
-                    editNodeIsRoot,
+                    node: nodeRef[nodeToEdit.id]
                 };
 
                 $scope.graphState.nodeBeingEdited = nodeToEdit.id;
