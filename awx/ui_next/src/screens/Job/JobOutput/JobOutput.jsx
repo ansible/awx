@@ -15,25 +15,21 @@ import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
-import MenuControls from './MenuControls';
+import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
 
 const OutputHeader = styled.div`
   font-weight: var(--pf-global--FontWeight--bold);
 `;
-const OutputToolbar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
+
 const OutputWrapper = styled.div`
-  height: calc(100vh - 350px);
   background-color: #fafafa;
-  margin-top: 24px;
-  font-family: monospace;
-  font-size: 15px;
-  outline: 1px solid #d7d7d7;
   display: flex;
   flex-direction: column;
+  font-family: monospace;
+  font-size: 15px;
+  height: calc(100vh - 350px);
+  outline: 1px solid #d7d7d7;
 `;
 const OutputFooter = styled.div`
   background-color: #ebebeb;
@@ -310,14 +306,12 @@ class JobOutput extends Component {
           />
         )}
         <OutputHeader>{job.name}</OutputHeader>
-        <OutputToolbar>
-          <MenuControls
-            onScrollFirst={this.handleScrollFirst}
-            onScrollLast={this.handleScrollLast}
-            onScrollNext={this.handleScrollNext}
-            onScrollPrevious={this.handleScrollPrevious}
-          />
-        </OutputToolbar>
+        <PageControls
+          onScrollFirst={this.handleScrollFirst}
+          onScrollLast={this.handleScrollLast}
+          onScrollNext={this.handleScrollNext}
+          onScrollPrevious={this.handleScrollPrevious}
+        />
         <OutputWrapper>
           <InfiniteLoader
             isRowLoaded={this.isRowLoaded}

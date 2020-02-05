@@ -10,26 +10,25 @@ import {
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  display: grid;
-  grid-gap: 20px;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  height: 35px;
+  outline: 1px solid #d7d7d7;
+  width: 100%;
 `;
 
 const Button = styled(PFButton)`
-  &:hover {
-    background-color: #0066cc;
-    color: white;
-  }
+  position: relative;
+  z-index: 1;
 `;
 
-const MenuControls = ({
+const PageControls = ({
   onScrollFirst,
   onScrollLast,
   onScrollNext,
   onScrollPrevious,
 }) => (
   <Wrapper>
-    <Button variant="plain">
+    <Button variant="plain" css="margin-right: auto">
       <PlusIcon />
     </Button>
     <Button
@@ -51,4 +50,4 @@ const MenuControls = ({
   </Wrapper>
 );
 
-export default MenuControls;
+export default PageControls;
