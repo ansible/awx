@@ -13,6 +13,7 @@ function TemplatesStrings (BaseString) {
         ADD_DD_JT_LABEL: t.s('Job Template'),
         ADD_DD_WF_LABEL: t.s('Workflow Template'),
         OPEN_WORKFLOW_VISUALIZER: t.s('Click here to open the workflow visualizer'),
+        ROW_ITEM_LABEL_ORGANIZATION: t.s('Organization'),
         ROW_ITEM_LABEL_DESCRIPTION: t.s('Description'),
         ROW_ITEM_LABEL_ACTIVITY: t.s('Activity'),
         ROW_ITEM_LABEL_INVENTORY: t.s('Inventory'),
