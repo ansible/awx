@@ -52,7 +52,19 @@ class TowerModule(AnsibleModule):
         args.update(argument_spec)
         kwargs['supports_check_mode'] = True
 
+        # We have to take off mutually_exclusive_if in order to init with Ansible
+        mutually_exclusive_if = kwargs.pop('mutually_exclusive_if', None)
+
         super(TowerModule, self).__init__(argument_spec=args, **kwargs)
+ 
+        # Eventually, we would like to push this as a feature to Ansible core for others to use...
+        # Test mutually_exclusive if
+        if mutually_exclusive_if:
+            for (var_name, var_value, exclusive_names) in mutually_exclusive_if:
+                if self.params.get(var_name) == var_value:
+                    for excluded_param_name in exclusive_names:
+                        if self.params.get(excluded_param_name) != None:
+                            self.fail_json(msg='Arguments {} can not be set if source is {}'.format(', '.join(exclusive_names), var_value))
 
         self.load_config_files()
 
