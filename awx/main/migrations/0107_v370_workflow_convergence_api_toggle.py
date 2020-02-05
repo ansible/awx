@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='all_parents_must_converge',
-            field=models.BooleanField(default=False, help_text='If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node', verbose_name='self'),
+            field=models.BooleanField(default=False, help_text='If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node'),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='all_parents_must_converge',
-            field=models.BooleanField(default=False, help_text='If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node', verbose_name='self'),
+            field=models.BooleanField(default=False, help_text='If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node'),
         ),
     ]

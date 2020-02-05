@@ -80,7 +80,6 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         related_name='%(class)ss_always',
     )
     all_parents_must_converge = models.BooleanField(
-        'self',
         default=False,
         help_text=_("If enabled then the node will only run if all of the parent nodes "
                     "have met the criteria to reach this node")
