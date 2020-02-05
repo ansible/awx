@@ -122,12 +122,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         help_text=_('This field is deprecated and will be removed in a future release. '
                     'Total number of groups in this inventory.'),
     )
-    groups_with_active_failures = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. '
-                    'Number of groups in this inventory with active failures.'),
-    )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,

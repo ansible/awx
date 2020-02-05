@@ -16,13 +16,10 @@ from awx.main.models import (
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate,
     SystemJob, WorkflowJob, Notification
 )
-from awx.main.signals import ( # noqa
-    emit_update_inventory_on_created_or_deleted,
-    emit_update_inventory_computed_fields,
+from awx.main.signals import (
     disable_activity_stream,
     disable_computed_fields
 )
-from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
 class Command(BaseCommand):
