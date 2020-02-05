@@ -21,11 +21,13 @@ def base_inventory():
 
 @pytest.mark.django_db
 def test_inventory_source_create(run_module, admin_user, base_inventory):
+    source_path = '/var/lib/awx/example_source_path/'
     result = run_module('tower_inventory_source', dict(
         name='foo',
         inventory='test-inv',
         state='present',
         source='scm',
+        source_path=source_path,
         source_project='test-proj'
     ), admin_user)
     assert result.pop('changed', None), result
@@ -35,8 +37,9 @@ def test_inventory_source_create(run_module, admin_user, base_inventory):
     result.pop('invocation')
     assert result == {
         'id': inv_src.id,
-        'inventory_source': 'foo',
-        'state': 'present'
+        'name': 'foo',
+        'state': 'present',
+        'credential_type': 'Nexus'
     }
 
 
@@ -58,7 +61,8 @@ def test_create_inventory_source_implied_org(run_module, admin_user):
 
     result.pop('invocation')
     assert result == {
-        "inventory_source": "Test Inventory Source",
+        "credential_type": "Nexus",
+        "name": "Test Inventory Source",
         "state": "present",
         "id": inv_src.id,
     }
@@ -67,27 +71,27 @@ def test_create_inventory_source_implied_org(run_module, admin_user):
 @pytest.mark.django_db
 def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     org = Organization.objects.create(name='test-org')
-    inv = Inventory.objects.create(name='test-inv', organization=org)
+    Inventory.objects.create(name='test-inv', organization=org)
 
     # make another inventory by same name in another org
     org2 = Organization.objects.create(name='test-org-number-two')
-    Inventory.objects.create(name='test-inv', organization=org2)
+    inv2 = Inventory.objects.create(name='test-inv', organization=org2)
 
     result = run_module('tower_inventory_source', dict(
         name='Test Inventory Source',
-        inventory='test-inv',
+        inventory=inv2.id,
         source='ec2',
-        organization='test-org',
         state='present'
     ), admin_user)
     assert result.pop('changed', None), result
 
     inv_src = InventorySource.objects.get(name='Test Inventory Source')
-    assert inv_src.inventory == inv
+    assert inv_src.inventory == inv2
 
     result.pop('invocation')
     assert result == {
-        "inventory_source": "Test Inventory Source",
+        "credential_type": "Nexus",
+        "name": "Test Inventory Source",
         "state": "present",
         "id": inv_src.id,
     }
@@ -96,6 +100,7 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
 @pytest.mark.django_db
 def test_create_inventory_source_with_venv(run_module, admin_user, base_inventory, mocker):
     path = '/var/lib/awx/venv/custom-venv/foobar13489435/'
+    source_path = '/var/lib/awx/example_source_path/'
     with mocker.patch('awx.main.models.mixins.get_custom_venv_choices', return_value=[path]):
         result = run_module('tower_inventory_source', dict(
             name='foo',
@@ -103,7 +108,8 @@ def test_create_inventory_source_with_venv(run_module, admin_user, base_inventor
             state='present',
             source='scm',
             source_project='test-proj',
-            custom_virtualenv=path
+            custom_virtualenv=path,
+            source_path=source_path
         ), admin_user)
     assert result.pop('changed'), result
 
@@ -121,6 +127,7 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker):
     This enforces assumptions about the behavior of the AnsibleModule
     default argument_spec behavior.
     """
+    source_path = '/var/lib/awx/example_source_path/'
     inv_src = InventorySource.objects.create(
         name='foo',
         inventory=base_inventory,
@@ -135,7 +142,9 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker):
             description='this is the changed description',
             inventory='test-inv',
             source='scm',  # is required, but behavior is arguable
-            state='present'
+            state='present',
+            source_project='test-proj',
+            source_path=source_path
         ), admin_user)
     assert result.pop('changed', None), result
     inv_src.refresh_from_db()

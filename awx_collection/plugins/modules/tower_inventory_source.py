@@ -97,7 +97,7 @@ options:
       type: int
     verbosity:
       description: The verbosity level to run this inventory source under.
-      tpye: int
+      type: int
       choices: [ 0, 1, 2 ]
     update_on_launch:
       description:
@@ -121,6 +121,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -137,11 +142,12 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerModule
 from json import dumps
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(type=str),
+        new_name=dict(type='str'),
         description=dict(),
         inventory=dict(required=True),
         #
@@ -152,28 +158,28 @@ def main():
                              "openstack", "rhv", "tower", "custom"], required=False),
         source_path=dict(),
         source_script=dict(),
-        source_vars=dict(type=dict),
+        source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
         instance_filters=dict(),
         group_by=dict(),
-        overwrite=dict(type=bool),
-        overwrite_vars=dict(type=bool),
-        custom_virtualenv=dict(type=str),
-        timeout=dict(type=int),
-        verbosity=dict(type=int, choices=[0,1,2]),
-        update_on_launch=dict(type=bool),
-        update_cache_timeout=dict(type=int),
-        source_project=dict(type=str),
-        update_on_project_update=dict(type=bool),
+        overwrite=dict(type='bool'),
+        overwrite_vars=dict(type='bool'),
+        custom_virtualenv=dict(type='str'),
+        timeout=dict(type='int'),
+        verbosity=dict(type='int', choices=[0, 1, 2]),
+        update_on_launch=dict(type='bool'),
+        update_cache_timeout=dict(type='int'),
+        source_project=dict(type='str'),
+        update_on_project_update=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # One question here is do we want to end up supporting this within the ansible module itself (i.e. required if, etc)
-    # Or do we want to let the API return issues with thtis dosen't support that, etc.
+    # Or do we want to let the API return issues with "this dosen't support that", etc.
     #
     # GUI OPTIONS:
-    #				manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	cloudforms	openstack	rhv	tower	custom
+    # - - - - - - - manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	cloudforms	openstack	rhv	tower	custom
     # credential		?	?	o	o	r	r		r	r	r		r		r	r	o
     # source_project		?	?	r	-	-	-		-	-	-		-		-	-	-
     # source_path		?	?	r	-	-	-		-	-	-		-		-	-	-
@@ -192,36 +198,101 @@ def main():
     # * - source_vars are labeled environment_vars on project and custom sources
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True,
-        required_if = [
-            # We don't want to require source if state is present because you might be doing an update to an existing source.
-            # Later on in the code, we will do a test so that if state: present  and we don't have an object we must have source.
-            ('source', 'scm', ['source_project', 'source_path']),
-            ('source', 'gce', ['credential']),
-            ('source', 'azure_rm', ['credential']),
-            ('source', 'vmware', ['credential']),
-            ('source', 'satellite6', ['credential']),
-            ('source', 'cloudforms', ['credential']),
-            ('source', 'openstack', ['credential']),
-            ('source', 'rhv', ['credential']),
-            ('source', 'tower', ['credential']),
-            ('source', 'custom', ['source_script']),
-        ],
-        # This is proveded by our module, its not a core thing
-        mutually_exclusive_if = [
-            ('source', 'scm', ['source_regions', 'instance_filters', 'group_by', 'source_script']),
-            ('source', 'ec2', ['source_project', 'source_path', 'update_on_project_launch', 'source_script']),
-            ('source', 'gce', ['source_project', 'source_path', 'update_on_project_launch', 'instance_filters', 'group_by', 'source_vars', 'source_script']),
-            ('source', 'azure_rm', ['source_project', 'source_path', 'update_on_project_launch', 'instance_filters', 'group_by', 'source_script']),
-            ('source', 'vmware', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'source_script']),
-            ('source', 'satellite6', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'instance_filters', 'group_by', 'source_script']),
-            ('source', 'cloudforms', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'instance_filters', 'group_by', 'source_script']),
-            ('source', 'openstack', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'instance_filters', 'group_by', 'source_script']),
-            ('source', 'rhv', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'instance_filters', 'group_by', 'source_vars', 'source_script']),
-            ('source', 'tower', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'group_by', 'source_vars', 'source_script']),
-            ('source', 'custom', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'instance_filters', 'group_by']),
-        ]
-    )
+    module = TowerModule(argument_spec=argument_spec,
+                         supports_check_mode=True,
+                         required_if=[
+                             # We don't want to require source if state is present because
+                             # you might be doing an update to an existing source.
+                             # Later on in the code, we will do a test so that if state: present
+                             # and if we don't have an object, we must have source.
+                             ('source', 'scm', ['source_project', 'source_path']),
+                             ('source', 'gce', ['credential']),
+                             ('source', 'azure_rm', ['credential']),
+                             ('source', 'vmware', ['credential']),
+                             ('source', 'satellite6', ['credential']),
+                             ('source', 'cloudforms', ['credential']),
+                             ('source', 'openstack', ['credential']),
+                             ('source', 'rhv', ['credential']),
+                             ('source', 'tower', ['credential']),
+                             ('source', 'custom', ['source_script']),
+                         ],
+                         # This is provided by our module, it's not a core thing
+                         mutually_exclusive_if=[
+                             ('source', 'scm', ['source_regions',
+                                                'instance_filters',
+                                                'group_by',
+                                                'source_script'
+                                                ]),
+                             ('source', 'ec2', ['source_project',
+                                                'source_path',
+                                                'update_on_project_launch',
+                                                'source_script'
+                                                ]),
+                             ('source', 'gce', ['source_project',
+                                                'source_path',
+                                                'update_on_project_launch',
+                                                'instance_filters',
+                                                'group_by',
+                                                'source_vars',
+                                                'source_script'
+                                                ]),
+                             ('source', 'azure_rm', ['source_project',
+                                                     'source_path',
+                                                     'update_on_project_launch',
+                                                     'instance_filters',
+                                                     'group_by',
+                                                     'source_script'
+                                                     ]),
+                             ('source', 'vmware', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'source_script']),
+                             ('source', 'satellite6', ['source_project',
+                                                       'source_path',
+                                                       'update_on_project_launch',
+                                                       'source_regions',
+                                                       'instance_filters',
+                                                       'group_by',
+                                                       'source_script'
+                                                       ]),
+                             ('source', 'cloudforms', ['source_project',
+                                                       'source_path',
+                                                       'update_on_project_launch',
+                                                       'source_regions',
+                                                       'instance_filters',
+                                                       'group_by',
+                                                       'source_script'
+                                                       ]),
+                             ('source', 'openstack', ['source_project',
+                                                      'source_path',
+                                                      'update_on_project_launch',
+                                                      'source_regions',
+                                                      'instance_filters',
+                                                      'group_by',
+                                                      'source_script'
+                                                      ]),
+                             ('source', 'rhv', ['source_project',
+                                                'source_path',
+                                                'update_on_project_launch',
+                                                'source_regions',
+                                                'instance_filters',
+                                                'group_by',
+                                                'source_vars',
+                                                'source_script'
+                                                ]),
+                             ('source', 'tower', ['source_project',
+                                                  'source_path',
+                                                  'update_on_project_launch',
+                                                  'source_regions',
+                                                  'group_by',
+                                                  'source_vars',
+                                                  'source_script'
+                                                  ]),
+                             ('source', 'custom', ['source_project',
+                                                   'source_path',
+                                                   'update_on_project_launch',
+                                                   'source_regions',
+                                                   'instance_filters',
+                                                   'group_by'
+                                                   ]),
+                         ])
 
     optional_vars = {}
     # Extract our parameters
