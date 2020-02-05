@@ -42,7 +42,7 @@ bcrypt==3.1.7             # via paramiko
 boto3==1.9.223
 boto==2.47.0
 botocore==1.12.253        # via boto3, s3transfer
-cachetools==3.1.1; python_version < "3" # via google-auth
+cachetools==3.1.1         # via google-auth
 certifi==2019.11.28       # via msrest, requests
 cffi==1.13.2              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
@@ -76,7 +76,7 @@ netaddr==0.7.19
 netifaces==0.10.9         # via openstacksdk
 ntlm-auth==1.4.0          # via requests-credssp, requests-ntlm
 oauthlib==3.1.0           # via requests-oauthlib
-openstacksdk==0.31.1
+openstacksdk==0.37.0
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
 ovirt-engine-sdk-python==4.3.0
 packaging==19.2
