@@ -7,6 +7,7 @@ from . import consumers
 websocket_urlpatterns = [
     url(r'websocket/$', consumers.EventConsumer),
     url(r'websocket/broadcast/$', consumers.BroadcastConsumer),
+    url(r'websocket/health/$', consumers.HealthConsumer),
 ]
 
 application = ProtocolTypeRouter({
