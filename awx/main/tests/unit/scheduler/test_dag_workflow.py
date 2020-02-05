@@ -95,7 +95,7 @@ class TestDNR():
         (g, nodes) = workflow_dag_1
 
         r'''
-               S0
+                0
                /\
             S /  \
              /    \
@@ -114,7 +114,7 @@ class TestDNR():
         assert 0 == len(do_not_run_nodes)
 
         r'''
-               S0
+                0
                /\
             S /  \
              /    \
@@ -301,10 +301,10 @@ class TestAllWorkflowNodes():
 
         nodes[0].job = Job(status='successful')
         nodes[1].job = Job(status='running')
-        nodes[2].job = Job(status='failure')
+        nodes[2].job = Job(status='failed')
         return (g, nodes)
 
-    def test_workflow_all_converge_will_run(self, workflow_all_converge_dnr):
+    def test_workflow_all_converge_while_parent_runs(self, workflow_all_converge_dnr):
         (g, nodes) = workflow_all_converge_dnr
         dnr_nodes = g.mark_dnr_nodes()
         assert 0 == len(dnr_nodes), "No nodes should get marked DNR"
@@ -312,7 +312,9 @@ class TestAllWorkflowNodes():
         nodes_to_run = g.bfs_nodes_to_run()
         assert 0 == len(nodes_to_run), "No nodes should run yet"
 
+    def test_workflow_all_converge_with_incorrect_parent(self, workflow_all_converge_dnr):
         # Another tick of the scheduler
+        (g, nodes) = workflow_all_converge_dnr
         nodes[1].job.status = 'successful'
         dnr_nodes = g.mark_dnr_nodes()
         assert 1 == len(dnr_nodes), "1 and only 1 node should be marked DNR"
@@ -320,6 +322,16 @@ class TestAllWorkflowNodes():
 
         nodes_to_run = g.bfs_nodes_to_run()
         assert 0 == len(nodes_to_run), "Convergence node should NOT be chosen to run because it is DNR"
+
+    def test_workflow_all_converge_runs(self, workflow_all_converge_dnr):
+        # Trick the scheduler again to make sure the convergence node acutally runs
+        (g, nodes) = workflow_all_converge_dnr
+        nodes[1].job.status = 'failed'
+        dnr_nodes = g.mark_dnr_nodes()
+        assert 0 == len(dnr_nodes), "No nodes should be marked DNR"
+
+        nodes_to_run = g.bfs_nodes_to_run()
+        assert 1 == len(nodes_to_run), "Convergence node should be chosen to run"
 
     @pytest.fixture
     def workflow_all_converge_deep_dnr_tree(self, wf_node_generator):
@@ -342,7 +354,7 @@ class TestAllWorkflowNodes():
                  \    /
                 S \  / S
                    \/
-                   6
+                    6
         '''
         g.add_edge(nodes[0], nodes[3], "success_nodes")
         g.add_edge(nodes[1], nodes[3], "success_nodes")
