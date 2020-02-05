@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import MenuControls from './MenuControls';
+import PageControls from './PageControls';
 
 let wrapper;
 let PlusIcon;
@@ -17,14 +17,14 @@ const findChildren = () => {
   AngleDownIcon = wrapper.find('AngleDownIcon');
 };
 
-describe('MenuControls', () => {
+describe('PageControls', () => {
   test('should render successfully', () => {
-    wrapper = mount(<MenuControls />);
+    wrapper = mount(<PageControls />);
     expect(wrapper).toHaveLength(1);
   });
 
   test('should render menu control icons', () => {
-    wrapper = mount(<MenuControls />);
+    wrapper = mount(<PageControls />);
     findChildren();
     expect(PlusIcon.length).toBe(1);
     expect(AngleDoubleUpIcon.length).toBe(1);
