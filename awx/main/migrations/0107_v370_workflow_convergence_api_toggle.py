@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0105_v370_remove_jobevent_parent_and_hosts'),
+        ('main', '0106_v370_remove_inventory_groups_with_active_failures'),
     ]
 
     operations = [
