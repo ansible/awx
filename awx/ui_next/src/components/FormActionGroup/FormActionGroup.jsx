@@ -5,11 +5,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ActionGroup as PFActionGroup, Button } from '@patternfly/react-core';
 
-const ErrorMessage = styled('div')`
-  color: var(--pf-global--danger-color--200);
-  font-weight: var(--pf-global--FontWeight--bold);
-`;
-
 const ActionGroup = styled(PFActionGroup)`
   display: flex;
   justify-content: flex-end;
@@ -34,7 +29,7 @@ const FormActionGroup = ({
   i18n,
 }) => (
   <ActionGroup>
-    {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
+    {errorMessage}
     <Button
       aria-label={i18n._(t`Save`)}
       variant="primary"

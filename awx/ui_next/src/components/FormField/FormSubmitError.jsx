@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
+import styled from 'styled-components';
+
+const ErrorMessage = styled('div')`
+  color: var(--pf-global--danger-color--200);
+  font-weight: var(--pf-global--FontWeight--bold);
+`;
+ErrorMessage.displayName = 'ErrorMessage';
 
 function FormSubmitError({ error }) {
   const [formError, setFormError] = useState(null);
@@ -24,7 +31,7 @@ function FormSubmitError({ error }) {
     return null;
   }
 
-  return <span>{formError.message}</span>;
+  return <ErrorMessage>{formError.message}</ErrorMessage>;
 }
 
 export default FormSubmitError;
