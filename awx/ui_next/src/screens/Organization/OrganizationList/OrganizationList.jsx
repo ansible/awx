@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
+import useRequest from '@util/useRequest';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -25,63 +26,68 @@ const QS_CONFIG = getQSConfig('organization', {
 function OrganizationsList({ i18n }) {
   const location = useLocation();
   const match = useRouteMatch();
-  const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [itemCount, setItemCount] = useState(0);
-  const [organizations, setOrganizations] = useState([]);
-  const [orgActions, setOrgActions] = useState(null);
+
   const [selected, setSelected] = useState([]);
+  const [deletionError, setDeletionError] = useState(null);
 
   const addUrl = `${match.url}/add`;
-  const canAdd = orgActions && orgActions.POST;
-  const isAllSelected =
-    selected.length === organizations.length && selected.length > 0;
 
-  const loadOrganizations = async ({ search }) => {
-    const params = parseQueryString(QS_CONFIG, search);
-    setContentError(null);
-    setHasContentLoading(true);
-    try {
-      const [
-        {
-          data: { count, results },
-        },
-        {
-          data: { actions },
-        },
-      ] = await Promise.all([
+  const {
+    result: { organizations, organizationCount, actions },
+    error: contentError,
+    isLoading: isOrgsLoading,
+    request: fetchOrganizations,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const [orgs, orgActions] = await Promise.all([
         OrganizationsAPI.read(params),
-        loadOrganizationActions(),
+        OrganizationsAPI.readOptions(),
       ]);
-      setItemCount(count);
-      setOrganizations(results);
-      setOrgActions(actions);
-      setSelected([]);
-    } catch (error) {
-      setContentError(error);
-    } finally {
-      setHasContentLoading(false);
+      return {
+        organizations: orgs.data.results,
+        organizationCount: orgs.data.count,
+        actions: orgActions.data.actions,
+      };
+    }, [location]),
+    {
+      organizations: [],
+      organizationCount: 0,
+      actions: {},
     }
-  };
+  );
 
-  const loadOrganizationActions = () => {
-    if (orgActions) {
-      return Promise.resolve({ data: { actions: orgActions } });
+  const {
+    isLoading: isDeleteLoading,
+    error: dError,
+    request: deleteOrganizations,
+  } = useRequest(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(({ id }) => OrganizationsAPI.destroy(id))
+      );
+    }, [selected])
+  );
+
+  useEffect(() => {
+    if (dError) {
+      setDeletionError(dError);
     }
-    return OrganizationsAPI.readOptions();
-  };
+  }, [dError]);
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, [fetchOrganizations]);
 
   const handleOrgDelete = async () => {
-    setHasContentLoading(true);
-    try {
-      await Promise.all(selected.map(({ id }) => OrganizationsAPI.destroy(id)));
-    } catch (error) {
-      setDeletionError(error);
-    } finally {
-      await loadOrganizations(location);
-    }
+    await deleteOrganizations();
+    await fetchOrganizations();
   };
+
+  const hasContentLoading = isDeleteLoading || isOrgsLoading;
+  const canAdd = actions && actions.POST;
+  const isAllSelected =
+    selected.length === organizations.length && selected.length > 0;
 
   const handleSelectAll = isSelected => {
     if (isSelected) {
@@ -99,14 +105,6 @@ function OrganizationsList({ i18n }) {
     }
   };
 
-  const handleDeleteErrorClose = () => {
-    setDeletionError(null);
-  };
-
-  useEffect(() => {
-    loadOrganizations(location);
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <>
       <PageSection>
@@ -115,7 +113,7 @@ function OrganizationsList({ i18n }) {
             contentError={contentError}
             hasContentLoading={hasContentLoading}
             items={organizations}
-            itemCount={itemCount}
+            itemCount={organizationCount}
             pluralizedItemName="Organizations"
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
@@ -179,7 +177,7 @@ function OrganizationsList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={handleDeleteErrorClose}
+        onClose={() => setDeletionError(null)}
       >
         {i18n._(t`Failed to delete one or more organizations.`)}
         <ErrorDetail error={deletionError} />

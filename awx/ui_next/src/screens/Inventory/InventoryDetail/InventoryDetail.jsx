@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -11,37 +11,28 @@ import DeleteButton from '@components/DeleteButton';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { InventoriesAPI } from '@api';
+import useRequest from '@util/useRequest';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {
-  const [instanceGroups, setInstanceGroups] = useState([]);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [contentError, setContentError] = useState(null);
   const history = useHistory();
-  const isMounted = useRef(null);
+
+  const {
+    result: instanceGroups,
+    isLoading,
+    error,
+    request: fetchInstanceGroups,
+  } = useRequest(
+    useCallback(async () => {
+      const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
+      return data.results;
+    }, [inventory.id]),
+    []
+  );
 
   useEffect(() => {
-    isMounted.current = true;
-    (async () => {
-      setHasContentLoading(true);
-      try {
-        const { data } = await InventoriesAPI.readInstanceGroups(inventory.id);
-        if (!isMounted.current) {
-          return;
-        }
-        setInstanceGroups(data.results);
-      } catch (err) {
-        setContentError(err);
-      } finally {
-        if (isMounted.current) {
-          setHasContentLoading(false);
-        }
-      }
-    })();
-    return () => {
-      isMounted.current = false;
-    };
-  }, [inventory.id]);
+    fetchInstanceGroups();
+  }, [fetchInstanceGroups]);
 
   const deleteInventory = async () => {
     await InventoriesAPI.destroy(inventory.id);
@@ -53,12 +44,12 @@ function InventoryDetail({ inventory, i18n }) {
     user_capabilities: userCapabilities,
   } = inventory.summary_fields;
 
-  if (hasContentLoading) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  if (error) {
+    return <ContentError error={error} />;
   }
 
   return (
