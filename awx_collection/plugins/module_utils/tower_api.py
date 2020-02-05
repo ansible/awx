@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.basic import env_fallback
+from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
@@ -14,7 +13,12 @@ import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
-import yaml
+
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
 
 
 class ConfigFileException(Exception):
@@ -56,15 +60,15 @@ class TowerModule(AnsibleModule):
         mutually_exclusive_if = kwargs.pop('mutually_exclusive_if', None)
 
         super(TowerModule, self).__init__(argument_spec=args, **kwargs)
- 
+
         # Eventually, we would like to push this as a feature to Ansible core for others to use...
         # Test mutually_exclusive if
         if mutually_exclusive_if:
             for (var_name, var_value, exclusive_names) in mutually_exclusive_if:
                 if self.params.get(var_name) == var_value:
                     for excluded_param_name in exclusive_names:
-                        if self.params.get(excluded_param_name) != None:
-                            self.fail_json(msg='Arguments {} can not be set if source is {}'.format(', '.join(exclusive_names), var_value))
+                        if self.params.get(excluded_param_name) is not None:
+                            self.fail_json(msg='Arguments {0} can not be set if source is {1}'.format(', '.join(exclusive_names), var_value))
 
         self.load_config_files()
 
@@ -573,6 +577,9 @@ class TowerModule(AnsibleModule):
     def load_variables_if_file_specified(self, vars_value, var_name):
         if not vars_value.startswith('@'):
             return vars_value
+
+        if not HAS_YAML:
+            self.fail_json(msg=self.missing_required_lib('yaml'))
 
         file_name = None
         file_content = None
