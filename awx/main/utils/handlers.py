@@ -15,11 +15,10 @@ from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import RequestException
 
 # Django
-from django.conf import settings
+from django.conf import settings as django_settings
 
 # requests futures, a dependency used by these handlers
 from requests_futures.sessions import FuturesSession
-import cachetools
 
 # AWX
 from awx.main.utils.formatters import LogstashFormatter
@@ -275,16 +274,6 @@ HANDLER_MAPPING = {
 }
 
 
-TTLCache = cachetools.TTLCache
-
-if 'py.test' in os.environ.get('_', ''):
-    # don't cache settings in unit tests
-    class TTLCache(TTLCache):
-
-        def __getitem__(self, item):
-            raise KeyError()
-
-
 class AWXProxyHandler(logging.Handler):
     '''
     Handler specific to the AWX external logging feature
@@ -328,12 +317,12 @@ class AWXProxyHandler(logging.Handler):
     def get_handler_class(self, protocol):
         return HANDLER_MAPPING.get(protocol, AWXNullHandler)
 
-    @cachetools.cached(cache=TTLCache(maxsize=1, ttl=3), key=lambda *args, **kw: 'get_handler')
     def get_handler(self, custom_settings=None, force_create=False):
+        from awx.conf.settings import get_logging_settings  # circular import
         new_kwargs = {}
-        use_settings = custom_settings or settings
+        use_settings = get_logging_settings()
         for field_name, setting_name in PARAM_NAMES.items():
-            val = getattr(use_settings, setting_name, None)
+            val = use_settings.get(setting_name)
             if val is None:
                 continue
             new_kwargs[field_name] = val
@@ -355,15 +344,16 @@ class AWXProxyHandler(logging.Handler):
             self._handler.setFormatter(self.formatter)
         return self._handler
 
-    @cachetools.cached(cache=TTLCache(maxsize=1, ttl=3), key=lambda *args, **kw: 'should_audit')
     def should_audit(self):
-        return settings.LOG_AGGREGATOR_AUDIT
+        from awx.conf.settings import get_logging_settings  # circular import
+        return get_logging_settings()['LOG_AGGREGATOR_AUDIT']
 
     def emit(self, record):
+        from awx.conf.settings import get_logging_settings  # circular import
         if AWXProxyHandler.thread_local.enabled:
             actual_handler = self.get_handler()
             if self.should_audit():
-                self.auditor.setLevel(settings.LOG_AGGREGATOR_LEVEL)
+                self.auditor.setLevel(get_logging_settings()['LOG_AGGREGATOR_LEVEL'])
                 self.auditor.emit(record)
             return actual_handler.emit(record)
 
@@ -405,7 +395,7 @@ AWXProxyHandler.thread_local.enabled = True
 
 ColorHandler = logging.StreamHandler
 
-if settings.COLOR_LOGS is True:
+if django_settings.COLOR_LOGS is True:
     try:
         from logutils.colorize import ColorizingStreamHandler
 

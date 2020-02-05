@@ -19,6 +19,8 @@ from django.utils.functional import cached_property
 # Django REST Framework
 from rest_framework.fields import empty, SkipField
 
+import cachetools
+
 # Tower
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
@@ -100,6 +102,15 @@ def filter_sensitive(registry, key, value):
     if registry.is_setting_encrypted(key):
         return '$encrypted$'
     return value
+
+
+@cachetools.cached(cache=cachetools.TTLCache(maxsize=1, ttl=3), key=lambda *args, **kw: 'logging_settings')
+def get_logging_settings():
+    keys = settings_registry.get_registered_settings(category_slug='logging')
+    return dict(
+        (key, getattr(settings, key, None))
+        for key in keys
+    )
 
 
 class TransientSetting(object):

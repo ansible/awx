@@ -13,7 +13,6 @@ from logging import Filter
 
 from django.apps import apps
 from django.db import models
-from django.conf import settings
 
 from awx.main.constants import LOGGER_BLACKLIST
 from awx.main.utils.common import get_search_fields
@@ -34,9 +33,10 @@ class FieldFromSettings(object):
         self.setting_name = setting_name
 
     def __get__(self, instance, type=None):
+        from awx.conf.settings import get_logging_settings  # circular import
         if self.setting_name in getattr(instance, 'settings_override', {}):
             return instance.settings_override[self.setting_name]
-        return getattr(settings, self.setting_name, None)
+        return get_logging_settings()[self.setting_name]
 
     def __set__(self, instance, value):
         if value is None:
@@ -108,12 +108,15 @@ class DynamicLevelFilter(Filter):
         """Filters out logs that have a level below the threshold defined
         by the databse setting LOG_AGGREGATOR_LEVEL
         """
+        from awx.conf.settings import get_logging_settings  # circular import
         if record_is_blacklisted(record):
             # Fine to write blacklisted loggers to file, apply default filtering level
             cutoff_level = logging.WARNING
         else:
             try:
-                cutoff_level = logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
+                cutoff_level = logging._nameToLevel[
+                    get_logging_settings()['LOG_AGGREGATOR_LEVEL']
+                ]
             except Exception:
                 cutoff_level = logging.WARNING
 
