@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ActionGroup as PFActionGroup, Button } from '@patternfly/react-core';
-import styled from 'styled-components';
+
+const ErrorMessage = styled('div')`
+  color: var(--pf-global--danger-color--200);
+  font-weight: var(--pf-global--FontWeight--bold);
+`;
 
 const ActionGroup = styled(PFActionGroup)`
   display: flex;
@@ -11,19 +16,25 @@ const ActionGroup = styled(PFActionGroup)`
   --pf-c-form__group--m-action--MarginTop: 0;
 
   .pf-c-form__actions {
-    display: grid;
-    gap: 24px;
-    grid-template-columns: auto auto;
-    margin: 0;
-
     & > button {
       margin: 0;
+    }
+
+    & > :not(:first-child) {
+      margin-left: 24px;
     }
   }
 `;
 
-const FormActionGroup = ({ onSubmit, submitDisabled, onCancel, i18n }) => (
+const FormActionGroup = ({
+  onSubmit,
+  submitDisabled,
+  onCancel,
+  errorMessage,
+  i18n,
+}) => (
   <ActionGroup>
+    {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
     <Button
       aria-label={i18n._(t`Save`)}
       variant="primary"
@@ -48,10 +59,12 @@ FormActionGroup.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   submitDisabled: PropTypes.bool,
+  errorMessage: PropTypes.node,
 };
 
 FormActionGroup.defaultProps = {
   submitDisabled: false,
+  errorMessage: null,
 };
 
 export default withI18n()(FormActionGroup);

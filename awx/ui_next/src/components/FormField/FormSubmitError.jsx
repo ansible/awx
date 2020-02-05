@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
-import ErrorDetail from '@components/ErrorDetail';
-import AlertModal from '@components/AlertModal';
 
-function FormSubmitError({ error, i18n }) {
+function FormSubmitError({ error }) {
   const [formError, setFormError] = useState(null);
   const { setErrors } = useFormikContext();
 
@@ -18,6 +14,8 @@ function FormSubmitError({ error, i18n }) {
       setErrors(error.response.data);
       setFormError(null);
     } else {
+      /* eslint-disable-next-line no-console */
+      console.error(error);
       setFormError(error);
     }
   }, [error, setErrors]);
@@ -26,17 +24,7 @@ function FormSubmitError({ error, i18n }) {
     return null;
   }
 
-  return (
-    <AlertModal
-      variant="danger"
-      title={i18n._(t`Error!`)}
-      isOpen={formError}
-      onClose={() => setFormError(null)}
-    >
-      {i18n._(t`An error occurred when saving`)}
-      <ErrorDetail error={formError} />
-    </AlertModal>
-  );
+  return <span>{formError.message}</span>;
 }
 
-export default withI18n()(FormSubmitError);
+export default FormSubmitError;
