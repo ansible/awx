@@ -14,6 +14,7 @@ import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
+import yaml
 
 
 class ConfigFileException(Exception):
@@ -576,7 +577,7 @@ class TowerModule(AnsibleModule):
             # Maybe it wasn't a YAML structure... lets try JSON
             try:
                 vars_value = loads(file_content)
-            except ValueError as ve:
+            except ValueError:
                 self.fail_json(msg="Failed to load file {0} specifed by {1} as yaml or json".format(file_name, var_name))
 
         return dumps(vars_value)

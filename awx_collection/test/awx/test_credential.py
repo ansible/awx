@@ -78,7 +78,6 @@ def test_create_custom_credential_type(run_module, admin_user):
 
     ct = CredentialType.objects.get(name='Nexus')
     result.pop('invocation')
-    result.pop('existing_credential_type')
     result.pop('name')
     assert result == {
         "credential_type": "Nexus",

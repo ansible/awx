@@ -52,6 +52,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -91,10 +96,10 @@ def main():
     state = module.params.pop('state')
     variables = module.params.get('variables')
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
-    # Attempt to lookup the object based on the provided name and org ID
+    # Attempt to look up the object based on the provided name and inventory ID
     group = module.get_one('groups', **{
         'data': {
             'name': name,
@@ -102,7 +107,7 @@ def main():
         }
     })
 
-    # If the variables were spacified as a file, load them
+    # If the variables were specified as a file, load them
     if variables:
         variables = module.load_variables_if_file_specified(variables, 'variables')
 
@@ -122,6 +127,7 @@ def main():
     elif state == 'present':
         # If the state was present we can let the module build or update the existing group, this will return on its own
         module.create_or_update_if_needed(group, group_fields, endpoint='groups', item_type='group')
+
 
 if __name__ == '__main__':
     main()
