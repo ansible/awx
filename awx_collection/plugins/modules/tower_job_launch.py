@@ -60,10 +60,10 @@ options:
     scm_branch:
       description:
         - A specific of the SCM project to run the template on.
-        - This is only applicable if your project allows for branch override
+        - This is only applicable if your project allows for branch override.
       type: str
     skip_tags:
-      decription:
+      description:
         - Specific tags to skip from the playbook.
       type: list
     verbosity:
