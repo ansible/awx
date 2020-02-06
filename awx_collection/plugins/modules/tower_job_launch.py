@@ -69,7 +69,7 @@ options:
     verbosity:
       description:
         - Verbosity level for this job run
-      tpye: int
+      type: int
       choices: [ 0, 1, 2, 3, 4, 5 ]
     diff_mode:
       description:
@@ -78,6 +78,12 @@ options:
     credential_passwords:
       description:
         - Passwords for credentials which are set to prompt on launch
+      type: dict
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -130,22 +136,23 @@ status:
 
 from ..module_utils.tower_api import TowerModule
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(type=str, required=True, aliases=['job_template']),
-        job_type=dict(type=str, choices=['run', 'check']),
-        inventory=dict(type=str, default=None),
+        name=dict(type='str', required=True, aliases=['job_template']),
+        job_type=dict(type='str', choices=['run', 'check']),
+        inventory=dict(type='str', default=None),
         # Credentials will be a str instead of a list for backwards compatability
         credentials=dict(type='list', default=None, aliases=['credential']),
         limit=dict(),
         tags=dict(type='list'),
-        extra_vars=dict(type=dict, required=False),
-        scm_branch=dict(type=str, required=False),
-        skip_tags=dict(type=list, required=False),
-        verbosity=dict(type=int, required=False, choices=[0,1,2,3,4,5]),
-        diff_mode=dict(type=bool, required=False),
-        credential_passwords=dict(type=dict, required=False),
+        extra_vars=dict(type='dict', required=False),
+        scm_branch=dict(type='str', required=False),
+        skip_tags=dict(type='list', required=False),
+        verbosity=dict(type='int', required=False, choices=[0, 1, 2, 3, 4, 5]),
+        diff_mode=dict(type='bool', required=False),
+        credential_passwords=dict(type='dict', required=False),
     )
 
     # Create a module for ourselves
@@ -179,7 +186,7 @@ def main():
     if credentials:
         post_data['credentials'] = []
         for credential in credentials:
-            post_data['credentials'].append( module.resolve_name_to_id('credentials', credential) )
+            post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
 
     # Attempt to look up job_template based on the provided name
     job_template = module.get_one('job_templates', **{
@@ -188,7 +195,7 @@ def main():
         }
     })
 
-    if job_template == None:
+    if job_template is None:
         module.fail_json(msg="Unable to find job template by name {0}".format(name))
 
     # The API will allow you to submit values to a jb launch that are not prompt on launch.
@@ -211,19 +218,20 @@ def main():
         if module.params.get(variable_name) and not job_template[check_vars_to_prompts[variable_name]]:
             param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
     if len(param_errors) > 0:
-        module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{ 'errors': param_errors })
+        module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{'errors': param_errors})
 
     # Launch the job
-    results = module.post_endpoint(job_template['related']['launch'], **{ 'data': post_data })
- 
+    results = module.post_endpoint(job_template['related']['launch'], **{'data': post_data})
+
     if results['status_code'] != 201:
-        module.fail_json(msg="Failed to launch job, see response for details", **{'response': results })
+        module.fail_json(msg="Failed to launch job, see response for details", **{'response': results})
 
     module.exit_json(**{
         'changed': True,
         'id': results['json']['id'],
         'status': results['json']['status'],
     })
+
 
 if __name__ == '__main__':
     main()

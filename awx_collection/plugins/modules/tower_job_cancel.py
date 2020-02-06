@@ -33,6 +33,11 @@ options:
         - Fail loudly if the I(job_id) can not be canceled
       default: False
       type: bool
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -52,6 +57,7 @@ id:
 
 
 from ..module_utils.tower_api import TowerModule
+
 
 def main():
     # Any additional arguments that are not fields of the item can be added here
@@ -77,25 +83,25 @@ def main():
         }
     })
 
-    if job == None:
+    if job is None:
         module.fail_json(msg="Unable to find job with id {0}".format(job_id))
 
     cancel_page = module.get_endpoint(job['related']['cancel'])
     if 'json' not in cancel_page or 'can_cancel' not in cancel_page['json']:
-        module.fail_json(msg="Failed to cancel job, got unexpected response from tower", **{ 'response': cancel_page })
+        module.fail_json(msg="Failed to cancel job, got unexpected response from tower", **{'response': cancel_page})
 
     if not cancel_page['json']['can_cancel']:
         if fail_if_not_running:
             module.fail_json(msg="Job is not running")
         else:
-            module.exit_json(**{ 'changed': False })
+            module.exit_json(**{'changed': False})
 
-    response = module.post_endpoint(job['related']['cancel'], **{ 'data': {} })
+    results = module.post_endpoint(job['related']['cancel'], **{'data': {}})
 
-    if response['status_code'] != 202:
-        module.fail_json(msg="Failed to cancel job, see response for details", **{'response': results })
+    if results['status_code'] != 202:
+        module.fail_json(msg="Failed to cancel job, see response for details", **{'response': results})
 
-    module.exit_json(**{ 'changed': True })
+    module.exit_json(**{'changed': True})
 
 
 if __name__ == '__main__':
