@@ -1014,6 +1014,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 dir=settings.JOBOUTPUT_ROOT,
                 encoding='utf-8'
             )
+            from awx.main.tasks import purge_old_stdout_files  # circular import
+            purge_old_stdout_files.apply_async()
 
         # Before the addition of event-based stdout, older versions of
         # awx stored stdout as raw text blobs in a certain database column

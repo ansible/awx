@@ -137,11 +137,6 @@ in the top-level Makefile.
 
 ## Library Notes
 
-### celery
-
-This is only used for the beat feature (running periodic tasks).
-This could be replaced, see: https://github.com/ansible/awx/pull/2530
-
 ### requests-futures
 
 This can be removed when a solution for the external log queuing is ready.
