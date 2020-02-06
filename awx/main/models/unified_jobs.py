@@ -623,6 +623,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         editable=False,
         help_text=_("The date and time the job was queued for starting."),
     )
+    dependencies_processed = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=_("If True, the task manager has already processed potential dependencies for this job.")
+    )
     finished = models.DateTimeField(
         null=True,
         default=None,
