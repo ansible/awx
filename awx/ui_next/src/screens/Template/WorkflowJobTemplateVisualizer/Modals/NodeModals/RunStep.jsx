@@ -29,6 +29,7 @@ function RunStep({ i18n, linkType, onUpdateLinkType }) {
       </p>
       <Grid>
         <SelectableCard
+          id="link-type-success"
           isSelected={linkType === 'success'}
           label={i18n._(t`On Success`)}
           description={i18n._(
@@ -37,6 +38,7 @@ function RunStep({ i18n, linkType, onUpdateLinkType }) {
           onClick={() => onUpdateLinkType('success')}
         />
         <SelectableCard
+          id="link-type-failure"
           isSelected={linkType === 'failure'}
           label={i18n._(t`On Failure`)}
           description={i18n._(
@@ -45,6 +47,7 @@ function RunStep({ i18n, linkType, onUpdateLinkType }) {
           onClick={() => onUpdateLinkType('failure')}
         />
         <SelectableCard
+          id="link-type-always"
           isSelected={linkType === 'always'}
           label={i18n._(t`Always`)}
           description={i18n._(

@@ -26,6 +26,7 @@ const TimeoutInput = styled(TextInput)`
     margin-left: 20px;
   }
 `;
+TimeoutInput.displayName = 'TimeoutInput';
 
 const TimeoutLabel = styled.p`
   margin-left: 10px;
@@ -125,12 +126,12 @@ function NodeTypeStep({
             timeoutMinutes: Math.floor(timeout / 60),
             timeoutSeconds: timeout - Math.floor(timeout / 60) * 60,
           }}
-          render={() => (
+        >
+          {() => (
             <Form css="margin-top: 20px;">
               <FormRow>
-                <Field
-                  name="name"
-                  render={({ field, form }) => {
+                <Field name="name">
+                  {({ field, form }) => {
                     const isValid =
                       form &&
                       (!form.touched[field.name] || !form.errors[field.name]);
@@ -150,19 +151,18 @@ function NodeTypeStep({
                           type="text"
                           {...field}
                           onChange={(value, evt) => {
-                            onUpdateName(value);
+                            onUpdateName(evt.target.value);
                             field.onChange(evt);
                           }}
                         />
                       </FormGroup>
                     );
                   }}
-                />
+                </Field>
               </FormRow>
               <FormRow>
-                <Field
-                  name="description"
-                  render={({ field }) => (
+                <Field name="description">
+                  {({ field }) => (
                     <FormGroup
                       fieldId="approval-description"
                       label={i18n._(t`Description`)}
@@ -172,13 +172,13 @@ function NodeTypeStep({
                         type="text"
                         {...field}
                         onChange={(value, evt) => {
-                          onUpdateDescription(value);
+                          onUpdateDescription(evt.target.value);
                           field.onChange(evt);
                         }}
                       />
                     </FormGroup>
                   )}
-                />
+                </Field>
               </FormRow>
               <FormRow>
                 <FormGroup
@@ -186,9 +186,8 @@ function NodeTypeStep({
                   fieldId="approval-timeout"
                 >
                   <div css="display: flex;align-items: center;">
-                    <Field
-                      name="timeoutMinutes"
-                      render={({ field, form }) => (
+                    <Field name="timeoutMinutes">
+                      {({ field, form }) => (
                         <>
                           <TimeoutInput
                             id="approval-timeout-minutes"
@@ -197,11 +196,14 @@ function NodeTypeStep({
                             step="1"
                             {...field}
                             onChange={(value, evt) => {
-                              if (!value || value === '') {
-                                value = 0;
+                              if (
+                                !evt.target.value ||
+                                evt.target.value === ''
+                              ) {
+                                evt.target.value = 0;
                               }
                               onUpdateTimeout(
-                                Number(value) * 60 +
+                                Number(evt.target.value) * 60 +
                                   Number(form.values.timeoutSeconds)
                               );
                               field.onChange(evt);
@@ -212,10 +214,9 @@ function NodeTypeStep({
                           </TimeoutLabel>
                         </>
                       )}
-                    />
-                    <Field
-                      name="timeoutSeconds"
-                      render={({ field, form }) => (
+                    </Field>
+                    <Field name="timeoutSeconds">
+                      {({ field, form }) => (
                         <>
                           <TimeoutInput
                             id="approval-timeout-seconds"
@@ -224,11 +225,14 @@ function NodeTypeStep({
                             step="1"
                             {...field}
                             onChange={(value, evt) => {
-                              if (!value || value === '') {
-                                value = 0;
+                              if (
+                                !evt.target.value ||
+                                evt.target.value === ''
+                              ) {
+                                evt.target.value = 0;
                               }
                               onUpdateTimeout(
-                                Number(value) +
+                                Number(evt.target.value) +
                                   Number(form.values.timeoutMinutes) * 60
                               );
                               field.onChange(evt);
@@ -239,13 +243,13 @@ function NodeTypeStep({
                           </TimeoutLabel>
                         </>
                       )}
-                    />
+                    </Field>
                   </div>
                 </FormGroup>
               </FormRow>
             </Form>
           )}
-        />
+        </Formik>
       )}
     </>
   );

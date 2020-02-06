@@ -1,38 +1,42 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '@contexts/Workflow';
-import LinkEditModal from './LinkEditModal';
+import NodeAddModal from './NodeAddModal';
 
 const dispatch = jest.fn();
 
-const workflowContext = {
-  linkToEdit: {
-    source: {
-      id: 2,
-    },
-    target: {
-      id: 3,
-    },
-    linkType: 'always',
-  },
+const nodeResource = {
+  id: 448,
+  type: 'job_template',
+  name: 'Test JT',
 };
 
-describe('LinkEditModal', () => {
-  test('Confirm button dispatches as expected', () => {
+const workflowContext = {
+  addNodeSource: 2,
+};
+
+describe('NodeAddModal', () => {
+  test('Node modal confirmation dispatches as expected', () => {
     const wrapper = mountWithContexts(
       <WorkflowDispatchContext.Provider value={dispatch}>
         <WorkflowStateContext.Provider value={workflowContext}>
-          <LinkEditModal />
+          <NodeAddModal />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
     );
-    wrapper.find('button#link-confirm').simulate('click');
+    act(() => {
+      wrapper.find('NodeModal').prop('onSave')(nodeResource, 'success');
+    });
     expect(dispatch).toHaveBeenCalledWith({
-      type: 'UPDATE_LINK',
-      linkType: 'always',
+      type: 'CREATE_NODE',
+      node: {
+        linkType: 'success',
+        nodeResource,
+      },
     });
   });
 });

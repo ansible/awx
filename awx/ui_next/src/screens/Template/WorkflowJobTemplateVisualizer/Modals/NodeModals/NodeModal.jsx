@@ -104,7 +104,7 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
           }
         : nodeResource;
 
-    onSave(linkType, resource, nodeType);
+    onSave(resource, askLinkType ? linkType : null);
   };
 
   const handleCancel = () => {
@@ -177,11 +177,15 @@ function NodeModal({ askLinkType, i18n, onSave, title }) {
               }
             />
             {activeStep && activeStep.id !== 1 && (
-              <Button variant="secondary" onClick={onBack}>
+              <Button id="back-node-modal" variant="secondary" onClick={onBack}>
                 {i18n._(t`Back`)}
               </Button>
             )}
-            <Button variant="link" onClick={handleCancel}>
+            <Button
+              id="cancel-node-modal"
+              variant="link"
+              onClick={handleCancel}
+            >
               {i18n._(t`Cancel`)}
             </Button>
           </>

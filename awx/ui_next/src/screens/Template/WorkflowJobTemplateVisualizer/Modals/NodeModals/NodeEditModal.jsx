@@ -7,13 +7,11 @@ import NodeModal from './NodeModal';
 function NodeEditModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);
 
-  const updateNode = (linkType, resource, nodeType) => {
+  const updateNode = resource => {
     dispatch({
       type: 'UPDATE_NODE',
       node: {
-        linkType,
         nodeResource: resource,
-        nodeType,
       },
     });
   };

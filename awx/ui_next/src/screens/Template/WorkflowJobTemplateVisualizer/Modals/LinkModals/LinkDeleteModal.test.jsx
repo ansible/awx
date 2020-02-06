@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   WorkflowDispatchContext,
-  WorkflowStateContext
+  WorkflowStateContext,
 } from '@contexts/Workflow';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import LinkDeleteModal from './LinkDeleteModal';
@@ -12,13 +12,13 @@ const dispatch = jest.fn();
 const workflowContext = {
   linkToDelete: {
     source: {
-      id: 2
+      id: 2,
     },
     target: {
-      id: 3
+      id: 3,
     },
-    linkType: 'always'
-  }
+    linkType: 'always',
+  },
 };
 
 describe('LinkDeleteModal', () => {
@@ -54,7 +54,8 @@ describe('LinkDeleteModal', () => {
   test('Close button dispatches as expected', () => {
     wrapper.find('TimesIcon').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({
-      type: 'SET_LINK_TO_DELETE', value: null
+      type: 'SET_LINK_TO_DELETE',
+      value: null,
     });
   });
 });

@@ -19,6 +19,7 @@ function NodeDeleteModal({ i18n }) {
       onClose={() => dispatch({ type: 'SET_NODE_TO_DELETE', value: null })}
       actions={[
         <Button
+          id="confirm-node-removal"
           key="remove"
           variant="danger"
           aria-label={i18n._(t`Confirm node removal`)}
@@ -27,6 +28,7 @@ function NodeDeleteModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
+          id="cancel-node-removal"
           key="cancel"
           variant="secondary"
           aria-label={i18n._(t`Cancel node removal`)}

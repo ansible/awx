@@ -11,13 +11,12 @@ function NodeAddModal({ i18n }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const { addNodeSource } = useContext(WorkflowStateContext);
 
-  const addNode = (linkType, resource, nodeType) => {
+  const addNode = (resource, linkType) => {
     dispatch({
       type: 'CREATE_NODE',
       node: {
         linkType,
         nodeResource: resource,
-        nodeType,
       },
     });
   };

@@ -18,6 +18,7 @@ function NodeNextButton({
 
   return (
     <Button
+      id="next-node-modal"
       variant="primary"
       type="submit"
       onClick={() => onClick(activeStep)}

@@ -28,7 +28,7 @@ function LinkDeleteModal({ i18n }) {
           {i18n._(t`Remove`)}
         </Button>,
         <Button
-        id="cancel-link-removal"
+          id="cancel-link-removal"
           aria-label={i18n._(t`Cancel link removal`)}
           key="cancel"
           onClick={() => dispatch({ type: 'SET_LINK_TO_DELETE', value: null })}
