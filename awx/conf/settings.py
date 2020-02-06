@@ -87,7 +87,7 @@ def _ctit_db_wrapper(trans_safe=False):
         yield
     except DBError:
         if trans_safe:
-            if 'check_migrations' not in sys.argv:
+            if 'migrate' not in sys.argv and 'check_migrations' not in sys.argv:
                 logger.exception('Database settings are not available, using defaults.')
         else:
             logger.exception('Error modifying something related to database settings.')
