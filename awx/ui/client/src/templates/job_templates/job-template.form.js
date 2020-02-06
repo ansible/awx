@@ -43,19 +43,6 @@ function(NotificationsList, i18n) {
                     column: 1,
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
-                organization: {
-                    label: i18n._('Organization'),
-                    type: 'lookup',
-                    list: 'OrganizationList',
-                    sourceModel: 'organization',
-                    basePath: 'organizations',
-                    sourceField: 'name',
-                    dataTitle: i18n._('Organization'),
-                    dataContainer: 'body',
-                    dataPlacement: 'right',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
-                    awLookupWhen: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
                 job_type: {
                     label: i18n._('Job Type'),
                     type: 'select',

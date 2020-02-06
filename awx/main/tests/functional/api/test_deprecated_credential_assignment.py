@@ -278,7 +278,6 @@ def test_multi_vault_preserved_on_put(get, put, admin_user, job_template, vault_
     job_template.credentials.add(vault_credential, vault2)
     assert job_template.credentials.count() == 2  # sanity check
     r = get(job_template.get_absolute_url(), admin_user, expect=200)
-    r.data.pop('organization')  # so that it passes validation
     # should be a no-op PUT request
     put(
         job_template.get_absolute_url(),

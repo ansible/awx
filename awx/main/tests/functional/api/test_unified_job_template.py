@@ -2,7 +2,6 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main import models
-from awx.main.utils import get_type_for_model
 
 
 @pytest.mark.django_db

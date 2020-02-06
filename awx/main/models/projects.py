@@ -584,8 +584,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def preferred_instance_groups(self):
-        if self.project is not None and self.project.organization is not None:
-            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        if self.organization is not None:
+            organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
             organization_groups = []
         template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]

@@ -199,7 +199,6 @@ def update_role_parentage_for_instance(instance):
     updates the parents listing for all the roles
     of a given instance if they have changed
     '''
-    changed_ct = 0
     parents_removed = set()
     parents_added = set()
     for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):

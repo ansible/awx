@@ -21,8 +21,6 @@ from awx.main.models import (
     Credential
 )
 
-from rest_framework.exceptions import PermissionDenied
-
 from crum import impersonate
 
 
