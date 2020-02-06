@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import {
   AutoSizer,
@@ -7,23 +8,22 @@ import {
   List,
 } from 'react-virtualized';
 
-import React, { Component } from 'react';
 import { CardBody } from '@components/Card';
-
-import { JobsAPI } from '@api';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
+import { HostStatusBar } from './shared';
+import { JobsAPI } from '@api';
 
 const OutputHeader = styled.div`
   font-weight: var(--pf-global--FontWeight--bold);
 `;
 
 const OutputWrapper = styled.div`
-  background-color: #fafafa;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   font-family: monospace;
@@ -306,6 +306,7 @@ class JobOutput extends Component {
           />
         )}
         <OutputHeader>{job.name}</OutputHeader>
+        <HostStatusBar counts={job.host_status_counts} />
         <PageControls
           onScrollFirst={this.handleScrollFirst}
           onScrollLast={this.handleScrollLast}

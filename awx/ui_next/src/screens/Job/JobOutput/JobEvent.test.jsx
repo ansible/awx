@@ -53,7 +53,7 @@ describe('<JobEvent />', () => {
     expect(
       lineText
         .html()
-        .includes('<span style="color:#080">ok: [localhost]</span>')
+        .includes('<span style="color:#486B00">ok: [localhost]</span>')
     ).toBe(true);
   });
 
