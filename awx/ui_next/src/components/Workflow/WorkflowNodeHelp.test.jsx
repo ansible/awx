@@ -13,6 +13,7 @@ describe('WorkflowNodeHelp', () => {
         name: 'Foo Job Template',
         elapsed: 9000,
         status: 'successful',
+        type: 'job',
       },
       unifiedJobTemplate: {
         name: 'Foo Job Template',
