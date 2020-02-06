@@ -37,6 +37,7 @@ function VisualizerStartScreen({ i18n }) {
         <StartPanel>
           <p>{i18n._(t`Please click the Start button to begin.`)}</p>
           <Button
+            id="visualizer-start"
             aria-label={i18n._(t`Start`)}
             onClick={() =>
               dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 })
