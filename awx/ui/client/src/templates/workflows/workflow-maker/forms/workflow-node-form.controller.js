@@ -106,6 +106,10 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 element: '#workflow_node_edge',
                 multiple: false
             });
+            CreateSelect2({
+                element: '#workflow_node_convergence',
+                multiple: false
+            });
         };
 
         const formatPopOverDetails = (model) => {
@@ -500,6 +504,22 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 type: 'workflow_job_template,job_template'
             };
 
+            const all_parents_must_converge = _.get(
+                $scope, ['nodeConfig', 'node', 'all_parents_must_converge'],
+                _.get($scope, ['nodeConfig', 'node', 'originalNodeObject', 'all_parents_must_converge'], false)
+            );
+            $scope.convergenceOptions = [
+                {
+                    label: $scope.strings.get('workflow_maker.ALL'),
+                    value: true,
+                },
+                {
+                    label: $scope.strings.get('workflow_maker.ANY'),
+                    value: false,
+                },
+            ];
+            $scope.convergenceChoice = $scope.convergenceOptions.find(({ value }) => value === all_parents_must_converge);
+
             $scope.wf_maker_templates = [];
             $scope.wf_maker_template_dataset = {};
 
@@ -617,7 +637,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         $scope.confirmNodeForm = () => {
             const nodeFormData = {
-                edgeType: $scope.edgeType
+                edgeType: $scope.edgeType,
+                all_parents_must_converge: $scope.convergenceChoice.value,
             };
 
             if ($scope.activeTab === "approval") {

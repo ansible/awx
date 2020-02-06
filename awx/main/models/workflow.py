@@ -79,6 +79,11 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         symmetrical=False,
         related_name='%(class)ss_always',
     )
+    all_parents_must_converge = models.BooleanField(
+        default=False,
+        help_text=_("If enabled then the node will only run if all of the parent nodes "
+                    "have met the criteria to reach this node")
+    )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         related_name='%(class)ss',
@@ -102,7 +107,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         '''
         return ['workflow_job', 'unified_job_template',
                 'extra_data', 'survey_passwords',
-                'inventory', 'credentials', 'char_prompts']
+                'inventory', 'credentials', 'char_prompts', 'all_parents_must_converge']
 
     def create_workflow_job_node(self, **kwargs):
         '''
@@ -130,7 +135,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
     FIELDS_TO_PRESERVE_AT_COPY = [
         'unified_job_template', 'workflow_job_template', 'success_nodes', 'failure_nodes',
         'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
-        'char_prompts'
+        'char_prompts', 'all_parents_must_converge'
     ]
     REENCRYPTION_BLACKLIST_AT_COPY = ['extra_data', 'survey_passwords']
 

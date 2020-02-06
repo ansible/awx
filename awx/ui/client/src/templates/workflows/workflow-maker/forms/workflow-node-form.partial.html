@@ -183,6 +183,24 @@
             </select>
         </div>
     </div>
+    <div id="workflow_node_checkbox_group" class="form-group Form-formGroup Form-formGroup--singleColumn" >
+        <label for="edgeType" class="Form-inputLabelContainer">
+            <span class="Form-requiredAsterisk">*</span>
+            <span class="Form-inputLabel">{{:: strings.get('workflow_maker.CONVERGENCE') }}</span>
+        </label>
+        <div>
+            <select
+                id="workflow_node_convergence"
+                ng-options="v as v.label for v in convergenceOptions track by v.value"
+                ng-model="convergenceChoice"
+                class="form-control Form-dropDown"
+                name="convergenceChoice"
+                tabindex="-1"
+                ng-disabled="readOnly"
+                aria-hidden="true">
+            </select>
+        </div>
+    </div>
     <div ng-show="readOnly">
         <div
             class="WorkflowMaker-readOnlyPromptText"

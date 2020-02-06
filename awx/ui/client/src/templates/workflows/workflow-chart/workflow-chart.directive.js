@@ -34,6 +34,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                 nodeH = 60,
                 rootW = startNodeTextWidth + 25,
                 rootH = 40,
+                strokeW = 2, // px
                 startNodeOffsetY = scope.mode === 'details' ? 17 : 10,
                 maxNodeTextLength = 27,
                 windowHeight,
@@ -118,6 +119,14 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
             };
 
             const rounded_rect = (x, y, w, h, r, tl, tr, bl, br) => {
+                // x, y - position coordinates
+                // w - width
+                // h - height
+                // r - border radius
+                // round the top-left corner (bool)
+                // round the top-right corner (bool)
+                // round the bottom-left corner (bool)
+                // round the bottom-right corner (bool)
                 let retval;
                 retval  = "M" + (x + r) + "," + y;
                 retval += "h" + (w - 2*r);
@@ -855,6 +864,9 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                         .attr("fill", (d) => { return scope.graphState.addLinkSource === d.id ? "#337AB7" : "#D7D7D7"; })
                         .style("display", (d) => { return scope.graphState.isLinkMode && !d.isInvalidLinkTarget ? null : "none"; });
 
+                    baseSvg.selectAll(".WorkflowChart-convergenceTypeRectangle")
+                        .style("display", (d) => d.all_parents_must_converge ? null : "none");
+
                     // Add new nodes
                     const nodeEnter = nodes
                       .enter()
@@ -924,7 +936,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                         return "#D7D7D7";
                                     }
                                 })
-                                .attr('stroke-width', "2px")
+                                .attr('stroke-width', `${strokeW}px`)
                                 .attr("class", (d) => {
                                     let classString = d.id === scope.graphState.nodeBeingAdded ? "WorkflowChart-rect WorkflowChart-isNodeBeingAdded" : "WorkflowChart-rect";
                                     classString += !_.get(d, 'unifiedJobTemplate.name') ? " WorkflowChart-dashedNode" : "";
@@ -979,6 +991,34 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-approvedText")
                                 .html(`<span>${TemplatesStrings.get('workflow_maker.APPROVED')}</span>`)
                                 .style("display", (d) => { return d.job && d.job.type === "workflow_approval" && d.job.status === "successful" && !d.job.timed_out ? null : "none"; });
+
+                            // Build the 'ALL' symbol for all-convergence nodes
+                            const convergenceTypeHeight = nodeH / 5;
+                            const convergenceTypeWidth = nodeW / 5;
+                            const convergenceTypeXCoord = nodeW / 2 - convergenceTypeWidth / 2;
+                            const convergenceTypeYCoord = -convergenceTypeHeight + (strokeW / 2);
+                            const convergenceTypeBorderRadius = 3;
+
+                            const convergenceRectangle = rounded_rect(
+                                convergenceTypeXCoord,
+                                convergenceTypeYCoord,
+                                convergenceTypeWidth,
+                                convergenceTypeHeight,
+                                convergenceTypeBorderRadius,
+                                true,  // round top-left
+                                true,  // round top-right
+                                false, // round bottom-left
+                                false  // round bottom-right
+                            );
+                            thisNode.append("path")
+                                .attr("d", convergenceRectangle)
+                                .attr("class", "WorkflowChart-convergenceTypeRectangle")
+                                .style("display", (d) => d.all_parents_must_converge ? null : "none");
+                            thisNode.append("text")
+                                .attr("y", ((convergenceTypeYCoord + convergenceTypeHeight) / 2) - Math.min(strokeW, 2))
+                                .attr("x", convergenceTypeXCoord + (convergenceTypeWidth / 4))
+                                .attr("class", "WorkflowChart-convergenceTypeLetter")
+                                .text("ALL");
 
                             thisNode.append("circle")
                                 .attr("cy", nodeH)

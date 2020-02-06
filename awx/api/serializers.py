@@ -3677,7 +3677,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
     class Meta:
         model = WorkflowJobTemplateNode
         fields = ('*', 'workflow_job_template', '-name', '-description', 'id', 'url', 'related',
-                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
+                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes', 'all_parents_must_converge',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateNodeSerializer, self).get_related(obj)
@@ -3716,8 +3716,8 @@ class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
     class Meta:
         model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job', '-name', '-description', 'id', 'url', 'related',
-                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
-                  'do_not_run',)
+                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes', 
+                  'all_parents_must_converge', 'do_not_run',)
 
     def get_related(self, obj):
         res = super(WorkflowJobNodeSerializer, self).get_related(obj)

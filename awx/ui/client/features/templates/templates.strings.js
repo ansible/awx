@@ -153,7 +153,10 @@ function TemplatesStrings (BaseString) {
         TIMED_OUT: t.s('APPROVAL TIMED OUT'),
         TIMEOUT: t.s('Timeout'),
         APPROVED: t.s('APPROVED'),
-        DENIED: t.s('DENIED')
+        DENIED: t.s('DENIED'),
+        CONVERGENCE: t.s('Convergence'),
+        ALL: t.s('All'),
+        ANY: t.s('Any'),
     };
 }
 
