@@ -65,7 +65,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
-    <Toolbar>
+    <Toolbar id="workflow-output-toolbar">
       <ToolbarJob>
         <StatusIconWithMargin status={job.status} />
         <b>{job.name}</b>
@@ -76,7 +76,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
         <VerticalSeparator />
         <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
           <ActionButton
-            id="workflow-output-legend-button"
+            id="workflow-output-toggle-legend"
             isActive={showLegend}
             onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
             variant="plain"
@@ -86,7 +86,7 @@ function WorkflowOutputToolbar({ i18n, job }) {
         </Tooltip>
         <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
           <ActionButton
-            id="workflow-output-tools-button"
+            id="workflow-output-toggle-tools"
             isActive={showTools}
             onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
             variant="plain"

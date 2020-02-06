@@ -48,7 +48,7 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
 
   return (
-    <div>
+    <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
         <div css="display: flex;">
           <b>{i18n._(t`Workflow Visualizer`)}</b>
@@ -61,6 +61,7 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
+              id="visualizer-toggle-legend"
               isActive={showLegend}
               onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
               variant="plain"
@@ -70,6 +71,7 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           </Tooltip>
           <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
             <ActionButton
+              id="visualizer-toggle-tools"
               isActive={showTools}
               onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
               variant="plain"
@@ -77,14 +79,15 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
               <WrenchIcon />
             </ActionButton>
           </Tooltip>
-          <ActionButton variant="plain" isDisabled>
+          <ActionButton id="visualizer-documentation" variant="plain" isDisabled>
             <BookIcon />
           </ActionButton>
-          <ActionButton variant="plain" isDisabled>
+          <ActionButton id="visualizer-launch" variant="plain" isDisabled>
             <RocketIcon />
           </ActionButton>
           <Tooltip content={i18n._(t`Delete All Nodes`)} position="bottom">
             <ActionButton
+              id="visualizer-delete-all"
               aria-label={i18n._(t`Delete all nodes`)}
               isDisabled={totalNodes === 0}
               onClick={() =>
@@ -100,6 +103,7 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           </Tooltip>
           <VerticalSeparator />
           <Button
+            id="visualizer-save"
             aria-label={i18n._(t`Save`)}
             variant="primary"
             onClick={onSave}
@@ -108,6 +112,7 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           </Button>
           <VerticalSeparator />
           <Button
+            id="visualizer-close"
             aria-label={i18n._(t`Close`)}
             onClick={onClose}
             variant="plain"
