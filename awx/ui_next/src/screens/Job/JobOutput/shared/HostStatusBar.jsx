@@ -30,24 +30,24 @@ const HostStatusBar = ({ i18n, counts = {} }) => {
   const noData = Object.keys(counts).length === 0;
   const hostStatus = {
     ok: {
-      color: '#92D400',
+      color: '#4CB140',
       label: i18n._(t`OK`),
     },
-    dark: {
-      color: '#470000',
-      label: i18n._(t`Unreachable`),
-    },
-    failures: {
-      color: '#C9190B',
-      label: i18n._(t`Failed`),
+    skipped: {
+      color: '#73BCF7',
+      label: i18n._(t`Skipped`),
     },
     changed: {
       color: '#F0AB00',
       label: i18n._(t`Changed`),
     },
-    skipped: {
-      color: '#73BCF7',
-      label: i18n._(t`Skipped`),
+    failures: {
+      color: '#C9190B',
+      label: i18n._(t`Failed`),
+    },
+    dark: {
+      color: '#8B8D8F',
+      label: i18n._(t`Unreachable`),
     },
   };
 

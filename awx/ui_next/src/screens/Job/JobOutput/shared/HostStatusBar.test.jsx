@@ -29,10 +29,10 @@ describe('<HostStatusBar />', () => {
     const tooltips = wrapper.find('TooltipContent');
     const expectedContent = [
       { label: 'OK', count: 5 },
-      { label: 'Unreachable', count: 0 },
-      { label: 'Failed', count: 0 },
-      { label: 'Changed', count: 0 },
       { label: 'Skipped', count: 1 },
+      { label: 'Changed', count: 0 },
+      { label: 'Failed', count: 0 },
+      { label: 'Unreachable', count: 0 },
     ];
 
     tooltips.forEach((tooltip, index) => {
