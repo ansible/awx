@@ -30,7 +30,7 @@ options:
       type: int
     fail_if_not_running:
       description:
-        - Fail loudly if the I(job_id) does not reference a running job.
+        - Fail loudly if the I(job_id) can not be canceled
       default: False
       type: bool
 extends_documentation_fragment: awx.awx.auth
@@ -48,54 +48,54 @@ id:
     returned: success
     type: int
     sample: 94
-status:
-    description: status of the cancel request
-    returned: success
-    type: str
-    sample: canceled
 '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
+from ..module_utils.tower_api import TowerModule
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         job_id=dict(type='int', required=True),
         fail_if_not_running=dict(type='bool', default=False),
     )
 
+    # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
     )
 
+    # Extract our parameters
     job_id = module.params.get('job_id')
-    json_output = {}
+    fail_if_not_running = module.params.get('fail_if_not_running')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        job = tower_cli.get_resource('job')
-        params = module.params.copy()
+    # Attempt to look up the job based on the provided name
+    job = module.get_one('jobs', **{
+        'data': {
+            'id': job_id,
+        }
+    })
 
-        try:
-            result = job.cancel(job_id, **params)
-            json_output['id'] = job_id
-        except (exc.ConnectionError, exc.BadRequest, exc.TowerCLIError, exc.AuthError) as excinfo:
-            module.fail_json(msg='Unable to cancel job_id/{0}: {1}'.format(job_id, excinfo), changed=False)
+    if job == None:
+        module.fail_json(msg="Unable to find job with id {0}".format(job_id))
 
-    json_output['changed'] = result['changed']
-    json_output['status'] = result['status']
-    module.exit_json(**json_output)
+    cancel_page = module.get_endpoint(job['related']['cancel'])
+    if 'json' not in cancel_page or 'can_cancel' not in cancel_page['json']:
+        module.fail_json(msg="Failed to cancel job, got unexpected response from tower", **{ 'response': cancel_page })
+
+    if not cancel_page['json']['can_cancel']:
+        if fail_if_not_running:
+            module.fail_json(msg="Job is not running")
+        else:
+            module.exit_json(**{ 'changed': False })
+
+    response = module.post_endpoint(job['related']['cancel'], **{ 'data': {} })
+
+    if response['status_code'] != 202:
+        module.fail_json(msg="Failed to cancel job, see response for details", **{'response': results })
+
+    module.exit_json(**{ 'changed': True })
 
 
 if __name__ == '__main__':
