@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { t } from '@lingui/macro';
-import { withI18n } from '@lingui/react';
 import { CardBody } from '@components/Card';
-import ErrorDetail from '@components/ErrorDetail';
-import AlertModal from '@components/AlertModal';
 import { HostsAPI } from '@api';
 import HostForm from '../shared';
 
-function HostEdit({ host, i18n }) {
+function HostEdit({ host }) {
   const [formError, setFormError] = useState(null);
   const hostsMatch = useRouteMatch('/hosts/:id/edit');
   const inventoriesMatch = useRouteMatch(
@@ -35,13 +31,15 @@ function HostEdit({ host, i18n }) {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);
     } catch (error) {
-      // check for field-specific errors from API
-      if (error.response?.data && typeof error.response.data === 'object') {
-        throw error.response.data;
-      }
+      console.log('caught:', error);
+      // // check for field-specific errors from API
+      // if (error.response?.data && typeof error.response.data === 'object') {
+      //   throw error.response.data;
+      // }
       setFormError(error);
     }
   };
+  console.log('render:', formError);
 
   const handleCancel = () => {
     history.push(detailsUrl);
@@ -53,18 +51,8 @@ function HostEdit({ host, i18n }) {
         host={host}
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
+        submitError={formError}
       />
-      {formError && (
-        <AlertModal
-          variant="danger"
-          title={i18n._(t`Error!`)}
-          isOpen={formError}
-          onClose={() => setFormError(null)}
-        >
-          {i18n._(t`An error occurred when saving Host`)}
-          <ErrorDetail error={formError} />
-        </AlertModal>
-      )}
     </CardBody>
   );
 }
@@ -73,5 +61,4 @@ HostEdit.propTypes = {
   host: PropTypes.shape().isRequired,
 };
 
-export { HostEdit as _HostEdit };
-export default withI18n()(HostEdit);
+export default HostEdit;

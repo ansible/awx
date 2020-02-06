@@ -18,8 +18,13 @@ function FormSubmitError({ error }) {
     }
     // check for field-specific errors from API
     if (error.response?.data && typeof error.response.data === 'object') {
-      setErrors(error.response.data);
-      setFormError(null);
+      const errorMessages = error.response.data;
+      setErrors(errorMessages);
+      if (errorMessages.__all__) {
+        setFormError({ message: errorMessages.__all__ });
+      } else {
+        setFormError(null);
+      }
     } else {
       /* eslint-disable-next-line no-console */
       console.error(error);
