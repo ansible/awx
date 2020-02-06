@@ -46,7 +46,7 @@ const HostStatusBar = ({ i18n, counts = {} }) => {
       label: i18n._(t`Failed`),
     },
     dark: {
-      color: '#8B8D8F',
+      color: '#8F4700',
       label: i18n._(t`Unreachable`),
     },
   };

@@ -23,7 +23,7 @@ const OutputHeader = styled.div`
 `;
 
 const OutputWrapper = styled.div`
-  background-color: #fafafa;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   font-family: monospace;
