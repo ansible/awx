@@ -79,7 +79,11 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
               <WrenchIcon />
             </ActionButton>
           </Tooltip>
-          <ActionButton id="visualizer-documentation" variant="plain" isDisabled>
+          <ActionButton
+            id="visualizer-documentation"
+            variant="plain"
+            isDisabled
+          >
             <BookIcon />
           </ActionButton>
           <ActionButton id="visualizer-launch" variant="plain" isDisabled>
