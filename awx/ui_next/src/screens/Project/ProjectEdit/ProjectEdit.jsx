@@ -42,13 +42,9 @@ function ProjectEdit({ project }) {
           project={project}
           handleCancel={handleCancel}
           handleSubmit={handleSubmit}
+          submitError={formSubmitError}
         />
       </CardBody>
-      {formSubmitError ? (
-        <div className="formSubmitError">formSubmitError</div>
-      ) : (
-        ''
-      )}
     </Card>
   );
 }

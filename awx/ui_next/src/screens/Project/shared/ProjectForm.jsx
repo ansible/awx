@@ -10,7 +10,10 @@ import AnsibleSelect from '@components/AnsibleSelect';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import FormField, { FieldTooltip } from '@components/FormField';
+import FormField, {
+  FieldTooltip,
+  FormSubmitError,
+} from '@components/FormField';
 import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { CredentialTypesAPI, ProjectsAPI } from '@api';
@@ -70,7 +73,7 @@ const fetchCredentials = async credential => {
   };
 };
 
-function ProjectForm({ project, ...props }) {
+function ProjectForm({ project, submitError, ...props }) {
   const { i18n, handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
   const [contentError, setContentError] = useState(null);
@@ -388,6 +391,7 @@ function ProjectForm({ project, ...props }) {
               <FormActionGroup
                 onCancel={handleCancel}
                 onSubmit={formik.handleSubmit}
+                errorMessage={<FormSubmitError error={submitError} />}
               />
             </Form>
           )}
@@ -401,10 +405,12 @@ ProjectForm.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   project: PropTypes.shape({}),
+  submitError: PropTypes.shape({}),
 };
 
 ProjectForm.defaultProps = {
   project: {},
+  submitError: null,
 };
 
 export default withI18n()(ProjectForm);

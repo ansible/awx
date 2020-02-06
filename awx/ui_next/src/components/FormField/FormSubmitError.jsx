@@ -9,7 +9,7 @@ const ErrorMessage = styled('div')`
 ErrorMessage.displayName = 'ErrorMessage';
 
 function FormSubmitError({ error }) {
-  const [formError, setFormError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const { setErrors } = useFormikContext();
 
   useEffect(() => {
@@ -21,22 +21,22 @@ function FormSubmitError({ error }) {
       const errorMessages = error.response.data;
       setErrors(errorMessages);
       if (errorMessages.__all__) {
-        setFormError({ message: errorMessages.__all__ });
+        setErrorMessage(errorMessages.__all__);
       } else {
-        setFormError(null);
+        setErrorMessage(null);
       }
     } else {
       /* eslint-disable-next-line no-console */
       console.error(error);
-      setFormError(error);
+      setErrorMessage(error.message);
     }
   }, [error, setErrors]);
 
-  if (!formError) {
+  if (!errorMessage) {
     return null;
   }
 
-  return <ErrorMessage>{formError.message}</ErrorMessage>;
+  return <ErrorMessage>{errorMessage}</ErrorMessage>;
 }
 
 export default FormSubmitError;
