@@ -98,7 +98,7 @@
         helm upgrade {{ postgresql_service_name }} \
           --install \
           --namespace {{ kubernetes_namespace }} \
-          --version="8.1.5" \
+          --version="8.3.0" \
           --values {{ values_file.path }} \
           stable/postgresql
       register: kubernetes_pg_activate
