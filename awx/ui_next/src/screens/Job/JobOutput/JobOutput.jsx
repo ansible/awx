@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   AutoSizer,
@@ -8,18 +11,39 @@ import {
   List,
 } from 'react-virtualized';
 
+import AlertModal from '@components/AlertModal';
 import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import ErrorDetail from '@components/ErrorDetail';
+import { StatusIcon } from '@components/Sparkline';
+
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
 import PageControls from './PageControls';
 import HostEventModal from './HostEventModal';
-import { HostStatusBar } from './shared';
-import { JobsAPI } from '@api';
+import { HostStatusBar, OutputToolbar } from './shared';
+import {
+  JobsAPI,
+  ProjectUpdatesAPI,
+  SystemJobsAPI,
+  WorkflowJobsAPI,
+  InventoriesAPI,
+  AdHocCommandsAPI,
+} from '@api';
+
+const HeaderTitle = styled.div`
+  display: inline-flex;
+  align-items: center;
+  h1 {
+    margin-left: 10px;
+    font-weight: var(--pf-global--FontWeight--bold);
+  }
+`;
 
 const OutputHeader = styled.div`
-  font-weight: var(--pf-global--FontWeight--bold);
+  display: flex;
+  justify-content: space-between;
 `;
 
 const OutputWrapper = styled.div`
@@ -31,6 +55,7 @@ const OutputWrapper = styled.div`
   height: calc(100vh - 350px);
   outline: 1px solid #d7d7d7;
 `;
+
 const OutputFooter = styled.div`
   background-color: #ebebeb;
   border-right: 1px solid #d7d7d7;
@@ -52,6 +77,7 @@ class JobOutput extends Component {
     this.listRef = React.createRef();
     this.state = {
       contentError: null,
+      deletionError: null,
       hasContentLoading: true,
       results: {},
       currentlyLoading: [],
@@ -67,6 +93,7 @@ class JobOutput extends Component {
 
     this._isMounted = false;
     this.loadJobEvents = this.loadJobEvents.bind(this);
+    this.handleDeleteJob = this.handleDeleteJob.bind(this);
     this.rowRenderer = this.rowRenderer.bind(this);
     this.handleHostEventClick = this.handleHostEventClick.bind(this);
     this.handleHostModalClose = this.handleHostModalClose.bind(this);
@@ -140,6 +167,34 @@ class JobOutput extends Component {
             n => !loadRange.includes(n)
           ),
         }));
+    }
+  }
+
+  async handleDeleteJob() {
+    const { job, history } = this.props;
+    try {
+      switch (job.type) {
+        case 'project_update':
+          await ProjectUpdatesAPI.destroy(job.idd);
+          break;
+        case 'system_job':
+          await SystemJobsAPI.destroy(job.id);
+          break;
+        case 'workflow_job':
+          await WorkflowJobsAPI.destroy(job.id);
+          break;
+        case 'ad_hoc_command':
+          await AdHocCommandsAPI.destroy(job.id);
+          break;
+        case 'inventory_update':
+          await InventoriesAPI.destroy(job.id);
+          break;
+        default:
+          await JobsAPI.destroy(job.id);
+      }
+      history.push('/jobs');
+    } catch (err) {
+      this.setState({ deletionError: err });
     }
   }
 
@@ -279,9 +334,11 @@ class JobOutput extends Component {
   }
 
   render() {
-    const { job } = this.props;
+    const { job, i18n } = this.props;
+
     const {
       contentError,
+      deletionError,
       hasContentLoading,
       hostEvent,
       isHostModalOpen,
@@ -305,7 +362,13 @@ class JobOutput extends Component {
             hostEvent={hostEvent}
           />
         )}
-        <OutputHeader>{job.name}</OutputHeader>
+        <OutputHeader>
+          <HeaderTitle>
+            <StatusIcon status={job.status} />
+            <h1>{job.name}</h1>
+          </HeaderTitle>
+          <OutputToolbar job={job} onDelete={this.handleDeleteJob} />
+        </OutputHeader>
         <HostStatusBar counts={job.host_status_counts} />
         <PageControls
           onScrollFirst={this.handleScrollFirst}
@@ -345,9 +408,20 @@ class JobOutput extends Component {
           </InfiniteLoader>
           <OutputFooter />
         </OutputWrapper>
+        {deletionError && (
+          <AlertModal
+            isOpen={deletionError}
+            variant="danger"
+            onClose={() => this.setState({ deletionError: null })}
+            title={i18n._(t`Job Delete Error`)}
+          >
+            <ErrorDetail error={deletionError} />
+          </AlertModal>
+        )}
       </CardBody>
     );
   }
 }
 
-export default JobOutput;
+export { JobOutput as _JobOutput };
+export default withI18n()(withRouter(JobOutput));
