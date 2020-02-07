@@ -20,7 +20,6 @@ dockerhub_base=ansible
 # Kubernetes Install
 # kubernetes_context=test-cluster
 # kubernetes_namespace=awx
-# tiller_namespace=kube-system
 # Optional Kubernetes Variables
 # pg_image_registry=docker.io
 # pg_serviceaccount=awx
