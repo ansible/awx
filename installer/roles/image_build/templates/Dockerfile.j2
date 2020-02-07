@@ -11,8 +11,11 @@ RUN dnf -y update && \
   ansible \
   bubblewrap \
   curl \
+  diffutils \
+  dnf-utils \
   gcc \
   gcc-c++ \
+  gettext \
   git-core \
   glibc-langpack-en \
   krb5-workstation \
@@ -44,11 +47,11 @@ RUN dnf -y update && \
   tmux \
   unzip \
   vim-minimal \
+  which \
   xmlsec1 \
   xmlsec1-devel \
   xmlsec1-openssl \
-  xmlsec1-openssl-devel \
-  dnf-utils
+  xmlsec1-openssl-devel
 
 ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
 RUN chmod +x /tini
