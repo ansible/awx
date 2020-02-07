@@ -15,7 +15,7 @@ from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.models.ha import TowerAnalyticsState
-from awx.main.utils import get_awx_http_client_headers
+from awx.main.utils import get_awx_http_client_headers, set_environ
 
 
 __all__ = ['register', 'gather', 'ship', 'table_version']
@@ -169,12 +169,13 @@ def ship(path):
             s = requests.Session()
             s.headers = get_awx_http_client_headers()
             s.headers.pop('Content-Type')
-            response = s.post(url, 
-                              files=files,
-                              verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
-                              auth=(rh_user, rh_password),
-                              headers=s.headers,
-                              timeout=(31, 31))
+            with set_environ(**settings.AWX_TASK_ENV):
+                response = s.post(url,
+                                  files=files,
+                                  verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+                                  auth=(rh_user, rh_password),
+                                  headers=s.headers,
+                                  timeout=(31, 31))
             if response.status_code != 202:
                 return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
                                                                                   response.text))

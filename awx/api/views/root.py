@@ -38,6 +38,7 @@ from awx.main.models import (
     InstanceGroup,
     JobTemplate,
 )
+from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views.root')
 
@@ -191,7 +192,8 @@ class ApiV2SubscriptionView(APIView):
             data['rh_password'] = settings.REDHAT_PASSWORD
         try:
             user, pw = data.get('rh_username'), data.get('rh_password')
-            validated = get_licenser().validate_rh(user, pw)
+            with set_environ(**settings.AWX_TASK_ENV):
+                validated = get_licenser().validate_rh(user, pw)
             if user:
                 settings.REDHAT_USERNAME = data['rh_username']
             if pw:
@@ -203,10 +205,15 @@ class ApiV2SubscriptionView(APIView):
                 getattr(getattr(exc, 'response', None), 'status_code', None) == 401
             ):
                 msg = _("The provided credentials are invalid (HTTP 401).")
-            if isinstance(exc, (ValueError, OSError)) and exc.args:
+            elif isinstance(exc, requests.exceptions.ProxyError):
+                msg = _("Unable to connect to proxy server.")
+            elif isinstance(exc, requests.exceptions.ConnectionError):
+                msg = _("Could not connect to subscription service.")
+            elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
-            logger.exception(smart_text(u"Invalid license submitted."),
-                             extra=dict(actor=request.user.username))
+            else:
+                logger.exception(smart_text(u"Invalid license submitted."),
+                                 extra=dict(actor=request.user.username))
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
