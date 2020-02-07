@@ -102,7 +102,7 @@ class TowerModule(AnsibleModule):
         except Exception as e:
             self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
 
-        self.session = Request(cookies=self.cookie_jar)
+        self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
