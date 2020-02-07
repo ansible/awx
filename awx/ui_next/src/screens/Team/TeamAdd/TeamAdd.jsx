@@ -43,10 +43,10 @@ class TeamAdd extends React.Component {
                   handleSubmit={this.handleSubmit}
                   handleCancel={this.handleCancel}
                   me={me || {}}
+                  submitError={error}
                 />
               )}
             </Config>
-            {error ? <div>error</div> : ''}
           </CardBody>
         </Card>
       </PageSection>

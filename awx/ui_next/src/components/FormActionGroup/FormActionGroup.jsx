@@ -21,15 +21,8 @@ const ActionGroup = styled(PFActionGroup)`
   }
 `;
 
-const FormActionGroup = ({
-  onSubmit,
-  submitDisabled,
-  onCancel,
-  errorMessage,
-  i18n,
-}) => (
+const FormActionGroup = ({ onSubmit, submitDisabled, onCancel, i18n }) => (
   <ActionGroup>
-    {errorMessage}
     <Button
       aria-label={i18n._(t`Save`)}
       variant="primary"
@@ -54,12 +47,10 @@ FormActionGroup.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   submitDisabled: PropTypes.bool,
-  errorMessage: PropTypes.node,
 };
 
 FormActionGroup.defaultProps = {
   submitDisabled: false,
-  errorMessage: null,
 };
 
 export default withI18n()(FormActionGroup);

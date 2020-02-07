@@ -5,13 +5,13 @@ import { t } from '@lingui/macro';
 import { Formik, Field } from 'formik';
 import { Form } from '@patternfly/react-core';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import FormField from '@components/FormField';
+import FormField, { FormSubmitError } from '@components/FormField';
 import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required } from '@util/validators';
 
 function TeamForm(props) {
-  const { team, handleCancel, handleSubmit, i18n } = props;
+  const { team, handleCancel, handleSubmit, submitError, i18n } = props;
   const [organization, setOrganization] = useState(
     team.summary_fields ? team.summary_fields.organization : null
   );
@@ -70,6 +70,7 @@ function TeamForm(props) {
               )}
             </Field>
           </FormRow>
+          <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}
@@ -84,10 +85,12 @@ TeamForm.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   team: PropTypes.shape({}),
+  submitError: PropTypes.shape(),
 };
 
 TeamForm.defaultProps = {
   team: {},
+  submitError: null,
 };
 
 export default withI18n()(TeamForm);

@@ -85,10 +85,10 @@ function HostForm({ handleSubmit, handleCancel, host, submitError, i18n }) {
               label={i18n._(t`Variables`)}
             />
           </FormRow>
+          <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}
-            errorMessage={<FormSubmitError error={submitError} />}
           />
         </Form>
       )}

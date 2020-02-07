@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
-import styled from 'styled-components';
-
-const ErrorMessage = styled('div')`
-  color: var(--pf-global--danger-color--200);
-  font-weight: var(--pf-global--FontWeight--bold);
-`;
-ErrorMessage.displayName = 'ErrorMessage';
+import { Alert } from '@patternfly/react-core';
 
 function FormSubmitError({ error }) {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -36,7 +30,7 @@ function FormSubmitError({ error }) {
     return null;
   }
 
-  return <ErrorMessage>{errorMessage}</ErrorMessage>;
+  return <Alert variant="danger" isInline title={errorMessage} />;
 }
 
 export default FormSubmitError;

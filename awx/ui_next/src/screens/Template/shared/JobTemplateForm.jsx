@@ -593,11 +593,8 @@ class JobTemplateForm extends Component {
             </FormRow>
           </div>
         </AdvancedFieldsWrapper>
-        <FormActionGroup
-          onCancel={handleCancel}
-          onSubmit={handleSubmit}
-          errorMessage={<FormSubmitError error={submitError} />}
-        />
+        <FormSubmitError error={submitError} />
+        <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
     );
   }

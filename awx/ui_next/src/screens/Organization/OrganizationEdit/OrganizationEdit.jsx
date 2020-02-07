@@ -48,10 +48,10 @@ function OrganizationEdit({ organization }) {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             me={me || {}}
+            submitError={formError}
           />
         )}
       </Config>
-      {formError ? <div>error</div> : null}
     </CardBody>
   );
 }

@@ -388,10 +388,10 @@ function ProjectForm({ project, submitError, ...props }) {
                   }
                 </Config>
               </FormRow>
+              <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}
                 onSubmit={formik.handleSubmit}
-                errorMessage={<FormSubmitError error={submitError} />}
               />
             </Form>
           )}

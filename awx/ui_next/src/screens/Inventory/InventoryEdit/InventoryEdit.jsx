@@ -105,10 +105,6 @@ function InventoryEdit({ inventory }) {
     return <ContentLoading />;
   }
 
-  if (error) {
-    return <ContentError />;
-  }
-
   return (
     <CardBody>
       <InventoryForm
@@ -117,6 +113,7 @@ function InventoryEdit({ inventory }) {
         inventory={inventory}
         instanceGroups={associatedInstanceGroups}
         credentialTypeId={credentialTypeId}
+        submitError={error}
       />
     </CardBody>
   );

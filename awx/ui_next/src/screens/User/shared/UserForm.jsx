@@ -6,13 +6,15 @@ import { Formik, Field } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '@components/AnsibleSelect';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import FormField, { PasswordField } from '@components/FormField';
+import FormField, {
+  PasswordField,
+  FormSubmitError,
+} from '@components/FormField';
 import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required, requiredEmail } from '@util/validators';
 
-function UserForm(props) {
-  const { user, handleCancel, handleSubmit, i18n } = props;
+function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
   const [organization, setOrganization] = useState(null);
 
   const userTypeOptions = [
@@ -183,6 +185,7 @@ function UserForm(props) {
               }}
             </Field>
           </FormRow>
+          <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}

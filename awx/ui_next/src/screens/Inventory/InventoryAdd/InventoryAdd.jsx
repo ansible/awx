@@ -69,17 +69,6 @@ function InventoryAdd() {
     }
   };
 
-  if (error) {
-    return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ContentError error={error} />
-          </CardBody>
-        </Card>
-      </PageSection>
-    );
-  }
   if (isLoading) {
     return <ContentLoading />;
   }
@@ -91,6 +80,7 @@ function InventoryAdd() {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             credentialTypeId={credentialTypeId}
+            submitError={error}
           />
         </CardBody>
       </Card>

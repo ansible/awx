@@ -40,10 +40,10 @@ function OrganizationAdd() {
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 me={me || {}}
+                submitError={formError}
               />
             )}
           </Config>
-          {formError ? <div>error</div> : ''}
         </CardBody>
       </Card>
     </PageSection>

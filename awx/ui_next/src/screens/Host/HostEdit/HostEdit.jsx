@@ -31,15 +31,9 @@ function HostEdit({ host }) {
       await HostsAPI.update(host.id, values);
       history.push(detailsUrl);
     } catch (error) {
-      console.log('caught:', error);
-      // // check for field-specific errors from API
-      // if (error.response?.data && typeof error.response.data === 'object') {
-      //   throw error.response.data;
-      // }
       setFormError(error);
     }
   };
-  console.log('render:', formError);
 
   const handleCancel = () => {
     history.push(detailsUrl);
