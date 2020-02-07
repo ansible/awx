@@ -14,6 +14,7 @@ import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
+from distutils.util import strtobool
 
 try:
     import yaml
@@ -153,6 +154,10 @@ class TowerModule(AnsibleModule):
         for honorred_setting in self.honorred_settings:
             try:
                 setattr(self, honorred_setting, config.get('general', honorred_setting))
+                if honorred_setting == 'verify_ssl':
+                    setattr(self, honorred_setting, strtobool(config.get('general', honorred_setting)))
+                else:
+                    setattr(self, honorred_setting, config.get('general', honorred_setting))
             except (NoOptionError):
                 pass
 
