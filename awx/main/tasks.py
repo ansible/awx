@@ -338,9 +338,15 @@ def send_notifications(notification_list, job_id=None):
 
 @task()
 def gather_analytics():
+    from awx.conf.models import Setting
+    from rest_framework.fields import DateTimeField
     if not settings.INSIGHTS_TRACKING_STATE:
         return
-    last_time = settings.AUTOMATION_ANALYTICS_LAST_GATHER
+    last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
+    if last_gather:
+        last_time = DateTimeField().to_internal_value(last_gather.value)
+    else:
+        last_time = None
     gather_time = now()
     if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         with advisory_lock('gather_analytics_lock', wait=False) as acquired:
