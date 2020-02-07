@@ -48,7 +48,7 @@ describe('<FormSubmitError>', () => {
       );
     });
     wrapper.update();
-    expect(wrapper.text()).toEqual('There was an error');
+    expect(wrapper.find('Alert').prop('title')).toEqual('There was an error');
     expect(global.console.error).toHaveBeenCalledWith(error);
     global.console = realConsole;
   });

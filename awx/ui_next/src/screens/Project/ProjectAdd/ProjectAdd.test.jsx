@@ -106,7 +106,8 @@ describe('<ProjectAdd />', () => {
       project_local_paths: ['foobar', 'qux'],
       project_base_dir: 'dir/foo/bar',
     };
-    ProjectsAPI.create.mockImplementation(() => Promise.reject(new Error()));
+    const error = new Error('oops');
+    ProjectsAPI.create.mockImplementation(() => Promise.reject(error));
     await act(async () => {
       wrapper = mountWithContexts(<ProjectAdd />, {
         context: { config },
@@ -121,7 +122,7 @@ describe('<ProjectAdd />', () => {
     });
     wrapper.update();
     expect(ProjectsAPI.create).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('ProjectAdd .formSubmitError').length).toBe(1);
+    expect(wrapper.find('ProjectForm').prop('submitError')).toEqual(error);
   });
 
   test('CardBody cancel button should navigate to projects list', async () => {
