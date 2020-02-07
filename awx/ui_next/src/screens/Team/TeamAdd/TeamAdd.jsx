@@ -12,7 +12,7 @@ class TeamAdd extends React.Component {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
-    this.state = { error: '' };
+    this.state = { error: null };
   }
 
   async handleSubmit(values) {

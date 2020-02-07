@@ -10,8 +10,7 @@ function FormSubmitError({ error }) {
     if (!error) {
       return;
     }
-    // check for field-specific errors from API
-    if (error.response?.data && typeof error.response.data === 'object') {
+    if (error?.response?.data && typeof error.response.data === 'object') {
       const errorMessages = error.response.data;
       setErrors(errorMessages);
       if (errorMessages.__all__) {

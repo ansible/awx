@@ -9,6 +9,7 @@ jest.mock('@api');
 
 describe('<TeamAdd />', () => {
   test('handleSubmit should post to api', async () => {
+    TeamsAPI.create.mockResolvedValueOnce({ data: {} });
     const wrapper = mountWithContexts(<TeamAdd />);
     const updatedTeamData = {
       name: 'new name',

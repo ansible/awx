@@ -14,6 +14,7 @@ describe('<OrganizationAdd />', () => {
       description: 'new description',
       custom_virtualenv: 'Buzz',
     };
+    OrganizationsAPI.create.mockResolvedValueOnce({ data: {} });
     await act(async () => {
       const wrapper = mountWithContexts(<OrganizationAdd />);
       wrapper.find('OrganizationForm').prop('onSubmit')(updatedOrgData, [], []);

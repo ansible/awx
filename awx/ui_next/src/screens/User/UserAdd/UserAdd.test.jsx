@@ -13,6 +13,7 @@ describe('<UserAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserAdd />);
     });
+    UsersAPI.create.mockResolvedValueOnce({ data: {} });
     const updatedUserData = {
       username: 'sysadmin',
       email: 'sysadmin@ansible.com',

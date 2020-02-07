@@ -30,6 +30,12 @@ describe('<HostAdd />', () => {
   });
 
   test('handleSubmit should post to api', async () => {
+    HostsAPI.create.mockResolvedValueOnce({
+      data: {
+        ...hostData,
+        id: 5,
+      },
+    });
     await act(async () => {
       wrapper.find('HostForm').prop('handleSubmit')(hostData);
     });
