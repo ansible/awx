@@ -14,6 +14,8 @@ RUN dnf -y update && \
   ansible \
   bubblewrap \
   curl \
+  diffutils \
+  dnf-utils \
   gcc \
   gcc-c++ \
   gettext \
@@ -48,11 +50,11 @@ RUN dnf -y update && \
   tmux \
   unzip \
   vim-minimal \
+  which \
   xmlsec1 \
   xmlsec1-devel \
   xmlsec1-openssl \
-  xmlsec1-openssl-devel \
-  dnf-utils
+  xmlsec1-openssl-devel
 
 # UI tests only, do not put in installer/roles/image_build/templates/Dockerfile.j2
 RUN dnf -y install \
