@@ -4,8 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { Formik, Field } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { QuestionCircleIcon } from '@patternfly/react-icons';
-import { Tooltip, Form, FormGroup } from '@patternfly/react-core';
+import { Form, FormGroup } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
 import { ConfigContext } from '@contexts/Config';
@@ -113,21 +112,12 @@ function OrganizationForm({ organization, i18n, me, onCancel, onSubmit }) {
               id="org-max_hosts"
               name="max_hosts"
               type="number"
-              label={
-                <>
-                  {i18n._(t`Max Hosts`)}{' '}
-                  <Tooltip
-                    position="right"
-                    content={i18n._(
-                      t`The maximum number of hosts allowed to be managed by this organization.
+              label={i18n._(t`Max Hosts`)}
+              tooltip={i18n._(
+                t`The maximum number of hosts allowed to be managed by this organization.
                       Value defaults to 0 which means no limit. Refer to the Ansible
                       documentation for more details.`
-                    )}
-                  >
-                    <QuestionCircleIcon />
-                  </Tooltip>
-                </>
-              }
+              )}
               validate={minMaxValue(0, Number.MAX_SAFE_INTEGER, i18n)}
               me={me || {}}
               isDisabled={!me.is_superuser}
