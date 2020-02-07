@@ -4,6 +4,7 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.six import PY2
+from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
@@ -137,13 +138,17 @@ class TowerModule(AnsibleModule):
         if not access(config_path, R_OK):
             raise ConfigFileException("The specified config file can not be read")
 
-        # If the config has not sections we will get a MissingSectionHeaderError
+        # If the config has no sections we will get a MissingSectionHeaderError
         try:
             config.read(config_path)
         except MissingSectionHeaderError:
-            self.warn("No general section in file, auto-appending")
             with open(config_path, 'r') as f:
-                config.read_string('[general]\n%s' % f.read())
+                config_string = '[general]\n%s' % f.read()
+            placeholder_file = StringIO(config_string)
+            if hasattr(config, 'read_file'):
+                config.read_file(placeholder_file)
+            else:
+                config.readfp(placeholder_file)
 
         for honorred_setting in self.honorred_settings:
             try:
