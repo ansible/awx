@@ -2,6 +2,24 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 9.2.0 (Date TBD)
+- Added the ability to configure the convergence behavior of workflow nodes https://github.com/ansible/awx/issues/3054
+- AWX now allows for a configurable global limit for fork count (per-job run).  The default maximum is 200. https://github.com/ansible/awx/pull/5604
+- Added the ability to specify AZURE_PUBLIC_CLOUD (for e.g., Azure Government KeyVault support) for the Azure credential plugin https://github.com/ansible/awx/issues/5138
+- Added support for several additional parameters for Satellite dynamic inventory https://github.com/ansible/awx/pull/5598
+- Added a new field to jobs for tracking the date/time a job is cancelled https://github.com/ansible/awx/pull/5610
+- Made a series of additional optimizations to the callback receiver to further improve stdout write speed for running playbooks https://github.com/ansible/awx/pull/5677 https://github.com/ansible/awx/pull/5739
+- Optimized AWX's job dependency/scheduling code to drastically improve processing time in scenarios where there are many pending jobs scheduled simultaneously https://github.com/ansible/awx/issues/5154
+- Fixed a bug which could cause SCM authentication details (basic auth passwords) to be reported to external loggers in certain failure scenarios (e.g., when a git clone fails and ansible itself prints an error message to stdout) https://github.com/ansible/awx/pull/5812
+- Fixed a k8s installer bug that caused installs to fail in certain situations https://github.com/ansible/awx/issues/5574
+- Fixed a number of issues that caused analytics gathering and reporting to run more often than necessary https://github.com/ansible/awx/pull/5721
+- Fixed a bug in the AWX CLI that prevented JSON-type settings from saving properly https://github.com/ansible/awx/issues/5528
+- Improved support for fetching custom virtualenv dependencies when AWX is installed behind a proxy https://github.com/ansible/awx/pull/5805
+- Updated the bundled version of openstacksdk to address a known issue https://github.com/ansible/awx/issues/5821
+- Updated the bundled vmware_inventory plugin to the latest version to address a bug https://github.com/ansible/awx/pull/5668
+- Fixed a bug that can cause inventory updates to fail to properly save their output when run within a workflow https://github.com/ansible/awx/pull/5666
+- Removed a number of pre-computed fields from the Host and Group models to improve AWX performance.  As part of this change, inventory group UIs throughout the interface no longer display status icons https://github.com/ansible/awx/pull/5448 
+
 ## 9.1.1 (Jan 14, 2020)
 
 - Fixed a bug that caused database migrations on Kubernetes installs to hang https://github.com/ansible/awx/pull/5579
