@@ -93,6 +93,7 @@
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com
         helm repo update
         helm upgrade {{ postgresql_service_name }} \
           --install \
