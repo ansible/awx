@@ -131,7 +131,6 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg=cfe)
 
     def load_config(self, config_path):
-        config = ConfigParser()
         # Validate the config file is an actual file
         if not isfile(config_path):
             raise ConfigFileException('The specified config file does not exist')
@@ -139,27 +138,54 @@ class TowerModule(AnsibleModule):
         if not access(config_path, R_OK):
             raise ConfigFileException("The specified config file can not be read")
 
-        # If the config has no sections we will get a MissingSectionHeaderError
-        try:
-            config.read(config_path)
-        except MissingSectionHeaderError:
-            with open(config_path, 'r') as f:
-                config_string = '[general]\n%s' % f.read()
-            placeholder_file = StringIO(config_string)
-            if hasattr(config, 'read_file'):
-                config.read_file(placeholder_file)
-            else:
-                config.readfp(placeholder_file)
+        # Read in the file contents:
+        with open(config_path, 'r') as f:
+            config_string = f.read()
 
-        for honorred_setting in self.honorred_settings:
+        # First try to yaml load the content (which will also load json)
+        try:
+            config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
+            # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
+            assert type(config_data) is dict
+
+        except(AttributeError, yaml.YAMLError, AssertionError):
+            # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
+            if '[general]' not in config_string:
+                config_string = '[general]{0}'.format(config_string)
+
+            config = ConfigParser()
+
             try:
-                setattr(self, honorred_setting, config.get('general', honorred_setting))
-                if honorred_setting == 'verify_ssl':
-                    setattr(self, honorred_setting, strtobool(config.get('general', honorred_setting)))
+                placeholder_file = StringIO(config_string)
+                # py2 ConfigParser has readfp, that has been depricated in favor of read_file in py3
+                # This if removes the deprication warning
+                if hasattr(config, 'read_file'):
+                    config.read_file(placeholder_file)
                 else:
-                    setattr(self, honorred_setting, config.get('general', honorred_setting))
-            except (NoOptionError):
-                pass
+                    config.readfp(placeholder_file)
+
+                # If we made it here then we have values from reading the ini file, so lets pull them out into a dict
+                config_data = {}
+                for honorred_setting in self.honorred_settings:
+                    try:
+                        config_data[honorred_setting] = config.get('general', honorred_setting)
+                    except (NoOptionError):
+                        pass
+
+            except Exception as e:
+                raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
+
+        except Exception as e:
+            raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e))
+
+        # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
+        for honorred_setting in self.honorred_settings:
+            if honorred_setting in config_data:
+                # Veriffy SSL must be a boolean
+                if honorred_setting == 'verify_ssl':
+                    setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
+                else:
+                    setattr(self, honorred_setting, config_data[honorred_setting])
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
