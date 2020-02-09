@@ -79,22 +79,35 @@
 
 - name: Deploy PostgreSQL (Kubernetes)
   block:
-    - name: Template PostgreSQL Deployment (Kubernetes)
-      set_fact:
-        pg_values: "{{ lookup('template', 'postgresql-values.yml.j2') }}"
+    - name: Create Temporary Values File (Kubernetes)
+      tempfile:
+        state: file
+        suffix: .yml
+      register: values_file
+
+    - name: Populate Temporary Values File (Kubernetes)
+      template:
+        src: postgresql-values.yml.j2
+        dest: "{{ values_file.path }}"
       no_log: true
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
-        helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
-        echo {{ pg_values | quote }} | helm upgrade {{ postgresql_service_name }} --install \
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo update
+        helm upgrade {{ postgresql_service_name }} \
+          --install \
           --namespace {{ kubernetes_namespace }} \
-          --version="6.2.1" \
-          --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
-          --values - \
+          --version="8.3.0" \
+          --values {{ values_file.path }} \
           stable/postgresql
       register: kubernetes_pg_activate
       no_log: true
+
+    - name: Remove tempfile
+      file:
+        path: "{{ values_file.path }}"
+        state: absent
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
