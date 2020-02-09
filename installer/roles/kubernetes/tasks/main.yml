@@ -194,8 +194,8 @@
     "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"
   with_items:
     - 'configmap'
-    - 'deployment'
     - 'secret'
+    - 'deployment'
   no_log: true
 
 - name: Apply Deployment
@@ -203,8 +203,8 @@
     echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
   with_items:
     - "{{ configmap }}"
-    - "{{ deployment }}"
     - "{{ secret }}"
+    - "{{ deployment }}"
   no_log: true
 
 - name: Delete any existing management pod
