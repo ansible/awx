@@ -173,25 +173,27 @@ virtualenv_awx:
 	fi
 
 # --ignore-install flag is not used because *.txt files should specify exact versions
-requirements_ansible: virtualenv_ansible
+requirements_ansible: virtualenv_ansible requirements_global_site_cleanup
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
-requirements_ansible_py3: virtualenv_ansible_py3
+requirements_ansible_py3: virtualenv_ansible_py3 requirements_global_site_cleanup
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) -r /dev/stdin ; \
 	else \
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+
+requirements_global_site_cleanup:
+	# Older versions of virtualenv have bugs, so we do this, which has the same effect as using --system-site-packages flag on venv creation
+	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt || true
+	# If the above file doesn't exist, it means we're probably on a newer (>version 20) virtualenv
+	echo "include-system-site-packages = true" >> $(VENV_BASE)/ansible/pyvenv.cfg
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
