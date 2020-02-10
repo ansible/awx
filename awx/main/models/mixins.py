@@ -498,6 +498,8 @@ class WebhookTemplateMixin(models.Model):
     SERVICES = [
         ('github', "GitHub"),
         ('gitlab', "GitLab"),
+        ('gitea', "Gitea"),
+
     ]
 
     webhook_service = models.CharField(
@@ -577,6 +579,7 @@ class WebhookMixin(models.Model):
         service_header = {
             'github': ('Authorization', 'token {}'),
             'gitlab': ('PRIVATE-TOKEN', '{}'),
+            'gitea': ('Authorization', 'token {}'),
         }
         service_statuses = {
             'github': {
@@ -594,6 +597,14 @@ class WebhookMixin(models.Model):
                 'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
                 'canceled': 'canceled',
             },
+            'gitea': {
+                'pending': 'pending',
+                'successful': 'success',
+                'failed': 'failure',
+                'error': 'error',
+                'canceled': 'failure', # Gitea doesn't have a 'cancelled' status :(
+            },
+
         }
 
         statuses = service_statuses[self.webhook_service]

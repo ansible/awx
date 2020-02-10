@@ -82,6 +82,7 @@ def test_default_cred_types():
         'cloudforms',
         'conjur',
         'gce',
+        'gitea_token',
         'github_token',
         'gitlab_token',
         'hashivault_kv',

@@ -1010,6 +1010,23 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='gitea_token',
+    kind='token',
+    name=ugettext_noop('Gitea Personal Access Token'),
+    managed_by_tower=True,
+    inputs={
+        'fields': [{
+            'id': 'token',
+            'label': ugettext_noop('Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('This token needs to come from your profile settings in Gitea')
+        }],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=ugettext_noop('Insights'),

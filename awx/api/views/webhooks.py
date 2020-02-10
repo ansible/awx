@@ -1,4 +1,4 @@
-from hashlib import sha1
+from hashlib import sha1, sha256
 import hmac
 import logging
 import urllib.parse
@@ -244,3 +244,54 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
         # analysis by attackers.
         if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
             raise PermissionDenied
+
+
+class GiteaWebhookReceiver(WebhookReceiverBase):
+    service = 'gitea'
+
+    ref_keys = {
+        'pull_request': 'pull_request.head.sha',
+        'pull_request_review': 'pull_request.head.sha',
+        'pull_request_review_comment': 'pull_request.head.sha',
+        'push': 'after',
+        'release': 'release.tag_name',
+        'create': 'ref',
+    }
+
+    def get_event_type(self):
+        return self.request.META.get('HTTP_X_GITEA_EVENT')
+
+    def get_event_guid(self):
+        return self.request.META.get('HTTP_X_GITEA_DELIVERY')
+
+    def get_event_status_api(self):
+        if self.get_event_type() != 'pull_request':
+            return
+        repository = self.request.data.get('repository', {})
+        repo_url = repository.get('html_url')
+        if not repo_url:
+            return
+
+        parsed = urllib.parse.urlparse(repo_url)
+
+        return "{}://{}/api/v1/repos/{}/statuses/{}".format(
+            parsed.scheme, parsed.netloc, repository['full_name'], self.get_event_ref())
+
+    def get_signature(self):
+        signature = self.request.META.get('HTTP_X_GITEA_SIGNATURE')
+        if not signature:
+            logger.debug("Expected signature missing from header key HTTP_X_GITEA_SIGNATURE")
+            raise PermissionDenied
+        return force_bytes(signature)
+
+    # Gitea uses sha256
+    def check_signature(self, obj):
+        if not obj.webhook_key:
+            raise PermissionDenied
+
+        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha256)
+        logger.debug("header signature: %s", self.get_signature())
+        logger.debug("calculated signature: %s", force_bytes(mac.hexdigest()))
+        if not hmac.compare_digest(force_bytes(mac.hexdigest()), self.get_signature()):
+            raise PermissionDenied
+
