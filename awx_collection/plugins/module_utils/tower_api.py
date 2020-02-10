@@ -184,7 +184,10 @@ class TowerModule(AnsibleModule):
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
-                    setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
+                    if type(config_data[honorred_setting]) is str:
+                        setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
+                    else:
+                        setattr(self, honorred_setting, bool(config_data[honorred_setting]))
                 else:
                     setattr(self, honorred_setting, config_data[honorred_setting])
 
