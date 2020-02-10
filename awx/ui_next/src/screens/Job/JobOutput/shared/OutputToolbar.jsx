@@ -40,18 +40,19 @@ const Wrapper = styled.div`
   font-size: 14px;
 `;
 
-function toHHMMSS(s) {
-  function pad(n) {
+const toHHMMSS = elapsed => {
+  const pad = n => {
     return `00${n}`.slice(-2);
-  }
+  };
 
-  const secs = s % 60;
-  s = (s - secs) / 60;
-  const mins = s % 60;
-  const hrs = (s - mins) / 60;
+  const date = new Date();
+  date.setTime(elapsed * 1000);
+  const hrs = date.getUTCHours();
+  const mins = date.getUTCMinutes();
+  const secs = date.getUTCSeconds();
 
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
-}
+};
 
 const OUTPUT_NO_COUNT_JOB_TYPES = [
   'ad_hoc_command',

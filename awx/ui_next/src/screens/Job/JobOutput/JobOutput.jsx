@@ -175,7 +175,7 @@ class JobOutput extends Component {
     try {
       switch (job.type) {
         case 'project_update':
-          await ProjectUpdatesAPI.destroy(job.idd);
+          await ProjectUpdatesAPI.destroy(job.id);
           break;
         case 'system_job':
           await SystemJobsAPI.destroy(job.id);
