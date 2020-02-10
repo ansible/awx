@@ -1,6 +1,7 @@
 from awxkit.api.resources import resources
 from awxkit.utils import random_title, update_payload
 from awxkit.api.mixins import HasStatus
+from awxkit.config import config
 from . import base
 from . import page
 
@@ -61,7 +62,22 @@ class UnifiedJobTemplate(HasStatus, base.Base):
 
         update_payload(payload, self.optional_schedule_fields, kwargs)
 
-        return self.related.schedules.post(payload)
+        schedule = self.related.schedules.post(payload)
+        # register schedule in temporary dependency store as means of
+        # getting its teardown method to run on cleanup
+        if not hasattr(self, '_schedules_store'):
+            self._schedules_store = set()
+        if schedule not in self._schedules_store:
+            self._schedules_store.add(schedule)
+        return schedule
+
+    def silent_delete(self):
+        if hasattr(self, '_schedules_store') and config.prevent_teardown:
+            # when prevent_teardown is off, we rely on cascade deletes
+            # in this case, looping is needed to turn them off
+            for schedule in self._schedules_store:
+                schedule.silent_delete()
+        return super(UnifiedJobTemplate, self).silent_delete()
 
     @property
     def is_successful(self):

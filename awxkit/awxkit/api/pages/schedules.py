@@ -2,13 +2,23 @@ from awxkit.api.pages import UnifiedJob
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 from awxkit.utils import suppress
+from awxkit.config import config
 from . import page
 from . import base
 
 
 class Schedule(UnifiedJob):
 
-    pass
+    def silent_delete(self):
+        """If we are told to prevent_teardown of schedules, then keep them
+        but do not leave them activated, or system will be swamped quickly"""
+        try:
+            if not config.prevent_teardown:
+                return self.delete()
+            else:
+                self.patch(enabled=False)
+        except (exc.NoContent, exc.NotFound, exc.Forbidden):
+            pass
 
 
 page.register_page([resources.schedule,
