@@ -251,8 +251,8 @@ Each Tower instance is made up of several different services working collaborati
 
 * **HTTP Services** - This includes the Tower application itself as well as external web services.
 * **Callback Receiver** - Receives job events that result from running Ansible jobs.
-* **Celery** - The worker queue that processes and runs all jobs.
-* **RabbitMQ** - A Message Broker, this is used as a signaling mechanism for Celery as well as any event data propagated to the application.
+* **Dispatcher** - The worker queue that processes and runs all jobs.
+* **RabbitMQ** - A Message Broker, this is used as a signaling mechanism for the dispatcher as well as any event data propagated to the application.
 * **Memcached** - A local caching service for the instance it lives on.
 
 Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.

@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 bcast = 'tower_broadcast_all'
                 queues = [
                     Queue(q, Exchange(q), routing_key=q)
-                    for q in (settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()])
+                    for q in (settings.BROKER_DEFAULT_QUEUE, get_local_queuename())
                 ]
                 queues.append(
                     Queue(

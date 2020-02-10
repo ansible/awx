@@ -279,7 +279,7 @@ This task allows the user to turn on a global profiler in their system, so that 
 
 #### Gather Analytics
 
-The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever instance it is invoked on. When these functions are called by Celery beat (currently at midnight local time), it is run on one `execution_node` by the Python in the AWX virtualenv.
+The analytics collection `gather()` and `ship()` functions are called by an `awx-manage gather_analytics --ship` command, which runs on whichever instance it is invoked on. When these functions are called periodically (currently at midnight local time), it is run on one `execution_node` by the Python in the AWX virtualenv.
 
 For more details about analytics, please visit the [Usability Analytics and Data Collection](https://docs.ansible.com/ansible-tower/latest/html/administration/usability_data_collection.html) page.
 

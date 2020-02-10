@@ -422,8 +422,8 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-CELERY_DEFAULT_QUEUE = 'awx_private_queue'
-CELERYBEAT_SCHEDULE = {
+BROKER_DEFAULT_QUEUE = 'awx_private_queue'
+BROKER_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
@@ -450,14 +450,6 @@ CELERYBEAT_SCHEDULE = {
     },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
-
-AWX_CELERY_QUEUES_STATIC = [
-    CELERY_DEFAULT_QUEUE,
-]
-
-AWX_CELERY_BCAST_QUEUES_STATIC = [
-    'tower_broadcast_all',
-]
 
 ASGI_AMQP = {
     'INIT_FUNC': 'awx.prepare_env',
@@ -1053,10 +1045,6 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'dispatcher',
         },
-        'celery.beat': {
-            'class':'logging.StreamHandler',
-            'level': 'ERROR'
-        },  # don't log every celerybeat wakeup
         'inventory_import': {
             'level': 'DEBUG',
             'class':'logging.StreamHandler',
@@ -1104,10 +1092,6 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['console', 'file', 'tower_warnings'],
-            'level': 'WARNING',
-        },
-        'celery': {  # for celerybeat connection warnings
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },

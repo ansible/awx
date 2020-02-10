@@ -1444,7 +1444,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return r
 
     def get_queue_name(self):
-        return self.controller_node or self.execution_node or settings.CELERY_DEFAULT_QUEUE
+        return self.controller_node or self.execution_node or settings.BROKER_DEFAULT_QUEUE
 
     def is_isolated(self):
         return bool(self.controller_node)

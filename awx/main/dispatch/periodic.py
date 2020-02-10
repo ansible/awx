@@ -45,7 +45,7 @@ class Scheduler(Scheduler):
 
 def run_continuously():
     scheduler = Scheduler()
-    for task in settings.CELERYBEAT_SCHEDULE.values():
+    for task in settings.BROKER_SCHEDULE.values():
         apply_async = TaskWorker.resolve_callable(task['task']).apply_async
         total_seconds = task['schedule'].total_seconds()
         scheduler.every(total_seconds).seconds.do(apply_async)

@@ -74,7 +74,7 @@ class task:
                 queue = (
                     queue or
                     getattr(cls.queue, 'im_func', cls.queue) or
-                    settings.CELERY_DEFAULT_QUEUE
+                    settings.BROKER_DEFAULT_QUEUE
                 )
                 obj = {
                     'uuid': task_id,

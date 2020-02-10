@@ -52,9 +52,6 @@ COLOR_LOGS = True
 # Pipe management playbook output to console
 LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
-# celery is annoyingly loud when docker containers start
-LOGGING['loggers'].pop('celery', None)  # noqa
-
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)
@@ -162,7 +159,7 @@ except ImportError:
     sys.exit(1)
 
 
-CELERYBEAT_SCHEDULE.update({  # noqa
+BROKER_SCHEDULE.update({  # noqa
     'isolated_heartbeat': {
         'task': 'awx.main.tasks.awx_isolated_heartbeat',
         'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),  # noqa
