@@ -41,17 +41,16 @@ const Wrapper = styled.div`
 `;
 
 const toHHMMSS = elapsed => {
-  const pad = n => {
-    return `00${n}`.slice(-2);
-  };
+  const sec_num = parseInt(elapsed, 10);
+  const hours = Math.floor(sec_num / 3600);
+  const minutes = Math.floor(sec_num / 60) % 60;
+  const seconds = sec_num % 60;
 
-  const date = new Date();
-  date.setTime(elapsed * 1000);
-  const hrs = date.getUTCHours();
-  const mins = date.getUTCMinutes();
-  const secs = date.getUTCSeconds();
+  const stampHours = hours < 10 ? `0${hours}` : hours;
+  const stampMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  const stampSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
-  return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  return `${stampHours}:${stampMinutes}:${stampSeconds}`;
 };
 
 const OUTPUT_NO_COUNT_JOB_TYPES = [
@@ -67,7 +66,7 @@ const OutputToolbar = ({ i18n, job, onDelete }) => {
   const taskCount = job?.playbook_counts?.task_count;
   const darkCount = job?.host_status_counts?.dark;
   const failureCount = job?.host_status_counts?.failures;
-  const totalHostCount = Object.keys(job?.host_status_counts).reduce(
+  const totalHostCount = Object.keys(job?.host_status_counts || {}).reduce(
     (sum, key) => sum + job?.host_status_counts[key],
     0
   );

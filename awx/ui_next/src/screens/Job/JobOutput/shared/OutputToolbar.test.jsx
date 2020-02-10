@@ -67,6 +67,22 @@ describe('<OutputToolbar />', () => {
     expect(wrapper.find('div[aria-label="Failed Host Count"]').length).toBe(0);
   });
 
+  test('should display elapsed time as HH:MM:SS', () => {
+    wrapper = mountWithContexts(
+      <OutputToolbar
+        job={{
+          ...mockJobData,
+          elapsed: 274265,
+        }}
+        onDelete={() => {}}
+      />
+    );
+
+    expect(wrapper.find('div[aria-label="Elapsed Time"] Badge').text()).toBe(
+      '76:11:05'
+    );
+  });
+
   test('should hide relaunch button based on user capabilities', () => {
     expect(wrapper.find('LaunchButton').length).toBe(1);
     wrapper = mountWithContexts(
