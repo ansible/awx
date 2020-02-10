@@ -81,7 +81,8 @@ from awx.main.utils import (
     getattrd,
     get_pk_from_dict,
     schedule_task_manager,
-    ignore_inventory_computed_fields
+    ignore_inventory_computed_fields,
+    set_environ
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
@@ -1606,7 +1607,8 @@ class HostInsights(GenericAPIView):
 
     def _call_insights_api(self, url, session, headers):
         try:
-            res = session.get(url, headers=headers, timeout=120)
+            with set_environ(**settings.AWX_TASK_ENV):
+                res = session.get(url, headers=headers, timeout=120)
         except requests.exceptions.SSLError:
             raise BadGateway(_('SSLError while trying to connect to {}').format(url))
         except requests.exceptions.Timeout:
