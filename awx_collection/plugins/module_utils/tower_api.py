@@ -8,7 +8,7 @@ from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
-from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError, MissingSectionHeaderError
+from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from socket import gethostbyname
 import re
 from json import loads, dumps
@@ -146,7 +146,8 @@ class TowerModule(AnsibleModule):
         try:
             config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
             # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-            assert type(config_data) is dict
+            if type(config_data) is not dict:
+                raise AssertionError("The yaml config file is not properly formatted as a dict.")
 
         except(AttributeError, yaml.YAMLError, AssertionError):
             # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
@@ -157,8 +158,8 @@ class TowerModule(AnsibleModule):
 
             try:
                 placeholder_file = StringIO(config_string)
-                # py2 ConfigParser has readfp, that has been depricated in favor of read_file in py3
-                # This if removes the deprication warning
+                # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
+                # This "if" removes the deprecation warning
                 if hasattr(config, 'read_file'):
                     config.read_file(placeholder_file)
                 else:
