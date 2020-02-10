@@ -13,8 +13,6 @@ from uuid import UUID
 from queue import Empty as QueueEmpty
 
 from django import db
-from kombu import Producer
-from kombu.mixins import ConsumerMixin
 from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
@@ -44,11 +42,10 @@ class WorkerSignalHandler:
 
 
 class AWXConsumerBase(object):
-    def __init__(self, name, connection, worker, queues=[], pool=None):
+    def __init__(self, name, worker, queues=[], pool=None):
         self.should_stop = False
 
         self.name = name
-        self.connection = connection
         self.total_messages = 0
         self.queues = queues
         self.worker = worker
@@ -110,7 +107,7 @@ class AWXConsumerBase(object):
         # Child should implement other things here
 
     def stop(self, signum, frame):
-        self.should_stop = True  # this makes the kombu mixin stop consuming
+        self.should_stop = True
         logger.warn('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
@@ -142,6 +139,8 @@ class AWXConsumerPG(AWXConsumerBase):
                         conn.listen(queue)
                     for e in conn.events():
                         self.process_task(json.loads(e.payload))
+                    if self.should_stop:
+                        return
             except psycopg2.InterfaceError:
                 logger.warn("Stale Postgres message bus connection, reconnecting")
                 continue

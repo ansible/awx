@@ -10,8 +10,6 @@ import redis
 # Django
 from django.conf import settings
 
-# Kombu
-from kombu import Exchange, Producer, Connection
 
 __all__ = ['CallbackQueueDispatcher']
 

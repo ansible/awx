@@ -8,7 +8,7 @@ import os
 import time
 
 from django.conf import settings
-from kombu.utils.url import parse_url
+import redis
 
 # Mock
 from unittest import mock
@@ -390,11 +390,10 @@ def test_saml_x509cert_validation(patch, get, admin, headers):
 
 @pytest.mark.django_db
 def test_broker_url_with_special_characters():
-    settings.BROKER_URL = 'amqp://guest:a@ns:ibl3#@rabbitmq:5672//'
-    url = parse_url(settings.BROKER_URL)
-    assert url['transport'] == 'amqp'
-    assert url['hostname'] == 'rabbitmq'
-    assert url['port'] == 5672
-    assert url['userid'] == 'guest'
-    assert url['password'] == 'a@ns:ibl3#'
-    assert url['virtual_host'] == '/'
+    settings.BROKER_URL = 'redis://unused:a@ns:ibl3#@redis-fancy:5672/?db=mydb'
+    cli = redis.from_url(settings.BROKER_URL)
+    assert cli.host == 'redis-fancy'
+    assert cli.port == 5672
+    # Note: There are no usernames in redis
+    assert cli.password == 'a@ns:ibl3#'
+    assert cli.db == 'mydb'

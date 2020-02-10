@@ -5,7 +5,6 @@ import random
 import json
 
 from awx.main.dispatch import get_local_queuename
-from kombu import Queue, Exchange, Producer, Consumer, Connection
 
 from . import pg_bus_conn
 
