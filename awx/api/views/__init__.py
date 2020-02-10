@@ -171,7 +171,7 @@ from awx.api.views.root import (  # noqa
     ApiV2SubscriptionView,
     ApiV2AttachView,
 )
-from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
+from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver, GiteaWebhookReceiver  # noqa
 
 
 logger = logging.getLogger('awx.api.views')
