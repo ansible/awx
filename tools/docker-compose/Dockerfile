@@ -78,7 +78,7 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/n
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 RUN chmod 640 /etc/nginx/nginx.{csr,key,crt}
 
-RUN python3 -m ensurepip && pip3 install virtualenv flake8
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" flake8
 RUN pip3 install supervisor
 
 ADD Makefile /tmp/Makefile
