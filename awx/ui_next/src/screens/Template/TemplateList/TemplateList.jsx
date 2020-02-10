@@ -199,8 +199,24 @@ function TemplatesList({ i18n }) {
           ]}
           toolbarSortColumns={[
             {
+              name: i18n._(t`Inventory`),
+              key: 'job_template__inventory__id',
+            },
+            {
+              name: i18n._(t`Last Job Run`),
+              key: 'last_job_run',
+            },
+            {
+              name: i18n._(t`Modified`),
+              key: 'modified',
+            },
+            {
               name: i18n._(t`Name`),
               key: 'name',
+            },
+            {
+              name: i18n._(t`Project`),
+              key: 'jobtemplate__project__id',
             },
             {
               name: i18n._(t`Type`),
