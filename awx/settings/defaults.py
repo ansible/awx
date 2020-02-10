@@ -434,10 +434,6 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=60),
         'options': {'expires': 50,}
     },
-    'purge_stdout_files': {
-        'task': 'awx.main.tasks.purge_old_stdout_files',
-        'schedule': timedelta(days=7)
-    },
     'gather_analytics': {
         'task': 'awx.main.tasks.gather_analytics',
         'schedule': timedelta(minutes=5)
@@ -454,7 +450,6 @@ CELERYBEAT_SCHEDULE = {
     },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
-AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 
 AWX_CELERY_QUEUES_STATIC = [
     CELERY_DEFAULT_QUEUE,
