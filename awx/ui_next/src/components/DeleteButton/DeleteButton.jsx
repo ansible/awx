@@ -5,17 +5,24 @@ import { Button } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import { CardActionsRow } from '@components/Card';
 
-function DeleteButton({ onConfirm, modalTitle, name, i18n }) {
+function DeleteButton({
+  onConfirm,
+  modalTitle,
+  name,
+  i18n,
+  variant,
+  children,
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <Button
-        variant="danger"
+        variant={variant || 'danger'}
         aria-label={i18n._(t`Delete`)}
         onClick={() => setIsOpen(true)}
       >
-        {i18n._(t`Delete`)}
+        {children || i18n._(t`Delete`)}
       </Button>
       <AlertModal
         isOpen={isOpen}
