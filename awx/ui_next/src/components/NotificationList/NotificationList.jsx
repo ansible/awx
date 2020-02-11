@@ -164,7 +164,7 @@ class NotificationList extends Component {
       }
       this.setState(stateUpdateFunction);
     } catch (err) {
-      this.setState({ toggleError: true });
+      this.setState({ toggleError: err });
     } finally {
       this.setState({ toggleLoading: false });
     }

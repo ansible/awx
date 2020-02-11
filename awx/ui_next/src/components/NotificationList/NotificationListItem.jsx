@@ -8,8 +8,8 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell as PFDataListCell,
+  Switch,
 } from '@patternfly/react-core';
-import Switch from '@components/Switch';
 
 import styled from 'styled-components';
 

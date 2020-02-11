@@ -6,6 +6,7 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
+  Switch,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
@@ -16,7 +17,6 @@ import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
 import { Sparkline } from '@components/Sparkline';
-import Switch from '@components/Switch';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Host } from '@types';
 

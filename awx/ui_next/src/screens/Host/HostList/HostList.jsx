@@ -34,7 +34,7 @@ class HostsList extends Component {
       selected: [],
       itemCount: 0,
       actions: null,
-      toggleError: false,
+      toggleError: null,
       toggleLoading: null,
     };
 
@@ -83,7 +83,7 @@ class HostsList extends Component {
   }
 
   handleHostToggleErrorClose() {
-    this.setState({ toggleError: false });
+    this.setState({ toggleError: null });
   }
 
   async handleHostDelete() {
@@ -112,7 +112,7 @@ class HostsList extends Component {
         ),
       });
     } catch (err) {
-      this.setState({ toggleError: true });
+      this.setState({ toggleError: err });
     } finally {
       this.setState({ toggleLoading: null });
     }
