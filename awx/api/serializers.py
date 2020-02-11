@@ -132,7 +132,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'insights_credential': DEFAULT_SUMMARY_FIELDS,
     'source_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'target_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
-    'webhook_credential': DEFAULT_SUMMARY_FIELDS,
+    'webhook_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
     'credential_type': DEFAULT_SUMMARY_FIELDS,
 }
