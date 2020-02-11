@@ -181,7 +181,7 @@ requirements_ansible: virtualenv_ansible
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	sed -i "s/\(include-system-site-packages\) = false/\1 = true/" ${VENV_BASE}/ansible/pyvenv.cfg
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -191,7 +191,7 @@ requirements_ansible_py3: virtualenv_ansible_py3
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	sed -i "s/\(include-system-site-packages\) = false/\1 = true/" ${VENV_BASE}/ansible/pyvenv.cfg
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
