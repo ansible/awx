@@ -2,13 +2,14 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 9.2.0 (Date TBD)
+## 9.2.0 (Feb 12, 2020)
 - Added the ability to configure the convergence behavior of workflow nodes https://github.com/ansible/awx/issues/3054
 - AWX now allows for a configurable global limit for fork count (per-job run).  The default maximum is 200. https://github.com/ansible/awx/pull/5604
 - Added the ability to specify AZURE_PUBLIC_CLOUD (for e.g., Azure Government KeyVault support) for the Azure credential plugin https://github.com/ansible/awx/issues/5138
 - Added support for several additional parameters for Satellite dynamic inventory https://github.com/ansible/awx/pull/5598
 - Added a new field to jobs for tracking the date/time a job is cancelled https://github.com/ansible/awx/pull/5610
 - Made a series of additional optimizations to the callback receiver to further improve stdout write speed for running playbooks https://github.com/ansible/awx/pull/5677 https://github.com/ansible/awx/pull/5739
+- Updated AWX to be compatible with Helm 3.x (https://github.com/ansible/awx/pull/5776)
 - Optimized AWX's job dependency/scheduling code to drastically improve processing time in scenarios where there are many pending jobs scheduled simultaneously https://github.com/ansible/awx/issues/5154
 - Fixed a bug which could cause SCM authentication details (basic auth passwords) to be reported to external loggers in certain failure scenarios (e.g., when a git clone fails and ansible itself prints an error message to stdout) https://github.com/ansible/awx/pull/5812
 - Fixed a k8s installer bug that caused installs to fail in certain situations https://github.com/ansible/awx/issues/5574
