@@ -4,7 +4,7 @@ import sys
 
 from awxkit import api, config
 from awxkit.utils import to_str
-from awxkit.api.pages import Page
+from awxkit.api.pages import Page, TentativePage
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
@@ -201,14 +201,29 @@ class Export(CustomCommand):
         return endpoint.options().json['actions']['POST']
 
     def register_natural_key(self, asset):
+        if asset['url'] in self._natural_keys:
+            return
+
         natural_key = {'type': asset['type']}
         lookup = NATURAL_KEYS.get(asset['type'])
         if callable(lookup):
             natural_key.update(lookup(asset))
         else:
-            natural_key.update((key, asset[key]) for key in lookup or ())
+            natural_key.update((key, asset.get(key)) for key in lookup or ())
 
         self._natural_keys[asset['url']] = natural_key
+
+    def get_natural_key(self, url=None, asset=None):
+        if url is None:
+            url = asset['url']
+        if url not in self._natural_keys:
+            if asset is None:
+                # get the asset by following the url
+                raise Exception("Oops!")
+
+            self.register_natural_key(asset)
+
+        return self._natural_keys[url]
 
     def get_assets(self, endpoint, value):
         if value:
@@ -224,16 +239,6 @@ class Export(CustomCommand):
 
         return results
 
-    def get_natural_key(self, asset_url):
-        if asset_url not in self._natural_keys:
-            # FIXME:
-            # get the asset by following the url
-            # prune down the data using NATURAL_KEYS
-            # register the natural key dict
-            return {}
-
-        return self._natural_keys[asset_url]
-
     def enhance_asset(self, endpoint, asset, options):
         fields = {
             key: asset[key] for key in options
@@ -241,11 +246,18 @@ class Export(CustomCommand):
         }
 
         fk_fields = {
-            key: self.get_natural_key(asset['related'][key]) for key in options
+            key: self.get_natural_key(url=asset['related'][key]) for key in options
             if key in asset and options[key]['type'] == 'id'
         }
 
         related = {}
+        for k, v in asset['related'].items():
+            if k != 'roles':
+                continue
+            related_endpoint = TentativePage(v, endpoint.connection)
+            data = related_endpoint.get(all_pages=True).json
+            if 'results' in data:
+                related[k] = [self.get_natural_key(asset=x) for x in data['results']]
 
         related_fields = {'related': related} if related else {}
         return dict(**fields, **fk_fields, **related_fields)
