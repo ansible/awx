@@ -96,8 +96,9 @@ function OrganizationsList({ i18n }) {
           newParams
         )}`
       );
+    } else {
+      await fetchOrganizations();
     }
-    await fetchOrganizations();
   };
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;

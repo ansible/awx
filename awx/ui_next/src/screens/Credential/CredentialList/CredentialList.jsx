@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CredentialsAPI } from '@api';
@@ -11,7 +11,12 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import {
+  getQSConfig,
+  parseQueryString,
+  removeParams,
+  encodeNonDefaultQueryString,
+} from '@util/qs';
 import { CredentialListItem } from '.';
 
 const QS_CONFIG = getQSConfig('credential', {
@@ -30,6 +35,7 @@ function CredentialList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const location = useLocation();
+  const history = useHistory();
 
   const loadCredentials = async ({ search }) => {
     const params = parseQueryString(QS_CONFIG, search);
@@ -92,20 +98,23 @@ function CredentialList({ i18n }) {
       setDeletionError(error);
     }
 
+    adjustPagination();
+    setSelected([]);
+  };
+
+  const adjustPagination = () => {
     const params = parseQueryString(QS_CONFIG, location.search);
-    try {
-      const {
-        data: { count, results },
-      } = await CredentialsAPI.read(params);
-
-      setCredentials(results);
-      setCredentialCount(count);
-      setSelected([]);
-    } catch (error) {
-      setContentError(error);
+    if (params.page > 1 && selected.length === credentials.length) {
+      const newParams = removeParams(QS_CONFIG, params, { page: params.page });
+      history.push(
+        `${location.pathname}?${encodeNonDefaultQueryString(
+          QS_CONFIG,
+          newParams
+        )}`
+      );
+    } else {
+      loadCredentials(location);
     }
-
-    setHasContentLoading(false);
   };
 
   const canAdd =
