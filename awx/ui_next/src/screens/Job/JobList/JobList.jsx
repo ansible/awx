@@ -218,16 +218,28 @@ class JobList extends Component {
             ]}
             toolbarSortColumns={[
               {
-                name: i18n._(t`Name`),
-                key: 'name',
+                name: i18n._(t`Finish Time`),
+                key: 'finished',
               },
               {
                 name: i18n._(t`ID`),
                 key: 'id',
               },
               {
-                name: i18n._(t`Finished`),
-                key: 'finished',
+                name: i18n._(t`Launched By`),
+                key: 'created_by__id',
+              },
+              {
+                name: i18n._(t`Name`),
+                key: 'name',
+              },
+              {
+                name: i18n._(t`Project`),
+                key: 'unified_job_template__project__id',
+              },
+              {
+                name: i18n._(t`Start Time`),
+                key: 'started',
               },
             ]}
             renderToolbar={props => (
