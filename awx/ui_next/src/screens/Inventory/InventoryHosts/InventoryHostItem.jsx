@@ -12,7 +12,6 @@ import {
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -59,7 +58,7 @@ function InventoryHostItem(props) {
             <DataListCell key="recentJobs">
               <Sparkline jobs={recentPlaybookJobs} />
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell alignRight isFilled={false}>
               <Tooltip
                 content={i18n._(
                   t`Indicates if a host is available and should be included
@@ -69,6 +68,7 @@ function InventoryHostItem(props) {
                 position="top"
               >
                 <Switch
+                  css="display: inline-flex;"
                   id={`host-${host.id}-toggle`}
                   label={i18n._(t`On`)}
                   labelOff={i18n._(t`Off`)}
@@ -81,6 +81,8 @@ function InventoryHostItem(props) {
                   aria-label={i18n._(t`Toggle host`)}
                 />
               </Tooltip>
+            </DataListCell>,
+            <DataListCell alignRight isFilled={false}>
               {host.summary_fields.user_capabilities?.edit && (
                 <Tooltip content={i18n._(t`Edit Host`)} position="top">
                   <ListActionButton
@@ -92,7 +94,7 @@ function InventoryHostItem(props) {
                   </ListActionButton>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

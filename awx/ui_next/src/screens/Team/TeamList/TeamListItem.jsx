@@ -11,7 +11,6 @@ import {
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -60,7 +59,7 @@ class TeamListItem extends React.Component {
                   </Fragment>
                 )}
               </DataListCell>,
-              <ActionButtonCell lastcolumn="true" key="action">
+              <DataListCell alignRight isFilled={false}>
                 {team.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Team`)} position="top">
                     <ListActionButton
@@ -72,7 +71,7 @@ class TeamListItem extends React.Component {
                     </ListActionButton>
                   </Tooltip>
                 )}
-              </ActionButtonCell>,
+              </DataListCell>,
             ]}
           />
         </DataListItemRow>

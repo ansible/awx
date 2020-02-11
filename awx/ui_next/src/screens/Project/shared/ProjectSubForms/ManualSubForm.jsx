@@ -37,22 +37,22 @@ const ManualSubForm = ({
 
   return (
     <>
-      {options.length === 1 && (
-        <Alert
-          title={i18n._(t`WARNING: `)}
-          css="grid-column: 1/-1"
-          variant="warning"
-          isInline
-        >
-          {i18n._(t`
+      {/* {options.length === 1 && ( */}
+      <Alert
+        title={i18n._(t`WARNING: `)}
+        css="grid-column: 1/-1"
+        variant="warning"
+        isInline
+      >
+        {i18n._(t`
             There are no available playbook directories in ${project_base_dir}.
             Either that directory is empty, or all of the contents are already
             assigned to other projects. Create a new directory there and make
             sure the playbook files can be read by the "awx" system user,
             or have ${brandName} directly retrieve your playbooks from
             source control using the SCM Type option above.`)}
-        </Alert>
-      )}
+      </Alert>
+      {/* )} */}
       <FormField
         id="project-base-dir"
         label={i18n._(t`Project Base Path`)}

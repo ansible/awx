@@ -11,7 +11,6 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -55,7 +54,7 @@ class InventoryListItem extends React.Component {
                   ? i18n._(t`Smart Inventory`)
                   : i18n._(t`Inventory`)}
               </DataListCell>,
-              <ActionButtonCell lastcolumn="true" key="action">
+              <DataListCell alignRight isFilled={false}>
                 {inventory.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
                     <ListActionButton
@@ -71,7 +70,7 @@ class InventoryListItem extends React.Component {
                     </ListActionButton>
                   </Tooltip>
                 )}
-              </ActionButtonCell>,
+              </DataListCell>,
             ]}
           />
         </DataListItemRow>

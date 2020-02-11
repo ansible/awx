@@ -12,7 +12,6 @@ import {
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -83,7 +82,7 @@ class HostListItem extends React.Component {
                   </Fragment>
                 )}
               </DataListCell>,
-              <ActionButtonCell lastcolumn="true" key="action">
+              <DataListCell alignRight isFilled={false}>
                 <Tooltip
                   content={i18n._(
                     t`Indicates if a host is available and should be included in running jobs.  For hosts that are part of an external inventory, this may be reset by the inventory sync process.`
@@ -91,6 +90,7 @@ class HostListItem extends React.Component {
                   position="top"
                 >
                   <Switch
+                    css="display: inline-flex;"
                     id={`host-${host.id}-toggle`}
                     label={i18n._(t`On`)}
                     labelOff={i18n._(t`Off`)}
@@ -103,6 +103,8 @@ class HostListItem extends React.Component {
                     aria-label={i18n._(t`Toggle host`)}
                   />
                 </Tooltip>
+              </DataListCell>,
+              <DataListCell alignRight isFilled={false}>
                 {host.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Host`)} position="top">
                     <ListActionButton
@@ -114,7 +116,7 @@ class HostListItem extends React.Component {
                     </ListActionButton>
                   </Tooltip>
                 )}
-              </ActionButtonCell>,
+              </DataListCell>,
             ]}
           />
         </DataListItemRow>

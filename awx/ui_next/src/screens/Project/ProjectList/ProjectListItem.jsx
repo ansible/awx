@@ -11,7 +11,6 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
@@ -116,7 +115,7 @@ class ProjectListItem extends React.Component {
                   />
                 ) : null}
               </DataListCell>,
-              <ActionButtonCell lastcolumn="true" key="action">
+              <DataListCell lastcolumn="true" key="action">
                 {project.summary_fields.user_capabilities.start && (
                   <Tooltip content={i18n._(t`Sync Project`)} position="top">
                     <ProjectSyncButton projectId={project.id}>
@@ -128,6 +127,8 @@ class ProjectListItem extends React.Component {
                     </ProjectSyncButton>
                   </Tooltip>
                 )}
+              </DataListCell>,
+              <DataListCell alignRight isFilled={false}>
                 {project.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Project`)} position="top">
                     <ListActionButton
@@ -139,7 +140,7 @@ class ProjectListItem extends React.Component {
                     </ListActionButton>
                   </Tooltip>
                 )}
-              </ActionButtonCell>,
+              </DataListCell>,
             ]}
           />
         </DataListItemRow>

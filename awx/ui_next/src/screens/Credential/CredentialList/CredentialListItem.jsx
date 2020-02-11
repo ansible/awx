@@ -11,7 +11,6 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -59,7 +58,7 @@ function CredentialListItem({
             <DataListCell key="type">
               {credential.summary_fields.credential_type.name}
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell alignRight isFilled={false}>
               {canEdit && (
                 <Tooltip content={i18n._(t`Edit Credential`)} position="top">
                   <ListActionButton
@@ -71,7 +70,7 @@ function CredentialListItem({
                   </ListActionButton>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

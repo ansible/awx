@@ -4,17 +4,16 @@ import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  DataListCell,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
 import ListActionButton from '@components/ListActionButton';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
@@ -29,11 +28,7 @@ class JobListItem extends Component {
     const { i18n, job, isSelected, onSelect } = this.props;
 
     return (
-      <DataListItem
-        aria-labelledby={`check-action-${job.id}`}
-        css="--pf-c-data-list__expandable-content--BoxShadow: none;"
-        id={`${job.id}`}
-      >
+      <DataListItem aria-labelledby={`check-action-${job.id}`} id={`${job.id}`}>
         <DataListItemRow>
           <DataListCheck
             id={`select-job-${job.id}`}
@@ -44,7 +39,6 @@ class JobListItem extends Component {
           <DataListItemCells
             dataListCells={[
               <DataListCell key="divider">
-                <VerticalSeparator />
                 {job.status && <PaddedIcon status={job.status} />}
                 <span>
                   <Link
@@ -60,7 +54,7 @@ class JobListItem extends Component {
               <DataListCell key="finished">
                 {formatDateString(job.finished)}
               </DataListCell>,
-              <DataListCell lastcolumn="true" key="relaunch">
+              <DataListCell isFilled={false} alignRight key="relaunch">
                 {job.type !== 'system_job' &&
                   job.summary_fields.user_capabilities.start && (
                     <Tooltip content={i18n._(t`Relaunch Job`)} position="top">

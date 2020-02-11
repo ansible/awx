@@ -13,7 +13,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import ListActionButton from '@components/ListActionButton';
@@ -85,7 +84,7 @@ function OrganizationListItem({
                 </Badge>
               </ListGroup>
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell alignRight isFilled={false}>
               {organization.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Organization`)} position="top">
                   <ListActionButton
@@ -97,7 +96,7 @@ function OrganizationListItem({
                   </ListActionButton>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>
