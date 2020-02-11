@@ -90,7 +90,6 @@ export { addDefaultsToObject as _addDefaultsToObject };
 /**
  * Convert query param object to url query string
  * Used to encode params for interacting with the api
- * @param {object} qs config object for namespacing params, filtering defaults
  * @param {object} query param object
  * @return {string} url query string
  */
