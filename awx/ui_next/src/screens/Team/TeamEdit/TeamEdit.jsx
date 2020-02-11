@@ -34,10 +34,10 @@ function TeamEdit({ team }) {
             handleSubmit={handleSubmit}
             handleCancel={handleCancel}
             me={me || {}}
+            submitError={error}
           />
         )}
       </Config>
-      {error ? <div>error</div> : null}
     </CardBody>
   );
 }

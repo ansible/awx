@@ -66,9 +66,9 @@ function JobTemplateAdd() {
         <JobTemplateForm
           handleCancel={handleCancel}
           handleSubmit={handleSubmit}
+          submitError={formSubmitError}
         />
       </CardBody>
-      {formSubmitError ? <div>formSubmitError</div> : ''}
     </Card>
   );
 }

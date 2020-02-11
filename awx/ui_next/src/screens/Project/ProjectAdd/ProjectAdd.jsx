@@ -41,13 +41,9 @@ function ProjectAdd() {
           <ProjectForm
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
+            submitError={formSubmitError}
           />
         </CardBody>
-        {formSubmitError ? (
-          <div className="formSubmitError">formSubmitError</div>
-        ) : (
-          ''
-        )}
       </Card>
     </PageSection>
   );

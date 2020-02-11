@@ -45,8 +45,8 @@ function HostEdit({ host }) {
         host={host}
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
+        submitError={formError}
       />
-      {formError ? <div>error</div> : null}
     </CardBody>
   );
 }
@@ -55,5 +55,4 @@ HostEdit.propTypes = {
   host: PropTypes.shape().isRequired,
 };
 
-export { HostEdit as _HostEdit };
 export default HostEdit;

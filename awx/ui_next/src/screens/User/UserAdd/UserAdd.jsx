@@ -35,13 +35,12 @@ function UserAdd() {
     <PageSection>
       <Card>
         <CardBody>
-          <UserForm handleCancel={handleCancel} handleSubmit={handleSubmit} />
+          <UserForm
+            handleCancel={handleCancel}
+            handleSubmit={handleSubmit}
+            submitError={formSubmitError}
+          />
         </CardBody>
-        {formSubmitError ? (
-          <div className="formSubmitError">formSubmitError</div>
-        ) : (
-          ''
-        )}
       </Card>
     </PageSection>
   );

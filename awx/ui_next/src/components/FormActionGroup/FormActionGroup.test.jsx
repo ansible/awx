@@ -4,7 +4,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import FormActionGroup from './FormActionGroup';
 
 describe('FormActionGroup', () => {
-  test('renders the expected content', () => {
+  test('should render the expected content', () => {
     const wrapper = mountWithContexts(
       <FormActionGroup onSubmit={() => {}} onCancel={() => {}} />
     );

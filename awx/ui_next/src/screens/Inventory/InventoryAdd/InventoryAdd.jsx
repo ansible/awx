@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
@@ -69,17 +68,6 @@ function InventoryAdd() {
     }
   };
 
-  if (error) {
-    return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ContentError error={error} />
-          </CardBody>
-        </Card>
-      </PageSection>
-    );
-  }
   if (isLoading) {
     return <ContentLoading />;
   }
@@ -91,6 +79,7 @@ function InventoryAdd() {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             credentialTypeId={credentialTypeId}
+            submitError={error}
           />
         </CardBody>
       </Card>

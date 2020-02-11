@@ -33,8 +33,11 @@ function HostAdd() {
 
   return (
     <CardBody>
-      <HostForm handleSubmit={handleSubmit} handleCancel={handleCancel} />
-      {formError ? <div>error</div> : ''}
+      <HostForm
+        handleSubmit={handleSubmit}
+        handleCancel={handleCancel}
+        submitError={formError}
+      />
     </CardBody>
   );
 }

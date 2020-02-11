@@ -6,7 +6,7 @@ import { func, number, shape } from 'prop-types';
 
 import { VariablesField } from '@components/CodeMirrorInput';
 import { Form } from '@patternfly/react-core';
-import FormField from '@components/FormField';
+import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import FormRow from '@components/FormRow';
 import { required } from '@util/validators';
@@ -21,6 +21,7 @@ function InventoryForm({
   onSubmit,
   instanceGroups,
   credentialTypeId,
+  submitError,
 }) {
   const initialValues = {
     name: inventory.name || '',
@@ -129,6 +130,7 @@ function InventoryForm({
             />
           </FormRow>
           <FormRow>
+            <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={onCancel}
               onSubmit={formik.handleSubmit}
@@ -146,11 +148,13 @@ InventoryForm.proptype = {
   instanceGroups: shape(),
   inventory: shape(),
   credentialTypeId: number.isRequired,
+  submitError: shape(),
 };
 
 InventoryForm.defaultProps = {
   inventory: {},
   instanceGroups: [],
+  submitError: null,
 };
 
 export default withI18n()(InventoryForm);

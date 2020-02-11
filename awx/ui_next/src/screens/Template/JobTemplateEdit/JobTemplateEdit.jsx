@@ -113,8 +113,8 @@ class JobTemplateEdit extends Component {
         this.submitCredentials(credentials),
       ]);
       history.push(this.detailsUrl);
-    } catch (formSubmitError) {
-      this.setState({ formSubmitError });
+    } catch (error) {
+      this.setState({ formSubmitError: error });
     }
   }
 
@@ -209,8 +209,8 @@ class JobTemplateEdit extends Component {
           handleCancel={this.handleCancel}
           handleSubmit={this.handleSubmit}
           relatedProjectPlaybooks={relatedProjectPlaybooks}
+          submitError={formSubmitError}
         />
-        {formSubmitError ? <div> error </div> : null}
       </CardBody>
     );
   }

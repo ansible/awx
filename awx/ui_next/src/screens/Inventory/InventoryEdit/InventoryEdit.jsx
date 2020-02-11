@@ -5,7 +5,6 @@ import { object } from 'prop-types';
 import { CardBody } from '@components/Card';
 import { InventoriesAPI, CredentialTypesAPI } from '@api';
 import ContentLoading from '@components/ContentLoading';
-import ContentError from '@components/ContentError';
 import InventoryForm from '../shared/InventoryForm';
 import { getAddedAndRemoved } from '../../../util/lists';
 
@@ -105,10 +104,6 @@ function InventoryEdit({ inventory }) {
     return <ContentLoading />;
   }
 
-  if (error) {
-    return <ContentError />;
-  }
-
   return (
     <CardBody>
       <InventoryForm
@@ -117,6 +112,7 @@ function InventoryEdit({ inventory }) {
         inventory={inventory}
         instanceGroups={associatedInstanceGroups}
         credentialTypeId={credentialTypeId}
+        submitError={error}
       />
     </CardBody>
   );

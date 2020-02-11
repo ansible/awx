@@ -12,7 +12,7 @@ class TeamAdd extends React.Component {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
-    this.state = { error: '' };
+    this.state = { error: null };
   }
 
   async handleSubmit(values) {
@@ -43,10 +43,10 @@ class TeamAdd extends React.Component {
                   handleSubmit={this.handleSubmit}
                   handleCancel={this.handleCancel}
                   me={me || {}}
+                  submitError={error}
                 />
               )}
             </Config>
-            {error ? <div>error</div> : ''}
           </CardBody>
         </Card>
       </PageSection>

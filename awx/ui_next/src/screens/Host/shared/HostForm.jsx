@@ -9,13 +9,13 @@ import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
 
 import FormRow from '@components/FormRow';
-import FormField from '@components/FormField';
+import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
 import { InventoryLookup } from '@components/Lookup';
 
-function HostForm({ handleSubmit, handleCancel, host, i18n }) {
+function HostForm({ handleSubmit, handleCancel, host, submitError, i18n }) {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
@@ -85,6 +85,7 @@ function HostForm({ handleSubmit, handleCancel, host, i18n }) {
               label={i18n._(t`Variables`)}
             />
           </FormRow>
+          <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}
@@ -99,6 +100,7 @@ HostForm.propTypes = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
   host: shape({}),
+  submitError: shape({}),
 };
 
 HostForm.defaultProps = {
@@ -111,6 +113,7 @@ HostForm.defaultProps = {
       inventory: null,
     },
   },
+  submitError: null,
 };
 
 export { HostForm as _HostForm };

@@ -27,8 +27,8 @@ function UserEdit({ user, history }) {
         user={user}
         handleCancel={handleCancel}
         handleSubmit={handleSubmit}
+        submitError={formSubmitError}
       />
-      {formSubmitError ? <div> error </div> : null}
     </CardBody>
   );
 }

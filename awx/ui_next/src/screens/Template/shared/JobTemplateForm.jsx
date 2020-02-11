@@ -16,7 +16,11 @@ import ContentLoading from '@components/ContentLoading';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { TagMultiSelect } from '@components/MultiSelect';
 import FormActionGroup from '@components/FormActionGroup';
-import FormField, { CheckboxField, FieldTooltip } from '@components/FormField';
+import FormField, {
+  CheckboxField,
+  FieldTooltip,
+  FormSubmitError,
+} from '@components/FormField';
 import FormRow from '@components/FormRow';
 import CollapsibleSection from '@components/CollapsibleSection';
 import { required } from '@util/validators';
@@ -48,6 +52,7 @@ class JobTemplateForm extends Component {
     template: JobTemplate,
     handleCancel: PropTypes.func.isRequired,
     handleSubmit: PropTypes.func.isRequired,
+    submitError: PropTypes.shape({}),
   };
 
   static defaultProps = {
@@ -66,6 +71,7 @@ class JobTemplateForm extends Component {
       },
       isNew: true,
     },
+    submitError: null,
   };
 
   constructor(props) {
@@ -161,8 +167,9 @@ class JobTemplateForm extends Component {
       handleSubmit,
       handleBlur,
       setFieldValue,
-      i18n,
       template,
+      submitError,
+      i18n,
     } = this.props;
 
     const jobTypeOptions = [
@@ -201,6 +208,7 @@ class JobTemplateForm extends Component {
     if (contentError) {
       return <ContentError error={contentError} />;
     }
+
     const AdvancedFieldsWrapper = template.isNew ? CollapsibleSection : 'div';
     return (
       <Form autoComplete="off" onSubmit={handleSubmit}>
@@ -585,6 +593,7 @@ class JobTemplateForm extends Component {
             </FormRow>
           </div>
         </AdvancedFieldsWrapper>
+        <FormSubmitError error={submitError} />
         <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
       </Form>
     );
@@ -631,7 +640,13 @@ const FormikApp = withFormik({
       credentials: summary_fields.credentials || [],
     };
   },
-  handleSubmit: (values, { props }) => props.handleSubmit(values),
+  handleSubmit: async (values, { props, setErrors }) => {
+    try {
+      await props.handleSubmit(values);
+    } catch (errors) {
+      setErrors(errors);
+    }
+  },
 })(JobTemplateForm);
 
 export { JobTemplateForm as _JobTemplateForm };
