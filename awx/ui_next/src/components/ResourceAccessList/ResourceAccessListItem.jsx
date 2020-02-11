@@ -3,6 +3,8 @@ import { func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Chip,
+  ChipGroup,
   DataListItem,
   DataListItemRow,
   DataListItemCells as PFDataListItemCells,
@@ -14,7 +16,6 @@ import {
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { ChipGroup, Chip } from '@components/Chip';
 import { DetailList, Detail } from '@components/DetailList';
 import { AccessRecord } from '@types';
 

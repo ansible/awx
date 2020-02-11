@@ -1,6 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { ChipGroup } from '../Chip';
+import { ChipGroup } from '@patternfly/react-core';
+
 import SelectedList from './SelectedList';
 
 describe('<SelectedList />', () => {

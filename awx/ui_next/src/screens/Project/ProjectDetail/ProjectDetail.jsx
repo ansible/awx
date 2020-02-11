@@ -12,7 +12,7 @@ import ContentLoading from '@components/ContentLoading';
 import DeleteButton from '@components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import ErrorDetail from '@components/ErrorDetail';
-import { CredentialChip } from '@components/Chip';
+import CredentialChip from '@components/CredentialChip';
 import { ProjectsAPI } from '@api';
 import { toTitleCase } from '@util/strings';
 

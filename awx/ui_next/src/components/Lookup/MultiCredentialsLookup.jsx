@@ -7,7 +7,7 @@ import { FormGroup, ToolbarItem } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { FieldTooltip } from '@components/FormField';
-import { CredentialChip } from '@components/Chip';
+import CredentialChip from '@components/CredentialChip';
 import VerticalSeperator from '@components/VerticalSeparator';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import Lookup from './Lookup';
