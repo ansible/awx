@@ -4,6 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells as _DataListItemCells,
@@ -13,7 +14,6 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import styled from 'styled-components';
 import { Credential } from '@types';
@@ -58,16 +58,16 @@ function CredentialListItem({
             <DataListCell key="type">
               {credential.summary_fields.credential_type.name}
             </DataListCell>,
-            <DataListCell alignRight isFilled={false}>
+            <DataListCell key="edit" alignRight isFilled={false}>
               {canEdit && (
                 <Tooltip content={i18n._(t`Edit Credential`)} position="top">
-                  <ListActionButton
+                  <Button
                     variant="plain"
                     component={Link}
                     to={`/credentials/${credential.id}/edit`}
                   >
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
             </DataListCell>,

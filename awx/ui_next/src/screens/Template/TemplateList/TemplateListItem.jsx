@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -17,7 +18,6 @@ import {
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
-import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
@@ -76,24 +76,24 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
                 <Tooltip content={i18n._(t`Launch Template`)} position="top">
                   <LaunchButton resource={template}>
                     {({ handleLaunch }) => (
-                      <ListActionButton variant="plain" onClick={handleLaunch}>
+                      <Button variant="plain" onClick={handleLaunch}>
                         <RocketIcon />
-                      </ListActionButton>
+                      </Button>
                     )}
                   </LaunchButton>
                 </Tooltip>
               )}
             </DataListCell>,
-            <DataListCell alignRight isFilled={false}>
+            <DataListCell key="edit" alignRight isFilled={false}>
               {template.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Template`)} position="top">
-                  <ListActionButton
+                  <Button
                     variant="plain"
                     component={Link}
                     to={`/templates/${template.type}/${template.id}/edit`}
                   >
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
             </DataListCell>,

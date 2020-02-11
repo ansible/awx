@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -14,7 +15,6 @@ import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { StatusIcon } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
@@ -105,7 +105,7 @@ class ProjectListItem extends React.Component {
                   ? i18n._(t`Manual`)
                   : toTitleCase(project.scm_type)}
               </DataListCell>,
-              <DataListCell key="revision">
+              <DataListCell alignRight isFilled={false} key="revision">
                 {project.scm_revision.substring(0, 7)}
                 {project.scm_revision ? (
                   <ClipboardCopyButton
@@ -115,29 +115,29 @@ class ProjectListItem extends React.Component {
                   />
                 ) : null}
               </DataListCell>,
-              <DataListCell lastcolumn="true" key="action">
+              <DataListCell alignRight isFilled={false} key="sync">
                 {project.summary_fields.user_capabilities.start && (
                   <Tooltip content={i18n._(t`Sync Project`)} position="top">
                     <ProjectSyncButton projectId={project.id}>
                       {handleSync => (
-                        <ListActionButton variant="plain" onClick={handleSync}>
+                        <Button variant="plain" onClick={handleSync}>
                           <SyncIcon />
-                        </ListActionButton>
+                        </Button>
                       )}
                     </ProjectSyncButton>
                   </Tooltip>
                 )}
               </DataListCell>,
-              <DataListCell alignRight isFilled={false}>
+              <DataListCell key="edit" alignRight isFilled={false}>
                 {project.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Project`)} position="top">
-                    <ListActionButton
+                    <Button
                       variant="plain"
                       component={Link}
                       to={`/projects/${project.id}/edit`}
                     >
                       <PencilAltIcon />
-                    </ListActionButton>
+                    </Button>
                   </Tooltip>
                 )}
               </DataListCell>,

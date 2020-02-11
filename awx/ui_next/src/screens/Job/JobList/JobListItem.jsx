@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Button,
   DataListCell,
   DataListCheck,
   DataListItem,
@@ -13,7 +14,6 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 import LaunchButton from '@components/LaunchButton';
-import ListActionButton from '@components/ListActionButton';
 import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
@@ -60,12 +60,9 @@ class JobListItem extends Component {
                     <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
                       <LaunchButton resource={job}>
                         {({ handleRelaunch }) => (
-                          <ListActionButton
-                            variant="plain"
-                            onClick={handleRelaunch}
-                          >
+                          <Button variant="plain" onClick={handleRelaunch}>
                             <RocketIcon />
-                          </ListActionButton>
+                          </Button>
                         )}
                       </LaunchButton>
                     </Tooltip>

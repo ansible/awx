@@ -123,7 +123,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(1)
-      .find('PFSwitch[aria-label="Toggle notification success"]')
+      .find('Switch[aria-label="Toggle notification success"]')
       .prop('onChange')();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
@@ -150,7 +150,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(0)
-      .find('PFSwitch[aria-label="Toggle notification failure"]')
+      .find('Switch[aria-label="Toggle notification failure"]')
       .prop('onChange')();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
@@ -178,7 +178,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(0)
-      .find('PFSwitch[aria-label="Toggle notification start"]')
+      .find('Switch[aria-label="Toggle notification start"]')
       .prop('onChange')();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
@@ -205,7 +205,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(0)
-      .find('PFSwitch[aria-label="Toggle notification success"]')
+      .find('Switch[aria-label="Toggle notification success"]')
       .prop('onChange')();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,
@@ -232,7 +232,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(1)
-      .find('PFSwitch[aria-label="Toggle notification failure"]')
+      .find('Switch[aria-label="Toggle notification failure"]')
       .prop('onChange')();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,
@@ -259,7 +259,7 @@ describe('<NotificationList />', () => {
     const items = wrapper.find('NotificationListItem');
     items
       .at(2)
-      .find('PFSwitch[aria-label="Toggle notification start"]')
+      .find('Switch[aria-label="Toggle notification start"]')
       .prop('onChange')();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,

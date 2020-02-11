@@ -154,14 +154,14 @@ describe('<InventoryHostList />', () => {
     HostsAPI.update.mockResolvedValueOnce({
       data: { ...mockHosts[1], enabled: false },
     });
-    expect(wrapper.find('PFSwitch[id="host-2-toggle"]').props().isChecked).toBe(
+    expect(wrapper.find('Switch[id="host-2-toggle"]').props().isChecked).toBe(
       true
     );
     await act(async () => {
-      wrapper.find('PFSwitch[id="host-2-toggle"]').invoke('onChange')();
+      wrapper.find('Switch[id="host-2-toggle"]').invoke('onChange')();
     });
     wrapper.update();
-    expect(wrapper.find('PFSwitch[id="host-2-toggle"]').props().isChecked).toBe(
+    expect(wrapper.find('Switch[id="host-2-toggle"]').props().isChecked).toBe(
       false
     );
     expect(HostsAPI.update).toHaveBeenCalledTimes(1);
@@ -170,7 +170,7 @@ describe('<InventoryHostList />', () => {
   test('should show error modal if host is not successfully toggled', async () => {
     HostsAPI.update.mockImplementationOnce(() => Promise.reject(new Error()));
     await act(async () => {
-      wrapper.find('PFSwitch[id="host-2-toggle"]').invoke('onChange')();
+      wrapper.find('Switch[id="host-2-toggle"]').invoke('onChange')();
     });
     wrapper.update();
     await waitForElement(

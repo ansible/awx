@@ -3,6 +3,7 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -14,7 +15,6 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import { Sparkline } from '@components/Sparkline';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Host } from '@types';
@@ -82,7 +82,7 @@ class HostListItem extends React.Component {
                   </Fragment>
                 )}
               </DataListCell>,
-              <DataListCell alignRight isFilled={false}>
+              <DataListCell key="enable" alignRight isFilled={false}>
                 <Tooltip
                   content={i18n._(
                     t`Indicates if a host is available and should be included in running jobs.  For hosts that are part of an external inventory, this may be reset by the inventory sync process.`
@@ -104,16 +104,16 @@ class HostListItem extends React.Component {
                   />
                 </Tooltip>
               </DataListCell>,
-              <DataListCell alignRight isFilled={false}>
+              <DataListCell key="edit" alignRight isFilled={false}>
                 {host.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Host`)} position="top">
-                    <ListActionButton
+                    <Button
                       variant="plain"
                       component={Link}
                       to={`/hosts/${host.id}/edit`}
                     >
                       <PencilAltIcon />
-                    </ListActionButton>
+                    </Button>
                   </Tooltip>
                 )}
               </DataListCell>,

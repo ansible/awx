@@ -2,6 +2,7 @@ import React from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -13,7 +14,6 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Inventory } from '@types';
 
@@ -54,10 +54,10 @@ class InventoryListItem extends React.Component {
                   ? i18n._(t`Smart Inventory`)
                   : i18n._(t`Inventory`)}
               </DataListCell>,
-              <DataListCell alignRight isFilled={false}>
+              <DataListCell key="edit" alignRight isFilled={false}>
                 {inventory.summary_fields.user_capabilities.edit && (
                   <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
-                    <ListActionButton
+                    <Button
                       variant="plain"
                       component={Link}
                       to={`/inventories/${
@@ -67,7 +67,7 @@ class InventoryListItem extends React.Component {
                       }/${inventory.id}/edit`}
                     >
                       <PencilAltIcon />
-                    </ListActionButton>
+                    </Button>
                   </Tooltip>
                 )}
               </DataListCell>,
