@@ -56,7 +56,7 @@ RUN dnf -y update && \
 ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
 RUN chmod +x /tini
 
-RUN python3 -m ensurepip && pip3 install virtualenv
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
 RUN pip3 install supervisor
 
 ADD Makefile /tmp/Makefile
