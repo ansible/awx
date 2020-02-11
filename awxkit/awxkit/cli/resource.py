@@ -51,12 +51,27 @@ EXPORTABLE_RESOURCES = [
     # 'credential_types',
     # 'credentials',
     # 'notification_templates',
-    # 'inventory_scripts',
     # 'projects',
     # 'inventory',
     # 'job_templates',
     # 'workflow_job_templates',
 ]
+
+NATURAL_KEYS = {
+    'user': ('username',),
+    'organization': ('name',),
+    'team': ('organization', 'name'),
+    'credential_type': ('name', 'kind'),
+    'credential': ('organization', 'name', 'credential_type'),
+    'notification_template': ('organization', 'name'),
+    'project': ('organization', 'name'),
+    'inventory': ('organization', 'name'),
+    'job_template': ('name',),
+    'workflow_job_template': ('organization', 'name'),
+
+    # related resources
+    'role': ('name',),  # FIXME: we also need the content_object, itself as a natural key representation
+}
 
 
 class CustomCommand(metaclass=CustomRegistryMeta):
@@ -168,6 +183,10 @@ class Export(CustomCommand):
     name = 'export'
     help_text = 'export resources from Tower'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._natural_keys = {}
+
     def extend_parser(self, parser):
         resources = parser.add_argument_group('resources')
 
@@ -181,6 +200,16 @@ class Export(CustomCommand):
     def get_resource_options(self, endpoint):
         return endpoint.options().json['actions']['POST']
 
+    def register_natural_key(self, asset):
+        natural_key = {'type': asset['type']}
+        lookup = NATURAL_KEYS.get(asset['type'])
+        if callable(lookup):
+            natural_key.update(lookup(asset))
+        else:
+            natural_key.update((key, asset[key]) for key in lookup or ())
+
+        self._natural_keys[asset['url']] = natural_key
+
     def get_assets(self, endpoint, value):
         if value:
             from .options import pk_or_name
@@ -190,12 +219,35 @@ class Export(CustomCommand):
         else:
             results = endpoint.get(all_pages=True).json['results']
 
+        for asset in results:
+            self.register_natural_key(asset)
+
         return results
 
+    def get_natural_key(self, asset_url):
+        if asset_url not in self._natural_keys:
+            # FIXME:
+            # get the asset by following the url
+            # prune down the data using NATURAL_KEYS
+            # register the natural key dict
+            return {}
+
+        return self._natural_keys[asset_url]
+
     def enhance_asset(self, endpoint, asset, options):
-        fields = {key: asset[key] for key in options if key in asset}
-        fk_fields = {}
-        related_fields = {}
+        fields = {
+            key: asset[key] for key in options
+            if key in asset and options[key]['type'] != 'id'
+        }
+
+        fk_fields = {
+            key: self.get_natural_key(asset['related'][key]) for key in options
+            if key in asset and options[key]['type'] == 'id'
+        }
+
+        related = {}
+
+        related_fields = {'related': related} if related else {}
         return dict(**fields, **fk_fields, **related_fields)
 
     def handle(self, client, parser):
