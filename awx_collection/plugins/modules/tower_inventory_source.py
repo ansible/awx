@@ -56,6 +56,7 @@ options:
       description:
         - Inventory script to be used when group type is C(custom).
       type: str
+      required: False
     source_vars:
       description:
         - The variables or environment fields to apply to this source type.
@@ -157,7 +158,7 @@ def main():
                              "azure_rm", "vmware", "satellite6", "cloudforms",
                              "openstack", "rhv", "tower", "custom"], required=False),
         source_path=dict(),
-        source_script=dict(),
+        source_script=dict(required=False),
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
