@@ -192,6 +192,30 @@ describe('Visualizer', () => {
     ).toHaveBeenCalledWith(8, 9);
   });
 
+  test('Start Screen shown when no nodes are present', async () => {
+    WorkflowJobTemplatesAPI.readNodes.mockResolvedValue({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <svg>
+          <Visualizer template={template} />
+        </svg>
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('VisualizerStartScreen')).toHaveLength(1);
+    expect(
+      wrapper.find('ActionButton#visualizer-toggle-tools').props().isDisabled
+    ).toBe(true);
+    expect(
+      wrapper.find('ActionButton#visualizer-toggle-legend').props().isDisabled
+    ).toBe(true);
+  });
+
   test('Error shown to user when error thrown fetching workflow nodes', async () => {
     WorkflowJobTemplatesAPI.readNodes.mockRejectedValue(new Error());
     await act(async () => {

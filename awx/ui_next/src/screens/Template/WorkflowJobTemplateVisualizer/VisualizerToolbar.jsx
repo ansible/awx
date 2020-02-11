@@ -39,6 +39,7 @@ const ActionButton = styled(Button)`
     color: white;
   }
 `;
+ActionButton.displayName = 'ActionButton';
 
 function VisualizerToolbar({ i18n, onClose, onSave, template }) {
   const dispatch = useContext(WorkflowDispatchContext);
@@ -62,7 +63,8 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
               id="visualizer-toggle-legend"
-              isActive={showLegend}
+              isActive={totalNodes > 0 && showLegend}
+              isDisabled={totalNodes === 0}
               onClick={() => dispatch({ type: 'TOGGLE_LEGEND' })}
               variant="plain"
             >
@@ -72,7 +74,8 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           <Tooltip content={i18n._(t`Toggle Tools`)} position="bottom">
             <ActionButton
               id="visualizer-toggle-tools"
-              isActive={showTools}
+              isActive={totalNodes > 0 && showTools}
+              isDisabled={totalNodes === 0}
               onClick={() => dispatch({ type: 'TOGGLE_TOOLS' })}
               variant="plain"
             >
