@@ -61,7 +61,7 @@ class AWXConsumer(ConsumerMixin):
         ])
 
     def control(self, body, message):
-        logger.warn(body)
+        logger.warn('Consumer received control message {}'.format(body))
         control = body.get('control')
         if control in ('status', 'running'):
             producer = Producer(
