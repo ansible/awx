@@ -93,10 +93,6 @@ pg_port=5432
 # containerized postgres deployment on OpenShift
 # pg_admin_password=postgrespass
 
-# RabbitMQ Configuration
-rabbitmq_password=awxpass
-rabbitmq_erlang_cookie=cookiemonster
-
 # Use a local distribution build container image for building the AWX package
 # This is helpful if you don't want to bother installing the build-time dependencies as
 # it is taken care of already.

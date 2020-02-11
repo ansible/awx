@@ -85,17 +85,14 @@ DATABASES = {
 if os.getenv("DATABASE_SSLMODE", False):
     DATABASES['default']['OPTIONS'] = {'sslmode': os.getenv("DATABASE_SSLMODE")}
 
-BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
-    os.getenv("RABBITMQ_USER", None),
-    os.getenv("RABBITMQ_PASSWORD", None),
-    os.getenv("RABBITMQ_HOST", None),
-    os.getenv("RABBITMQ_PORT", "5672"),
-    os.getenv("RABBITMQ_VHOST", "tower"))
+BROKER_URL = 'redis://{}:{}'.format(
+    os.getenv("REDIS_HOST", None),
+    os.getenv("REDIS_PORT", "6379"),
 
 CHANNEL_LAYERS = {
     'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
                 'ROUTING': 'awx.main.routing.channel_routing',
-                'CONFIG': {'url': BROKER_URL}}
+                'CONFIG': {'hosts': [(os.getenv("REDIS_HOST", None), int(os.getenv("REDIS_PORT", 6379)))]}}
 }
 
 USE_X_FORWARDED_PORT = True
