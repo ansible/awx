@@ -4,7 +4,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import TemplatesListItem from './TemplateListItem';
 
-describe('<TemplatesListItem />', () => {
+describe('<TemplateListItem />', () => {
   test('launch button shown to users with start capabilities', () => {
     const wrapper = mountWithContexts(
       <TemplatesListItem

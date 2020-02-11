@@ -71,7 +71,7 @@ const mockTemplates = [
   },
 ];
 
-describe('<TemplatesList />', () => {
+describe('<TemplateList />', () => {
   beforeEach(() => {
     UnifiedJobTemplatesAPI.read.mockResolvedValue({
       data: {
