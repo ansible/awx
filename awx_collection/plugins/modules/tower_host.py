@@ -125,7 +125,7 @@ def main():
         }
     })
 
-    # Create data to send to create and update
+    # Create the data that gets sent for create and update
     host_fields = {
         'name': new_name if new_name else name,
         'description': description,

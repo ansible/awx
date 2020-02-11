@@ -56,6 +56,7 @@ options:
       description:
         - Inventory script to be used when group type is C(custom).
       type: str
+      required: False
     source_vars:
       description:
         - The variables or environment fields to apply to this source type.
@@ -130,13 +131,16 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Add tower group
-  tower_group:
-    name: localhost
-    description: "Local Host Group"
-    inventory: "Local Inventory"
-    state: present
-    tower_config_file: "~/tower_cli.cfg"
+- name: Add an inventory source
+  tower_inventory_source:
+    name: "source-inventory"
+    description: Source for inventory
+    inventory: previously-created-inventory
+    credential: previously-created-credential
+    overwrite: True
+    update_on_launch: True
+    source_vars:
+      private: false
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -157,7 +161,7 @@ def main():
                              "azure_rm", "vmware", "satellite6", "cloudforms",
                              "openstack", "rhv", "tower", "custom"], required=False),
         source_path=dict(),
-        source_script=dict(),
+        source_script=dict(required=False),
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
@@ -176,7 +180,7 @@ def main():
     )
 
     # One question here is do we want to end up supporting this within the ansible module itself (i.e. required if, etc)
-    # Or do we want to let the API return issues with "this dosen't support that", etc.
+    # Or do we want to let the API return issues with "this doesn't support that", etc.
     #
     # GUI OPTIONS:
     # - - - - - - - manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	cloudforms	openstack	rhv	tower	custom
@@ -323,7 +327,7 @@ def main():
     if optional_vars['source_vars']:
         optional_vars['source_vars'] = dumps(optional_vars['source_vars'])
 
-    # Attempt to lookup the related items the user specified (these will fail the module if not found)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
     if credential:
         optional_vars['credential'] = module.resolve_name_to_id('credentials', credential)
@@ -332,7 +336,7 @@ def main():
     if source_script:
         optional_vars['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
-    # Attempt to lookup team based on the provided name and org ID
+    # Attempt to look up inventory source based on the provided name and inventory ID
     inventory_source = module.get_one('inventory_sources', **{
         'data': {
             'name': name,
@@ -344,7 +348,7 @@ def main():
     if state == 'present' and not inventory_source and not optional_vars['source']:
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-    # Create data to sent to create and update
+    # Create the data that gets sent for create and update
     inventory_source_fields = {
         'name': new_name if new_name else name,
         'inventory': inventory_id,

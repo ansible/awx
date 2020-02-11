@@ -46,8 +46,6 @@ options:
 extends_documentation_fragment: awx.awx.auth
 '''
 
-RETURN = ''' # '''
-
 EXAMPLES = '''
 - name: Set the value of AWX_PROOT_BASE_PATH
   tower_settings:

@@ -111,7 +111,7 @@ def main():
     if variables:
         variables = module.load_variables_if_file_specified(variables, 'variables')
 
-    # Create data to sent to create and update
+    # Create the data that gets sent for create and update
     group_fields = {
         'name': new_name if new_name else name,
         'inventory': inventory_id,
