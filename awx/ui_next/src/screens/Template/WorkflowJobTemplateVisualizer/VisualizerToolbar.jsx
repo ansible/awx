@@ -51,14 +51,14 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
   return (
     <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
-        <div css="display: flex;">
+        <div css="display: flex;" id="visualizer-toolbar-template-name">
           <b>{i18n._(t`Workflow Visualizer`)}</b>
           <VerticalSeparator />
           <b>{template.name}</b>
         </div>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
-          <div>{i18n._(t`Total Nodes`)}</div>
-          <Badge isRead>{totalNodes}</Badge>
+          <div >{i18n._(t`Total Nodes`)}</div>
+          <Badge id="visualizer-total-nodes-badge" isRead>{totalNodes}</Badge>
           <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
