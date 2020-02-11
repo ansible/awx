@@ -845,10 +845,7 @@ def galaxy_validate(serializer, attrs):
     to save settings which obviously break all project updates.
     """
     prefix = 'PRIMARY_GALAXY_'
-
-    from awx.main.constants import GALAXY_SERVER_FIELDS
-    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
-        return attrs
+    errors = {}
 
     def _new_value(setting_name):
         if setting_name in attrs:
@@ -857,10 +854,22 @@ def galaxy_validate(serializer, attrs):
             return ''
         return getattr(serializer.instance, setting_name, '')
 
+    if not _new_value('PRIMARY_GALAXY_URL'):
+        if _new_value('PUBLIC_GALAXY_ENABLED') is False:
+            msg = _('A URL for Primary Galaxy must be defined before disabling public Galaxy.')
+            # put error in both keys because UI has trouble with errors in toggles
+            for key in ('PRIMARY_GALAXY_URL', 'PUBLIC_GALAXY_ENABLED'):
+                errors.setdefault(key, [])
+                errors[key].append(msg)
+            raise serializers.ValidationError(errors)
+
+    from awx.main.constants import GALAXY_SERVER_FIELDS
+    if not any('{}{}'.format(prefix, subfield.upper()) in attrs for subfield in GALAXY_SERVER_FIELDS):
+        return attrs
+
     galaxy_data = {}
     for subfield in GALAXY_SERVER_FIELDS:
         galaxy_data[subfield] = _new_value('{}{}'.format(prefix, subfield.upper()))
-    errors = {}
     if not galaxy_data['url']:
         for k, v in galaxy_data.items():
             if v:
@@ -903,11 +912,6 @@ def galaxy_validate(serializer, attrs):
             setting_name = '{}{}'.format(prefix, k.upper())
             errors.setdefault(setting_name, [])
             errors[setting_name].append(msg)
-    if not galaxy_data['url']:
-        if _new_value('PUBLIC_GALAXY_ENABLED') is False:
-            errors.setdefault('PUBLIC_GALAXY_ENABLED', [])
-            msg = _('A URL for Primary Galaxy must be defined before disabling public Galaxy.')
-            errors['PUBLIC_GALAXY_ENABLED'].append(msg)
 
     if errors:
         raise serializers.ValidationError(errors)
