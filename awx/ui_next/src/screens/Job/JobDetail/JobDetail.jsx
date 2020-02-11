@@ -34,10 +34,9 @@ const VariablesInput = styled(_VariablesInput)`
 
 const StatusDetailValue = styled.div`
   align-items: center;
-  display: inline-flex;
-  .at-c-statusIcon {
-    margin-right: 10px;
-  }
+  display: inline-grid;
+  grid-gap: 10px;
+  grid-template-columns: auto auto;
 `;
 
 const VERBOSITY = {

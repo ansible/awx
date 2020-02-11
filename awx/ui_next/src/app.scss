@@ -4,41 +4,6 @@
 }
 
 //
-// sidebar overrides
-//
-
-.pf-c-page__sidebar {
-  --pf-c-page__sidebar--md--Width: 255px;
-
-  .pf-c-nav {
-    overflow-y: auto;
-
-    .pf-c-nav__section {
-      --pf-c-nav__section--MarginTop: 8px;
-    }
-
-    .pf-c-nav__section + .pf-c-nav__section {
-      --pf-c-nav__section--MarginTop: 8px;
-    }
-
-    .pf-c-nav__simple-list .pf-c-nav__link {
-      --pf-c-nav__simple-list-link--PaddingBottom: 6px;
-      --pf-c-nav__simple-list-link--PaddingTop: 6px;
-    }
-
-    .pf-c-nav__section-title {
-      --pf-c-nav__section-title--PaddingLeft: 24px;
-    }
-
-    .pf-c-nav__link {
-      display: flex;
-      align-items: center;
-      padding-right: 64px;
-    }
-  }
-}
-
-//
 // data list overrides
 //
 
@@ -85,102 +50,6 @@
     --pf-c-data-list__cell--PaddingTop: 12px;
     flex-grow: 0;
   }
-}
-
-//
-// pf modal overrides
-//
-
-.awx-c-modal.pf-c-modal-box {
-  margin: 0;
-  padding: 24px;
-  width: 600px;
-
-  .pf-c-modal-box__body {
-    overflow: auto;
-  }
-
-  .pf-c-modal-box__footer > .pf-c-button:not(:last-child) {
-    margin-right: 20px;
-  }
-}
-
-.pf-c-modal-box__footer {
-  --pf-c-modal-box__footer--PaddingTop: 20px;
-  --pf-c-modal-box__footer--PaddingRight: 20px;
-  --pf-c-modal-box__footer--PaddingBottom: 20px;
-  --pf-c-modal-box__footer--PaddingLeft: 20px;
-  --pf-c-modal-box__footer--MarginTop: 24px;
-  justify-content: flex-end;
-}
-
-.pf-c-modal-box__header {
-  --pf-c-modal-box__header--PaddingTop: 10px;
-  --pf-c-modal-box__header--PaddingRight: 0;
-  --pf-c-modal-box__header--PaddingBottom: 0;
-  --pf-c-modal-box__header--PaddingLeft: 20px;
-}
-
-.pf-c-modal-box__body {
-  --pf-c-modal-box__body--PaddingLeft: 20px;
-  --pf-c-modal-box__body--PaddingRight: 20px;
-  --pf-c-modal-box__body--PaddingBottom: 5px;
-}
-
-//
-// pf tooltip overrides
-//
-
-.pf-c-tooltip__content {
-  --pf-c-tooltip__content--PaddingTop: 0.71rem;
-  --pf-c-tooltip__content--PaddingRight: 0.71rem;
-  --pf-c-tooltip__content--PaddingBottom: 0.71rem;
-  --pf-c-tooltip__content--PaddingLeft: 0.71rem;
-}
-// higher specificity needed to override PF styles added dynamically to page
-.pf-c-tooltip .pf-c-tooltip__content {
-  text-align: left;
-}
-
-//
-// pf empty state overrides
-//
-
-.pf-c-empty-state {
-  align-self: center;
-}
-
-//
-// assorted custom component styles
-// note that these should be given a consistent prefix
-// and bem style, as well as moved into component-based scss files
-//
-
-.awx-c-card {
-  position: relative;
-}
-
-//
-// PF Alert notification component overrides
-//
-
-.pf-c-alert__title {
-  --pf-c-alert__title--PaddingTop: 20px;
-  --pf-c-alert__title--PaddingRight: 20px;
-  --pf-c-alert__title--PaddingBottom: 20px;
-  --pf-c-alert__title--PaddingLeft: 20px;
-}
-
-.pf-c-alert__description {
-  --pf-c-alert__description--PaddingRight: 20px;
-  --pf-c-alert__description--PaddingBottom: 20px;
-  --pf-c-alert__description--PaddingLeft: 20px;
-}
-
-.pf-c-alert {
-  position: absolute;
-  width: 100%;
-  z-index: 20;
 }
 
 //
@@ -245,12 +114,4 @@
   .at-c-alertModal__icon {
     color: var(--pf-global--success-color--200);
   }
-}
-
-//
-// LoginModal overrides
-//
-
-.pf-m-error p.pf-c-form__helper-text {
-  color: var(--pf-global--danger-color--100);
 }

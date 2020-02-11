@@ -5,7 +5,7 @@ import {
   PageSectionVariants,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbHeading as PFBreadcrumbHeading,
+  BreadcrumbHeading,
 } from '@patternfly/react-core';
 import { Link, Route, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -13,12 +13,6 @@ import styled from 'styled-components';
 const PageSection = styled(PFPageSection)`
   padding-top: 10px;
   padding-bottom: 10px;
-`;
-
-const BreadcrumbHeading = styled(PFBreadcrumbHeading)`
-  --pf-c-breadcrumb__heading--FontSize: 20px;
-  line-height: 24px;
-  flex: 100%;
 `;
 
 const Breadcrumbs = ({ breadcrumbConfig }) => {

@@ -26,7 +26,7 @@ function InventoryGroupForm({
   };
 
   return (
-    <Card className="awx-c-card">
+    <Card>
       <CardBody>
         <Formik initialValues={initialValues} onSubmit={handleSubmit}>
           {formik => (

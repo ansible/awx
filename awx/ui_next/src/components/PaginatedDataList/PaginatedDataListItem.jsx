@@ -27,7 +27,7 @@ export default function PaginatedDataListItem({ item }) {
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="team-name">
+            <DataListCell key="name">
               <DetailWrapper>
                 <Link to={{ pathname: item.url }}>
                   <b id={`items-list-item-${item.id}`}>{item.name}</b>

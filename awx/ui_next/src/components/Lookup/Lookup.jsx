@@ -139,7 +139,7 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
-        className="awx-c-modal"
+        isLarge
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -148,9 +148,7 @@ function Lookup(props) {
             key="select"
             variant="primary"
             onClick={save}
-            style={
-              required && selectedItems.length === 0 ? { display: 'none' } : {}
-            }
+            isDisabled={required && selectedItems.length === 0}
           >
             {i18n._(t`Select`)}
           </Button>,

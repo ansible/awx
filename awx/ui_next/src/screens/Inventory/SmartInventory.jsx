@@ -88,7 +88,7 @@ class SmartInventory extends Component {
     if (!hasContentLoading && contentError) {
       return (
         <PageSection>
-          <Card className="awx-c-card">
+          <Card>
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
@@ -105,7 +105,7 @@ class SmartInventory extends Component {
     }
     return (
       <PageSection>
-        <Card className="awx-c-card">
+        <Card>
           {cardHeader}
           <Switch>
             <Redirect

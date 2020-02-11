@@ -5,7 +5,7 @@ import ContentError from '@components/ContentError';
 function NotFound() {
   return (
     <PageSection>
-      <Card className="awx-c-card">
+      <Card>
         <ContentError isNotFound />
       </Card>
     </PageSection>

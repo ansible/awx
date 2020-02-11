@@ -39,7 +39,7 @@ function ContentError({ error, children, isNotFound, i18n }) {
       {is401 ? (
         <Redirect to="/login" />
       ) : (
-        <EmptyState>
+        <EmptyState variant="full">
           <EmptyStateIcon icon={ExclamationTriangleIcon} />
           <Title size="lg">
             {is404 ? i18n._(t`Not Found`) : i18n._(t`Something went wrong...`)}

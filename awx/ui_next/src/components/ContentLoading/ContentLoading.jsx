@@ -5,7 +5,7 @@ import { EmptyState, EmptyStateBody } from '@patternfly/react-core';
 
 // TODO: Better loading state - skeleton lines / spinner, etc.
 const ContentLoading = ({ className, i18n }) => (
-  <EmptyState className={className}>
+  <EmptyState variant="full" className={className}>
     <EmptyStateBody>{i18n._(t`Loading...`)}</EmptyStateBody>
   </EmptyState>
 );

@@ -63,7 +63,7 @@ function Credential({ i18n, setBreadcrumb }) {
   if (!hasContentLoading && contentError) {
     return (
       <PageSection>
-        <Card className="awx-c-card">
+        <Card>
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
@@ -79,7 +79,7 @@ function Credential({ i18n, setBreadcrumb }) {
 
   return (
     <PageSection>
-      <Card className="awx-c-card">
+      <Card>
         {cardHeader}
         <Switch>
           <Redirect

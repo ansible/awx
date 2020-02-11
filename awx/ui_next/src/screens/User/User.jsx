@@ -96,7 +96,7 @@ class User extends Component {
     if (!hasContentLoading && contentError) {
       return (
         <PageSection>
-          <Card className="awx-c-card">
+          <Card>
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
@@ -112,7 +112,7 @@ class User extends Component {
 
     return (
       <PageSection>
-        <Card className="awx-c-card">
+        <Card>
           {cardHeader}
           <Switch>
             <Redirect from="/users/:id" to="/users/:id/details" exact />

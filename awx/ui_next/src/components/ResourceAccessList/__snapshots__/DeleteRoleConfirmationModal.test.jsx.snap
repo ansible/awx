@@ -73,7 +73,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   aria-describedby="pf-modal-0"
                   aria-label="Remove {0} Access"
                   aria-modal="true"
-                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
                   role="dialog"
                 >
                   <button
@@ -154,7 +154,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
       hideTitle={false}
       isFooterLeftAligned={false}
-      isLarge={false}
+      isLarge={true}
       isOpen={true}
       isSmall={false}
       onClose={[Function]}
@@ -174,7 +174,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   aria-describedby="pf-modal-0"
                   aria-label="Remove {0} Access"
                   aria-modal="true"
-                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
                   role="dialog"
                 >
                   <button
@@ -274,7 +274,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           hideTitle={false}
           id="pf-modal-0"
           isFooterLeftAligned={false}
-          isLarge={false}
+          isLarge={true}
           isOpen={true}
           isSmall={false}
           onClose={[Function]}
@@ -303,7 +303,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   <ModalBox
                     className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
                     id="pf-modal-0"
-                    isLarge={false}
+                    isLarge={true}
                     isSmall={false}
                     style={Object {}}
                     title="Remove {0} Access"
@@ -312,7 +312,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       aria-describedby="pf-modal-0"
                       aria-label="Remove {0} Access"
                       aria-modal="true"
-                      className="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                      className="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
                       role="dialog"
                       style={Object {}}
                     >
