@@ -2147,7 +2147,7 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
                     host__inventory_sources=inv_source
                 ).delete()
                 r = super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
-        update_inventory_computed_fields.delay(inv_source.inventory_id, True)
+        update_inventory_computed_fields.delay(inv_source.inventory_id)
         return r
 
 
@@ -2174,7 +2174,7 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
                     group__inventory_sources=inv_source
                 ).delete()
                 r = super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
-        update_inventory_computed_fields.delay(inv_source.inventory_id, True)
+        update_inventory_computed_fields.delay(inv_source.inventory_id)
         return r
 
 
