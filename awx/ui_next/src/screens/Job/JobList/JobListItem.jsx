@@ -38,7 +38,10 @@ class JobListItem extends Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
+              <DataListCell
+                key="name"
+                css="display: inline-flex; align-items: center;"
+              >
                 {job.status && <PaddedIcon status={job.status} />}
                 <span>
                   <Link

@@ -3,6 +3,7 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -14,10 +15,8 @@ import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
 import { StatusIcon } from '@components/Sparkline';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { toTitleCase } from '@util/strings';
 import { Project } from '@types';
 
@@ -74,7 +73,6 @@ class ProjectListItem extends React.Component {
           <DataListItemCells
             dataListCells={[
               <DataListCell key="divider">
-                <VerticalSeparator />
                 {project.summary_fields.last_job && (
                   <Tooltip
                     position="top"

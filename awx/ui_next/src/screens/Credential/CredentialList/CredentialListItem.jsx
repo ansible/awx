@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells as _DataListItemCells,
@@ -13,8 +14,6 @@ import {
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import styled from 'styled-components';
 import { Credential } from '@types';
 
@@ -50,7 +49,6 @@ function CredentialListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
-              <VerticalSeparator />
               <Link to={`${detailUrl}`}>
                 <b>{credential.name}</b>
               </Link>

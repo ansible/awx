@@ -34,13 +34,6 @@ const AdditionalControlsDataToolbarGroup = styled(DataToolbarGroup)`
   margin-right: 0 !important;
 `;
 
-const DataToolbarSeparator = styled(DataToolbarItem)`
-  width: 1px !important;
-  height: 30px !important;
-  margin-left: 3px !important;
-  margin-right: 10px !important;
-`;
-
 class DataListToolbar extends React.Component {
   render() {
     const {
@@ -80,7 +73,6 @@ class DataListToolbar extends React.Component {
                   id="select-all"
                 />
               </DataToolbarItem>
-              <DataToolbarSeparator variant="separator" />
             </DataToolbarGroup>
           )}
           <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">

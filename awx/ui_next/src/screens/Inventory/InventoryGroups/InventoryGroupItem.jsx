@@ -6,6 +6,7 @@ import { Group } from '@types';
 
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -15,8 +16,6 @@ import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 
 function InventoryGroupItem({
   i18n,
@@ -41,7 +40,6 @@ function InventoryGroupItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="divider">
-              <VerticalSeparator />
               <Link to={`${detailUrl}`} id={labelId}>
                 <b>{group.name}</b>
               </Link>

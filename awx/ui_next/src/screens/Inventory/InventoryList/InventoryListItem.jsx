@@ -3,6 +3,7 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -13,8 +14,6 @@ import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { Inventory } from '@types';
 
 class InventoryListItem extends React.Component {
@@ -44,7 +43,6 @@ class InventoryListItem extends React.Component {
           <DataListItemCells
             dataListCells={[
               <DataListCell key="divider">
-                <VerticalSeparator />
                 <Link to={`${detailUrl}`}>
                   <b>{inventory.name}</b>
                 </Link>

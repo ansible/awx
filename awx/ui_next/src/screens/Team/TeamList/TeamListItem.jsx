@@ -4,6 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -13,8 +14,6 @@ import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { Team } from '@types';
 
 class TeamListItem extends React.Component {
@@ -40,7 +39,6 @@ class TeamListItem extends React.Component {
           <DataListItemCells
             dataListCells={[
               <DataListCell key="divider">
-                <VerticalSeparator />
                 <Link id={labelId} to={`${detailUrl}`}>
                   <b>{team.name}</b>
                 </Link>

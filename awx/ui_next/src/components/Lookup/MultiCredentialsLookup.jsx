@@ -8,7 +8,6 @@ import { CredentialsAPI, CredentialTypesAPI } from '@api';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { FieldTooltip } from '@components/FormField';
 import CredentialChip from '@components/CredentialChip';
-import VerticalSeperator from '@components/VerticalSeparator';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import Lookup from './Lookup';
 import OptionsList from './shared/OptionsList';
@@ -97,8 +96,9 @@ function MultiCredentialsLookup(props) {
             <Fragment>
               {credentialTypes && credentialTypes.length > 0 && (
                 <ToolbarItem css=" display: flex; align-items: center;">
-                  <div css="flex: 0 0 25%;">{i18n._(t`Selected Category`)}</div>
-                  <VerticalSeperator />
+                  <div css="flex: 0 0 25%; margin-right: 32px">
+                    {i18n._(t`Selected Category`)}
+                  </div>
                   <AnsibleSelect
                     css="flex: 1 1 75%;"
                     id="multiCredentialsLookUp-select"

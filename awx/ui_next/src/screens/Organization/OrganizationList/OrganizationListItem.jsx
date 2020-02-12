@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import {
   Badge as PFBadge,
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -15,8 +16,6 @@ import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { Organization } from '@types';
 
 const Badge = styled(PFBadge)`
@@ -63,7 +62,6 @@ function OrganizationListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="divider">
-              <VerticalSeparator />
               <span id={labelId}>
                 <Link to={`${detailUrl}`}>
                   <b>{organization.name}</b>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -16,9 +17,7 @@ import {
 } from '@patternfly/react-icons';
 
 import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { Sparkline } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
@@ -46,7 +45,6 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
         <DataListItemCells
           dataListCells={[
             <DataListCell key="divider">
-              <VerticalSeparator />
               <span>
                 <Link to={`${detailUrl}`}>
                   <b>{template.name}</b>
