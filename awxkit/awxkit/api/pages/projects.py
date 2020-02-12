@@ -112,7 +112,8 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
         self.update_identity(Projects(self.connection).post(payload))
 
         if kwargs.get('wait', True):
-            self.related.current_update.get().wait_until_completed()
+            update = self.related.current_update.get()
+            update.wait_until_completed().assert_successful()
             return self.get()
 
         return self
