@@ -133,6 +133,7 @@ class TestDNR():
         assert 1 == len(do_not_run_nodes)
         assert nodes[3] == do_not_run_nodes[0]
 
+
 class TestAllWorkflowNodes():
     # test workflow convergence is functioning as expected
     @pytest.fixture
@@ -150,9 +151,9 @@ class TestAllWorkflowNodes():
             1      2
              \    /
             F \  / S
-               \/ 
+               \/
                 3
-                
+
             '''
         g.add_edge(nodes[0], nodes[1], "success_nodes")
         g.add_edge(nodes[0], nodes[2], "success_nodes")
@@ -186,7 +187,7 @@ class TestAllWorkflowNodes():
               S|  1
                | /
                |/ A
-               2  
+               2
         '''
         g.add_edge(nodes[0], nodes[1], "failure_nodes")
         g.add_edge(nodes[0], nodes[2], "success_nodes")
@@ -222,7 +223,7 @@ class TestAllWorkflowNodes():
               F|  1
                | /
                |/ A
-               2  
+               2
         '''
         g.add_edge(nodes[0], nodes[1], "success_nodes")
         g.add_edge(nodes[0], nodes[2], "failure_nodes")
@@ -341,7 +342,7 @@ class TestAllWorkflowNodes():
             g.add_node(n)
         r'''
                0    1    2
-                \   |   / 
+                \   |   /
                S \ S|  / F
                   \ | /
                    \|/
@@ -349,7 +350,7 @@ class TestAllWorkflowNodes():
                     3
                    /\
                 S /  \ S
-                 /    \ 
+                 /    \
                4|      | 5
                  \    /
                 S \  / S
