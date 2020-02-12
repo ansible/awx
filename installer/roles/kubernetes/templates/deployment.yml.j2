@@ -285,6 +285,10 @@ spec:
           env:
             - name: AWX_SKIP_MIGRATIONS
               value: "1"
+            - name: MY_POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
