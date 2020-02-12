@@ -16,7 +16,7 @@ import PaginatedDataList, {
 import {
   getQSConfig,
   parseQueryString,
-  removeParams,
+  replaceParams,
   encodeNonDefaultQueryString,
 } from '@util/qs';
 
@@ -87,17 +87,19 @@ function OrganizationsList({ i18n }) {
 
   const handleOrgDelete = async () => {
     await deleteOrganizations();
+    await adjustPagination();
+  };
+
+  const adjustPagination = () => {
     const params = parseQueryString(QS_CONFIG, location.search);
     if (params.page > 1 && selected.length === organizations.length) {
-      const newParams = removeParams(QS_CONFIG, params, { page: params.page });
-      history.push(
-        `${location.pathname}?${encodeNonDefaultQueryString(
-          QS_CONFIG,
-          newParams
-        )}`
+      const newParams = encodeNonDefaultQueryString(
+        QS_CONFIG,
+        replaceParams(params, { page: params.page - 1 })
       );
+      history.push(`${location.pathname}?${newParams}`);
     } else {
-      await fetchOrganizations();
+      fetchOrganizations();
     }
   };
 
