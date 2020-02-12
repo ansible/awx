@@ -117,7 +117,7 @@ def main():
         }
     })
 
-    # Create the data sent to create and update
+    # Create the data that gets sent for create and update
     inventory_fields = {
         'name': name,
         'description': description,

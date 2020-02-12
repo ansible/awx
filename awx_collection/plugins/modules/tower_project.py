@@ -232,6 +232,7 @@ def main():
         }
     })
 
+    # Create the data that gets sent for create and update
     project_fields = {
         'name': name,
         'description': description,

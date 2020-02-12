@@ -345,7 +345,7 @@ def main():
     if state == 'present' and not inventory_source and not optional_vars['source']:
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-    # Create data to sent to create and update
+    # Create the data that gets sent for create and update
     inventory_source_fields = {
         'name': new_name if new_name else name,
         'inventory': inventory_id,

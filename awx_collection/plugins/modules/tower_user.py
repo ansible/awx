@@ -128,6 +128,8 @@ def main():
 
     # Extract our parameters
     state = module.params.get('state')
+
+    # Create the data that gets sent for create and update
     user_fields = {
         'username': module.params.get('username'),
         'first_name': module.params.get('first_name'),

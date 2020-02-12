@@ -108,6 +108,7 @@ def main():
         }
     })
 
+    # Create the data that gets sent for create and update
     org_fields = {'name': name}
     if description:
         org_fields['description'] = description
