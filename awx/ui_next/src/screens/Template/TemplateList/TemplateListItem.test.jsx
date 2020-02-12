@@ -2,12 +2,12 @@ import React from 'react';
 
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
-import TemplatesListItem from './TemplateListItem';
+import TemplateListItem from './TemplateListItem';
 
 describe('<TemplateListItem />', () => {
   test('launch button shown to users with start capabilities', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -26,7 +26,7 @@ describe('<TemplateListItem />', () => {
   });
   test('launch button hidden from users without start capabilities', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -45,7 +45,7 @@ describe('<TemplateListItem />', () => {
   });
   test('edit button shown to users with edit capabilities', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -64,7 +64,7 @@ describe('<TemplateListItem />', () => {
   });
   test('edit button hidden from users without edit capabilities', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -83,7 +83,7 @@ describe('<TemplateListItem />', () => {
   });
   test('missing resource icon is shown.', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -102,7 +102,7 @@ describe('<TemplateListItem />', () => {
   });
   test('missing resource icon is not shown when there is a project and an inventory.', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -123,7 +123,7 @@ describe('<TemplateListItem />', () => {
   });
   test('missing resource icon is not shown when inventory is prompt_on_launch, and a project', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,
@@ -144,7 +144,7 @@ describe('<TemplateListItem />', () => {
   });
   test('missing resource icon is not shown type is workflow_job_template', () => {
     const wrapper = mountWithContexts(
-      <TemplatesListItem
+      <TemplateListItem
         isSelected={false}
         template={{
           id: 1,

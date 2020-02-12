@@ -252,5 +252,4 @@ function TemplateList({ i18n }) {
   );
 }
 
-export { TemplateList as _TemplatesList };
 export default withI18n()(TemplateList);

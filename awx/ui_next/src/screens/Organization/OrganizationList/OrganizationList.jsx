@@ -88,6 +88,7 @@ function OrganizationsList({ i18n }) {
   const handleOrgDelete = async () => {
     await deleteOrganizations();
     await adjustPagination();
+    setSelected([]);
   };
 
   const adjustPagination = () => {
