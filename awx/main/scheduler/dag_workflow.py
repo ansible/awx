@@ -83,8 +83,8 @@ class WorkflowDAG(SimpleDAG):
                 elif p.job and p.job.status == "failed":
                     status = "failure_nodes"
                 #check that the nodes status matches either a pathway of the same status or is an always path.
-                if (p not in [node['node_object'] for node in self.get_parents(obj, status)]
-                    and p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
+                if (p not in [node['node_object'] for node in self.get_parents(obj, status)] and
+                        p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
                     return False
         return True
 
@@ -102,13 +102,13 @@ class WorkflowDAG(SimpleDAG):
             elif obj.job:
                 if obj.job.status in ['failed', 'error', 'canceled']:
                     nodes.extend(self.get_children(obj, 'failure_nodes') +
-                                self.get_children(obj, 'always_nodes'))
+                                 self.get_children(obj, 'always_nodes'))
                 elif obj.job.status == 'successful':
                     nodes.extend(self.get_children(obj, 'success_nodes') +
-                                self.get_children(obj, 'always_nodes'))
+                                 self.get_children(obj, 'always_nodes'))
             elif obj.unified_job_template is None:
                 nodes.extend(self.get_children(obj, 'failure_nodes') +
-                            self.get_children(obj, 'always_nodes'))
+                             self.get_children(obj, 'always_nodes'))
             else:
                 # This catches root nodes or ANY convergence nodes
                 if not obj.all_parents_must_converge and self._are_relevant_parents_finished(n):
@@ -231,9 +231,9 @@ class WorkflowDAG(SimpleDAG):
 
 
     r'''
-    determine if the current node is a convergence node by checking if all the 
-    parents are finished then checking to see if all parents meet the needed 
-    path criteria to run the convergence child. 
+    determine if the current node is a convergence node by checking if all the
+    parents are finished then checking to see if all parents meet the needed
+    path criteria to run the convergence child.
     (i.e. parent must fail, parent must succeed, etc. to proceed)
 
     Return a list object

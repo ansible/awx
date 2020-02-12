@@ -1,13 +1,11 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
-import os
 import logging
-from multiprocessing import Process
 
 from django.conf import settings
 from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
-from django.db import connection as django_connection, connections
+from django.db import connection as django_connection
 from kombu import Exchange, Queue
 
 from awx.main.utils.handlers import AWXProxyHandler
