@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
 import { CheckboxField } from '@components/FormField';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
+import { FieldTooltip } from '@components/FormField';
 import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
@@ -20,7 +21,15 @@ const StyledCheckboxField = styled(CheckboxField)`
   --pf-c-check__label--FontSize: var(--pf-c-form__label--FontSize);
 `;
 
-function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
+function VariablesField({
+  i18n,
+  id,
+  name,
+  label,
+  readOnly,
+  promptId,
+  tooltip,
+}) {
   const [field, meta, helpers] = useField(name);
   const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
 
@@ -32,6 +41,7 @@ function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
             </label>
+            {tooltip && <FieldTooltip content={tooltip} />}
           </SplitItem>
           <SplitItem>
             <YamlJsonToggle

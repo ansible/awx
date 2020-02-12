@@ -7,7 +7,11 @@ import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
 import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplateForm } from '../shared';
 
-function WorkflowJobTemplateEdit({ template, hasContentLoading }) {
+function WorkflowJobTemplateEdit({
+  template,
+  hasTemplateLoading,
+  webhook_key,
+}) {
   const [formSubmitError, setFormSubmitError] = useState();
   const history = useHistory();
 
@@ -57,7 +61,7 @@ function WorkflowJobTemplateEdit({ template, hasContentLoading }) {
   const handleCancel = () => {
     history.push(`/templates`);
   };
-  if (hasContentLoading) {
+  if (hasTemplateLoading) {
     return <ContentLoading />;
   }
   return (
@@ -67,6 +71,7 @@ function WorkflowJobTemplateEdit({ template, hasContentLoading }) {
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
           template={template}
+          webhook_key={webhook_key}
         />
       </CardBody>
       {formSubmitError ? <div>formSubmitError</div> : ''}

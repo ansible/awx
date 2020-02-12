@@ -6,6 +6,14 @@ class WorkflowJobTemplates extends Base {
     this.baseUrl = '/api/v2/workflow_job_templates/';
   }
 
+  readWebhookKey(id) {
+    return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
+  }
+
+  updateWebhookKey(id) {
+    return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
+  }
+
   associateLabel(id, label, orgId) {
     return this.http.post(`${this.baseUrl}${id}/labels/`, {
       name: label.name,

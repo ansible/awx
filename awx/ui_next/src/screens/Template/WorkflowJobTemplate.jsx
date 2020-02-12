@@ -63,7 +63,7 @@ class WorkflowJobTemplate extends Component {
         );
         data.summary_fields.webhook_credential.kind = name;
       }
-
+      setBreadcrumb(data);
       this.setState({ template: data });
       setBreadcrumb(data);
     } catch (err) {

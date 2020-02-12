@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import { CredentialsAPI } from '@api';
 import { Credential } from '@types';
 import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
+import { FieldTooltip } from '@components/FormField';
 import { FormGroup } from '@patternfly/react-core';
 import Lookup from '@components/Lookup';
 import OptionsList from './shared/OptionsList';
@@ -28,6 +29,7 @@ function CredentialLookup({
   value,
   history,
   i18n,
+  tooltip,
 }) {
   const [credentials, setCredentials] = useState([]);
   const [count, setCount] = useState(0);
@@ -60,6 +62,7 @@ function CredentialLookup({
       label={label}
       helperTextInvalid={helperTextInvalid}
     >
+      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="credential"
         header={label}
