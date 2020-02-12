@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useHistory, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -13,7 +13,12 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import {
+  getQSConfig,
+  parseQueryString,
+  replaceParams,
+  encodeNonDefaultQueryString,
+} from '@util/qs';
 
 import OrganizationListItem from './OrganizationListItem';
 
@@ -25,6 +30,7 @@ const QS_CONFIG = getQSConfig('organization', {
 
 function OrganizationsList({ i18n }) {
   const location = useLocation();
+  const history = useHistory();
   const match = useRouteMatch();
 
   const [selected, setSelected] = useState([]);
@@ -81,7 +87,21 @@ function OrganizationsList({ i18n }) {
 
   const handleOrgDelete = async () => {
     await deleteOrganizations();
-    await fetchOrganizations();
+    await adjustPagination();
+    setSelected([]);
+  };
+
+  const adjustPagination = () => {
+    const params = parseQueryString(QS_CONFIG, location.search);
+    if (params.page > 1 && selected.length === organizations.length) {
+      const newParams = encodeNonDefaultQueryString(
+        QS_CONFIG,
+        replaceParams(params, { page: params.page - 1 })
+      );
+      history.push(`${location.pathname}?${newParams}`);
+    } else {
+      fetchOrganizations();
+    }
   };
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;

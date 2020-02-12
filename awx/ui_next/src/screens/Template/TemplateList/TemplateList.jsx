@@ -29,7 +29,7 @@ const QS_CONFIG = getQSConfig('template', {
   type: 'job_template,workflow_job_template',
 });
 
-function TemplatesList({ i18n }) {
+function TemplateList({ i18n }) {
   const { id: projectId } = useParams();
   const { pathname, search } = useLocation();
 
@@ -268,5 +268,4 @@ function TemplatesList({ i18n }) {
   );
 }
 
-export { TemplatesList as _TemplatesList };
-export default withI18n()(TemplatesList);
+export default withI18n()(TemplateList);

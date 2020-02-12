@@ -9,7 +9,7 @@ import {
 } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
-import TemplatesList from './TemplateList';
+import TemplateList from './TemplateList';
 
 jest.mock('@api');
 
@@ -71,7 +71,7 @@ const mockTemplates = [
   },
 ];
 
-describe('<TemplatesList />', () => {
+describe('<TemplateList />', () => {
   beforeEach(() => {
     UnifiedJobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -94,7 +94,7 @@ describe('<TemplatesList />', () => {
   test('initially renders successfully', async () => {
     await act(async () => {
       mountWithContexts(
-        <TemplatesList
+        <TemplateList
           match={{ path: '/templates', url: '/templates' }}
           location={{ search: '', pathname: '/templates' }}
         />
@@ -105,7 +105,7 @@ describe('<TemplatesList />', () => {
   test('Templates are retrieved from the api and the components finishes loading', async () => {
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<TemplatesList />);
+      wrapper = mountWithContexts(<TemplateList />);
     });
     expect(UnifiedJobTemplatesAPI.read).toBeCalled();
     await act(async () => {
@@ -115,7 +115,7 @@ describe('<TemplatesList />', () => {
   });
 
   test('handleSelect is called when a template list item is selected', async () => {
-    const wrapper = mountWithContexts(<TemplatesList />);
+    const wrapper = mountWithContexts(<TemplateList />);
     await act(async () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -143,7 +143,7 @@ describe('<TemplatesList />', () => {
   });
 
   test('handleSelectAll is called when a template list item is selected', async () => {
-    const wrapper = mountWithContexts(<TemplatesList />);
+    const wrapper = mountWithContexts(<TemplateList />);
     await act(async () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -158,7 +158,7 @@ describe('<TemplatesList />', () => {
   });
 
   test('delete button is disabled if user does not have delete capabilities on a selected template', async () => {
-    const wrapper = mountWithContexts(<TemplatesList />);
+    const wrapper = mountWithContexts(<TemplateList />);
     await act(async () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -217,7 +217,7 @@ describe('<TemplatesList />', () => {
   });
 
   test('api is called to delete templates for each selected template.', async () => {
-    const wrapper = mountWithContexts(<TemplatesList />);
+    const wrapper = mountWithContexts(<TemplateList />);
     await act(async () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -277,7 +277,7 @@ describe('<TemplatesList />', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<TemplatesList />);
+    const wrapper = mountWithContexts(<TemplateList />);
     await act(async () => {
       await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     });
@@ -315,7 +315,7 @@ describe('<TemplatesList />', () => {
     const wrapper = mountWithContexts(
       <Route
         path="/projects/:id/job_templates"
-        component={() => <TemplatesList />}
+        component={() => <TemplateList />}
       />,
       {
         context: {
