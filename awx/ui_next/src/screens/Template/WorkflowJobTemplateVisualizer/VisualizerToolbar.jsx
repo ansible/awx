@@ -57,8 +57,10 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           <b>{template.name}</b>
         </div>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
-          <div >{i18n._(t`Total Nodes`)}</div>
-          <Badge id="visualizer-total-nodes-badge" isRead>{totalNodes}</Badge>
+          <div>{i18n._(t`Total Nodes`)}</div>
+          <Badge id="visualizer-total-nodes-badge" isRead>
+            {totalNodes}
+          </Badge>
           <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
