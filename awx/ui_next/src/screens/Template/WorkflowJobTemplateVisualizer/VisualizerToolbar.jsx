@@ -52,8 +52,6 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
     <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
         <div css="display: flex;" id="visualizer-toolbar-template-name">
-          <b>{i18n._(t`Workflow Visualizer`)}</b>
-          <VerticalSeparator />
           <b>{template.name}</b>
         </div>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
