@@ -106,13 +106,10 @@ def main():
     inventory = module.params.get('inventory')
     enabled = module.params.get('enabled')
     state = module.params.get('state')
-
     variables = module.params.get('variables')
+
     if variables:
-        if variables.startswith('@'):
-            filename = os.path.expanduser(variables[1:])
-            with open(filename, 'r') as f:
-                variables = f.read()
+        variables = module.load_variables_if_file_specified(variables, 'variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
@@ -130,8 +127,10 @@ def main():
         'name': new_name if new_name else name,
         'description': description,
         'inventory': inventory_id,
-        'enabled': enabled
+        'enabled': enabled,
     }
+    if variables:
+        host_fields['variables'] = variables
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
