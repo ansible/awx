@@ -255,10 +255,16 @@ class TowerModule(AnsibleModule):
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
-            # If we got 0 items by name, maybe they gave us an ID, lets try looking it by by ID
-            response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
-            if response is not None:
-                return name_or_id
+            try:
+                integer = int(name_or_id)
+                # If we got 0 items by name, maybe they gave us an ID, lets try looking it by by ID
+                response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
+                if response is not None:
+                    return name_or_id
+            except ValueError as ve:
+                # If we got a value error than we didn't have an integer so we can just pass and fall down to the fail
+                pass
+
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
         else:
             self.fail_json(msg="Found too many names {0} at endpoint {1} try using an ID instead of a name".format(name_or_id, endpoint))
