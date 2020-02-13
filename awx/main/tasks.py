@@ -1904,7 +1904,8 @@ class RunJob(BaseTask):
         except Inventory.DoesNotExist:
             pass
         else:
-            update_inventory_computed_fields.delay(inventory.id)
+            if inventory is not None:
+                update_inventory_computed_fields.delay(inventory.id)
 
 
 @task()
