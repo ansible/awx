@@ -4,6 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Badge as PFBadge,
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -13,10 +14,8 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Organization } from '@types';
 
@@ -85,19 +84,19 @@ function OrganizationListItem({
                 </Badge>
               </ListGroup>
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell key="edit" alignRight isFilled={false}>
               {organization.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Organization`)} position="top">
-                  <ListActionButton
+                  <Button
                     variant="plain"
                     component={Link}
                     to={`/organizations/${organization.id}/edit`}
                   >
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

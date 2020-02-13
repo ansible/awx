@@ -5,10 +5,9 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell,
+  DataListCheck,
 } from '@patternfly/react-core';
-import DataListCheck from '@components/DataListCheck';
 import DataListRadio from '@components/DataListRadio';
-import VerticalSeparator from '../VerticalSeparator';
 
 const CheckboxListItem = ({
   itemId,
@@ -37,12 +36,6 @@ const CheckboxListItem = ({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell
-              key="divider"
-              className="pf-c-data-list__cell--divider"
-            >
-              <VerticalSeparator />
-            </DataListCell>,
             <DataListCell key="name">
               <label
                 id={`check-action-item-${itemId}`}

@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import { Group } from '@types';
 
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -13,10 +14,8 @@ import {
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import VerticalSeparator from '@components/VerticalSeparator';
 
 function InventoryGroupItem({
@@ -47,19 +46,15 @@ function InventoryGroupItem({
                 <b>{group.name}</b>
               </Link>
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell key="edit" alignRight isFilled={false}>
               {group.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Group`)} position="top">
-                  <ListActionButton
-                    variant="plain"
-                    component={Link}
-                    to={editUrl}
-                  >
+                  <Button variant="plain" component={Link} to={editUrl}>
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

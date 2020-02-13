@@ -3,20 +3,19 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Button,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
+  Switch,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import DataListCell from '@components/DataListCell';
 import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
 import { Sparkline } from '@components/Sparkline';
-import Switch from '@components/Switch';
 import VerticalSeparator from '@components/VerticalSeparator';
 import { Host } from '@types';
 
@@ -59,7 +58,7 @@ function InventoryHostItem(props) {
             <DataListCell key="recentJobs">
               <Sparkline jobs={recentPlaybookJobs} />
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListCell key="enable" alignRight isFilled={false}>
               <Tooltip
                 content={i18n._(
                   t`Indicates if a host is available and should be included
@@ -69,6 +68,7 @@ function InventoryHostItem(props) {
                 position="top"
               >
                 <Switch
+                  css="display: inline-flex;"
                   id={`host-${host.id}-toggle`}
                   label={i18n._(t`On`)}
                   labelOff={i18n._(t`Off`)}
@@ -81,18 +81,16 @@ function InventoryHostItem(props) {
                   aria-label={i18n._(t`Toggle host`)}
                 />
               </Tooltip>
+            </DataListCell>,
+            <DataListCell key="edit" alignRight isFilled={false}>
               {host.summary_fields.user_capabilities?.edit && (
                 <Tooltip content={i18n._(t`Edit Host`)} position="top">
-                  <ListActionButton
-                    variant="plain"
-                    component={Link}
-                    to={`${editUrl}`}
-                  >
+                  <Button variant="plain" component={Link} to={`${editUrl}`}>
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

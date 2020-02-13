@@ -3,18 +3,6 @@ import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
 
-import styled from 'styled-components';
-
-const CopyButton = styled(Button)`
-  padding: 2px 4px;
-  margin-left: 8px;
-  border: none;
-  &:hover {
-    background-color: #0066cc;
-    color: white;
-  }
-`;
-
 export const clipboardCopyFunc = (event, text) => {
   const clipboard = event.currentTarget.parentElement;
   const el = document.createElement('input');
@@ -62,13 +50,13 @@ class ClipboardCopyButton extends React.Component {
         trigger="mouseenter focus click"
         content={copied ? clickTip : hoverTip}
       >
-        <CopyButton
+        <Button
           variant="plain"
           onClick={this.handleCopyClick}
           aria-label={hoverTip}
         >
           <CopyIcon />
-        </CopyButton>
+        </Button>
       </Tooltip>
     );
   }
