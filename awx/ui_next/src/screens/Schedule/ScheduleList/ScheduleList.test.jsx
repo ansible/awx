@@ -1,0 +1,163 @@
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { SchedulesAPI } from '@api';
+import ScheduleList from './ScheduleList';
+import mockSchedules from '../data.schedules.json';
+
+jest.mock('@api/models/Schedules');
+
+SchedulesAPI.destroy = jest.fn();
+SchedulesAPI.update.mockResolvedValue({
+  data: mockSchedules.results[0],
+});
+
+describe('ScheduleList', () => {
+  let wrapper;
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('read call successful', () => {
+    beforeAll(async () => {
+      SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      await act(async () => {
+        wrapper = mountWithContexts(<ScheduleList />);
+      });
+      wrapper.update();
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+    });
+
+    test('should fetch schedules from api and render the list', () => {
+      expect(SchedulesAPI.read).toHaveBeenCalled();
+      expect(wrapper.find('ScheduleListItem').length).toBe(5);
+    });
+
+    test('should check and uncheck the row item', async () => {
+      expect(
+        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+      ).toBe(false);
+      await act(async () => {
+        wrapper
+          .find('PFDataListCheck[id="select-schedule-1"]')
+          .invoke('onChange')(true);
+      });
+      wrapper.update();
+      expect(
+        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+      ).toBe(true);
+      await act(async () => {
+        wrapper
+          .find('PFDataListCheck[id="select-schedule-1"]')
+          .invoke('onChange')(false);
+      });
+      wrapper.update();
+      expect(
+        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+      ).toBe(false);
+    });
+
+    test('should check all row items when select all is checked', async () => {
+      wrapper.find('PFDataListCheck').forEach(el => {
+        expect(el.props().checked).toBe(false);
+      });
+      await act(async () => {
+        wrapper.find('Checkbox#select-all').invoke('onChange')(true);
+      });
+      wrapper.update();
+      wrapper.find('PFDataListCheck').forEach(el => {
+        expect(el.props().checked).toBe(true);
+      });
+      await act(async () => {
+        wrapper.find('Checkbox#select-all').invoke('onChange')(false);
+      });
+      wrapper.update();
+      wrapper.find('PFDataListCheck').forEach(el => {
+        expect(el.props().checked).toBe(false);
+      });
+    });
+
+    test('should call api delete schedules for each selected schedule', async () => {
+      await act(async () => {
+        wrapper
+          .find('PFDataListCheck[id="select-schedule-3"]')
+          .invoke('onChange')();
+      });
+      wrapper.update();
+      await act(async () => {
+        wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+      });
+      wrapper.update();
+      expect(SchedulesAPI.destroy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should show error modal when schedule is not successfully deleted from api', async () => {
+      SchedulesAPI.destroy.mockImplementationOnce(() =>
+        Promise.reject(new Error())
+      );
+      expect(wrapper.find('Modal').length).toBe(0);
+      await act(async () => {
+        wrapper
+          .find('PFDataListCheck[id="select-schedule-2"]')
+          .invoke('onChange')();
+      });
+      wrapper.update();
+      await act(async () => {
+        wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+      });
+      wrapper.update();
+      expect(wrapper.find('Modal').length).toBe(1);
+      await act(async () => {
+        wrapper.find('ModalBoxCloseButton').invoke('onClose')();
+      });
+      wrapper.update();
+      expect(wrapper.find('Modal').length).toBe(0);
+    });
+
+    test('should call api update schedules when toggle clicked', async () => {
+      await act(async () => {
+        wrapper
+          .find('Switch[id="schedule-5-toggle"]')
+          .first()
+          .invoke('onChange')();
+      });
+      wrapper.update();
+      expect(SchedulesAPI.update).toHaveBeenCalledTimes(1);
+    });
+
+    test('should show error modal when schedule is not successfully updated on toggle', async () => {
+      SchedulesAPI.update.mockImplementationOnce(() =>
+        Promise.reject(new Error())
+      );
+      expect(wrapper.find('Modal').length).toBe(0);
+      await act(async () => {
+        wrapper
+          .find('Switch[id="schedule-1-toggle"]')
+          .first()
+          .invoke('onChange')();
+      });
+      wrapper.update();
+      expect(wrapper.find('Modal').length).toBe(1);
+      await act(async () => {
+        wrapper.find('ModalBoxCloseButton').invoke('onClose')();
+      });
+      wrapper.update();
+      expect(wrapper.find('Modal').length).toBe(0);
+    });
+  });
+
+  describe('read call unsuccessful', () => {
+    test('should show content error when read call unsuccessful', async () => {
+      SchedulesAPI.read.mockRejectedValue(new Error());
+      await act(async () => {
+        wrapper = mountWithContexts(<ScheduleList />);
+      });
+      wrapper.update();
+      expect(wrapper.find('ContentError').length).toBe(1);
+    });
+  });
+});

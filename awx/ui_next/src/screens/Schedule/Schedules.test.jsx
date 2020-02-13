@@ -1,29 +1,36 @@
 import React from 'react';
-
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-
+import { createMemoryHistory } from 'history';
 import Schedules from './Schedules';
 
 describe('<Schedules />', () => {
-  let pageWrapper;
-  let pageSections;
-  let title;
-
-  beforeEach(() => {
-    pageWrapper = mountWithContexts(<Schedules />);
-    pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
-  });
+  let wrapper;
 
   afterEach(() => {
-    pageWrapper.unmount();
+    wrapper.unmount();
   });
 
-  test('initially renders without crashing', () => {
-    expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
-    expect(pageSections.first().props().variant).toBe('light');
+  test('initially renders succesfully', () => {
+    wrapper = mountWithContexts(<Schedules />);
+  });
+
+  test('should display schedule list breadcrumb heading', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/schedules'],
+    });
+
+    wrapper = mountWithContexts(<Schedules />, {
+      context: {
+        router: {
+          history,
+          route: {
+            location: history.location,
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find('Crumb').length).toBe(1);
+    expect(wrapper.find('BreadcrumbHeading').text()).toBe('Schedules');
   });
 });

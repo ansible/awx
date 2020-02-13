@@ -1,0 +1,106 @@
+{
+  "count": 5,
+  "next": "/api/v2/schedules/",
+  "previous": null,
+  "results": [
+    {
+      "url": "/api/v2/schedules/1",
+      "rrule":
+        "DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+      "id": 1,
+      "summary_fields": {
+        "unified_job_template": {
+          "id": 6,
+          "name": "Mock JT",
+          "description": "",
+          "unified_job_type": "job"
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        }
+      },
+      "name": "Mock JT Schedule",
+      "next_run": "2020-02-20T05:00:00Z"
+    }, {
+      "url": "/api/v2/schedules/2",
+      "rrule":
+        "DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+      "id": 2,
+      "summary_fields": {
+        "unified_job_template": {
+          "id": 7,
+          "name": "Mock WFJT",
+          "description": "",
+          "unified_job_type": "workflow_job"
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        }
+      },
+      "name": "Mock WFJT Schedule",
+      "next_run": "2020-02-20T05:00:00Z"
+    }, {
+      "url": "/api/v2/schedules/3",
+      "rrule":
+        "DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+      "id": 3,
+      "summary_fields": {
+        "unified_job_template": {
+          "id": 8,
+          "name": "Mock Project Update",
+          "description": "",
+          "unified_job_type": "project_update"
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        }
+      },
+      "name": "Mock Project Update Schedule",
+      "next_run": "2020-02-20T05:00:00Z"
+    }, {
+      "url": "/api/v2/schedules/4",
+      "rrule":
+        "DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+      "id": 4,
+      "summary_fields": {
+        "unified_job_template": {
+          "id": 9,
+          "name": "Mock System Job",
+          "description": "",
+          "unified_job_type": "system_job"
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        }
+      },
+      "name": "Mock System Job Schedule",
+      "next_run": "2020-02-20T05:00:00Z"
+    }, {
+      "url": "/api/v2/schedules/5",
+      "rrule":
+        "DTSTART;TZID=America/New_York:20200220T000000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+      "id": 5,
+      "summary_fields": {
+        "unified_job_template": {
+          "id": 10,
+          "name": "Mock Inventory Update",
+          "description": "",
+          "unified_job_type": "inventory_update"
+        },
+        "user_capabilities": {
+          "edit": true,
+          "delete": true
+        },
+        "inventory": {
+          "id": 11
+        }
+      },
+      "name": "Mock Inventory Update Schedule",
+      "next_run": "2020-02-20T05:00:00Z"
+    }
+  ]
+}
