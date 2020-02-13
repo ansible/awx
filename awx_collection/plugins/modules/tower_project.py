@@ -255,7 +255,7 @@ def main():
     if scm_type == '':
         project_fields['local_path'] = local_path
 
-    if state != 'absent' and (scm_update_cache_timeout is not None and scm_update_on_launch is not True):
+    if state != 'absent' and (scm_update_cache_timeout != 0 and scm_update_on_launch is not True):
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
 
     # If we are doing a not manual project, register our on_change method
