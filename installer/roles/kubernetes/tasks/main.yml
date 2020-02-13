@@ -194,10 +194,6 @@
       when: kubernetes_web_image is not defined
   when: docker_registry is defined
 
-- name: Generate SSL certificates for RabbitMQ, if needed
-  include_tasks: ssl_cert_gen.yml
-  when: "rabbitmq_use_ssl|default(False)|bool"
-
 - name: Determine StatefulSet api version
   set_fact:
     kubernetes_statefulset_api_version: "{{ 'apps/v1' if kube_api_version is version('1.9', '>=') else 'apps/v1beta1' }}"

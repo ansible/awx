@@ -16,131 +16,6 @@ imagePullSecrets:
 {% endif %}
 
 ---
-kind: Service
-apiVersion: v1
-metadata:
-  namespace: {{ kubernetes_namespace }}
-  name: rabbitmq
-  labels:
-    app: {{ kubernetes_deployment_name }}
-    type: LoadBalancer
-spec:
-  type: NodePort
-  ports:
-   - name: http
-     protocol: TCP
-     port: 15672
-     targetPort: 15672
-   - name: amqp
-     protocol: TCP
-     port: 5672
-     targetPort: 5672
-  selector:
-    app: {{ kubernetes_deployment_name }}
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: rabbitmq-config
-  namespace: {{ kubernetes_namespace }}
-data:
-  enabled_plugins: |
-      [rabbitmq_management,rabbitmq_peer_discovery_k8s].
-  rabbitmq_definitions.json: |
-      {
-        "users":[{"name": "{{ rabbitmq_user }}", "password": "{{ rabbitmq_password }}", "tags": "administrator"}],
-        "permissions":[
-          {"user":"{{ rabbitmq_user }}","vhost":"awx","configure":".*","write":".*","read":".*"}
-        ],
-        "vhosts":[{"name":"awx"}],
-        "policies":[
-            {"vhost":"awx","name":"ha-all","pattern":".*","definition":{"ha-mode":"all","ha-sync-mode":"automatic"}}
-        ]
-      }
-  rabbitmq.conf: |
-      ## Clustering
-      management.load_definitions = /etc/rabbitmq/rabbitmq_definitions.json
-      cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
-      cluster_formation.k8s.host = kubernetes.default.svc
-      cluster_formation.k8s.address_type = ip
-      cluster_formation.node_cleanup.interval = 10
-      cluster_formation.node_cleanup.only_log_warning = false
-      cluster_partition_handling = autoheal
-      ## queue master locator
-      queue_master_locator=min-masters
-      ## enable guest user
-      loopback_users.guest = false
-{% if rabbitmq_use_ssl|default(False)|bool %}
-      ssl_options.cacertfile=/etc/pki/rabbitmq/ca.crt
-      ssl_options.certfile=/etc/pki/rabbitmq/server-combined.pem
-      ssl_options.verify=verify_peer
-{% endif %}
-  rabbitmq-env.conf: |
-      NODENAME=${RABBITMQ_NODENAME}
-      USE_LONGNAME=true
-{% if rabbitmq_use_ssl|default(False)|bool %}
-      ERL_SSL_PATH=$(erl -eval 'io:format("~p", [code:lib_dir(ssl, ebin)]),halt().' -noshell)
-      SSL_ADDITIONAL_ERL_ARGS="-pa '$ERL_SSL_PATH' -proto_dist inet_tls -ssl_dist_opt server_certfile /etc/pki/rabbitmq/server-combined.pem -ssl_dist_opt server_secure_renegotiate true client_secure_renegotiate true"
-      SERVER_ADDITIONAL_ERL_ARGS="$SERVER_ADDITIONAL_ERL_ARGS $SSL_ADDITIONAL_ERL_ARGS"
-      CTL_ERL_ARGS="$SSL_ADDITIONAL_ERL_ARGS"
-{% endif %}
-
-{% if kubernetes_context is defined %}
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: endpoint-reader
-  namespace: {{ kubernetes_namespace }}
-rules:
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["get"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: endpoint-reader
-  namespace: {{ kubernetes_namespace }}
-subjects:
-- kind: ServiceAccount
-  name: awx
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: endpoint-reader
-{% endif %}
-
-{% if openshift_host is defined %}
----
-kind: Role
-apiVersion: v1
-metadata:
-  name: endpoint-reader
-  namespace: {{ kubernetes_namespace }}
-rules:
-  - apiGroups: [""]
-    resources: ["endpoints"]
-    verbs: ["get"]
----
-kind: RoleBinding
-apiVersion: v1
-metadata:
-  name: endpoint-reader
-  namespace: {{ kubernetes_namespace }}
-roleRef:
-  name: endpoint-reader
-  namespace: {{ kubernetes_namespace }}
-subjects:
-  - kind: ServiceAccount
-    name: awx
-    namespace: {{ kubernetes_namespace }}
-userNames:
-  - system:serviceaccount:{{ kubernetes_namespace }}:awx
-{% endif %}
-
----
 apiVersion: {{ kubernetes_statefulset_api_version }}
 kind: StatefulSet
 metadata:
@@ -165,7 +40,6 @@ spec:
         service: django
         app: {{ kubernetes_deployment_name }}
     spec:
-      serviceAccountName: awx
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
@@ -266,7 +140,7 @@ spec:
 {% if web_cpu_limit is defined %}
               cpu: "{{ web_cpu_limit }}m"
 {% endif %}
-        - name: {{ kubernetes_deployment_name }}-celery
+        - name: {{ kubernetes_deployment_name }}-task
           securityContext:
             privileged: true
           image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
@@ -303,6 +177,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
@@ -316,72 +194,25 @@ spec:
 {% if task_cpu_limit is defined %}
               cpu: "{{ task_cpu_limit }}m"
 {% endif %}
-        - name: {{ kubernetes_deployment_name }}-rabbit
-          image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
+        - name: {{ kubernetes_deployment_name }}-redis
+          image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
           ports:
-            - name: http
+            - name: redis
               protocol: TCP
-              containerPort: 15672
-            - name: amqp
-              protocol: TCP
-              containerPort: 5672
-          livenessProbe:
-            exec:
-              command:
-              - /usr/local/bin/healthchecks/rabbit_health_node.py
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-              - /usr/local/bin/healthchecks/rabbit_health_node.py
-            initialDelaySeconds: 10
-            timeoutSeconds: 10
-          env:
-            - name: MY_POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-            - name: RABBITMQ_USE_LONGNAME
-              value: "true"
-            - name: RABBITMQ_NODENAME
-              value: "rabbit@$(MY_POD_IP)"
-            - name: RABBITMQ_ERLANG_COOKIE
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: rabbitmq_erlang_cookie
-            - name: K8S_SERVICE_NAME
-              value: "rabbitmq"
-            - name: RABBITMQ_USER
-              value: {{ rabbitmq_user }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: rabbitmq_password
-          volumeMounts:
-            - name: rabbitmq-config
-              mountPath: /etc/rabbitmq
-            - name: rabbitmq-healthchecks
-              mountPath: /usr/local/bin/healthchecks
-{% if rabbitmq_use_ssl|default(False)|bool %}
-            - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
-              mountPath: /etc/pki/rabbitmq
-{% endif %}
+              containerPort: 6379
           resources:
             requests:
-              memory: "{{ rabbitmq_mem_request }}Gi"
-              cpu: "{{ rabbitmq_cpu_request }}m"
-{% if rabbitmq_mem_limit is defined or rabbitmq_cpu_limit is defined %}
+              memory: "{{ redis_mem_request }}Gi"
+              cpu: "{{ redis_cpu_request }}m"
+{% if redis_mem_limit is defined or redis_cpu_limit is defined %}
             limits:
 {% endif %}
-{% if rabbitmq_mem_limit is defined %}
-              memory: "{{ rabbitmq_mem_limit }}Gi"
+{% if redis_mem_limit is defined %}
+              memory: "{{ redis_mem_limit }}Gi"
 {% endif %}
-{% if rabbitmq_cpu_limit is defined %}
-              cpu: "{{ rabbitmq_cpu_limit }}m"
+{% if redis_cpu_limit is defined %}
+              cpu: "{{ redis_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
@@ -458,68 +289,6 @@ spec:
               - key: secret_key
                 path: SECRET_KEY
 
-        - name: rabbitmq-config
-          configMap:
-            name: rabbitmq-config
-            items:
-            - key: rabbitmq.conf
-              path: rabbitmq.conf
-            - key: enabled_plugins
-              path: enabled_plugins
-            - key: rabbitmq_definitions.json
-              path: rabbitmq_definitions.json
-            - key: rabbitmq-env.conf
-              path: rabbitmq-env.conf
-
-{% if rabbitmq_use_ssl|default(False)|bool %}
-        - name: "{{ kubernetes_deployment_name }}-rabbitmq-certs-vol"
-          secret:
-            secretName: "{{ kubernetes_deployment_name }}-rabbitmq-certs"
-            items:
-              - key: rabbitmq_ssl_cert
-                path: 'server.crt'
-              - key: rabbitmq_ssl_key
-                path: 'server.key'
-              - key: rabbitmq_ssl_cacert
-                path: 'ca.crt'
-              - key: rabbitmq_ssl_combined
-                path: 'server-combined.pem'
-{% endif %}
-        - name: rabbitmq-healthchecks
-          configMap:
-            name: {{ kubernetes_deployment_name }}-healthchecks
-            items:
-            - key: rabbit_health_node.py
-              path: rabbit_health_node.py
-            defaultMode: 0755
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ kubernetes_deployment_name }}-healthchecks
-  namespace: {{ kubernetes_namespace }}
-data:
-  rabbit_health_node.py: |
-    #!/usr/bin/env python
-    try:
-      from http.client import HTTPConnection
-    except ImportError:
-      from httplib import HTTPConnection
-    import sys
-    import os
-    import base64
-    authsecret = base64.b64encode(os.getenv('RABBITMQ_USER') + ':' + os.getenv('RABBITMQ_PASSWORD'))
-    conn=HTTPConnection('localhost:15672')
-    conn.request('GET', '/api/healthchecks/node', headers={'Authorization': 'Basic %s' % authsecret})
-    r1 = conn.getresponse()
-    if r1.status != 200:
-      sys.stderr.write('Received http error %i\\n' % (r1.status))
-      sys.exit(1)
-    body = r1.read()
-    if body != '{"status":"ok"}':
-      sys.stderr.write('Received body: %s' % body)
-      sys.exit(2)
-    sys.exit(0)
 ---
 apiVersion: v1
 kind: Service
@@ -536,22 +305,7 @@ spec:
       targetPort: 8052
   selector:
     name: {{ kubernetes_deployment_name }}-web-deploy
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ kubernetes_deployment_name }}-rmq-mgmt
-  namespace: {{ kubernetes_namespace }}
-  labels:
-    name: {{ kubernetes_deployment_name }}-rmq-mgmt
-spec:
-  type: ClusterIP
-  ports:
-    - name: rmqmgmt
-      port: 15672
-      targetPort: 15672
-  selector:
-    name: {{ kubernetes_deployment_name }}-web-deploy
+
 {% if kubernetes_context is defined %}
 ---
 apiVersion: extensions/v1beta1

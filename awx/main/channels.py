@@ -38,11 +38,12 @@ def unwrap_broadcast_msg(payload: dict):
 
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
-    return [h[0] for h in Instance.objects.filter(rampart_groups__controller__isnull=True)
-                                          .exclude(hostname=Instance.objects.me().hostname)
-                                          .order_by('hostname')
-                                          .values_list('hostname')
-                                          .distinct()]
+    instances = Instance.objects.filter(rampart_groups__controller__isnull=True) \
+                                .exclude(hostname=Instance.objects.me().hostname) \
+                                .order_by('hostname') \
+                                .values('hostname', 'ip_address') \
+                                .distinct()
+    return [i['ip_address'] or i['hostname'] for i in instances]
 
 
 def get_local_host():

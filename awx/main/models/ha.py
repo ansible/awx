@@ -53,6 +53,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     uuid = models.CharField(max_length=40)
     hostname = models.CharField(max_length=250, unique=True)
+    ip_address = models.CharField(
+        blank=True,
+        null=True,
+        default=None,
+        max_length=50,
+        unique=True,
+    )
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     last_isolated_check = models.DateTimeField(

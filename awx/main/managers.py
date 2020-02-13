@@ -3,6 +3,7 @@
 
 import sys
 import logging
+import os
 
 from django.db import models
 from django.conf import settings
@@ -114,7 +115,7 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, uuid=None, hostname=None):
+    def register(self, uuid=None, hostname=None, ip_address=None):
         if not uuid:
             uuid = settings.SYSTEM_UUID
         if not hostname:
@@ -122,13 +123,23 @@ class InstanceManager(models.Manager):
         with advisory_lock('instance_registration_%s' % hostname):
             instance = self.filter(hostname=hostname)
             if instance.exists():
-                return (False, instance[0])
-            instance = self.create(uuid=uuid, hostname=hostname, capacity=0)
+                instance = instance.get()
+                if instance.ip_address != ip_address:
+                    instance.ip_address = ip_address
+                    instance.save()
+                    return (True, instance)
+                else:
+                    return (False, instance)
+            instance = self.create(uuid=uuid,
+                                   hostname=hostname,
+                                   ip_address=ip_address,
+                                   capacity=0)
         return (True, instance)
 
     def get_or_register(self):
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            return self.register()
+            pod_ip = os.environ.get('MY_POD_IP')
+            return self.register(ip_address=pod_ip)
         else:
             return (False, self.me())
 
