@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { bool, func, node, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
@@ -72,13 +72,14 @@ function FieldWithPrompt({
 }
 
 FieldWithPrompt.propTypes = {
-  fieldId: PropTypes.string.isRequired,
-  isRequired: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  promptId: PropTypes.string.isRequired,
-  promptValidate: PropTypes.func,
-  tooltip: PropTypes.node,
-  tooltipMaxWidth: PropTypes.string,
+  fieldId: string.isRequired,
+  isRequired: bool,
+  label: string.isRequired,
+  promptId: string.isRequired,
+  promptName: string.isRequired,
+  promptValidate: func,
+  tooltip: node,
+  tooltipMaxWidth: string,
 };
 
 FieldWithPrompt.defaultProps = {
