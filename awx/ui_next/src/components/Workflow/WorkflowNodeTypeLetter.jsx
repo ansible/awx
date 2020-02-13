@@ -57,7 +57,9 @@ function WorkflowNodeTypeLetter({ node }) {
 
   return (
     <foreignObject y="50" x="-10" height="20" width="20">
-      <NodeTypeLetter>{nodeTypeLetter}</NodeTypeLetter>
+      <NodeTypeLetter id={`node-${node.id}-type-letter`}>
+        {nodeTypeLetter}
+      </NodeTypeLetter>
     </foreignObject>
   );
 }

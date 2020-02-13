@@ -199,7 +199,7 @@ function VisualizerNode({
         y="1"
       >
         <NodeContents isInvalidLinkTarget={node.isInvalidLinkTarget}>
-          <NodeResourceName>
+          <NodeResourceName id={`node-${node.id}-name`}>
             {node.unifiedJobTemplate
               ? node.unifiedJobTemplate.name
               : i18n._(t`DELETED`)}
