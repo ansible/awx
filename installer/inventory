@@ -78,10 +78,6 @@ docker_compose_dir="~/.awx/awxcompose"
 # docker_registry_username=developer
 
 
-# Docker_image will not attempt to push to remote if the image already exists locally
-# Set this to true to delete images from docker on the build host so that they are pushed to the remote repository
-# docker_remove_local_images=False
-
 # Set pg_hostname if you have an external postgres server, otherwise
 # a new postgres service will be created
 # pg_hostname=postgresql
