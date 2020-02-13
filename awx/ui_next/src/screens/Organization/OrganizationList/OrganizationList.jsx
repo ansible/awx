@@ -13,13 +13,8 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import {
-  getQSConfig,
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-} from '@util/qs';
-
+import { getQSConfig, parseQueryString } from '@util/qs';
+import updateUrlAfterDelete from '@util/updateUrlAfterDelete';
 import OrganizationListItem from './OrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organization', {
@@ -87,21 +82,18 @@ function OrganizationsList({ i18n }) {
 
   const handleOrgDelete = async () => {
     await deleteOrganizations();
-    await adjustPagination();
-    setSelected([]);
-  };
-
-  const adjustPagination = () => {
-    const params = parseQueryString(QS_CONFIG, location.search);
-    if (params.page > 1 && selected.length === organizations.length) {
-      const newParams = encodeNonDefaultQueryString(
-        QS_CONFIG,
-        replaceParams(params, { page: params.page - 1 })
-      );
-      history.push(`${location.pathname}?${newParams}`);
+    const url = updateUrlAfterDelete(
+      QS_CONFIG,
+      location,
+      organizations,
+      selected
+    );
+    if (url) {
+      history.push(url);
     } else {
       fetchOrganizations();
     }
+    setSelected([]);
   };
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;

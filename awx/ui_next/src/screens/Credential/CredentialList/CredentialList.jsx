@@ -12,12 +12,8 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import useRequest from '@util/useRequest';
-import {
-  getQSConfig,
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-} from '@util/qs';
+import updateUrlAfterDelete from '@util/updateUrlAfterDelete';
+import { getQSConfig, parseQueryString } from '@util/qs';
 import { CredentialListItem } from '.';
 
 const QS_CONFIG = getQSConfig('credential', {
@@ -80,21 +76,18 @@ function CredentialList({ i18n }) {
 
   const handleDelete = async () => {
     await deleteCredentials();
-    adjustPagination();
-    setSelected([]);
-  };
-
-  const adjustPagination = () => {
-    const params = parseQueryString(QS_CONFIG, location.search);
-    if (params.page > 1 && selected.length === credentials.length) {
-      const newParams = encodeNonDefaultQueryString(
-        QS_CONFIG,
-        replaceParams(params, { page: params.page - 1 })
-      );
-      history.push(`${location.pathname}?${newParams}`);
+    const url = updateUrlAfterDelete(
+      QS_CONFIG,
+      location,
+      credentials,
+      selected
+    );
+    if (url) {
+      history.push(url);
     } else {
       fetchCredentials();
     }
+    setSelected([]);
   };
 
   const handleSelectAll = isSelected => {
