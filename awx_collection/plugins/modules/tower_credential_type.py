@@ -124,9 +124,6 @@ def main():
     kind = module.params.get('kind')
     state = module.params.get('state')
 
-    # Deal with check mode
-    module.default_check_mode()
-
     # These will be passed into the create/updates
     credential_type_params = {
         'name': new_name if new_name else name,
