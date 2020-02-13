@@ -162,6 +162,19 @@ if __name__ == '__main__':
             w.join()
 
         workers = []
+
+        print('generating unique start/end line counts')
+        cursor.execute('CREATE SEQUENCE IF NOT EXISTS firehose_seq;')
+        cursor.execute('CREATE SEQUENCE IF NOT EXISTS firehose_line_seq;')
+        conn.commit()
+
+        cursor.execute(
+            "UPDATE main_jobevent SET "
+            "counter=nextval('firehose_seq')::integer,"
+            "start_line=nextval('firehose_seq')::integer,"
+            "end_line=currval('firehose_seq')::integer + 2"
+        )
+        conn.commit()
     finally:
         # restore all indexes
         print(datetime.datetime.utcnow().isoformat())
