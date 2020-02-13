@@ -45,7 +45,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "manual", "file", "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
       type: str
       required: False
     source_path:
@@ -157,7 +157,7 @@ def main():
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
-        source=dict(choices=["manual", "file", "scm", "ec2", "gce",
+        source=dict(choices=["scm", "ec2", "gce",
                              "azure_rm", "vmware", "satellite6", "cloudforms",
                              "openstack", "rhv", "tower", "custom"], required=False),
         source_path=dict(),
@@ -169,7 +169,7 @@ def main():
         group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(type='str'),
+        custom_virtualenv=dict(type='str', default=''),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
