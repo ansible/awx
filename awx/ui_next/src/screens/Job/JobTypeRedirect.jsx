@@ -54,7 +54,7 @@ class JobTypeRedirect extends Component {
     if (error) {
       return (
         <PageSection>
-          <Card className="awx-c-card">
+          <Card>
             {error === NOT_FOUND ? (
               <ContentError isNotFound>
                 <Link to="/jobs">{i18n._(`View all Jobs`)}</Link>

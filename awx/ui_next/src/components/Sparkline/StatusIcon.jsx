@@ -75,7 +75,7 @@ const SkippedBottom = styled.div`
 
 const StatusIcon = ({ status, ...props }) => {
   return (
-    <div className="at-c-statusIcon" {...props}>
+    <div {...props}>
       {status === 'running' && <RunningJob />}
       {(status === 'new' ||
         status === 'pending' ||

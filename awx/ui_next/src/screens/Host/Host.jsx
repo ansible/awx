@@ -117,7 +117,7 @@ function Host({ inventory, i18n, setBreadcrumb }) {
 
   if (!hasContentLoading && contentError) {
     return (
-      <Card className="awx-c-card">
+      <Card>
         <ContentError error={contentError}>
           {contentError.response && contentError.response.status === 404 && (
             <span>
@@ -141,7 +141,7 @@ function Host({ inventory, i18n, setBreadcrumb }) {
   );
 
   return (
-    <Card className="awx-c-card">
+    <Card>
       {cardHeader}
       <Switch>
         {redirect}

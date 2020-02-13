@@ -30,6 +30,7 @@ export default ({ variant, children, ...props }) => {
   props.isOpen = Boolean(isOpen);
   return (
     <Modal
+      isLarge
       className={`awx-c-modal${variant &&
         ` at-c-alertModal at-c-alertModal--${variant}`}`}
       {...props}

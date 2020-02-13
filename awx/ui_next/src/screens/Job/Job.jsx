@@ -83,7 +83,7 @@ class Job extends Component {
     if (!hasContentLoading && contentError) {
       return (
         <PageSection>
-          <Card className="awx-c-card">
+          <Card>
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>

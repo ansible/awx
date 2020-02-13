@@ -13,6 +13,8 @@ import { SearchIcon } from '@patternfly/react-icons';
 import {
   Button,
   ButtonVariant,
+  Chip,
+  ChipGroup,
   InputGroup as PFInputGroup,
   Modal,
 } from '@patternfly/react-core';
@@ -21,7 +23,6 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 import reducer, { initReducer } from './shared/reducer';
-import { ChipGroup, Chip } from '../Chip';
 import { QSConfig } from '@types';
 
 const SearchButton = styled(Button)`
@@ -139,7 +140,7 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
-        className="awx-c-modal"
+        isLarge
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -148,9 +149,7 @@ function Lookup(props) {
             key="select"
             variant="primary"
             onClick={save}
-            style={
-              required && selectedItems.length === 0 ? { display: 'none' } : {}
-            }
+            isDisabled={required && selectedItems.length === 0}
           >
             {i18n._(t`Select`)}
           </Button>,

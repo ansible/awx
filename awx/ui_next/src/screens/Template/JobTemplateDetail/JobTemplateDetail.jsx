@@ -3,6 +3,8 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
   Button,
+  Chip,
+  ChipGroup,
   TextList,
   TextListItem,
   TextListItemVariants,
@@ -15,7 +17,7 @@ import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import { ChipGroup, Chip, CredentialChip } from '@components/Chip';
+import CredentialChip from '@components/CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
