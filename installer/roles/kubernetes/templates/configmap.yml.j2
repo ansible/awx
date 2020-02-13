@@ -144,7 +144,7 @@ data:
 
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
-    SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+    SYSTEM_UUID = os.environ.get('MY_POD_UID', '00000000-0000-0000-0000-000000000000')
 
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
