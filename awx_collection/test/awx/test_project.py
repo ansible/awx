@@ -25,8 +25,6 @@ def test_create_project(run_module, admin_user, organization):
 
     result.pop('invocation')
     assert result == {
-        'credential_type': 'Nexus',
-        'state': 'present',
         'name': 'foo',
         'id': proj.id,
         'warnings': warning

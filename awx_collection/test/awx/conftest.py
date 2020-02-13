@@ -16,6 +16,8 @@ import pytest
 from awx.main.tests.functional.conftest import _request
 from awx.main.models import Organization, Project, Inventory, Credential, CredentialType
 
+from ansible.module_utils.common import warnings
+
 try:
     import tower_cli
     HAS_TOWER_CLI = True
@@ -101,6 +103,9 @@ def run_module(request):
 
         if not isinstance(module_params, dict):
             raise RuntimeError('Module params must be dict, got {0}'.format(type(module_params)))
+
+        warnings._global_warnings = []
+        warnings._global_deprecations = []
 
         # Ansible params can be passed as an invocation argument or over stdin
         # this short circuits within the AnsibleModule interface

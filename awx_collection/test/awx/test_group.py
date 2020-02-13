@@ -25,11 +25,9 @@ def test_create_group(run_module, admin_user):
 
     result.pop('invocation')
     assert result == {
-        'credential_type': 'Nexus',
         'id': group.id,
         'name': 'Test Group',
         'changed': True,
-        'state': 'present'
     }
 
 
@@ -54,8 +52,5 @@ def test_tower_group_idempotent(run_module, admin_user):
     result.pop('invocation')
     assert result == {
         'id': group.id,
-        'credential_type': 'Nexus',
-        'name': 'Test Group',
         'changed': False,  # idempotency assertion
-        'state': 'present'
     }
