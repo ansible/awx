@@ -506,10 +506,6 @@ If you wish to tag and push built images to a Docker registry, set the following
 
 > Username of the user that will push images to the registry. Defaults to *developer*.
 
-*docker_remove_local_images*
-
-> Due to the way that the docker_image module behaves, images will not be pushed to a remote repository if they are present locally.  Set this to delete local versions of the images that will be pushed to the remote.  This will fail if containers are currently running from those images.
-
 **Note**
 
 > These settings are ignored if using official images
