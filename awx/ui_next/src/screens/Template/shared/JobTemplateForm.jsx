@@ -230,10 +230,14 @@ class JobTemplateForm extends Component {
           />
           <FieldWithPrompt
             fieldId="template-job-type"
+            isRequired
             label={i18n._(t`Job Type`)}
             promptId="template-ask-job-type-on-launch"
             promptName="ask_job_type_on_launch"
-            isRequired
+            tooltip={i18n._(t`For job templates, select run to execute
+            the playbook. Select check to only check playbook syntax,
+            test environment setup, and report problems without
+            executing the playbook.`)}
           >
             <Field
               name="job_type"
