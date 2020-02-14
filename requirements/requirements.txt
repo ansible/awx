@@ -101,7 +101,6 @@ python-string-utils==0.6.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.9.0
 pytz==2019.3              # via django, irc, tempora, twilio
-pyyaml==5.2               # via ansible-runner, djangorestframework-yaml, kubernetes
 pyyaml==5.3               # via ansible-runner, djangorestframework-yaml, kubernetes
 redis==3.3.11
 requests-futures==1.0.0

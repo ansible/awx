@@ -11,7 +11,7 @@ from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
-from awx.main.dispatch.worker import AWXConsumer, TaskWorker
+from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
 from awx.main.dispatch import periodic
 
 logger = logging.getLogger('awx.main.dispatch')
