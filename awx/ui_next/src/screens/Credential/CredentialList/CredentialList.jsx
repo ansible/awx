@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CredentialsAPI } from '@api';
@@ -11,8 +11,7 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import useRequest from '@util/useRequest';
-import updateUrlAfterDelete from '@util/updateUrlAfterDelete';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import { CredentialListItem } from '.';
 
@@ -23,11 +22,8 @@ const QS_CONFIG = getQSConfig('credential', {
 });
 
 function CredentialList({ i18n }) {
-  const [showDeletionError, setShowDeletionError] = useState(false);
   const [selected, setSelected] = useState([]);
-
   const location = useLocation();
-  const history = useHistory();
 
   const {
     result: { credentials, credentialCount, actions },
@@ -60,33 +56,23 @@ function CredentialList({ i18n }) {
 
   const {
     isLoading: isDeleteLoading,
-    error: deletionError,
-    request: deleteCredentials,
-  } = useRequest(
+    deleteItems: deleteCredentials,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
     useCallback(async () => {
       return Promise.all(selected.map(({ id }) => CredentialsAPI.destroy(id)));
-    }, [selected])
-  );
-
-  useEffect(() => {
-    if (deletionError) {
-      setShowDeletionError(true);
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      items: credentials,
+      selected,
+      fetchItems: fetchCredentials,
     }
-  }, [deletionError]);
+  );
 
   const handleDelete = async () => {
     await deleteCredentials();
-    const url = updateUrlAfterDelete(
-      QS_CONFIG,
-      location,
-      credentials,
-      selected
-    );
-    if (url) {
-      history.push(url);
-    } else {
-      fetchCredentials();
-    }
     setSelected([]);
   };
 
@@ -149,10 +135,10 @@ function CredentialList({ i18n }) {
         />
       </Card>
       <AlertModal
-        isOpen={showDeletionError}
+        isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setShowDeletionError(false)}
+        onClose={clearDeletionError}
       >
         {i18n._(t`Failed to delete one or more credentials.`)}
         <ErrorDetail error={deletionError} />
