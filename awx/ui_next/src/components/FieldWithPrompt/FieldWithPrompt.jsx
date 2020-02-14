@@ -1,15 +1,9 @@
 import React from 'react';
-import { bool, func, node, string } from 'prop-types';
+import { bool, node, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Tooltip } from '@patternfly/react-core';
-import { CheckboxField } from '@components/FormField';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
+import { CheckboxField, FieldTooltip } from '@components/FormField';
 import styled from 'styled-components';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
 
 const FieldHeader = styled.div`
   display: flex;
@@ -33,9 +27,7 @@ function FieldWithPrompt({
   label,
   promptId,
   promptName,
-  promptValidate,
   tooltip,
-  tooltipMaxWidth,
 }) {
   return (
     <div className="pf-c-form__group">
@@ -49,21 +41,12 @@ function FieldWithPrompt({
               </span>
             )}
           </label>
-          {tooltip && (
-            <Tooltip
-              content={tooltip}
-              maxWidth={tooltipMaxWidth}
-              position="right"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
-          )}
+          {tooltip && <FieldTooltip content={tooltip} />}
         </div>
         <StyledCheckboxField
           id={promptId}
           label={i18n._(t`Prompt On Launch`)}
           name={promptName}
-          validate={promptValidate}
         />
       </FieldHeader>
       {children}
@@ -77,16 +60,12 @@ FieldWithPrompt.propTypes = {
   label: string.isRequired,
   promptId: string.isRequired,
   promptName: string.isRequired,
-  promptValidate: func,
   tooltip: node,
-  tooltipMaxWidth: string,
 };
 
 FieldWithPrompt.defaultProps = {
   isRequired: false,
-  promptValidate: () => {},
   tooltip: null,
-  tooltipMaxWidth: '',
 };
 
 export default withI18n()(FieldWithPrompt);
