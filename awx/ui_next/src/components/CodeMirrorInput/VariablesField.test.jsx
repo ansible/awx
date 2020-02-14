@@ -69,6 +69,22 @@ describe('VariablesField', () => {
     expect(field.prop('hasErrors')).toEqual(true);
     expect(wrapper.find('.pf-m-error')).toHaveLength(1);
   });
+  it('should render tooltip', () => {
+    const value = '---\n';
+    const wrapper = mount(
+      <Formik initialValues={{ variables: value }}>
+        {() => (
+          <VariablesField
+            id="the-field"
+            name="variables"
+            label="Variables"
+            tooltip="This is a tooltip"
+          />
+        )}
+      </Formik>
+    );
+    expect(wrapper.find('Tooltip').length).toBe(1);
+  });
 
   it('should submit value through Formik', async () => {
     const value = '---\nfoo: bar\n';

@@ -94,4 +94,27 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     });
     expect(history.location.pathname).toBe('/templates');
   });
+  test('throwing error renders FormSubmitError component', async () => {
+    const error = new Error('oops');
+    WorkflowJobTemplatesAPI.update.mockImplementation(() =>
+      Promise.reject(error)
+    );
+    await act(async () => {
+      wrapper.find('WorkflowJobTemplateForm').prop('handleSubmit')({
+        id: 6,
+        name: 'Alex',
+        description: 'Apollo and Athena',
+        inventory: { id: 1, name: 'Inventory 1' },
+        organization: 2,
+        scm_branch: 'master',
+        limit: '5000',
+        variables: '---',
+      });
+    });
+    wrapper.update();
+    expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalled();
+    expect(wrapper.find('WorkflowJobTemplateForm').prop('submitError')).toEqual(
+      error
+    );
+  });
 });

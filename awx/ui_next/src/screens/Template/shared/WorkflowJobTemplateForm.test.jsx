@@ -1,10 +1,20 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Route } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { sleep } from '@testUtils/testUtils';
+
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
+import { WorkflowJobTemplatesAPI } from '../../../api';
 
+jest.mock('@api/models/WorkflowJobTemplates');
+WorkflowJobTemplatesAPI.updateWebhookKey.mockResolvedValue({
+  data: { webhook_key: 'sdafdghjkl2345678ionbvcxz' },
+});
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
+  let history;
   const handleSubmit = jest.fn();
   const handleCancel = jest.fn();
   const mockTemplate = {
@@ -21,15 +31,38 @@ describe('<WorkflowJobTemplateForm/>', () => {
     scm_branch: 'devel',
     limit: '5000',
     variables: '---',
+    related: {
+      webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
+    },
   };
   beforeEach(() => {
+    history = createMemoryHistory({
+      initialEntries: ['/templates/workflow_job_template/6/edit'],
+    });
     act(() => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplateForm
-          template={mockTemplate}
-          handleCancel={handleCancel}
-          handleSubmit={handleSubmit}
-        />
+        <Route
+          path="/templates/workflow_job_template/:id/edit"
+          component={() => (
+            <WorkflowJobTemplateForm
+              template={mockTemplate}
+              handleCancel={handleCancel}
+              handleSubmit={handleSubmit}
+              webhook_key="sdfghjklmnbvcdsew435678iokjhgfd"
+            />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 6 } },
+              },
+            },
+          },
+        }
       );
     });
   });
@@ -63,7 +96,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
   });
   test('changing inputs should update values', async () => {
     const inputsToChange = [
-      { element: 'wfjt-name', value: { value: 'new foo', name: 'name' } },
+      {
+        element: 'wfjt-name',
+        value: { value: 'new foo', name: 'name' },
+      },
       {
         element: 'wfjt-description',
         value: { value: 'new bar', name: 'description' },
@@ -76,12 +112,13 @@ describe('<WorkflowJobTemplateForm/>', () => {
     ];
     const changeInputs = async ({ element, value }) => {
       wrapper.find(`input#${element}`).simulate('change', {
-        target: value,
+        target: { value: `${value.value}`, name: `${value.name}` },
       });
     };
 
     await act(async () => {
       inputsToChange.map(input => changeInputs(input));
+
       wrapper.find('LabelSelect').invoke('onChange')([
         { name: 'new label', id: 5 },
         { name: 'Label 1', id: 1 },
@@ -97,13 +134,17 @@ describe('<WorkflowJobTemplateForm/>', () => {
       });
     });
     wrapper.update();
+
+    expect(wrapper.find('input#wfjt-name').prop('value')).toEqual('new foo');
+
     const assertChanges = ({ element, value }) => {
       expect(wrapper.find(`input#${element}`).prop('value')).toEqual(
-        typeof value.value === 'string' ? `${value.value}` : value.value
+        `${value.value}`
       );
     };
 
     inputsToChange.map(input => assertChanges(input));
+    expect(wrapper.find('input#wfjt-name').prop('value')).toEqual('new foo');
     expect(wrapper.find('InventoryLookup').prop('value')).toEqual({
       id: 3,
       name: 'inventory',
@@ -118,16 +159,57 @@ describe('<WorkflowJobTemplateForm/>', () => {
       { name: 'Label 2', id: 2 },
     ]);
   });
-  test('handleSubmit is called on submit button click', async () => {
-    await act(async () => {
-      await wrapper.find('button[aria-label="Save"]').simulate('click');
-    });
 
+  test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      expect(handleSubmit).toBeCalled();
+      wrapper.find('Checkbox[name="has_webhooks"]').invoke('onChange')(true);
+      wrapper.find('Checkbox[name="allow_simultaneous"]').invoke('onChange')(
+        true
+      );
     });
+    wrapper.update();
+    expect(
+      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
+    ).toBe(true);
+    expect(
+      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('value')
+    ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
+    await act(() =>
+      wrapper
+        .find('FormGroup[name="webhook_key"]')
+        .find('Button[variant="tertiary"]')
+        .prop('onClick')()
+    );
+
+    expect(WorkflowJobTemplatesAPI.updateWebhookKey).toBeCalledWith('6');
+    expect(
+      wrapper.find('TextInputBase[name="webhook_url"]').prop('value')
+    ).toBe('http://127.0.0.1:3001/api/v2/workflow_job_templates/57/gitlab/');
+
+    wrapper.update();
+
+    expect(
+      wrapper.find('Checkbox[name="has_webhooks"]').prop('isChecked')
+    ).toBe(true);
+    expect(
+      wrapper.find('Checkbox[name="allow_simultaneous"]').prop('isChecked')
+    ).toBe(true);
+    expect(wrapper.find('Field[name="webhook_service"]').length).toBe(1);
+
+    act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
+    wrapper.update();
+
+    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('gitlab');
   });
-  test('handleCancel is called on cancel button click', () => {
+  test('handleSubmit is called on submit button click', async () => {
+    act(() => {
+      wrapper.find('Formik').prop('onSubmit')();
+    });
+    wrapper.update();
+    sleep(0);
+    expect(handleSubmit).toBeCalled();
+  });
+  test('handleCancel is called on cancel button click', async () => {
     act(() => {
       wrapper.find('button[aria-label="Cancel"]').simulate('click');
     });

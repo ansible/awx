@@ -22,15 +22,18 @@ function WorkflowJobTemplateAdd() {
       setFormSubmitError(err);
     }
   };
+
   const submitLabels = (templateId, labels = [], organizationId) => {
     const associatePromises = labels.map(label =>
       WorkflowJobTemplatesAPI.associateLabel(templateId, label, organizationId)
     );
     return Promise.all([...associatePromises]);
   };
+
   const handleCancel = () => {
     history.push(`/templates`);
   };
+
   return (
     <PageSection>
       <Card>
@@ -38,9 +41,9 @@ function WorkflowJobTemplateAdd() {
           <WorkflowJobTemplateForm
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
+            submitError={formSubmitError}
           />
         </CardBody>
-        {formSubmitError ? <div>formSubmitError</div> : ''}
       </Card>
     </PageSection>
   );

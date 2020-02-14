@@ -25,6 +25,7 @@ function WorkflowJobTemplateEdit({
       setFormSubmitError(err);
     }
   };
+
   const submitLabels = async (labels = [], orgId) => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.labels.results,
@@ -40,9 +41,11 @@ function WorkflowJobTemplateEdit({
         setFormSubmitError(err);
       }
     }
+
     const disassociationPromises = removed.map(label =>
       WorkflowJobTemplatesAPI.disassociateLabel(template.id, label)
     );
+
     const associationPromises = added.map(label => {
       return WorkflowJobTemplatesAPI.associateLabel(
         template.id,
@@ -61,6 +64,7 @@ function WorkflowJobTemplateEdit({
   const handleCancel = () => {
     history.push(`/templates`);
   };
+
   if (hasTemplateLoading) {
     return <ContentLoading />;
   }
@@ -72,9 +76,9 @@ function WorkflowJobTemplateEdit({
           handleCancel={handleCancel}
           template={template}
           webhook_key={webhook_key}
+          submitError={formSubmitError}
         />
       </CardBody>
-      {formSubmitError ? <div>formSubmitError</div> : ''}
     </>
   );
 }

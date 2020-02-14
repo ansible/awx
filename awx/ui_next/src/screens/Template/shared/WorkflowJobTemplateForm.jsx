@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '@lingui/macro';
+import { func, shape } from 'prop-types';
+
 import { withI18n } from '@lingui/react';
 import { Formik, Field } from 'formik';
 import {
@@ -11,14 +13,17 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import { required } from '@util/validators';
-import PropTypes from 'prop-types';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import { useParams } from 'react-router-dom';
 
 import AnsibleSelect from '@components/AnsibleSelect';
 import { WorkflowJobTemplatesAPI, CredentialTypesAPI } from '@api';
 import FormRow from '@components/FormRow';
-import FormField, { FieldTooltip, CheckboxField } from '@components/FormField';
+
+import FormField, {
+  FieldTooltip,
+  FormSubmitError,
+} from '@components/FormField';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
 import { InventoryLookup } from '@components/Lookup';
@@ -44,11 +49,11 @@ function WorkflowJobTemplateForm({
   handleCancel,
   i18n,
   template = {},
-  className,
   webhook_key,
+  submitError,
 }) {
-  const urlOrigin = window.location.origin;
   const { id } = useParams();
+  const urlOrigin = window.location.origin;
   const [contentError, setContentError] = useState(null);
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory || null
@@ -139,9 +144,10 @@ function WorkflowJobTemplateForm({
         variables: template.variables || '---',
         limit: template.limit || '',
         scmBranch: template.scm_branch || '',
-        allow_simultaneous: template?.allow_simultaneous || false,
-        webhook_url: `${urlOrigin}${template?.related?.webhook_receiver}` || '',
-        webhook_key: webHookKey,
+        allow_simultaneous: template.allow_simultaneous || false,
+        webhook_url:
+          template?.related?.webhook_receiver &&
+          `${urlOrigin}${template?.related?.webhook_receiver}`,
         webhook_credential:
           template?.summary_fields?.webhook_credential?.id || null,
         webhook_service: webhookService,
@@ -269,16 +275,12 @@ function WorkflowJobTemplateForm({
           </FormRow>
           <FormRow>
             <VariablesField
-              id="host-variables"
+              id="wfjt-variables"
               name="variables"
               label={i18n._(t`Variables`)}
-              tooltip={i18n._(
-                t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
-              )}
             />
           </FormRow>
           <GridFormGroup
-            className={className}
             fieldId="options"
             isInline
             label={i18n._(t`Options`)}
@@ -302,21 +304,34 @@ function WorkflowJobTemplateForm({
                 setHasWebhooks(checked);
               }}
             />
-            <CheckboxField
-              id="wfjt-allow_simultaneous"
-              name="allow_simultaneous"
-              label={i18n._(t`Enable Concurrent Jobs`)}
-              tooltip={i18n._(
-                t`If enabled, simultaneous runs of this workflow job template will be allowed.`
+            <Field name="allow_simultaneous">
+              {({ field, form }) => (
+                <Checkbox
+                  name="allow_simultaneous"
+                  id="wfjt-allow_simultaneous"
+                  label={
+                    <span>
+                      {i18n._(t`Enable Concurrent Jobs`)} &nbsp;
+                      <FieldTooltip
+                        content={i18n._(
+                          t`If enabled, simultaneous runs of this workflow job template will be allowed.`
+                        )}
+                      />
+                    </span>
+                  }
+                  isChecked={field.value}
+                  onChange={value => {
+                    form.setFieldValue('allow_simultaneous', value);
+                  }}
+                />
               )}
-            />
+            </Field>
           </GridFormGroup>
           {hasWebhooks && (
             <>
               <FormRow>
                 {template.related && (
                   <FormGroup
-                    className={className}
                     fieldId="wfjt-webhook-url"
                     id="wfjt-webhook-url"
                     name="webhook_url"
@@ -362,69 +377,60 @@ function WorkflowJobTemplateForm({
                   </FormGroup>
                 )}
                 <Field name="webhook_service">
-                  {({ form }) => {
-                    const isValid =
-                      !form.errors.webhook_service;
-                    return (
-                      <FormGroup
-                        name="webhook_service"
-                        fieldId="webhook_service"
-                        helperTextInvalid={form.errors.webhook_service}
-                        isValid={isValid}
-                        label={i18n._(t`Webhook Service`)}
-                      >
-                        <FieldTooltip
-                          content={i18n._(t`Select a webhook service`)}
-                        />
-                        <AnsibleSelect
-                          isValid={isValid}
-                          id="webhook_service"
-                          data={webhookServiceOptions}
-                          value={webhookService}
-                          onChange={(event, val) => {
-                            setWebHookService(val);
-                            setWebHookCredential(null);
-                            form.setFieldValue('webhook_credential', null);
-                          }}
-                        />
-                      </FormGroup>
-                    );
-                  }}
+                  {({ form }) => (
+                    <FormGroup
+                      name="webhook_service"
+                      fieldId="webhook_service"
+                      helperTextInvalid={form.errors.webhook_service}
+                      label={i18n._(t`Webhook Service`)}
+                    >
+                      <FieldTooltip
+                        content={i18n._(t`Select a webhook service`)}
+                      />
+                      <AnsibleSelect
+                        id="webhook_service"
+                        data={webhookServiceOptions}
+                        value={webhookService}
+                        onChange={(event, val) => {
+                          setWebHookService(val);
+                          setWebHookCredential(null);
+                          form.setFieldValue('webhook_service', val);
+                          form.setFieldValue('webhook_credential', null);
+                        }}
+                      />
+                    </FormGroup>
+                  )}
                 </Field>
               </FormRow>
               {credTypeId && (
                 <FormRow>
                   <Field name="webhook_credential">
-                    {({ form }) => {
-                      return (
-                        <FormGroup
-                          fieldId="webhook_credential"
-                          id="webhook_credential"
-                          name="webhook_credential"
-                        >
-                          <CredentialLookup
-                            label={i18n._(t`Webhook Credential`)}
-                            tooltip={i18n._(
-                              t`Optionally select the credential to use to send status updates back to the webhook service.`
-                            )}
-                            credentialTypeId={credTypeId || null}
-                            onChange={value => {
-                              setWebHookCredential(value);
-                              form.setFieldValue(
-                                'webhook_credential',
-                                value.id
-                              );
-                            }}
-                            value={webhookCredential}
-                          />
-                        </FormGroup>
-                      );
-                    }}
+                    {({ form }) => (
+                      <FormGroup
+                        fieldId="webhook_credential"
+                        id="webhook_credential"
+                        name="webhook_credential"
+                      >
+                        <CredentialLookup
+                          label={i18n._(t`Webhook Credential`)}
+                          tooltip={i18n._(
+                            t`Optionally select the credential to use to send status updates back to the webhook service.`
+                          )}
+                          credentialTypeId={credTypeId || null}
+                          onChange={value => {
+                            setWebHookCredential(value);
+                            form.setFieldValue('webhook_credential', value.id);
+                          }}
+                          value={webhookCredential}
+                        />
+                      </FormGroup>
+                    )}
                   </Field>
                 </FormRow>
               )}
             </>
           )}
+          <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}
@@ -436,7 +442,13 @@ function WorkflowJobTemplateForm({
 }
 
 WorkflowJobTemplateForm.propTypes = {
-  handleSubmit: PropTypes.func.isRequired,
-  handleCancel: PropTypes.func.isRequired,
+  handleSubmit: func.isRequired,
+  handleCancel: func.isRequired,
+  submitError: shape({}),
 };
+
+WorkflowJobTemplateForm.defaultProps = {
+  submitError: null,
+};
+
 export default withI18n()(WorkflowJobTemplateForm);
