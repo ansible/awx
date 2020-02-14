@@ -79,8 +79,6 @@ EXAMPLES = '''
 '''
 
 
-import os
-
 from ..module_utils.tower_api import TowerModule
 
 
