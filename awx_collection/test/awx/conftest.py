@@ -17,7 +17,7 @@ from awx.main.tests.functional.conftest import _request
 from awx.main.models import Organization, Project, Inventory, Credential, CredentialType
 
 try:
-    import tower_cli
+    import tower_cli  # noqa
     HAS_TOWER_CLI = True
 except ImportError:
     HAS_TOWER_CLI = False
