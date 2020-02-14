@@ -1250,3 +1250,6 @@ BROADCAST_WEBSOCKETS_VERIFY_CERT = False
 
 # Connect to other AWX nodes using http or https
 BROADCAST_WEBSOCKETS_PROTOCOL = 'https'
+
+# How often websocket process will look for changes in the Instance table
+BROADCAST_WEBSOCKETS_NEW_INSTANCE_POLL_RATE_SECONDS = 10
