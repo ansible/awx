@@ -122,29 +122,6 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         await self.send(event['text'])
 
 
-class HealthConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        try:
-            WebsocketSecretAuthHelper.is_authorized(self.scope)
-        except Exception:
-            await self.close()
-            return
-
-        # TODO: log ip of connected client
-        logger.info("Client connected to health endpoint")
-        await self.accept()
-
-    async def disconnect(self, code):
-        # TODO: log ip of disconnected client
-        logger.info("Client disconnected from health endpoint")
-
-    async def receive_json(self, content, **kwargs):
-        logger.debug(f"Got Health status {content}")
-
-    async def internal_message(self, event):
-        logger.info("Got internal message from health endpoint .. can this happen?")
-
-
 class EventConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         user = self.scope['user']
