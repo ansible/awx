@@ -87,11 +87,10 @@ if os.getenv("DATABASE_SSLMODE", False):
 
 BROKER_URL = 'redis://{}:{}'.format(
     os.getenv("REDIS_HOST", None),
-    os.getenv("REDIS_PORT", "6379"),
+    os.getenv("REDIS_PORT", "6379"),)
 
 CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
-                'ROUTING': 'awx.main.routing.channel_routing',
+    'default': {'BACKEND': 'channels_redis.core.RedisChannelLayer',
                 'CONFIG': {'hosts': [(os.getenv("REDIS_HOST", None), int(os.getenv("REDIS_PORT", 6379)))]}}
 }
 

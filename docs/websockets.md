@@ -43,14 +43,14 @@ This section will specifically discuss deployment in the context of websockets a
 | `nginx`     | listens on ports 80/443, handles HTTPS proxying, serves static assets, routes requests for `daphne` and `uwsgi` |
 | `uwsgi`      | listens on port 8050, handles API requests |
 | `daphne`      | listens on port 8051, handles websocket requests |
-| `runworker`   | no listening port, watches and processes the message queue |
+| `wsbroadcast`   | no listening port, forwards all group messages to all cluster nodes |
 | `supervisord` | (production-only) handles the process management of all the services except `nginx` |
 
 When a request comes in to `nginx` and has the `Upgrade` header and is for the path `/websocket`, then `nginx` knows that it should be routing that request to our `daphne` service.
 
-`daphne` receives the request and generates channel and routing information for the request. The configured event handlers for `daphne` then unpack and parse the request message using the wire protocol mentioned above. This ensures that the connection has its context limited to only receive messages for events it is interested in. `daphne` uses internal events to trigger further behavior, which will generate messages and send them to the queue, which is then processed by the `runworker`.
+`daphne` handles websocket connections proxied by nginx.
 
-`runworker` processes the messages from the queue. This uses the contextual information of the message provided by the `daphne` server and our `asgi_amqp` implementation to broadcast messages out to each client.
+`wsbroadcast` fully connects all cluster nodes to every other cluster nodes. Sends a copy of all group websocket messages to all other cluster nodes (i.e. job event type messages).
 
 ### Development
  - `nginx` listens on 8013/8043 instead of 80/443

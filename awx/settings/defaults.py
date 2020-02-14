@@ -959,7 +959,7 @@ ASGI_APPLICATION = "awx.main.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("localhost", 6379)],
         },

@@ -21,7 +21,7 @@ from channels.db import database_sync_to_async
 
 from asgiref.sync import async_to_sync
 
-from awx.main.channels import wrap_broadcast_msg
+from awx.main.wsbroadcast import wrap_broadcast_msg
 
 
 logger = logging.getLogger('awx.main.consumers')
@@ -106,11 +106,13 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
         except Exception:
+            # TODO: log ip of connected client
+            logger.warn("Broadcast client failed to authorize.")
             await self.close()
             return
 
         # TODO: log ip of connected client
-        logger.info("Client connected")
+        logger.info(f"Broadcast client connected.")
         await self.accept()
         await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
 

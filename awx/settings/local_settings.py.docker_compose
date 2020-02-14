@@ -58,7 +58,7 @@ redis_parts = parse.urlparse(BROKER_URL)
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "awx.main.channels.RedisGroupBroadcastChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(redis_parts.hostname, redis_parts.port)]
         },

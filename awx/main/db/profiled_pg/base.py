@@ -64,7 +64,7 @@ class RecordedQueryLog(object):
             if not os.path.isdir(self.dest):
                 os.makedirs(self.dest)
             progname = ' '.join(sys.argv)
-            for match in ('uwsgi', 'dispatcher', 'callback_receiver', 'runworker'):
+            for match in ('uwsgi', 'dispatcher', 'callback_receiver', 'wsbroadcast'):
                 if match in progname:
                     progname = match
                     break

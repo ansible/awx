@@ -5,6 +5,7 @@ import logging
 import aiohttp
 import asyncio
 import datetime
+import sys
 
 from channels_redis.core import RedisChannelLayer
 from channels.layers import get_channel_layer
@@ -15,7 +16,7 @@ from django.apps import apps
 from django.core.serializers.json import DjangoJSONEncoder
 
 
-logger = logging.getLogger('awx.main')
+logger = logging.getLogger('awx.main.wsbroadcast')
 
 
 def wrap_broadcast_msg(group, message: str):
@@ -100,7 +101,7 @@ class WebsocketTask():
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
             # Does aiohttp throws an exception if a disconnect happens?
-            logger.warn("Websocket broadcast client exception {}".format(e))
+            logger.warn(f"Websocket broadcast client exception {str(e)}")
             # Reconnect
             self.start(attempt=attempt+1)
 
@@ -129,7 +130,6 @@ class BroadcastWebsocketTask(WebsocketTask):
 
                 (group, message) = unwrap_broadcast_msg(payload)
 
-                logger.debug(f"{self.name} broadcasting message")
                 await self.channel_layer.group_send(group, {"type": "internal.message", "text": message})
 
 
@@ -167,11 +167,4 @@ class BroadcastWebsocketManager(object):
 
     def start(self):
         self.async_task = self.event_loop.create_task(self.run_loop())
-
-
-class RedisGroupBroadcastChannelLayer(RedisChannelLayer):
-    def __init__(self, *args, **kwargs):
-        super(RedisGroupBroadcastChannelLayer, self).__init__(*args, **kwargs)
-
-        broadcast_websocket_mgr = BroadcastWebsocketManager()
-        broadcast_websocket_mgr.start()
+        return self.async_task
