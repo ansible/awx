@@ -28,10 +28,11 @@ dockerhub_base=ansible
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
+# Ingress Configuratio
+ingress_hostname=awx.example.org
+
 # Kubernetes Ingress Configuration
 # You can use the variables below to configure Kubernetes Ingress
-# Set hostname
-# kubernetes_ingress_hostname=awx.example.org
 # Add annotations. The example below shows an annotation to be used with Traefik but other Ingress controllers are also supported
 # kubernetes_ingress_annotations={'kubernetes.io/ingress.class': 'traefik', 'traefik.ingress.kubernetes.io/redirect-entry-point': 'https'}
 # Specify a secret for TLS termination
