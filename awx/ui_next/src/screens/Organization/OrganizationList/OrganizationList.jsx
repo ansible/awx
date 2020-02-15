@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { OrganizationsAPI } from '@api';
-import useRequest from '@util/useRequest';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -14,7 +14,6 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import updateUrlAfterDelete from '@util/updateUrlAfterDelete';
 import OrganizationListItem from './OrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organization', {
@@ -29,7 +28,6 @@ function OrganizationsList({ i18n }) {
   const match = useRouteMatch();
 
   const [selected, setSelected] = useState([]);
-  const [deletionError, setDeletionError] = useState(null);
 
   const addUrl = `${match.url}/add`;
 
@@ -58,48 +56,37 @@ function OrganizationsList({ i18n }) {
     }
   );
 
-  const {
-    isLoading: isDeleteLoading,
-    error: dError,
-    request: deleteOrganizations,
-  } = useRequest(
-    useCallback(async () => {
-      return Promise.all(
-        selected.map(({ id }) => OrganizationsAPI.destroy(id))
-      );
-    }, [selected])
-  );
-
-  useEffect(() => {
-    if (dError) {
-      setDeletionError(dError);
-    }
-  }, [dError]);
-
   useEffect(() => {
     fetchOrganizations();
   }, [fetchOrganizations]);
 
+  const isAllSelected =
+    selected.length === organizations.length && selected.length > 0;
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteOrganizations,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(({ id }) => OrganizationsAPI.destroy(id))
+      );
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchOrganizations,
+    }
+  );
+
   const handleOrgDelete = async () => {
     await deleteOrganizations();
-    const url = updateUrlAfterDelete(
-      QS_CONFIG,
-      location,
-      organizations,
-      selected
-    );
-    if (url) {
-      history.push(url);
-    } else {
-      fetchOrganizations();
-    }
     setSelected([]);
   };
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;
   const canAdd = actions && actions.POST;
-  const isAllSelected =
-    selected.length === organizations.length && selected.length > 0;
 
   const handleSelectAll = isSelected => {
     if (isSelected) {
@@ -189,7 +176,7 @@ function OrganizationsList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setDeletionError(null)}
+        onClose={clearDeletionError}
       >
         {i18n._(t`Failed to delete one or more organizations.`)}
         <ErrorDetail error={deletionError} />

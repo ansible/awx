@@ -54,6 +54,8 @@ function CredentialList({ i18n }) {
     fetchCredentials();
   }, [fetchCredentials]);
 
+  const isAllSelected =
+    selected.length > 0 && selected.length === credentials.length;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteCredentials,
@@ -65,8 +67,7 @@ function CredentialList({ i18n }) {
     }, [selected]),
     {
       qsConfig: QS_CONFIG,
-      items: credentials,
-      selected,
+      allItemsSelected: isAllSelected,
       fetchItems: fetchCredentials,
     }
   );
@@ -90,8 +91,6 @@ function CredentialList({ i18n }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected =
-    selected.length > 0 && selected.length === credentials.length;
 
   return (
     <PageSection>

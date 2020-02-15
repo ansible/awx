@@ -56,18 +56,23 @@ export default function useRequest(makeRequest, initialValue) {
 
 export function useDeleteItems(
   makeRequest,
-  { qsConfig, items, selected, fetchItems }
+  { qsConfig, allItemsSelected, fetchItems }
 ) {
   const location = useLocation();
   const history = useHistory();
   const [showError, setShowError] = useState(false);
-
   const { error, isLoading, request } = useRequest(makeRequest, null);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+    }
+  }, [error]);
 
   const deleteItems = async () => {
     await request();
     const params = parseQueryString(qsConfig, location.search);
-    if (params.page > 1 && selected.length === items.length) {
+    if (params.page > 1 && allItemsSelected) {
       const newParams = encodeNonDefaultQueryString(
         qsConfig,
         replaceParams(params, { page: params.page - 1 })
