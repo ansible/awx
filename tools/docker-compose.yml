@@ -50,6 +50,8 @@ services:
     container_name: tools_postgres_1
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
   memcached:
     image: memcached:alpine
     container_name: tools_memcached_1
