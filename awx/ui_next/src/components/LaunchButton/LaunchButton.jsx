@@ -13,6 +13,7 @@ import {
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobsAPI,
+  WorkflowJobTemplatesAPI,
 } from '@api';
 
 class LaunchButton extends React.Component {
@@ -46,13 +47,24 @@ class LaunchButton extends React.Component {
 
   async handleLaunch() {
     const { history, resource } = this.props;
+    const readLaunch =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
+        : JobTemplatesAPI.readLaunch(resource.id);
+    const launchJob =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.launch(resource.id)
+        : JobTemplatesAPI.launch(resource.id);
     try {
-      const { data: launchConfig } = await JobTemplatesAPI.readLaunch(
-        resource.id
-      );
+      const { data: launchConfig } = await readLaunch;
+
       if (launchConfig.can_start_without_user_input) {
-        const { data: job } = await JobTemplatesAPI.launch(resource.id);
-        history.push(`/jobs/${job.id}`);
+        const { data: job } = await launchJob;
+        history.push(
+          `/${
+            resource.type === 'workflow_job_template' ? 'workflow' : 'jobs'
+          }/${job.id}`
+        );
       } else {
         this.setState({ promptError: true });
       }
