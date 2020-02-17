@@ -70,8 +70,29 @@ NATURAL_KEYS = {
     'workflow_job_template': ('organization', 'name'),
 
     # related resources
-    'role': ('name',),  # FIXME: we also need the content_object, itself as a natural key representation
+    'role': ('name', ':content_object'),
 }
+
+
+def get_natural_key(page):
+    natural_key = {'type': page.type}
+    lookup = NATURAL_KEYS.get(page.type, ())
+
+    for key in lookup or ():
+        if key.startswith(':'):
+            # treat it like a special-case related object
+            related_objs = [
+                related for name, related in page.related.items()
+                if name not in ('users', 'teams')
+            ]
+            if related_objs:
+                natural_key[key[1:]] = get_natural_key(related_objs[0].get())
+        elif key in page.related:
+            natural_key[key] = get_natural_key(page.related[key].get())
+        else:
+            natural_key[key] = page[key]
+
+    return natural_key
 
 
 class CustomCommand(metaclass=CustomRegistryMeta):
@@ -183,10 +204,6 @@ class Export(CustomCommand):
     name = 'export'
     help_text = 'export resources from Tower'
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._natural_keys = {}
-
     def extend_parser(self, parser):
         resources = parser.add_argument_group('resources')
 
@@ -199,16 +216,6 @@ class Export(CustomCommand):
 
     def get_options(self, endpoint):
         return endpoint.options().json['actions']['POST']
-
-    def get_natural_key(self, page):
-        natural_key = {'type': page.type}
-        lookup = NATURAL_KEYS.get(page.type)
-        if callable(lookup):
-            natural_key.update(lookup(page))
-        else:
-            natural_key.update((key, page[key]) for key in lookup or ())
-
-        return natural_key
 
     def get_assets(self, resource, value):
         endpoint = getattr(self.v2, resource)
@@ -230,7 +237,7 @@ class Export(CustomCommand):
         }
 
         fk_fields = {
-            key: self.get_natural_key(asset.related[key].get()) for key in options
+            key: get_natural_key(asset.related[key].get()) for key in options
             if key in asset.related
         }
 
@@ -240,7 +247,7 @@ class Export(CustomCommand):
                 continue
             data = related_endpoint.get(all_pages=True)
             if 'results' in data:
-                related[k] = [self.get_natural_key(x) for x in data.results]
+                related[k] = [get_natural_key(x) for x in data.results]
 
         related_fields = {'related': related} if related else {}
         return dict(**fields, **fk_fields, **related_fields)
