@@ -210,11 +210,13 @@ class WSClient(object):
                     self._should_subscribe_to_pending_job['events'] == 'project_update_events'):
                 self._update_subscription(message['unified_job_id'])
 
+        ret = self._recv_queue.put(message)
+
         # unsubscribe acknowledgement
         if 'groups_current' in message:
             self._pending_unsubscribe.set()
 
-        return self._recv_queue.put(message)
+        return ret
 
     def _update_subscription(self, job_id):
         subscription = dict(jobs=self._should_subscribe_to_pending_job['jobs'])
