@@ -225,20 +225,20 @@ class Export(CustomCommand):
 
     def serialize_asset(self, asset, options):
         fields = {
-            key: asset.json[key] for key in options
-            if key in asset.json and options[key]['type'] != 'id'
+            key: asset[key] for key in options
+            if key in asset.json and key not in asset.related
         }
 
         fk_fields = {
             key: self.get_natural_key(asset.related[key].get()) for key in options
-            if key in asset.json and options[key]['type'] == 'id'
+            if key in asset.related
         }
 
         related = {}
         for k, related_endpoint in asset.related.items():
             if k != 'roles':
                 continue
-            data = related_endpoint.get(all_pages=True).json
+            data = related_endpoint.get(all_pages=True)
             if 'results' in data:
                 related[k] = [self.get_natural_key(x) for x in data.results]
 
