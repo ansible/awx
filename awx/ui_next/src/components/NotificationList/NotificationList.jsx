@@ -250,7 +250,7 @@ class NotificationList extends Component {
           )}
         />
         <AlertModal
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           isOpen={toggleError && !toggleLoading}
           onClose={this.handleNotificationErrorClose}

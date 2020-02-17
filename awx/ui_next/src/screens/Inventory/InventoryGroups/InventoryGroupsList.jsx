@@ -259,7 +259,7 @@ function InventoryGroupsList({ i18n, location, match }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

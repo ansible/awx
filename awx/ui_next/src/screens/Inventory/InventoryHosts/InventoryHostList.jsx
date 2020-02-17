@@ -198,7 +198,7 @@ function InventoryHostList({ i18n, location, match }) {
 
       {toggleError && !toggleLoading && (
         <AlertModal
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           isOpen={toggleError && !toggleLoading}
           onClose={() => setToggleError(false)}
@@ -211,7 +211,7 @@ function InventoryHostList({ i18n, location, match }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

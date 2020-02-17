@@ -236,7 +236,7 @@ function JobList({ i18n }) {
       </Card>
       <AlertModal
         isOpen={deletionError}
-        variant="danger"
+        variant="error"
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >

@@ -132,7 +132,7 @@ function OrganizationDetail({ i18n, organization }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

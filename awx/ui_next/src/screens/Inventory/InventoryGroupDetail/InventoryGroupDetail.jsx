@@ -98,7 +98,7 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
       )}
       {error && (
         <AlertModal
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           isOpen={error}
           onClose={() => setError(false)}

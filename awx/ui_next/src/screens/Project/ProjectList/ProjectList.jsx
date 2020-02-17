@@ -231,7 +231,7 @@ class ProjectsList extends Component {
         </PageSection>
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >

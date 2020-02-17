@@ -213,7 +213,7 @@ describe('<InventoryGroupsList />', () => {
         .find('ModalBoxFooter Button[aria-label="Delete"]')
         .invoke('onClick')();
     });
-    await waitForElement(wrapper, { title: 'Error!', variant: 'danger' });
+    await waitForElement(wrapper, { title: 'Error!', variant: 'error' });
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });

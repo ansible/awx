@@ -137,6 +137,7 @@ class ToolbarDeleteButton extends React.Component {
   render() {
     const { itemsToDelete, pluralizedItemName, i18n } = this.props;
     const { isModalOpen } = this.state;
+    const modalTitle = i18n._(t`Delete ${pluralizedItemName}?`);
 
     const isDisabled =
       itemsToDelete.length === 0 || itemsToDelete.some(cannotDelete);
@@ -161,7 +162,7 @@ class ToolbarDeleteButton extends React.Component {
         {isModalOpen && (
           <AlertModal
             variant="danger"
-            title={pluralizedItemName}
+            title={modalTitle}
             isOpen={isModalOpen}
             onClose={this.handleCancelDelete}
             actions={[
@@ -183,15 +184,15 @@ class ToolbarDeleteButton extends React.Component {
               </Button>,
             ]}
           >
-            {i18n._(t`Are you sure you want to delete:`)}
-            <br />
+            <div css="margin-bottom: 16px;">
+              {i18n._(t`This action will delete the following:`)}
+            </div>
             {itemsToDelete.map(item => (
               <span key={item.id}>
                 <strong>{item.name || item.username}</strong>
                 <br />
               </span>
             ))}
-            <br />
           </AlertModal>
         )}
       </Fragment>

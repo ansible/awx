@@ -1,42 +1,47 @@
 import React from 'react';
-
-import { Modal } from '@patternfly/react-core';
-
+import { Modal, Title } from '@patternfly/react-core';
 import {
-  ExclamationTriangleIcon,
-  ExclamationCircleIcon,
-  InfoCircleIcon,
   CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  InfoCircleIcon,
+  TimesCircleIcon,
 } from '@patternfly/react-icons';
+import styled from 'styled-components';
 
-const getIcon = variant => {
-  let icon;
-  if (variant === 'warning') {
-    icon = <ExclamationTriangleIcon className="at-c-alertModal__icon" />;
-  } else if (variant === 'danger') {
-    icon = <ExclamationCircleIcon className="at-c-alertModal__icon" />;
+const Header = styled.div`
+  display: flex;
+  svg {
+    margin-right: 16px;
   }
-  if (variant === 'info') {
-    icon = <InfoCircleIcon className="at-c-alertModal__icon" />;
-  }
-  if (variant === 'success') {
-    icon = <CheckCircleIcon className="at-c-alertModal__icon" />;
-  }
-  return icon;
-};
+`;
 
-export default ({ variant, children, ...props }) => {
-  const { isOpen = null } = props;
-  props.isOpen = Boolean(isOpen);
+export default ({ isOpen = null, title, variant, children, ...props }) => {
+  const variantIcons = {
+    danger: <ExclamationCircleIcon size="lg" css="color: #c9190b" />,
+    error: <TimesCircleIcon size="lg" css="color: #c9190b" />,
+    info: <InfoCircleIcon size="lg" css="color: #73bcf7" />,
+    success: <CheckCircleIcon size="lg" css="color: #92d400" />,
+    warning: <ExclamationTriangleIcon size="lg" css="color: #f0ab00" />,
+  };
+
+  const customHeader = (
+    <Header>
+      {variant ? variantIcons[variant] : null}
+      <Title size="2xl">{title}</Title>
+    </Header>
+  );
+
   return (
     <Modal
-      isLarge
-      className={`awx-c-modal${variant &&
-        ` at-c-alertModal at-c-alertModal--${variant}`}`}
+      header={customHeader}
+      isFooterLeftAligned
+      isOpen={Boolean(isOpen)}
+      isSmall
+      title={title}
       {...props}
     >
       {children}
-      {getIcon(variant)}
     </Modal>
   );
 };

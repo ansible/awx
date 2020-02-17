@@ -177,7 +177,7 @@ function ProjectDetail({ project, i18n }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

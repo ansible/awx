@@ -250,7 +250,7 @@ class HostsList extends Component {
         </Card>
         {toggleError && !toggleLoading && (
           <AlertModal
-            variant="danger"
+            variant="error"
             title={i18n._(t`Error!`)}
             isOpen={toggleError && !toggleLoading}
             onClose={this.handleHostToggleErrorClose}
@@ -262,7 +262,7 @@ class HostsList extends Component {
         {deletionError && (
           <AlertModal
             isOpen={deletionError}
-            variant="danger"
+            variant="error"
             title={i18n._(t`Error!`)}
             onClose={this.handleDeleteErrorClose}
           >

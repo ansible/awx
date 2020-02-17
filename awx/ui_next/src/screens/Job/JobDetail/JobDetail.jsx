@@ -275,7 +275,7 @@ function JobDetail({ job, i18n }) {
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}
-          variant="danger"
+          variant="error"
           onClose={() => setErrorMsg()}
           title={i18n._(t`Job Delete Error`)}
         >

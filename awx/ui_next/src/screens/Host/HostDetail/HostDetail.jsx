@@ -69,7 +69,7 @@ function HostDetail({ host, i18n, onUpdateHost }) {
   if (toggleError && !toggleLoading) {
     return (
       <AlertModal
-        variant="danger"
+        variant="error"
         title={i18n._(t`Error!`)}
         isOpen={toggleError && !toggleLoading}
         onClose={() => setToggleError(false)}
@@ -83,7 +83,7 @@ function HostDetail({ host, i18n, onUpdateHost }) {
     return (
       <AlertModal
         isOpen={deletionError}
-        variant="danger"
+        variant="error"
         title={i18n._(t`Error!`)}
         onClose={() => setDeletionError(false)}
       >

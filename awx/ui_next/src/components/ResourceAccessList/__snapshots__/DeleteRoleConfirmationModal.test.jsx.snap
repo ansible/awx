@@ -73,7 +73,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   aria-describedby="pf-modal-0"
                   aria-label="Remove {0} Access"
                   aria-modal="true"
-                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
+                  class="pf-c-modal-box pf-m-sm"
                   role="dialog"
                 >
                   <button
@@ -96,13 +96,34 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       />
                     </svg>
                   </button>
-                  <h1
-                    class="pf-c-title pf-m-2xl"
+                  <div
+                    class="pf-c-title"
                   >
-                     
-                    Remove {0} Access
-                     
-                  </h1>
+                    <div
+                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="sc-bdVaJa bkDjEn"
+                        fill="currentColor"
+                        height="2em"
+                        role="img"
+                        style="vertical-align: -0.25em;"
+                        viewBox="0 0 512 512"
+                        width="2em"
+                      >
+                        <path
+                          d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                          transform=""
+                        />
+                      </svg>
+                      <h1
+                        class="pf-c-title pf-m-2xl"
+                      >
+                        Remove {0} Access
+                      </h1>
+                    </div>
+                  </div>
                   <div
                     class="pf-c-modal-box__body"
                     id="pf-modal-0"
@@ -111,24 +132,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     <br />
                     <br />
                     If you only want to remove access for this particular user, please remove them from the team.
-                    <svg
-                      aria-hidden="true"
-                      class="at-c-alertModal__icon"
-                      fill="currentColor"
-                      height="1em"
-                      role="img"
-                      style="vertical-align: -0.125em;"
-                      viewBox="0 0 512 512"
-                      width="1em"
-                    >
-                      <path
-                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                        transform=""
-                      />
-                    </svg>
                   </div>
                   <div
-                    class="pf-c-modal-box__footer"
+                    class="pf-c-modal-box__footer pf-m-align-left"
                   >
                     <button
                       aria-label="Confirm delete"
@@ -151,12 +157,24 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         </body>
       }
       ariaDescribedById=""
-      className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+      className=""
+      header={
+        <ForwardRef>
+          <ForwardRef
+            size="lg"
+          />
+          <Title
+            size="2xl"
+          >
+            Remove {0} Access
+          </Title>
+        </ForwardRef>
+      }
       hideTitle={false}
-      isFooterLeftAligned={false}
-      isLarge={true}
+      isFooterLeftAligned={true}
+      isLarge={false}
       isOpen={true}
-      isSmall={false}
+      isSmall={true}
       onClose={[Function]}
       showClose={true}
       title="Remove {0} Access"
@@ -174,7 +192,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   aria-describedby="pf-modal-0"
                   aria-label="Remove {0} Access"
                   aria-modal="true"
-                  class="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
+                  class="pf-c-modal-box pf-m-sm"
                   role="dialog"
                 >
                   <button
@@ -197,13 +215,34 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       />
                     </svg>
                   </button>
-                  <h1
-                    class="pf-c-title pf-m-2xl"
+                  <div
+                    class="pf-c-title"
                   >
-                     
-                    Remove {0} Access
-                     
-                  </h1>
+                    <div
+                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="sc-bdVaJa bkDjEn"
+                        fill="currentColor"
+                        height="2em"
+                        role="img"
+                        style="vertical-align: -0.25em;"
+                        viewBox="0 0 512 512"
+                        width="2em"
+                      >
+                        <path
+                          d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                          transform=""
+                        />
+                      </svg>
+                      <h1
+                        class="pf-c-title pf-m-2xl"
+                      >
+                        Remove {0} Access
+                      </h1>
+                    </div>
+                  </div>
                   <div
                     class="pf-c-modal-box__body"
                     id="pf-modal-0"
@@ -212,24 +251,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     <br />
                     <br />
                     If you only want to remove access for this particular user, please remove them from the team.
-                    <svg
-                      aria-hidden="true"
-                      class="at-c-alertModal__icon"
-                      fill="currentColor"
-                      height="1em"
-                      role="img"
-                      style="vertical-align: -0.125em;"
-                      viewBox="0 0 512 512"
-                      width="1em"
-                    >
-                      <path
-                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                        transform=""
-                      />
-                    </svg>
                   </div>
                   <div
-                    class="pf-c-modal-box__footer"
+                    class="pf-c-modal-box__footer pf-m-align-left"
                   >
                     <button
                       aria-label="Confirm delete"
@@ -270,13 +294,25 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
             ]
           }
           ariaDescribedById=""
-          className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+          className=""
+          header={
+            <ForwardRef>
+              <ForwardRef
+                size="lg"
+              />
+              <Title
+                size="2xl"
+              >
+                Remove {0} Access
+              </Title>
+            </ForwardRef>
+          }
           hideTitle={false}
           id="pf-modal-0"
-          isFooterLeftAligned={false}
-          isLarge={true}
+          isFooterLeftAligned={true}
+          isLarge={false}
           isOpen={true}
-          isSmall={false}
+          isSmall={true}
           onClose={[Function]}
           showClose={true}
           title="Remove {0} Access"
@@ -301,10 +337,10 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   className="pf-l-bullseye"
                 >
                   <ModalBox
-                    className="awx-c-modal at-c-alertModal at-c-alertModal--danger"
+                    className=""
                     id="pf-modal-0"
-                    isLarge={true}
-                    isSmall={false}
+                    isLarge={false}
+                    isSmall={true}
                     style={Object {}}
                     title="Remove {0} Access"
                   >
@@ -312,7 +348,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       aria-describedby="pf-modal-0"
                       aria-label="Remove {0} Access"
                       aria-modal="true"
-                      className="pf-c-modal-box awx-c-modal at-c-alertModal at-c-alertModal--danger pf-m-lg"
+                      className="pf-c-modal-box pf-m-sm"
                       role="dialog"
                       style={Object {}}
                     >
@@ -395,23 +431,110 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           </ComponentWithOuia>
                         </Component>
                       </ModalBoxCloseButton>
-                      <ModalBoxHeader
-                        hideTitle={false}
+                      <div
+                        className="pf-c-title"
                       >
-                        <Title
-                          className=""
-                          headingLevel="h1"
-                          size="2xl"
-                        >
-                          <h1
-                            className="pf-c-title pf-m-2xl"
+                        <AlertModal__Header>
+                          <StyledComponent
+                            forwardedComponent={
+                              Object {
+                                "$$typeof": Symbol(react.forward_ref),
+                                "attrs": Array [],
+                                "componentStyle": ComponentStyle {
+                                  "componentId": "AlertModal__Header-sc-9waqvl-0",
+                                  "isStatic": true,
+                                  "lastClassName": "dYqVFx",
+                                  "rules": Array [
+                                    "display:flex;svg{margin-right:16px;}",
+                                  ],
+                                },
+                                "displayName": "AlertModal__Header",
+                                "foldedComponentIds": Array [],
+                                "render": [Function],
+                                "styledComponentId": "AlertModal__Header-sc-9waqvl-0",
+                                "target": "div",
+                                "toString": [Function],
+                                "warnTooManyClasses": [Function],
+                                "withComponent": [Function],
+                              }
+                            }
+                            forwardedRef={null}
                           >
-                             
-                            Remove {0} Access
-                             
-                          </h1>
-                        </Title>
-                      </ModalBoxHeader>
+                            <div
+                              className="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                            >
+                              <Styled(ExclamationCircleIcon)
+                                size="lg"
+                              >
+                                <StyledComponent
+                                  forwardedComponent={
+                                    Object {
+                                      "$$typeof": Symbol(react.forward_ref),
+                                      "attrs": Array [],
+                                      "componentStyle": ComponentStyle {
+                                        "componentId": "sc-bdVaJa",
+                                        "isStatic": true,
+                                        "lastClassName": "bkDjEn",
+                                        "rules": Array [
+                                          "color: #c9190b",
+                                        ],
+                                      },
+                                      "displayName": "Styled(ExclamationCircleIcon)",
+                                      "foldedComponentIds": Array [],
+                                      "render": [Function],
+                                      "styledComponentId": "sc-bdVaJa",
+                                      "target": [Function],
+                                      "toString": [Function],
+                                      "warnTooManyClasses": [Function],
+                                      "withComponent": [Function],
+                                    }
+                                  }
+                                  forwardedRef={null}
+                                  size="lg"
+                                >
+                                  <ExclamationCircleIcon
+                                    className="sc-bdVaJa bkDjEn"
+                                    color="currentColor"
+                                    noVerticalAlign={false}
+                                    size="lg"
+                                    title={null}
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      aria-labelledby={null}
+                                      className="sc-bdVaJa bkDjEn"
+                                      fill="currentColor"
+                                      height="2em"
+                                      role="img"
+                                      style={
+                                        Object {
+                                          "verticalAlign": "-0.25em",
+                                        }
+                                      }
+                                      viewBox="0 0 512 512"
+                                      width="2em"
+                                    >
+                                      <path
+                                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                                        transform=""
+                                      />
+                                    </svg>
+                                  </ExclamationCircleIcon>
+                                </StyledComponent>
+                              </Styled(ExclamationCircleIcon)>
+                              <Title
+                                size="2xl"
+                              >
+                                <h1
+                                  className="pf-c-title pf-m-2xl"
+                                >
+                                  Remove {0} Access
+                                </h1>
+                              </Title>
+                            </div>
+                          </StyledComponent>
+                        </AlertModal__Header>
+                      </div>
                       <ModalBoxBody
                         id="pf-modal-0"
                       >
@@ -423,41 +546,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           <br />
                           <br />
                           If you only want to remove access for this particular user, please remove them from the team.
-                          <ExclamationCircleIcon
-                            className="at-c-alertModal__icon"
-                            color="currentColor"
-                            noVerticalAlign={false}
-                            size="sm"
-                            title={null}
-                          >
-                            <svg
-                              aria-hidden={true}
-                              aria-labelledby={null}
-                              className="at-c-alertModal__icon"
-                              fill="currentColor"
-                              height="1em"
-                              role="img"
-                              style={
-                                Object {
-                                  "verticalAlign": "-0.125em",
-                                }
-                              }
-                              viewBox="0 0 512 512"
-                              width="1em"
-                            >
-                              <path
-                                d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                                transform=""
-                              />
-                            </svg>
-                          </ExclamationCircleIcon>
                         </div>
                       </ModalBoxBody>
                       <ModalBoxFooter
-                        isLeftAligned={false}
+                        isLeftAligned={true}
                       >
                         <div
-                          className="pf-c-modal-box__footer"
+                          className="pf-c-modal-box__footer pf-m-align-left"
                         >
                           <Component
                             aria-label="Confirm delete"
