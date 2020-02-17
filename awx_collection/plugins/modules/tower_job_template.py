@@ -219,7 +219,12 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+
+requirements:
+- ansible-tower-cli >= 3.0.2
+
 extends_documentation_fragment: awx.awx.auth
+
 notes:
   - JSON for survey_spec can be found in Tower API Documentation. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)

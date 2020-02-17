@@ -33,7 +33,7 @@ class ItemNotDefined(Exception):
 
 class TowerModule(AnsibleModule):
     url = None
-    honorred_settings = ['host', 'username', 'password', 'verify_ssl', 'oauth_token']
+    honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
     host = '127.0.0.1'
     username = None
     password = None
@@ -43,7 +43,6 @@ class TowerModule(AnsibleModule):
     session = None
     cookie_jar = CookieJar()
     authenticated = False
-    json_output = {'changed': False}
     config_name = 'tower_cli.cfg'
 
     def __init__(self, argument_spec, **kwargs):
@@ -57,6 +56,8 @@ class TowerModule(AnsibleModule):
         )
         args.update(argument_spec)
         kwargs['supports_check_mode'] = True
+
+        self.json_output = {'changed': False}
 
         # We have to take off mutually_exclusive_if in order to init with Ansible
         mutually_exclusive_if = kwargs.pop('mutually_exclusive_if', None)
@@ -136,7 +137,7 @@ class TowerModule(AnsibleModule):
             raise ConfigFileException('The specified config file does not exist')
 
         if not access(config_path, R_OK):
-            raise ConfigFileException("The specified config file can not be read")
+            raise ConfigFileException("The specified config file cannot be read")
 
         # Read in the file contents:
         with open(config_path, 'r') as f:

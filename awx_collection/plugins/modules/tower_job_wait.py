@@ -42,6 +42,10 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish.
       type: int
+
+requirements:
+- ansible-tower-cli >= 3.0.2
+
 extends_documentation_fragment: awx.awx.auth
 '''
 

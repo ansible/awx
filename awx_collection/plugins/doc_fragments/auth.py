@@ -36,9 +36,6 @@ options:
     - Path to the Tower or AWX config file.
     type: path
 
-requirements:
-- ansible-tower-cli >= 3.0.2
-
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
   defaults to find your Tower host information.

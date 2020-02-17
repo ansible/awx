@@ -5,7 +5,7 @@ import io
 import json
 import datetime
 import importlib
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, suppress
 from unittest import mock
 import logging
 
@@ -15,6 +15,12 @@ import pytest
 
 from awx.main.tests.functional.conftest import _request
 from awx.main.models import Organization, Project, Inventory, Credential, CredentialType
+
+try:
+    import tower_cli  # noqa
+    HAS_TOWER_CLI = True
+except ImportError:
+    HAS_TOWER_CLI = False
 
 
 logger = logging.getLogger('awx.main.tests')
@@ -104,7 +110,11 @@ def run_module(request):
         with mock.patch.object(resource_module.TowerModule, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests
             with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
-                with mock.patch('tower_cli.api.Session.request', new=new_request):
+                if HAS_TOWER_CLI:
+                    tower_cli_mgr = mock.patch('tower_cli.api.Session.request', new=new_request)
+                else:
+                    tower_cli_mgr = suppress()
+                with tower_cli_mgr:
                     # Ansible modules return data to the mothership over stdout
                     with redirect_stdout(stdout_buffer):
                         try:
@@ -114,6 +124,9 @@ def run_module(request):
 
         module_stdout = stdout_buffer.getvalue().strip()
         result = json.loads(module_stdout)
+        # A module exception should never be a test expectation
+        if 'exception' in result:
+            raise Exception('Module encountered error:\n{0}'.format(result['exception']))
         return result
 
     return rf

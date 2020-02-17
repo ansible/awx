@@ -38,8 +38,6 @@ def test_inventory_source_create(run_module, admin_user, base_inventory):
     assert result == {
         'id': inv_src.id,
         'name': 'foo',
-        'state': 'present',
-        'credential_type': 'Nexus'
     }
 
 
@@ -61,9 +59,7 @@ def test_create_inventory_source_implied_org(run_module, admin_user):
 
     result.pop('invocation')
     assert result == {
-        "credential_type": "Nexus",
         "name": "Test Inventory Source",
-        "state": "present",
         "id": inv_src.id,
     }
 
@@ -90,9 +86,7 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
 
     result.pop('invocation')
     assert result == {
-        "credential_type": "Nexus",
         "name": "Test Inventory Source",
-        "state": "present",
         "id": inv_src.id,
     }
 
