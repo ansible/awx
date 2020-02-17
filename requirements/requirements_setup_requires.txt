@@ -4,7 +4,6 @@ setuptools==41.6.0
 vcversioner>=2.16.0.0
 pytest-runner
 isort
-virtualenv
 m2r
 cffi>=1.1
 wheel>=0.33.6,<42.0.0

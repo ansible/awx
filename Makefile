@@ -152,7 +152,7 @@ virtualenv_ansible_py3:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv -p $(PYTHON) $(VENV_BASE)/ansible; \
+			$(PYTHON) -m venv $(VENV_BASE)/ansible; \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
@@ -166,7 +166,7 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			virtualenv -p $(PYTHON) $(VENV_BASE)/awx; \
+			$(PYTHON) -m venv $(VENV_BASE)/awx; \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP) && \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) flit; \
 		fi; \
@@ -181,7 +181,7 @@ requirements_ansible: virtualenv_ansible
 	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	rm -f $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
 requirements_ansible_py3: virtualenv_ansible_py3
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -191,7 +191,7 @@ requirements_ansible_py3: virtualenv_ansible_py3
 	fi
 	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
+	rm -f $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
