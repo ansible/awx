@@ -197,7 +197,7 @@ class Export(CustomCommand):
             # 3) the resource flag is used with an argument, and the attr will be that argument's value
             resources.add_argument('--{}'.format(resource), nargs='?', const='')
 
-    def get_resource_options(self, endpoint):
+    def get_options(self, endpoint):
         return endpoint.options().json['actions']['POST']
 
     def register_natural_key(self, asset):
@@ -231,32 +231,31 @@ class Export(CustomCommand):
             from .options import pk_or_name
 
             pk = pk_or_name(self.v2, resource, value)
-            results = endpoint.get(id=pk).json['results']
+            results = endpoint.get(id=pk).results
         else:
-            results = endpoint.get(all_pages=True).json['results']
+            results = endpoint.get(all_pages=True).results
 
         for asset in results:
-            self.register_natural_key(asset)
+            self.register_natural_key(asset.json)
 
-        options = self.get_resource_options(endpoint)
-        return [self.enhance_asset(endpoint, asset, options) for asset in results]
+        options = self.get_options(endpoint)
+        return [self.serialize_asset(asset, options) for asset in results]
 
-    def enhance_asset(self, endpoint, asset, options):
+    def serialize_asset(self, asset, options):
         fields = {
-            key: asset[key] for key in options
-            if key in asset and options[key]['type'] != 'id'
+            key: asset.json[key] for key in options
+            if key in asset.json and options[key]['type'] != 'id'
         }
 
         fk_fields = {
-            key: self.get_natural_key(url=asset['related'][key]) for key in options
-            if key in asset and options[key]['type'] == 'id'
+            key: self.get_natural_key(url=asset.related[key].endpoint) for key in options
+            if key in asset.json and options[key]['type'] == 'id'
         }
 
         related = {}
-        for k, v in asset['related'].items():
+        for k, related_endpoint in asset.related.items():
             if k != 'roles':
                 continue
-            related_endpoint = TentativePage(v, endpoint.connection)
             data = related_endpoint.get(all_pages=True).json
             if 'results' in data:
                 related[k] = [self.get_natural_key(asset=x) for x in data['results']]
