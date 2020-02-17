@@ -225,11 +225,12 @@ class Export(CustomCommand):
 
         return self._natural_keys[url]
 
-    def get_assets(self, endpoint, value):
+    def get_assets(self, resource, value):
+        endpoint = getattr(self.v2, resource)
         if value:
             from .options import pk_or_name
 
-            pk = pk_or_name(client.v2, resource, value)
+            pk = pk_or_name(self.v2, resource, value)
             results = endpoint.get(id=pk).json['results']
         else:
             results = endpoint.get(all_pages=True).json['results']
@@ -237,7 +238,8 @@ class Export(CustomCommand):
         for asset in results:
             self.register_natural_key(asset)
 
-        return results
+        options = self.get_resource_options(endpoint)
+        return [self.enhance_asset(endpoint, asset, options) for asset in results]
 
     def enhance_asset(self, endpoint, asset, options):
         fields = {
@@ -275,16 +277,13 @@ class Export(CustomCommand):
         # If no resource flags are explicitly used, export everything.
         all_resources = all(getattr(parsed, resource, None) is None for resource in EXPORTABLE_RESOURCES)
 
+        self.v2 = client.v2
+
         data = {}
         for resource in EXPORTABLE_RESOURCES:
             value = getattr(parsed, resource, None)
-            if value is None and not all_resources:
-                continue
-            endpoint = getattr(client.v2, resource)
-            options = self.get_resource_options(endpoint)
-            assets = self.get_assets(endpoint, value)
-
-            data[resource] = [self.enhance_asset(endpoint, asset, options) for asset in assets]
+            if all_resources or value is not None:
+                data[resource] = self.get_assets(resource, value)
 
         return data
 
