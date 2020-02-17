@@ -200,30 +200,15 @@ class Export(CustomCommand):
     def get_options(self, endpoint):
         return endpoint.options().json['actions']['POST']
 
-    def register_natural_key(self, asset):
-        if asset['url'] in self._natural_keys:
-            return
-
-        natural_key = {'type': asset['type']}
-        lookup = NATURAL_KEYS.get(asset['type'])
+    def get_natural_key(self, page):
+        natural_key = {'type': page.type}
+        lookup = NATURAL_KEYS.get(page.type)
         if callable(lookup):
-            natural_key.update(lookup(asset))
+            natural_key.update(lookup(page))
         else:
-            natural_key.update((key, asset.get(key)) for key in lookup or ())
+            natural_key.update((key, page[key]) for key in lookup or ())
 
-        self._natural_keys[asset['url']] = natural_key
-
-    def get_natural_key(self, url=None, asset=None):
-        if url is None:
-            url = asset['url']
-        if url not in self._natural_keys:
-            if asset is None:
-                # get the asset by following the url
-                raise Exception("Oops!")
-
-            self.register_natural_key(asset)
-
-        return self._natural_keys[url]
+        return natural_key
 
     def get_assets(self, resource, value):
         endpoint = getattr(self.v2, resource)
@@ -235,9 +220,6 @@ class Export(CustomCommand):
         else:
             results = endpoint.get(all_pages=True).results
 
-        for asset in results:
-            self.register_natural_key(asset.json)
-
         options = self.get_options(endpoint)
         return [self.serialize_asset(asset, options) for asset in results]
 
@@ -248,7 +230,7 @@ class Export(CustomCommand):
         }
 
         fk_fields = {
-            key: self.get_natural_key(url=asset.related[key].endpoint) for key in options
+            key: self.get_natural_key(asset.related[key].get()) for key in options
             if key in asset.json and options[key]['type'] == 'id'
         }
 
@@ -258,7 +240,7 @@ class Export(CustomCommand):
                 continue
             data = related_endpoint.get(all_pages=True).json
             if 'results' in data:
-                related[k] = [self.get_natural_key(asset=x) for x in data['results']]
+                related[k] = [self.get_natural_key(x) for x in data.results]
 
         related_fields = {'related': related} if related else {}
         return dict(**fields, **fk_fields, **related_fields)
