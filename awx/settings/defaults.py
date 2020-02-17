@@ -451,11 +451,6 @@ CELERYBEAT_SCHEDULE = {
     # 'isolated_heartbeat': set up at the end of production.py and development.py
 }
 
-ASGI_AMQP = {
-    'INIT_FUNC': 'awx.prepare_env',
-    'MODEL': 'awx.main.models.channels.ChannelGroup',
-}
-
 # Django Caching Configuration
 CACHES = {
     'default': {
