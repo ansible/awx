@@ -60,6 +60,7 @@ module.exports = {
     alias: {
       '@api': path.join(SRC_PATH, 'api'),
       '@components': path.join(SRC_PATH, 'components'),
+      '@constants': path.join(SRC_PATH, 'constants.js'),
       '@contexts': path.join(SRC_PATH, 'contexts'),
       '@screens': path.join(SRC_PATH, 'screens'),
       '@types': path.join(SRC_PATH, 'types'),

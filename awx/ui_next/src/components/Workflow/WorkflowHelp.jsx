@@ -1,29 +1,28 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Outer = styled.div`
-  position: relative;
   height: 0;
+  pointer-events: none;
+  position: relative;
 `;
 
 const Inner = styled.div`
-  position: absolute;
-  left: 10px;
-  top: 10px;
   background-color: #383f44;
-  color: white;
-  padding: 5px 10px;
   border-radius: 2px;
+  color: white;
+  left: 10px;
   max-width: 300px;
+  padding: 5px 10px;
+  position: absolute;
+  top: 10px;
 `;
 
 function WorkflowHelp({ children }) {
   return (
-    <Fragment>
-      <Outer>
-        <Inner>{children}</Inner>
-      </Outer>
-    </Fragment>
+    <Outer>
+      <Inner>{children}</Inner>
+    </Outer>
   );
 }
 

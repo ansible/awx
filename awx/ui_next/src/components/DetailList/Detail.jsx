@@ -25,8 +25,15 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
   `}
 `;
 
-const Detail = ({ label, value, fullWidth, className, dataCy }) => {
-  if (!value && typeof value !== 'number') {
+const Detail = ({
+  label,
+  value,
+  fullWidth,
+  className,
+  dataCy,
+  alwaysVisible,
+}) => {
+  if (!value && typeof value !== 'number' && !alwaysVisible) {
     return null;
   }
 
@@ -58,10 +65,12 @@ Detail.propTypes = {
   label: node.isRequired,
   value: node,
   fullWidth: bool,
+  alwaysVisible: bool,
 };
 Detail.defaultProps = {
   value: null,
   fullWidth: false,
+  alwaysVisible: false,
 };
 
 export default Detail;

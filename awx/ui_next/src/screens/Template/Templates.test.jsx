@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import Templates from './Templates';

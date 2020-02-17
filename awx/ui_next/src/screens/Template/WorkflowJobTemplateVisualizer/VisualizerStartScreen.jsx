@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button as PFButton } from '@patternfly/react-core';
@@ -14,28 +15,35 @@ const Button = styled(PFButton)`
 `;
 
 const StartPanel = styled.div`
-  padding: 60px 80px;
-  border: 1px solid #c7c7c7;
   background-color: white;
-  color: var(--pf-global--Color--200);
+  border: 1px solid #c7c7c7;
+  padding: 60px 80px;
   text-align: center;
 `;
 
 const StartPanelWrapper = styled.div`
-  display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100%;
   background-color: #f6f6f6;
+  display: flex;
+  height: 100%;
+  justify-content: center;
 `;
 
-function StartScreen({ i18n }) {
+function VisualizerStartScreen({ i18n }) {
+  const dispatch = useContext(WorkflowDispatchContext);
   return (
     <div css="flex: 1">
       <StartPanelWrapper>
         <StartPanel>
           <p>{i18n._(t`Please click the Start button to begin.`)}</p>
-          <Button variant="primary" aria-label={i18n._(t`Start`)}>
+          <Button
+            id="visualizer-start"
+            aria-label={i18n._(t`Start`)}
+            onClick={() =>
+              dispatch({ type: 'START_ADD_NODE', sourceNodeId: 1 })
+            }
+            variant="primary"
+          >
             {i18n._(t`Start`)}
           </Button>
         </StartPanel>
@@ -44,4 +52,4 @@ function StartScreen({ i18n }) {
   );
 }
 
-export default withI18n()(StartScreen);
+export default withI18n()(VisualizerStartScreen);

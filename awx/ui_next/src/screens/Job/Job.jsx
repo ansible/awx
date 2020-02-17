@@ -11,7 +11,9 @@ import RoutedTabs from '@components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
-import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+import WorkflowDetail from './WorkflowDetail';
+import { WorkflowOutput } from './WorkflowOutput';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 class Job extends Component {
   constructor(props) {
@@ -120,33 +122,54 @@ class Job extends Component {
               to="/jobs/:type/:id/output"
               exact
             />
-            {job && [
-              <Route
-                key="details"
-                path="/jobs/:type/:id/details"
-                render={() => <JobDetail type={match.params.type} job={job} />}
-              />,
-              <Route
-                key="output"
-                path="/jobs/:type/:id/output"
-                render={() => <JobOutput type={match.params.type} job={job} />}
-              />,
-              <Route
-                key="not-found"
-                path="*"
-                render={() =>
-                  !hasContentLoading && (
-                    <ContentError isNotFound>
-                      <Link
-                        to={`/jobs/${match.params.type}/${match.params.id}/details`}
-                      >
-                        {i18n._(`View Job Details`)}
-                      </Link>
-                    </ContentError>
-                  )
-                }
-              />,
-            ]}
+            <Route
+              key="workflow-details"
+              path="/jobs/workflow/:id/details"
+              render={() =>
+                job &&
+                job.type === 'workflow_job' && <WorkflowDetail job={job} />
+              }
+            />
+            <Route
+              key="workflow-output"
+              path="/jobs/workflow/:id/output"
+              render={() =>
+                job &&
+                job.type === 'workflow_job' && <WorkflowOutput job={job} />
+              }
+            />
+            {job &&
+              job.type !== 'workflow_job' && [
+                <Route
+                  key="details"
+                  path="/jobs/:type/:id/details"
+                  render={() => (
+                    <JobDetail type={match.params.type} job={job} />
+                  )}
+                />,
+                <Route
+                  key="output"
+                  path="/jobs/:type/:id/output"
+                  render={() => (
+                    <JobOutput type={match.params.type} job={job} />
+                  )}
+                />,
+                <Route
+                  key="not-found"
+                  path="*"
+                  render={() =>
+                    !hasContentLoading && (
+                      <ContentError isNotFound>
+                        <Link
+                          to={`/jobs/${match.params.type}/${match.params.id}/details`}
+                        >
+                          {i18n._(`View Job Details`)}
+                        </Link>
+                      </ContentError>
+                    )
+                  }
+                />,
+              ]}
           </Switch>
         </Card>
       </PageSection>

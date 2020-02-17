@@ -1,6 +1,6 @@
 export { default as Visualizer } from './Visualizer';
-export { default as Toolbar } from './Toolbar';
-export { default as Graph } from './Graph';
-export { default as StartScreen } from './StartScreen';
-export { default as WorkflowHelp } from './WorkflowHelp';
-export { default as WorkflowHelpDetails } from './WorkflowHelpDetails';
+export { default as VisualizerGraph } from './VisualizerGraph';
+export { default as VisualizerLink } from './VisualizerLink';
+export { default as VisualizerNode } from './VisualizerNode';
+export { default as VisualizerStartScreen } from './VisualizerStartScreen';
+export { default as VisualizerToolbar } from './VisualizerToolbar';

@@ -72,6 +72,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     stacked={true}
                   >
                     <Detail
+                      alwaysVisible={false}
                       fullWidth={false}
                       label="Name"
                       value="jane brown"
@@ -83,6 +84,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     stacked={true}
                   >
                     <Detail
+                      alwaysVisible={false}
                       fullWidth={false}
                       label="Team Roles"
                       value={
@@ -133,6 +135,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       stacked={true}
                     >
                       <Detail
+                        alwaysVisible={false}
                         fullWidth={false}
                         label="Name"
                         value="jane brown"
@@ -144,6 +147,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       stacked={true}
                     >
                       <Detail
+                        alwaysVisible={false}
                         fullWidth={false}
                         label="Team Roles"
                         value={
@@ -217,6 +221,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         stacked={true}
                       >
                         <Detail
+                          alwaysVisible={false}
                           fullWidth={false}
                           label="Name"
                           value="jane brown"
@@ -228,6 +233,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         stacked={true}
                       >
                         <Detail
+                          alwaysVisible={false}
                           fullWidth={false}
                           label="Team Roles"
                           value={
@@ -400,6 +406,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 data-pf-content={true}
                               >
                                 <Detail
+                                  alwaysVisible={false}
                                   fullWidth={false}
                                   label="Name"
                                   value="jane brown"
@@ -573,6 +580,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 data-pf-content={true}
                               >
                                 <Detail
+                                  alwaysVisible={false}
                                   fullWidth={false}
                                   label="Team Roles"
                                   value={

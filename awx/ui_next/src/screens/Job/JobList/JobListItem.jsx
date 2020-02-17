@@ -17,7 +17,7 @@ import LaunchButton from '@components/LaunchButton';
 import { StatusIcon } from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
-import { JOB_TYPE_URL_SEGMENTS } from '../../../constants';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 const PaddedIcon = styled(StatusIcon)`
   margin-right: 20px;

@@ -7,7 +7,7 @@ import { Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { formatDateString } from '@util/dates';
-import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 /* eslint-disable react/jsx-pascal-case */
 const Link = styled(props => <_Link {...props} />)`

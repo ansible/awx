@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { string, number } from 'prop-types';
+import { string, node, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
@@ -90,7 +90,7 @@ function VariablesDetail({ value, label, rows }) {
 }
 VariablesDetail.propTypes = {
   value: string.isRequired,
-  label: string.isRequired,
+  label: node.isRequired,
   rows: number,
 };
 VariablesDetail.defaultProps = {

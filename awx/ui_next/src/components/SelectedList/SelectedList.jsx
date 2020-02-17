@@ -10,14 +10,11 @@ import styled from 'styled-components';
 import VerticalSeparator from '../VerticalSeparator';
 
 const Split = styled(PFSplit)`
-  padding-top: 15px;
-  padding-bottom: 5px;
-  border-bottom: #ebebeb var(--pf-global--BorderWidth--sm) solid;
+  margin: 20px 0px;
   align-items: baseline;
 `;
 
 const SplitLabelItem = styled(SplitItem)`
-  font-size: 14px;
   font-weight: bold;
   word-break: initial;
 `;
