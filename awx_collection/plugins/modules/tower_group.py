@@ -44,8 +44,8 @@ options:
       type: str
     variables:
       description:
-        - Variables to use for the group, use C(@) for a file.
-      type: str
+        - Variables to use for the group.
+      type: dict
     state:
       description:
         - Desired state of the resource.
@@ -72,6 +72,7 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.tower_api import TowerModule
+import json
 
 
 def main():
@@ -81,7 +82,7 @@ def main():
         new_name=dict(required=False),
         description=dict(),
         inventory=dict(required=True),
-        variables=dict(),
+        variables=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -107,10 +108,6 @@ def main():
         }
     })
 
-    # If the variables were specified as a file, load them
-    if variables:
-        variables = module.load_variables_if_file_specified(variables, 'variables')
-
     # Create the data that gets sent for create and update
     group_fields = {
         'name': new_name if new_name else name,
@@ -119,7 +116,7 @@ def main():
     if description:
         group_fields['description'] = description
     if variables:
-        group_fields['variables'] = variables
+        group_fields['variables'] = json.dumps(variables)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

@@ -599,9 +599,9 @@ class TestControlledBySCM:
         delete(inv_src.get_absolute_url(), admin_user, expect=204)
         assert scm_inventory.inventory_sources.count() == 0
 
-    def test_adding_inv_src_ok(self, post, scm_inventory, admin_user):
+    def test_adding_inv_src_ok(self, post, scm_inventory, project, admin_user):
         post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-             {'name': 'new inv src', 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
+             {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
              admin_user, expect=201)
 
     def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):

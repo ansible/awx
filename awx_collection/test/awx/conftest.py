@@ -47,7 +47,19 @@ def sanitize_dict(din):
 
 
 @pytest.fixture
-def run_module(request):
+def collection_import():
+    """These tests run assuming that the awx_collection folder is inserted
+    into the PATH before-hand. But all imports internally to the collection
+    go through this fixture so that can be changed if needed.
+    For instance, we could switch to fully-qualified import paths.
+    """
+    def rf(path):
+        return importlib.import_module(path)
+    return rf
+
+
+@pytest.fixture
+def run_module(request, collection_import):
     def rf(module_name, module_params, request_user):
 
         def new_request(self, method, url, **kwargs):
@@ -97,7 +109,7 @@ def run_module(request):
         # Note that a proper Ansiballz explosion of the modules will have an import path like:
         # ansible_collections.awx.awx.plugins.modules.{}
         # We should consider supporting that in the future
-        resource_module = importlib.import_module('plugins.modules.{0}'.format(module_name))
+        resource_module = collection_import('plugins.modules.{0}'.format(module_name))
 
         if not isinstance(module_params, dict):
             raise RuntimeError('Module params must be dict, got {0}'.format(type(module_params)))

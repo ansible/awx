@@ -24,6 +24,8 @@ The following notes are changes that may require changes to playbooks.
  - When the `extra_vars` parameter is used with the `tower_job_launch` module, the Job Template launch will fail unless `add_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
  - tower_group used to also service inventory sources, this functionality has been removed from this module; instead use tower_inventory_source.
  - Specified tower_config file used to handle k=v pairs on a single line. This is no longer supported. You may a file formatted in: yaml, json or ini only.
+ - The `variables` parameter in the `tower_group` and `tower_host` modules are now in `dict` format and no longer
+ supports the use of the `C(@)` syntax (for an external vars file).
 
 ## Running
 

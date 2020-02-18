@@ -144,10 +144,6 @@ def main():
         }
     })
 
-    # Add entries to json_output to match old module
-    module.json_output['credential_type'] = name
-    module.json_output['state'] = state
-
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential_type)

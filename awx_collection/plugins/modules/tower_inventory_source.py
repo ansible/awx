@@ -179,164 +179,20 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    # One question here is do we want to end up supporting this within the ansible module itself (i.e. required if, etc)
-    # Or do we want to let the API return issues with "this doesn't support that", etc.
-    #
-    # GUI OPTIONS:
-    # - - - - - - - manual:	file:	scm:	ec2:	gce	azure_rm	vmware	sat	cloudforms	openstack	rhv	tower	custom
-    # credential		?	?	o	o	r	r		r	r	r		r		r	r	o
-    # source_project		?	?	r	-	-	-		-	-	-		-		-	-	-
-    # source_path		?	?	r	-	-	-		-	-	-		-		-	-	-
-    # verbosity			?	?	o	o	o	o		o	o	o		o		o	o	o
-    # overwrite			?	?	o	o	o	o		o	o	o		o		o	o	o
-    # overwrite_vars		?	?	o	o	o	o		o	o	o		o		o	o	o
-    # update_on_launch		?	?	o	o	o	o		o	o	o		o		o	o	o
-    # update_on_project_launch	?	?	o	-	-	-		-	-	-		-		-	-	-
-    # source_regions		?	?	-	o	o	o		-	-	-		-		-	-	-
-    # instance_filters		?	?	-	o	-	-		o	-	-		-		-	o	-
-    # group_by			?	?	-	o	-	-		o	-	-		-		-	-	-
-    # source_vars*		?	?	-	o	-	o		o	o	o		o		-	-	-
-    # environmet vars*		?	?	o	-	-	-		-	-	-		-		-	-	o
-    # source_script		?	?	-	-	-	-		-	-	-		-		-	-	r
-    #
-    # * - source_vars are labeled environment_vars on project and custom sources
-
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec,
-                         supports_check_mode=True,
-                         required_if=[
-                             # We don't want to require source if state is present because
-                             # you might be doing an update to an existing source.
-                             # Later on in the code, we will do a test so that if state: present
-                             # and if we don't have an object, we must have source.
-                             ('source', 'scm', ['source_project', 'source_path']),
-                             ('source', 'gce', ['credential']),
-                             ('source', 'azure_rm', ['credential']),
-                             ('source', 'vmware', ['credential']),
-                             ('source', 'satellite6', ['credential']),
-                             ('source', 'cloudforms', ['credential']),
-                             ('source', 'openstack', ['credential']),
-                             ('source', 'rhv', ['credential']),
-                             ('source', 'tower', ['credential']),
-                             ('source', 'custom', ['source_script']),
-                         ],
-                         # This is provided by our module, it's not a core thing
-                         mutually_exclusive_if=[
-                             ('source', 'scm', ['source_regions',
-                                                'instance_filters',
-                                                'group_by',
-                                                'source_script'
-                                                ]),
-                             ('source', 'ec2', ['source_project',
-                                                'source_path',
-                                                'update_on_project_launch',
-                                                'source_script'
-                                                ]),
-                             ('source', 'gce', ['source_project',
-                                                'source_path',
-                                                'update_on_project_launch',
-                                                'instance_filters',
-                                                'group_by',
-                                                'source_vars',
-                                                'source_script'
-                                                ]),
-                             ('source', 'azure_rm', ['source_project',
-                                                     'source_path',
-                                                     'update_on_project_launch',
-                                                     'instance_filters',
-                                                     'group_by',
-                                                     'source_script'
-                                                     ]),
-                             ('source', 'vmware', ['source_project', 'source_path', 'update_on_project_launch', 'source_regions', 'source_script']),
-                             ('source', 'satellite6', ['source_project',
-                                                       'source_path',
-                                                       'update_on_project_launch',
-                                                       'source_regions',
-                                                       'instance_filters',
-                                                       'group_by',
-                                                       'source_script'
-                                                       ]),
-                             ('source', 'cloudforms', ['source_project',
-                                                       'source_path',
-                                                       'update_on_project_launch',
-                                                       'source_regions',
-                                                       'instance_filters',
-                                                       'group_by',
-                                                       'source_script'
-                                                       ]),
-                             ('source', 'openstack', ['source_project',
-                                                      'source_path',
-                                                      'update_on_project_launch',
-                                                      'source_regions',
-                                                      'instance_filters',
-                                                      'group_by',
-                                                      'source_script'
-                                                      ]),
-                             ('source', 'rhv', ['source_project',
-                                                'source_path',
-                                                'update_on_project_launch',
-                                                'source_regions',
-                                                'instance_filters',
-                                                'group_by',
-                                                'source_vars',
-                                                'source_script'
-                                                ]),
-                             ('source', 'tower', ['source_project',
-                                                  'source_path',
-                                                  'update_on_project_launch',
-                                                  'source_regions',
-                                                  'group_by',
-                                                  'source_vars',
-                                                  'source_script'
-                                                  ]),
-                             ('source', 'custom', ['source_project',
-                                                   'source_path',
-                                                   'update_on_project_launch',
-                                                   'source_regions',
-                                                   'instance_filters',
-                                                   'group_by'
-                                                   ]),
-                         ])
+    module = TowerModule(argument_spec=argument_spec)
 
-    optional_vars = {}
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
-    optional_vars['description'] = module.params.get('description')
     inventory = module.params.get('inventory')
-    optional_vars['source'] = module.params.get('source')
-    optional_vars['source_path'] = module.params.get('source_path')
     source_script = module.params.get('source_script')
-    optional_vars['source_vars'] = module.params.get('source_vars')
     credential = module.params.get('credential')
-    optional_vars['source_regions'] = module.params.get('source_regions')
-    optional_vars['instance_filters'] = module.params.get('instance_filters')
-    optional_vars['group_by'] = module.params.get('group_by')
-    optional_vars['overwrite'] = module.params.get('overwrite')
-    optional_vars['overwrite_vars'] = module.params.get('overwrite_vars')
-    optional_vars['custom_virtualenv'] = module.params.get('custom_virtualenv')
-    optional_vars['timeout'] = module.params.get('timeout')
-    optional_vars['verbosity'] = module.params.get('verbosity')
-    optional_vars['update_on_launch'] = module.params.get('update_on_launch')
-    optional_vars['update_cache_timeout'] = module.params.get('update_cache_timeout')
     source_project = module.params.get('source_project')
-    optional_vars['update_on_project_update'] = module.params.get('update_on_project_update')
     state = module.params.get('state')
 
-    # Attempt to JSON encode source vars
-    if optional_vars['source_vars']:
-        optional_vars['source_vars'] = dumps(optional_vars['source_vars'])
-
-    # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
-    if credential:
-        optional_vars['credential'] = module.resolve_name_to_id('credentials', credential)
-    if source_project:
-        optional_vars['source_project'] = module.resolve_name_to_id('projects', source_project)
-    if source_script:
-        optional_vars['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
-
     # Attempt to look up inventory source based on the provided name and inventory ID
+    inventory_id = module.resolve_name_to_id('inventories', inventory)
     inventory_source = module.get_one('inventory_sources', **{
         'data': {
             'name': name,
@@ -344,19 +200,41 @@ def main():
         }
     })
 
-    # Sanity check on arguments
-    if state == 'present' and not inventory_source and not optional_vars['source']:
-        module.fail_json(msg="If creating a new inventory source, the source param must be present")
-
     # Create the data that gets sent for create and update
     inventory_source_fields = {
         'name': new_name if new_name else name,
         'inventory': inventory_id,
     }
+
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if credential:
+        inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+    if source_project:
+        inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
+    if source_script:
+        inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
+
+    OPTIONAL_VARS = (
+        'description', 'source', 'source_path', 'source_vars',
+        'source_regions', 'instance_filters', 'group_by',
+        'overwrite', 'overwrite_vars', 'custom_virtualenv',
+        'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
+        'update_on_project_update'
+    )
+
     # Layer in all remaining optional information
-    for field_name in optional_vars:
-        if optional_vars[field_name]:
-            inventory_source_fields[field_name] = optional_vars[field_name]
+    for field_name in OPTIONAL_VARS:
+        field_val = module.params.get(field_name)
+        if field_val:
+            inventory_source_fields[field_name] = field_val
+
+    # Attempt to JSON encode source vars
+    if inventory_source_fields.get('source_vars', None):
+        inventory_source_fields['source_vars'] = dumps(inventory_source_fields['source_vars'])
+
+    # Sanity check on arguments
+    if state == 'present' and not inventory_source and not inventory_source_fields['source']:
+        module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

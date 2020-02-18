@@ -59,19 +59,7 @@ class TowerModule(AnsibleModule):
 
         self.json_output = {'changed': False}
 
-        # We have to take off mutually_exclusive_if in order to init with Ansible
-        mutually_exclusive_if = kwargs.pop('mutually_exclusive_if', None)
-
         super(TowerModule, self).__init__(argument_spec=args, **kwargs)
-
-        # Eventually, we would like to push this as a feature to Ansible core for others to use...
-        # Test mutually_exclusive if
-        if mutually_exclusive_if:
-            for (var_name, var_value, exclusive_names) in mutually_exclusive_if:
-                if self.params.get(var_name) == var_value:
-                    for excluded_param_name in exclusive_names:
-                        if self.params.get(excluded_param_name) is not None:
-                            self.fail_json(msg='Arguments {0} can not be set if source is {1}'.format(', '.join(exclusive_names), var_value))
 
         self.load_config_files()
 
@@ -125,7 +113,17 @@ class TowerModule(AnsibleModule):
 
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
+            duplicated_params = []
+            for direct_field in ('tower_host', 'tower_username', 'tower_password', 'validate_certs', 'tower_oauthtoken'):
+                if self.params.get(direct_field):
+                    duplicated_params.append(direct_field)
+            if duplicated_params:
+                self.warn((
+                    'The parameter(s) {0} were provided at the same time as tower_config_file. '
+                    'Precedence may be unstable, we suggest either using config file or params.'
+                ).format(', '.join(duplicated_params)))
             try:
+                # TODO: warn if there are conflicts with other params
                 self.load_config(self.params.get('tower_config_file'))
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want it to fail if we have an error
@@ -620,30 +618,3 @@ class TowerModule(AnsibleModule):
             return False
         else:
             return True
-
-    def load_variables_if_file_specified(self, vars_value, var_name):
-        if not vars_value.startswith('@'):
-            return vars_value
-
-        if not HAS_YAML:
-            self.fail_json(msg=self.missing_required_lib('yaml'))
-
-        file_name = None
-        file_content = None
-        try:
-            file_name = expanduser(vars_value[1:])
-            with open(file_name, 'r') as f:
-                file_content = f.read()
-        except Exception as e:
-            self.fail_json(msg="Failed to load file {0} for {1} : {2}".format(file_name, var_name, e))
-
-        try:
-            vars_value = yaml.safe_load(file_content)
-        except yaml.YAMLError:
-            # Maybe it wasn't a YAML structure... lets try JSON
-            try:
-                vars_value = loads(file_content)
-            except ValueError:
-                self.fail_json(msg="Failed to load file {0} specifed by {1} as yaml or json".format(file_name, var_name))
-
-        return dumps(vars_value)

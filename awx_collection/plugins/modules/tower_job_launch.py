@@ -45,7 +45,7 @@ options:
       aliases: ['credential']
     extra_vars:
       description:
-        - extra_vars to use for the Job Template. Prepend C(@) if a file.
+        - extra_vars to use for the Job Template.
         - ask_extra_vars needs to be set to True via tower_job_template module
           when creating the Job Template.
       type: dict

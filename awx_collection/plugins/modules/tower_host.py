@@ -49,8 +49,8 @@ options:
       default: 'yes'
     variables:
       description:
-        - Variables to use for the host. Use C(@) for a file.
-      type: str
+        - Variables to use for the host.
+      type: dict
     state:
       description:
         - Desired state of the resource.
@@ -80,6 +80,7 @@ EXAMPLES = '''
 
 
 from ..module_utils.tower_api import TowerModule
+import json
 
 
 def main():
@@ -90,7 +91,7 @@ def main():
         description=dict(default=''),
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
-        variables=dict(default=''),
+        variables=dict(type='dict', default=''),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -105,9 +106,6 @@ def main():
     enabled = module.params.get('enabled')
     state = module.params.get('state')
     variables = module.params.get('variables')
-
-    if variables:
-        variables = module.load_variables_if_file_specified(variables, 'variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
@@ -128,7 +126,7 @@ def main():
         'enabled': enabled,
     }
     if variables:
-        host_fields['variables'] = variables
+        host_fields['variables'] = json.dumps(variables)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

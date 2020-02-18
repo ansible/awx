@@ -192,7 +192,7 @@ class APIView(views.APIView):
                 response.data['detail'] += ' To establish a login session, visit /api/login/.'
                 logger.info(status_msg)
             else:
-                logger.warn(status_msg)
+                logger.warning(status_msg)
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
