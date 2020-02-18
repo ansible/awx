@@ -2594,7 +2594,7 @@ class rhv(PluginFileInjector):
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
     ini_env_reference = 'FOREMAN_INI_PATH'
-    initial_version = 2.10
+    initial_version = '2.10'
     # No base injector, because this does not work in playbooks. Bug??
     namespace = 'theforeman'
     collection = 'foreman'
@@ -2664,6 +2664,37 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
+
+        # Compatibility content
+        group_by_hostvar = {
+            "environment":           {"prefix": "foreman_environment_",
+                                      "separator": "",
+                                      "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
+                                             "regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')"},  # NOQA: W605
+            "location":              {"prefix": "foreman_location_",
+                                      "separator": "",
+                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "organization":          {"prefix": "foreman_organization_",
+                                      "separator": "",
+                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "lifecycle_environment": {"prefix": "foreman_lifecycle_environment_",
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "content_view":          {"prefix": "foreman_content_view_",
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['content_view_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"}
+            }
+        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
+        ret['legacy_hostvars'] = True
+        ret['want_facts'] = True
+        ret['want_params'] = True
+
         return ret
 
 
