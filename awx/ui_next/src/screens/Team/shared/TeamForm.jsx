@@ -66,10 +66,7 @@ function TeamForm(props) {
       onSubmit={handleSubmit}
     >
       {formik => (
-        <Form
-          autoComplete="off"
-          onSubmit={formik.handleSubmit}
-        >
+        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <TeamFormFields team={team} {...rest} />
             <FormSubmitError error={submitError} />
