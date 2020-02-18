@@ -238,12 +238,14 @@ function InventoryGroupsList({ i18n, location, match }) {
                   </DeleteButton>
                 </div>
               </Tooltip>,
-              canAdd && (
-                <ToolbarAddButton
-                  key="add"
-                  linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
-                />
-              ),
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}

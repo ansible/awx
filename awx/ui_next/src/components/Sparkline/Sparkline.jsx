@@ -13,6 +13,10 @@ import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 const Link = styled(props => <_Link {...props} />)`
   margin-right: 5px;
 `;
+
+const Wrapper = styled.div`
+  display: inline-flex;
+`;
 /* eslint-enable react/jsx-pascal-case */
 
 const Sparkline = ({ i18n, jobs }) => {
@@ -32,13 +36,15 @@ const Sparkline = ({ i18n, jobs }) => {
     </Fragment>
   );
 
-  return jobs.map(job => (
+  const statusIcons = jobs.map(job => (
     <Tooltip position="top" content={generateTooltip(job)} key={job.id}>
       <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
         <StatusIcon status={job.status} />
       </Link>
     </Tooltip>
   ));
+
+  return <Wrapper>{statusIcons}</Wrapper>;
 };
 
 Sparkline.propTypes = {

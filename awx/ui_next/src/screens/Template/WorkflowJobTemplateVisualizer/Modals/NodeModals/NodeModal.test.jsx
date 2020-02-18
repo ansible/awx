@@ -109,7 +109,7 @@ describe('NodeModal', () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
       wrapper.update();
-      wrapper.find('DataListRadio').simulate('click');
+      wrapper.find('Radio').simulate('click');
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -136,7 +136,7 @@ describe('NodeModal', () => {
         wrapper.find('AnsibleSelect').prop('onChange')(null, 'project_sync');
       });
       wrapper.update();
-      wrapper.find('DataListRadio').simulate('click');
+      wrapper.find('Radio').simulate('click');
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -166,7 +166,7 @@ describe('NodeModal', () => {
         );
       });
       wrapper.update();
-      wrapper.find('DataListRadio').simulate('click');
+      wrapper.find('Radio').simulate('click');
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -193,7 +193,7 @@ describe('NodeModal', () => {
         );
       });
       wrapper.update();
-      wrapper.find('DataListRadio').simulate('click');
+      wrapper.find('Radio').simulate('click');
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });
@@ -396,7 +396,7 @@ describe('NodeModal', () => {
         );
       });
       wrapper.update();
-      wrapper.find('DataListRadio').simulate('click');
+      wrapper.find('Radio').simulate('click');
       await act(async () => {
         wrapper.find('button#next-node-modal').simulate('click');
       });

@@ -206,9 +206,14 @@ class ProjectsList extends Component {
                       itemsToDelete={selected}
                       pluralizedItemName={i18n._(t`Projects`)}
                     />,
-                    canAdd ? (
-                      <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                    ) : null,
+                    ...(canAdd
+                      ? [
+                          <ToolbarAddButton
+                            key="add"
+                            linkTo={`${match.url}/add`}
+                          />,
+                        ]
+                      : []),
                   ]}
                 />
               )}

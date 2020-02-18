@@ -5,6 +5,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
+  DataListAction,
   DataListCell,
   DataListCheck,
   DataListItem,
@@ -20,28 +21,26 @@ import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 
 const PaddedIcon = styled(StatusIcon)`
-  margin-right: 20px;
+  margin: 6px 20px 0 0;
 `;
 
 class JobListItem extends Component {
   render() {
     const { i18n, job, isSelected, onSelect } = this.props;
+    const labelId = `check-action-${job.id}`;
 
     return (
-      <DataListItem aria-labelledby={`check-action-${job.id}`} id={`${job.id}`}>
+      <DataListItem aria-labelledby={labelId} id={`${job.id}`}>
         <DataListItemRow>
           <DataListCheck
             id={`select-job-${job.id}`}
             checked={isSelected}
             onChange={onSelect}
-            aria-labelledby={`check-action-${job.id}`}
+            aria-labelledby={labelId}
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell
-                key="name"
-                css="display: inline-flex; align-items: center;"
-              >
+              <DataListCell key="name" css="display: inline-flex;">
                 {job.status && <PaddedIcon status={job.status} />}
                 <span>
                   <Link
@@ -57,22 +56,26 @@ class JobListItem extends Component {
               <DataListCell key="finished">
                 {formatDateString(job.finished)}
               </DataListCell>,
-              <DataListCell isFilled={false} alignRight key="relaunch">
-                {job.type !== 'system_job' &&
-                  job.summary_fields.user_capabilities.start && (
-                    <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
-                      <LaunchButton resource={job}>
-                        {({ handleRelaunch }) => (
-                          <Button variant="plain" onClick={handleRelaunch}>
-                            <RocketIcon />
-                          </Button>
-                        )}
-                      </LaunchButton>
-                    </Tooltip>
-                  )}
-              </DataListCell>,
             ]}
           />
+          {job.type !== 'system_job' &&
+            job.summary_fields?.user_capabilities?.start && (
+              <DataListAction
+                aria-label="actions"
+                aria-labelledby={labelId}
+                id={labelId}
+              >
+                <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
+                  <LaunchButton resource={job}>
+                    {({ handleRelaunch }) => (
+                      <Button variant="plain" onClick={handleRelaunch}>
+                        <RocketIcon />
+                      </Button>
+                    )}
+                  </LaunchButton>
+                </Tooltip>
+              </DataListAction>
+            )}
         </DataListItemRow>
       </DataListItem>
     );

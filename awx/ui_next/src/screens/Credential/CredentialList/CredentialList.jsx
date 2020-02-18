@@ -125,9 +125,9 @@ function CredentialList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Credentials`)}
                 />,
-                canAdd && (
-                  <ToolbarAddButton key="add" linkTo="/credentials/add" />
-                ),
+                ...(canAdd
+                  ? [<ToolbarAddButton key="add" linkTo="/credentials/add" />]
+                  : []),
               ]}
             />
           )}

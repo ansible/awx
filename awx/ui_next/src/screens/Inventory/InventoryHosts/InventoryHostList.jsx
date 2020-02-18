@@ -165,12 +165,14 @@ function InventoryHostList({ i18n, location, match }) {
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,
-              canAdd && (
-                <ToolbarAddButton
-                  key="add"
-                  linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
-                />
-              ),
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}

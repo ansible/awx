@@ -121,21 +121,25 @@ function TemplateList({ i18n }) {
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
   const addButtonOptions = [];
+
   if (canAddJT) {
     addButtonOptions.push({
       label: i18n._(t`Template`),
       url: `/templates/job_template/add/`,
     });
   }
+
   if (canAddWFJT) {
     addButtonOptions.push({
       label: i18n._(t`Workflow Template`),
       url: `/templates/workflow_job_template/add/`,
     });
   }
+
   const addButton = (
     <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
   );
+
   return (
     <>
       <Card>
@@ -215,7 +219,7 @@ function TemplateList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName="Templates"
                 />,
-                (canAddJT || canAddWFJT) && addButton,
+                ...(canAddJT || canAddWFJT ? [addButton] : []),
               ]}
             />
           )}

@@ -7,7 +7,6 @@ import { Formik, Field } from 'formik';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
 import FormRow from '@components/FormRow';
 import AnsibleSelect from '@components/AnsibleSelect';
-import VerticalSeperator from '@components/VerticalSeparator';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
@@ -47,9 +46,8 @@ function NodeTypeStep({
 }) {
   return (
     <>
-      <div css=" display: flex; align-items: center; margin-bottom: 20px;">
-        <b>{i18n._(t`Node Type`)}</b>
-        <VerticalSeperator />
+      <div css="display: flex; align-items: center; margin-bottom: 20px;">
+        <b css="margin-right: 24px">{i18n._(t`Node Type`)}</b>
         <div>
           <AnsibleSelect
             id="nodeResource-select"

@@ -3,17 +3,18 @@ import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import {
   Button,
+  DataListAction,
+  DataListCell,
   DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import DataListCell from '@components/DataListCell';
 import { Inventory } from '@types';
 
 class InventoryListItem extends React.Component {
@@ -52,25 +53,27 @@ class InventoryListItem extends React.Component {
                   ? i18n._(t`Smart Inventory`)
                   : i18n._(t`Inventory`)}
               </DataListCell>,
-              <DataListCell key="edit" alignRight isFilled={false}>
-                {inventory.summary_fields.user_capabilities.edit && (
-                  <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
-                    <Button
-                      variant="plain"
-                      component={Link}
-                      to={`/inventories/${
-                        inventory.kind === 'smart'
-                          ? 'smart_inventory'
-                          : 'inventory'
-                      }/${inventory.id}/edit`}
-                    >
-                      <PencilAltIcon />
-                    </Button>
-                  </Tooltip>
-                )}
-              </DataListCell>,
             ]}
           />
+          <DataListAction
+            aria-label="actions"
+            aria-labelledby={labelId}
+            id={labelId}
+          >
+            {inventory.summary_fields.user_capabilities.edit && (
+              <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
+                <Button
+                  variant="plain"
+                  component={Link}
+                  to={`/inventories/${
+                    inventory.kind === 'smart' ? 'smart_inventory' : 'inventory'
+                  }/${inventory.id}/edit`}
+                >
+                  <PencilAltIcon />
+                </Button>
+              </Tooltip>
+            )}
+          </DataListAction>
         </DataListItemRow>
       </DataListItem>
     );

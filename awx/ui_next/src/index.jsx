@@ -5,7 +5,6 @@ import { I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import '@patternfly/react-core/dist/styles/base.css';
-import './app.scss';
 
 import { isAuthenticated } from '@util/auth';
 import Background from '@components/Background';

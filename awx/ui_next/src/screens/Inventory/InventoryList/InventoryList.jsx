@@ -208,7 +208,7 @@ class InventoriesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Inventories"
                   />,
-                  canAdd && addButton,
+                  ...(canAdd ? [addButton] : []),
                 ]}
               />
             )}

@@ -4,24 +4,20 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
+  DataListAction as _DataListAction,
+  DataListCell,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
-  DataListCell as PFDataListCell,
+  DataListItemRow,
   Switch,
 } from '@patternfly/react-core';
-
 import styled from 'styled-components';
 
-const DataListCell = styled(PFDataListCell)`
-  display: flex;
-  justify-content: ${props => (props.righthalf ? 'flex-start' : 'inherit')};
-  padding-bottom: ${props => (props.righthalf ? '16px' : '8px')};
-
-  @media screen and (min-width: 768px) {
-    justify-content: ${props => (props.righthalf ? 'flex-end' : 'inherit')};
-    padding-bottom: 0;
-  }
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: repeat(3, max-content);
 `;
 
 function NotificationListItem(props) {
@@ -51,7 +47,6 @@ function NotificationListItem(props) {
                 to={{
                   pathname: detailUrl,
                 }}
-                css="margin-right: 1.5em;"
               >
                 <b id={`items-list-item-${notification.id}`}>
                   {notification.name}
@@ -61,51 +56,47 @@ function NotificationListItem(props) {
             <DataListCell key="type">
               {typeLabels[notification.notification_type]}
             </DataListCell>,
-            <DataListCell righthalf="true" key="toggles">
-              <Switch
-                id={`notification-${notification.id}-started-toggle`}
-                label={i18n._(t`Start`)}
-                labelOff={i18n._(t`Start`)}
-                isChecked={startedTurnedOn}
-                isDisabled={!canToggleNotifications}
-                onChange={() =>
-                  toggleNotification(
-                    notification.id,
-                    startedTurnedOn,
-                    'started'
-                  )
-                }
-                aria-label={i18n._(t`Toggle notification start`)}
-              />
-              <Switch
-                id={`notification-${notification.id}-success-toggle`}
-                label={i18n._(t`Success`)}
-                labelOff={i18n._(t`Success`)}
-                isChecked={successTurnedOn}
-                isDisabled={!canToggleNotifications}
-                onChange={() =>
-                  toggleNotification(
-                    notification.id,
-                    successTurnedOn,
-                    'success'
-                  )
-                }
-                aria-label={i18n._(t`Toggle notification success`)}
-              />
-              <Switch
-                id={`notification-${notification.id}-error-toggle`}
-                label={i18n._(t`Failure`)}
-                labelOff={i18n._(t`Failure`)}
-                isChecked={errorTurnedOn}
-                isDisabled={!canToggleNotifications}
-                onChange={() =>
-                  toggleNotification(notification.id, errorTurnedOn, 'error')
-                }
-                aria-label={i18n._(t`Toggle notification failure`)}
-              />
-            </DataListCell>,
           ]}
         />
+        <DataListAction
+          aria-label="actions"
+          aria-labelledby={`items-list-item-${notification.id}`}
+          id={`items-list-item-${notification.id}`}
+        >
+          <Switch
+            id={`notification-${notification.id}-started-toggle`}
+            label={i18n._(t`Start`)}
+            labelOff={i18n._(t`Start`)}
+            isChecked={startedTurnedOn}
+            isDisabled={!canToggleNotifications}
+            onChange={() =>
+              toggleNotification(notification.id, startedTurnedOn, 'started')
+            }
+            aria-label={i18n._(t`Toggle notification start`)}
+          />
+          <Switch
+            id={`notification-${notification.id}-success-toggle`}
+            label={i18n._(t`Success`)}
+            labelOff={i18n._(t`Success`)}
+            isChecked={successTurnedOn}
+            isDisabled={!canToggleNotifications}
+            onChange={() =>
+              toggleNotification(notification.id, successTurnedOn, 'success')
+            }
+            aria-label={i18n._(t`Toggle notification success`)}
+          />
+          <Switch
+            id={`notification-${notification.id}-error-toggle`}
+            label={i18n._(t`Failure`)}
+            labelOff={i18n._(t`Failure`)}
+            isChecked={errorTurnedOn}
+            isDisabled={!canToggleNotifications}
+            onChange={() =>
+              toggleNotification(notification.id, errorTurnedOn, 'error')
+            }
+            aria-label={i18n._(t`Toggle notification failure`)}
+          />
+        </DataListAction>
       </DataListItemRow>
     </DataListItem>
   );

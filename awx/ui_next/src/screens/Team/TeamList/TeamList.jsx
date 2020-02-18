@@ -193,9 +193,14 @@ class TeamsList extends Component {
                       itemsToDelete={selected}
                       pluralizedItemName={i18n._(t`Teams`)}
                     />,
-                    canAdd ? (
-                      <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                    ) : null,
+                    ...(canAdd
+                      ? [
+                          <ToolbarAddButton
+                            key="add"
+                            linkTo={`${match.url}/add`}
+                          />,
+                        ]
+                      : []),
                   ]}
                 />
               )}

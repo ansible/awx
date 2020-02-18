@@ -94,7 +94,7 @@ describe('NodeTypeStep', () => {
     wrapper.update();
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('job_template');
     expect(wrapper.find('JobTemplatesList').length).toBe(1);
-    wrapper.find('DataListRadio').simulate('click');
+    wrapper.find('Radio').simulate('click');
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 1,
       name: 'Test Job Template',
@@ -119,7 +119,7 @@ describe('NodeTypeStep', () => {
     wrapper.update();
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
     expect(wrapper.find('ProjectsList').length).toBe(1);
-    wrapper.find('DataListRadio').simulate('click');
+    wrapper.find('Radio').simulate('click');
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 1,
       name: 'Test Project',
@@ -146,7 +146,7 @@ describe('NodeTypeStep', () => {
       'inventory_source_sync'
     );
     expect(wrapper.find('InventorySourcesList').length).toBe(1);
-    wrapper.find('DataListRadio').simulate('click');
+    wrapper.find('Radio').simulate('click');
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 1,
       name: 'Test Inventory Source',
@@ -173,7 +173,7 @@ describe('NodeTypeStep', () => {
       'workflow_job_template'
     );
     expect(wrapper.find('WorkflowJobTemplatesList').length).toBe(1);
-    wrapper.find('DataListRadio').simulate('click');
+    wrapper.find('Radio').simulate('click');
     expect(onUpdateNodeResource).toHaveBeenCalledWith({
       id: 1,
       name: 'Test Workflow Job Template',

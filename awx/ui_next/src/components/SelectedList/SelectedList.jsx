@@ -15,6 +15,7 @@ const Split = styled(PFSplit)`
 
 const SplitLabelItem = styled(SplitItem)`
   font-weight: bold;
+  margin-right: 32px;
   word-break: initial;
 `;
 
@@ -39,7 +40,7 @@ class SelectedList extends Component {
 
     return (
       <Split>
-        <SplitLabelItem css="margin-right: 32px">{label}</SplitLabelItem>
+        <SplitLabelItem>{label}</SplitLabelItem>
         <SplitItem>
           <ChipGroup numChips={5}>
             {selected.map(item =>

@@ -197,9 +197,14 @@ class UsersList extends Component {
                       itemsToDelete={selected}
                       pluralizedItemName="Users"
                     />,
-                    canAdd ? (
-                      <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-                    ) : null,
+                    ...(canAdd
+                      ? [
+                          <ToolbarAddButton
+                            key="add"
+                            linkTo={`${match.url}/add`}
+                          />,
+                        ]
+                      : []),
                   ]}
                 />
               )}
