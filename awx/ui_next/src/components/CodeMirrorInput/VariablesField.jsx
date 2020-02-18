@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { string, bool } from 'prop-types';
-import { Field, useFormikContext } from 'formik';
+import { useField } from 'formik';
 import { Split, SplitItem } from '@patternfly/react-core';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
@@ -8,9 +8,8 @@ import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function VariablesField({ id, name, label, readOnly }) {
-  const { values } = useFormikContext();
-  const value = values[name];
-  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
+  const [field, meta, helpers] = useField(name);
+  const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
 
   return (
     <Field name={name}>
@@ -31,10 +30,10 @@ function VariablesField({ id, name, label, readOnly }) {
                       newMode === YAML_MODE
                         ? jsonToYaml(field.value)
                         : yamlToJson(field.value);
-                    form.setFieldValue(name, newVal);
+                helpers.setValue(newVal);
                     setMode(newMode);
                   } catch (err) {
-                    form.setFieldError(name, err.message);
+                helpers.setError(err.message);
                   }
                 }}
               />
@@ -45,16 +44,13 @@ function VariablesField({ id, name, label, readOnly }) {
             readOnly={readOnly}
             {...field}
             onChange={newVal => {
-              form.setFieldValue(name, newVal);
+          helpers.setValue(newVal);
             }}
-            hasErrors={!!form.errors[field.name]}
+        hasErrors={!!meta.error}
           />
-          {form.errors[field.name] ? (
-            <div
-              className="pf-c-form__helper-text pf-m-error"
-              aria-live="polite"
-            >
-              {form.errors[field.name]}
+      {meta.error ? (
+        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
+          {meta.error}
             </div>
           ) : null}
         </div>

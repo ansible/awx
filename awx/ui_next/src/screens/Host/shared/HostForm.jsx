@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
 
 import { useRouteMatch } from 'react-router-dom';
-import { Formik, Field } from 'formik';
+import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
@@ -15,26 +15,21 @@ import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
 import { InventoryLookup } from '@components/Lookup';
 
-function HostForm({ handleSubmit, handleCancel, host, submitError, i18n }) {
+function HostFormFields({ host, i18n }) {
   const [inventory, setInventory] = useState(
     host ? host.summary_fields.inventory : ''
   );
 
   const hostAddMatch = useRouteMatch('/hosts/add');
+  const inventoryFieldArr = useField({
+    name: 'inventory',
+    validate: required(i18n._(t`Select aå value for this field`), i18n),
+  });
+  const inventoryMeta = inventoryFieldArr[1];
+  const inventoryHelpers = inventoryFieldArr[2];
 
   return (
-    <Formik
-      initialValues={{
-        name: host.name,
-        description: host.description,
-        inventory: host.inventory || '',
-        variables: host.variables,
-      }}
-      onSubmit={handleSubmit}
-    >
-      {formik => (
-        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormRow>
+    <>
             <FormField
               id="host-name"
               name="name"
@@ -50,41 +45,46 @@ function HostForm({ handleSubmit, handleCancel, host, submitError, i18n }) {
               label={i18n._(t`Description`)}
             />
             {hostAddMatch && (
-              <Field
-                name="inventory"
-                validate={required(
-                  i18n._(t`Select a value for this field`),
-                  i18n
-                )}
-              >
-                {({ form }) => (
                   <InventoryLookup
                     value={inventory}
-                    onBlur={() => form.setFieldTouched('inventory')}
+          onBlur={() => inventoryHelpers.setTouched()}
                     tooltip={i18n._(
                       t`Select the inventory that this host will belong to.`
                     )}
-                    isValid={!form.touched.inventory || !form.errors.inventory}
-                    helperTextInvalid={form.errors.inventory}
+          isValid={!inventoryMeta.touched || !inventoryMeta.error}
+          helperTextInvalid={inventoryMeta.error}
                     onChange={value => {
-                      form.setFieldValue('inventory', value.id);
+            inventoryHelpers.setValuealue(value.id);
                       setInventory(value);
                     }}
                     required
-                    touched={form.touched.inventory}
-                    error={form.errors.inventory}
+          touched={inventoryMeta.touched}
+          error={inventoryMeta.error}
                   />
                 )}
-              </Field>
-            )}
-          </FormRow>
-          <FormRow>
             <VariablesField
               id="host-variables"
               name="variables"
               label={i18n._(t`Variables`)}
             />
-          </FormRow>
+    </>
+  );
+}
+
+function HostForm({ handleSubmit, host, submitError, handleCancel, ...rest }) {
+  return (
+    <Formik
+      initialValues={{
+        name: host.name,
+        description: host.description,
+        inventory: host.inventory || '',
+        variables: host.variables,
+      }}
+      onSubmit={handleSubmit}
+    >
+      {formik => (
+        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+            <HostFormFields host={host} {...rest} />
           <FormSubmitError error={submitError} />
           <FormActionGroup
             onCancel={handleCancel}

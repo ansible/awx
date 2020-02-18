@@ -1,11 +1,10 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Field } from 'formik';
+import { useField } from 'formik';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
 import FormField, { CheckboxField } from '@components/FormField';
 import { required } from '@util/validators';
-import FormRow from '@components/FormRow';
 import { FormGroup, Title } from '@patternfly/react-core';
 import styled from 'styled-components';
 
@@ -41,21 +40,21 @@ export const BranchFormField = withI18n()(({ i18n, label }) => (
 ));
 
 export const ScmCredentialFormField = withI18n()(
-  ({ i18n, credential, onCredentialSelection }) => (
-    <Field name="credential">
-      {({ form }) => (
+  ({ i18n, credential, onCredentialSelection }) => {
+    const credHelpers = useField('credential')[2];
+
+    return (
         <CredentialLookup
           credentialTypeId={credential.typeId}
           label={i18n._(t`SCM Credential`)}
           value={credential.value}
           onChange={value => {
             onCredentialSelection('scm', value);
-            form.setFieldValue('credential', value ? value.id : '');
+          credHelpers.setValue(value ? value.id : '');
           }}
         />
-      )}
-    </Field>
-  )
+    );
+  }
 );
 
 export const ScmTypeOptions = withI18n()(

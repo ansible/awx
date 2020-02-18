@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Field } from 'formik';
-import { FormGroup, TextInput, Tooltip } from '@patternfly/react-core';
+import { useField } from 'formik';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
@@ -21,16 +20,13 @@ function FormField(props) {
     ...rest
   } = props;
 
-  return (
-    <Field name={name} validate={validate}>
-      {({ field, form }) => {
-        const isValid =
-          form && (!form.touched[field.name] || !form.errors[field.name]);
+  const [field, meta] = useField({ name, validate });
+  const isValid = !(meta.touched && meta.error);
 
         return (
           <FormGroup
             fieldId={id}
-            helperTextInvalid={form.errors[field.name]}
+          helperTextInvalid={meta.error}
             isRequired={isRequired}
             isValid={isValid}
             label={label}
@@ -44,6 +40,8 @@ function FormField(props) {
                 <QuestionCircleIcon />
               </Tooltip>
             )}
+            isValid={isValid}
+          helperTextInvalid={meta.error}
             <TextInput
               id={id}
               isRequired={isRequired}

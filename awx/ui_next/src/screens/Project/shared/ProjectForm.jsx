@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Formik, Field } from 'formik';
+import { Formik, useField } from 'formik';
 import { Config } from '@contexts/Config';
-import { Form, FormGroup } from '@patternfly/react-core';
+import { Form, FormGroup, Title } from '@patternfly/react-core';
 import AnsibleSelect from '@components/AnsibleSelect';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
@@ -24,16 +24,8 @@ import {
   HgSubForm,
   SvnSubForm,
   InsightsSubForm,
-  SubFormTitle,
   ManualSubForm,
 } from './ProjectSubForms';
-
-const ScmTypeFormRow = styled(FormRow)`
-  background-color: #f5f5f5;
-  grid-column: 1 / -1;
-  margin: 0 -24px;
-  padding: 24px;
-`;
 
 const fetchCredentials = async credential => {
   const [
@@ -73,14 +65,238 @@ const fetchCredentials = async credential => {
   };
 };
 
-function ProjectForm({ project, submitError, ...props }) {
-  const { i18n, handleCancel, handleSubmit } = props;
+function ProjectFormFields({
+  project_base_dir,
+  project_local_paths,
+  formik,
+  i18n,
+  setCredentials,
+  credentials,
+  scmTypeOptions,
+  setScmSubFormState,
+  scmSubFormState,
+  setOrganization,
+  organization,
+}) {
+  const scmFormFields = {
+    scm_url: '',
+    scm_branch: '',
+    scm_refspec: '',
+    credential: '',
+    scm_clean: false,
+    scm_delete_on_update: false,
+    scm_update_on_launch: false,
+    allow_override: false,
+    scm_update_cache_timeout: 0,
+  };
+
+  const [scmTypeField, scmTypeMeta, scmTypeHelpers] = useField({
+    name: 'scm_type',
+    validate: required(i18n._(t`Set a value for this field`), i18n),
+  });
+  const [venvField] = useField('custom_virtualenv');
+  const orgFieldArr = useField({
+    name: 'organization',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
+  const organizationMeta = orgFieldArr[1];
+  const organizationHelpers = orgFieldArr[2];
+
+  /* Save current scm subform field values to state */
+  const saveSubFormState = form => {
+    const currentScmFormFields = { ...scmFormFields };
+
+    Object.keys(currentScmFormFields).forEach(label => {
+      currentScmFormFields[label] = form.values[label];
+    });
+
+    setScmSubFormState(currentScmFormFields);
+  };
+
+  /**
+   * If scm type is !== the initial scm type value,
+   * reset scm subform field values to defaults.
+   * If scm type is === the initial scm type value,
+   * reset scm subform field values to scmSubFormState.
+   */
+  const resetScmTypeFields = (value, form) => {
+    if (form.values.scm_type === form.initialValues.scm_type) {
+      saveSubFormState(formik);
+    }
+
+    Object.keys(scmFormFields).forEach(label => {
+      if (value === form.initialValues.scm_type) {
+        form.setFieldValue(label, scmSubFormState[label]);
+      } else {
+        form.setFieldValue(label, scmFormFields[label]);
+      }
+      form.setFieldTouched(label, false);
+    });
+  };
+
+  const handleCredentialSelection = (type, value) => {
+    setCredentials({
+      ...credentials,
+      [type]: {
+        ...credentials[type],
+        value,
+      },
+    });
+  };
+
+  return (
+    <>
+                <FormField
+                  id="project-name"
+                  label={i18n._(t`Name`)}
+                  name="name"
+                  type="text"
+                  validate={required(null, i18n)}
+                  isRequired
+                />
+                <FormField
+                  id="project-description"
+                  label={i18n._(t`Description`)}
+                  name="description"
+                  type="text"
+                />
+                    <OrganizationLookup
+        helperTextInvalid={organizationMeta.error}
+        isValid={!organizationMeta.touched || !organizationMeta.error}
+        onBlur={() => organizationHelpers.setTouched()}
+                      onChange={value => {
+          organizationHelpers.setValue(value.id);
+                        setOrganization(value);
+                      }}
+                      value={organization}
+                      required
+                    />
+                    <FormGroup
+                      fieldId="project-scm-type"
+        helperTextInvalid={scmTypeMeta.error}
+                      isRequired
+        isValid={!scmTypeMeta.touched || !scmTypeMeta.error}
+                      label={i18n._(t`SCM Type`)}
+                    >
+                      <AnsibleSelect
+          {...scmTypeField}
+                        id="scm_type"
+                        data={[
+                          {
+                            value: '',
+                            key: '',
+                            label: i18n._(t`Choose an SCM Type`),
+                            isDisabled: true,
+                          },
+                          ...scmTypeOptions.map(([value, label]) => {
+                            if (label === 'Manual') {
+                              value = 'manual';
+                            }
+                            return {
+                              label,
+                              value,
+                              key: value,
+                            };
+                          }),
+                        ]}
+                        onChange={(event, value) => {
+            scmTypeHelpers.setValue(value);
+            resetScmTypeFields(value, formik);
+                        }}
+                      />
+                    </FormGroup>
+                {formik.values.scm_type !== '' && (
+                  <ScmTypeFormRow>
+                    <SubFormTitle size="md">
+                      {i18n._(t`Type Details`)}
+                    </SubFormTitle>
+                    {
+                      {
+                        manual: (
+                          <ManualSubForm
+                            localPath={formik.initialValues.local_path}
+                            project_base_dir={project_base_dir}
+                            project_local_paths={project_local_paths}
+                          />
+                        ),
+                        git: (
+                          <GitSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                          />
+                        ),
+                        hg: (
+                          <HgSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                          />
+                        ),
+                        svn: (
+                          <SvnSubForm
+                            credential={credentials.scm}
+                            onCredentialSelection={handleCredentialSelection}
+                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                          />
+                        ),
+                        insights: (
+                          <InsightsSubForm
+                            credential={credentials.insights}
+                            onCredentialSelection={handleCredentialSelection}
+                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                          />
+                        ),
+                      }[formik.values.scm_type]
+                    }
+                  </ScmTypeFormRow>
+                )}
+                <Config>
+                  {({ custom_virtualenvs }) =>
+                    custom_virtualenvs &&
+                    custom_virtualenvs.length > 1 && (
+                      <Field name="custom_virtualenv">
+                        {({ field }) => (
+                          <FormGroup
+                            fieldId="project-custom-virtualenv"
+                            label={i18n._(t`Ansible Environment`)}
+                          >
+                            <FieldTooltip
+                              content={i18n._(t`Select the playbook to be executed by
+                              this job.`)}
+                            />
+                            <AnsibleSelect
+                              id="project-custom-virtualenv"
+                              data={[
+                                {
+                    label: i18n._(t`Use Default Ansible Environment`),
+                                  value: '/venv/ansible/',
+                                  key: 'default',
+                                },
+                                ...custom_virtualenvs
+                                  .filter(datum => datum !== '/venv/ansible/')
+                                  .map(datum => ({
+                                    label: datum,
+                                    value: datum,
+                                    key: datum,
+                                  })),
+                              ]}
+                {...venvField}
+                            />
+                          </FormGroup>
+                    )
+                  }
+                </Config>
+    </>
+  );
+}
+
+function ProjectForm({ i18n, project, submitError, ...props }) {
+  const { handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [organization, setOrganization] = useState(
-    summary_fields.organization || null
-  );
+  const [organization, setOrganization] = useState(null);
   const [scmSubFormState, setScmSubFormState] = useState(null);
   const [scmTypeOptions, setScmTypeOptions] = useState(null);
   const [credentials, setCredentials] = useState({
@@ -113,60 +329,6 @@ function ProjectForm({ project, submitError, ...props }) {
 
     fetchData();
   }, [summary_fields.credential]);
-
-  const scmFormFields = {
-    scm_url: '',
-    scm_branch: '',
-    scm_refspec: '',
-    credential: '',
-    scm_clean: false,
-    scm_delete_on_update: false,
-    scm_update_on_launch: false,
-    allow_override: false,
-    scm_update_cache_timeout: 0,
-  };
-
-  /* Save current scm subform field values to state */
-  const saveSubFormState = form => {
-    const currentScmFormFields = { ...scmFormFields };
-
-    Object.keys(currentScmFormFields).forEach(label => {
-      currentScmFormFields[label] = form.values[label];
-    });
-
-    setScmSubFormState(currentScmFormFields);
-  };
-
-  /**
-   * If scm type is !== the initial scm type value,
-   * reset scm subform field values to defaults.
-   * If scm type is === the initial scm type value,
-   * reset scm subform field values to scmSubFormState.
-   */
-  const resetScmTypeFields = (value, form) => {
-    if (form.values.scm_type === form.initialValues.scm_type) {
-      saveSubFormState(form);
-    }
-
-    Object.keys(scmFormFields).forEach(label => {
-      if (value === form.initialValues.scm_type) {
-        form.setFieldValue(label, scmSubFormState[label]);
-      } else {
-        form.setFieldValue(label, scmFormFields[label]);
-      }
-      form.setFieldTouched(label, false);
-    });
-  };
-
-  const handleCredentialSelection = (type, value) => {
-    setCredentials({
-      ...credentials,
-      [type]: {
-        ...credentials[type],
-        value,
-      },
-    });
-  };
 
   if (isLoading) {
     return <ContentLoading />;
@@ -211,183 +373,19 @@ function ProjectForm({ project, submitError, ...props }) {
               onSubmit={formik.handleSubmit}
               css="padding: 0 24px"
             >
-              <FormRow>
-                <FormField
-                  id="project-name"
-                  label={i18n._(t`Name`)}
-                  name="name"
-                  type="text"
-                  validate={required(null, i18n)}
-                  isRequired
+                <ProjectFormFields
+                  project_base_dir={project_base_dir}
+                  project_local_paths={project_local_paths}
+                  formik={formik}
+                  i18n={i18n}
+                  setCredentials={setCredentials}
+                  credentials={credentials}
+                  scmTypeOptions={scmTypeOptions}
+                  setScmSubFormState={setScmSubFormState}
+                  scmSubFormState={scmSubFormState}
+                  setOrganization={setOrganization}
+                  organization={organization}
                 />
-                <FormField
-                  id="project-description"
-                  label={i18n._(t`Description`)}
-                  name="description"
-                  type="text"
-                />
-                <Field
-                  name="organization"
-                  validate={required(
-                    i18n._(t`Select a value for this field`),
-                    i18n
-                  )}
-                >
-                  {({ form }) => (
-                    <OrganizationLookup
-                      helperTextInvalid={form.errors.organization}
-                      isValid={
-                        !form.touched.organization || !form.errors.organization
-                      }
-                      onBlur={() => form.setFieldTouched('organization')}
-                      onChange={value => {
-                        form.setFieldValue('organization', value.id);
-                        setOrganization(value);
-                      }}
-                      value={organization}
-                      required
-                    />
-                  )}
-                </Field>
-                <Field
-                  name="scm_type"
-                  validate={required(
-                    i18n._(t`Select a value for this field`),
-                    i18n
-                  )}
-                >
-                  {({ field, form }) => (
-                    <FormGroup
-                      fieldId="project-scm-type"
-                      helperTextInvalid={form.errors.scm_type}
-                      isRequired
-                      isValid={!form.touched.scm_type || !form.errors.scm_type}
-                      label={i18n._(t`SCM Type`)}
-                    >
-                      <AnsibleSelect
-                        {...field}
-                        id="scm_type"
-                        data={[
-                          {
-                            value: '',
-                            key: '',
-                            label: i18n._(t`Choose an SCM Type`),
-                            isDisabled: true,
-                          },
-                          ...scmTypeOptions.map(([value, label]) => {
-                            if (label === 'Manual') {
-                              value = 'manual';
-                            }
-                            return {
-                              label,
-                              value,
-                              key: value,
-                            };
-                          }),
-                        ]}
-                        onChange={(event, value) => {
-                          form.setFieldValue('scm_type', value);
-                          resetScmTypeFields(value, form);
-                        }}
-                      />
-                    </FormGroup>
-                  )}
-                </Field>
-                {formik.values.scm_type !== '' && (
-                  <ScmTypeFormRow>
-                    <SubFormTitle size="md">
-                      {i18n._(t`Type Details`)}
-                    </SubFormTitle>
-                    {
-                      {
-                        manual: (
-                          <ManualSubForm
-                            localPath={formik.initialValues.local_path}
-                            project_base_dir={project_base_dir}
-                            project_local_paths={project_local_paths}
-                          />
-                        ),
-                        git: (
-                          <GitSubForm
-                            credential={credentials.scm}
-                            onCredentialSelection={handleCredentialSelection}
-                            scmUpdateOnLaunch={
-                              formik.values.scm_update_on_launch
-                            }
-                          />
-                        ),
-                        hg: (
-                          <HgSubForm
-                            credential={credentials.scm}
-                            onCredentialSelection={handleCredentialSelection}
-                            scmUpdateOnLaunch={
-                              formik.values.scm_update_on_launch
-                            }
-                          />
-                        ),
-                        svn: (
-                          <SvnSubForm
-                            credential={credentials.scm}
-                            onCredentialSelection={handleCredentialSelection}
-                            scmUpdateOnLaunch={
-                              formik.values.scm_update_on_launch
-                            }
-                          />
-                        ),
-                        insights: (
-                          <InsightsSubForm
-                            credential={credentials.insights}
-                            onCredentialSelection={handleCredentialSelection}
-                            scmUpdateOnLaunch={
-                              formik.values.scm_update_on_launch
-                            }
-                          />
-                        ),
-                      }[formik.values.scm_type]
-                    }
-                  </ScmTypeFormRow>
-                )}
-                <Config>
-                  {({ custom_virtualenvs }) =>
-                    custom_virtualenvs &&
-                    custom_virtualenvs.length > 1 && (
-                      <Field name="custom_virtualenv">
-                        {({ field }) => (
-                          <FormGroup
-                            fieldId="project-custom-virtualenv"
-                            label={i18n._(t`Ansible Environment`)}
-                          >
-                            <FieldTooltip
-                              content={i18n._(t`Select the playbook to be executed by
-                              this job.`)}
-                            />
-                            <AnsibleSelect
-                              id="project-custom-virtualenv"
-                              data={[
-                                {
-                                  label: i18n._(
-                                    t`Use Default Ansible Environment`
-                                  ),
-                                  value: '/venv/ansible/',
-                                  key: 'default',
-                                },
-                                ...custom_virtualenvs
-                                  .filter(datum => datum !== '/venv/ansible/')
-                                  .map(datum => ({
-                                    label: datum,
-                                    value: datum,
-                                    key: datum,
-                                  })),
-                              ]}
-                              {...field}
-                            />
-                          </FormGroup>
-                        )}
-                      </Field>
-                    )
-                  }
-                </Config>
-              </FormRow>
               <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}
