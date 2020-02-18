@@ -167,8 +167,7 @@ virtualenv_awx:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			virtualenv -p $(PYTHON) $(VENV_BASE)/awx; \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP) && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) flit; \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) $(VENV_BOOTSTRAP); \
 		fi; \
 	fi
 

@@ -37,7 +37,7 @@ django-taggit==1.2.0
 django==2.2.8
 djangorestframework-yaml==1.0.3
 djangorestframework==3.11.0
-
+docutils==0.15.2          # via python-daemon
 future==0.16.0            # via django-radius
 gitdb2==2.0.6             # via gitpython
 gitpython==3.0.5
