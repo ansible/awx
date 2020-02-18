@@ -172,21 +172,17 @@ function OrganizationForm({
               setInstanceGroups={setInstanceGroups}
               {...rest}
             />
-          <FormSubmitError error={submitError} />
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+            />
           </FormColumnLayout>
         </Form>
       )}
     </Formik>
   );
 }
-
-FormField.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
-};
 
 OrganizationForm.propTypes = {
   organization: PropTypes.shape(),
