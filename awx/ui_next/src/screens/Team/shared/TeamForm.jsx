@@ -8,6 +8,7 @@ import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from '@components/FormField';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required } from '@util/validators';
+import { FormColumnLayout } from '@components/FormLayout';
 
 function TeamFormFields(props) {
   const { team, i18n } = props;
@@ -23,31 +24,31 @@ function TeamFormFields(props) {
 
   return (
     <>
-            <FormField
-              id="team-name"
-              label={i18n._(t`Name`)}
-              name="name"
-              type="text"
-              validate={required(null, i18n)}
-              isRequired
-            />
-            <FormField
-              id="team-description"
-              label={i18n._(t`Description`)}
-              name="description"
-              type="text"
-            />
-                <OrganizationLookup
+      <FormField
+        id="team-name"
+        label={i18n._(t`Name`)}
+        name="name"
+        type="text"
+        validate={required(null, i18n)}
+        isRequired
+      />
+      <FormField
+        id="team-description"
+        label={i18n._(t`Description`)}
+        name="description"
+        type="text"
+      />
+      <OrganizationLookup
         helperTextInvalid={orgMeta.error}
         isValid={!orgMeta.touched || !orgMeta.error}
         onBlur={() => orgHelpers.setTouched('organization')}
-                  onChange={value => {
+        onChange={value => {
           orgHelpers.setValue(value.id);
-                    setOrganization(value);
-                  }}
-                  value={organization}
-                  required
-                />
+          setOrganization(value);
+        }}
+        value={organization}
+        required
+      />
     </>
   );
 }
@@ -68,14 +69,15 @@ function TeamForm(props) {
         <Form
           autoComplete="off"
           onSubmit={formik.handleSubmit}
-          css="padding: 0 24px"
         >
+          <FormColumnLayout>
             <TeamFormFields team={team} {...rest} />
-          <FormSubmitError error={submitError} />
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+            />
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>

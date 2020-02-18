@@ -10,9 +10,9 @@ import FormField, {
   PasswordField,
   FormSubmitError,
 } from '@components/FormField';
-import FormRow from '@components/FormRow';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import { required, requiredEmail } from '@util/validators';
+import { FormColumnLayout } from '@components/FormLayout';
 
 function UserFormFields({ user, i18n }) {
   const [organization, setOrganization] = useState(null);
@@ -41,7 +41,7 @@ function UserFormFields({ user, i18n }) {
   const organizationFieldArr = useField({
     name: 'organization',
     validate: required(i18n._(t`Select a value for this field`), i18n),
-      });
+  });
   const organizationMeta = organizationFieldArr[1];
   const organizationHelpers = organizationFieldArr[2];
 
@@ -99,6 +99,7 @@ function UserFormFields({ user, i18n }) {
         type="text"
       />
       {!user.id && (
+<<<<<<< HEAD
             <OrganizationLookup
     helperTextInvalid={organizationMeta.error}
     isValid={!organizationMeta.touched || !organizationMeta.error}
@@ -125,8 +126,36 @@ function UserFormFields({ user, i18n }) {
     {...userTypeField}
               />
             </FormGroup>
+=======
+        <OrganizationLookup
+          helperTextInvalid={organizationMeta.error}
+          isValid={!organizationMeta.touched || !organizationMeta.error}
+          onBlur={() => organizationHelpers.setTouched()}
+          onChange={value => {
+            organizationHelpers.setValue(value.id);
+            setOrganization(value);
+          }}
+          value={organization}
+          required
+        />
+      )}
+      <FormGroup
+        fieldId="user-type"
+        helperTextInvalid={userTypeMeta.error}
+        isRequired
+        isValid={!userTypeMeta.touched || !userTypeMeta.error}
+        label={i18n._(t`User Type`)}
+      >
+        <AnsibleSelect
+          isValid={!userTypeMeta.touched || !userTypeMeta.error}
+          id="user-type"
+          data={userTypeOptions}
+          {...userTypeField}
+        />
+      </FormGroup>
+>>>>>>> update forms from FormRow to using FormLayout components
     </>
-                );
+  );
 }
 
 function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
@@ -173,12 +202,14 @@ function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <FormColumnLayout>
             <UserFormFields user={user} i18n={i18n} />
-          <FormSubmitError error={submitError} />
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+            />
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>

@@ -9,6 +9,7 @@ const ActionGroup = styled(PFActionGroup)`
   display: flex;
   justify-content: flex-end;
   --pf-c-form__group--m-action--MarginTop: 0;
+  grid-column: 1 / -1;
 
   .pf-c-form__actions {
     & > button {

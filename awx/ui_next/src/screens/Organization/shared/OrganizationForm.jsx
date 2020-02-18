@@ -11,12 +11,12 @@ import { ConfigContext } from '@contexts/Config';
 import AnsibleSelect from '@components/AnsibleSelect';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import FormRow from '@components/FormRow';
 import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { InstanceGroupsLookup } from '@components/Lookup/';
 import { getAddedAndRemoved } from '@util/lists';
 import { required, minMaxValue } from '@util/validators';
+import { FormColumnLayout } from '@components/FormLayout';
 
 function OrganizationFormFields({
   i18n,
@@ -166,6 +166,7 @@ function OrganizationForm({
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <FormColumnLayout>
             <OrganizationFormFields
               instanceGroups={instanceGroups}
               setInstanceGroups={setInstanceGroups}
@@ -176,6 +177,7 @@ function OrganizationForm({
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}
           />
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>

@@ -1,4 +1,3 @@
-export { SubFormTitle } from './SharedFields';
 export { default as GitSubForm } from './GitSubForm';
 export { default as HgSubForm } from './HgSubForm';
 export { default as InsightsSubForm } from './InsightsSubForm';

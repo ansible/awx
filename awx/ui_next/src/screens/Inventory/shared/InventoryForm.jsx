@@ -12,6 +12,7 @@ import { required } from '@util/validators';
 import InstanceGroupsLookup from '@components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
+import { FormColumnLayout } from '@components/FormLayout';
 
 function InventoryFormFields({ i18n, credentialTypeId }) {
   const [organizationField, organizationMeta, organizationHelpers] = useField({
@@ -27,52 +28,52 @@ function InventoryFormFields({ i18n, credentialTypeId }) {
   const insightsCredentialHelpers = insightsCredentialFieldArr[2];
   return (
     <>
-            <FormField
-              id="inventory-name"
-              label={i18n._(t`Name`)}
-              name="name"
-              type="text"
-              validate={required(null, i18n)}
-              isRequired
-            />
-            <FormField
-              id="inventory-description"
-              label={i18n._(t`Description`)}
-              name="description"
-              type="text"
-            />
-                <OrganizationLookup
+      <FormField
+        id="inventory-name"
+        label={i18n._(t`Name`)}
+        name="name"
+        type="text"
+        validate={required(null, i18n)}
+        isRequired
+      />
+      <FormField
+        id="inventory-description"
+        label={i18n._(t`Description`)}
+        name="description"
+        type="text"
+      />
+      <OrganizationLookup
         helperTextInvalid={organizationMeta.error}
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
-                  onChange={value => {
+        onChange={value => {
           organizationHelpers.setValue(value);
-                  }}
+        }}
         value={organizationField.value}
         touched={organizationMeta.touched}
         error={organizationMeta.error}
-                  required
-                />
-                <CredentialLookup
-                  label={i18n._(t`Insights Credential`)}
-                  credentialTypeId={credentialTypeId}
+        required
+      />
+      <CredentialLookup
+        label={i18n._(t`Insights Credential`)}
+        credentialTypeId={credentialTypeId}
         onChange={value => insightsCredentialHelpers.setValue(value)}
         value={insightsCredentialField.value}
-                />
-                <InstanceGroupsLookup
+      />
+      <InstanceGroupsLookup
         value={instanceGroupsField.value}
-                  onChange={value => {
+        onChange={value => {
           instanceGroupsHelpers.setValue(value);
-                  }}
-                />
-            <VariablesField
-              tooltip={i18n._(
-                t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
-              )}
-              id="inventory-variables"
-              name="variables"
-              label={i18n._(t`Variables`)}
-            />
+        }}
+      />
+      <VariablesField
+        tooltip={i18n._(
+          t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
+        )}
+        id="inventory-variables"
+        name="variables"
+        label={i18n._(t`Variables`)}
+      />
     </>
   );
 }
@@ -108,13 +109,14 @@ function InventoryForm({
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <FormColumnLayout>
             <InventoryFormFields {...rest} />
             <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={onCancel}
               onSubmit={formik.handleSubmit}
             />
-          </FormRow>
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>

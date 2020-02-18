@@ -8,12 +8,12 @@ import { t } from '@lingui/macro';
 
 import { Form } from '@patternfly/react-core';
 
-import FormRow from '@components/FormRow';
 import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
 import { InventoryLookup } from '@components/Lookup';
+import { FormColumnLayout } from '@components/FormLayout';
 
 function HostFormFields({ host, i18n }) {
   const [inventory, setInventory] = useState(
@@ -30,43 +30,43 @@ function HostFormFields({ host, i18n }) {
 
   return (
     <>
-            <FormField
-              id="host-name"
-              name="name"
-              type="text"
-              label={i18n._(t`Name`)}
-              validate={required(null, i18n)}
-              isRequired
-            />
-            <FormField
-              id="host-description"
-              name="description"
-              type="text"
-              label={i18n._(t`Description`)}
-            />
-            {hostAddMatch && (
-                  <InventoryLookup
-                    value={inventory}
+      <FormField
+        id="host-name"
+        name="name"
+        type="text"
+        label={i18n._(t`Name`)}
+        validate={required(null, i18n)}
+        isRequired
+      />
+      <FormField
+        id="host-description"
+        name="description"
+        type="text"
+        label={i18n._(t`Description`)}
+      />
+      {hostAddMatch && (
+        <InventoryLookup
+          value={inventory}
           onBlur={() => inventoryHelpers.setTouched()}
-                    tooltip={i18n._(
-                      t`Select the inventory that this host will belong to.`
-                    )}
+          tooltip={i18n._(
+            t`Select the inventory that this host will belong to.`
+          )}
           isValid={!inventoryMeta.touched || !inventoryMeta.error}
           helperTextInvalid={inventoryMeta.error}
-                    onChange={value => {
+          onChange={value => {
             inventoryHelpers.setValuealue(value.id);
-                      setInventory(value);
-                    }}
-                    required
+            setInventory(value);
+          }}
+          required
           touched={inventoryMeta.touched}
           error={inventoryMeta.error}
-                  />
-                )}
-            <VariablesField
-              id="host-variables"
-              name="variables"
-              label={i18n._(t`Variables`)}
-            />
+        />
+      )}
+      <VariablesField
+        id="host-variables"
+        name="variables"
+        label={i18n._(t`Variables`)}
+      />
     </>
   );
 }
@@ -84,12 +84,14 @@ function HostForm({ handleSubmit, host, submitError, handleCancel, ...rest }) {
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+          <FormColumnLayout>
             <HostFormFields host={host} {...rest} />
-          <FormSubmitError error={submitError} />
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
+            />
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>
