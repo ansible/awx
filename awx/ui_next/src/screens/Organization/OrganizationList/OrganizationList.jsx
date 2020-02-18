@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useHistory, useRouteMatch } from 'react-router-dom';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -24,7 +24,6 @@ const QS_CONFIG = getQSConfig('organization', {
 
 function OrganizationsList({ i18n }) {
   const location = useLocation();
-  const history = useHistory();
   const match = useRouteMatch();
 
   const [selected, setSelected] = useState([]);
