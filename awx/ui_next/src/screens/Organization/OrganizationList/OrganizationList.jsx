@@ -89,11 +89,7 @@ function OrganizationsList({ i18n }) {
   const canAdd = actions && actions.POST;
 
   const handleSelectAll = isSelected => {
-    if (isSelected) {
-      setSelected(organizations);
-    } else {
-      setSelected([]);
-    }
+    setSelected(isSelected ? [...organizations] : []);
   };
 
   const handleSelect = row => {

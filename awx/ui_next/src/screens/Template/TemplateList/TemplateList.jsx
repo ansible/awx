@@ -105,8 +105,7 @@ function TemplateList({ i18n }) {
   };
 
   const handleSelectAll = isSelected => {
-    const selectedItems = isSelected ? [...templates] : [];
-    setSelected(selectedItems);
+    setSelected(isSelected ? [...templates] : []);
   };
 
   const handleSelect = template => {
