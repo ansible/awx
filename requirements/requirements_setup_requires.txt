@@ -4,7 +4,6 @@ setuptools==41.6.0
 vcversioner>=2.16.0.0
 pytest-runner
 isort
-virtualenv
 m2r
 cffi>=1.1
 wheel>=0.33.6,<42.0.0
@@ -18,3 +17,4 @@ twine; python_version >= "3.6"
 incremental>=16.10.1; python_version >= "3.6"
 lxml>=3.0; python_version >= "3.6"
 pkgconfig; python_version >= "3.6"
+shellingham==1.3.1
