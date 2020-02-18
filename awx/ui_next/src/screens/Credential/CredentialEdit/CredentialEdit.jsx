@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { PageSection, Card } from '@patternfly/react-core';
+import { object } from 'prop-types';
+
 import { CardBody } from '@components/Card';
+import { CredentialsAPI, CredentialTypesAPI } from '@api';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-
-import { CredentialTypesAPI, CredentialsAPI } from '@api';
 import CredentialForm from '../shared/CredentialForm';
 
-function CredentialAdd({ me }) {
+function CredentialEdit({ credential, me }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [credentialTypes, setCredentialTypes] = useState(null);
@@ -31,7 +31,9 @@ function CredentialAdd({ me }) {
   }, []);
 
   const handleCancel = () => {
-    history.push('/credentials');
+    const url = `/credentials/${credential.id}/details`;
+
+    history.push(`${url}`);
   };
 
   const handleSubmit = async values => {
@@ -39,7 +41,7 @@ function CredentialAdd({ me }) {
     try {
       const {
         data: { id: credentialId },
-      } = await CredentialsAPI.create({
+      } = await CredentialsAPI.update(credential.id, {
         user: (me && me.id) || null,
         organization: (organization && organization.id) || null,
         ...remainingValues,
@@ -52,33 +54,28 @@ function CredentialAdd({ me }) {
   };
 
   if (error) {
-    return (
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ContentError error={error} />
-          </CardBody>
-        </Card>
-      </PageSection>
-    );
+    return <ContentError />;
   }
+
   if (isLoading) {
     return <ContentLoading />;
   }
+
   return (
-    <PageSection>
-      <Card>
-        <CardBody>
-          <CredentialForm
-            onCancel={handleCancel}
-            onSubmit={handleSubmit}
-            credentialTypes={credentialTypes}
-          />
-        </CardBody>
-      </Card>
-    </PageSection>
+    <CardBody>
+      <CredentialForm
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+        credential={credential}
+        credentialTypes={credentialTypes}
+      />
+    </CardBody>
   );
 }
 
-export { CredentialAdd as _CredentialAdd };
-export default CredentialAdd;
+CredentialEdit.proptype = {
+  inventory: object.isRequired,
+};
+
+export { CredentialEdit as _CredentialEdit };
+export default CredentialEdit;

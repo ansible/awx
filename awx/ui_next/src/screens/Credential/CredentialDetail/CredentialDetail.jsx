@@ -82,7 +82,7 @@ function CredentialDetail({ i18n, credential }) {
         />
       );
     } else if (secret === true) {
-      detail = <Detail key={id} label={label} value={i18n._(t`Encrypted`)} />;
+      detail = null;
     } else {
       detail = <Detail key={id} label={label} value={inputs[id]} />;
     }

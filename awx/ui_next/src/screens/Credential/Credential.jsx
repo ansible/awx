@@ -17,6 +17,7 @@ import { ResourceAccessList } from '@components/ResourceAccessList';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
 import CredentialDetail from './CredentialDetail';
+import CredentialEdit from './CredentialEdit';
 import { CredentialsAPI } from '@api';
 
 function Credential({ i18n, setBreadcrumb }) {
@@ -100,6 +101,11 @@ function Credential({ i18n, setBreadcrumb }) {
               path="/credentials/:id/details"
               render={() => <CredentialDetail credential={credential} />}
             />,
+            <Route
+              key="edit"
+              path="/credentials/:id/edit"
+              render={() => <CredentialEdit credential={credential} />}
+            />,
             credential.organization && (
               <Route
                 key="access"
@@ -122,7 +128,7 @@ function Credential({ i18n, setBreadcrumb }) {
                       <Link to={`/credentials/${match.params.id}/details`}>
                         {i18n._(`View Credential Details`)}
                       </Link>
-          )}
+                    )}
                   </ContentError>
                 )
               }
