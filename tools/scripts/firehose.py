@@ -209,14 +209,17 @@ def generate_events(events, job):
 
         print('generating unique start/end line counts')
         cursor.execute('CREATE SEQUENCE IF NOT EXISTS firehose_seq;')
-        cursor.execute('CREATE SEQUENCE IF NOT EXISTS firehose_line_seq;')
+        cursor.execute('CREATE SEQUENCE IF NOT EXISTS firehose_line_seq MINVALUE 0;')
+        cursor.execute('ALTER SEQUENCE firehose_seq RESTART WITH 1;')
+        cursor.execute('ALTER SEQUENCE firehose_line_seq RESTART WITH 0;')
+        cursor.execute("SELECT nextval('firehose_line_seq')")
         conn.commit()
 
         cursor.execute(
             "UPDATE main_jobevent SET "
             "counter=nextval('firehose_seq')::integer,"
-            "start_line=nextval('firehose_seq')::integer,"
-            "end_line=currval('firehose_seq')::integer + 2"
+            "start_line=nextval('firehose_line_seq')::integer,"
+            "end_line=currval('firehose_line_seq')::integer + 2"
         )
         conn.commit()
     finally:
