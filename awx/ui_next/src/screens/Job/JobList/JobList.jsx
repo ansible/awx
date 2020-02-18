@@ -247,5 +247,4 @@ function JobList({ i18n }) {
   );
 }
 
-// export { JobList as _JobList };
 export default withI18n()(JobList);
