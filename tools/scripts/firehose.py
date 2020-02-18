@@ -127,13 +127,23 @@ def generate_jobs(jobs):
     setup_django()
 
     from awx.main.models import UnifiedJob, Job, JobTemplate
+    fields = list(set(Job._meta.fields) - set(UnifiedJob._meta.fields))
+    job_field_names = set([f.attname for f in fields])
+    jt = JobTemplate.objects.first()
+    jt_defaults = dict(
+        (f.attname, getattr(jt, f.attname))
+        for f in JobTemplate._meta.get_fields()
+        if f.editable and f.attname in job_field_names and getattr(jt, f.attname)
+    )
+    jt_defaults['job_template_id'] = jt.pk
 
-    def make_batch(N):
-        jt = JobTemplate.objects.first()
-        jobs = [Job(job_template=jt, status='canceled', created=now(), modified=now(), elapsed=0.) for i in range(N)]
+    def make_batch(N, **extra):
+        jobs = [
+            Job(status='canceled', created=now(), modified=now(), elapsed=0., **extra)
+            for i in range(N)
+        ]
         ujs = UnifiedJob.objects.bulk_create(jobs)
         query = InsertQuery(Job)
-        fields = list(set(Job._meta.fields) - set(UnifiedJob._meta.fields))
         query.insert_values(fields, ujs)
         with connection.cursor() as cursor:
             query, params = query.sql_with_params()[0]
@@ -144,7 +154,7 @@ def generate_jobs(jobs):
     while jobs > 0:
         s = time()
         print('running batch {}, runtime {}'.format(i, time() - s))
-        created = make_batch(min(jobs, 1000))
+        created = make_batch(min(jobs, 1000), **jt_defaults)
         print('took {}'.format(time() - s))
         i += 1
         jobs -= 1000
