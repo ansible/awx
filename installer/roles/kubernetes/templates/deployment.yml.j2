@@ -136,6 +136,10 @@ kind: StatefulSet
 metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
+  {% if openshift_host is defined %}
+  labels:
+    app: {{ kubernetes_deployment_name }}
+  {% endif %}
 spec:
   serviceName: {{ kubernetes_deployment_name }}
   replicas: 1
