@@ -52,10 +52,6 @@ class WorkflowJobTemplates extends Base {
     });
   }
 
-  readWebhookKey(id) {
-    return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
-  }
-
 }
 
 export default WorkflowJobTemplates;
