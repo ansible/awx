@@ -25,7 +25,7 @@ import LaunchButton from '@components/LaunchButton';
 import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
-function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
+function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
   const {
     id,
     ask_inventory_on_launch,
@@ -143,7 +143,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
             value={`${urlOrigin}${template.related.webhook_receiver}`}
           />
         )}
-        <Detail label={i18n._(t`Webhook Key`)} value={webHookKey} />
+        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
         {webhook_credential && (
           <Detail
             fullWidth

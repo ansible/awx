@@ -51,7 +51,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
           component={() => (
             <WorkflowJobTemplateDetail
               template={template}
-              webHookKey="Foo webhook key"
+              webhook_key="Foo webhook key"
               hasContentLoading={false}
               onSetContentLoading={() => {}}
             />

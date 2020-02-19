@@ -4,14 +4,9 @@ import { useHistory } from 'react-router-dom';
 import { CardBody } from '@components/Card';
 import { getAddedAndRemoved } from '@util/lists';
 import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
-import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplateForm } from '../shared';
 
-function WorkflowJobTemplateEdit({
-  template,
-  hasTemplateLoading,
-  webhook_key,
-}) {
+function WorkflowJobTemplateEdit({ template, webhook_key }) {
   const [formSubmitError, setFormSubmitError] = useState();
   const history = useHistory();
 
@@ -65,9 +60,6 @@ function WorkflowJobTemplateEdit({
     history.push(`/templates`);
   };
 
-  if (hasTemplateLoading) {
-    return <ContentLoading />;
-  }
   return (
     <>
       <CardBody>

@@ -51,7 +51,6 @@ class WorkflowJobTemplates extends Base {
       params
     });
   }
-
 }
 
 export default WorkflowJobTemplates;

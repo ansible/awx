@@ -11,6 +11,7 @@ import FullPage from '@components/FullPage';
 import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import ScheduleList from '@components/ScheduleList';
+import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
@@ -51,12 +52,14 @@ class WorkflowJobTemplate extends Component {
         const {
           data: { webhook_key },
         } = await WorkflowJobTemplatesAPI.readWebhookKey(id);
-        this.setState({ webHookKey: webhook_key });
+        this.setState({ webhook_key });
       }
       if (data?.summary_fields?.webhook_credential) {
         const {
           data: {
-            summary_fields: { credential_type: name },
+            summary_fields: {
+              credential_type: { name },
+            },
           },
         } = await CredentialsAPI.readDetail(
           data.summary_fields.webhook_credential.id
@@ -84,7 +87,7 @@ class WorkflowJobTemplate extends Component {
       contentError,
       hasContentLoading,
       template,
-      webHookKey,
+      webhook_key,
     } = this.state;
 
     const tabsArray = [
@@ -116,7 +119,9 @@ class WorkflowJobTemplate extends Component {
     if (location.pathname.endsWith('edit')) {
       cardHeader = null;
     }
-
+    if (hasContentLoading) {
+      return <ContentLoading />;
+    }
     if (!hasContentLoading && contentError) {
       return (
         <PageSection>
@@ -151,7 +156,7 @@ class WorkflowJobTemplate extends Component {
                 render={() => (
                   <WorkflowJobTemplateDetail
                     template={template}
-                    webHookKey={webHookKey}
+                    webhook_key={webhook_key}
                   />
                 )}
               />
@@ -163,7 +168,7 @@ class WorkflowJobTemplate extends Component {
                 render={() => (
                   <WorkflowJobTemplateEdit
                     template={template}
-                    webHookKey={webHookKey}
+                    webhook_key={webhook_key}
                   />
                 )}
               />
@@ -200,7 +205,7 @@ class WorkflowJobTemplate extends Component {
                 />
               </Route>
             )}
-            {template && (
+            {template.id && (
               <Route
                 path="/templates/:templateType/:id/schedules"
                 render={() => (
