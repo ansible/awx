@@ -1,4 +1,4 @@
-const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'ja', 'nl'];
+const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'ja', 'nl', 'zh'];
 const DEFAULT_LOCALE = 'en';
 const BASE_PATH = global.$basePath ? `${global.$basePath}languages/` : '/static/languages/';
 

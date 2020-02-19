@@ -2526,8 +2526,7 @@ msgstr "'{value}' n'appartient pas aux valeurs ['{allowed_values}']"
 #: awx/main/fields.py:421
 #, python-brace-format
 msgid "{type} provided in relative path {path}, expected {expected_type}"
-msgstr ""
-"{type} donné dans le chemin d'accès relatif {path}, {expected_type} attendu"
+msgstr "{type} fourni dans le chemin d’accès relatif {path}, {expected_type} attendu"
 
 #: awx/main/fields.py:426
 #, python-brace-format
@@ -4439,7 +4438,14 @@ msgstr "Exception lors de la connexion à Twilio : {}"
 msgid "Error sending notification webhook: {}"
 msgstr "Erreur lors de l'envoi d'un webhook de notification : {}"
 
-#: awx/main/scheduler/task_manager.py:201
+#: awx/main/scheduler/dag_workflow.py:148
+#, python-brace-format
+msgid ""
+"No error handle path for workflow job node(s) [{node_status}] workflow job "
+"node(s) missing unified job template and error handle path [{no_ufjt}]."
+msgstr "Pas de « error handle path » pour le ou les nœuds de tâches [{node_status}], le ou les nœuds de tâche de flux de travail n'ont pas de modèle de tâche unifié ni d'« error handle path » [{no_ufjt}]."
+
+#: awx/main/scheduler/task_manager.py:132
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
@@ -6027,3 +6033,4 @@ msgstr ""
 #: awx/ui/fields.py:30
 msgid "Invalid base64-encoded data in data URL."
 msgstr "Données codées en base64 non valides dans l'URL de données"
+

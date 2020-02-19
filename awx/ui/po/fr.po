@@ -1,8 +1,3 @@
-# aude_stoquart <aude.carlier@stoquart.com>, 2017. #zanata
-# croe <croe@redhat.com>, 2017. #zanata
-# mkim <mkim@redhat.com>, 2017. #zanata
-# shanemcd <shanemcd@redhat.com>, 2017. #zanata
-# croe <croe@redhat.com>, 2018. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
@@ -10,10 +5,9 @@ msgstr ""
 "Last-Translator: croe <croe@redhat.com>\n"
 "Language-Team: French\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Generator: Zanata 4.6.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
 
 #: client/src/projects/add/projects-add.controller.js:162
 #: client/src/projects/edit/projects-edit.controller.js:297
@@ -7031,3 +7025,4 @@ msgstr "{{::state._hint}}"
 #: client/src/shared/paginate/paginate.partial.html:55
 msgid "{{pageSize}}"
 msgstr "{{pageSize}}"
+
