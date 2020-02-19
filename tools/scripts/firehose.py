@@ -219,7 +219,8 @@ def generate_events(events, job):
             "UPDATE main_jobevent SET "
             "counter=nextval('firehose_seq')::integer,"
             "start_line=nextval('firehose_line_seq')::integer,"
-            "end_line=currval('firehose_line_seq')::integer + 2"
+            "end_line=currval('firehose_line_seq')::integer + 2 "
+            f"WHERE job_id={job}"
         )
         conn.commit()
     finally:
