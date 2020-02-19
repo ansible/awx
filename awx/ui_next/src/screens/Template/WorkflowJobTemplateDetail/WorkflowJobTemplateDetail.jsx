@@ -91,8 +91,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
       </Link>
     );
   };
-  const canLaunch =
-    summary_fields.user_capabilities && summary_fields.user_capabilities.start;
+  const canLaunch = summary_fields?.user_capabilities?.start;
   const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
     ...job,
     type: 'job',

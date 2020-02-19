@@ -62,8 +62,8 @@ class LaunchButton extends React.Component {
         const { data: job } = await launchJob;
         history.push(
           `/${
-            resource.type === 'workflow_job_template' ? 'workflow' : 'jobs'
-          }/${job.id}`
+            resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
+          }/${job.id}/output`
         );
       } else {
         this.setState({ promptError: true });

@@ -55,7 +55,7 @@ describe('LaunchButton', () => {
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1);
-    expect(history.location.pathname).toEqual('/jobs/9000');
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
   test('should launch the correct job type', async () => {
     WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({
