@@ -11,9 +11,20 @@ jest.mock('@api');
 const mockJobTemplate = {
   allow_callbacks: false,
   allow_simultaneous: false,
+  ask_scm_branch_on_launch: false,
+  ask_diff_mode_on_launch: false,
+  ask_variables_on_launch: false,
+  ask_limit_on_launch: false,
+  ask_tags_on_launch: false,
+  ask_skip_tags_on_launch: false,
   ask_job_type_on_launch: false,
+  ask_verbosity_on_launch: false,
+  ask_inventory_on_launch: false,
+  ask_credential_on_launch: false,
+  become_enabled: false,
   description: 'Bar',
   diff_mode: false,
+  extra_vars: '---',
   forks: 0,
   host_config_key: '',
   id: 1,
@@ -192,6 +203,7 @@ describe('<JobTemplateEdit />', () => {
       );
     });
     const updatedTemplateData = {
+      job_type: 'check',
       name: 'new name',
       inventory: 1,
     };
@@ -206,14 +218,18 @@ describe('<JobTemplateEdit />', () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'new name', name: 'name' },
       });
-      wrapper.find('AnsibleSelect#template-job-type').invoke('onChange')(
+      wrapper.find('AnsibleSelect#template-job-type').prop('onChange')(
+        null,
         'check'
       );
+      wrapper.find('LabelSelect').invoke('onChange')(labels);
+    });
+    wrapper.update();
+    act(() => {
       wrapper.find('InventoryLookup').invoke('onChange')({
         id: 1,
         organization: 1,
       });
-      wrapper.find('LabelSelect').invoke('onChange')(labels);
     });
     wrapper.update();
     await act(async () => {
@@ -224,7 +240,6 @@ describe('<JobTemplateEdit />', () => {
     const expected = {
       ...mockJobTemplate,
       ...updatedTemplateData,
-      become_enabled: false,
     };
     delete expected.summary_fields;
     delete expected.id;

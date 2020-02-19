@@ -10,9 +10,20 @@ jest.mock('@api');
 const jobTemplateData = {
   allow_callbacks: false,
   allow_simultaneous: false,
+  ask_credential_on_launch: false,
+  ask_diff_mode_on_launch: false,
+  ask_inventory_on_launch: false,
   ask_job_type_on_launch: false,
-  description: 'Baz',
+  ask_limit_on_launch: false,
+  ask_scm_branch_on_launch: false,
+  ask_skip_tags_on_launch: false,
+  ask_tags_on_launch: false,
+  ask_variables_on_launch: false,
+  ask_verbosity_on_launch: false,
+  become_enabled: false,
+  description: '',
   diff_mode: false,
+  extra_vars: '---\n',
   forks: 0,
   host_config_key: '',
   inventory: 1,
@@ -20,9 +31,9 @@ const jobTemplateData = {
   job_tags: '',
   job_type: 'run',
   limit: '',
-  name: 'Foo',
-  playbook: 'Bar',
-  project: 2,
+  name: '',
+  playbook: '',
+  project: 1,
   scm_branch: '',
   skip_tags: '',
   timeout: 0,
@@ -103,13 +114,12 @@ describe('<JobTemplateAdd />', () => {
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
     act(() => {
       wrapper.find('input#template-name').simulate('change', {
-        target: { value: 'Foo', name: 'name' },
+        target: { value: 'Bar', name: 'name' },
       });
-      wrapper.find('AnsibleSelect#template-job-type').invoke('onChange')('run');
-      wrapper.find('InventoryLookup').invoke('onChange')({
-        id: 1,
-        organization: 1,
-      });
+      wrapper.find('AnsibleSelect#template-job-type').prop('onChange')(
+        null,
+        'check'
+      );
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 2,
         name: 'project',
@@ -119,8 +129,15 @@ describe('<JobTemplateAdd />', () => {
         .find('PlaybookSelect')
         .prop('field')
         .onChange({
-          target: { value: 'Bar', name: 'playbook' },
+          target: { value: 'Baz', name: 'playbook' },
         });
+    });
+    wrapper.update();
+    act(() => {
+      wrapper.find('InventoryLookup').invoke('onChange')({
+        id: 2,
+        organization: 1,
+      });
     });
     wrapper.update();
     await act(async () => {
@@ -129,8 +146,11 @@ describe('<JobTemplateAdd />', () => {
     wrapper.update();
     expect(JobTemplatesAPI.create).toHaveBeenCalledWith({
       ...jobTemplateData,
-      description: '',
-      become_enabled: false,
+      name: 'Bar',
+      job_type: 'check',
+      project: 2,
+      playbook: 'Baz',
+      inventory: 2,
     });
   });
 
@@ -154,11 +174,10 @@ describe('<JobTemplateAdd />', () => {
       wrapper.find('input#template-name').simulate('change', {
         target: { value: 'Foo', name: 'name' },
       });
-      wrapper.find('AnsibleSelect#template-job-type').invoke('onChange')('run');
-      wrapper.find('InventoryLookup').invoke('onChange')({
-        id: 1,
-        organization: 1,
-      });
+      wrapper.find('AnsibleSelect#template-job-type').prop('onChange')(
+        null,
+        'check'
+      );
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 2,
         name: 'project',
@@ -170,6 +189,13 @@ describe('<JobTemplateAdd />', () => {
         .onChange({
           target: { value: 'Bar', name: 'playbook' },
         });
+    });
+    wrapper.update();
+    act(() => {
+      wrapper.find('InventoryLookup').invoke('onChange')({
+        id: 1,
+        organization: 1,
+      });
     });
     wrapper.update();
     await act(async () => {

@@ -22,6 +22,7 @@ import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
+import { VariablesDetail } from '@components/CodeMirrorInput';
 import { JobTemplatesAPI } from '@api';
 
 const MissingDetail = styled(Detail)`
@@ -38,6 +39,7 @@ function JobTemplateDetail({ i18n, template }) {
     created,
     description,
     diff_mode,
+    extra_vars,
     forks,
     host_config_key,
     job_slice_count,
@@ -302,6 +304,11 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         )}
+        <VariablesDetail
+          value={extra_vars}
+          rows={4}
+          label={i18n._(t`Variables`)}
+        />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities &&
