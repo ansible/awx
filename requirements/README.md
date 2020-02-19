@@ -38,8 +38,6 @@ This script will:
   - Update `requirements.txt` based on `requirements.in`
   - Update/generate `requirements_ansible.txt` based on `requirements_ansible.in`
     - including an automated patch that adds `python_version < "3"` for Python 2 backward compatibility
-  - Removes the `docutils` dependency line from `requirements.txt` and `requirements_ansible.txt`
-
 
 ## Licenses and Source Files
 
@@ -128,6 +126,11 @@ https://github.com/adamchainz/django-jsonfield/pull/14
 This breaks a very large amount of AWX code that assumes these fields
 are returned as dicts. Upgrading this library will require a refactor
 to accomidate this change.
+
+### wheel
+
+azure-cli-core requires a version of wheel that is incompatible with
+certain packages building with later versions of pip, so we override it.
 
 ### pip and setuptools
 

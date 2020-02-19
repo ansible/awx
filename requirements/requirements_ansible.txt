@@ -111,7 +111,7 @@ stevedore==1.31.0         # via keystoneauth1
 tabulate==0.8.2           # via azure-cli-core, knack
 typing==3.7.4.1; python_version < "3" # via msrest
 urllib3==1.25.7           # via botocore, requests
-wheel==0.30.0             # via azure-cli-core
+wheel==0.33.6  # via azure-cli-core (overriden, see upgrade blockers)
 xmltodict==0.12.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
