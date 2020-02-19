@@ -3546,9 +3546,8 @@ msgstr "このラベルが属する組織。"
 #, python-brace-format
 msgid ""
 "Variables {list_of_keys} are not allowed on launch. Check the Prompt on "
-"Launch setting on the Job Template to include Extra Variables."
-msgstr ""
-"変数 {list_of_keys} は起動時に許可されていません。ジョブテンプレートで起動時のプロンプト設定を確認し、追加変数を組み込みます。"
+"Launch setting on the {model_name} to include Extra Variables."
+msgstr "変数 {list_of_keys} は起動時に許可されていません。{model_name} で起動時のプロンプト設定を確認し、追加変数を組み込みます。"
 
 #: awx/main/models/mixins.py:440
 msgid "Local absolute file path containing a custom Python virtualenv to use"
@@ -5577,3 +5576,4 @@ msgstr ""
 #: awx/ui/fields.py:30
 msgid "Invalid base64-encoded data in data URL."
 msgstr "データ URL の無効な base64 エンコードされたデータ。"
+
