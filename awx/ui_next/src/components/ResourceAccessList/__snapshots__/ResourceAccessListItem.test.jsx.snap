@@ -374,9 +374,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               "componentStyle": ComponentStyle {
                                 "componentId": "DetailList-sc-12g7m4-0",
                                 "isStatic": false,
-                                "lastClassName": "eYaZBv",
+                                "lastClassName": "iAtits",
                                 "rules": Array [
-                                  "display:grid;grid-gap:20px;align-items:flex-start;",
+                                  "display:grid;grid-gap:20px;align-items:center;",
                                   [Function],
                                 ],
                               },
@@ -394,15 +394,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           stacked={true}
                         >
                           <DetailList
-                            className="DetailList-sc-12g7m4-0 eYaZBv"
+                            className="DetailList-sc-12g7m4-0 iAtits"
                             stacked={true}
                           >
                             <TextList
-                              className="DetailList-sc-12g7m4-0 eYaZBv"
+                              className="DetailList-sc-12g7m4-0 iAtits"
                               component="dl"
                             >
                               <dl
-                                className="DetailList-sc-12g7m4-0 eYaZBv"
+                                className="DetailList-sc-12g7m4-0 iAtits"
                                 data-pf-content={true}
                               >
                                 <Detail
@@ -548,9 +548,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               "componentStyle": ComponentStyle {
                                 "componentId": "DetailList-sc-12g7m4-0",
                                 "isStatic": false,
-                                "lastClassName": "eYaZBv",
+                                "lastClassName": "iAtits",
                                 "rules": Array [
-                                  "display:grid;grid-gap:20px;align-items:flex-start;",
+                                  "display:grid;grid-gap:20px;align-items:center;",
                                   [Function],
                                 ],
                               },
@@ -568,15 +568,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           stacked={true}
                         >
                           <DetailList
-                            className="DetailList-sc-12g7m4-0 eYaZBv"
+                            className="DetailList-sc-12g7m4-0 iAtits"
                             stacked={true}
                           >
                             <TextList
-                              className="DetailList-sc-12g7m4-0 eYaZBv"
+                              className="DetailList-sc-12g7m4-0 iAtits"
                               component="dl"
                             >
                               <dl
-                                className="DetailList-sc-12g7m4-0 eYaZBv"
+                                className="DetailList-sc-12g7m4-0 iAtits"
                                 data-pf-content={true}
                               >
                                 <Detail

@@ -1,17 +1,238 @@
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { CardBody } from '@components/Card';
-import { DetailList } from '@components/DetailList';
+import { t } from '@lingui/macro';
+import {
+  Chip,
+  ChipGroup,
+  Button,
+  TextList,
+  TextListItem,
+  TextListVariants,
+  TextListItemVariants,
+  Label,
+} from '@patternfly/react-core';
 
-class WorkflowJobTemplateDetail extends Component {
-  render() {
-    return (
-      <CardBody>
-        <DetailList gutter="sm" />
-      </CardBody>
-    );
+import { CardBody, CardActionsRow } from '@components/Card';
+import ContentLoading from '@components/ContentLoading';
+import { WorkflowJobTemplatesAPI } from '@api';
+import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import { VariablesDetail } from '@components/CodeMirrorInput';
+import LaunchButton from '@components/LaunchButton';
+import DeleteButton from '@components/DeleteButton';
+import { toTitleCase } from '@util/strings';
+import { Sparkline } from '@components/Sparkline';
+
+function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
+  const {
+    id,
+    ask_inventory_on_launch,
+    name,
+    description,
+    type,
+    extra_vars,
+    created,
+    modified,
+    summary_fields,
+    related,
+    webhook_credential,
+  } = template;
+  const urlOrigin = window.location.origin;
+  const history = useHistory();
+  const [deletionError, setDeletionError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const renderOptionsField =
+    template.allow_simultaneous || template.webhook_servicee;
+
+  const renderOptions = (
+    <TextList component={TextListVariants.ul}>
+      {template.allow_simultaneous && (
+        <TextListItem component={TextListItemVariants.li}>
+          {i18n._(t`- Enable Concurrent Jobs`)}
+        </TextListItem>
+      )}
+      {template.webhook_service && (
+        <TextListItem component={TextListItemVariants.li}>
+          {i18n._(t`- Webhooks`)}
+        </TextListItem>
+      )}
+    </TextList>
+  );
+
+  if (hasContentLoading) {
+    return <ContentLoading />;
   }
+
+  const handleDelete = async () => {
+    setHasContentLoading(true);
+    try {
+      await WorkflowJobTemplatesAPI.destroy(id);
+      history.push(`/templates`);
+    } catch (error) {
+      setDeletionError(error);
+    }
+    setHasContentLoading(false);
+  };
+  const inventoryValue = (kind, inventoryId) => {
+    const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
+
+    return ask_inventory_on_launch ? (
+      <>
+        <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
+          <Label>{summary_fields.inventory.name}</Label>
+        </Link>
+        <span> {i18n._(t`(Prompt on Launch)`)}</span>
+      </>
+    ) : (
+      <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
+        <Label>{summary_fields.inventory.name}</Label>
+      </Link>
+    );
+  };
+  const canLaunch = summary_fields?.user_capabilities?.start;
+  const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
+    ...job,
+    type: 'job',
+  }));
+
+  return (
+    <CardBody>
+      <DetailList gutter="sm">
+        <Detail label={i18n._(t`Name`)} value={name} dataCy="jt-detail-name" />
+        <Detail label={i18n._(t`Description`)} value={description} />
+        {summary_fields.recent_jobs?.length > 0 && (
+          <Detail
+            css="display: flex; flex: 1;"
+            value={<Sparkline jobs={recentPlaybookJobs} />}
+            label={i18n._(t`Activity`)}
+          />
+        )}
+        {summary_fields.organization && (
+          <Detail
+            label={i18n._(t`Organization`)}
+            value={
+              <Link
+                to={`/organizations/${summary_fields.organization.id}/details`}
+              >
+                <Label>{summary_fields.organization.name}</Label>
+              </Link>
+            }
+          />
+        )}
+        <Detail label={i18n._(t`Job Type`)} value={toTitleCase(type)} />
+        {summary_fields.inventory && (
+          <Detail
+            label={i18n._(t`Inventory`)}
+            value={inventoryValue(
+              summary_fields.inventory.kind,
+              summary_fields.inventory.id
+            )}
+          />
+        )}
+        {renderOptionsField && (
+          <Detail label={i18n._(t`Options`)} value={renderOptions} />
+        )}
+        <Detail
+          label={i18n._(t`Webhook Service`)}
+          value={toTitleCase(template.webhook_service)}
+        />
+        {related.webhook_receiver && (
+          <Detail
+            label={i18n._(t`Webhook URL`)}
+            value={`${urlOrigin}${template.related.webhook_receiver}`}
+          />
+        )}
+        <Detail label={i18n._(t`Webhook Key`)} value={webHookKey} />
+        {webhook_credential && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Webhook Credentials`)}
+            value={
+              <Link
+                to={`/credentials/${summary_fields.webhook_credential.id}/details`}
+              >
+                <Label>{summary_fields.webhook_credential.name}</Label>
+              </Link>
+            }
+          />
+        )}
+        {summary_fields.labels?.results?.length > 0 && (
+          <Detail
+            fullWidth
+            label={i18n._(t`Labels`)}
+            value={
+              <ChipGroup>
+                {summary_fields.labels.results.map(l => (
+                  <Chip key={l.id} isReadOnly>
+                    {l.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
+        <VariablesDetail
+          label={i18n._(t`Variables`)}
+          value={extra_vars}
+          rows={4}
+        />
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={created}
+          user={summary_fields.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Modified`)}
+          date={modified}
+          user={summary_fields.modified_by}
+        />
+      </DetailList>
+      <CardActionsRow>
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.edit && (
+            <Button
+              component={Link}
+              to={`/templates/workflow_job_template/${id}/edit`}
+              aria-label={i18n._(t`Edit`)}
+            >
+              {i18n._(t`Edit`)}
+            </Button>
+          )}
+        {canLaunch && (
+          <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+            {({ handleLaunch }) => (
+              <Button variant="secondary" type="submit" onClick={handleLaunch}>
+                {i18n._(t`Launch`)}
+              </Button>
+            )}
+          </LaunchButton>
+        )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              name={name}
+              modalTitle={i18n._(t`Delete Workflow Job Template`)}
+              onConfirm={handleDelete}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
+      </CardActionsRow>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={() => setDeletionError(null)}
+        >
+          {i18n._(t`Failed to delete workflow job template.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+    </CardBody>
+  );
 }
 export { WorkflowJobTemplateDetail as _WorkflowJobTemplateDetail };
-export default withI18n()(withRouter(WorkflowJobTemplateDetail));
+export default withI18n()(WorkflowJobTemplateDetail);

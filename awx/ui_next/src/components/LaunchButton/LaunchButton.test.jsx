@@ -4,9 +4,10 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
 
 import LaunchButton from './LaunchButton';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 
-jest.mock('@api');
+jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('@api/models/JobTemplates');
 
 describe('LaunchButton', () => {
   JobTemplatesAPI.readLaunch.mockResolvedValue({
@@ -23,7 +24,7 @@ describe('LaunchButton', () => {
     id: 1,
     type: 'job_template',
   };
-
+  afterEach(() => jest.clearAllMocks());
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
       <LaunchButton resource={resource}>{children}</LaunchButton>
@@ -35,6 +36,7 @@ describe('LaunchButton', () => {
     const history = createMemoryHistory({
       initialEntries: ['/jobs/9000'],
     });
+
     JobTemplatesAPI.launch.mockResolvedValue({
       data: {
         id: 9000,
@@ -53,10 +55,48 @@ describe('LaunchButton', () => {
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
     expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1);
+    expect(history.location.pathname).toEqual('/jobs/9000/output');
+  });
+  test('should launch the correct job type', async () => {
+    WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({
+      data: {
+        can_start_without_user_input: true,
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/jobs/9000'],
+    });
+    JobTemplatesAPI.launch.mockResolvedValue({
+      data: {
+        id: 9000,
+      },
+    });
+    const wrapper = mountWithContexts(
+      <LaunchButton
+        resource={{
+          id: 1,
+          type: 'workflow_job_template',
+        }}
+      >
+        {children}
+      </LaunchButton>,
+      {
+        context: {
+          router: { history },
+        },
+      }
+    );
+    const button = wrapper.find('button');
+    button.prop('onClick')();
+    expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
+    await sleep(0);
+    expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1);
     expect(history.location.pathname).toEqual('/jobs/9000');
   });
-
   test('displays error modal after unsuccessful launch', async () => {
+    const wrapper = mountWithContexts(
+      <LaunchButton resource={resource}>{children}</LaunchButton>
+    );
     JobTemplatesAPI.launch.mockRejectedValue(
       new Error({
         response: {
@@ -68,9 +108,6 @@ describe('LaunchButton', () => {
           status: 403,
         },
       })
-    );
-    const wrapper = mountWithContexts(
-      <LaunchButton resource={resource}>{children}</LaunchButton>
     );
     expect(wrapper.find('Modal').length).toBe(0);
     wrapper.find('button').prop('onClick')();
