@@ -203,6 +203,10 @@ spec:
             - name: custom-venvs
               mountPath: {{ custom_venvs_path }}
 {% endif %}
+{% if kubernetes_image_pull_secrets is defined %}
+      imagePullSecrets:
+        - name: "{{ kubernetes_image_pull_secrets }}"
+{% endif %}
       containers:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"

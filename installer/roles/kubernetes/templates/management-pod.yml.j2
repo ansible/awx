@@ -5,6 +5,10 @@ metadata:
   name: ansible-tower-management
   namespace: {{ kubernetes_namespace }}
 spec:
+{% if kubernetes_image_pull_secrets is defined %}
+  imagePullSecrets:
+    - name: "{{ kubernetes_image_pull_secrets }}"
+{% endif %}
   containers:
     - name: ansible-tower-management
       image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
