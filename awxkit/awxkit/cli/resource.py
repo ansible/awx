@@ -179,11 +179,12 @@ class Import(CustomCommand):
     name = 'import'
     help_text = 'import resources into Tower'
 
-    def create_resource(self, client, resource, asset):
-        api_resource = getattr(client.v2, resource)
-        if resource == 'users' and 'password' not in asset:
-            asset['password'] = 'password'
-        api_resource.post(asset)
+    def create_assets(self, resource, assets):
+        endpoint = getattr(self.v2, resource)
+        for asset in assets:
+            if resource == 'users' and 'password' not in asset:
+                asset['password'] = 'password'
+            endpoint.post({k: v for k, v in asset.items() if k != 'related'})
 
     def handle(self, client, parser):
         if client.help:
@@ -192,10 +193,10 @@ class Import(CustomCommand):
 
         data = json.load(sys.stdin)
         client.authenticate()
+        self.v2 = client.v2
 
-        for resource, assets in data.items():
-            for asset in assets:
-                self.create_resource(client, resource, asset)
+        for resource, assets in data.items():  # FIXME: do a topological sort by dependencies
+            self.create_assets(resource, assets)
 
         return {}
 
