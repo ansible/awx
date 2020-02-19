@@ -13,7 +13,7 @@ import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
 import { InventoryLookup } from '@components/Lookup';
-import { FormColumnLayout } from '@components/FormLayout';
+import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
 
 function HostFormFields({ host, i18n }) {
   const [inventory, setInventory] = useState(
@@ -62,11 +62,13 @@ function HostFormFields({ host, i18n }) {
           error={inventoryMeta.error}
         />
       )}
-      <VariablesField
-        id="host-variables"
-        name="variables"
-        label={i18n._(t`Variables`)}
-      />
+      <FormFullWidthLayout>
+        <VariablesField
+          id="host-variables"
+          name="variables"
+          label={i18n._(t`Variables`)}
+        />
+      </FormFullWidthLayout>
     </>
   );
 }

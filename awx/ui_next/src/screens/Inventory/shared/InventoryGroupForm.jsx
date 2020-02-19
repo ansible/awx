@@ -10,7 +10,7 @@ import FormField from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
-import { FormColumnLayout } from '@components/FormLayout';
+import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
 
 function InventoryGroupForm({
   i18n,
@@ -46,11 +46,13 @@ function InventoryGroupForm({
                   type="text"
                   label={i18n._(t`Description`)}
                 />
-                <VariablesField
-                  id="host-variables"
-                  name="variables"
-                  label={i18n._(t`Variables`)}
-                />
+                <FormFullWidthLayout>
+                  <VariablesField
+                    id="host-variables"
+                    name="variables"
+                    label={i18n._(t`Variables`)}
+                  />
+                </FormFullWidthLayout>
                 <FormActionGroup
                   onCancel={handleCancel}
                   onSubmit={formik.handleSubmit}

@@ -3,7 +3,6 @@ import { string, bool } from 'prop-types';
 import { useField } from 'formik';
 import { Split, SplitItem } from '@patternfly/react-core';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import { FormFullWidthLayout } from '@components/FormLayout';
 import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
@@ -13,7 +12,7 @@ function VariablesField({ id, name, label, readOnly }) {
   const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
 
   return (
-    <FormFullWidthLayout>
+    <>
       <Split gutter="sm">
         <SplitItem>
           <label htmlFor={id} className="pf-c-form__label">
@@ -52,7 +51,7 @@ function VariablesField({ id, name, label, readOnly }) {
           {meta.error}
         </div>
       ) : null}
-    </FormFullWidthLayout>
+    </>
   );
 }
 VariablesField.propTypes = {

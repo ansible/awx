@@ -12,7 +12,7 @@ import { required } from '@util/validators';
 import InstanceGroupsLookup from '@components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
-import { FormColumnLayout } from '@components/FormLayout';
+import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
 
 function InventoryFormFields({ i18n, credentialTypeId }) {
   const [organizationField, organizationMeta, organizationHelpers] = useField({
@@ -66,14 +66,16 @@ function InventoryFormFields({ i18n, credentialTypeId }) {
           instanceGroupsHelpers.setValue(value);
         }}
       />
-      <VariablesField
-        tooltip={i18n._(
-          t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
-        )}
-        id="inventory-variables"
-        name="variables"
-        label={i18n._(t`Variables`)}
-      />
+      <FormFullWidthLayout>
+        <VariablesField
+          tooltip={i18n._(
+            t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax`
+          )}
+          id="inventory-variables"
+          name="variables"
+          label={i18n._(t`Variables`)}
+        />
+      </FormFullWidthLayout>
     </>
   );
 }
