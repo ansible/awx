@@ -97,7 +97,6 @@ const ManualSubForm = ({
           }}
         />
       </FormGroup>
-      )}
     </>
   );
 };

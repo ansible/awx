@@ -510,7 +510,6 @@ class JobTemplateForm extends Component {
                   </Field>
                   <FormGroup
                     fieldId="template-option-checkboxes"
-                    isInline
                     label={i18n._(t`Options`)}
                   >
                     <FormCheckboxLayout>

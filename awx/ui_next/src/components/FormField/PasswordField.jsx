@@ -17,6 +17,7 @@ function PasswordField(props) {
   const { id, name, label, validate, isRequired, i18n } = props;
   const [inputType, setInputType] = useState('password');
   const [field, meta] = useField({ name, validate });
+
   const isValid = !(meta.touched && meta.error);
 
   const handlePasswordToggle = () => {
@@ -46,11 +47,13 @@ function PasswordField(props) {
         </Tooltip>
         <TextInput
           id={id}
+          placeholder={field.value === '$encrypted$' ? 'ENCRYPTED' : undefined}
+          {...field}
+          value={field.value === '$encrypted$' ? '' : field.value}
           isRequired={isRequired}
           isValid={isValid}
           type={inputType}
-          {...field}
-          onChange={(value, event) => {
+          onChange={(_, event) => {
             field.onChange(event);
           }}
         />

@@ -368,7 +368,6 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
             <Form
               autoComplete="off"
               onSubmit={formik.handleSubmit}
-              css="padding: 0 24px"
             >
               <FormColumnLayout>
                 <ProjectFormFields
