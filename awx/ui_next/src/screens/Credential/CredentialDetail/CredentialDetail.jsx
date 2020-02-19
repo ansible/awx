@@ -83,7 +83,14 @@ function CredentialDetail({ i18n, credential }) {
       );
     } else if (inputs[id] === '$encrypted$') {
       const isEncrypted = true;
-      detail = <Detail key={id} label={label} value={i18n._(t`Encrypted`)} isEncrypted={isEncrypted} />;
+      detail = (
+        <Detail
+          key={id}
+          label={label}
+          value={i18n._(t`Encrypted`)}
+          isEncrypted={isEncrypted}
+        />
+      );
     } else {
       detail = <Detail key={id} label={label} value={inputs[id]} />;
     }

@@ -365,10 +365,7 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
           onSubmit={handleSubmit}
         >
           {formik => (
-            <Form
-              autoComplete="off"
-              onSubmit={formik.handleSubmit}
-            >
+            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <ProjectFormFields
                   project_base_dir={project_base_dir}

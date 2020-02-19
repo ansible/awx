@@ -23,7 +23,8 @@ const DetailValue = styled(({ fullWidth, isEncrypted, ...props }) => (
     `
     grid-column: 2 / -1;
   `}
-  ${props => props.isEncrypted &&
+  ${props =>
+    props.isEncrypted &&
     `
     text-transform: uppercase
     color: var(--pf-global--Color--400);
