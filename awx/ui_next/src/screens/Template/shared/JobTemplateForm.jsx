@@ -1370,15 +1370,16 @@ const FormikApp = withFormik({
       setErrors(errors);
     }
   },
-  validate: values => {
+  validate: (values, { i18n }) => {
     const errors = {};
 
     if (
       (!values.inventory || values.inventory === '') &&
       !values.ask_inventory_on_launch
     ) {
-      errors.inventory =
-        'Please select an Inventory or check the Prompt on Launch option.';
+      errors.inventory = i18n._(
+        t`Please select an Inventory or check the Prompt on Launch option.`
+      );
     }
 
     return errors;

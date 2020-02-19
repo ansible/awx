@@ -17,8 +17,6 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
-  // some stuff was stripped out of this component - need to propagate those changes
-  // out to other forms that use this lookup
   const [inventories, setInventories] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
