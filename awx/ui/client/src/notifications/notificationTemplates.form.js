@@ -718,7 +718,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             running_message: {
-                label: i18n._('Workflow Running Message'),
+                label: i18n._('Workflow Pending Approval Message'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
@@ -729,7 +729,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
             },
             running_body: {
-                label: i18n._('Workflow Running Message Body'),
+                label: i18n._('Workflow Pending Approval Message Body'),
                 class: 'Form-formGroup--fullWidth',
                 type: 'syntax_highlight',
                 mode: 'jinja2',
