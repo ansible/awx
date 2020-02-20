@@ -125,9 +125,9 @@ function CredentialList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Credentials`)}
                 />,
-                canAdd && (
-                  <ToolbarAddButton key="add" linkTo="/credentials/add" />
-                ),
+                ...(canAdd
+                  ? [<ToolbarAddButton key="add" linkTo="/credentials/add" />]
+                  : []),
               ]}
             />
           )}
@@ -135,7 +135,7 @@ function CredentialList({ i18n }) {
       </Card>
       <AlertModal
         isOpen={deletionError}
-        variant="danger"
+        variant="error"
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >

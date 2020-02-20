@@ -208,7 +208,7 @@ class InventoriesList extends Component {
                     itemsToDelete={selected}
                     pluralizedItemName="Inventories"
                   />,
-                  canAdd && addButton,
+                  ...(canAdd ? [addButton] : []),
                 ]}
               />
             )}
@@ -231,7 +231,7 @@ class InventoriesList extends Component {
         </Card>
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >

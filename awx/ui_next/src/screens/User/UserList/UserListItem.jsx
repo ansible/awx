@@ -4,17 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
+  DataListAction,
+  DataListCell,
+  DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { User } from '@types';
 
 class UserListItem extends React.Component {
@@ -39,8 +39,7 @@ class UserListItem extends React.Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
-                <VerticalSeparator />
+              <DataListCell key="username">
                 <Link to={`${detailUrl}`} id={labelId}>
                   <b>{user.username}</b>
                 </Link>
@@ -48,7 +47,7 @@ class UserListItem extends React.Component {
               <DataListCell key="first-name">
                 {user.first_name && (
                   <Fragment>
-                    <b css={{ marginRight: '20px' }}>{i18n._(t`First Name`)}</b>
+                    <b css="margin-right: 24px">{i18n._(t`First Name`)}</b>
                     {user.first_name}
                   </Fragment>
                 )}
@@ -56,26 +55,30 @@ class UserListItem extends React.Component {
               <DataListCell key="last-name">
                 {user.last_name && (
                   <Fragment>
-                    <b css={{ marginRight: '20px' }}>{i18n._(t`Last Name`)}</b>
+                    <b css="margin-right: 24px">{i18n._(t`Last Name`)}</b>
                     {user.last_name}
                   </Fragment>
                 )}
               </DataListCell>,
-              <DataListCell key="edit" alignRight isFilled={false}>
-                {user.summary_fields.user_capabilities.edit && (
-                  <Tooltip content={i18n._(t`Edit User`)} position="top">
-                    <Button
-                      variant="plain"
-                      component={Link}
-                      to={`/users/${user.id}/edit`}
-                    >
-                      <PencilAltIcon />
-                    </Button>
-                  </Tooltip>
-                )}
-              </DataListCell>,
             ]}
           />
+          <DataListAction
+            aria-label="actions"
+            aria-labelledby={labelId}
+            id={labelId}
+          >
+            {user.summary_fields.user_capabilities.edit && (
+              <Tooltip content={i18n._(t`Edit User`)} position="top">
+                <Button
+                  variant="plain"
+                  component={Link}
+                  to={`/users/${user.id}/edit`}
+                >
+                  <PencilAltIcon />
+                </Button>
+              </Tooltip>
+            )}
+          </DataListAction>
         </DataListItemRow>
       </DataListItem>
     );

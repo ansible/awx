@@ -238,12 +238,14 @@ function InventoryGroupsList({ i18n, location, match }) {
                   </DeleteButton>
                 </div>
               </Tooltip>,
-              canAdd && (
-                <ToolbarAddButton
-                  key="add"
-                  linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
-                />
-              ),
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      linkTo={`/inventories/inventory/${inventoryId}/groups/add`}
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}
@@ -259,7 +261,7 @@ function InventoryGroupsList({ i18n, location, match }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

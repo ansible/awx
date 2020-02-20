@@ -98,46 +98,46 @@ describe('<InventoryGroupsList />', () => {
 
   test('should check and uncheck the row item', async () => {
     expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
+      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
     ).toBe(false);
 
     await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')(
+      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
         true
       );
     });
     wrapper.update();
     expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
+      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')(
+      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')(
         false
       );
     });
     wrapper.update();
     expect(
-      wrapper.find('PFDataListCheck[id="select-group-1"]').props().checked
+      wrapper.find('DataListCheck[id="select-group-1"]').props().checked
     ).toBe(false);
   });
 
   test('should check all row items when select all is checked', async () => {
-    wrapper.find('PFDataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(true);
     });
     wrapper.update();
-    wrapper.find('PFDataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach(el => {
       expect(el.props().checked).toBe(true);
     });
     await act(async () => {
       wrapper.find('Checkbox#select-all').invoke('onChange')(false);
     });
     wrapper.update();
-    wrapper.find('PFDataListCheck').forEach(el => {
+    wrapper.find('DataListCheck').forEach(el => {
       expect(el.props().checked).toBe(false);
     });
   });
@@ -157,7 +157,7 @@ describe('<InventoryGroupsList />', () => {
       Promise.reject(new Error())
     );
     await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')();
+      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -191,7 +191,7 @@ describe('<InventoryGroupsList />', () => {
       })
     );
     await act(async () => {
-      wrapper.find('PFDataListCheck[id="select-group-1"]').invoke('onChange')();
+      wrapper.find('DataListCheck[id="select-group-1"]').invoke('onChange')();
     });
     wrapper.update();
     await act(async () => {
@@ -213,7 +213,7 @@ describe('<InventoryGroupsList />', () => {
         .find('ModalBoxFooter Button[aria-label="Delete"]')
         .invoke('onClick')();
     });
-    await waitForElement(wrapper, { title: 'Error!', variant: 'danger' });
+    await waitForElement(wrapper, { title: 'Error!', variant: 'error' });
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });

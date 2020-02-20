@@ -23,6 +23,7 @@ const mockOrganizations = {
           },
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },
@@ -37,6 +38,7 @@ const mockOrganizations = {
           },
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },
@@ -51,6 +53,7 @@ const mockOrganizations = {
           },
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },

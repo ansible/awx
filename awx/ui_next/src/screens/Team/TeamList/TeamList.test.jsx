@@ -17,6 +17,7 @@ const mockAPITeamsList = {
         summary_fields: {
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },
@@ -27,6 +28,7 @@ const mockAPITeamsList = {
         summary_fields: {
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },
@@ -37,6 +39,7 @@ const mockAPITeamsList = {
         summary_fields: {
           user_capabilities: {
             delete: true,
+            edit: true,
           },
         },
       },

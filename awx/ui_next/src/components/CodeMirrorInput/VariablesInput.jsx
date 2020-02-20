@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { string, func, bool, number } from 'prop-types';
 import { Button, Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import ButtonGroup from '@components/ButtonGroup';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
+import ButtonGroup from './ButtonGroup';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function formatJson(jsonString) {

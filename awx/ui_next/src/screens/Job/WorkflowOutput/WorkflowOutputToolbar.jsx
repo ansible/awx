@@ -8,12 +8,11 @@ import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import { CompassIcon, WrenchIcon } from '@patternfly/react-icons';
-import { StatusIcon } from '@components/Sparkline';
-import VerticalSeparator from '@components/VerticalSeparator';
+import StatusIcon from '@components/StatusIcon';
 import styled from 'styled-components';
 
 const Toolbar = styled.div`
-  align-items: center
+  align-items: center;
   border-bottom: 1px solid grey;
   display: flex;
   height: 56px;
@@ -73,7 +72,6 @@ function WorkflowOutputToolbar({ i18n, job }) {
       <ToolbarActions>
         <div>{i18n._(t`Total Nodes`)}</div>
         <Badge isRead>{totalNodes}</Badge>
-        <VerticalSeparator />
         <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
           <ActionButton
             id="workflow-output-toggle-legend"

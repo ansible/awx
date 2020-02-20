@@ -5,7 +5,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { func, shape } from 'prop-types';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import { WorkflowNodeTypeLetter } from '@components/Workflow';
 import { secondsToHHMMSS } from '@util/dates';
 import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';

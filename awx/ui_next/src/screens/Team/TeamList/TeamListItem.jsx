@@ -4,17 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
+  DataListAction,
+  DataListCell,
+  DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
 import { Team } from '@types';
 
 class TeamListItem extends React.Component {
@@ -28,6 +28,7 @@ class TeamListItem extends React.Component {
   render() {
     const { team, isSelected, onSelect, detailUrl, i18n } = this.props;
     const labelId = `check-action-${team.id}`;
+
     return (
       <DataListItem key={team.id} aria-labelledby={labelId} id={`${team.id}`}>
         <DataListItemRow>
@@ -39,8 +40,7 @@ class TeamListItem extends React.Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="divider">
-                <VerticalSeparator />
+              <DataListCell key="name">
                 <Link id={labelId} to={`${detailUrl}`}>
                   <b>{team.name}</b>
                 </Link>
@@ -48,9 +48,7 @@ class TeamListItem extends React.Component {
               <DataListCell key="organization">
                 {team.summary_fields.organization && (
                   <Fragment>
-                    <b css={{ marginRight: '20px' }}>
-                      {i18n._(t`Organization`)}
-                    </b>
+                    <b css="margin-right: 24px">{i18n._(t`Organization`)}</b>
                     <Link
                       to={`/organizations/${team.summary_fields.organization.id}/details`}
                     >
@@ -59,21 +57,25 @@ class TeamListItem extends React.Component {
                   </Fragment>
                 )}
               </DataListCell>,
-              <DataListCell key="edit" alignRight isFilled={false}>
-                {team.summary_fields.user_capabilities.edit && (
-                  <Tooltip content={i18n._(t`Edit Team`)} position="top">
-                    <Button
-                      variant="plain"
-                      component={Link}
-                      to={`/teams/${team.id}/edit`}
-                    >
-                      <PencilAltIcon />
-                    </Button>
-                  </Tooltip>
-                )}
-              </DataListCell>,
             ]}
           />
+          <DataListAction
+            aria-label="actions"
+            aria-labelledby={labelId}
+            id={labelId}
+          >
+            {team.summary_fields.user_capabilities.edit && (
+              <Tooltip content={i18n._(t`Edit Team`)} position="top">
+                <Button
+                  variant="plain"
+                  component={Link}
+                  to={`/teams/${team.id}/edit`}
+                >
+                  <PencilAltIcon />
+                </Button>
+              </Tooltip>
+            )}
+          </DataListAction>
         </DataListItemRow>
       </DataListItem>
     );

@@ -7,7 +7,6 @@ import {
   SplitItem,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
-import VerticalSeparator from '../VerticalSeparator';
 
 const Split = styled(PFSplit)`
   margin: 20px 0px;
@@ -16,6 +15,7 @@ const Split = styled(PFSplit)`
 
 const SplitLabelItem = styled(SplitItem)`
   font-weight: bold;
+  margin-right: 32px;
   word-break: initial;
 `;
 
@@ -41,7 +41,6 @@ class SelectedList extends Component {
     return (
       <Split>
         <SplitLabelItem>{label}</SplitLabelItem>
-        <VerticalSeparator />
         <SplitItem>
           <ChipGroup numChips={5}>
             {selected.map(item =>

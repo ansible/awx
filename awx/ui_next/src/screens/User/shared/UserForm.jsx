@@ -80,11 +80,7 @@ function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
       onSubmit={handleValidateAndSubmit}
     >
       {formik => (
-        <Form
-          autoComplete="off"
-          onSubmit={formik.handleSubmit}
-          css="padding: 0 24px"
-        >
+        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormField
               id="user-username"

@@ -165,12 +165,14 @@ function InventoryHostList({ i18n, location, match }) {
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Hosts`)}
               />,
-              canAdd && (
-                <ToolbarAddButton
-                  key="add"
-                  linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
-                />
-              ),
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}
@@ -198,7 +200,7 @@ function InventoryHostList({ i18n, location, match }) {
 
       {toggleError && !toggleLoading && (
         <AlertModal
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           isOpen={toggleError && !toggleLoading}
           onClose={() => setToggleError(false)}
@@ -211,7 +213,7 @@ function InventoryHostList({ i18n, location, match }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

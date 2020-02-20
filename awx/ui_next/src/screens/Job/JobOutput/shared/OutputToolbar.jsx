@@ -9,7 +9,6 @@ import {
   TrashAltIcon,
 } from '@patternfly/react-icons';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
-import VerticalSeparator from '@components/VerticalSeparator';
 import DeleteButton from '@components/DeleteButton';
 import LaunchButton from '@components/LaunchButton';
 
@@ -122,8 +121,6 @@ const OutputToolbar = ({ i18n, job, onDelete }) => {
           <Badge isRead>{toHHMMSS(job.elapsed)}</Badge>
         </Tooltip>
       </BadgeGroup>
-
-      <VerticalSeparator />
 
       {job.type !== 'system_job' &&
         job.summary_fields.user_capabilities?.start && (

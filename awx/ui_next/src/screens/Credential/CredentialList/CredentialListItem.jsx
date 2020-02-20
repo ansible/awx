@@ -5,24 +5,17 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
   Button,
+  DataListAction,
+  DataListCell,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
-  DataListItemCells as _DataListItemCells,
+  DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import VerticalSeparator from '@components/VerticalSeparator';
-import styled from 'styled-components';
 import { Credential } from '@types';
-
-const DataListItemCells = styled(_DataListItemCells)`
-  ${DataListCell}:first-child {
-    flex-grow: 2;
-  }
-`;
 
 function CredentialListItem({
   credential,
@@ -50,7 +43,6 @@ function CredentialListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
-              <VerticalSeparator />
               <Link to={`${detailUrl}`}>
                 <b>{credential.name}</b>
               </Link>
@@ -58,21 +50,25 @@ function CredentialListItem({
             <DataListCell key="type">
               {credential.summary_fields.credential_type.name}
             </DataListCell>,
-            <DataListCell key="edit" alignRight isFilled={false}>
-              {canEdit && (
-                <Tooltip content={i18n._(t`Edit Credential`)} position="top">
-                  <Button
-                    variant="plain"
-                    component={Link}
-                    to={`/credentials/${credential.id}/edit`}
-                  >
-                    <PencilAltIcon />
-                  </Button>
-                </Tooltip>
-              )}
-            </DataListCell>,
           ]}
         />
+        <DataListAction
+          aria-label="actions"
+          aria-labelledby={labelId}
+          id={labelId}
+        >
+          {canEdit && (
+            <Tooltip content={i18n._(t`Edit Credential`)} position="top">
+              <Button
+                variant="plain"
+                component={Link}
+                to={`/credentials/${credential.id}/edit`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </Tooltip>
+          )}
+        </DataListAction>
       </DataListItemRow>
     </DataListItem>
   );

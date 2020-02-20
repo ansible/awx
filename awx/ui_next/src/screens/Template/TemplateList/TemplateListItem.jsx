@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button,
+  DataListAction as _DataListAction,
+  DataListCell,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
@@ -15,14 +18,20 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
 import LaunchButton from '@components/LaunchButton';
-import VerticalSeparator from '@components/VerticalSeparator';
-import { Sparkline } from '@components/Sparkline';
+import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
+import styled from 'styled-components';
+
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: repeat(2, 40px);
+`;
 
 function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
+  const labelId = `check-action-${template.id}`;
   const canLaunch = template.summary_fields.user_capabilities.start;
 
   const missingResourceIcon =
@@ -32,21 +41,17 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
         !template.ask_inventory_on_launch));
 
   return (
-    <DataListItem
-      aria-labelledby={`check-action-${template.id}`}
-      id={`${template.id}`}
-    >
+    <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
       <DataListItemRow>
         <DataListCheck
           id={`select-jobTemplate-${template.id}`}
           checked={isSelected}
           onChange={onSelect}
-          aria-labelledby={`check-action-${template.id}`}
+          aria-labelledby={labelId}
         />
         <DataListItemCells
           dataListCells={[
             <DataListCell key="divider">
-              <VerticalSeparator />
               <span>
                 <Link to={`${detailUrl}`}>
                   <b>{template.name}</b>
@@ -71,34 +76,41 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
             <DataListCell key="sparkline">
               <Sparkline jobs={template.summary_fields.recent_jobs} />
             </DataListCell>,
-            <DataListCell alignRight isFilled={false} key="launch">
-              {canLaunch && template.type === 'job_template' && (
-                <Tooltip content={i18n._(t`Launch Template`)} position="top">
-                  <LaunchButton resource={template}>
-                    {({ handleLaunch }) => (
-                      <Button variant="plain" onClick={handleLaunch}>
-                        <RocketIcon />
-                      </Button>
-                    )}
-                  </LaunchButton>
-                </Tooltip>
-              )}
-            </DataListCell>,
-            <DataListCell key="edit" alignRight isFilled={false}>
-              {template.summary_fields.user_capabilities.edit && (
-                <Tooltip content={i18n._(t`Edit Template`)} position="top">
-                  <Button
-                    variant="plain"
-                    component={Link}
-                    to={`/templates/${template.type}/${template.id}/edit`}
-                  >
-                    <PencilAltIcon />
-                  </Button>
-                </Tooltip>
-              )}
-            </DataListCell>,
           ]}
         />
+        <DataListAction
+          aria-label="actions"
+          aria-labelledby={labelId}
+          id={labelId}
+        >
+          {canLaunch && template.type === 'job_template' && (
+            <Tooltip content={i18n._(t`Launch Template`)} position="top">
+              <LaunchButton resource={template}>
+                {({ handleLaunch }) => (
+                  <Button
+                    css="grid-column: 1"
+                    variant="plain"
+                    onClick={handleLaunch}
+                  >
+                    <RocketIcon />
+                  </Button>
+                )}
+              </LaunchButton>
+            </Tooltip>
+          )}
+          {template.summary_fields.user_capabilities.edit && (
+            <Tooltip content={i18n._(t`Edit Template`)} position="top">
+              <Button
+                css="grid-column: 2"
+                variant="plain"
+                component={Link}
+                to={`/templates/${template.type}/${template.id}/edit`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </Tooltip>
+          )}
+        </DataListAction>
       </DataListItemRow>
     </DataListItem>
   );

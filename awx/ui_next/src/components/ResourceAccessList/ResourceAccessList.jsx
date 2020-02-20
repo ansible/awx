@@ -232,7 +232,7 @@ class ResourceAccessList extends React.Component {
         )}
         <AlertModal
           isOpen={hasDeletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={this.handleDeleteErrorClose}
         >

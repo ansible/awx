@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { WorkflowJobTemplatesAPI } from '@api';
 import {
   Chip,
   ChipGroup,
@@ -13,17 +14,16 @@ import {
   Label,
 } from '@patternfly/react-core';
 
-import { CardBody, CardActionsRow } from '@components/Card';
-import ContentLoading from '@components/ContentLoading';
-import { WorkflowJobTemplatesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import { CardBody, CardActionsRow } from '@components/Card';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-import LaunchButton from '@components/LaunchButton';
+import ContentLoading from '@components/ContentLoading';
 import DeleteButton from '@components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import ErrorDetail from '@components/ErrorDetail';
+import LaunchButton from '@components/LaunchButton';
+import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
-import { Sparkline } from '@components/Sparkline';
 
 function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
   const {
@@ -104,7 +104,6 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
         <Detail label={i18n._(t`Description`)} value={description} />
         {summary_fields.recent_jobs?.length > 0 && (
           <Detail
-            css="display: flex; flex: 1;"
             value={<Sparkline jobs={recentPlaybookJobs} />}
             label={i18n._(t`Activity`)}
           />
@@ -223,7 +222,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >

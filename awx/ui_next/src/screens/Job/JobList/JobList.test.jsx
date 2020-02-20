@@ -23,6 +23,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        start: true,
       },
     },
   },
@@ -34,6 +35,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        start: true,
       },
     },
   },
@@ -45,6 +47,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        start: true,
       },
     },
   },
@@ -56,6 +59,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        start: true,
       },
     },
   },
@@ -67,6 +71,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        edit: true,
       },
     },
   },
@@ -78,6 +83,7 @@ const mockResults = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        edit: true,
       },
     },
   },

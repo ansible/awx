@@ -54,7 +54,7 @@ class ProjectSyncButton extends React.Component {
         {syncError && (
           <AlertModal
             isOpen={syncError}
-            variant="danger"
+            variant="error"
             title={i18n._(t`Error!`)}
             onClose={this.handleSyncErrorClose}
           >

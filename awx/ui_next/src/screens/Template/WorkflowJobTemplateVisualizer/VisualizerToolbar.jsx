@@ -6,7 +6,12 @@ import {
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
+import {
+  Badge as PFBadge,
+  Button,
+  Title,
+  Tooltip,
+} from '@patternfly/react-core';
 import {
   BookIcon,
   CompassIcon,
@@ -15,7 +20,6 @@ import {
   TrashAltIcon,
   WrenchIcon,
 } from '@patternfly/react-icons';
-import VerticalSeparator from '@components/VerticalSeparator';
 import styled from 'styled-components';
 
 const Badge = styled(PFBadge)`
@@ -51,15 +55,12 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
   return (
     <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
-        <div css="display: flex;" id="visualizer-toolbar-template-name">
-          <b>{template.name}</b>
-        </div>
+        <Title size="xl">{template.name}</Title>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
           <div>{i18n._(t`Total Nodes`)}</div>
           <Badge id="visualizer-total-nodes-badge" isRead>
             {totalNodes}
           </Badge>
-          <VerticalSeparator />
           <Tooltip content={i18n._(t`Toggle Legend`)} position="bottom">
             <ActionButton
               id="visualizer-toggle-legend"
@@ -108,16 +109,15 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
               <TrashAltIcon />
             </ActionButton>
           </Tooltip>
-          <VerticalSeparator />
           <Button
             id="visualizer-save"
+            css="margin: 0 32px"
             aria-label={i18n._(t`Save`)}
             variant="primary"
             onClick={onSave}
           >
             {i18n._(t`Save`)}
           </Button>
-          <VerticalSeparator />
           <Button
             id="visualizer-close"
             aria-label={i18n._(t`Close`)}

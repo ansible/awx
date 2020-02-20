@@ -13,7 +13,7 @@ import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
 import { Job } from '@types';
@@ -275,7 +275,7 @@ function JobDetail({ job, i18n }) {
       {errorMsg && (
         <AlertModal
           isOpen={errorMsg}
-          variant="danger"
+          variant="error"
           onClose={() => setErrorMsg()}
           title={i18n._(t`Job Delete Error`)}
         >

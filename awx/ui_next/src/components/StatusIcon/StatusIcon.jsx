@@ -12,8 +12,12 @@ const Pulse = keyframes`
 `;
 
 const Wrapper = styled.div`
-  width: 14px;
+  align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
   height: 14px;
+  margin: 5px 0;
+  width: 14px;
 `;
 
 const WhiteTop = styled.div`

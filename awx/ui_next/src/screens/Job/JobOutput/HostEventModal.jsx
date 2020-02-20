@@ -4,7 +4,7 @@ import CodeMirrorInput from '@components/CodeMirrorInput';
 import ContentEmpty from '@components/ContentEmpty';
 import PropTypes from 'prop-types';
 import { DetailList, Detail } from '@components/DetailList';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';

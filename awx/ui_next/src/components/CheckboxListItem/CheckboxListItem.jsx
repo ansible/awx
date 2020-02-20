@@ -6,19 +6,21 @@ import {
   DataListItemCells,
   DataListCell,
   DataListCheck,
+  Radio,
 } from '@patternfly/react-core';
-import DataListRadio from '@components/DataListRadio';
 
 const CheckboxListItem = ({
+  isDisabled = false,
+  isRadio = false,
+  isSelected = false,
   itemId,
-  name,
   label,
-  isSelected,
-  onSelect,
+  name,
   onDeselect,
-  isRadio,
+  onSelect,
 }) => {
-  const CheckboxRadio = isRadio ? DataListRadio : DataListCheck;
+  const CheckboxRadio = isRadio ? Radio : DataListCheck;
+
   return (
     <DataListItem
       key={itemId}
@@ -27,11 +29,14 @@ const CheckboxListItem = ({
     >
       <DataListItemRow>
         <CheckboxRadio
-          id={`selected-${itemId}`}
-          checked={isSelected}
-          onChange={isSelected ? onDeselect : onSelect}
+          aria-label={`check-action-item-${itemId}`}
           aria-labelledby={`check-action-item-${itemId}`}
+          checked={isSelected}
+          disabled={isDisabled}
+          id={`selected-${itemId}`}
+          isChecked={isSelected}
           name={name}
+          onChange={isSelected ? onDeselect : onSelect}
           value={itemId}
         />
         <DataListItemCells
@@ -53,12 +58,12 @@ const CheckboxListItem = ({
 };
 
 CheckboxListItem.propTypes = {
-  itemId: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
   isSelected: PropTypes.bool.isRequired,
-  onSelect: PropTypes.func.isRequired,
+  itemId: PropTypes.number.isRequired,
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   onDeselect: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
 };
 
 export default CheckboxListItem;

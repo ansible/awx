@@ -2,7 +2,7 @@ import React from 'react';
 import { oneOf, func } from 'prop-types';
 import styled from 'styled-components';
 import { Button } from '@patternfly/react-core';
-import ButtonGroup from '../ButtonGroup';
+import ButtonGroup from './ButtonGroup';
 
 const SmallButton = styled(Button)`
   padding: 3px 8px;
