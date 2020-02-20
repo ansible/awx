@@ -96,13 +96,17 @@ describe('VisualizerLink', () => {
       .find('g')
       .first()
       .simulate('mouseenter');
-    wrapper.find('#link-add-node').simulate('mouseenter');
+    wrapper
+      .find('WorkflowActionTooltipItem#link-add-node')
+      .simulate('mouseenter');
     expect(updateHelpText).toHaveBeenCalledWith(
       'Add a new node between these two nodes'
     );
-    wrapper.find('#link-add-node').simulate('mouseleave');
+    wrapper
+      .find('WorkflowActionTooltipItem#link-add-node')
+      .simulate('mouseleave');
     expect(updateHelpText).toHaveBeenCalledWith(null);
-    wrapper.find('#link-add-node').simulate('click');
+    wrapper.find('WorkflowActionTooltipItem#link-add-node').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({
       type: 'START_ADD_NODE',
       sourceNodeId: 2,
@@ -116,11 +120,11 @@ describe('VisualizerLink', () => {
       .find('g')
       .first()
       .simulate('mouseenter');
-    wrapper.find('#link-edit').simulate('mouseenter');
+    wrapper.find('WorkflowActionTooltipItem#link-edit').simulate('mouseenter');
     expect(updateHelpText).toHaveBeenCalledWith('Edit this link');
-    wrapper.find('#link-edit').simulate('mouseleave');
+    wrapper.find('WorkflowActionTooltipItem#link-edit').simulate('mouseleave');
     expect(updateHelpText).toHaveBeenCalledWith(null);
-    wrapper.find('#link-edit').simulate('click');
+    wrapper.find('WorkflowActionTooltipItem#link-edit').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({
       type: 'SET_LINK_TO_EDIT',
       value: link,
@@ -133,11 +137,15 @@ describe('VisualizerLink', () => {
       .find('g')
       .first()
       .simulate('mouseenter');
-    wrapper.find('#link-delete').simulate('mouseenter');
+    wrapper
+      .find('WorkflowActionTooltipItem#link-delete')
+      .simulate('mouseenter');
     expect(updateHelpText).toHaveBeenCalledWith('Delete this link');
-    wrapper.find('#link-delete').simulate('mouseleave');
+    wrapper
+      .find('WorkflowActionTooltipItem#link-delete')
+      .simulate('mouseleave');
     expect(updateHelpText).toHaveBeenCalledWith(null);
-    wrapper.find('#link-delete').simulate('click');
+    wrapper.find('WorkflowActionTooltipItem#link-delete').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({
       type: 'START_DELETE_LINK',
       link,
