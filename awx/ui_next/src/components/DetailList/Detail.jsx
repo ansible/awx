@@ -38,7 +38,7 @@ const Detail = ({
   className,
   dataCy,
   alwaysVisible,
-  isEncrypted
+  isEncrypted,
 }) => {
   if (!value && typeof value !== 'number' && !alwaysVisible) {
     return null;
