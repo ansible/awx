@@ -4,6 +4,12 @@ kind: ServiceAccount
 metadata:
   name: awx
   namespace: {{ kubernetes_namespace }}
+{% if kubernetes_service_account_annotations is defined %}
+  annotations:
+{% for key, value in kubernetes_service_account_annotations.items() %}
+    {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
 {% if kubernetes_image_pull_secrets is defined %}
 imagePullSecrets:
   - name: "{{ kubernetes_image_pull_secrets }}"
