@@ -138,6 +138,9 @@ Inside these folders, the internal structure is:
   - **/shared** - Components that are meant to be used specifically by a particular route, but might be sharable across pages of that route. For example, a form component which is used on both add and edit screens.
 - **/util** - Stateless helper functions that aren't tied to react.
 
+### Patterns
+- A **screen** shouldn't import from another screen. If a component _needs_ to be shared between two or more screens, it is a generic and should be moved to `src/components`.
+
 #### Bootstrapping the application (root src/ files)
 
 In the root of `/src`, there are a few files which are used to initialize the react app.  These are
