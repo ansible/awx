@@ -27,12 +27,14 @@ function WorkflowActionTooltipItem({
   onClick,
   onMouseEnter,
   onMouseLeave,
+  ...rest
 }) {
   return (
     <TooltipItem
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      {...rest}
     >
       {children}
     </TooltipItem>
