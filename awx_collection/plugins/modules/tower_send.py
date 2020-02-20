@@ -35,12 +35,14 @@ options:
       required: False
       default: []
       type: list
+      elements: str
     prevent:
       description:
         - A list of asset types to prevent import for
       required: false
       default: []
       type: list
+      elements: str
     password_management:
       description:
         - The password management option to use.
@@ -97,8 +99,8 @@ except ImportError:
 def main():
     argument_spec = dict(
         assets=dict(required=False),
-        files=dict(required=False, default=[], type='list'),
-        prevent=dict(required=False, default=[], type='list'),
+        files=dict(required=False, default=[], type='list', elements='str'),
+        prevent=dict(required=False, default=[], type='list', elements='str'),
         password_management=dict(required=False, default='default', choices=['default', 'random']),
     )
 

@@ -282,7 +282,7 @@ def main():
         name=dict(required=True),
         user=dict(),
         team=dict(),
-        kind=dict(choices=KIND_CHOICES.keys()),
+        kind=dict(choices=list(KIND_CHOICES.keys())),
         credential_type=dict(),
         inputs=dict(type='dict'),
         host=dict(),

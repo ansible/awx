@@ -43,6 +43,7 @@ options:
         - Credential to use for job, only used if prompt for credential is set.
       type: list
       aliases: ['credential']
+      elements: str
     extra_vars:
       description:
         - extra_vars to use for the Job Template.
@@ -57,6 +58,7 @@ options:
       description:
         - Specific tags to use for from playbook.
       type: list
+      elements: str
     scm_branch:
       description:
         - A specific of the SCM project to run the template on.
@@ -66,6 +68,7 @@ options:
       description:
         - Specific tags to skip from the playbook.
       type: list
+      elements: str
     verbosity:
       description:
         - Verbosity level for this job run
@@ -137,12 +140,12 @@ def main():
         job_type=dict(type='str', choices=['run', 'check']),
         inventory=dict(type='str', default=None),
         # Credentials will be a str instead of a list for backwards compatability
-        credentials=dict(type='list', default=None, aliases=['credential']),
+        credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
         limit=dict(),
-        tags=dict(type='list'),
+        tags=dict(type='list', elements='str'),
         extra_vars=dict(type='dict', required=False),
         scm_branch=dict(type='str', required=False),
-        skip_tags=dict(type='list', required=False),
+        skip_tags=dict(type='list', required=False, elements='str'),
         verbosity=dict(type='int', required=False, choices=[0, 1, 2, 3, 4, 5]),
         diff_mode=dict(type='bool', required=False),
         credential_passwords=dict(type='dict', required=False),

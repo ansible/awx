@@ -31,7 +31,7 @@ options:
     new_name:
       description:
         - To use when changing a hosts's name.
-      required: True
+      required: False
       type: str
     description:
       description:
@@ -91,7 +91,7 @@ def main():
         description=dict(default=''),
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
-        variables=dict(type='dict', default=''),
+        variables=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

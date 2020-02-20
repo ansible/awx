@@ -31,7 +31,7 @@ options:
     new_name:
       description:
         - To use when changing a team's name.
-      required: True
+      required: False
       type: str
     description:
       description:

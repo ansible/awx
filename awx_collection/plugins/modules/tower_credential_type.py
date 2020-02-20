@@ -109,7 +109,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(required=False),
-        kind=dict(required=False, choices=KIND_CHOICES.keys()),
+        kind=dict(required=False, choices=list(KIND_CHOICES.keys())),
         inputs=dict(type='dict', required=False),
         injectors=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),

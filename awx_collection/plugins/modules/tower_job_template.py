@@ -65,6 +65,7 @@ options:
       version_added: 2.8
       type: list
       default: []
+      elements: str
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
@@ -338,7 +339,7 @@ def main():
         credential=dict(default=''),
         vault_credential=dict(default=''),
         custom_virtualenv=dict(type='str', required=False),
-        credentials=dict(type='list', default=[]),
+        credentials=dict(type='list', default=[], elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
