@@ -17,6 +17,8 @@ function CredentialFormFields({
   credentialTypes,
   formik,
   initialValues,
+  scmCredentialTypeId,
+  sshCredentialTypeId,
 }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
@@ -31,19 +33,13 @@ function CredentialFormFields({
       label: credentialTypes[key].name,
     };
   });
-  const scmCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].kind === 'scm')
-    .map(key => credentialTypes[key].id)[0];
-  const sshCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].kind === 'ssh')
-    .map(key => credentialTypes[key].id)[0];
 
   const resetSubFormFields = (value, form) => {
     Object.keys(form.initialValues.inputs).forEach(label => {
       if (parseInt(value, 10) === form.initialValues.credential_type) {
         form.setFieldValue(`inputs.${label}`, initialValues.inputs[label]);
       } else {
-        form.setFieldValue(`inputs.${label}`, undefined);
+        form.setFieldValue(`inputs.${label}`, '');
       }
       form.setFieldTouched(`inputs.${label}`, false);
     });
@@ -117,37 +113,72 @@ function CredentialFormFields({
   );
 }
 
-function CredentialForm({ credential = {}, onSubmit, onCancel, ...rest }) {
+function CredentialForm({
+  credential = {},
+  credentialTypes,
+  onSubmit,
+  onCancel,
+  ...rest
+}) {
   const initialValues = {
-    name: credential.name || undefined,
-    description: credential.description || undefined,
-    organization:
-      (credential.summary_fields && credential.summary_fields.organization) ||
-      null,
-    credential_type: credential.credential_type || undefined,
+    name: credential.name || '',
+    description: credential.description || '',
+    organization: credential?.summary_fields?.organization || null,
+    credential_type: credential.credential_type || '',
     inputs: {
-      username: (credential.inputs && credential.inputs.username) || undefined,
-      password: (credential.inputs && credential.inputs.password) || undefined,
-      ssh_key_data:
-        (credential.inputs && credential.inputs.ssh_key_data) || undefined,
-      ssh_public_key_data:
-        (credential.inputs && credential.inputs.ssh_public_key_data) ||
-        undefined,
-      ssh_key_unlock:
-        (credential.inputs && credential.inputs.ssh_key_unlock) || undefined,
-      become_method:
-        (credential.inputs && credential.inputs.become_method) || undefined,
-      become_username:
-        (credential.inputs && credential.inputs.become_username) || undefined,
-      become_password:
-        (credential.inputs && credential.inputs.become_password) || undefined,
+      username: credential?.inputs?.username || '',
+      password: credential?.inputs?.password || '',
+      ssh_key_data: credential?.inputs?.ssh_key_data || '',
+      ssh_public_key_data: credential?.inputs?.ssh_public_key_data || '',
+      ssh_key_unlock: credential?.inputs?.ssh_key_unlock || '',
+      become_method: credential?.inputs?.become_method || '',
+      become_username: credential?.inputs?.become_username || '',
+      become_password: credential?.inputs?.become_password || '',
     },
   };
+
+  const scmCredentialTypeId = Object.keys(credentialTypes)
+    .filter(key => credentialTypes[key].kind === 'scm')
+    .map(key => credentialTypes[key].id)[0];
+  const sshCredentialTypeId = Object.keys(credentialTypes)
+    .filter(key => credentialTypes[key].kind === 'ssh')
+    .map(key => credentialTypes[key].id)[0];
 
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={values => {
+        const scmKeys = [
+          'username',
+          'password',
+          'ssh_key_data',
+          'ssh_key_unlock',
+        ];
+        const sshKeys = [
+          'username',
+          'password',
+          'ssh_key_data',
+          'ssh_public_key_data',
+          'ssh_key_unlock',
+          'become_method',
+          'become_username',
+          'become_password',
+        ];
+        if (parseInt(values.credential_type, 10) === scmCredentialTypeId) {
+          Object.keys(values.inputs).forEach(key => {
+            if (scmKeys.indexOf(key) < 0) {
+              delete values.inputs[key];
+            }
+          });
+        } else if (
+          parseInt(values.credential_type, 10) === sshCredentialTypeId
+        ) {
+          Object.keys(values.inputs).forEach(key => {
+            if (sshKeys.indexOf(key) < 0) {
+              delete values.inputs[key];
+            }
+          });
+        }
         onSubmit(values);
       }}
     >
@@ -157,6 +188,9 @@ function CredentialForm({ credential = {}, onSubmit, onCancel, ...rest }) {
             <CredentialFormFields
               formik={formik}
               initialValues={initialValues}
+              credentialTypes={credentialTypes}
+              scmCredentialTypeId={scmCredentialTypeId}
+              sshCredentialTypeId={sshCredentialTypeId}
               {...rest}
             />
             <FormActionGroup
