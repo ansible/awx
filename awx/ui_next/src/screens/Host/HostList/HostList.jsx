@@ -177,5 +177,4 @@ function HostList({ i18n }) {
   );
 }
 
-export { HostList as _HostList };
 export default withI18n()(HostList);
