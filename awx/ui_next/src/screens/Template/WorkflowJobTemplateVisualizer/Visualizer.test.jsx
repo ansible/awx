@@ -171,7 +171,7 @@ describe('Visualizer', () => {
     wrapper.update();
     expect(wrapper.find('LinkEditModal').length).toBe(0);
     wrapper.find('g#link-2-3').simulate('mouseenter');
-    wrapper.find('#link-edit').simulate('click');
+    wrapper.find('WorkflowActionTooltipItem#link-edit').simulate('click');
     expect(wrapper.find('LinkEditModal').length).toBe(1);
     act(() => {
       wrapper

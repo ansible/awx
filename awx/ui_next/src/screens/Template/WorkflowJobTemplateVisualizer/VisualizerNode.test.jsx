@@ -86,11 +86,11 @@ describe('VisualizerNode', () => {
 
     test('Add tooltip action hover/click updates help text and dispatches properly', () => {
       wrapper.find('VisualizerNode').simulate('mouseenter');
-      wrapper.find('#node-add').simulate('mouseenter');
+      wrapper.find('WorkflowActionTooltipItem#node-add').simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('Add a new node');
-      wrapper.find('#node-add').simulate('mouseleave');
+      wrapper.find('WorkflowActionTooltipItem#node-add').simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
-      wrapper.find('#node-add').simulate('click');
+      wrapper.find('WorkflowActionTooltipItem#node-add').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'START_ADD_NODE',
         sourceNodeId: 2,
@@ -100,11 +100,15 @@ describe('VisualizerNode', () => {
 
     test('Edit tooltip action hover/click updates help text and dispatches properly', () => {
       wrapper.find('VisualizerNode').simulate('mouseenter');
-      wrapper.find('#node-edit').simulate('mouseenter');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-edit')
+        .simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('Edit this node');
-      wrapper.find('#node-edit').simulate('mouseleave');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-edit')
+        .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
-      wrapper.find('#node-edit').simulate('click');
+      wrapper.find('WorkflowActionTooltipItem#node-edit').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'SET_NODE_TO_EDIT',
         value: nodeWithJT,
@@ -114,11 +118,15 @@ describe('VisualizerNode', () => {
 
     test('Details tooltip action hover/click updates help text and dispatches properly', () => {
       wrapper.find('VisualizerNode').simulate('mouseenter');
-      wrapper.find('#node-details').simulate('mouseenter');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-details')
+        .simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('View node details');
-      wrapper.find('#node-details').simulate('mouseleave');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-details')
+        .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
-      wrapper.find('#node-details').simulate('click');
+      wrapper.find('WorkflowActionTooltipItem#node-details').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'SET_NODE_TO_VIEW',
         value: nodeWithJT,
@@ -128,11 +136,15 @@ describe('VisualizerNode', () => {
 
     test('Link tooltip action hover/click updates help text and dispatches properly', () => {
       wrapper.find('VisualizerNode').simulate('mouseenter');
-      wrapper.find('#node-link').simulate('mouseenter');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-link')
+        .simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('Link to an available node');
-      wrapper.find('#node-link').simulate('mouseleave');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-link')
+        .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
-      wrapper.find('#node-link').simulate('click');
+      wrapper.find('WorkflowActionTooltipItem#node-link').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'SELECT_SOURCE_FOR_LINKING',
         node: nodeWithJT,
@@ -142,11 +154,15 @@ describe('VisualizerNode', () => {
 
     test('Delete tooltip action hover/click updates help text and dispatches properly', () => {
       wrapper.find('VisualizerNode').simulate('mouseenter');
-      wrapper.find('#node-delete').simulate('mouseenter');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-delete')
+        .simulate('mouseenter');
       expect(updateHelpText).toHaveBeenCalledWith('Delete this node');
-      wrapper.find('#node-delete').simulate('mouseleave');
+      wrapper
+        .find('WorkflowActionTooltipItem#node-delete')
+        .simulate('mouseleave');
       expect(updateHelpText).toHaveBeenCalledWith(null);
-      wrapper.find('#node-delete').simulate('click');
+      wrapper.find('WorkflowActionTooltipItem#node-delete').simulate('click');
       expect(dispatch).toHaveBeenCalledWith({
         type: 'SET_NODE_TO_DELETE',
         value: nodeWithJT,
