@@ -42,21 +42,7 @@
             $scope.$on(`ws-jobs`, function(e, data){
                 inventory_source = Find({ list: $scope.inventory_sources, key: 'id', val: data.inventory_source_id });
 
-                if (inventory_source === undefined || inventory_source === null) {
-                    inventory_source = {};
-                }
-
-                if(data.status === 'failed' || data.status === 'successful'){
-                    let path = GetBasePath('inventory') + $stateParams.inventory_id + '/inventory_sources';
-
-                    qs.search(path, $state.params[`${list.iterator}_search`])
-                    .then((searchResponse)=> {
-                        $scope[`${list.iterator}_dataset`] = searchResponse.data;
-                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-                        _.forEach($scope[list.name], buildStatusIndicators);
-                        optionsRequestDataProcessing();
-                    });
-                } else {
+                if (inventory_source) {
                     var status = GetSyncStatusMsg({
                         status: data.status
                     });
