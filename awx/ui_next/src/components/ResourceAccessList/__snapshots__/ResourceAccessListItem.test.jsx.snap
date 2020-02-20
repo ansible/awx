@@ -482,9 +482,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailValue-sc-16ypsyv-1",
                                             "isStatic": false,
-                                            "lastClassName": "yHlYM",
+                                            "lastClassName": "kCDjmZ",
                                             "rules": Array [
                                               "word-break:break-all;",
+                                              [Function],
+                                              " ",
                                               [Function],
                                             ],
                                           },
@@ -502,18 +504,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       fullWidth={false}
                                     >
                                       <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                           component="dd"
                                           data-cy={null}
                                         >
                                           <dd
-                                            className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                             data-cy={null}
                                             data-pf-content={true}
                                           >
@@ -672,9 +674,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           "componentStyle": ComponentStyle {
                                             "componentId": "Detail__DetailValue-sc-16ypsyv-1",
                                             "isStatic": false,
-                                            "lastClassName": "yHlYM",
+                                            "lastClassName": "kCDjmZ",
                                             "rules": Array [
                                               "word-break:break-all;",
+                                              [Function],
+                                              " ",
                                               [Function],
                                             ],
                                           },
@@ -692,18 +696,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       fullWidth={false}
                                     >
                                       <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
                                         <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                           component="dd"
                                           data-cy={null}
                                         >
                                           <dd
-                                            className="Detail__DetailValue-sc-16ypsyv-1 yHlYM"
+                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
                                             data-cy={null}
                                             data-pf-content={true}
                                           >
