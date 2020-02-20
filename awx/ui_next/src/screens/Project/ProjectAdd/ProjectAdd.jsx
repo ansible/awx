@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-import { Card as _Card, PageSection } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
 import ProjectForm from '../shared/ProjectForm';
 import { ProjectsAPI } from '@api';
-
-const Card = styled(_Card)`
-  --pf-c-card--child--PaddingLeft: 0;
-  --pf-c-card--child--PaddingRight: 0;
-`;
 
 function ProjectAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
