@@ -4,7 +4,7 @@ import sys
 
 from awxkit import api, config
 from awxkit.utils import to_str
-from awxkit.api.pages import Page, TentativePage
+from awxkit.api.pages import Page
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
@@ -75,8 +75,8 @@ NATURAL_KEYS = {
 
 
 def get_natural_key(page):
-    natural_key = {'type': page.type}
-    lookup = NATURAL_KEYS.get(page.type, ())
+    natural_key = {'type': page['type']}
+    lookup = NATURAL_KEYS.get(page['type'], ())
 
     for key in lookup or ():
         if key.startswith(':'):
@@ -236,6 +236,7 @@ class Export(CustomCommand):
             key: asset[key] for key in options
             if key in asset.json and key not in asset.related
         }
+        fields['natural_key'] = get_natural_key(asset)
 
         fk_fields = {
             key: get_natural_key(asset.related[key].get()) for key in options
