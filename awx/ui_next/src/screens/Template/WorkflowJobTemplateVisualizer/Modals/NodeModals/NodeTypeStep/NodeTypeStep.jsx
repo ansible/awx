@@ -12,13 +12,6 @@ import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
 import WorkflowJobTemplatesList from './WorkflowJobTemplatesList';
 
-const Divider = styled.div`
-  height: 1px;
-  background-color: var(--pf-global--Color--light-300);
-  border: 0;
-  flex-shrink: 0;
-`;
-
 const TimeoutInput = styled(TextInput)`
   width: 200px;
   :not(:first-of-type) {
@@ -91,7 +84,6 @@ function NodeTypeStep({
           />
         </div>
       </div>
-      <Divider component="div" />
       {nodeType === 'job_template' && (
         <JobTemplatesList
           nodeResource={nodeResource}

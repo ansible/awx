@@ -9,7 +9,7 @@ import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-import { Sparkline } from '@components/Sparkline';
+import Sparkline from '@components/Sparkline';
 import DeleteButton from '@components/DeleteButton';
 import { HostsAPI } from '@api';
 
@@ -107,7 +107,6 @@ function HostDetail({ host, i18n, onUpdateHost }) {
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail
-          css="display: flex; flex: 1;"
           value={<Sparkline jobs={recentPlaybookJobs} />}
           label={i18n._(t`Activity`)}
         />

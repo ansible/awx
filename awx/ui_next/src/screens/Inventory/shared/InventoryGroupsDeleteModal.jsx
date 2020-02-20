@@ -60,7 +60,7 @@ const InventoryGroupsDeleteModal = ({
           return <ListItem key={group.id}>{group.name}</ListItem>;
         })}
       </div>
-      <div css="padding-left: 1px;">
+      <div>
         <Radio
           id="radio-delete"
           key="radio-delete"

@@ -8,7 +8,7 @@ import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import { CompassIcon, WrenchIcon } from '@patternfly/react-icons';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import styled from 'styled-components';
 
 const Toolbar = styled.div`

@@ -184,9 +184,7 @@ class ToolbarDeleteButton extends React.Component {
               </Button>,
             ]}
           >
-            <div css="margin-bottom: 16px;">
-              {i18n._(t`This action will delete the following:`)}
-            </div>
+            <div>{i18n._(t`This action will delete the following:`)}</div>
             {itemsToDelete.map(item => (
               <span key={item.id}>
                 <strong>{item.name || item.username}</strong>

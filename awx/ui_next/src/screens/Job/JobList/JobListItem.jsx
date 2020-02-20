@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -15,14 +14,10 @@ import {
 } from '@patternfly/react-core';
 import { RocketIcon } from '@patternfly/react-icons';
 import LaunchButton from '@components/LaunchButton';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '@constants';
-
-const PaddedIcon = styled(StatusIcon)`
-  margin: 6px 20px 0 0;
-`;
 
 class JobListItem extends Component {
   render() {
@@ -40,8 +35,10 @@ class JobListItem extends Component {
           />
           <DataListItemCells
             dataListCells={[
+              <DataListCell key="status" isFilled={false}>
+                {job.status && <StatusIcon status={job.status} />}
+              </DataListCell>,
               <DataListCell key="name" css="display: inline-flex;">
-                {job.status && <PaddedIcon status={job.status} />}
                 <span>
                   <Link
                     to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}

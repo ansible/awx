@@ -16,7 +16,7 @@ import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import ErrorDetail from '@components/ErrorDetail';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';

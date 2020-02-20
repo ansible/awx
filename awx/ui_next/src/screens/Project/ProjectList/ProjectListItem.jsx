@@ -18,13 +18,9 @@ import styled from 'styled-components';
 
 import ClipboardCopyButton from '@components/ClipboardCopyButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import { StatusIcon } from '@components/Sparkline';
+import StatusIcon from '@components/StatusIcon';
 import { toTitleCase } from '@util/strings';
 import { Project } from '@types';
-
-const PaddedIcon = styled(StatusIcon)`
-  margin: 6px 20px 0 0;
-`;
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -84,7 +80,7 @@ class ProjectListItem extends React.Component {
           />
           <DataListItemCells
             dataListCells={[
-              <DataListCell key="name" css="display: inline-flex">
+              <DataListCell key="status" isFilled={false}>
                 {project.summary_fields.last_job && (
                   <Tooltip
                     position="top"
@@ -96,12 +92,14 @@ class ProjectListItem extends React.Component {
                     <Link
                       to={`/jobs/project/${project.summary_fields.last_job.id}`}
                     >
-                      <PaddedIcon
+                      <StatusIcon
                         status={project.summary_fields.last_job.status}
                       />
                     </Link>
                   </Tooltip>
                 )}
+              </DataListCell>,
+              <DataListCell key="name">
                 <Link id={labelId} to={`${detailUrl}`}>
                   <b>{project.name}</b>
                 </Link>

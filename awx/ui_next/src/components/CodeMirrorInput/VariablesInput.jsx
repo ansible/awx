@@ -4,7 +4,7 @@ import { Button, Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
-import { ButtonGroup } from '.';
+import ButtonGroup from './ButtonGroup';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function formatJson(jsonString) {

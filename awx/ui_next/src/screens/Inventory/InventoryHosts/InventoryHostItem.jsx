@@ -15,7 +15,7 @@ import {
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { Sparkline } from '@components/Sparkline';
+import Sparkline from '@components/Sparkline';
 import { Host } from '@types';
 import styled from 'styled-components';
 

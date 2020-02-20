@@ -234,7 +234,7 @@ function VisualizerGraph({ i18n, readOnly }) {
           {linkHelp && <WorkflowLinkHelp link={linkHelp} />}
         </WorkflowHelp>
       )}
-      <WorkflowSVG id="workflow-svg" ref={svgRef} css="">
+      <WorkflowSVG id="workflow-svg" ref={svgRef}>
         <defs>
           <marker
             className="WorkflowChart-noPointerEvents"

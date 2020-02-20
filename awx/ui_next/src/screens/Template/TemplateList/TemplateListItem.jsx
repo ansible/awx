@@ -19,7 +19,7 @@ import {
 } from '@patternfly/react-icons';
 
 import LaunchButton from '@components/LaunchButton';
-import { Sparkline } from '@components/Sparkline';
+import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import styled from 'styled-components';
 
