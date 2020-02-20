@@ -40,7 +40,7 @@ function UserFormFields({ user, i18n }) {
 
   const organizationFieldArr = useField({
     name: 'organization',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
+    validate: !user.id ? required(i18n._(t`Select a value for this field`), i18n) : () => undefined
   });
   const organizationMeta = organizationFieldArr[1];
   const organizationHelpers = organizationFieldArr[2];
