@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { func } from 'prop-types';
+import { func, string } from 'prop-types';
 
 const TooltipItem = styled.div`
   align-items: center;
@@ -24,17 +24,17 @@ const TooltipItem = styled.div`
 
 function WorkflowActionTooltipItem({
   children,
+  id,
   onClick,
   onMouseEnter,
   onMouseLeave,
-  ...rest
 }) {
   return (
     <TooltipItem
+      id={id}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      {...rest}
     >
       {children}
     </TooltipItem>
@@ -42,6 +42,7 @@ function WorkflowActionTooltipItem({
 }
 
 WorkflowActionTooltipItem.propTypes = {
+  id: string.isRequired,
   onClick: func,
   onMouseEnter: func,
   onMouseLeave: func,
