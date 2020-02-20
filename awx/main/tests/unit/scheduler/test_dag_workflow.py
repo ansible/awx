@@ -467,8 +467,8 @@ class TestIsWorkflowDone():
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == \
-            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
-                                " missing unified job template and error handle path [].").format(nodes[2].id, nodes[2].job.status)))
+            (True, smart_text(_("No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
+                                " missing unified job template and error handling path [].").format(nodes[2].id, nodes[2].job.status)))
 
     def test_is_workflow_done_no_unified_job_tempalte_end(self, workflow_dag_failed):
         (g, nodes) = workflow_dag_failed
@@ -477,8 +477,8 @@ class TestIsWorkflowDone():
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == \
-            (True, smart_text(_("No error handle path for workflow job node(s) [] workflow job node(s) missing"
-             " unified job template and error handle path [{}].").format(nodes[2].id)))
+            (True, smart_text(_("No error handling path for workflow job node(s) []. Workflow job node(s) missing"
+             " unified job template and error handling path [{}].").format(nodes[2].id)))
 
     def test_is_workflow_done_no_unified_job_tempalte_begin(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
@@ -488,22 +488,22 @@ class TestIsWorkflowDone():
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == \
-            (True, smart_text(_("No error handle path for workflow job node(s) [] workflow job node(s) missing"
-             " unified job template and error handle path [{}].").format(nodes[0].id)))
+            (True, smart_text(_("No error handling path for workflow job node(s) []. Workflow job node(s) missing"
+             " unified job template and error handling path [{}].").format(nodes[0].id)))
 
     def test_canceled_should_fail(self, workflow_dag_canceled):
         (g, nodes) = workflow_dag_canceled
 
         assert g.has_workflow_failed() == \
-            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
-                                " missing unified job template and error handle path [].").format(nodes[0].id, nodes[0].job.status)))
+            (True, smart_text(_("No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
+                                " missing unified job template and error handling path [].").format(nodes[0].id, nodes[0].job.status)))
 
     def test_failure_should_fail(self, workflow_dag_failure):
         (g, nodes) = workflow_dag_failure
 
         assert g.has_workflow_failed() == \
-            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
-                                " missing unified job template and error handle path [].").format(nodes[0].id, nodes[0].job.status)))
+            (True, smart_text(_("No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
+                                " missing unified job template and error handling path [].").format(nodes[0].id, nodes[0].job.status)))
 
 
 class TestBFSNodesToRun():
