@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
@@ -25,7 +25,7 @@ const QS_CONFIG = getQSConfig('host', {
 
 function HostList({ i18n }) {
   const location = useLocation();
-  const match = useParams();
+  const match = useRouteMatch();
   const [selected, setSelected] = useState([]);
 
   const {
@@ -146,13 +146,13 @@ function HostList({ i18n }) {
               ]}
             />
           )}
-          renderItem={o => (
+          renderItem={host => (
             <HostListItem
-              key={o.id}
-              host={o}
-              detailUrl={`${match.url}/${o.id}/details`}
-              isSelected={selected.some(row => row.id === o.id)}
-              onSelect={() => handleSelect(o)}
+              key={host.id}
+              host={host}
+              detailUrl={`${match.url}/${host.id}/details`}
+              isSelected={selected.some(row => row.id === host.id)}
+              onSelect={() => handleSelect(host)}
             />
           )}
           emptyStateControls={
@@ -177,4 +177,5 @@ function HostList({ i18n }) {
   );
 }
 
+export { HostList as _HostList };
 export default withI18n()(HostList);

@@ -7,7 +7,7 @@ import ErrorDetail from '@components/ErrorDetail';
 import useRequest from '@util/useRequest';
 import { HostsAPI } from '@api';
 
-function HostToggle({ host, i18n }) {
+function HostToggle({ host, onToggle, className, i18n }) {
   const [isEnabled, setIsEnabled] = useState(host.enabled);
   const [showError, setShowError] = useState(false);
 
@@ -24,8 +24,11 @@ function HostToggle({ host, i18n }) {
   useEffect(() => {
     if (result !== isEnabled) {
       setIsEnabled(result);
+      if (onToggle) {
+        onToggle(result);
+      }
     }
-  }, [result, isEnabled]);
+  }, [result, isEnabled, onToggle]);
 
   useEffect(() => {
     if (error) {
@@ -44,6 +47,7 @@ function HostToggle({ host, i18n }) {
         position="top"
       >
         <Switch
+          className={className}
           css="display: inline-flex;"
           id={`host-${host.id}-toggle`}
           label={i18n._(t`On`)}
@@ -56,7 +60,7 @@ function HostToggle({ host, i18n }) {
       </Tooltip>
       {showError && error && !isLoading && (
         <AlertModal
-          variant="danger"
+          variant="error"
           title={i18n._(t`Error!`)}
           isOpen={error && !isLoading}
           onClose={() => setShowError(false)}

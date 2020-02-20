@@ -16,7 +16,13 @@ const Header = styled.div`
   }
 `;
 
-export default ({ isOpen = null, title, variant, children, ...props }) => {
+export default function AlertModal({
+  isOpen = null,
+  title,
+  variant,
+  children,
+  ...props
+}) {
   const variantIcons = {
     danger: <ExclamationCircleIcon size="lg" css="color: #c9190b" />,
     error: <TimesCircleIcon size="lg" css="color: #c9190b" />,
@@ -44,4 +50,4 @@ export default ({ isOpen = null, title, variant, children, ...props }) => {
       {children}
     </Modal>
   );
-};
+}

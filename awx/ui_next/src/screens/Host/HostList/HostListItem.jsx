@@ -17,8 +17,8 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 
 import Sparkline from '@components/Sparkline';
 import { Host } from '@types';
-import HostToggle from './HostToggle';
 import styled from 'styled-components';
+import HostToggle from '../shared/HostToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
