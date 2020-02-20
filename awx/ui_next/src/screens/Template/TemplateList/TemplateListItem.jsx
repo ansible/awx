@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Button,
   DataListAction as _DataListAction,
@@ -39,6 +39,12 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
     (!template.summary_fields.project ||
       (!template.summary_fields.inventory &&
         !template.ask_inventory_on_launch));
+
+  const location = useLocation();
+
+  if (location.pathname.startsWith('/projects')) {
+    detailUrl = `/templates/job_template/${template.id}/details`;
+  }
 
   return (
     <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
