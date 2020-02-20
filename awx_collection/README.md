@@ -27,10 +27,7 @@ The following notes are changes that may require changes to playbooks.
 
 To use this collection, the "old" tower-cli needs to be installed
 in the virtual environment where the collection runs.
-You can install it from either:
-
- - https://github.com/ansible/tower-cli/
- - https://pypi.org/project/ansible-tower-cli/
+You can install it from [PyPI](https://pypi.org/project/ansible-tower-cli/).
 
 To use this collection in AWX, you should create a custom virtual environment
 to install the requirement into. NOTE: running locally, you will also need
@@ -76,14 +73,6 @@ PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
 The build target `make build_collection` will template out a `galaxy.yml` file
 with automatic detection of the current AWX version. Then it builds the
 collection with the `ansible-galaxy` CLI.
-
-## Roadmap
-
-Major future development items on the agenda include:
-
- - Removing tower-cli as a dependency
- - Renaming the modules, for example `tower_organization` to just `organization`
-   and giving a deprecation period for the switch
 
 ## Licensing
 
