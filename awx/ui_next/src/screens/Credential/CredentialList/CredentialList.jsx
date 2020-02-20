@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { CredentialsAPI } from '@api';
@@ -11,12 +11,8 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
-import {
-  getQSConfig,
-  parseQueryString,
-  replaceParams,
-  encodeNonDefaultQueryString,
-} from '@util/qs';
+import useRequest, { useDeleteItems } from '@util/useRequest';
+import { getQSConfig, parseQueryString } from '@util/qs';
 import { CredentialListItem } from '.';
 
 const QS_CONFIG = getQSConfig('credential', {
@@ -26,53 +22,59 @@ const QS_CONFIG = getQSConfig('credential', {
 });
 
 function CredentialList({ i18n }) {
-  const [actions, setActions] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [credentialCount, setCredentialCount] = useState(0);
-  const [credentials, setCredentials] = useState([]);
-  const [deletionError, setDeletionError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
   const [selected, setSelected] = useState([]);
-
   const location = useLocation();
-  const history = useHistory();
 
-  const loadCredentials = async ({ search }) => {
-    const params = parseQueryString(QS_CONFIG, search);
-    setContentError(null);
-    setHasContentLoading(true);
-    try {
-      const [
-        {
-          data: { count, results },
-        },
-        {
-          data: { actions: optionActions },
-        },
-      ] = await Promise.all([
+  const {
+    result: { credentials, credentialCount, actions },
+    error: contentError,
+    isLoading,
+    request: fetchCredentials,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const [creds, credActions] = await Promise.all([
         CredentialsAPI.read(params),
-        loadCredentialActions(),
+        CredentialsAPI.readOptions(),
       ]);
-
-      setCredentials(results);
-      setCredentialCount(count);
-      setActions(optionActions);
-    } catch (error) {
-      setContentError(error);
-    } finally {
-      setHasContentLoading(false);
+      return {
+        credentials: creds.data.results,
+        credentialCount: creds.data.count,
+        actions: credActions.data.actions,
+      };
+    }, [location]),
+    {
+      credentials: [],
+      credentialCount: 0,
+      actions: {},
     }
-  };
+  );
 
   useEffect(() => {
-    loadCredentials(location);
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchCredentials();
+  }, [fetchCredentials]);
 
-  const loadCredentialActions = () => {
-    if (actions) {
-      return Promise.resolve({ data: { actions } });
+  const isAllSelected =
+    selected.length > 0 && selected.length === credentials.length;
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteCredentials,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(selected.map(({ id }) => CredentialsAPI.destroy(id)));
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchCredentials,
     }
-    return CredentialsAPI.readOptions();
+  );
+
+  const handleDelete = async () => {
+    await deleteCredentials();
+    setSelected([]);
   };
 
   const handleSelectAll = isSelected => {
@@ -87,45 +89,15 @@ function CredentialList({ i18n }) {
     }
   };
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-
-    try {
-      await Promise.all(
-        selected.map(credential => CredentialsAPI.destroy(credential.id))
-      );
-    } catch (error) {
-      setDeletionError(error);
-    }
-
-    adjustPagination();
-    setSelected([]);
-  };
-
-  const adjustPagination = () => {
-    const params = parseQueryString(QS_CONFIG, location.search);
-    if (params.page > 1 && selected.length === credentials.length) {
-      const newParams = encodeNonDefaultQueryString(
-        QS_CONFIG,
-        replaceParams(params, { page: params.page - 1 })
-      );
-      history.push(`${location.pathname}?${newParams}`);
-    } else {
-      loadCredentials(location);
-    }
-  };
-
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected =
-    selected.length > 0 && selected.length === credentials.length;
 
   return (
     <PageSection>
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={hasContentLoading}
+          hasContentLoading={isLoading || isDeleteLoading}
           items={credentials}
           itemCount={credentialCount}
           qsConfig={QS_CONFIG}
@@ -165,7 +137,7 @@ function CredentialList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setDeletionError(null)}
+        onClose={clearDeletionError}
       >
         {i18n._(t`Failed to delete one or more credentials.`)}
         <ErrorDetail error={deletionError} />

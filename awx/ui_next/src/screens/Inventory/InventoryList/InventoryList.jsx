@@ -17,8 +17,6 @@ import { getQSConfig, parseQueryString } from '@util/qs';
 import AddDropDownButton from '@components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
-// The type value in const QS_CONFIG below does not have a space between job_inventory and
-// workflow_job_inventory so the params sent to the API match what the api expects.
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
   page_size: 20,

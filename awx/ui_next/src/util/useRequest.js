@@ -1,4 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
+import {
+  parseQueryString,
+  replaceParams,
+  encodeNonDefaultQueryString,
+} from './qs';
 
 /*
  * The useRequest hook accepts a request function and returns an object with
@@ -45,5 +51,42 @@ export default function useRequest(makeRequest, initialValue) {
         }
       }
     }, [makeRequest]),
+  };
+}
+
+export function useDeleteItems(
+  makeRequest,
+  { qsConfig, allItemsSelected, fetchItems }
+) {
+  const location = useLocation();
+  const history = useHistory();
+  const [showError, setShowError] = useState(false);
+  const { error, isLoading, request } = useRequest(makeRequest, null);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+    }
+  }, [error]);
+
+  const deleteItems = async () => {
+    await request();
+    const params = parseQueryString(qsConfig, location.search);
+    if (params.page > 1 && allItemsSelected) {
+      const newParams = encodeNonDefaultQueryString(
+        qsConfig,
+        replaceParams(params, { page: params.page - 1 })
+      );
+      history.push(`${location.pathname}?${newParams}`);
+    } else {
+      fetchItems();
+    }
+  };
+
+  return {
+    isLoading,
+    deleteItems,
+    deletionError: showError && error,
+    clearDeletionError: () => setShowError(false),
   };
 }

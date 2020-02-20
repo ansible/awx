@@ -1,6 +1,6 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -87,58 +87,118 @@ UnifiedJobsAPI.read.mockResolvedValue({
   data: { count: 3, results: mockResults },
 });
 
+function waitForLoaded(wrapper) {
+  return waitForElement(
+    wrapper,
+    'JobList',
+    el => el.find('ContentLoading').length === 0
+  );
+}
+
 describe('<JobList />', () => {
-  test('initially renders succesfully', async done => {
-    const wrapper = mountWithContexts(<JobList />);
-    await waitForElement(
-      wrapper,
-      'JobList',
-      el => el.state('jobs').length === 6
-    );
-
-    done();
+  test('initially renders succesfully', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+    expect(wrapper.find('JobListItem')).toHaveLength(6);
   });
 
-  test('select makes expected state updates', async done => {
+  test('should select and un-select items', async () => {
     const [mockItem] = mockResults;
-    const wrapper = mountWithContexts(<JobList />);
-    await waitForElement(wrapper, 'JobListItem', el => el.length === 6);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
 
-    wrapper
-      .find('JobListItem')
-      .first()
-      .prop('onSelect')(mockItem);
-    expect(wrapper.find('JobList').state('selected').length).toEqual(1);
+    act(() => {
+      wrapper
+        .find('JobListItem')
+        .first()
+        .invoke('onSelect')(mockItem);
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('JobListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(1);
 
-    wrapper
-      .find('JobListItem')
-      .first()
-      .prop('onSelect')(mockItem);
-    expect(wrapper.find('JobList').state('selected').length).toEqual(0);
-
-    done();
+    act(() => {
+      wrapper
+        .find('JobListItem')
+        .first()
+        .invoke('onSelect')(mockItem);
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('JobListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(false);
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(0);
   });
 
-  test('select-all-delete makes expected state updates and api calls', async done => {
+  test('should select and deselect all', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(6);
+
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(false);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(0);
+  });
+
+  test('should send all corresponding delete API requests', async () => {
     AdHocCommandsAPI.destroy = jest.fn();
     InventoryUpdatesAPI.destroy = jest.fn();
     JobsAPI.destroy = jest.fn();
     ProjectUpdatesAPI.destroy = jest.fn();
     SystemJobsAPI.destroy = jest.fn();
     WorkflowJobsAPI.destroy = jest.fn();
-    const wrapper = mountWithContexts(<JobList />);
-    await waitForElement(wrapper, 'JobListItem', el => el.length === 6);
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
 
-    wrapper.find('DataListToolbar').prop('onSelectAll')(true);
-    expect(wrapper.find('JobList').state('selected').length).toEqual(6);
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('ToolbarDeleteButton').prop('itemsToDelete')
+    ).toHaveLength(6);
 
-    wrapper.find('DataListToolbar').prop('onSelectAll')(false);
-    expect(wrapper.find('JobList').state('selected').length).toEqual(0);
-
-    wrapper.find('DataListToolbar').prop('onSelectAll')(true);
-    expect(wrapper.find('JobList').state('selected').length).toEqual(6);
-
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
     expect(AdHocCommandsAPI.destroy).toHaveBeenCalledTimes(1);
     expect(InventoryUpdatesAPI.destroy).toHaveBeenCalledTimes(1);
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
@@ -146,12 +206,12 @@ describe('<JobList />', () => {
     expect(SystemJobsAPI.destroy).toHaveBeenCalledTimes(1);
     expect(WorkflowJobsAPI.destroy).toHaveBeenCalledTimes(1);
 
-    done();
+    jest.restoreAllMocks();
   });
 
-  test('error is shown when job not successfully deleted from api', async done => {
-    JobsAPI.destroy.mockRejectedValue(
-      new Error({
+  test('error is shown when job not successfully deleted from api', async () => {
+    JobsAPI.destroy.mockImplementation(() => {
+      throw new Error({
         response: {
           config: {
             method: 'delete',
@@ -159,21 +219,29 @@ describe('<JobList />', () => {
           },
           data: 'An error occurred',
         },
-      })
-    );
-    const wrapper = mountWithContexts(<JobList />);
-    wrapper.find('JobList').setState({
-      jobs: mockResults,
-      itemCount: 6,
-      selected: mockResults.slice(1, 2),
+      });
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+    await act(async () => {
+      wrapper
+        .find('JobListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
     await waitForElement(
       wrapper,
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
-
-    done();
   });
 });

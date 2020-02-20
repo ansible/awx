@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -15,6 +15,7 @@ import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
 
 import AddDropDownButton from '@components/AddDropDownButton';
@@ -31,82 +32,80 @@ const QS_CONFIG = getQSConfig('template', {
 
 function TemplateList({ i18n }) {
   const { id: projectId } = useParams();
-  const { pathname, search } = useLocation();
+  const location = useLocation();
 
-  const [deletionError, setDeletionError] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [jtActions, setJTActions] = useState(null);
-  const [wfjtActions, setWFJTActions] = useState(null);
-  const [count, setCount] = useState(0);
-  const [templates, setTemplates] = useState([]);
   const [selected, setSelected] = useState([]);
 
-  useEffect(
-    () => {
-      const loadTemplates = async () => {
-        const params = {
-          ...parseQueryString(QS_CONFIG, search),
-        };
-
-        let jtOptionsPromise;
-        if (jtActions) {
-          jtOptionsPromise = Promise.resolve({
-            data: { actions: jtActions },
-          });
-        } else {
-          jtOptionsPromise = JobTemplatesAPI.readOptions();
-        }
-
-        let wfjtOptionsPromise;
-        if (wfjtActions) {
-          wfjtOptionsPromise = Promise.resolve({
-            data: { actions: wfjtActions },
-          });
-        } else {
-          wfjtOptionsPromise = WorkflowJobTemplatesAPI.readOptions();
-        }
-        if (pathname.startsWith('/projects') && projectId) {
-          params.jobtemplate__project = projectId;
-        }
-
-        const promises = Promise.all([
-          UnifiedJobTemplatesAPI.read(params),
-          jtOptionsPromise,
-          wfjtOptionsPromise,
-        ]);
-        setDeletionError(null);
-
-        try {
-          const [
-            {
-              data: { count: itemCount, results },
-            },
-            {
-              data: { actions: jobTemplateActions },
-            },
-            {
-              data: { actions: workFlowJobTemplateActions },
-            },
-          ] = await promises;
-          setJTActions(jobTemplateActions);
-          setWFJTActions(workFlowJobTemplateActions);
-          setCount(itemCount);
-          setTemplates(results);
-          setHasContentLoading(false);
-        } catch (err) {
-          setContentError(err);
-        }
+  const {
+    result: { templates, count, jtActions, wfjtActions },
+    error: contentError,
+    isLoading,
+    request: fetchTemplates,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      if (location.pathname.startsWith('/projects') && projectId) {
+        params.jobtemplate__project = projectId;
+      }
+      const results = await Promise.all([
+        UnifiedJobTemplatesAPI.read(params),
+        JobTemplatesAPI.readOptions(),
+        WorkflowJobTemplatesAPI.readOptions(),
+      ]);
+      return {
+        templates: results[0].data.results,
+        count: results[0].data.count,
+        jtActions: results[1].data.actions,
+        wfjtActions: results[2].data.actions,
       };
-      loadTemplates();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pathname, search, count, projectId]
+    }, [location, projectId]),
+    {
+      templates: [],
+      count: 0,
+      jtActions: {},
+      wfjtActions: {},
+    }
   );
 
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  const isAllSelected =
+    selected.length === templates.length && selected.length > 0;
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteTemplates,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(({ type, id }) => {
+          if (type === 'job_template') {
+            return JobTemplatesAPI.destroy(id);
+          }
+          if (type === 'workflow_job_template') {
+            return WorkflowJobTemplatesAPI.destroy(id);
+          }
+          return false;
+        })
+      );
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchTemplates,
+    }
+  );
+
+  const handleTemplateDelete = async () => {
+    await deleteTemplates();
+    setSelected([]);
+  };
+
   const handleSelectAll = isSelected => {
-    const selectedItems = isSelected ? [...templates] : [];
-    setSelected(selectedItems);
+    setSelected(isSelected ? [...templates] : []);
   };
 
   const handleSelect = template => {
@@ -114,26 +113,6 @@ function TemplateList({ i18n }) {
       setSelected(selected.filter(s => s.id !== template.id));
     } else {
       setSelected(selected.concat(template));
-    }
-  };
-
-  const handleTemplateDelete = async () => {
-    setHasContentLoading(true);
-    try {
-      await Promise.all(
-        selected.map(({ type, id }) => {
-          let deletePromise;
-          if (type === 'job_template') {
-            deletePromise = JobTemplatesAPI.destroy(id);
-          } else if (type === 'workflow_job_template') {
-            deletePromise = WorkflowJobTemplatesAPI.destroy(id);
-          }
-          return deletePromise;
-        })
-      );
-      setCount(count - selected.length);
-    } catch (err) {
-      setDeletionError(err);
     }
   };
 
@@ -154,8 +133,6 @@ function TemplateList({ i18n }) {
       url: `/templates/workflow_job_template/add/`,
     });
   }
-  const isAllSelected =
-    selected.length === templates.length && selected.length > 0;
   const addButton = (
     <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
   );
@@ -164,7 +141,7 @@ function TemplateList({ i18n }) {
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={hasContentLoading}
+          hasContentLoading={isLoading || isDeleteLoading}
           items={templates}
           itemCount={count}
           pluralizedItemName={i18n._(t`Templates`)}
@@ -247,7 +224,7 @@ function TemplateList({ i18n }) {
               key={template.id}
               value={template.name}
               template={template}
-              detailUrl={`${pathname}/${template.type}/${template.id}`}
+              detailUrl={`${location.pathname}/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
             />
@@ -259,7 +236,7 @@ function TemplateList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setDeletionError(null)}
+        onClose={clearDeletionError}
       >
         {i18n._(t`Failed to delete one or more templates.`)}
         <ErrorDetail error={deletionError} />
