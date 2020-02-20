@@ -202,13 +202,13 @@ class InventoriesList extends Component {
                 onSelectAll={this.handleSelectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
+                  ...(canAdd ? [addButton] : []),
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={this.handleInventoryDelete}
                     itemsToDelete={selected}
                     pluralizedItemName="Inventories"
                   />,
-                  ...(canAdd ? [addButton] : []),
                 ]}
               />
             )}

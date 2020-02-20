@@ -140,15 +140,15 @@ function OrganizationsList({ i18n }) {
                 onSelectAll={handleSelectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
+                  ...(canAdd
+                    ? [<ToolbarAddButton key="add" linkTo={addUrl} />]
+                    : []),
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleOrgDelete}
                     itemsToDelete={selected}
                     pluralizedItemName="Organizations"
                   />,
-                  ...(canAdd
-                    ? [<ToolbarAddButton key="add" linkTo={addUrl} />]
-                    : []),
                 ]}
               />
             )}

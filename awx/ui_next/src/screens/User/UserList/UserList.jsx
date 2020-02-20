@@ -191,12 +191,6 @@ class UsersList extends Component {
                   onSelectAll={this.handleSelectAll}
                   qsConfig={QS_CONFIG}
                   additionalControls={[
-                    <ToolbarDeleteButton
-                      key="delete"
-                      onDelete={this.handleUserDelete}
-                      itemsToDelete={selected}
-                      pluralizedItemName="Users"
-                    />,
                     ...(canAdd
                       ? [
                           <ToolbarAddButton
@@ -205,6 +199,12 @@ class UsersList extends Component {
                           />,
                         ]
                       : []),
+                    <ToolbarDeleteButton
+                      key="delete"
+                      onDelete={this.handleUserDelete}
+                      itemsToDelete={selected}
+                      pluralizedItemName="Users"
+                    />,
                   ]}
                 />
               )}

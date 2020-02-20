@@ -81,8 +81,8 @@ class DataListToolbar extends React.Component {
               <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
             </DataToolbarItem>
           </DataToolbarToggleGroup>
-          <DataToolbarGroup>
-            {showExpandCollapse && (
+          {showExpandCollapse && (
+            <DataToolbarGroup>
               <Fragment>
                 <DataToolbarItem>
                   <ExpandCollapse
@@ -92,9 +92,9 @@ class DataListToolbar extends React.Component {
                   />
                 </DataToolbarItem>
               </Fragment>
-            )}
-          </DataToolbarGroup>
-          <DataToolbarGroup css="margin-left: auto">
+            </DataToolbarGroup>
+          )}
+          <DataToolbarGroup>
             {additionalControls.map(control => (
               <DataToolbarItem key={control.key}>{control}</DataToolbarItem>
             ))}

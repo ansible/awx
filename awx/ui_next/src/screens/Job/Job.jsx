@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Route, withRouter, Switch, Redirect, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { JobsAPI } from '@api';
 import { TabbedCardHeader } from '@components/Card';
 import ContentError from '@components/ContentError';
@@ -74,7 +74,9 @@ class Job extends Component {
     let cardHeader = (
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
-        <CardCloseButton linkTo="/jobs" />
+        <CardActions>
+          <CardCloseButton linkTo="/jobs" />
+        </CardActions>
       </TabbedCardHeader>
     );
 

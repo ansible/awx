@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import CardCloseButton from '@components/CardCloseButton';
 import { TabbedCardHeader } from '@components/Card';
 import RoutedTabs from '@components/RoutedTabs';
@@ -132,7 +132,9 @@ class Organization extends Component {
     let cardHeader = (
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
-        <CardCloseButton linkTo="/organizations" />
+        <CardActions>
+          <CardCloseButton linkTo="/organizations" />
+        </CardActions>
       </TabbedCardHeader>
     );
 

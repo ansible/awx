@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
@@ -77,7 +77,9 @@ class SmartInventory extends Component {
     let cardHeader = hasContentLoading ? null : (
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
-        <CardCloseButton linkTo="/inventories" />
+        <CardActions>
+          <CardCloseButton linkTo="/inventories" />
+        </CardActions>
       </TabbedCardHeader>
     );
 

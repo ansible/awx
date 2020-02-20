@@ -85,7 +85,6 @@ class SelectResourceStep extends React.Component {
 
     return (
       <Fragment>
-        {isLoading && <div>{i18n._(t`Loading...`)}</div>}
         {isInitialized && (
           <Fragment>
             <div>
@@ -102,6 +101,7 @@ class SelectResourceStep extends React.Component {
               />
             )}
             <PaginatedDataList
+              hasContentLoading={isLoading}
               items={resources}
               itemCount={count}
               qsConfig={this.qsConfig}

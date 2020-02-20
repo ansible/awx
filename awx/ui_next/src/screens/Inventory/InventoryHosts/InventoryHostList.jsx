@@ -159,12 +159,6 @@ function InventoryHostList({ i18n, location, match }) {
             onSelectAll={handleSelectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
-              <ToolbarDeleteButton
-                key="delete"
-                onDelete={handleDelete}
-                itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Hosts`)}
-              />,
               ...(canAdd
                 ? [
                     <ToolbarAddButton
@@ -173,6 +167,12 @@ function InventoryHostList({ i18n, location, match }) {
                     />,
                   ]
                 : []),
+              <ToolbarDeleteButton
+                key="delete"
+                onDelete={handleDelete}
+                itemsToDelete={selected}
+                pluralizedItemName={i18n._(t`Hosts`)}
+              />,
             ]}
           />
         )}

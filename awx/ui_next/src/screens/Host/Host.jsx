@@ -9,7 +9,7 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card } from '@patternfly/react-core';
+import { Card, CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 
 import { TabbedCardHeader } from '@components/Card';
@@ -103,7 +103,9 @@ function Host({ inventory, i18n, setBreadcrumb }) {
   let cardHeader = (
     <TabbedCardHeader>
       <RoutedTabs tabsArray={tabsArray} />
-      <CardCloseButton linkTo={hostListUrl} />
+      <CardActions>
+        <CardCloseButton linkTo={hostListUrl} />
+      </CardActions>
     </TabbedCardHeader>
   );
 
