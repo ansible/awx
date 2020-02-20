@@ -31,6 +31,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
+from jsonpointer import JsonPointerException
+from jsonpatch import JsonPatch, JsonPatchException
+
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import (
@@ -45,6 +48,7 @@ from awx.main.utils import (
     get_object_or_400,
     decrypt_field
 )
+from awx.main.fields import JSONField, JSONBField
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning
@@ -765,6 +769,34 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
 
     def partial_update(self, request, *args, **kwargs):
         self.update_filter(request, *args, **kwargs)
+
+        if request.content_type == 'application/json-patch+json':
+            patch = JsonPatch(request.data)
+            try:
+                if not isinstance(request.data, list):
+                    raise JsonPatchException(
+                        "The patch must be supplied as a list",
+                    )
+                obj = self.get_object()
+                fields = [
+                    field for field in obj._meta.get_fields()
+                    if isinstance(field, (JSONField, JSONBField))
+                ]
+                doc = dict(
+                    (field.name, getattr(obj, field.name))
+                    for field in fields
+                )
+
+                # Set the modified data to the request data
+                # This will allow us to update the object using it
+                request._data = request._full_data = patch.apply(doc)
+                return super(RetrieveUpdateAPIView, self).partial_update(request, *args, **kwargs)
+            except (JsonPointerException, JsonPatchException) as exc:
+                return Response({
+                    "detail": "jsonpatch error: %s" % str(exc)},
+                    status=400
+                )
+
         return super(RetrieveUpdateAPIView, self).partial_update(request, *args, **kwargs)
 
     def update_filter(self, request, *args, **kwargs):

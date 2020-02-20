@@ -299,6 +299,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PARSER_CLASSES': (
         'awx.api.parsers.JSONParser',
+        'awx.api.parsers.JSONPatchParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',

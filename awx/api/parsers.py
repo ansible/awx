@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import parsers
+from rest_framework.negotiation import DefaultContentNegotiation
 from rest_framework.exceptions import ParseError
 
 
@@ -30,7 +31,15 @@ class JSONParser(parsers.JSONParser):
                 return {}
             obj = json.loads(data, object_pairs_hook=OrderedDict)
             if not isinstance(obj, dict) and obj is not None:
-                raise ParseError(_('JSON parse error - not a JSON object'))
+                if self.media_type == 'application/json-patch+json' and isinstance(obj, list):
+                    # application/json-patch+json sends a JSON-ified list of patch operations
+                    pass
+                else:
+                    raise ParseError(_('JSON parse error - not a JSON object'))
             return obj
         except ValueError as exc:
             raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % str(exc)))
+
+
+class JSONPatchParser(JSONParser):
+    media_type = 'application/json-patch+json'
