@@ -167,8 +167,8 @@ class WorkflowDAG(SimpleDAG):
                     failed_path_nodes_id_status.append((str(obj.id), obj.job.status))
 
         if res is True:
-            s = _("No error handle path for workflow job node(s) [{node_status}] workflow job "
-                  "node(s) missing unified job template and error handle path [{no_ufjt}].")
+            s = _("No error handling path for workflow job node(s) [{node_status}]. Workflow job "
+                  "node(s) missing unified job template and error handling path [{no_ufjt}].")
             parms = {
                 'node_status': '',
                 'no_ufjt': '',
