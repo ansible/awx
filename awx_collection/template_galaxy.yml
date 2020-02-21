@@ -21,7 +21,9 @@
             path: "{{ item.path }}"
             regexp: '^extends_documentation_fragment: awx.awx.auth$'
             replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
-          with_items: "{{ module_files.files }}"
+          loop: "{{ module_files.files }}"
+          loop_control:
+            label: "{{ item.path[ playbook_dir | length :] }}"
 
         - name: Change files to support desired namespace and package names
           replace:

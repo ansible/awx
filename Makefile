@@ -416,18 +416,25 @@ test_collection_all: prepare_collection_venv test_collection flake8_collection
 
 test_collection_sanity:
 	rm -rf sanity
-	mkdir -p sanity/ansible_collections/awx
-	cp -Ra awx_collection sanity/ansible_collections/awx/awx  # symlinks do not work
-	cd sanity/ansible_collections/awx/awx && git init && git add . # requires both this file structure and a git repo, so there you go
-	cd sanity/ansible_collections/awx/awx && ansible-test sanity
+	mkdir -p sanity/ansible_collections/$(COLLECTION_NAMESPACE)
+	cp -Ra awx_collection sanity/ansible_collections/$(COLLECTION_NAMESPACE)/awx  # symlinks do not work
+	cd sanity/ansible_collections/$(COLLECTION_NAMESPACE)/awx && git init && git add . # requires both this file structure and a git repo, so there you go
+	cd sanity/ansible_collections/$(COLLECTION_NAMESPACE)/awx && ansible-test sanity
+
+# WARNING: symlinking a collection is fundamentally unstable
+# this is for rapid development iteration with playbooks, do not use with other test targets
+symlink_collection:
+	rm -rf ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)
+	mkdir -p ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)
+	ln -s $(shell pwd)/awx_collection ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/awx
 
 build_collection:
 	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
 	ansible-galaxy collection build awx_collection --force --output-path=awx_collection
 
 install_collection: build_collection
-	rm -rf ~/.ansible/collections/ansible_collections/awx/awx
-	ansible-galaxy collection install awx_collection/awx-awx-$(VERSION).tar.gz
+	rm -rf ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/awx
+	ansible-galaxy collection install awx_collection/$(COLLECTION_NAMESPACE)-awx-$(VERSION).tar.gz
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
