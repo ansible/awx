@@ -17,7 +17,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
   }
   username="jane"
 >
-  <_default
+  <AlertModal
     actions={
       Array [
         <Unknown
@@ -648,6 +648,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         </ModalContent>
       </Portal>
     </Modal>
-  </_default>
+  </AlertModal>
 </DeleteRoleConfirmationModal>
 `;

@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import HostsListItem from './HostListItem';
@@ -44,6 +43,7 @@ describe('<HostsListItem />', () => {
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
+
   test('edit button hidden from users without edit capabilities', () => {
     const copyMockHost = Object.assign({}, mockHost);
     copyMockHost.summary_fields.user_capabilities.edit = false;
@@ -57,40 +57,5 @@ describe('<HostsListItem />', () => {
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
-  });
-  test('handles toggle click when host is enabled', () => {
-    const wrapper = mountWithContexts(
-      <HostsListItem
-        isSelected={false}
-        detailUrl="/host/1"
-        onSelect={() => {}}
-        host={mockHost}
-        onToggleHost={onToggleHost}
-      />
-    );
-    wrapper
-      .find('Switch')
-      .first()
-      .find('input')
-      .simulate('change');
-    expect(onToggleHost).toHaveBeenCalledWith(mockHost);
-  });
-
-  test('handles toggle click when host is disabled', () => {
-    const wrapper = mountWithContexts(
-      <HostsListItem
-        isSelected={false}
-        detailUrl="/host/1"
-        onSelect={() => {}}
-        host={mockHost}
-        onToggleHost={onToggleHost}
-      />
-    );
-    wrapper
-      .find('Switch')
-      .first()
-      .find('input')
-      .simulate('change');
-    expect(onToggleHost).toHaveBeenCalledWith(mockHost);
   });
 });

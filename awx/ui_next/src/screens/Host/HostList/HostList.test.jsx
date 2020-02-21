@@ -1,9 +1,9 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { HostsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 
-import HostsList, { _HostsList } from './HostList';
+import HostList from './HostList';
 
 jest.mock('@api');
 
@@ -68,7 +68,15 @@ const mockHosts = [
   },
 ];
 
-describe('<HostsList />', () => {
+function waitForLoaded(wrapper) {
+  return waitForElement(
+    wrapper,
+    'HostList',
+    el => el.find('ContentLoading').length === 0
+  );
+}
+
+describe('<HostList />', () => {
   beforeEach(() => {
     HostsAPI.read.mockResolvedValue({
       data: {
@@ -91,114 +99,114 @@ describe('<HostsList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    mountWithContexts(
-      <HostsList
-        match={{ path: '/hosts', url: '/hosts' }}
-        location={{ search: '', pathname: '/hosts' }}
-      />
-    );
-  });
-
-  test('Hosts are retrieved from the api and the components finishes loading', async done => {
-    const loadHosts = jest.spyOn(_HostsList.prototype, 'loadHosts');
-    const wrapper = mountWithContexts(<HostsList />);
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(loadHosts).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === false
-    );
-    done();
-  });
-
-  test('handleSelect is called when a host list item is selected', async done => {
-    const handleSelect = jest.spyOn(_HostsList.prototype, 'handleSelect');
-    const wrapper = mountWithContexts(<HostsList />);
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === false
-    );
-    await wrapper
-      .find('input#select-host-1')
-      .closest('DataListCheck')
-      .props()
-      .onChange();
-    expect(handleSelect).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('selected').length === 1
-    );
-    done();
-  });
-
-  test('handleSelectAll is called when select all checkbox is clicked', async done => {
-    const handleSelectAll = jest.spyOn(_HostsList.prototype, 'handleSelectAll');
-    const wrapper = mountWithContexts(<HostsList />);
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === false
-    );
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(true);
-    expect(handleSelectAll).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('selected').length === 3
-    );
-    done();
-  });
-
-  test('delete button is disabled if user does not have delete capabilities on a selected host', async done => {
-    const wrapper = mountWithContexts(<HostsList />);
-    wrapper.find('HostsList').setState({
-      hosts: mockHosts,
-      itemCount: 3,
-      isInitialized: true,
-      selected: mockHosts.slice(0, 1),
+  test('initially renders successfully', async () => {
+    await act(async () => {
+      mountWithContexts(
+        <HostList
+          match={{ path: '/hosts', url: '/hosts' }}
+          location={{ search: '', pathname: '/hosts' }}
+        />
+      );
     });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === false
-    );
-    wrapper.find('HostsList').setState({
-      selected: mockHosts,
-    });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === true
-    );
-    done();
   });
 
-  test('api is called to delete hosts for each selected host.', () => {
+  test('Hosts are retrieved from the api and the components finishes loading', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
+    expect(HostsAPI.read).toHaveBeenCalled();
+    expect(wrapper.find('HostListItem')).toHaveLength(3);
+  });
+
+  test('should select single item', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper
+        .find('input#select-host-1')
+        .closest('DataListCheck')
+        .invoke('onChange')();
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('HostListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should select all items', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+
+    wrapper.find('HostListItem').forEach(item => {
+      expect(item.prop('isSelected')).toEqual(true);
+    });
+  });
+
+  test('delete button is disabled if user does not have delete capabilities on a selected host', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper
+        .find('HostListItem')
+        .at(2)
+        .invoke('onSelect')();
+    });
+    expect(wrapper.find('ToolbarDeleteButton button').prop('disabled')).toEqual(
+      true
+    );
+  });
+
+  test('api is called to delete hosts for each selected host.', async () => {
     HostsAPI.destroy = jest.fn();
-    const wrapper = mountWithContexts(<HostsList />);
-    wrapper.find('HostsList').setState({
-      hosts: mockHosts,
-      itemCount: 2,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockHosts.slice(0, 2),
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    await waitForLoaded(wrapper);
+
+    await act(async () => {
+      wrapper
+        .find('HostListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('HostListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
     expect(HostsAPI.destroy).toHaveBeenCalledTimes(2);
   });
 
-  test('error is shown when host not successfully deleted from api', async done => {
+  test('error is shown when host not successfully deleted from api', async () => {
     HostsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -210,43 +218,40 @@ describe('<HostsList />', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<HostsList />);
-    wrapper.find('HostsList').setState({
-      hosts: mockHosts,
-      itemCount: 1,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockHosts.slice(0, 1),
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    await sleep(0);
+    await waitForLoaded(wrapper);
+
+    await act(async () => {
+      wrapper
+        .find('HostListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
     wrapper.update();
-    await waitForElement(
-      wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
-    );
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
 
-    done();
+    const modal = wrapper.find('Modal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('title')).toEqual('Error!');
   });
 
-  test('Add button shown for users without ability to POST', async done => {
-    const wrapper = mountWithContexts(<HostsList />);
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === false
-    );
+  test('should show Add button according to permissions', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
-    done();
   });
 
-  test('Add button hidden for users without ability to POST', async done => {
+  test('should hide Add button according to permissions', async () => {
     HostsAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
@@ -254,18 +259,12 @@ describe('<HostsList />', () => {
         },
       },
     });
-    const wrapper = mountWithContexts(<HostsList />);
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'HostsList',
-      el => el.state('hasContentLoading') === false
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />);
+    });
+    await waitForLoaded(wrapper);
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
-    done();
   });
 });
