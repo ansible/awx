@@ -60,7 +60,8 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(redis_parts.hostname, redis_parts.port)]
+            "hosts": [(redis_parts.hostname, redis_parts.port)],
+            "capacity": 10000,
         },
     },
 }

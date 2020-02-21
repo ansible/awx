@@ -91,7 +91,10 @@ BROKER_URL = 'redis://{}:{}'.format(
 
 CHANNEL_LAYERS = {
     'default': {'BACKEND': 'channels_redis.core.RedisChannelLayer',
-                'CONFIG': {'hosts': [(os.getenv("REDIS_HOST", None), int(os.getenv("REDIS_PORT", 6379)))]}}
+                'CONFIG': {
+                    'hosts': [(os.getenv("REDIS_HOST", None), int(os.getenv("REDIS_PORT", 6379)))]
+                    'capacity': 10000,
+                }}
 }
 
 USE_X_FORWARDED_PORT = True
