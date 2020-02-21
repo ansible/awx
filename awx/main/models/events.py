@@ -438,6 +438,7 @@ class JobEvent(BasePlaybookEvent):
             ('job', 'parent_uuid'),
         ]
 
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     job = models.ForeignKey(
         'Job',
         related_name='job_events',
@@ -526,6 +527,7 @@ class ProjectUpdateEvent(BasePlaybookEvent):
             ('project_update', 'end_line'),
         ]
 
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     project_update = models.ForeignKey(
         'ProjectUpdate',
         related_name='project_update_events',
@@ -677,6 +679,7 @@ class AdHocCommandEvent(BaseCommandEvent):
     FAILED_EVENTS = [x[0] for x in EVENT_TYPES if x[2]]
     EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
 
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     event = models.CharField(
         max_length=100,
         choices=EVENT_CHOICES,
@@ -739,6 +742,7 @@ class InventoryUpdateEvent(BaseCommandEvent):
             ('inventory_update', 'end_line'),
         ]
 
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     inventory_update = models.ForeignKey(
         'InventoryUpdate',
         related_name='inventory_update_events',
@@ -772,6 +776,7 @@ class SystemJobEvent(BaseCommandEvent):
             ('system_job', 'end_line'),
         ]
 
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     system_job = models.ForeignKey(
         'SystemJob',
         related_name='system_job_events',
