@@ -1220,10 +1220,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     status_data['instance_group_name'] = None
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
+            status_data['unified_job_template_id'] = self.unified_job_template.id
             emit_channel_notification('jobs-status_changed', status_data)
 
             if self.spawned_by_workflow:
                 status_data['group_name'] = "workflow_events"
+                status_data['workflow_job_template_id'] = self.unified_job_template.id
                 emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
         except IOError:  # includes socket errors
             logger.exception('%s failed to emit channel msg about status change', self.log_format)
