@@ -107,6 +107,7 @@ class ApiVersionRootView(APIView):
         data['applications'] = reverse('api:o_auth2_application_list', request=request)
         data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
+        data['broadcast_websocket_metrics'] = reverse('api:broadcast_websocket_metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)

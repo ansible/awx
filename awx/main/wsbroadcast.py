@@ -15,6 +15,11 @@ from django.conf import settings
 from django.apps import apps
 from django.core.serializers.json import DjangoJSONEncoder
 
+from awx.main.analytics.broadcast_websocket import (
+    BroadcastWebsocketStats,
+    BroadcastWebsocketStatsManager,
+)
+
 
 logger = logging.getLogger('awx.main.wsbroadcast')
 
@@ -48,13 +53,15 @@ class WebsocketTask():
     def __init__(self,
                  name,
                  event_loop,
+                 stats: BroadcastWebsocketStats,
                  remote_host: str,
-                 remote_port: int=settings.BROADCAST_WEBSOCKETS_PORT,
-                 protocol: str=settings.BROADCAST_WEBSOCKETS_PROTOCOL,
-                 verify_ssl: bool=settings.BROADCAST_WEBSOCKETS_VERIFY_CERT,
+                 remote_port: int=settings.BROADCAST_WEBSOCKET_PORT,
+                 protocol: str=settings.BROADCAST_WEBSOCKET_PROTOCOL,
+                 verify_ssl: bool=settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
                  endpoint: str='broadcast'):
         self.name = name
         self.event_loop = event_loop
+        self.stats = stats
         self.remote_host = remote_host
         self.remote_port = remote_port
         self.endpoint = endpoint
@@ -78,7 +85,7 @@ class WebsocketTask():
 
         try:
             if attempt > 0:
-                await asyncio.sleep(5)
+                await asyncio.sleep(settings.BROADCAST_WEBSOCKET_RECONNECT_RETRY_RATE_SECONDS)
         except asyncio.CancelledError:
             logger.warn(f"{self.name} connection to {self.remote_host} cancelled")
             raise
@@ -91,17 +98,20 @@ class WebsocketTask():
             async with aiohttp.ClientSession(headers={'secret': secret_val},
                                              timeout=timeout) as session:
                 async with session.ws_connect(uri, ssl=self.verify_ssl) as websocket:
+                    self.stats.record_connection_established()
                     attempt = 0
                     await self.run_loop(websocket)
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
             logger.warn(f"{self.name} connection to {self.remote_host} cancelled")
+            self.stats.record_connection_lost()
             raise
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
             # Does aiohttp throws an exception if a disconnect happens?
             logger.warn(f"Websocket broadcast client exception {str(e)}")
+            self.stats.record_connection_lost()
             # Reconnect
             self.start(attempt=attempt+1)
 
@@ -115,6 +125,7 @@ class WebsocketTask():
 class BroadcastWebsocketTask(WebsocketTask):
     async def run_loop(self, websocket: aiohttp.ClientWebSocketResponse):
         async for msg in websocket:
+            self.stats.record_message_received()
 
             if msg.type == aiohttp.WSMsgType.ERROR:
                 break
@@ -137,9 +148,11 @@ class BroadcastWebsocketManager(object):
     def __init__(self):
         self.event_loop = asyncio.get_event_loop()
         self.broadcast_tasks = dict()
+        # parallel dict to broadcast_tasks that tracks stats
+        self.local_hostname = get_local_host()
+        self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
 
-    async def run_loop(self):
-        local_hostname = get_local_host()
+    async def run_per_host_websocket(self):
 
         while True:
             future_remote_hosts = get_broadcast_hosts()
@@ -148,23 +161,28 @@ class BroadcastWebsocketManager(object):
             new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
 
             if deleted_remote_hosts:
-                logger.warn(f"{local_hostname} going to remove {deleted_remote_hosts} from the websocket broadcast list")
+                logger.warn(f"{self.local_hostname} going to remove {deleted_remote_hosts} from the websocket broadcast list")
             if new_remote_hosts:
-                logger.warn(f"{local_hostname} going to add {new_remote_hosts} to the websocket broadcast list")
+                logger.warn(f"{self.local_hostname} going to add {new_remote_hosts} to the websocket broadcast list")
 
             for h in deleted_remote_hosts:
                 self.broadcast_tasks[h].cancel()
                 del self.broadcast_tasks[h]
+                self.stats_mgr.delete_remote_host_stats(h)
 
             for h in new_remote_hosts:
-                broadcast_task = BroadcastWebsocketTask(name=local_hostname,
+                stats = self.stats_mgr.new_remote_host_stats(h)
+                broadcast_task = BroadcastWebsocketTask(name=self.local_hostname,
                                                         event_loop=self.event_loop,
+                                                        stats=stats,
                                                         remote_host=h)
                 broadcast_task.start()
                 self.broadcast_tasks[h] = broadcast_task
 
-            await asyncio.sleep(settings.BROADCAST_WEBSOCKETS_NEW_INSTANCE_POLL_RATE_SECONDS)
+            await asyncio.sleep(settings.BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS)
 
     def start(self):
-        self.async_task = self.event_loop.create_task(self.run_loop())
+        self.stats_mgr.start()
+
+        self.async_task = self.event_loop.create_task(self.run_per_host_websocket())
         return self.async_task

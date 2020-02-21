@@ -23,5 +23,3 @@ class Command(BaseCommand):
             loop.run_until_complete(task)
         except KeyboardInterrupt:
             logger.debug('Terminating Websocket Broadcaster')
-            if broadcast_websocket_mgr:
-                broadcast_websocket_mgr.stop()

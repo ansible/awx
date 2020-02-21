@@ -1235,17 +1235,26 @@ MIDDLEWARE = [
 
 # Secret header value to exchange for websockets responsible for distributing websocket messages.
 # This needs to be kept secret and randomly generated
-BROADCAST_WEBSOCKETS_SECRET = ''
+BROADCAST_WEBSOCKET_SECRET = ''
 
 # Port for broadcast websockets to connect to
 # Note: that the clients will follow redirect responses
-BROADCAST_WEBSOCKETS_PORT = 443
+BROADCAST_WEBSOCKET_PORT = 443
 
 # Whether or not broadcast websockets should check nginx certs when interconnecting
-BROADCAST_WEBSOCKETS_VERIFY_CERT = False
+BROADCAST_WEBSOCKET_VERIFY_CERT = False
 
 # Connect to other AWX nodes using http or https
-BROADCAST_WEBSOCKETS_PROTOCOL = 'https'
+BROADCAST_WEBSOCKET_PROTOCOL = 'https'
+
+# All websockets that connect to the broadcast websocket endpoint will be put into this group
+BROADCAST_WEBSOCKET_GROUP_NAME = 'broadcast-group_send'
+
+# Time wait before retrying connecting to a websocket broadcast tower node
+BROADCAST_WEBSOCKET_RECONNECT_RETRY_RATE_SECONDS = 5
 
 # How often websocket process will look for changes in the Instance table
-BROADCAST_WEBSOCKETS_NEW_INSTANCE_POLL_RATE_SECONDS = 10
+BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
+
+# How often websocket process will generate stats
+BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5

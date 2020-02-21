@@ -21,12 +21,9 @@ from channels.db import database_sync_to_async
 
 from asgiref.sync import async_to_sync
 
-from awx.main.wsbroadcast import wrap_broadcast_msg
-
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
-BROADCAST_GROUP = 'broadcast-group_send'
 
 
 class WebsocketSecretAuthHelper:
@@ -42,12 +39,12 @@ class WebsocketSecretAuthHelper:
     def construct_secret(cls):
         nonce_serialized = "{}".format(int((datetime.datetime.utcnow()-datetime.datetime.fromtimestamp(0)).total_seconds()))
         payload_dict = {
-            'secret': settings.BROADCAST_WEBSOCKETS_SECRET,
+            'secret': settings.BROADCAST_WEBSOCKET_SECRET,
             'nonce': nonce_serialized
         }
         payload_serialized = json.dumps(payload_dict)
 
-        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKETS_SECRET),
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET),
                                      msg=force_bytes(payload_serialized),
                                      digestmod='sha256').hexdigest()
 
@@ -68,14 +65,14 @@ class WebsocketSecretAuthHelper:
 
         try:
             payload_expected = {
-                'secret': settings.BROADCAST_WEBSOCKETS_SECRET,
+                'secret': settings.BROADCAST_WEBSOCKET_SECRET,
                 'nonce': nonce_parsed,
             }
             payload_serialized = json.dumps(payload_expected)
         except Exception:
             raise ValueError("Failed to create hash to compare to secret.")
 
-        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKETS_SECRET),
+        secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET),
                                      msg=force_bytes(payload_serialized),
                                      digestmod='sha256').hexdigest()
 
@@ -114,7 +111,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         # TODO: log ip of connected client
         logger.info(f"Broadcast client connected.")
         await self.accept()
-        await self.channel_layer.group_add(BROADCAST_GROUP, self.channel_name)
+        await self.channel_layer.group_add(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
 
     async def disconnect(self, code):
         # TODO: log ip of disconnected client
@@ -185,7 +182,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                                 continue
                         new_groups.add(name)
                 else:
-                    if group_name == BROADCAST_GROUP:
+                    if group_name == settings.BROADCAST_WEBSOCKET_GROUP_NAME:
                         logger.warn("Non-priveleged client asked to join broadcast group!")
                         return
 
@@ -235,6 +232,8 @@ def _dump_payload(payload):
 
 
 async def emit_channel_notification_async(group, payload):
+    from awx.main.wsbroadcast import wrap_broadcast_msg # noqa
+
     payload_dumped = _dump_payload(payload)
     if payload_dumped is None:
         return
@@ -249,7 +248,7 @@ async def emit_channel_notification_async(group, payload):
     )
 
     await channel_layer.group_send(
-        BROADCAST_GROUP,
+        settings.BROADCAST_WEBSOCKET_GROUP_NAME,
         {
             "type": "internal.message",
             "text": wrap_broadcast_msg(group, payload_dumped),
@@ -258,6 +257,8 @@ async def emit_channel_notification_async(group, payload):
 
 
 def emit_channel_notification(group, payload):
+    from awx.main.wsbroadcast import wrap_broadcast_msg # noqa
+
     payload_dumped = _dump_payload(payload)
     if payload_dumped is None:
         return
@@ -273,7 +274,7 @@ def emit_channel_notification(group, payload):
     ))
 
     run_sync(channel_layer.group_send(
-        BROADCAST_GROUP,
+        settings.BROADCAST_WEBSOCKET_GROUP_NAME,
         {
             "type": "internal.message",
             "text": wrap_broadcast_msg(group, payload_dumped),
