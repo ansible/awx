@@ -15,6 +15,15 @@ from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
 
 
+'''
+Prevent logger.<warn, debug, error> calls from triggering database operations
+'''
+@pytest.fixture(autouse=True)
+def _disable_database_settings(mocker):
+    m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=mock.PropertyMock)
+    m.return_value = []
+
+
 def restricted(a, b):
     raise AssertionError("This code should not run because it isn't decorated with @task")
 
@@ -324,22 +333,23 @@ class TestTaskPublisher:
         assert Adder().run(2, 2) == 4
 
     def test_function_apply_async(self):
-        message, queue = add.apply_async([2, 2])
+        message, queue = add.apply_async([2, 2], queue='foobar')
         assert message['args'] == [2, 2]
         assert message['kwargs'] == {}
         assert message['task'] == 'awx.main.tests.functional.test_dispatch.add'
-        assert queue == 'awx_private_queue'
+        assert queue == 'foobar'
 
     def test_method_apply_async(self):
-        message, queue = Adder.apply_async([2, 2])
+        message, queue = Adder.apply_async([2, 2], queue='foobar')
         assert message['args'] == [2, 2]
         assert message['kwargs'] == {}
         assert message['task'] == 'awx.main.tests.functional.test_dispatch.Adder'
-        assert queue == 'awx_private_queue'
+        assert queue == 'foobar'
 
-    def test_apply_with_queue(self):
-        message, queue = add.apply_async([2, 2], queue='abc123')
-        assert queue == 'abc123'
+    def test_apply_async_queue_required(self):
+        with pytest.raises(ValueError) as e:
+            message, queue = add.apply_async([2, 2])
+        assert "awx.main.tests.functional.test_dispatch.add: Queue value required and may not me None" == e.value.args[0]
 
     def test_queue_defined_in_task_decorator(self):
         message, queue = multiply.apply_async([2, 2])
