@@ -140,9 +140,9 @@ function HostList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Hosts`)}
                 />,
-                ...(canAdd ? [(
-                  <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />]
-                ) : [],
+                ...(canAdd
+                  ? [<ToolbarAddButton key="add" linkTo={`${match.url}/add`} />]
+                  : []),
               ]}
             />
           )}
