@@ -4,28 +4,28 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
+  Button,
+  DataListAction as _DataListAction,
+  DataListCell,
+  DataListCheck,
   DataListItem,
   DataListItemRow,
-  DataListItemCells as _DataListItemCells,
+  DataListItemCells,
+  Switch,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import ActionButtonCell from '@components/ActionButtonCell';
 import { DetailList, Detail } from '@components/DetailList';
-import DataListCell from '@components/DataListCell';
-import DataListCheck from '@components/DataListCheck';
-import ListActionButton from '@components/ListActionButton';
-import Switch from '@components/Switch';
-import VerticalSeparator from '@components/VerticalSeparator';
 import styled from 'styled-components';
 import { Schedule } from '@types';
 import { formatDateString } from '@util/dates';
 
-const DataListItemCells = styled(_DataListItemCells)`
-  ${DataListCell}:first-child {
-    flex-grow: 2;
-  }
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: auto 40px;
 `;
 
 function ScheduleListItem({
@@ -84,7 +84,6 @@ function ScheduleListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
-              <VerticalSeparator />
               <Link to={`${scheduleBaseUrl}/details`}>
                 <b>{schedule.name}</b>
               </Link>
@@ -106,7 +105,12 @@ function ScheduleListItem({
                 </DetailList>
               )}
             </DataListCell>,
-            <ActionButtonCell lastcolumn="true" key="action">
+            <DataListAction
+              aria-label="actions"
+              aria-labelledby={labelId}
+              id={labelId}
+              key="actions"
+            >
               <Tooltip
                 content={
                   schedule.enabled
@@ -130,16 +134,17 @@ function ScheduleListItem({
               </Tooltip>
               {schedule.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Schedule`)} position="top">
-                  <ListActionButton
+                  <Button
+                    css="grid-column: 2"
                     variant="plain"
                     component={Link}
                     to={`${scheduleBaseUrl}/edit`}
                   >
                     <PencilAltIcon />
-                  </ListActionButton>
+                  </Button>
                 </Tooltip>
               )}
-            </ActionButtonCell>,
+            </DataListAction>,
           ]}
         />
       </DataListItemRow>

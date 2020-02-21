@@ -39,44 +39,44 @@ describe('ScheduleList', () => {
 
     test('should check and uncheck the row item', async () => {
       expect(
-        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
       ).toBe(false);
       await act(async () => {
         wrapper
-          .find('PFDataListCheck[id="select-schedule-1"]')
+          .find('DataListCheck[id="select-schedule-1"]')
           .invoke('onChange')(true);
       });
       wrapper.update();
       expect(
-        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
       ).toBe(true);
       await act(async () => {
         wrapper
-          .find('PFDataListCheck[id="select-schedule-1"]')
+          .find('DataListCheck[id="select-schedule-1"]')
           .invoke('onChange')(false);
       });
       wrapper.update();
       expect(
-        wrapper.find('PFDataListCheck[id="select-schedule-1"]').props().checked
+        wrapper.find('DataListCheck[id="select-schedule-1"]').props().checked
       ).toBe(false);
     });
 
     test('should check all row items when select all is checked', async () => {
-      wrapper.find('PFDataListCheck').forEach(el => {
+      wrapper.find('DataListCheck').forEach(el => {
         expect(el.props().checked).toBe(false);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(true);
       });
       wrapper.update();
-      wrapper.find('PFDataListCheck').forEach(el => {
+      wrapper.find('DataListCheck').forEach(el => {
         expect(el.props().checked).toBe(true);
       });
       await act(async () => {
         wrapper.find('Checkbox#select-all').invoke('onChange')(false);
       });
       wrapper.update();
-      wrapper.find('PFDataListCheck').forEach(el => {
+      wrapper.find('DataListCheck').forEach(el => {
         expect(el.props().checked).toBe(false);
       });
     });
@@ -84,7 +84,7 @@ describe('ScheduleList', () => {
     test('should call api delete schedules for each selected schedule', async () => {
       await act(async () => {
         wrapper
-          .find('PFDataListCheck[id="select-schedule-3"]')
+          .find('DataListCheck[id="select-schedule-3"]')
           .invoke('onChange')();
       });
       wrapper.update();
@@ -102,7 +102,7 @@ describe('ScheduleList', () => {
       expect(wrapper.find('Modal').length).toBe(0);
       await act(async () => {
         wrapper
-          .find('PFDataListCheck[id="select-schedule-2"]')
+          .find('DataListCheck[id="select-schedule-2"]')
           .invoke('onChange')();
       });
       wrapper.update();

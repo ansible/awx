@@ -81,7 +81,7 @@ describe('ScheduleListItem', () => {
       expect(
         wrapper
           .find('DataListCell')
-          .at(2)
+          .at(1)
           .text()
       ).toBe('Playbook Run');
     });
@@ -89,7 +89,7 @@ describe('ScheduleListItem', () => {
       expect(wrapper.find('PencilAltIcon').length).toBe(1);
       expect(
         wrapper
-          .find('ListActionButton')
+          .find('Button')
           .find('Link')
           .props().to
       ).toBe('/templates/job_template/12/schedules/6/edit');
@@ -112,7 +112,7 @@ describe('ScheduleListItem', () => {
     });
     test('Clicking checkbox makes expected callback', () => {
       wrapper
-        .find('PFDataListCheck')
+        .find('DataListCheck')
         .first()
         .find('input')
         .simulate('change');
@@ -161,7 +161,7 @@ describe('ScheduleListItem', () => {
       expect(
         wrapper
           .find('DataListCell')
-          .at(2)
+          .at(1)
           .text()
       ).toBe('Playbook Run');
     });

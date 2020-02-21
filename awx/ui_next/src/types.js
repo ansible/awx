@@ -283,7 +283,7 @@ export const Schedule = shape({
   modified: string,
   name: string.isRequired,
   description: string,
-  extra_data: shape({}),
+  extra_data: oneOfType([string, shape({})]),
   inventory: number,
   scm_branch: string,
   job_type: string,
