@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -10,6 +10,7 @@ import DataListToolbar from '@components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import { ScheduleListItem } from '.';
 
@@ -20,38 +21,54 @@ const QS_CONFIG = getQSConfig('schedule', {
 });
 
 function ScheduleList({ i18n }) {
-  const [contentError, setContentError] = useState(null);
-  const [scheduleCount, setScheduleCount] = useState(0);
-  const [schedules, setSchedules] = useState([]);
-  const [deletionError, setDeletionError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
   const [selected, setSelected] = useState([]);
-  const [toggleError, setToggleError] = useState(null);
-  const [toggleLoading, setToggleLoading] = useState(null);
 
   const location = useLocation();
 
-  const loadSchedules = async ({ search }) => {
-    const params = parseQueryString(QS_CONFIG, search);
-    setContentError(null);
-    setHasContentLoading(true);
-    try {
+  const {
+    result: { schedules, itemCount },
+    error: contentError,
+    isLoading,
+    request: fetchSchedules,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
       const {
         data: { count, results },
       } = await SchedulesAPI.read(params);
-
-      setSchedules(results);
-      setScheduleCount(count);
-    } catch (error) {
-      setContentError(error);
-    } finally {
-      setHasContentLoading(false);
+      return {
+        itemCount: count,
+        schedules: results,
+      };
+    }, [location]),
+    {
+      schedules: [],
+      itemCount: 0,
     }
-  };
+  );
 
   useEffect(() => {
-    loadSchedules(location);
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchSchedules();
+  }, [fetchSchedules]);
+
+  const isAllSelected =
+    selected.length === schedules.length && selected.length > 0;
+
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteJobs,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(selected.map(({ id }) => SchedulesAPI.destroy(id)));
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchSchedules,
+    }
+  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...schedules] : []);
@@ -66,64 +83,18 @@ function ScheduleList({ i18n }) {
   };
 
   const handleDelete = async () => {
-    setHasContentLoading(true);
-
-    try {
-      await Promise.all(
-        selected.map(schedule => SchedulesAPI.destroy(schedule.id))
-      );
-    } catch (error) {
-      setDeletionError(error);
-    }
-
-    const params = parseQueryString(QS_CONFIG, location.search);
-    try {
-      const {
-        data: { count, results },
-      } = await SchedulesAPI.read(params);
-
-      setSchedules(results);
-      setScheduleCount(count);
-      setSelected([]);
-    } catch (error) {
-      setContentError(error);
-    }
-
-    setHasContentLoading(false);
+    await deleteJobs();
+    setSelected([]);
   };
-
-  const handleScheduleToggle = async scheduleToToggle => {
-    setToggleLoading(scheduleToToggle.id);
-    try {
-      const { data: updatedSchedule } = await SchedulesAPI.update(
-        scheduleToToggle.id,
-        {
-          enabled: !scheduleToToggle.enabled,
-        }
-      );
-      setSchedules(
-        schedules.map(schedule =>
-          schedule.id === updatedSchedule.id ? updatedSchedule : schedule
-        )
-      );
-    } catch (err) {
-      setToggleError(err);
-    } finally {
-      setToggleLoading(null);
-    }
-  };
-
-  const isAllSelected =
-    selected.length > 0 && selected.length === schedules.length;
 
   return (
     <PageSection>
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={hasContentLoading}
+          hasContentLoading={isLoading || isDeleteLoading}
           items={schedules}
-          itemCount={scheduleCount}
+          itemCount={itemCount}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
           renderItem={item => (
@@ -131,9 +102,7 @@ function ScheduleList({ i18n }) {
               isSelected={selected.some(row => row.id === item.id)}
               key={item.id}
               onSelect={() => handleSelect(item)}
-              onToggleSchedule={handleScheduleToggle}
               schedule={item}
-              toggleLoading={toggleLoading === item.id}
             />
           )}
           toolbarSearchColumns={[
@@ -176,23 +145,12 @@ function ScheduleList({ i18n }) {
           )}
         />
       </Card>
-      {toggleError && !toggleLoading && (
-        <AlertModal
-          variant="danger"
-          title={i18n._(t`Error!`)}
-          isOpen={toggleError && !toggleLoading}
-          onClose={() => setToggleError(null)}
-        >
-          {i18n._(t`Failed to toggle schedule.`)}
-          <ErrorDetail error={toggleError} />
-        </AlertModal>
-      )}
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
           variant="danger"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={clearDeletionError}
         >
           {i18n._(t`Failed to delete one or more schedules.`)}
           <ErrorDetail error={deletionError} />

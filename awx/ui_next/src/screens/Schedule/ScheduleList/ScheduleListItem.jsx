@@ -11,15 +11,14 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  Switch,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
-
 import { DetailList, Detail } from '@components/DetailList';
 import styled from 'styled-components';
 import { Schedule } from '@types';
 import { formatDateString } from '@util/dates';
+import ScheduleToggle from '../shared/ScheduleToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -28,14 +27,7 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: auto 40px;
 `;
 
-function ScheduleListItem({
-  i18n,
-  isSelected,
-  onSelect,
-  onToggleSchedule,
-  schedule,
-  toggleLoading,
-}) {
+function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
   const labelId = `check-action-${schedule.id}`;
 
   const jobTypeLabels = {
@@ -111,27 +103,7 @@ function ScheduleListItem({
               id={labelId}
               key="actions"
             >
-              <Tooltip
-                content={
-                  schedule.enabled
-                    ? i18n._(t`Schedule is active`)
-                    : i18n._(t`Schedule is inactive`)
-                }
-                position="top"
-              >
-                <Switch
-                  id={`schedule-${schedule.id}-toggle`}
-                  label={i18n._(t`On`)}
-                  labelOff={i18n._(t`Off`)}
-                  isChecked={schedule.enabled}
-                  isDisabled={
-                    toggleLoading ||
-                    !schedule.summary_fields.user_capabilities.edit
-                  }
-                  onChange={() => onToggleSchedule(schedule)}
-                  aria-label={i18n._(t`Toggle schedule`)}
-                />
-              </Tooltip>
+              <ScheduleToggle schedule={schedule} />
               {schedule.summary_fields.user_capabilities.edit && (
                 <Tooltip content={i18n._(t`Edit Schedule`)} position="top">
                   <Button
@@ -154,7 +126,6 @@ function ScheduleListItem({
 
 ScheduleListItem.propTypes = {
   isSelected: bool.isRequired,
-  onToggleSchedule: func.isRequired,
   onSelect: func.isRequired,
   schedule: Schedule.isRequired,
 };

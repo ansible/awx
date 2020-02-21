@@ -43,7 +43,6 @@ const mockSchedule = {
   until: '',
 };
 
-const onToggleSchedule = jest.fn();
 const onSelect = jest.fn();
 
 describe('ScheduleListItem', () => {
@@ -55,7 +54,6 @@ describe('ScheduleListItem', () => {
           isSelected={false}
           onSelect={onSelect}
           schedule={mockSchedule}
-          onToggleSchedule={onToggleSchedule}
         />
       );
     });
@@ -102,14 +100,6 @@ describe('ScheduleListItem', () => {
           .props().isDisabled
       ).toBe(false);
     });
-    test('Clicking toggle makes expected callback', () => {
-      wrapper
-        .find('Switch')
-        .first()
-        .find('input')
-        .simulate('change');
-      expect(onToggleSchedule).toHaveBeenCalledWith(mockSchedule);
-    });
     test('Clicking checkbox makes expected callback', () => {
       wrapper
         .find('DataListCheck')
@@ -135,7 +125,6 @@ describe('ScheduleListItem', () => {
               },
             },
           }}
-          onToggleSchedule={onToggleSchedule}
         />
       );
     });
