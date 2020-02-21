@@ -121,7 +121,7 @@ def cleanup(sql):
     conn.close()
 
 
-def generate_jobs(jobs):
+def generate_jobs(jobs, batch_size):
     print(f'inserting {jobs} job(s)')
     sys.path.insert(0, pkg_resources.get_distribution('awx').module_path)
     from awx import prepare_env
@@ -150,7 +150,7 @@ def generate_jobs(jobs):
         jt_defaults = dict(
             (f.attname, getattr(jt, f.attname))
             for f in JobTemplate._meta.get_fields()
-            if f.editable and f.attname in job_field_names and getattr(jt, f.attname)
+            if f.concrete and f.attname in job_field_names and getattr(jt, f.attname)
         )
         jt_defaults['job_template_id'] = jt.pk
         jt_defaults['unified_job_template_id'] = jt.pk  # populated by save method
@@ -176,10 +176,10 @@ def generate_jobs(jobs):
     while jobs > 0:
         s_loop = time()
         print('running batch {}, runtime {}'.format(i, time() - s))
-        created, jt_pos = make_batch(min(jobs, 1000), jt_pos)
+        created, jt_pos = make_batch(min(jobs, batch_size), jt_pos)
         print('took {}'.format(time() - s_loop))
         i += 1
-        jobs -= 1000
+        jobs -= batch_size
     return created
 
 
@@ -283,9 +283,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--events', type=int, help='Number of events to create.',
         default=1000000000) # 1B by default
+    parser.add_argument(
+        '--batch-size', type=int, help='Number of jobs to create in a single batch.',
+        default=1000)
     params = parser.parse_args()
     jobs = params.jobs
     events = params.events
+    batch_size = params.batch_size
     print(datetime.datetime.utcnow().isoformat())
-    created = generate_jobs(jobs)
+    created = generate_jobs(jobs, batch_size=batch_size)
     generate_events(events, str(created.pk))
