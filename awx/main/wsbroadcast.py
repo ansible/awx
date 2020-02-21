@@ -2,10 +2,12 @@
 import os
 import json
 import logging
-import aiohttp
 import asyncio
 import datetime
 import sys
+
+import aiohttp
+from aiohttp import client_exceptions
 
 from channels_redis.core import RedisChannelLayer
 from channels.layers import get_channel_layer
@@ -107,12 +109,18 @@ class WebsocketTask():
             logger.warn(f"{self.name} connection to {self.remote_host} cancelled")
             self.stats.record_connection_lost()
             raise
+        except client_exceptions.ClientConnectorError as e:
+            logger.warn(f"Failed to connect to {self.remote_host}: '{e}'. Reconnecting ...")
+            self.stats.record_connection_lost()
+            self.start(attempt=attempt+1)
+        except asyncio.TimeoutError:
+            logger.warn(f"Timeout while trying to connect to {self.remote_host}. Reconnecting ...")
+            self.stats.record_connection_lost()
+            self.start(attempt=attempt+1)
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
-            # Does aiohttp throws an exception if a disconnect happens?
-            logger.warn(f"Websocket broadcast client exception {str(e)}")
+            logger.warn(f"Websocket broadcast client exception {type(e)} {e}")
             self.stats.record_connection_lost()
-            # Reconnect
             self.start(attempt=attempt+1)
 
     def start(self, attempt=0):
