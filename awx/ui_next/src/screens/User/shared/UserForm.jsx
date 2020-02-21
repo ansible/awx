@@ -101,34 +101,6 @@ function UserFormFields({ user, i18n }) {
         type="text"
       />
       {!user.id && (
-<<<<<<< HEAD
-            <OrganizationLookup
-    helperTextInvalid={organizationMeta.error}
-    isValid={!organizationMeta.touched || !organizationMeta.error}
-    onBlur={() => organizationHelpers.setTouched()}
-              onChange={value => {
-      organizationHelpers.setValue(value.id);
-                setOrganization(value);
-              }}
-              value={organization}
-              required
-            />
-          )}
-            <FormGroup
-              fieldId="user-type"
-  helperTextInvalid={userTypeMeta.error}
-              isRequired
-  isValid={!userTypeMeta.touched || !userTypeMeta.error}
-              label={i18n._(t`User Type`)}
-            >
-              <AnsibleSelect
-    isValid={!userTypeMeta.touched || !userTypeMeta.error}
-                id="user-type"
-                data={userTypeOptions}
-    {...userTypeField}
-              />
-            </FormGroup>
-=======
         <OrganizationLookup
           helperTextInvalid={organizationMeta.error}
           isValid={!organizationMeta.touched || !organizationMeta.error}
@@ -155,7 +127,6 @@ function UserFormFields({ user, i18n }) {
           {...userTypeField}
         />
       </FormGroup>
->>>>>>> update forms from FormRow to using FormLayout components
     </>
   );
 }
