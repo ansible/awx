@@ -57,6 +57,8 @@ dsn = f'dbname={name} user={user} password={pw} host={host}'
 
 u = str(uuid4())
 
+STATUS_OPTIONS = ('successful', 'failed', 'error', 'canceled')
+
 
 class YieldedRows(StringIO):
 
@@ -129,17 +131,35 @@ def generate_jobs(jobs):
     from awx.main.models import UnifiedJob, Job, JobTemplate
     fields = list(set(Job._meta.fields) - set(UnifiedJob._meta.fields))
     job_field_names = set([f.attname for f in fields])
-    jt = JobTemplate.objects.first()
-    jt_defaults = dict(
-        (f.attname, getattr(jt, f.attname))
-        for f in JobTemplate._meta.get_fields()
-        if f.editable and f.attname in job_field_names and getattr(jt, f.attname)
-    )
-    jt_defaults['job_template_id'] = jt.pk
+    # extra unified job field names from base class
+    for field_name in ('name', 'created_by_id', 'modified_by_id'):
+        job_field_names.add(field_name)
+    jt_count = JobTemplate.objects.count()
 
-    def make_batch(N, **extra):
+    def make_batch(N, jt_pos=0):
+        jt = None
+        while not jt:
+            try:
+                jt = JobTemplate.objects.all()[jt_pos % jt_count]
+            except IndexError as e:
+                # seems to happen every now and then due to some race condition
+                print('Warning: IndexError on {} JT, error: {}'.format(
+                    jt_pos % jt_count, e
+                ))
+            jt_pos += 1
+        jt_defaults = dict(
+            (f.attname, getattr(jt, f.attname))
+            for f in JobTemplate._meta.get_fields()
+            if f.editable and f.attname in job_field_names and getattr(jt, f.attname)
+        )
+        jt_defaults['job_template_id'] = jt.pk
+        jt_defaults['unified_job_template_id'] = jt.pk  # populated by save method
+
         jobs = [
-            Job(status='canceled', created=now(), modified=now(), elapsed=0., **extra)
+            Job(
+                status=STATUS_OPTIONS[i % len(STATUS_OPTIONS)],
+                started=now(), created=now(), modified=now(), finished=now(),
+                elapsed=0., **jt_defaults)
             for i in range(N)
         ]
         ujs = UnifiedJob.objects.bulk_create(jobs)
@@ -148,14 +168,16 @@ def generate_jobs(jobs):
         with connection.cursor() as cursor:
             query, params = query.sql_with_params()[0]
             cursor.execute(query, params)
-        return ujs[-1]
+        return ujs[-1], jt_pos
 
     i = 1
+    jt_pos = 0
+    s = time()
     while jobs > 0:
-        s = time()
+        s_loop = time()
         print('running batch {}, runtime {}'.format(i, time() - s))
-        created = make_batch(min(jobs, 1000), **jt_defaults)
-        print('took {}'.format(time() - s))
+        created, jt_pos = make_batch(min(jobs, 1000), jt_pos)
+        print('took {}'.format(time() - s_loop))
         i += 1
         jobs -= 1000
     return created
@@ -254,9 +276,13 @@ def generate_events(events, job):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--jobs', type=int, default=1000000) # 1M by default
-    parser.add_argument('--events', type=int, default=1000000000) # 1B by default
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--jobs', type=int, help='Number of jobs to create.',
+        default=1000000) # 1M by default
+    parser.add_argument(
+        '--events', type=int, help='Number of events to create.',
+        default=1000000000) # 1B by default
     params = parser.parse_args()
     jobs = params.jobs
     events = params.events
