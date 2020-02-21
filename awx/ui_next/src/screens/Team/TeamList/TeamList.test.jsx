@@ -1,12 +1,13 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { TeamsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
-import TeamsList, { _TeamsList } from './TeamList';
+import TeamList from './TeamList';
 
 jest.mock('@api');
 
-const mockAPITeamsList = {
+const mockAPITeamList = {
   data: {
     count: 3,
     results: [
@@ -50,15 +51,14 @@ const mockAPITeamsList = {
   warningMsg: 'message',
 };
 
-describe('<TeamsList />', () => {
-  let wrapper;
-
+describe('<TeamList />', () => {
   beforeEach(() => {
-    TeamsAPI.read = () =>
+    TeamsAPI.read = jest.fn(() =>
       Promise.resolve({
-        data: mockAPITeamsList.data,
-      });
-    TeamsAPI.readOptions = () =>
+        data: mockAPITeamList.data,
+      })
+    );
+    TeamsAPI.readOptions = jest.fn(() =>
       Promise.resolve({
         data: {
           actions: {
@@ -66,105 +66,119 @@ describe('<TeamsList />', () => {
             POST: {},
           },
         },
-      });
-  });
-
-  test('initially renders succesfully', () => {
-    mountWithContexts(<TeamsList />);
-  });
-
-  test('Selects one team when row is checked', async () => {
-    wrapper = mountWithContexts(<TeamsList />);
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === false
+      })
     );
-    expect(
-      wrapper
-        .find('input[type="checkbox"]')
-        .findWhere(n => n.prop('checked') === true).length
-    ).toBe(0);
-    wrapper
-      .find('TeamListItem')
-      .at(0)
-      .find('DataListCheck')
-      .props()
-      .onChange(true);
-    wrapper.update();
-    expect(
-      wrapper
-        .find('input[type="checkbox"]')
-        .findWhere(n => n.prop('checked') === true).length
-    ).toBe(1);
   });
 
-  test('Select all checkbox selects and unselects all rows', async () => {
-    wrapper = mountWithContexts(<TeamsList />);
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === false
-    );
-    expect(
-      wrapper
-        .find('input[type="checkbox"]')
-        .findWhere(n => n.prop('checked') === true).length
-    ).toBe(0);
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(true);
-    wrapper.update();
-    expect(
-      wrapper
-        .find('input[type="checkbox"]')
-        .findWhere(n => n.prop('checked') === true).length
-    ).toBe(4);
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(false);
-    wrapper.update();
-    expect(
-      wrapper
-        .find('input[type="checkbox"]')
-        .findWhere(n => n.prop('checked') === true).length
-    ).toBe(0);
-  });
-
-  test('api is called to delete Teams for each team in selected.', () => {
-    wrapper = mountWithContexts(<TeamsList />);
-    const component = wrapper.find('TeamsList');
-    wrapper.find('TeamsList').setState({
-      teams: mockAPITeamsList.data.results,
-      itemCount: 3,
-      isInitialized: true,
-      isModalOpen: mockAPITeamsList.isModalOpen,
-      selected: mockAPITeamsList.data.results,
+  test('should load and render teams', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    expect(TeamsAPI.destroy).toHaveBeenCalledTimes(
-      component.state('selected').length
-    );
+    wrapper.update();
+
+    expect(wrapper.find('TeamListItem')).toHaveLength(3);
   });
 
-  test('call loadTeams after team(s) have been deleted', () => {
-    const fetchTeams = jest.spyOn(_TeamsList.prototype, 'loadTeams');
-    const event = { preventDefault: () => {} };
-    wrapper = mountWithContexts(<TeamsList />);
-    wrapper.find('TeamsList').setState({
-      teams: mockAPITeamsList.data.results,
-      itemCount: 3,
-      isInitialized: true,
-      selected: mockAPITeamsList.data.results.slice(0, 1),
+  test('should select team when checked', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
     });
-    const component = wrapper.find('TeamsList');
-    component.instance().handleTeamDelete(event);
-    expect(fetchTeams).toBeCalled();
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('TeamListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('TeamListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
   });
 
-  test('error is shown when team not successfully deleted from api', async done => {
+  test('should select all', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+
+    const items = wrapper.find('TeamListItem');
+    expect(items).toHaveLength(3);
+    items.forEach(item => {
+      expect(item.prop('isSelected')).toEqual(true);
+    });
+
+    expect(
+      wrapper
+        .find('TeamListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should call delete api', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('TeamListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('TeamListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+
+    expect(TeamsAPI.destroy).toHaveBeenCalledTimes(2);
+  });
+
+  test('should re-fetch teams after team(s) have been deleted', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
+    });
+    wrapper.update();
+    expect(TeamsAPI.read).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      wrapper
+        .find('TeamListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+
+    expect(TeamsAPI.read).toHaveBeenCalledTimes(2);
+  });
+
+  test('should show deletion error', async () => {
     TeamsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -176,40 +190,41 @@ describe('<TeamsList />', () => {
         },
       })
     );
-
-    wrapper = mountWithContexts(<TeamsList />);
-    wrapper.find('TeamsList').setState({
-      teams: mockAPITeamsList.data.results,
-      itemCount: 3,
-      isInitialized: true,
-      selected: mockAPITeamsList.data.results.slice(0, 1),
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    await waitForElement(
-      wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
-    );
-    done();
+    wrapper.update();
+    expect(TeamsAPI.read).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      wrapper
+        .find('TeamListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
+
+    const modal = wrapper.find('Modal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('title')).toEqual('Error!');
   });
 
-  test('Add button shown for users without ability to POST', async done => {
-    wrapper = mountWithContexts(<TeamsList />);
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === false
-    );
+  test('Add button shown for users without ability to POST', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
+    });
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
-    done();
   });
 
-  test('Add button hidden for users without ability to POST', async done => {
+  test('Add button hidden for users without ability to POST', async () => {
     TeamsAPI.readOptions = () =>
       Promise.resolve({
         data: {
@@ -218,18 +233,12 @@ describe('<TeamsList />', () => {
           },
         },
       });
-    wrapper = mountWithContexts(<TeamsList />);
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'TeamsList',
-      el => el.state('hasContentLoading') === false
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<TeamList />);
+    });
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
-    done();
   });
 });
