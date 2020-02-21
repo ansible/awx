@@ -40,11 +40,11 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
       (!template.summary_fields.inventory &&
         !template.ask_inventory_on_launch));
 
-  const location = useLocation();
+  // const location = useLocation();
 
-  if (location.pathname.startsWith('/projects')) {
-    detailUrl = `/templates/job_template/${template.id}/details`;
-  }
+  // if (location.pathname.startsWith('/projects')) {
+  //   detailUrl = `/templates/job_template/${template.id}/details`;
+  // }
 
   return (
     <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
