@@ -1,10 +1,8 @@
-import time
 import threading
 import logging
 import atexit
 import json
 import ssl
-from datetime import datetime
 
 from six.moves.queue import Queue, Empty
 from six.moves.urllib.parse import urlparse
@@ -187,7 +185,6 @@ class WSClient(object):
         self._send(json.dumps(payload))
 
     def unsubscribe(self, wait=True, timeout=10):
-        time_start = datetime.now()
         if wait:
             # Other unnsubscribe events could have caused the edge to trigger.
             # This way the _next_ event will trigger our waiting.

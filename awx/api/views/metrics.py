@@ -41,6 +41,7 @@ class MetricsView(APIView):
             return Response(metrics().decode('UTF-8'))
         raise PermissionDenied()
 
+
 class BroadcastWebsocketMetricsView(APIView):
     name = _('Broadcast Websockets')
     swagger_topic = 'Broadcast Websockets'

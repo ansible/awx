@@ -4,7 +4,6 @@
 # Python
 import json
 import logging
-import os
 import redis
 
 # Django

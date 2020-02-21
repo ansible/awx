@@ -2,13 +2,11 @@ import inspect
 import logging
 import sys
 import json
-import re
 from uuid import uuid4
 
 from django.conf import settings
-from django.db import connection
 
-from . import pg_bus_conn, get_local_queuename
+from . import pg_bus_conn
 
 logger = logging.getLogger('awx.main.dispatch')
 

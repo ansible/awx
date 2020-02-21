@@ -1,18 +1,12 @@
-
-import os
 import json
 import logging
 import asyncio
-import datetime
-import sys
 
 import aiohttp
 from aiohttp import client_exceptions
 
-from channels_redis.core import RedisChannelLayer
 from channels.layers import get_channel_layer
 
-from django.utils.encoding import force_bytes
 from django.conf import settings
 from django.apps import apps
 from django.core.serializers.json import DjangoJSONEncoder
@@ -57,10 +51,10 @@ class WebsocketTask():
                  event_loop,
                  stats: BroadcastWebsocketStats,
                  remote_host: str,
-                 remote_port: int=settings.BROADCAST_WEBSOCKET_PORT,
-                 protocol: str=settings.BROADCAST_WEBSOCKET_PROTOCOL,
-                 verify_ssl: bool=settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
-                 endpoint: str='broadcast'):
+                 remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
+                 protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
+                 verify_ssl: bool = settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
+                 endpoint: str = 'broadcast'):
         self.name = name
         self.event_loop = event_loop
         self.stats = stats
@@ -112,16 +106,16 @@ class WebsocketTask():
         except client_exceptions.ClientConnectorError as e:
             logger.warn(f"Failed to connect to {self.remote_host}: '{e}'. Reconnecting ...")
             self.stats.record_connection_lost()
-            self.start(attempt=attempt+1)
+            self.start(attempt=attempt + 1)
         except asyncio.TimeoutError:
             logger.warn(f"Timeout while trying to connect to {self.remote_host}. Reconnecting ...")
             self.stats.record_connection_lost()
-            self.start(attempt=attempt+1)
+            self.start(attempt=attempt + 1)
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
             logger.warn(f"Websocket broadcast client exception {type(e)} {e}")
             self.stats.record_connection_lost()
-            self.start(attempt=attempt+1)
+            self.start(attempt=attempt + 1)
 
     def start(self, attempt=0):
         self.async_task = self.event_loop.create_task(self.connect(attempt=attempt))

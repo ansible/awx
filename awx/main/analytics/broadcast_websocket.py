@@ -1,8 +1,6 @@
 import datetime
-import os
 import asyncio
 import logging
-import json
 import aioredis
 import redis
 
@@ -11,10 +9,7 @@ from prometheus_client import (
     Gauge,
     Counter,
     Enum,
-    Histogram,
-    Enum,
     CollectorRegistry,
-    parser,
 )
 
 from django.conf import settings
@@ -50,7 +45,7 @@ class FixedSlidingWindow():
                     del self.buckets[k]
 
     def record(self, ts=datetime.datetime.now()):
-        now_bucket = int((ts-datetime.datetime(1970,1,1)).total_seconds())
+        now_bucket = int((ts - datetime.datetime(1970,1,1)).total_seconds())
 
         val = self.buckets.get(now_bucket, 0)
         self.buckets[now_bucket] = val + 1
@@ -118,15 +113,15 @@ class BroadcastWebsocketStats():
                                                 'Number of messages received, to be forwarded, by the broadcast websocket system',
                                                 registry=self._registry)
         self._messages_received = Gauge(f'awx_{self.remote_name}_messages_received',
-                                        'Number of messages received, to be forwarded, by the broadcast websocket system, for the duration of the current connection',
+                                        'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
                                         registry=self._registry)
         self._connection = Enum(f'awx_{self.remote_name}_connection',
-                                 'Websocket broadcast connection',
-                                 states=['disconnected', 'connected'],
-                                 registry=self._registry)
+                                'Websocket broadcast connection',
+                                states=['disconnected', 'connected'],
+                                registry=self._registry)
         self._connection_start = Gauge(f'awx_{self.remote_name}_connection_start',
                                        'Time the connection was established',
-                                        registry=self._registry)
+                                       registry=self._registry)
 
         self._messages_received_per_minute = Gauge(f'awx_{self.remote_name}_messages_received_per_minute',
                                                    'Messages received per minute',
@@ -160,6 +155,5 @@ class BroadcastWebsocketStats():
     def serialize(self):
         self.render()
 
-        data = {}
         registry_data = generate_latest(self._registry).decode('UTF-8')
         return registry_data

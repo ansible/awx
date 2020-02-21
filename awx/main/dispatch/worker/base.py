@@ -7,7 +7,6 @@ import signal
 import sys
 import redis
 import json
-import re
 import psycopg2
 from uuid import UUID
 from queue import Empty as QueueEmpty

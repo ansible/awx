@@ -1,15 +1,9 @@
-
-import os
 import json
 import logging
-import codecs
 import datetime
 import hmac
 import asyncio
 
-from django.utils.encoding import force_bytes
-from django.utils.encoding import smart_str
-from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.utils.encoding import force_bytes
@@ -18,8 +12,6 @@ from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
-
-from asgiref.sync import async_to_sync
 
 
 logger = logging.getLogger('awx.main.consumers')
@@ -37,7 +29,7 @@ class WebsocketSecretAuthHelper:
 
     @classmethod
     def construct_secret(cls):
-        nonce_serialized = "{}".format(int((datetime.datetime.utcnow()-datetime.datetime.fromtimestamp(0)).total_seconds()))
+        nonce_serialized = "{}".format(int((datetime.datetime.utcnow() - datetime.datetime.fromtimestamp(0)).total_seconds()))
         payload_dict = {
             'secret': settings.BROADCAST_WEBSOCKET_SECRET,
             'nonce': nonce_serialized
@@ -53,8 +45,6 @@ class WebsocketSecretAuthHelper:
 
     @classmethod
     def verify_secret(cls, s, nonce_tolerance=300):
-        hex_decoder = codecs.getdecoder("hex_codec")
-
         try:
             (prefix, payload) = s.split(' ')
             if prefix != 'HMAC-SHA256':
@@ -82,7 +72,7 @@ class WebsocketSecretAuthHelper:
         # Avoid timing attack and check the nonce after all the heavy lifting
         now = datetime.datetime.utcnow()
         nonce_parsed = datetime.datetime.fromtimestamp(int(nonce_parsed))
-        if (now-nonce_parsed).total_seconds() > nonce_tolerance:
+        if (now - nonce_parsed).total_seconds() > nonce_tolerance:
             raise ValueError("Potential replay attack or machine(s) time out of sync.")
 
         return True
@@ -160,9 +150,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             XRF_KEY not in self.scope["session"] or
             xrftoken != self.scope["session"][XRF_KEY]
         ):
-            logger.error(
-            "access denied to channel, XRF mismatch for {}".format(user.username)
-            )
+            logger.error(f"access denied to channel, XRF mismatch for {user.username}")
             await self.send_json({"error": "access denied to channel"})
             return
 

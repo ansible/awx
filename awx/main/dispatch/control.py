@@ -1,5 +1,4 @@
 import logging
-import socket
 import string
 import random
 import json
