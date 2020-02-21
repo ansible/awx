@@ -24,11 +24,36 @@ export default function AlertModal({
   ...props
 }) {
   const variantIcons = {
-    danger: <ExclamationCircleIcon size="lg" css="color: #c9190b" />,
-    error: <TimesCircleIcon size="lg" css="color: #c9190b" />,
-    info: <InfoCircleIcon size="lg" css="color: #73bcf7" />,
-    success: <CheckCircleIcon size="lg" css="color: #92d400" />,
-    warning: <ExclamationTriangleIcon size="lg" css="color: #f0ab00" />,
+    danger: (
+      <ExclamationCircleIcon
+        size="lg"
+        css="color: var(--pf-global--danger-color--100)"
+      />
+    ),
+    error: (
+      <TimesCircleIcon
+        size="lg"
+        css="color: var(--pf-global--danger-color--100)"
+      />
+    ),
+    info: (
+      <InfoCircleIcon
+        size="lg"
+        css="color: var(--pf-global--info-color--100)"
+      />
+    ),
+    success: (
+      <CheckCircleIcon
+        size="lg"
+        css="color: var(--pf-global--success-color--100)"
+      />
+    ),
+    warning: (
+      <ExclamationTriangleIcon
+        size="lg"
+        css="color: var(--pf-global--warning-color--100)"
+      />
+    ),
   };
 
   const customHeader = (

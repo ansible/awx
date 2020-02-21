@@ -104,7 +104,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa bkDjEn"
+                        class="sc-bdVaJa hIExGP"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -223,7 +223,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa bkDjEn"
+                        class="sc-bdVaJa hIExGP"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -474,9 +474,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                       "componentStyle": ComponentStyle {
                                         "componentId": "sc-bdVaJa",
                                         "isStatic": true,
-                                        "lastClassName": "bkDjEn",
+                                        "lastClassName": "hIExGP",
                                         "rules": Array [
-                                          "color: #c9190b",
+                                          "color: var(--pf-global--danger-color--100)",
                                         ],
                                       },
                                       "displayName": "Styled(ExclamationCircleIcon)",
@@ -493,7 +493,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   size="lg"
                                 >
                                   <ExclamationCircleIcon
-                                    className="sc-bdVaJa bkDjEn"
+                                    className="sc-bdVaJa hIExGP"
                                     color="currentColor"
                                     noVerticalAlign={false}
                                     size="lg"
@@ -502,7 +502,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                     <svg
                                       aria-hidden={true}
                                       aria-labelledby={null}
-                                      className="sc-bdVaJa bkDjEn"
+                                      className="sc-bdVaJa hIExGP"
                                       fill="currentColor"
                                       height="2em"
                                       role="img"
