@@ -70,7 +70,7 @@ function CredentialDetail({ i18n, credential }) {
     setHasContentLoading(false);
   };
 
-  const renderDetail = ({ id, label, type, secret }) => {
+  const renderDetail = ({ id, label, type }) => {
     let detail;
 
     if (type === 'boolean') {
@@ -81,8 +81,16 @@ function CredentialDetail({ i18n, credential }) {
           value={<List>{inputs[id] && <ListItem>{label}</ListItem>}</List>}
         />
       );
-    } else if (secret === true) {
-      detail = <Detail key={id} label={label} value={i18n._(t`Encrypted`)} />;
+    } else if (inputs[id] === '$encrypted$') {
+      const isEncrypted = true;
+      detail = (
+        <Detail
+          key={id}
+          label={label}
+          value={i18n._(t`Encrypted`)}
+          isEncrypted={isEncrypted}
+        />
+      );
     } else {
       detail = <Detail key={id} label={label} value={inputs[id]} />;
     }

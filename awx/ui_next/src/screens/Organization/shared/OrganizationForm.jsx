@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { Formik, Field } from 'formik';
+import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -11,27 +11,93 @@ import { ConfigContext } from '@contexts/Config';
 import AnsibleSelect from '@components/AnsibleSelect';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import FormRow from '@components/FormRow';
 import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { InstanceGroupsLookup } from '@components/Lookup/';
 import { getAddedAndRemoved } from '@util/lists';
 import { required, minMaxValue } from '@util/validators';
+import { FormColumnLayout } from '@components/FormLayout';
 
-function OrganizationForm({
-  organization,
+function OrganizationFormFields({
   i18n,
   me,
-  onCancel,
-  onSubmit,
-  submitError,
+  instanceGroups,
+  setInstanceGroups,
 }) {
+  const [venvField] = useField('custom_virtualenv');
+
   const defaultVenv = {
     label: i18n._(t`Use Default Ansible Environment`),
     value: '/venv/ansible/',
     key: 'default',
   };
   const { custom_virtualenvs } = useContext(ConfigContext);
+
+  return (
+    <>
+      <FormField
+        id="org-name"
+        name="name"
+        type="text"
+        label={i18n._(t`Name`)}
+        validate={required(null, i18n)}
+        isRequired
+      />
+      <FormField
+        id="org-description"
+        name="description"
+        type="text"
+        label={i18n._(t`Description`)}
+      />
+      <FormField
+        id="org-max_hosts"
+        name="max_hosts"
+        type="number"
+        label={i18n._(t`Max Hosts`)}
+        tooltip={i18n._(
+          t`The maximum number of hosts allowed to be managed by this organization.
+                    Value defaults to 0 which means no limit. Refer to the Ansible
+                    documentation for more details.`
+        )}
+        validate={minMaxValue(0, Number.MAX_SAFE_INTEGER, i18n)}
+        me={me || {}}
+        isDisabled={!me.is_superuser}
+      />
+      {custom_virtualenvs && custom_virtualenvs.length > 1 && (
+        <FormGroup
+          fieldId="org-custom-virtualenv"
+          label={i18n._(t`Ansible Environment`)}
+        >
+          <AnsibleSelect
+            id="org-custom-virtualenv"
+            data={[
+              defaultVenv,
+              ...custom_virtualenvs
+                .filter(value => value !== defaultVenv.value)
+                .map(value => ({ value, label: value, key: value })),
+            ]}
+            {...venvField}
+          />
+        </FormGroup>
+      )}
+      <InstanceGroupsLookup
+        value={instanceGroups}
+        onChange={setInstanceGroups}
+        tooltip={i18n._(
+          t`Select the Instance Groups for this Organization to run on.`
+        )}
+      />
+    </>
+  );
+}
+
+function OrganizationForm({
+  organization,
+  onCancel,
+  onSubmit,
+  submitError,
+  ...rest
+}) {
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [initialInstanceGroups, setInitialInstanceGroups] = useState([]);
@@ -100,78 +166,23 @@ function OrganizationForm({
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormRow>
-            <FormField
-              id="org-name"
-              name="name"
-              type="text"
-              label={i18n._(t`Name`)}
-              validate={required(null, i18n)}
-              isRequired
+          <FormColumnLayout>
+            <OrganizationFormFields
+              instanceGroups={instanceGroups}
+              setInstanceGroups={setInstanceGroups}
+              {...rest}
             />
-            <FormField
-              id="org-description"
-              name="description"
-              type="text"
-              label={i18n._(t`Description`)}
+            <FormSubmitError error={submitError} />
+            <FormActionGroup
+              onCancel={handleCancel}
+              onSubmit={formik.handleSubmit}
             />
-            <FormField
-              id="org-max_hosts"
-              name="max_hosts"
-              type="number"
-              label={i18n._(t`Max Hosts`)}
-              tooltip={i18n._(
-                t`The maximum number of hosts allowed to be managed by this organization.
-                      Value defaults to 0 which means no limit. Refer to the Ansible
-                      documentation for more details.`
-              )}
-              validate={minMaxValue(0, Number.MAX_SAFE_INTEGER, i18n)}
-              me={me || {}}
-              isDisabled={!me.is_superuser}
-            />
-            {custom_virtualenvs && custom_virtualenvs.length > 1 && (
-              <Field name="custom_virtualenv">
-                {({ field }) => (
-                  <FormGroup
-                    fieldId="org-custom-virtualenv"
-                    label={i18n._(t`Ansible Environment`)}
-                  >
-                    <AnsibleSelect
-                      id="org-custom-virtualenv"
-                      data={[
-                        defaultVenv,
-                        ...custom_virtualenvs
-                          .filter(value => value !== defaultVenv.value)
-                          .map(value => ({ value, label: value, key: value })),
-                      ]}
-                      {...field}
-                    />
-                  </FormGroup>
-                )}
-              </Field>
-            )}
-          </FormRow>
-          <InstanceGroupsLookup
-            value={instanceGroups}
-            onChange={setInstanceGroups}
-            tooltip={i18n._(
-              t`Select the Instance Groups for this Organization to run on.`
-            )}
-          />
-          <FormSubmitError error={submitError} />
-          <FormActionGroup
-            onCancel={handleCancel}
-            onSubmit={formik.handleSubmit}
-          />
+          </FormColumnLayout>
         </Form>
       )}
     </Formik>
   );
 }
-
-FormField.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
-};
 
 OrganizationForm.propTypes = {
   organization: PropTypes.shape(),

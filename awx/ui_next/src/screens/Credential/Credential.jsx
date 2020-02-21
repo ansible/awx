@@ -6,22 +6,28 @@ import {
   Switch,
   useParams,
   useLocation,
+  useRouteMatch,
   Route,
   Redirect,
   Link,
 } from 'react-router-dom';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
+import { ResourceAccessList } from '@components/ResourceAccessList';
 import ContentError from '@components/ContentError';
 import RoutedTabs from '@components/RoutedTabs';
 import CredentialDetail from './CredentialDetail';
+import CredentialEdit from './CredentialEdit';
 import { CredentialsAPI } from '@api';
 
 function Credential({ i18n, setBreadcrumb }) {
   const [credential, setCredential] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const match = useRouteMatch({
+    path: '/credentials/:id',
+  });
   const { id } = useParams();
 
   useEffect(() => {
@@ -37,17 +43,19 @@ function Credential({ i18n, setBreadcrumb }) {
       }
     }
     fetchData();
-  }, [id, setBreadcrumb]);
+  }, [id, pathname, setBreadcrumb]);
 
   const tabsArray = [
     { name: i18n._(t`Details`), link: `/credentials/${id}/details`, id: 0 },
-    { name: i18n._(t`Access`), link: `/credentials/${id}/access`, id: 1 },
-    {
-      name: i18n._(t`Notifications`),
-      link: `/credentials/${id}/notifications`,
-      id: 2,
-    },
   ];
+
+  if (credential && credential.organization) {
+    tabsArray.push({
+      name: i18n._(t`Access`),
+      link: `/credentials/${id}/access`,
+      id: 1,
+    });
+  }
 
   let cardHeader = hasContentLoading ? null : (
     <TabbedCardHeader>
@@ -56,7 +64,7 @@ function Credential({ i18n, setBreadcrumb }) {
     </TabbedCardHeader>
   );
 
-  if (location.pathname.endsWith('edit') || location.pathname.endsWith('add')) {
+  if (pathname.endsWith('edit') || pathname.endsWith('add')) {
     cardHeader = null;
   }
 
@@ -87,11 +95,45 @@ function Credential({ i18n, setBreadcrumb }) {
             to="/credentials/:id/details"
             exact
           />
-          {credential && (
-            <Route path="/credentials/:id/details">
-              <CredentialDetail credential={credential} />
-            </Route>
-          )}
+          {credential && [
+            <Route
+              key="details"
+              path="/credentials/:id/details"
+              render={() => <CredentialDetail credential={credential} />}
+            />,
+            <Route
+              key="edit"
+              path="/credentials/:id/edit"
+              render={() => <CredentialEdit credential={credential} />}
+            />,
+            credential.organization && (
+              <Route
+                key="access"
+                path="/credentials/:id/access"
+                render={() => (
+                  <ResourceAccessList
+                    resource={credential}
+                    apiModel={CredentialsAPI}
+                  />
+                )}
+              />
+            ),
+            <Route
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link to={`/credentials/${match.params.id}/details`}>
+                        {i18n._(`View Credential Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
+            />,
+          ]}
           <Route
             key="not-found"
             path="*"

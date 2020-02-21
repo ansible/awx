@@ -49,10 +49,6 @@ describe('<CredentialDetail />', () => {
       mockCredential.summary_fields.credential_type.name
     );
     expectDetailToMatch(wrapper, 'Username', mockCredential.inputs.username);
-    expectDetailToMatch(wrapper, 'Password', 'Encrypted');
-    expectDetailToMatch(wrapper, 'SSH Private Key', 'Encrypted');
-    expectDetailToMatch(wrapper, 'Signed SSH Certificate', 'Encrypted');
-    expectDetailToMatch(wrapper, 'Private Key Passphrase', 'Encrypted');
     expectDetailToMatch(
       wrapper,
       'Privilege Escalation Method',

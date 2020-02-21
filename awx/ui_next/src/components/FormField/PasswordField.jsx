@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Field } from 'formik';
+import { useField } from 'formik';
 import {
   Button,
   ButtonVariant,
@@ -16,54 +16,49 @@ import { EyeIcon, EyeSlashIcon } from '@patternfly/react-icons';
 function PasswordField(props) {
   const { id, name, label, validate, isRequired, i18n } = props;
   const [inputType, setInputType] = useState('password');
+  const [field, meta] = useField({ name, validate });
+
+  const isValid = !(meta.touched && meta.error);
 
   const handlePasswordToggle = () => {
     setInputType(inputType === 'text' ? 'password' : 'text');
   };
 
   return (
-    <Field name={name} validate={validate}>
-      {({ field, form }) => {
-        const isValid =
-          form && (!form.touched[field.name] || !form.errors[field.name]);
-        return (
-          <FormGroup
-            fieldId={id}
-            helperTextInvalid={form.errors[field.name]}
-            isRequired={isRequired}
-            isValid={isValid}
-            label={label}
+    <FormGroup
+      fieldId={id}
+      helperTextInvalid={meta.error}
+      isRequired={isRequired}
+      isValid={isValid}
+      label={label}
+    >
+      <InputGroup>
+        <Tooltip
+          content={inputType === 'password' ? i18n._(t`Show`) : i18n._(t`Hide`)}
+        >
+          <Button
+            variant={ButtonVariant.control}
+            aria-label={i18n._(t`Toggle Password`)}
+            onClick={handlePasswordToggle}
           >
-            <InputGroup>
-              <Tooltip
-                content={
-                  inputType === 'password' ? i18n._(t`Show`) : i18n._(t`Hide`)
-                }
-              >
-                <Button
-                  variant={ButtonVariant.control}
-                  aria-label={i18n._(t`Toggle Password`)}
-                  onClick={handlePasswordToggle}
-                >
-                  {inputType === 'password' && <EyeSlashIcon />}
-                  {inputType === 'text' && <EyeIcon />}
-                </Button>
-              </Tooltip>
-              <TextInput
-                id={id}
-                isRequired={isRequired}
-                isValid={isValid}
-                type={inputType}
-                {...field}
-                onChange={(value, event) => {
-                  field.onChange(event);
-                }}
-              />
-            </InputGroup>
-          </FormGroup>
-        );
-      }}
-    </Field>
+            {inputType === 'password' && <EyeSlashIcon />}
+            {inputType === 'text' && <EyeIcon />}
+          </Button>
+        </Tooltip>
+        <TextInput
+          id={id}
+          placeholder={field.value === '$encrypted$' ? 'ENCRYPTED' : undefined}
+          {...field}
+          value={field.value === '$encrypted$' ? '' : field.value}
+          isRequired={isRequired}
+          isValid={isValid}
+          type={inputType}
+          onChange={(_, event) => {
+            field.onChange(event);
+          }}
+        />
+      </InputGroup>
+    </FormGroup>
   );
 }
 

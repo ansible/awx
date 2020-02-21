@@ -1,18 +1,15 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Field } from 'formik';
+import { useField } from 'formik';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
 import FormField, { CheckboxField } from '@components/FormField';
 import { required } from '@util/validators';
-import FormRow from '@components/FormRow';
 import { FormGroup, Title } from '@patternfly/react-core';
-import styled from 'styled-components';
-
-export const SubFormTitle = styled(Title)`
-  --pf-c-title--m-md--FontWeight: 700;
-  grid-column: 1 / -1;
-`;
+import {
+  FormCheckboxLayout,
+  FormFullWidthLayout,
+} from '@components/FormLayout';
 
 export const UrlFormField = withI18n()(({ i18n, tooltip }) => (
   <FormField
@@ -41,32 +38,28 @@ export const BranchFormField = withI18n()(({ i18n, label }) => (
 ));
 
 export const ScmCredentialFormField = withI18n()(
-  ({ i18n, credential, onCredentialSelection }) => (
-    <Field name="credential">
-      {({ form }) => (
-        <CredentialLookup
-          credentialTypeId={credential.typeId}
-          label={i18n._(t`SCM Credential`)}
-          value={credential.value}
-          onChange={value => {
-            onCredentialSelection('scm', value);
-            form.setFieldValue('credential', value ? value.id : '');
-          }}
-        />
-      )}
-    </Field>
-  )
+  ({ i18n, credential, onCredentialSelection }) => {
+    const credHelpers = useField('credential')[2];
+
+    return (
+      <CredentialLookup
+        credentialTypeId={credential.typeId}
+        label={i18n._(t`SCM Credential`)}
+        value={credential.value}
+        onChange={value => {
+          onCredentialSelection('scm', value);
+          credHelpers.setValue(value ? value.id : '');
+        }}
+      />
+    );
+  }
 );
 
 export const ScmTypeOptions = withI18n()(
   ({ i18n, scmUpdateOnLaunch, hideAllowOverride }) => (
-    <>
-      <FormGroup
-        css="grid-column: 1/-1"
-        fieldId="project-option-checkboxes"
-        label={i18n._(t`Options`)}
-      >
-        <FormRow>
+    <FormFullWidthLayout>
+      <FormGroup fieldId="project-option-checkboxes" label={i18n._(t`Options`)}>
+        <FormCheckboxLayout>
           <CheckboxField
             id="option-scm-clean"
             name="scm_clean"
@@ -81,9 +74,9 @@ export const ScmTypeOptions = withI18n()(
             label={i18n._(t`Delete`)}
             tooltip={i18n._(
               t`Delete the local repository in its entirety prior to
-                performing an update. Depending on the size of the
-                repository this may significantly increase the amount
-                of time required to complete an update.`
+                  performing an update. Depending on the size of the
+                  repository this may significantly increase the amount
+                  of time required to complete an update.`
             )}
           />
           <CheckboxField
@@ -92,7 +85,7 @@ export const ScmTypeOptions = withI18n()(
             label={i18n._(t`Update Revision on Launch`)}
             tooltip={i18n._(
               t`Each time a job runs using this project, update the
-                revision of the project prior to starting the job.`
+                  revision of the project prior to starting the job.`
             )}
           />
           {!hideAllowOverride && (
@@ -102,15 +95,16 @@ export const ScmTypeOptions = withI18n()(
               label={i18n._(t`Allow Branch Override`)}
               tooltip={i18n._(
                 t`Allow changing the SCM branch or revision in a job
-                  template that uses this project.`
+                    template that uses this project.`
               )}
             />
           )}
-        </FormRow>
+        </FormCheckboxLayout>
       </FormGroup>
+
       {scmUpdateOnLaunch && (
         <>
-          <SubFormTitle size="md">{i18n._(t`Option Details`)}</SubFormTitle>
+          <Title size="md">{i18n._(t`Option Details`)}</Title>
           <FormField
             id="project-cache-timeout"
             name="scm_update_cache_timeout"
@@ -126,6 +120,6 @@ export const ScmTypeOptions = withI18n()(
           />
         </>
       )}
-    </>
+    </FormFullWidthLayout>
   )
 );

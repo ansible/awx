@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Field } from 'formik';
-import { FormGroup, TextInput, Tooltip } from '@patternfly/react-core';
+import { useField } from 'formik';
+import {
+  FormGroup,
+  TextInput,
+  TextArea,
+  Tooltip,
+} from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
@@ -18,53 +23,81 @@ function FormField(props) {
     tooltipMaxWidth,
     validate,
     isRequired,
+    type,
     ...rest
   } = props;
 
-  return (
-    <Field name={name} validate={validate}>
-      {({ field, form }) => {
-        const isValid =
-          form && (!form.touched[field.name] || !form.errors[field.name]);
+  const [field, meta] = useField({ name, validate });
+  const isValid = !(meta.touched && meta.error);
 
-        return (
-          <FormGroup
-            fieldId={id}
-            helperTextInvalid={form.errors[field.name]}
+  return (
+    <>
+      {(type === 'textarea' && (
+        <FormGroup
+          fieldId={id}
+          helperTextInvalid={meta.error}
+          isRequired={isRequired}
+          isValid={isValid}
+          label={label}
+        >
+          {tooltip && (
+            <Tooltip
+              content={tooltip}
+              maxWidth={tooltipMaxWidth}
+              position="right"
+            >
+              <QuestionCircleIcon />
+            </Tooltip>
+          )}
+          <TextArea
+            id={id}
             isRequired={isRequired}
             isValid={isValid}
-            label={label}
-          >
-            {tooltip && (
-              <Tooltip
-                content={tooltip}
-                maxWidth={tooltipMaxWidth}
-                position="right"
-              >
-                <QuestionCircleIcon />
-              </Tooltip>
-            )}
-            <TextInput
-              id={id}
-              isRequired={isRequired}
-              isValid={isValid}
-              {...rest}
-              {...field}
-              onChange={(value, event) => {
-                field.onChange(event);
-              }}
-            />
-          </FormGroup>
-        );
-      }}
-    </Field>
+            resizeOrientation="vertical"
+            {...rest}
+            {...field}
+            onChange={(value, event) => {
+              field.onChange(event);
+            }}
+          />
+        </FormGroup>
+      )) || (
+        <FormGroup
+          fieldId={id}
+          helperTextInvalid={meta.error}
+          isRequired={isRequired}
+          isValid={isValid}
+          label={label}
+        >
+          {tooltip && (
+            <Tooltip
+              content={tooltip}
+              maxWidth={tooltipMaxWidth}
+              position="right"
+            >
+              <QuestionCircleIcon />
+            </Tooltip>
+          )}
+          <TextInput
+            id={id}
+            isRequired={isRequired}
+            isValid={isValid}
+            {...rest}
+            {...field}
+            onChange={(value, event) => {
+              field.onChange(event);
+            }}
+          />
+        </FormGroup>
+      )}
+    </>
   );
 }
 
 FormField.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   type: PropTypes.string,
   validate: PropTypes.func,
   isRequired: PropTypes.bool,

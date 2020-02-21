@@ -1,7 +1,7 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Field } from 'formik';
+import { useField } from 'formik';
 import { required } from '@util/validators';
 import AnsibleSelect from '@components/AnsibleSelect';
 import FormField, { FieldTooltip } from '@components/FormField';
@@ -34,6 +34,10 @@ const ManualSubForm = ({
         label: path,
       })),
   ];
+  const [pathField, pathMeta, pathHelpers] = useField({
+    name: 'local_path',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
 
   return (
     <>
@@ -72,36 +76,27 @@ const ManualSubForm = ({
           </span>
         }
       />
-      {options.length !== 1 && (
-        <Field
-          name="local_path"
-          validate={required(i18n._(t`Select a value for this field`), i18n)}
-        >
-          {({ field, form }) => (
-            <FormGroup
-              fieldId="project-local-path"
-              helperTextInvalid={form.errors.local_path}
-              isRequired
-              isValid={!form.touched.local_path || !form.errors.local_path}
-              label={i18n._(t`Playbook Directory`)}
-            >
-              <FieldTooltip
-                content={i18n._(t`Select from the list of directories found in
-                the Project Base Path. Together the base path and the playbook
-                directory provide the full path used to locate playbooks.`)}
-              />
-              <AnsibleSelect
-                {...field}
-                id="local_path"
-                data={options}
-                onChange={(event, value) => {
-                  form.setFieldValue('local_path', value);
-                }}
-              />
-            </FormGroup>
-          )}
-        </Field>
-      )}
+      <FormGroup
+        fieldId="project-local-path"
+        helperTextInvalid={pathMeta.error}
+        isRequired
+        isValid={!pathMeta.touched || !pathMeta.error}
+        label={i18n._(t`Playbook Directory`)}
+      >
+        <FieldTooltip
+          content={i18n._(t`Select from the list of directories found in
+          the Project Base Path. Together the base path and the playbook
+          directory provide the full path used to locate playbooks.`)}
+        />
+        <AnsibleSelect
+          {...pathField}
+          id="local_path"
+          data={options}
+          onChange={(event, value) => {
+            pathHelpers.setValue(value);
+          }}
+        />
+      </FormGroup>
     </>
   );
 };

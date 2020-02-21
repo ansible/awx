@@ -19,7 +19,7 @@ function ExpandingContainer({ isExpanded, children }) {
   });
   useEffect(() => {
     setContentHeight(ref.current.scrollHeight);
-  }, [setContentHeight]);
+  }, [setContentHeight, children]);
   const height = isExpanded ? contentHeight : '0';
   return (
     <Container

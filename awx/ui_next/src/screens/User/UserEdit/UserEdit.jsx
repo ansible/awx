@@ -9,6 +9,7 @@ function UserEdit({ user, history }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
+    setFormSubmitError(null);
     try {
       await UsersAPI.update(user.id, values);
       history.push(`/users/${user.id}/details`);

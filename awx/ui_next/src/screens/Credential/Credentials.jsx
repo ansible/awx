@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
+import { Config } from '@contexts/Config';
 import Breadcrumbs from '@components/Breadcrumbs';
 import Credential from './Credential';
 import CredentialAdd from './CredentialAdd';
@@ -24,7 +24,9 @@ function Credentials({ i18n }) {
         '/credentials': i18n._(t`Credentials`),
         '/credentials/add': i18n._(t`Create New Credential`),
         [`/credentials/${credential.id}`]: `${credential.name}`,
+        [`/credentials/${credential.id}/edit`]: i18n._(t`Edit Details`),
         [`/credentials/${credential.id}/details`]: i18n._(t`Details`),
+        [`/credentials/${credential.id}/access`]: i18n._(t`Access`),
       });
     },
     [i18n]
@@ -35,7 +37,7 @@ function Credentials({ i18n }) {
       <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route path="/credentials/add">
-          <CredentialAdd />
+          <Config>{({ me }) => <CredentialAdd me={me || {}} />}</Config>
         </Route>
         <Route path="/credentials/:id">
           <Credential setBreadcrumb={buildBreadcrumbConfig} />

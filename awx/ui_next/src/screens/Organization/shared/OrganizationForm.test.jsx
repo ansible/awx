@@ -121,6 +121,11 @@ describe('<OrganizationForm />', () => {
   });
 
   test('changing inputs and saving triggers expected callback', async () => {
+    OrganizationsAPI.readInstanceGroups.mockReturnValue({
+      data: {
+        results: mockInstanceGroups,
+      },
+    });
     let wrapper;
     const onSubmit = jest.fn();
     await act(async () => {

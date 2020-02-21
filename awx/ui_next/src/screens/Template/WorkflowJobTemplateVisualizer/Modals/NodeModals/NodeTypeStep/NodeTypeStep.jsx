@@ -5,7 +5,7 @@ import { func, number, shape, string } from 'prop-types';
 import styled from 'styled-components';
 import { Formik, Field } from 'formik';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
-import FormRow from '@components/FormRow';
+import { FormFullWidthLayout } from '@components/FormLayout';
 import AnsibleSelect from '@components/AnsibleSelect';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
@@ -119,7 +119,7 @@ function NodeTypeStep({
         >
           {() => (
             <Form css="margin-top: 20px;">
-              <FormRow>
+              <FormFullWidthLayout>
                 <Field name="name">
                   {({ field, form }) => {
                     const isValid =
@@ -149,8 +149,6 @@ function NodeTypeStep({
                     );
                   }}
                 </Field>
-              </FormRow>
-              <FormRow>
                 <Field name="description">
                   {({ field }) => (
                     <FormGroup
@@ -169,8 +167,6 @@ function NodeTypeStep({
                     </FormGroup>
                   )}
                 </Field>
-              </FormRow>
-              <FormRow>
                 <FormGroup
                   label={i18n._(t`Timeout`)}
                   fieldId="approval-timeout"
@@ -236,7 +232,7 @@ function NodeTypeStep({
                     </Field>
                   </div>
                 </FormGroup>
-              </FormRow>
+              </FormFullWidthLayout>
             </Form>
           )}
         </Formik>

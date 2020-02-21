@@ -14,7 +14,7 @@ const DetailName = styled(({ fullWidth, ...props }) => (
   `}
 `;
 
-const DetailValue = styled(({ fullWidth, ...props }) => (
+const DetailValue = styled(({ fullWidth, isEncrypted, ...props }) => (
   <TextListItem {...props} />
 ))`
   word-break: break-all;
@@ -22,6 +22,12 @@ const DetailValue = styled(({ fullWidth, ...props }) => (
     props.fullWidth &&
     `
     grid-column: 2 / -1;
+  `}
+  ${props =>
+    props.isEncrypted &&
+    `
+    text-transform: uppercase
+    color: var(--pf-global--Color--400);
   `}
 `;
 
@@ -32,6 +38,7 @@ const Detail = ({
   className,
   dataCy,
   alwaysVisible,
+  isEncrypted,
 }) => {
   if (!value && typeof value !== 'number' && !alwaysVisible) {
     return null;
@@ -55,6 +62,7 @@ const Detail = ({
         component={TextListItemVariants.dd}
         fullWidth={fullWidth}
         data-cy={valueCy}
+        isEncrypted={isEncrypted}
       >
         {value}
       </DetailValue>
