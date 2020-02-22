@@ -25,6 +25,7 @@ class WorkflowJobTemplate extends Component {
       contentError: null,
       hasContentLoading: true,
       template: null,
+      webhook_key: null,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
@@ -66,7 +67,6 @@ class WorkflowJobTemplate extends Component {
         );
         data.summary_fields.webhook_credential.kind = name;
       }
-      setBreadcrumb(data);
       this.setState({ template: data });
       setBreadcrumb(data);
     } catch (err) {
@@ -141,7 +141,7 @@ class WorkflowJobTemplate extends Component {
 
     return (
       <PageSection>
-        <Card className="awx-c-card">
+        <Card>
           {cardHeader}
           <Switch>
             <Redirect

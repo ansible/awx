@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '@lingui/macro';
+import { useRouteMatch, useParams } from 'react-router-dom';
+
 import { func, shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
@@ -7,42 +9,34 @@ import { Formik, Field } from 'formik';
 import {
   Form,
   FormGroup,
-  Checkbox,
   InputGroup,
   Button,
   TextInput,
+  Checkbox,
 } from '@patternfly/react-core';
 import { required } from '@util/validators';
 import { SyncAltIcon } from '@patternfly/react-icons';
-import { useParams } from 'react-router-dom';
 
 import AnsibleSelect from '@components/AnsibleSelect';
 import { WorkflowJobTemplatesAPI, CredentialTypesAPI } from '@api';
-import FormRow from '@components/FormRow';
 
 import FormField, {
   FieldTooltip,
   FormSubmitError,
 } from '@components/FormField';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+  FormCheckboxLayout,
+} from '@components/FormLayout';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
 import CredentialLookup from '@components/Lookup/CredentialLookup';
 import { InventoryLookup } from '@components/Lookup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import FormActionGroup from '@components/FormActionGroup';
 import ContentError from '@components/ContentError';
-import styled from 'styled-components';
 import LabelSelect from './LabelSelect';
-
-const GridFormGroup = styled(FormGroup)`
-  & > label {
-    grid-column: 1 / -1;
-  }
-
-  && {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-`;
+import CheckboxField from '../../../components/FormField/CheckboxField';
 
 function WorkflowJobTemplateForm({
   handleSubmit,
@@ -53,25 +47,17 @@ function WorkflowJobTemplateForm({
   submitError,
 }) {
   const { id } = useParams();
+  const wfjtAddMatch = useRouteMatch('/templates/workflow_job_template/add');
+
   const urlOrigin = window.location.origin;
+
   const [contentError, setContentError] = useState(null);
-  const [inventory, setInventory] = useState(
-    template?.summary_fields?.inventory || null
-  );
-  const [organization, setOrganization] = useState(
-    template?.summary_fields?.organization || null
-  );
-  const [webHookKey, setWebHookKey] = useState(webhook_key);
+  const [webhookKey, setWebHookKey] = useState(webhook_key);
   const [credTypeId, setCredentialTypeId] = useState();
   const [webhookService, setWebHookService] = useState(
     template.webhook_service || ''
   );
-  const [hasWebhooks, setHasWebhooks] = useState(
-    webhookService !== '' || false
-  );
-  const [webhookCredential, setWebHookCredential] = useState(
-    template?.summary_fields?.webhook_credential || null
-  );
+  const [hasWebhooks, setHasWebhooks] = useState(Boolean(webhookService));
 
   const webhookServiceOptions = [
     {
@@ -83,14 +69,12 @@ function WorkflowJobTemplateForm({
     {
       value: 'github',
       key: 'github',
-      namespace: 'git_hub',
       label: i18n._(t`GitHub`),
       isDisabled: false,
     },
     {
       value: 'gitlab',
       key: 'gitlab',
-      namespace: 'git_lab',
       label: i18n._(t`Git Lab`),
       isDisabled: false,
     },
@@ -105,9 +89,7 @@ function WorkflowJobTemplateForm({
         const {
           data: { results },
         } = await CredentialTypesAPI.read({
-          namespace: webhookService.includes('hub')
-            ? 'github_token'
-            : 'gitlab_token',
+          namespace: `${webhookService}_token`,
         });
         setCredentialTypeId(results[0].id);
       } catch (err) {
@@ -128,20 +110,67 @@ function WorkflowJobTemplateForm({
     }
   };
 
+  let initialWebhookKey = webhook_key;
+
+  const setWebhookValues = (form, webhookServiceValue) => {
+    if (
+      webhookServiceValue === form.initialValues.webhook_service ||
+      webhookServiceValue === ''
+    ) {
+      form.setFieldValue(
+        'webhook_credential',
+        form.initialValues.webhook_credential
+      );
+      form.setFieldValue('webhook_url', form.initialValues.webhook_url);
+      form.setFieldValue('webhook_service', form.initialValues.webhook_service);
+
+      setWebHookKey(initialWebhookKey);
+    } else {
+      form.setFieldValue('webhook_credential', null);
+      form.setFieldValue(
+        'webhook_url',
+        `${urlOrigin}/api/v2/workflow_job_templates/${template.id}/${webhookServiceValue}/`
+      );
+
+      setWebHookKey('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE');
+    }
+  };
+
+  const handleWebhookEnablement = (
+    form,
+    enabledWebhooks,
+    webhookServiceValue
+  ) => {
+    if (!enabledWebhooks) {
+      initialWebhookKey = webhookKey;
+      form.setFieldValue('webhook_credential', null);
+      form.setFieldValue('webhook_service', '');
+      form.setFieldValue('webhook_url', '');
+      setWebHookService('');
+      setWebHookKey('');
+    } else {
+      setWebhookValues(form, webhookServiceValue);
+    }
+  };
+
   if (contentError) {
     return <ContentError error={contentError} />;
   }
-
   return (
     <Formik
-      onSubmit={handleSubmit}
+      onSubmit={values => {
+        values.webhook_credential = values?.webhook_credential?.id;
+        values.organization = values?.organization?.id;
+        values.inventory = values?.inventory?.id;
+        return handleSubmit(values);
+      }}
       initialValues={{
         name: template.name || '',
         description: template.description || '',
-        inventory: template.summary_fields?.inventory?.id || '',
-        organization: template.summary_fields?.organization?.id || '',
+        inventory: template?.summary_fields?.inventory || null,
+        organization: template?.summary_fields?.organization || null,
         labels: template.summary_fields?.labels?.results || [],
-        variables: template.variables || '---',
+        extra_vars: template.variables || '---',
         limit: template.limit || '',
         scmBranch: template.scm_branch || '',
         allow_simultaneous: template.allow_simultaneous || false,
@@ -149,8 +178,8 @@ function WorkflowJobTemplateForm({
           template?.related?.webhook_receiver &&
           `${urlOrigin}${template?.related?.webhook_receiver}`,
         webhook_credential:
-          template?.summary_fields?.webhook_credential?.id || null,
-        webhook_service: webhookService,
+          template?.summary_fields?.webhook_credential || null,
+        webhook_service: template.webhook_service || '',
         ask_limit_on_launch: template.ask_limit_on_launch || false,
         ask_inventory_on_launch: template.ask_inventory_on_launch || false,
         ask_variables_on_launch: template.ask_variables_on_launch || false,
@@ -159,7 +188,7 @@ function WorkflowJobTemplateForm({
     >
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormRow>
+          <FormColumnLayout>
             <FormField
               id="wfjt-name"
               name="name"
@@ -179,7 +208,7 @@ function WorkflowJobTemplateForm({
               label={i18n._(t`Organization`)}
               name="organization"
             >
-              {({ form }) => (
+              {({ form, field }) => (
                 <OrganizationLookup
                   helperTextInvalid={form.errors.organization}
                   isValid={
@@ -187,33 +216,26 @@ function WorkflowJobTemplateForm({
                   }
                   onBlur={() => form.setFieldTouched('organization')}
                   onChange={value => {
-                    form.setFieldValue('organization', value?.id || null);
-                    setOrganization(value);
+                    form.setFieldValue('organization', value);
                   }}
-                  value={organization}
+                  value={field.value}
                   touched={form.touched.organization}
                   error={form.errors.organization}
                 />
               )}
             </Field>
-          </FormRow>
-          <FormRow>
             <Field name="inventory">
-              {({ form }) => (
+              {({ form, field }) => (
                 <InventoryLookup
-                  value={inventory}
+                  value={field.value}
                   tooltip={i18n._(
                     t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
                   )}
                   isValid={!form.touched.inventory || !form.errors.inventory}
                   helperTextInvalid={form.errors.inventory}
                   onChange={value => {
-                    form.setFieldValue('inventory', value?.id || null);
-                    form.setFieldValue(
-                      'organizationId',
-                      value?.organization || null
-                    );
-                    setInventory(value);
+                    form.setFieldValue('inventory', value);
+                    form.setFieldValue('organizationId', value.organization);
                   }}
                   error={form.errors.inventory}
                 />
@@ -249,9 +271,8 @@ function WorkflowJobTemplateForm({
                 name="scmBranch"
               />
             </FormGroup>
-          </FormRow>
-
-          <FormRow>
+          </FormColumnLayout>
+          <FormFullWidthLayout>
             <Field name="labels">
               {({ form, field }) => (
                 <FormGroup
@@ -272,65 +293,92 @@ function WorkflowJobTemplateForm({
                 </FormGroup>
               )}
             </Field>
-          </FormRow>
-          <FormRow>
+          </FormFullWidthLayout>
+          <FormFullWidthLayout>
             <VariablesField
               id="wfjt-variables"
-              name="variables"
+              name="extra_vars"
               label={i18n._(t`Variables`)}
+              tooltip={i18n._(
+                t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
+              )}
             />
-          </FormRow>
-          <GridFormGroup
+          </FormFullWidthLayout>
+          <FormCheckboxLayout
             fieldId="options"
             isInline
             label={i18n._(t`Options`)}
             css="margin-top: 20px"
           >
-            <Checkbox
+            <Field
               id="wfjt-webhooks"
-              name="has_webhooks"
-              label={
-                <span>
-                  {i18n._(t`Webhooks`)} &nbsp;
-                  <FieldTooltip
-                    content={i18n._(
-                      t`Enable webhook for this workflow job template.`
-                    )}
-                  />
-                </span>
-              }
-              isChecked={hasWebhooks}
-              onChange={checked => {
-                setHasWebhooks(checked);
-              }}
-            />
-            <Field name="allow_simultaneous">
-              {({ field, form }) => (
+              name="hasWebhooks"
+              label={i18n._(t`Webhooks`)}
+            >
+              {({ form }) => (
                 <Checkbox
-                  name="allow_simultaneous"
-                  id="wfjt-allow_simultaneous"
+                  aria-label={i18n._(t`Webhooks`)}
                   label={
                     <span>
-                      {i18n._(t`Enable Concurrent Jobs`)} &nbsp;
+                      {i18n._(t`Webhooks`)}
+                      &nbsp;
                       <FieldTooltip
                         content={i18n._(
-                          t`If enabled, simultaneous runs of this workflow job template will be allowed.`
+                          t`Enable webhook for this workflow job template.`
                         )}
                       />
                     </span>
                   }
-                  isChecked={field.value}
-                  onChange={value => {
-                    form.setFieldValue('allow_simultaneous', value);
+                  id="wfjt-enabled-webhooks"
+                  isChecked={
+                    Boolean(form.values.webhook_service) || hasWebhooks
+                  }
+                  onChange={checked => {
+                    setHasWebhooks(checked);
+                    handleWebhookEnablement(form, checked, webhookService);
                   }}
                 />
               )}
             </Field>
-          </GridFormGroup>
+
+            <CheckboxField
+              name="allow_simultaneous"
+              id="allow_simultaneous"
+              tooltip={i18n._(
+                t`If enabled, simultaneous runs of this workflow job template will be allowed.`
+              )}
+              label={i18n._(t`Enable Concurrent Jobs`)}
+            />
+          </FormCheckboxLayout>
           {hasWebhooks && (
-            <>
-              <FormRow>
-                {template.related && (
+            <FormColumnLayout>
+              <Field name="webhook_service">
+                {({ form, field }) => (
+                  <FormGroup
+                    name="webhook_service"
+                    fieldId="webhook_service"
+                    helperTextInvalid={form.errors.webhook_service}
+                    label={i18n._(t`Webhook Service`)}
+                  >
+                    <FieldTooltip
+                      content={i18n._(t`Select a webhook service`)}
+                    />
+                    <AnsibleSelect
+                      id="webhook_service"
+                      data={webhookServiceOptions}
+                      value={field.value}
+                      onChange={(event, val) => {
+                        setWebHookService(val);
+                        setWebhookValues(form, val);
+
+                        form.setFieldValue('webhook_service', val);
+                      }}
+                    />
+                  </FormGroup>
+                )}
+              </Field>
+              {!wfjtAddMatch && (
+                <>
                   <FormGroup
                     fieldId="wfjt-webhook-url"
                     id="wfjt-webhook-url"
@@ -348,10 +396,9 @@ function WorkflowJobTemplateForm({
                       name="webhook_url"
                       label=""
                       isReadOnly
+                      value="asdfgh"
                     />
                   </FormGroup>
-                )}
-                {template.related && (
                   <FormGroup
                     fieldId="wfjt-webhook-key"
                     type="text"
@@ -368,67 +415,39 @@ function WorkflowJobTemplateForm({
                       <TextInput
                         isReadOnly
                         aria-label="wfjt-webhook-key"
-                        value={webHookKey}
+                        value={webhookKey}
                       />
                       <Button variant="tertiary" onClick={changeWebhookKey}>
                         <SyncAltIcon />
                       </Button>
                     </InputGroup>
                   </FormGroup>
-                )}
-                <Field name="webhook_service">
-                  {({ form }) => (
+                </>
+              )}
+              {credTypeId && (
+                <Field name="webhook_credential">
+                  {({ form, field }) => (
                     <FormGroup
-                      name="webhook_service"
-                      fieldId="webhook_service"
-                      helperTextInvalid={form.errors.webhook_service}
-                      label={i18n._(t`Webhook Service`)}
+                      fieldId="webhook_credential"
+                      id="webhook_credential"
+                      name="webhook_credential"
                     >
-                      <FieldTooltip
-                        content={i18n._(t`Select a webhook service`)}
-                      />
-                      <AnsibleSelect
-                        id="webhook_service"
-                        data={webhookServiceOptions}
-                        value={webhookService}
-                        onChange={(event, val) => {
-                          setWebHookService(val);
-                          setWebHookCredential(null);
-                          form.setFieldValue('webhook_service', val);
-                          form.setFieldValue('webhook_credential', null);
+                      <CredentialLookup
+                        label={i18n._(t`Webhook Credential`)}
+                        tooltip={i18n._(
+                          t`Optionally select the credential to use to send status updates back to the webhook service.`
+                        )}
+                        credentialTypeId={credTypeId || null}
+                        onChange={value => {
+                          form.setFieldValue('webhook_credential', value);
                         }}
+                        value={field.value}
                       />
                     </FormGroup>
                   )}
                 </Field>
-              </FormRow>
-              {credTypeId && (
-                <FormRow>
-                  <Field name="webhook_credential">
-                    {({ form }) => (
-                      <FormGroup
-                        fieldId="webhook_credential"
-                        id="webhook_credential"
-                        name="webhook_credential"
-                      >
-                        <CredentialLookup
-                          label={i18n._(t`Webhook Credential`)}
-                          tooltip={i18n._(
-                            t`Optionally select the credential to use to send status updates back to the webhook service.`
-                          )}
-                          credentialTypeId={credTypeId || null}
-                          onChange={value => {
-                            setWebHookCredential(value);
-                            form.setFieldValue('webhook_credential', value.id);
-                          }}
-                          value={webhookCredential}
-                        />
-                      </FormGroup>
-                    )}
-                  </Field>
-                </FormRow>
               )}
-            </>
+            </FormColumnLayout>
           )}
           <FormSubmitError error={submitError} />
           <FormActionGroup

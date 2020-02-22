@@ -75,22 +75,17 @@ describe('<WorkflowJobTemplateForm/>', () => {
   });
   test('all the fields render successfully', () => {
     const fields = [
-      'name',
-      'description',
-      'organization',
-      'inventory',
-      'limit',
-      'scmBranch',
-      'labels',
-      'variables',
+      'FormField[name="name"]',
+      'FormField[name="description"]',
+      'Field[name="organization"]',
+      'Field[name="inventory"]',
+      'FormField[name="limit"]',
+      'FormField[name="scmBranch"]',
+      'Field[name="labels"]',
+      'VariablesField',
     ];
-    const assertField = (field, index) => {
-      expect(
-        wrapper
-          .find('Field')
-          .at(index)
-          .prop('name')
-      ).toBe(`${field}`);
+    const assertField = field => {
+      expect(wrapper.find(`${field}`).length).toBe(1);
     };
     fields.map((field, index) => assertField(field, index));
   });
@@ -162,12 +157,15 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      wrapper.find('Checkbox[name="has_webhooks"]').invoke('onChange')(true);
-      wrapper.find('Checkbox[name="allow_simultaneous"]').invoke('onChange')(
-        true
-      );
+      wrapper.find('Checkbox[aria-label="Webhooks"]').invoke('onChange')(true, {
+        currentTarget: { value: true, type: 'change', checked: true },
+      });
     });
     wrapper.update();
+    expect(
+      wrapper.find('Checkbox[aria-label="Webhooks"]').prop('isChecked')
+    ).toBe(true);
+
     expect(
       wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
     ).toBe(true);
@@ -188,12 +186,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
     wrapper.update();
 
-    expect(
-      wrapper.find('Checkbox[name="has_webhooks"]').prop('isChecked')
-    ).toBe(true);
-    expect(
-      wrapper.find('Checkbox[name="allow_simultaneous"]').prop('isChecked')
-    ).toBe(true);
     expect(wrapper.find('Field[name="webhook_service"]').length).toBe(1);
 
     act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
@@ -203,7 +195,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
   });
   test('handleSubmit is called on submit button click', async () => {
     act(() => {
-      wrapper.find('Formik').prop('onSubmit')();
+      wrapper.find('Formik').prop('onSubmit')({});
     });
     wrapper.update();
     sleep(0);
