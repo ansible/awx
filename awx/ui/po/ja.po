@@ -689,6 +689,10 @@ msgstr "ホストの作成"
 msgid "CREATE INSTANCE GROUP"
 msgstr "インスタンスグループの作成"
 
+#: client/src/instance-groups/instance-groups.strings.js:13
+msgid "CREATE CONTAINER GROUP"
+msgstr "コンテナグループの作成"
+
 #: client/src/inventories-hosts/inventories/related/sources/add/sources-add.route.js:8
 msgid "CREATE INVENTORY SOURCE"
 msgstr "インベントリーソースの作成"
@@ -6699,3 +6703,8 @@ msgstr "{{::state._hint}}"
 msgid "{{pageSize}}"
 msgstr "{{pageSize}}"
 
+#: client/src/instance-groups/container-groups/add-container-group.view.html:5
+msgid "This feature is currently in tech preview and is subject to change in a future release.  Click here for documentation."
+msgstr ""
+"この機能は現在テクニカルプレビューであり、将来のリリースで変更される可能性があります。"
+"ドキュメントを確認するには、ここをクリックしてください。"
