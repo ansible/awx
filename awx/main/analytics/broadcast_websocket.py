@@ -3,6 +3,7 @@ import asyncio
 import logging
 import aioredis
 import redis
+import re
 
 from prometheus_client import (
     generate_latest,
@@ -106,8 +107,8 @@ class BroadcastWebsocketStats():
         self._registry = CollectorRegistry()
 
         # TODO: More robust replacement
-        self.name = self._local_hostname.replace('-', '_')
-        self.remote_name = self._remote_hostname.replace('-', '_')
+        self.name = self.safe_name(self._local_hostname)
+        self.remote_name = self.safe_name(self._remote_hostname)
 
         self._messages_received_total = Counter(f'awx_{self.remote_name}_messages_received_total',
                                                 'Number of messages received, to be forwarded, by the broadcast websocket system',
@@ -127,6 +128,10 @@ class BroadcastWebsocketStats():
                                                    'Messages received per minute',
                                                    registry=self._registry)
         self._internal_messages_received_per_minute = FixedSlidingWindow()
+
+    def safe_name(self, s):
+        # Replace all non alpha-numeric characters with _
+        return re.sub('[^0-9a-zA-Z]+', '_', s)
 
     def unregister(self):
         self._registry.unregister(f'awx_{self.remote_name}_messages_received')
