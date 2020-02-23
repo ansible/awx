@@ -30,7 +30,13 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: repeat(2, 40px);
 `;
 
-function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
+function ProjectJobTemplateListItem({
+  i18n,
+  template,
+  isSelected,
+  onSelect,
+  detailUrl,
+}) {
   const labelId = `check-action-${template.id}`;
   const canLaunch = template.summary_fields.user_capabilities.start;
 
@@ -116,5 +122,5 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
   );
 }
 
-export { TemplateListItem as _TemplateListItem };
-export default withI18n()(TemplateListItem);
+export { ProjectJobTemplateListItem as _ProjectJobTemplateListItem };
+export default withI18n()(ProjectJobTemplateListItem);

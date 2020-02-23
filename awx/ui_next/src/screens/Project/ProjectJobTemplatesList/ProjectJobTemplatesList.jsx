@@ -18,7 +18,7 @@ import PaginatedDataList, {
 import { getQSConfig, parseQueryString } from '@util/qs';
 
 import AddDropDownButton from '@components/AddDropDownButton';
-import ProjectTemplatesListItem from '../../Template/TemplateList/TemplateListItem';
+import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
 // workflow_job_template so the params sent to the API match what the api expects.
@@ -238,7 +238,7 @@ function ProjectJobTemplatesList({ i18n }) {
                   itemsToDelete={selected}
                   pluralizedItemName="Templates"
                 />,
-                (canAddJT || canAddWFJT) && addButton,
+                ...(canAddJT || canAddWFJT ? [addButton] : []),
               ]}
             />
           )}
