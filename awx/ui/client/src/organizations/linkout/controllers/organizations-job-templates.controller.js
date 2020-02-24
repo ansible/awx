@@ -33,6 +33,10 @@ export default ['$scope', '$stateParams', 'Rest', 'GetBasePath', '$state', 'OrgJ
                             const recentJob = template.summary_fields.recent_jobs[i];
                             if (recentJob.id === msg.unified_job_id) {
                                 recentJob.status = msg.status;
+                                if (msg.finished) {
+                                    recentJob.finished = msg.finished;
+                                    template.last_job_run = msg.finished;
+                                }
                                 break;
                             }
                         };
