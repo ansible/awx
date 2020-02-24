@@ -1218,7 +1218,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     status_data['instance_group_name'] = self.instance_group.name
                 else:
                     status_data['instance_group_name'] = None
-            elif status in ['successful', 'failed', 'cancelled', 'failed']:
+            elif status in ['successful', 'failed', 'canceled']:
                 status_data['finished'] = self.finished
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
