@@ -3,6 +3,7 @@ import os
 import sys
 
 from awxkit import api, config
+import awxkit.exceptions as exc
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
@@ -188,6 +189,13 @@ class Import(CustomCommand):
         self._natural_key = {}
         self._options = {}
 
+    def get_by_natural_key(self, key, fetch=True):
+        frozen_key = freeze(key)
+        if frozen_key not in self._natural_key and fetch:
+            pass
+
+        return self._natural_key.get(frozen_key)
+
     def create_assets(self, resource, assets):
         endpoint = getattr(self.v2, resource)
         options = self._options[resource]
@@ -196,19 +204,18 @@ class Import(CustomCommand):
             if resource == 'users' and 'password' not in asset:
                 post_data['password'] = 'password'
             for field, value in asset.items():
-                if k in ('related', 'natural_key'):
+                if field in ('related', 'natural_key'):
                     continue
                 if options[field]['type'] == 'id':
-                    post_data[field] = self._natural_key[freeze(value)]['id']  # FIXME: may not be registered
+                    post_data[field] = self.get_by_natural_key(value)['id']
                 else:
                     post_data[field] = value
 
-            natural_key = freeze(asset['natural_key'])
-            if natural_key in self._natural_key:
-                page = self._natural_key[natural_key]
-                page = page.put(post_data)
-            else:
+            page = self.get_by_natural_key(asset['natural_key'], fetch=False)
+            if page is None:
                 page = endpoint.post(post_data)
+            else:
+                page = page.put(post_data)
 
             self._natural_key[freeze(get_natural_key(page))] = page
 
@@ -220,6 +227,33 @@ class Import(CustomCommand):
         results = endpoint.get(all_pages=True).results
         for asset in results:
             self._natural_key[freeze(get_natural_key(asset))] = asset
+
+    def assign_roles(self, page, roles):
+        role_endpoint = page.json['related']['roles']
+        for role in roles:
+            if 'content_object' not in role:
+                continue  # admin role
+            obj_page = self.get_by_natural_key(role['content_object'])
+            if obj_page is not None:
+                role_page = obj_page.get_object_role(role['name'], by_name=True)
+                try:
+                    role_endpoint.post({'id': role_page['id']})
+                except exc.NoContent:  # desired exception on successful (dis)association
+                    pass
+            else:
+                pass  # admin role
+
+    def assign_related(self, page, name, related_set):
+        pass
+
+    def assign_related_assets(self, resource, assets):
+        for asset in assets:
+            page = self.get_by_natural_key(asset['natural_key'])
+            for name, S in asset.get('related', {}).items():
+                if name == 'roles':
+                    self.assign_roles(page, S)
+                else:
+                    self.assign_related(page, name, S)
 
     def handle(self, client, parser):
         if client.help:
@@ -236,10 +270,10 @@ class Import(CustomCommand):
         for resource, assets in data.items():  # FIXME: do a topological sort by dependencies
             self.create_assets(resource, assets)
 
-        # should we delete existing unpatched assets?
+        # FIXME: should we delete existing unpatched assets?
 
-        # loop over the sorted assets
-        #   resolve and add in the m2m relateds
+        for resource, assets in data.items():
+            self.assign_related_assets(resource, assets)
 
         return {}
 
