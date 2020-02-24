@@ -1,26 +1,26 @@
-import React, { Component, Fragment } from 'react';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  PageSectionVariants,
-  Title,
-} from '@patternfly/react-core';
 
-class Schedules extends Component {
-  render() {
-    const { i18n } = this.props;
-    const { light } = PageSectionVariants;
+import Breadcrumbs from '@components/Breadcrumbs';
+import { ScheduleList } from './ScheduleList';
 
-    return (
-      <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`Schedules`)}</Title>
-        </PageSection>
-        <PageSection />
-      </Fragment>
-    );
-  }
+function Schedules({ i18n }) {
+  return (
+    <>
+      <Breadcrumbs
+        breadcrumbConfig={{
+          '/schedules': i18n._(t`Schedules`),
+        }}
+      />
+      <Switch>
+        <Route path="/schedules">
+          <ScheduleList />
+        </Route>
+      </Switch>
+    </>
+  );
 }
 
 export default withI18n()(Schedules);

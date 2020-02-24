@@ -271,3 +271,32 @@ export const SortColumns = arrayOf(
     key: string.isRequired,
   })
 );
+
+export const Schedule = shape({
+  rrule: string.isRequired,
+  id: number.isRequired,
+  type: string,
+  url: string,
+  related: shape({}),
+  summary_fields: shape({}),
+  created: string,
+  modified: string,
+  name: string.isRequired,
+  description: string,
+  extra_data: oneOfType([string, shape({})]),
+  inventory: number,
+  scm_branch: string,
+  job_type: string,
+  job_tags: string,
+  skip_tags: string,
+  limit: string,
+  diff_mode: bool,
+  verbosity: string,
+  unified_job_template: number,
+  enabled: bool,
+  dtstart: string,
+  dtend: string,
+  next_run: string,
+  timezone: string,
+  until: string,
+});
