@@ -64,29 +64,35 @@ options:
         - A specific of the SCM project to run the template on.
         - This is only applicable if your project allows for branch override.
       type: str
+      version_added: "3.7"
     skip_tags:
       description:
         - Specific tags to skip from the playbook.
       type: list
       elements: str
+      version_added: "3.7"
     verbosity:
       description:
         - Verbosity level for this job run
       type: int
       choices: [ 0, 1, 2, 3, 4, 5 ]
+      version_added: "3.7"
     diff_mode:
       description:
         - Show the changes made by Ansible tasks where supported
       type: bool
+      version_added: "3.7"
     credential_passwords:
       description:
         - Passwords for credentials which are set to prompt on launch
       type: dict
+      version_added: "3.7"
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

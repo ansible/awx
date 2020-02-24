@@ -39,8 +39,9 @@ options:
       type: str
     variables:
       description:
-        - Inventory variables. Use C(@) to get from file.
-      type: str
+        - Inventory variables.
+      required: False
+      type: dict
     kind:
       description:
         - The kind field. Cannot be modified after created.
@@ -64,6 +65,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -86,9 +88,9 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(default=''),
+        description=dict(required=False),
         organization=dict(required=True),
-        variables=dict(default=''),
+        variables=dict(type='dict', required=False),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         state=dict(choices=['present', 'absent'], default='present'),

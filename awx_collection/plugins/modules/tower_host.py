@@ -33,6 +33,7 @@ options:
         - To use when changing a hosts's name.
       required: False
       type: str
+      version_added: "3.7"
     description:
       description:
         - The description to use for the host.
@@ -62,6 +63,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -88,7 +90,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(required=False),
-        description=dict(default=''),
+        description=dict(required=False),
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
         variables=dict(type='dict', required=False),

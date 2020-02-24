@@ -46,6 +46,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

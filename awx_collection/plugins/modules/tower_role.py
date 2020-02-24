@@ -141,6 +141,8 @@ def main():
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
+
     role_type = module.params.pop('role')
     state = module.params.pop('state')
 

@@ -33,6 +33,7 @@ options:
         - A new name for this assets (will rename the asset)
       required: False
       type: str
+      version_added: "3.7"
     description:
       description:
         - The description to use for the inventory source.
@@ -127,6 +128,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -152,7 +154,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(type='str'),
-        description=dict(),
+        description=dict(required=False),
         inventory=dict(required=True),
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them

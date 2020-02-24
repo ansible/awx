@@ -56,6 +56,7 @@ options:
         - The refspec to use for the SCM resource.
       type: str
       default: ''
+      version_added: "3.7"
     scm_credential:
       description:
         - Name of the credential to use with this SCM resource.
@@ -86,6 +87,7 @@ options:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
       type: bool
+      version_added: "3.7"
     job_timeout:
       version_added: "2.8"
       description:
@@ -123,6 +125,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -175,7 +178,7 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False, default=''),
+        description=dict(required=False),
         scm_type=dict(required=False, choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
         scm_url=dict(required=False),
         local_path=dict(required=False),

@@ -27,16 +27,19 @@ options:
         - The contents of the license file
       required: True
       type: dict
+      version_added: "3.7"
     eula_accepted:
       description:
         - Whether or not the EULA is accepted.
       required: True
       type: bool
+      version_added: "3.7"
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

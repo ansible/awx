@@ -33,6 +33,7 @@ options:
         - A new name for this group (for renaming)
       required: False
       type: str
+      version_added: "3.7"
     description:
       description:
         - The description to use for the group.
@@ -57,6 +58,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -80,7 +82,7 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(required=False),
-        description=dict(),
+        description=dict(required=False),
         inventory=dict(required=True),
         variables=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),

@@ -45,6 +45,7 @@ options:
       default: "0"
       type: int
       required: False
+      version_added: "3.7"
     state:
       description:
         - Desired state of the resource.
@@ -56,6 +57,7 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
