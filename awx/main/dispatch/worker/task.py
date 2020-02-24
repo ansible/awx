@@ -9,6 +9,7 @@ from kubernetes.config import kube_config
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
 from .base import BaseWorker
+from awx.main.dispatch.pool import log_serialize
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -57,8 +58,7 @@ class TaskWorker(BaseWorker):
             # the callable is a class, e.g., RunJob; instantiate and
             # return its `run()` method
             _call = _call().run
-        # don't print kwargs, they often contain launch-time secrets
-        logger.debug('task {} starting {}(*{})'.format(uuid, task, args))
+        logger.debug('task {} starting {}'.format(uuid, log_serialize(body)))
         return _call(*args, **kwargs)
 
     def perform_work(self, body):

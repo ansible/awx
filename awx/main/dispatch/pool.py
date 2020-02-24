@@ -25,6 +25,18 @@ else:
     logger = logging.getLogger('awx.main.dispatch')
 
 
+def log_serialize(body):
+    """Serialize a message body for printing in logs
+    example: awx.main.scheduler.tasks.run_task_manager(*[])
+    """
+    if isinstance(body, str):
+        return body
+    # don't print kwargs, they often contain launch-time secrets
+    task = body.get('task', 'unknown')
+    args = body.get('args', [])
+    return '{}(*{})'.format(task, args)
+
+
 class PoolWorker(object):
     '''
     Used to track a worker child process and its pending and finished messages.
@@ -214,7 +226,12 @@ class WorkerPool(object):
         self.target = target
         self.target_args = target_args
         for idx in range(self.min_workers):
-            self.up()
+            idx_prime, worker = self.up()
+            logger.info(
+                'scaled up worker {}, new total: {}, due to startup'.format(
+                    worker.pid, idx_prime
+                )
+            )
 
     def up(self):
         idx = len(self.workers)
@@ -229,8 +246,6 @@ class WorkerPool(object):
             worker.start()
         except Exception:
             logger.exception('could not fork')
-        else:
-            logger.warn('scaling up worker pid:{}'.format(worker.pid))
         return idx, worker
 
     def debug(self, *args, **kwargs):
@@ -369,7 +384,12 @@ class AutoscalePool(WorkerPool):
         for m in orphaned:
             # if all the workers are dead, spawn at least one
             if not len(self.workers):
-                self.up()
+                idx_prime, worker = self.up()
+                logger.warn(
+                    'scaled up worker {}, new total: {}, due to orphan {}'.format(
+                        worker.pid, len(self.workers), log_serialize(m)
+                    )
+                )
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
@@ -396,7 +416,14 @@ class AutoscalePool(WorkerPool):
             if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
                 self.cleanup()
             if self.should_grow:
-                self.up()
+                prior_size = len(self.workers)
+                idx, worker = self.up()
+                if len(self.workers) > prior_size:
+                    logger.warn(
+                        'scaled up worker {}, new total: {}, due to {}'.format(
+                            worker.pid, len(self.workers), log_serialize(body)
+                        )
+                    )
             # we don't care about "preferred queue" round robin distribution, just
             # find the first non-busy worker and claim it
             workers = self.workers[:]
