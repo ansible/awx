@@ -119,10 +119,19 @@ function ListJobsController (
         for (let i = 0; i < vm.jobs.length; i++) {
             if (vm.jobs[i].id === msg.unified_job_id) {
                 // Update the job status.
-                // If/when we get more info in the message we can
-                // update those fields here as well.
                 vm.jobs[i].status = msg.status;
-                i = vm.jobs.length;
+                if (msg.finished) {
+                    vm.jobs[i].finished = msg.finished;
+                    const orderByValue = _.get($state.params, 'job_search.order_by');
+                    if (orderByValue === '-finished') {
+                        // Attempt to sort the rows in the list by their finish
+                        // timestamp in descending order
+                        vm.jobs.sort((a, b) =>
+                            (!b.finished) - (!a.finished)
+                            || new Date(b.finished) - new Date(a.finished));
+                    }
+                }
+                break;
             }
         }
     };
