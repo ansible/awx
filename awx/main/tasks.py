@@ -584,7 +584,7 @@ def handle_work_error(task_id, *args, **kwargs):
                 first_instance = instance
                 first_instance_type = each_task['type']
 
-            if instance.celery_task_id != task_id and not instance.cancel_flag:
+            if instance.celery_task_id != task_id and not instance.cancel_flag and not instance.status == 'successful':
                 instance.status = 'failed'
                 instance.failed = True
                 if not instance.job_explanation:
@@ -1692,7 +1692,7 @@ class RunJob(BaseTask):
             if settings.MAX_FORKS > 0 and job.forks > settings.MAX_FORKS:
                 logger.warning(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.')
                 args.append('--forks=%d' % settings.MAX_FORKS)
-            else: 
+            else:
                 args.append('--forks=%d' % job.forks)
         if job.force_handlers:
             args.append('--force-handlers')
