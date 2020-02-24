@@ -90,9 +90,9 @@ export default ['$scope', '$filter', 'i18n', 'JobsStrings',
             $scope.sparkArray = sparkData;
             $scope.placeholders = new Array(10 - sparkData.length);
         }
-        $scope.$watchCollection('jobs', function(){
+        $scope.$watch('jobs', function(){
             init();
-        });
+        }, true);
 
 }];
 
