@@ -187,12 +187,6 @@ class TeamsList extends Component {
                   onSelectAll={this.handleSelectAll}
                   qsConfig={QS_CONFIG}
                   additionalControls={[
-                    <ToolbarDeleteButton
-                      key="delete"
-                      onDelete={this.handleTeamDelete}
-                      itemsToDelete={selected}
-                      pluralizedItemName={i18n._(t`Teams`)}
-                    />,
                     ...(canAdd
                       ? [
                           <ToolbarAddButton
@@ -201,6 +195,12 @@ class TeamsList extends Component {
                           />,
                         ]
                       : []),
+                    <ToolbarDeleteButton
+                      key="delete"
+                      onDelete={this.handleTeamDelete}
+                      itemsToDelete={selected}
+                      pluralizedItemName={i18n._(t`Teams`)}
+                    />,
                   ]}
                 />
               )}

@@ -39,7 +39,9 @@ describe('<ToolbarDeleteButton />', () => {
     );
     wrapper.find('ToolbarDeleteButton').setState({ isModalOpen: true });
     wrapper.update();
-    wrapper.find('button.pf-m-danger').simulate('click');
+    wrapper
+      .find('ModalBoxFooter button[aria-label="confirm delete"]')
+      .simulate('click');
     expect(onDelete).toHaveBeenCalled();
     expect(wrapper.find('ToolbarDeleteButton').state('isModalOpen')).toBe(
       false

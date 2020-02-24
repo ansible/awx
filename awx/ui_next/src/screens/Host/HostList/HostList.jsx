@@ -134,15 +134,15 @@ function HostList({ i18n }) {
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
+                ...(canAdd
+                  ? [<ToolbarAddButton key="add" linkTo={`${match.url}/add`} />]
+                  : []),
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleHostDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Hosts`)}
                 />,
-                ...(canAdd
-                  ? [<ToolbarAddButton key="add" linkTo={`${match.url}/add`} />]
-                  : []),
               ]}
             />
           )}

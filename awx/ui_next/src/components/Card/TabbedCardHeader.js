@@ -7,7 +7,7 @@ const TabbedCardHeader = styled(CardHeader)`
   --pf-c-card--child--PaddingRight: 0;
   --pf-c-card__header--not-last-child--PaddingBottom: 24px;
   --pf-c-card__header--not-last-child--PaddingBottom: 0;
-  position: relative;
+  display: flex;
 `;
 
 export default TabbedCardHeader;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, PageSection, CardActions } from '@patternfly/react-core';
 import {
   Switch,
   useParams,
@@ -60,7 +60,9 @@ function Credential({ i18n, setBreadcrumb }) {
   let cardHeader = hasContentLoading ? null : (
     <TabbedCardHeader>
       <RoutedTabs tabsArray={tabsArray} />
-      <CardCloseButton linkTo="/credentials" />
+      <CardActions>
+        <CardCloseButton linkTo="/credentials" />
+      </CardActions>
     </TabbedCardHeader>
   );
 

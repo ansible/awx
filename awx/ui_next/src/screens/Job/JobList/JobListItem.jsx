@@ -38,7 +38,7 @@ class JobListItem extends Component {
               <DataListCell key="status" isFilled={false}>
                 {job.status && <StatusIcon status={job.status} />}
               </DataListCell>,
-              <DataListCell key="name" css="display: inline-flex;">
+              <DataListCell key="name">
                 <span>
                   <Link
                     to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}

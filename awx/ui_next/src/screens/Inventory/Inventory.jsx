@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   Route,
@@ -66,7 +66,9 @@ function Inventory({ i18n, setBreadcrumb }) {
   let cardHeader = hasContentLoading ? null : (
     <TabbedCardHeader>
       <RoutedTabs tabsArray={tabsArray} />
-      <CardCloseButton linkTo="/inventories" />
+      <CardActions>
+        <CardCloseButton linkTo="/inventories" />
+      </CardActions>
     </TabbedCardHeader>
   );
 

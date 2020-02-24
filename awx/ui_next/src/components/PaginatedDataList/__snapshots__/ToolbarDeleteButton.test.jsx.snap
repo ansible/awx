@@ -97,121 +97,51 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
       zIndex={9999}
     >
       <div>
-        <ToolbarDeleteButton__DeleteButton
+        <Component
           aria-label="Delete"
           isDisabled={true}
           onClick={[Function]}
-          variant="plain"
+          variant="danger"
         >
-          <StyledComponent
-            aria-label="Delete"
-            forwardedComponent={
+          <ComponentWithOuia
+            component={[Function]}
+            componentProps={
               Object {
-                "$$typeof": Symbol(react.forward_ref),
-                "attrs": Array [],
-                "componentStyle": ComponentStyle {
-                  "componentId": "ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0",
-                  "isStatic": true,
-                  "lastClassName": "bQjfFG",
-                  "rules": Array [
-                    "padding:5px 8px;&:hover{background-color:#d9534f;color:white;}&[disabled]{color:var(--pf-c-button--m-plain--Color);pointer-events:initial;cursor:not-allowed;}",
-                  ],
-                },
-                "displayName": "ToolbarDeleteButton__DeleteButton",
-                "foldedComponentIds": Array [],
-                "render": [Function],
-                "styledComponentId": "ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0",
-                "target": [Function],
-                "toString": [Function],
-                "warnTooManyClasses": [Function],
-                "withComponent": [Function],
+                "aria-label": "Delete",
+                "children": "Delete",
+                "isDisabled": true,
+                "onClick": [Function],
+                "variant": "danger",
               }
             }
-            forwardedRef={null}
-            isDisabled={true}
-            onClick={[Function]}
-            variant="plain"
+            consumerContext={null}
           >
-            <Component
+            <Button
               aria-label="Delete"
-              className="ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
               isDisabled={true}
               onClick={[Function]}
-              variant="plain"
-            >
-              <ComponentWithOuia
-                component={[Function]}
-                componentProps={
-                  Object {
-                    "aria-label": "Delete",
-                    "children": <TrashAltIcon
-                      color="currentColor"
-                      noVerticalAlign={false}
-                      size="sm"
-                      title={null}
-                    />,
-                    "className": "ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG",
-                    "isDisabled": true,
-                    "onClick": [Function],
-                    "variant": "plain",
-                  }
+              ouiaContext={
+                Object {
+                  "isOuia": false,
+                  "ouiaId": null,
                 }
-                consumerContext={null}
+              }
+              variant="danger"
+            >
+              <button
+                aria-disabled={null}
+                aria-label="Delete"
+                className="pf-c-button pf-m-danger"
+                disabled={true}
+                onClick={[Function]}
+                tabIndex={null}
+                type="button"
               >
-                <Button
-                  aria-label="Delete"
-                  className="ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
-                  isDisabled={true}
-                  onClick={[Function]}
-                  ouiaContext={
-                    Object {
-                      "isOuia": false,
-                      "ouiaId": null,
-                    }
-                  }
-                  variant="plain"
-                >
-                  <button
-                    aria-disabled={null}
-                    aria-label="Delete"
-                    className="pf-c-button pf-m-plain ToolbarDeleteButton__DeleteButton-sc-1e3r0eg-0 bQjfFG"
-                    disabled={true}
-                    onClick={[Function]}
-                    tabIndex={null}
-                    type="button"
-                  >
-                    <TrashAltIcon
-                      color="currentColor"
-                      noVerticalAlign={false}
-                      size="sm"
-                      title={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        aria-labelledby={null}
-                        fill="currentColor"
-                        height="1em"
-                        role="img"
-                        style={
-                          Object {
-                            "verticalAlign": "-0.125em",
-                          }
-                        }
-                        viewBox="0 0 448 512"
-                        width="1em"
-                      >
-                        <path
-                          d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"
-                          transform=""
-                        />
-                      </svg>
-                    </TrashAltIcon>
-                  </button>
-                </Button>
-              </ComponentWithOuia>
-            </Component>
-          </StyledComponent>
-        </ToolbarDeleteButton__DeleteButton>
+                Delete
+              </button>
+            </Button>
+          </ComponentWithOuia>
+        </Component>
       </div>
       <Portal
         containerInfo={

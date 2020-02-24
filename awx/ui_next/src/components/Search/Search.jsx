@@ -204,7 +204,6 @@ class Search extends React.Component {
               }
               isOpen={isSearchDropdownOpen}
               dropdownItems={searchDropdownItems}
-              style={{ width: '100%', maxWidth: '100px' }}
             />
           ) : (
             <NoOptionDropdown>{searchColumnName}</NoOptionDropdown>

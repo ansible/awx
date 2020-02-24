@@ -10,8 +10,8 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
+import { CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { GroupsAPI } from '@api';
 import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
@@ -19,6 +19,7 @@ import ContentLoading from '@components/ContentLoading';
 import { TabbedCardHeader } from '@components/Card';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
+import { GroupsAPI } from '@api';
 
 function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
@@ -109,9 +110,11 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     cardHeader = (
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
-        <CardCloseButton
-          linkTo={`/inventories/inventory/${inventory.id}/groups`}
-        />
+        <CardActions>
+          <CardCloseButton
+            linkTo={`/inventories/inventory/${inventory.id}/groups`}
+          />
+        </CardActions>
       </TabbedCardHeader>
     );
   }

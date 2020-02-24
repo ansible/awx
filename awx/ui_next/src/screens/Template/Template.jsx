@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
@@ -124,7 +124,9 @@ class Template extends Component {
     let cardHeader = (
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
-        <CardCloseButton linkTo="/templates" />
+        <CardActions>
+          <CardCloseButton linkTo="/templates" />
+        </CardActions>
       </TabbedCardHeader>
     );
 

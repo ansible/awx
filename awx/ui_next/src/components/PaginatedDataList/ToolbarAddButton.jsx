@@ -1,19 +1,9 @@
 import React from 'react';
 import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Button as PFButton, Tooltip } from '@patternfly/react-core';
-import { PlusIcon } from '@patternfly/react-icons';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
-
-const Button = styled(PFButton)`
-  && {
-    background-color: #5cb85c;
-    padding: 5px 8px;
-    --pf-global--FontSize--md: 14px;
-  }
-`;
 
 function ToolbarAddButton({ linkTo, onClick, i18n }) {
   if (!linkTo && !onClick) {
@@ -30,14 +20,14 @@ function ToolbarAddButton({ linkTo, onClick, i18n }) {
           variant="primary"
           aria-label={i18n._(t`Add`)}
         >
-          <PlusIcon />
+          {i18n._(t`Add`)}
         </Button>
       </Tooltip>
     );
   }
   return (
     <Button variant="primary" aria-label={i18n._(t`Add`)} onClick={onClick}>
-      <PlusIcon />
+      {i18n._(t`Add`)}
     </Button>
   );
 }

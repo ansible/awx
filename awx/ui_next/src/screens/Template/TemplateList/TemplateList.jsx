@@ -213,13 +213,13 @@ function TemplateList({ i18n }) {
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
+                ...(canAddJT || canAddWFJT ? [addButton] : []),
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
                   pluralizedItemName="Templates"
                 />,
-                ...(canAddJT || canAddWFJT ? [addButton] : []),
               ]}
             />
           )}
