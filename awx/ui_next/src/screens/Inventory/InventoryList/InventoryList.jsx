@@ -157,7 +157,7 @@ function InventoryList({ i18n }) {
                   key="delete"
                   onDelete={handleInventoryDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName="Inventories"
+                  pluralizedItemName={i18n._(t`Inventories`)}
                 />,
               ]}
             />

@@ -141,7 +141,7 @@ describe('<InventoryList />', () => {
     jest.clearAllMocks();
   });
 
-  test('should load and render teams', async () => {
+  test('should load and render inventories', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<InventoryList />);
@@ -151,7 +151,7 @@ describe('<InventoryList />', () => {
     expect(wrapper.find('InventoryListItem')).toHaveLength(3);
   });
 
-  test('should select team when checked', async () => {
+  test('should select inventory when checked', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<InventoryList />);
@@ -254,7 +254,7 @@ describe('<InventoryList />', () => {
         response: {
           config: {
             method: 'delete',
-            url: '/api/v2/teams/1',
+            url: '/api/v2/inventory/1',
           },
           data: 'An error occurred',
         },
