@@ -1,4 +1,1 @@
-export {
-  default
-}
-from './ProjectJobTemplatesList';
+export { default } from './ProjectJobTemplatesList';
