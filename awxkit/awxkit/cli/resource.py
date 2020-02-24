@@ -175,16 +175,51 @@ class Config(CustomCommand):
         }
 
 
+def freeze(key):
+    return frozenset((k, freeze(v) if isinstance(v, dict) else v) for k, v in key.items())
+
+
 class Import(CustomCommand):
     name = 'import'
     help_text = 'import resources into Tower'
 
+    def __init__(self, *args, **kwargs):
+        super(Import, self).__init__(*args, **kwargs)
+        self._natural_key = {}
+        self._options = {}
+
     def create_assets(self, resource, assets):
         endpoint = getattr(self.v2, resource)
+        options = self._options[resource]
         for asset in assets:
+            post_data = {}
             if resource == 'users' and 'password' not in asset:
-                asset['password'] = 'password'
-            endpoint.post({k: v for k, v in asset.items() if k != 'related'})
+                post_data['password'] = 'password'
+            for field, value in asset.items():
+                if k in ('related', 'natural_key'):
+                    continue
+                if options[field]['type'] == 'id':
+                    post_data[field] = self._natural_key[freeze(value)]['id']  # FIXME: may not be registered
+                else:
+                    post_data[field] = value
+
+            natural_key = freeze(asset['natural_key'])
+            if natural_key in self._natural_key:
+                page = self._natural_key[natural_key]
+                page = page.put(post_data)
+            else:
+                page = endpoint.post(post_data)
+
+            self._natural_key[freeze(get_natural_key(page))] = page
+
+    def register_existing_assets(self, resource):
+        endpoint = getattr(self.v2, resource)
+        options = endpoint.options().json['actions']['POST']
+        self._options[resource] = options
+
+        results = endpoint.get(all_pages=True).results
+        for asset in results:
+            self._natural_key[freeze(get_natural_key(asset))] = asset
 
     def handle(self, client, parser):
         if client.help:
@@ -195,8 +230,16 @@ class Import(CustomCommand):
         client.authenticate()
         self.v2 = client.v2
 
+        for resource in data:
+            self.register_existing_assets(resource)
+
         for resource, assets in data.items():  # FIXME: do a topological sort by dependencies
             self.create_assets(resource, assets)
+
+        # should we delete existing unpatched assets?
+
+        # loop over the sorted assets
+        #   resolve and add in the m2m relateds
 
         return {}
 
