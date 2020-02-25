@@ -140,6 +140,7 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
+        isFooterLeftAligned
         isLarge
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
         isOpen={isModalOpen}

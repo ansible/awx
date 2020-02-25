@@ -10,6 +10,7 @@ function NodeViewModal({ i18n }) {
     <Modal
       isLarge
       isOpen
+      isFooterLeftAligned
       title={i18n._(t`Node Details`)}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
     >

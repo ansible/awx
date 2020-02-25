@@ -20,6 +20,7 @@ function LinkModal({ header, i18n, onConfirm }) {
       width={600}
       header={header}
       isOpen
+      isFooterLeftAligned
       title={i18n._(t`Workflow Link`)}
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
