@@ -1006,12 +1006,6 @@ class Command(BaseCommand):
         except re.error:
             raise CommandError('invalid regular expression for --host-filter')
 
-        '''
-        TODO: Remove this deprecation when we remove support for rax.py
-        '''
-        if self.source == "rax.py":
-            logger.info("Rackspace inventory sync is Deprecated in Tower 3.1.0 and support for Rackspace will be removed in a future release.")
-
         begin = time.time()
         self.load_inventory_from_database()
 
