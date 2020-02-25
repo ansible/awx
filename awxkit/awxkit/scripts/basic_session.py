@@ -90,18 +90,11 @@ def main():
                 exec(open(akit_args.akit_script).read(), globals())
             except Exception as e:
                 exc = e
-                raise exc
+                raise
     except Exception as e:
         exc = e
         rc = 1
-
-    if akit_args.non_interactive:
-        if exc:
-            traceback.print_exc(exc)
-        os._exit(rc)
-
-    if exc:
-        raise exc
+        raise
 
 
 def as_user(username, password=None):
