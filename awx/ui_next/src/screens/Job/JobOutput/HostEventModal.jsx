@@ -131,6 +131,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
 
   return (
     <Modal
+      isFooterLeftAligned
       isLarge
       isOpen={isOpen}
       onClose={onClose}

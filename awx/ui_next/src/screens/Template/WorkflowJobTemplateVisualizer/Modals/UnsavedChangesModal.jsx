@@ -11,6 +11,7 @@ function UnsavedChangesModal({ i18n, onSaveAndExit, onExit }) {
     <Modal
       width={600}
       isOpen
+      isFooterLeftAligned
       title={i18n._(t`Warning: Unsaved Changes`)}
       onClose={() => dispatch({ type: 'TOGGLE_UNSAVED_CHANGES_MODAL' })}
       actions={[
