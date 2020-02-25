@@ -11,7 +11,7 @@ import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
-import ProjectJobTemplates from './ProjectJobTemplates';
+import ProjectJobTemplatesList from './ProjectJobTemplatesList';
 import ProjectSchedules from './ProjectSchedules';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 
@@ -227,7 +227,7 @@ class Project extends Component {
             <Route
               path="/projects/:id/job_templates"
               render={() => (
-                <ProjectJobTemplates id={Number(match.params.id)} />
+                <ProjectJobTemplatesList id={Number(match.params.id)} />
               )}
             />
             <Route
