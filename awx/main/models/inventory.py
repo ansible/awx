@@ -2027,6 +2027,9 @@ class ec2(PluginFileInjector):
                 grouping_data['key'] += ' | regex_replace("{rx}", "_")'.format(rx=legacy_regex)
         # end compatibility content
 
+        if source_vars.get('iam_role_arn', None):
+            ret['iam_role_arn'] = source_vars['iam_role_arn']
+
         # This was an allowed ec2.ini option, also plugin option, so pass through
         if source_vars.get('boto_profile', None):
             ret['boto_profile'] = source_vars['boto_profile']
