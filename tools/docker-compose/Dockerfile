@@ -112,6 +112,9 @@ RUN dnf -y clean all
 
 RUN rm -rf /root/.cache
 
+# https://github.com/ansible/awx/issues/5224
+RUN chmod u+s /usr/bin/bwrap
+
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
