@@ -33,7 +33,6 @@ cloud_types = (
     'openstack_v2',
     'openstack_v3',
     'rhv',
-    'rax',
     'satellite6',
     'tower',
     'vmware')

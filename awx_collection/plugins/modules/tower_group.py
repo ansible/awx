@@ -48,7 +48,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: ["manual", "file", "ec2", "rax", "vmware", "gce", "azure", "azure_rm", "openstack", "satellite6" , "cloudforms", "custom"]
+      choices: ["manual", "file", "ec2", "vmware", "gce", "azure", "azure_rm", "openstack", "satellite6" , "cloudforms", "custom"]
       type: str
     source_regions:
       description:
@@ -124,7 +124,7 @@ def main():
         inventory=dict(required=True),
         variables=dict(),
         credential=dict(),
-        source=dict(choices=["manual", "file", "ec2", "rax", "vmware",
+        source=dict(choices=["manual", "file", "ec2", "vmware",
                              "gce", "azure", "azure_rm", "openstack",
                              "satellite6", "cloudforms", "custom"]),
         source_regions=dict(),
