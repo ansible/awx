@@ -8,6 +8,7 @@ import AppendBody from '@components/AppendBody';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
 import FullPage from '@components/FullPage';
+import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
@@ -81,6 +82,7 @@ class WorkflowJobTemplate extends Component {
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },
       { name: i18n._(t`Visualizer`), link: `${match.url}/visualizer` },
+      { name: i18n._(t`Completed Jobs`), link: `${match.url}/completed_jobs` },
     ];
 
     tabsArray.forEach((tab, n) => {
@@ -150,6 +152,15 @@ class WorkflowJobTemplate extends Component {
                 </AppendBody>
               )}
             />
+          )}
+          {template?.id && (
+            <Route path="/templates/workflow_job_template/:id/completed_jobs">
+              <JobList
+                defaultParams={{
+                  workflow_job__workflow_job_template: template.id,
+                }}
+              />
+            </Route>
           )}
           <Route
             key="not-found"

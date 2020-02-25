@@ -6,11 +6,11 @@ import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
+import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryHosts from './SmartInventoryHosts';
-import SmartInventoryCompletedJobs from './SmartInventoryCompletedJobs';
 import { InventoriesAPI } from '@api';
 import SmartInventoryEdit from './SmartInventoryEdit';
 
@@ -149,10 +149,17 @@ class SmartInventory extends Component {
               <Route
                 key="completed_jobs"
                 path="/inventories/smart_inventory/:id/completed_jobs"
-                render={() => (
-                  <SmartInventoryCompletedJobs inventory={inventory} />
-                )}
-              />,
+              >
+                <JobList
+                  defaultParams={{
+                    or__job__inventory: inventory.id,
+                    or__adhoccommand__inventory: inventory.id,
+                    or__inventoryupdate__inventory_source__inventory:
+                      inventory.id,
+                    or__workflowjob__inventory: inventory.id,
+                  }}
+                />
+              </Route>,
               <Route
                 key="not-found"
                 path="*"
