@@ -1,8 +1,8 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { ProjectsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
-import ProjectsList, { _ProjectsList } from './ProjectList';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import ProjectList from './ProjectList';
 
 jest.mock('@api');
 
@@ -63,7 +63,7 @@ const mockProjects = [
   },
 ];
 
-describe('<ProjectsList />', () => {
+describe('<ProjectList />', () => {
   beforeEach(() => {
     ProjectsAPI.read.mockResolvedValue({
       data: {
@@ -86,117 +86,114 @@ describe('<ProjectsList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    mountWithContexts(
-      <ProjectsList
-        match={{ path: '/projects', url: '/projects' }}
-        location={{ search: '', pathname: '/projects' }}
-      />
-    );
-  });
-
-  test('Projects are retrieved from the api and the components finishes loading', async done => {
-    const loadProjects = jest.spyOn(_ProjectsList.prototype, 'loadProjects');
-    const wrapper = mountWithContexts(<ProjectsList />);
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(loadProjects).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === false
-    );
-    done();
-  });
-
-  test('handleSelect is called when a project list item is selected', async done => {
-    const handleSelect = jest.spyOn(_ProjectsList.prototype, 'handleSelect');
-    const wrapper = mountWithContexts(<ProjectsList />);
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === false
-    );
-    await wrapper
-      .find('input#select-project-1')
-      .closest('DataListCheck')
-      .props()
-      .onChange();
-    expect(handleSelect).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('selected').length === 1
-    );
-    done();
-  });
-
-  test('handleSelectAll is called when select all checkbox is clicked', async done => {
-    const handleSelectAll = jest.spyOn(
-      _ProjectsList.prototype,
-      'handleSelectAll'
-    );
-    const wrapper = mountWithContexts(<ProjectsList />);
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === false
-    );
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(true);
-    expect(handleSelectAll).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('selected').length === 3
-    );
-    done();
-  });
-
-  test('delete button is disabled if user does not have delete capabilities on a selected project', async done => {
-    const wrapper = mountWithContexts(<ProjectsList />);
-    wrapper.find('ProjectsList').setState({
-      projects: mockProjects,
-      itemCount: 3,
-      isInitialized: true,
-      selected: mockProjects.slice(0, 1),
+  test('should load and render projects', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
     });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === false
-    );
-    wrapper.find('ProjectsList').setState({
-      selected: mockProjects,
-    });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === true
-    );
-    done();
+    wrapper.update();
+
+    expect(wrapper.find('ProjectListItem')).toHaveLength(3);
   });
 
-  test('api is called to delete projects for each selected project.', () => {
-    ProjectsAPI.destroy = jest.fn();
-    const wrapper = mountWithContexts(<ProjectsList />);
-    wrapper.find('ProjectsList').setState({
-      projects: mockProjects,
-      itemCount: 2,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockProjects.slice(0, 2),
+  test('should select project when checked', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('ProjectListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('ProjectListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should select all', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+
+    const items = wrapper.find('ProjectListItem');
+    expect(items).toHaveLength(3);
+    items.forEach(item => {
+      expect(item.prop('isSelected')).toEqual(true);
+    });
+
+    expect(
+      wrapper
+        .find('ProjectListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should disable delete button', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('ProjectListItem')
+        .at(2)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    expect(wrapper.find('ToolbarDeleteButton button').prop('disabled')).toEqual(
+      true
+    );
+  });
+
+  test('should call delete api', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('ProjectListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('ProjectListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+
     expect(ProjectsAPI.destroy).toHaveBeenCalledTimes(2);
   });
 
-  test('error is shown when project not successfully deleted from api', async done => {
+  test('should show deletion error', async () => {
     ProjectsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -208,60 +205,55 @@ describe('<ProjectsList />', () => {
         },
       })
     );
-    const wrapper = mountWithContexts(<ProjectsList />);
-    wrapper.find('ProjectsList').setState({
-      projects: mockProjects,
-      itemCount: 1,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockProjects.slice(0, 1),
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    await waitForElement(
-      wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
-    );
+    wrapper.update();
+    expect(ProjectsAPI.read).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      wrapper
+        .find('ProjectListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
 
-    done();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
+
+    const modal = wrapper.find('Modal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('title')).toEqual('Error!');
   });
 
-  test('Add button shown for users without ability to POST', async done => {
-    const wrapper = mountWithContexts(<ProjectsList />);
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === false
-    );
+  test('Add button shown for users without ability to POST', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
+    });
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
-    done();
   });
 
-  test('Add button hidden for users without ability to POST', async done => {
-    ProjectsAPI.readOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {},
+  test('Add button hidden for users without ability to POST', async () => {
+    ProjectsAPI.readOptions = () =>
+      Promise.resolve({
+        data: {
+          actions: {
+            GET: {},
+          },
         },
-      },
+      });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<ProjectList />);
     });
-    const wrapper = mountWithContexts(<ProjectsList />);
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'ProjectsList',
-      el => el.state('hasContentLoading') === false
-    );
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
-    done();
   });
 });

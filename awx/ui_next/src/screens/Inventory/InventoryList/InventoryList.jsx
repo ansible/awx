@@ -1,11 +1,12 @@
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import { InventoriesAPI } from '@api';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -23,225 +24,172 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-class InventoriesList extends Component {
-  constructor(props) {
-    super(props);
+function InventoryList({ i18n }) {
+  const location = useLocation();
+  const match = useRouteMatch();
+  const [selected, setSelected] = useState([]);
 
-    this.state = {
-      hasContentLoading: true,
-      contentError: null,
-      deletionError: null,
-      selected: [],
+  const {
+    result: { inventories, itemCount, actions },
+    error: contentError,
+    isLoading,
+    request: fetchInventories,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const [response, actionsResponse] = await Promise.all([
+        InventoriesAPI.read(params),
+        InventoriesAPI.readOptions(),
+      ]);
+      return {
+        inventories: response.data.results,
+        itemCount: response.data.count,
+        actions: actionsResponse.data.actions,
+      };
+    }, [location]),
+    {
       inventories: [],
       itemCount: 0,
-    };
-
-    this.loadInventories = this.loadInventories.bind(this);
-    this.handleSelectAll = this.handleSelectAll.bind(this);
-    this.handleSelect = this.handleSelect.bind(this);
-    this.handleInventoryDelete = this.handleInventoryDelete.bind(this);
-    this.handleDeleteErrorClose = this.handleDeleteErrorClose.bind(this);
-  }
-
-  componentDidMount() {
-    this.loadInventories();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
-
-    if (location !== prevProps.location) {
-      this.loadInventories();
+      actions: {},
     }
-  }
+  );
 
-  handleDeleteErrorClose() {
-    this.setState({ deletionError: null });
-  }
+  useEffect(() => {
+    fetchInventories();
+  }, [fetchInventories]);
 
-  handleSelectAll(isSelected) {
-    const { inventories } = this.state;
-    const selected = isSelected ? [...inventories] : [];
-    this.setState({ selected });
-  }
+  const isAllSelected =
+    selected.length === inventories.length && selected.length > 0;
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteTeams,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(selected.map(team => InventoriesAPI.destroy(team.id)));
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchInventories,
+    }
+  );
 
-  handleSelect(inventory) {
-    const { selected } = this.state;
-    if (selected.some(s => s.id === inventory.id)) {
-      this.setState({ selected: selected.filter(s => s.id !== inventory.id) });
+  const handleInventoryDelete = async () => {
+    await deleteTeams();
+    setSelected([]);
+  };
+
+  const hasContentLoading = isDeleteLoading || isLoading;
+  const canAdd = actions && actions.POST;
+
+  const handleSelectAll = isSelected => {
+    setSelected(isSelected ? [...inventories] : []);
+  };
+
+  const handleSelect = row => {
+    if (selected.some(s => s.id === row.id)) {
+      setSelected(selected.filter(s => s.id !== row.id));
     } else {
-      this.setState({ selected: selected.concat(inventory) });
+      setSelected(selected.concat(row));
     }
-  }
+  };
 
-  async handleInventoryDelete() {
-    const { selected, itemCount } = this.state;
-
-    this.setState({ hasContentLoading: true });
-    try {
-      await Promise.all(
-        selected.map(({ id }) => {
-          return InventoriesAPI.destroy(id);
-        })
-      );
-      this.setState({ itemCount: itemCount - selected.length });
-    } catch (err) {
-      this.setState({ deletionError: err });
-    } finally {
-      await this.loadInventories();
-    }
-  }
-
-  async loadInventories() {
-    const { location } = this.props;
-    const { actions: cachedActions } = this.state;
-    const params = parseQueryString(QS_CONFIG, location.search);
-
-    let optionsPromise;
-    if (cachedActions) {
-      optionsPromise = Promise.resolve({ data: { actions: cachedActions } });
-    } else {
-      optionsPromise = InventoriesAPI.readOptions();
-    }
-
-    const promises = Promise.all([InventoriesAPI.read(params), optionsPromise]);
-
-    this.setState({ contentError: null, hasContentLoading: true });
-
-    try {
-      const [
+  const addButton = (
+    <AddDropDownButton
+      key="add"
+      dropdownItems={[
         {
-          data: { count, results },
+          label: i18n._(t`Inventory`),
+          url: `${match.url}/inventory/add/`,
         },
         {
-          data: { actions },
+          label: i18n._(t`Smart Inventory`),
+          url: `${match.url}/smart_inventory/add/`,
         },
-      ] = await promises;
-
-      this.setState({
-        actions,
-        itemCount: count,
-        inventories: results,
-        selected: [],
-      });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
-    }
-  }
-
-  render() {
-    const {
-      contentError,
-      hasContentLoading,
-      deletionError,
-      inventories,
-      itemCount,
-      selected,
-      actions,
-    } = this.state;
-    const { match, i18n } = this.props;
-    const canAdd =
-      actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected =
-      selected.length === inventories.length && selected.length !== 0;
-    const addButton = (
-      <AddDropDownButton
-        key="add"
-        dropdownItems={[
-          {
-            label: i18n._(t`Inventory`),
-            url: `${match.url}/inventory/add/`,
-          },
-          {
-            label: i18n._(t`Smart Inventory`),
-            url: `${match.url}/smart_inventory/add/`,
-          },
-        ]}
-      />
-    );
-    return (
-      <PageSection>
-        <Card>
-          <PaginatedDataList
-            contentError={contentError}
-            hasContentLoading={hasContentLoading}
-            items={inventories}
-            itemCount={itemCount}
-            pluralizedItemName={i18n._(t`Inventories`)}
-            qsConfig={QS_CONFIG}
-            onRowClick={this.handleSelect}
-            toolbarSearchColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-                isDefault: true,
-              },
-              {
-                name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
-              },
-              {
-                name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
-              },
-            ]}
-            toolbarSortColumns={[
-              {
-                name: i18n._(t`Name`),
-                key: 'name',
-              },
-            ]}
-            renderToolbar={props => (
-              <DatalistToolbar
-                {...props}
-                showSelectAll
-                showExpandCollapse
-                isAllSelected={isAllSelected}
-                onSelectAll={this.handleSelectAll}
-                qsConfig={QS_CONFIG}
-                additionalControls={[
-                  ...(canAdd ? [addButton] : []),
-                  <ToolbarDeleteButton
-                    key="delete"
-                    onDelete={this.handleInventoryDelete}
-                    itemsToDelete={selected}
-                    pluralizedItemName="Inventories"
-                  />,
-                ]}
-              />
-            )}
-            renderItem={inventory => (
-              <InventoryListItem
-                key={inventory.id}
-                value={inventory.name}
-                inventory={inventory}
-                detailUrl={
-                  inventory.kind === 'smart'
-                    ? `${match.url}/smart_inventory/${inventory.id}/details`
-                    : `${match.url}/inventory/${inventory.id}/details`
-                }
-                onSelect={() => this.handleSelect(inventory)}
-                isSelected={selected.some(row => row.id === inventory.id)}
-              />
-            )}
-            emptyStateControls={canAdd && addButton}
-          />
-        </Card>
-        <AlertModal
-          isOpen={deletionError}
-          variant="error"
-          title={i18n._(t`Error!`)}
-          onClose={this.handleDeleteErrorClose}
-        >
-          {i18n._(t`Failed to delete one or more inventories.`)}
-          <ErrorDetail error={deletionError} />
-        </AlertModal>
-      </PageSection>
-    );
-  }
+      ]}
+    />
+  );
+  return (
+    <PageSection>
+      <Card>
+        <PaginatedDataList
+          contentError={contentError}
+          hasContentLoading={hasContentLoading}
+          items={inventories}
+          itemCount={itemCount}
+          pluralizedItemName={i18n._(t`Inventories`)}
+          qsConfig={QS_CONFIG}
+          onRowClick={handleSelect}
+          toolbarSearchColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isDefault: true,
+            },
+            {
+              name: i18n._(t`Created By (Username)`),
+              key: 'created_by__username',
+            },
+            {
+              name: i18n._(t`Modified By (Username)`),
+              key: 'modified_by__username',
+            },
+          ]}
+          toolbarSortColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+            },
+          ]}
+          renderToolbar={props => (
+            <DatalistToolbar
+              {...props}
+              showSelectAll
+              showExpandCollapse
+              isAllSelected={isAllSelected}
+              onSelectAll={handleSelectAll}
+              qsConfig={QS_CONFIG}
+              additionalControls={[
+                ...(canAdd ? [addButton] : []),
+                <ToolbarDeleteButton
+                  key="delete"
+                  onDelete={handleInventoryDelete}
+                  itemsToDelete={selected}
+                  pluralizedItemName={i18n._(t`Inventories`)}
+                />,
+              ]}
+            />
+          )}
+          renderItem={inventory => (
+            <InventoryListItem
+              key={inventory.id}
+              value={inventory.name}
+              inventory={inventory}
+              detailUrl={
+                inventory.kind === 'smart'
+                  ? `${match.url}/smart_inventory/${inventory.id}/details`
+                  : `${match.url}/inventory/${inventory.id}/details`
+              }
+              onSelect={() => handleSelect(inventory)}
+              isSelected={selected.some(row => row.id === inventory.id)}
+            />
+          )}
+          emptyStateControls={canAdd && addButton}
+        />
+      </Card>
+      <AlertModal
+        isOpen={deletionError}
+        variant="error"
+        title={i18n._(t`Error!`)}
+        onClose={clearDeletionError}
+      >
+        {i18n._(t`Failed to delete one or more inventories.`)}
+        <ErrorDetail error={deletionError} />
+      </AlertModal>
+    </PageSection>
+  );
 }
 
-export { InventoriesList as _InventoriesList };
-export default withI18n()(withRouter(InventoriesList));
+export default withI18n()(InventoryList);

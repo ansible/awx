@@ -1,8 +1,9 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { InventoriesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
-import InventoriesList, { _InventoriesList } from './InventoryList';
+import InventoryList from './InventoryList';
 
 jest.mock('@api');
 
@@ -117,7 +118,7 @@ const mockInventories = [
   },
 ];
 
-describe('<InventoriesList />', () => {
+describe('<InventoryList />', () => {
   beforeEach(() => {
     InventoriesAPI.read.mockResolvedValue({
       data: {
@@ -140,186 +141,174 @@ describe('<InventoriesList />', () => {
     jest.clearAllMocks();
   });
 
-  test('initially renders successfully', () => {
-    mountWithContexts(
-      <InventoriesList
-        match={{ path: '/inventories', url: '/inventories' }}
-        location={{ search: '', pathname: '/inventories' }}
-      />
-    );
-  });
-
-  test('Inventories are retrieved from the api and the components finishes loading', async done => {
-    const loadInventories = jest.spyOn(
-      _InventoriesList.prototype,
-      'loadInventories'
-    );
-    const wrapper = mountWithContexts(<InventoriesList />);
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(loadInventories).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === false
-    );
-    expect(wrapper.find('InventoryListItem').length).toBe(3);
-    done();
-  });
-
-  test('handleSelect is called when a inventory list item is selected', async done => {
-    const handleSelect = jest.spyOn(_InventoriesList.prototype, 'handleSelect');
-    const wrapper = mountWithContexts(<InventoriesList />);
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === false
-    );
-    await wrapper
-      .find('input#select-inventory-1')
-      .closest('DataListCheck')
-      .props()
-      .onChange();
-    expect(handleSelect).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('selected').length === 1
-    );
-    done();
-  });
-
-  test('handleSelectAll is called when a inventory list item is selected', async done => {
-    const handleSelectAll = jest.spyOn(
-      _InventoriesList.prototype,
-      'handleSelectAll'
-    );
-    const wrapper = mountWithContexts(<InventoriesList />);
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === false
-    );
-    wrapper
-      .find('Checkbox#select-all')
-      .props()
-      .onChange(true);
-    expect(handleSelectAll).toBeCalled();
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('selected').length === 3
-    );
-    done();
-  });
-
-  test('delete button is disabled if user does not have delete capabilities on a selected inventory', async done => {
-    const wrapper = mountWithContexts(<InventoriesList />);
-    wrapper.find('InventoriesList').setState({
-      inventories: mockInventories,
-      itemCount: 3,
-      isInitialized: true,
-      selected: mockInventories.slice(0, 2),
+  test('should load and render inventories', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
     });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === false
-    );
-    wrapper.find('InventoriesList').setState({
-      selected: mockInventories,
-    });
-    await waitForElement(
-      wrapper,
-      'ToolbarDeleteButton * button',
-      el => el.getDOMNode().disabled === true
-    );
-    done();
+    wrapper.update();
+
+    expect(wrapper.find('InventoryListItem')).toHaveLength(3);
   });
 
-  test('api is called to delete inventories for each selected inventory.', () => {
-    InventoriesAPI.destroy = jest.fn();
-    const wrapper = mountWithContexts(<InventoriesList />);
-    wrapper.find('InventoriesList').setState({
-      inventories: mockInventories,
-      itemCount: 3,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockInventories.slice(0, 2),
+  test('should select inventory when checked', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('InventoryListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('InventoryListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should select all', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+
+    const items = wrapper.find('InventoryListItem');
+    expect(items).toHaveLength(3);
+    items.forEach(item => {
+      expect(item.prop('isSelected')).toEqual(true);
+    });
+
+    expect(
+      wrapper
+        .find('InventoryListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(true);
+  });
+
+  test('should disable delete button', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('InventoryListItem')
+        .at(2)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    expect(wrapper.find('ToolbarDeleteButton button').prop('disabled')).toEqual(
+      true
+    );
+  });
+
+  test('should call delete api', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper
+        .find('InventoryListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('InventoryListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+
     expect(InventoriesAPI.destroy).toHaveBeenCalledTimes(2);
   });
 
-  test('error is shown when inventory not successfully deleted from api', async done => {
+  test('should show deletion error', async () => {
     InventoriesAPI.destroy.mockRejectedValue(
       new Error({
         response: {
           config: {
             method: 'delete',
-            url: '/api/v2/inventories/1',
+            url: '/api/v2/inventory/1',
           },
           data: 'An error occurred',
         },
       })
     );
-    const wrapper = mountWithContexts(<InventoriesList />);
-    wrapper.find('InventoriesList').setState({
-      inventories: mockInventories,
-      itemCount: 1,
-      isInitialized: true,
-      isModalOpen: true,
-      selected: mockInventories.slice(0, 1),
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
     });
-    wrapper.find('ToolbarDeleteButton').prop('onDelete')();
-    await waitForElement(
-      wrapper,
-      'Modal',
-      el => el.props().isOpen === true && el.props().title === 'Error!'
-    );
+    wrapper.update();
+    expect(InventoriesAPI.read).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      wrapper
+        .find('InventoryListItem')
+        .at(0)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
 
-    done();
+    await act(async () => {
+      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
+
+    const modal = wrapper.find('Modal');
+    expect(modal).toHaveLength(1);
+    expect(modal.prop('title')).toEqual('Error!');
   });
 
-  test('Add button shown for users with ability to POST', async done => {
-    const wrapper = mountWithContexts(<InventoriesList />);
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === false
-    );
+  test('Add button shown for users without ability to POST', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
+    });
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(1);
-    done();
   });
 
-  test('Add button hidden for users without ability to POST', async done => {
-    InventoriesAPI.readOptions.mockResolvedValue({
-      data: {
-        actions: {
-          GET: {},
+  test('Add button hidden for users without ability to POST', async () => {
+    InventoriesAPI.readOptions = () =>
+      Promise.resolve({
+        data: {
+          actions: {
+            GET: {},
+          },
         },
-      },
+      });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<InventoryList />);
     });
-    const wrapper = mountWithContexts(<InventoriesList />);
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === true
-    );
-    await waitForElement(
-      wrapper,
-      'InventoriesList',
-      el => el.state('hasContentLoading') === false
-    );
+    wrapper.update();
+
     expect(wrapper.find('ToolbarAddButton').length).toBe(0);
-    done();
   });
 });
