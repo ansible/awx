@@ -11,7 +11,7 @@ export default
                 templateUrl: templateUrl('home/dashboard/lists/job-templates/job-templates-list')
             };
 
-            function link(scope, element, attr) {
+            function link(scope) {
 
                 scope.$watch("data", function(data) {
                     if (data) {
@@ -22,7 +22,7 @@ export default
                             scope.noJobTemplates = true;
                         }
                     }
-                });
+                }, true);
 
                 scope.canAddJobTemplate = false;
                 let url = GetBasePath('job_templates');

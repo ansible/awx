@@ -12,18 +12,64 @@ export default ['$scope','Wait', '$timeout', 'i18n',
         var dataCount = 0;
         let launchModalOpen = false;
         let refreshAfterLaunchClose = false;
-        let pendingRefresh = false;
-        let refreshTimerRunning = false;
+        let pendingDashboardRefresh = false;
+        let dashboardTimerRunning = false;
+        let newJobsTimerRunning = false;
+        let newTemplatesTimerRunning = false;
+        let newJobs = [];
+        let newTemplates =[];
 
-        $scope.$on('ws-jobs', function () {
-            if (!launchModalOpen) {
-                if (!refreshTimerRunning) {
-                    refreshLists();
+        $scope.$on('ws-jobs', function (e, msg) {
+            if (msg.status === 'successful' || msg.status === 'failed' || msg.status === 'canceled') {
+                newJobs.push(msg.unified_job_id);
+                if (!newJobsTimerRunning) {
+                    fetchNewJobs();
+                }
+                if (!launchModalOpen) {
+                    if (!dashboardTimerRunning) {
+                        fetchDashboardData();
+                    } else {
+                        pendingDashboardRefresh = true;
+                    }
                 } else {
-                    pendingRefresh = true;
+                    refreshAfterLaunchClose = true;
+                }
+            }
+
+            const template = $scope.dashboardJobTemplatesListData.find((t) => t.id === msg.unified_job_template_id);
+            if (template) {
+                if (msg.status === 'pending') {
+                    if (template.summary_fields.recent_jobs.length === 10) {
+                        template.summary_fields.recent_jobs.pop();
+                    }
+
+                    template.summary_fields.recent_jobs.unshift({
+                        id: msg.unified_job_id,
+                        status: msg.status,
+                        type: msg.type
+                    });
+                } else {
+                    for (let i=0; i<template.summary_fields.recent_jobs.length; i++) {
+                        const recentJob = template.summary_fields.recent_jobs[i];
+                        if (recentJob.id === msg.unified_job_id) {
+                            recentJob.status = msg.status;
+                            if (msg.finished) {
+                                recentJob.finished = msg.finished;
+                                template.last_job_run = msg.finished;
+                            }
+                            break;
+                        }
+                    };
+
+                    if (msg.status === 'successful' || msg.status === 'failed' || msg.status === 'canceled') {
+                        $scope.dashboardJobTemplatesListData.sort((a, b) => new Date(b.last_job_run) - new Date(a.last_job_run));
+                    }
                 }
             } else {
-                refreshAfterLaunchClose = true;
+                newTemplates.push(msg.unified_job_template_id);
+                if (!launchModalOpen && !newTemplatesTimerRunning) {
+                    fetchNewTemplates();
+                }
             }
         });
 
@@ -31,7 +77,10 @@ export default ['$scope','Wait', '$timeout', 'i18n',
             evt.stopPropagation();
             if (!isOpen && refreshAfterLaunchClose) {
                 refreshAfterLaunchClose = false;
-                refreshLists();
+                fetchDashboardData();
+                if (newTemplates.length > 0) {
+                    fetchNewTemplates();
+                }
             }
             launchModalOpen = isOpen;
         });
@@ -75,7 +124,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
             $scope.$emit('dashboardDataLoadComplete');
         });
 
-        function refreshLists () {
+        const fetchDashboardData = () => {
             Rest.setUrl(GetBasePath('dashboard'));
             Rest.get()
             .then(({data}) => {
@@ -83,25 +132,6 @@ export default ['$scope','Wait', '$timeout', 'i18n',
             })
             .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard host graph data: ${status}`) });
-            });
-
-            Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job&count_disabled=1");
-            Rest.setHeader({'X-WS-Session-Quiet': true});
-            Rest.get()
-            .then(({data}) => {
-                $scope.dashboardJobsListData = data.results;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard jobs list: ${status}`) });
-            });
-
-            Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template&count_disabled=1");
-            Rest.get()
-            .then(({data}) => {
-                $scope.dashboardJobTemplatesListData = data.results;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n._(`Failed to get dashboard jobs list: ${status}`) });
             });
 
             if ($scope.graphData) {
@@ -119,16 +149,70 @@ export default ['$scope','Wait', '$timeout', 'i18n',
                 });
             }
 
-            pendingRefresh = false;
-            refreshTimerRunning = true;
+            pendingDashboardRefresh = false;
+            dashboardTimerRunning = true;
             $timeout(() => {
-                if (pendingRefresh) {
-                    refreshLists();
+                if (pendingDashboardRefresh) {
+                    fetchDashboardData();
                 } else {
-                    refreshTimerRunning = false;
+                    dashboardTimerRunning = false;
                 }
             }, 5000);
-        }
+        };
+
+        const fetchNewJobs = () => {
+            newJobsTimerRunning = true;
+            const newJobIdsFilter = newJobs.join(',');
+            newJobs = [];
+            Rest.setUrl(`${GetBasePath("unified_jobs")}?id__in=${newJobIdsFilter}&order_by=-finished&finished__isnull=false&type=workflow_job,job&count_disabled=1`);
+            Rest.get()
+                .then(({ data }) => {
+                    const joinedJobs = data.results.concat($scope.dashboardJobsListData);
+                    $scope.dashboardJobsListData = joinedJobs.length > 5
+                        ? joinedJobs.slice(0, 5)
+                        : joinedJobs;
+                    $timeout(() => {
+                        if (newJobs.length > 0) {
+                            fetchNewJobs();
+                        } else {
+                            newJobsTimerRunning = false;
+                        }
+                    }, 5000);
+                })
+                .catch(({ data, status }) => {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: i18n._('Error!'),
+                        msg: i18n._(`Failed to get new jobs for dashboard: ${status}`)
+                    });
+                });
+        };
+
+        const fetchNewTemplates = () => {
+            newTemplatesTimerRunning = true;
+            const newTemplateIdsFilter = newTemplates.join(',');
+            newTemplates = [];
+            Rest.setUrl(`${GetBasePath("unified_job_templates")}?id__in=${newTemplateIdsFilter}&order_by=-last_job_run&last_job_run__isnull=false&type=workflow_job_template,job_template&count_disabled=1"`);
+            Rest.get()
+                .then(({ data }) => {
+                    const joinedTemplates = data.results.concat($scope.dashboardJobTemplatesListData).sort((a, b) => new Date(b.last_job_run) - new Date(a.last_job_run));
+                    $scope.dashboardJobTemplatesListData = joinedTemplates.length > 5
+                        ? joinedTemplates.slice(0, 5)
+                        : joinedTemplates;
+                    $timeout(() => {
+                        if (newTemplates.length > 0 && !launchModalOpen) {
+                            fetchNewTemplates();
+                        } else {
+                            newTemplatesTimerRunning = false;
+                        }
+                    }, 5000);
+                })
+                .catch(({ data, status }) => {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: i18n._('Error!'),
+                        msg: i18n._(`Failed to get new templates for dashboard: ${status}`)
+                    });
+                });
+        };
 
         Wait('start');
         Rest.setUrl(GetBasePath('dashboard'));
