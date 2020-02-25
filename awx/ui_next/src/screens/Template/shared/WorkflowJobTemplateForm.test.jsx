@@ -9,9 +9,11 @@ import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
 import { WorkflowJobTemplatesAPI } from '../../../api';
 
 jest.mock('@api/models/WorkflowJobTemplates');
+
 WorkflowJobTemplatesAPI.updateWebhookKey.mockResolvedValue({
   data: { webhook_key: 'sdafdghjkl2345678ionbvcxz' },
 });
+
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
   let history;
@@ -35,6 +37,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
     },
   };
+
   beforeEach(() => {
     history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/6/edit'],
@@ -66,13 +69,16 @@ describe('<WorkflowJobTemplateForm/>', () => {
       );
     });
   });
+
   afterEach(() => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
+
   test('renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
+
   test('all the fields render successfully', () => {
     const fields = [
       'FormField[name="name"]',
@@ -89,6 +95,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     };
     fields.map((field, index) => assertField(field, index));
   });
+
   test('changing inputs should update values', async () => {
     const inputsToChange = [
       {
@@ -193,6 +200,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
     expect(wrapper.find('AnsibleSelect').prop('value')).toBe('gitlab');
   });
+
   test('handleSubmit is called on submit button click', async () => {
     act(() => {
       wrapper.find('Formik').prop('onSubmit')({});
@@ -201,6 +209,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     sleep(0);
     expect(handleSubmit).toBeCalled();
   });
+
   test('handleCancel is called on cancel button click', async () => {
     act(() => {
       wrapper.find('button[aria-label="Cancel"]').simulate('click');

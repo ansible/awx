@@ -7,8 +7,8 @@ import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
 import { WorkflowJobTemplateForm } from '../shared';
 
 function WorkflowJobTemplateEdit({ template, webhook_key }) {
-  const [formSubmitError, setFormSubmitError] = useState();
   const history = useHistory();
+  const [formSubmitError, setFormSubmitError] = useState();
 
   const handleSubmit = async values => {
     const { labels, ...remainingValues } = values;

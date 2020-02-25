@@ -46,14 +46,24 @@ function WorkflowJobTemplateForm({
   webhook_key,
   submitError,
 }) {
+  const urlOrigin = window.location.origin;
+
   const { id } = useParams();
   const wfjtAddMatch = useRouteMatch('/templates/workflow_job_template/add');
 
-  const urlOrigin = window.location.origin;
-
   const [contentError, setContentError] = useState(null);
-  const [webhookKey, setWebHookKey] = useState(webhook_key);
   const [credTypeId, setCredentialTypeId] = useState();
+
+  const [inventory, setInventory] = useState(
+    template?.summary_fields?.inventory || null
+  );
+  const [organization, setOrganization] = useState(
+    template?.summary_fields?.organization || null
+  );
+  const [webhookCredential, setWebhookCredential] = useState(
+    template?.summary_fields?.webhook_credential || null
+  );
+  const [webhookKey, setWebHookKey] = useState(webhook_key);
   const [webhookService, setWebHookService] = useState(
     template.webhook_service || ''
   );
@@ -159,16 +169,16 @@ function WorkflowJobTemplateForm({
   return (
     <Formik
       onSubmit={values => {
-        values.webhook_credential = values?.webhook_credential?.id;
-        values.organization = values?.organization?.id;
-        values.inventory = values?.inventory?.id;
+        if (values.webhook_service === '') {
+          values.webhook_credential = '';
+        }
         return handleSubmit(values);
       }}
       initialValues={{
         name: template.name || '',
         description: template.description || '',
-        inventory: template?.summary_fields?.inventory || null,
-        organization: template?.summary_fields?.organization || null,
+        inventory: template?.summary_fields?.inventory?.id || null,
+        organization: template?.summary_fields?.organization?.id || null,
         labels: template.summary_fields?.labels?.results || [],
         extra_vars: template.variables || '---',
         limit: template.limit || '',
@@ -178,7 +188,7 @@ function WorkflowJobTemplateForm({
           template?.related?.webhook_receiver &&
           `${urlOrigin}${template?.related?.webhook_receiver}`,
         webhook_credential:
-          template?.summary_fields?.webhook_credential || null,
+          template?.summary_fields?.webhook_credential?.id || null,
         webhook_service: template.webhook_service || '',
         ask_limit_on_launch: template.ask_limit_on_launch || false,
         ask_inventory_on_launch: template.ask_inventory_on_launch || false,
@@ -208,7 +218,7 @@ function WorkflowJobTemplateForm({
               label={i18n._(t`Organization`)}
               name="organization"
             >
-              {({ form, field }) => (
+              {({ form }) => (
                 <OrganizationLookup
                   helperTextInvalid={form.errors.organization}
                   isValid={
@@ -216,25 +226,27 @@ function WorkflowJobTemplateForm({
                   }
                   onBlur={() => form.setFieldTouched('organization')}
                   onChange={value => {
-                    form.setFieldValue('organization', value);
+                    form.setFieldValue('organization', value.id);
+                    setOrganization(value);
                   }}
-                  value={field.value}
+                  value={organization}
                   touched={form.touched.organization}
                   error={form.errors.organization}
                 />
               )}
             </Field>
             <Field name="inventory">
-              {({ form, field }) => (
+              {({ form }) => (
                 <InventoryLookup
-                  value={field.value}
+                  value={inventory}
                   tooltip={i18n._(
                     t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
                   )}
                   isValid={!form.touched.inventory || !form.errors.inventory}
                   helperTextInvalid={form.errors.inventory}
                   onChange={value => {
-                    form.setFieldValue('inventory', value);
+                    form.setFieldValue('inventory', value.id);
+                    setInventory(value);
                     form.setFieldValue('organizationId', value.organization);
                   }}
                   error={form.errors.inventory}
@@ -426,7 +438,7 @@ function WorkflowJobTemplateForm({
               )}
               {credTypeId && (
                 <Field name="webhook_credential">
-                  {({ form, field }) => (
+                  {({ form }) => (
                     <FormGroup
                       fieldId="webhook_credential"
                       id="webhook_credential"
@@ -439,9 +451,10 @@ function WorkflowJobTemplateForm({
                         )}
                         credentialTypeId={credTypeId || null}
                         onChange={value => {
-                          form.setFieldValue('webhook_credential', value);
+                          form.setFieldValue('webhook_credential', value.id);
+                          setWebhookCredential(value);
                         }}
-                        value={field.value}
+                        value={webhookCredential}
                       />
                     </FormGroup>
                   )}

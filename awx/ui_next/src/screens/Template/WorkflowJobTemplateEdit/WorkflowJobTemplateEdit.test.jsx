@@ -25,6 +25,7 @@ const mockTemplate = {
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
   let history;
+
   beforeEach(async () => {
     await act(async () => {
       history = createMemoryHistory({
@@ -49,12 +50,15 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       );
     });
   });
+
   afterEach(async () => {
     wrapper.unmount();
   });
+
   test('renders successfully', () => {
     expect(wrapper.find('WorkflowJobTemplateEdit').length).toBe(1);
   });
+
   test('api is called to properly to save the updated template.', async () => {
     await act(async () => {
       await wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
@@ -69,6 +73,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         variables: '---',
       });
     });
+
     expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalledWith(6, {
       id: 6,
       name: 'Alex',
@@ -88,12 +93,14 @@ describe('<WorkflowJobTemplateEdit/>', () => {
 
     await expect(WorkflowJobTemplatesAPI.associateLabel).toBeCalledTimes(1);
   });
+
   test('handleCancel navigates the user to the /templates', async () => {
     await act(async () => {
       await wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
     });
     expect(history.location.pathname).toBe('/templates');
   });
+
   test('throwing error renders FormSubmitError component', async () => {
     const error = new Error('oops');
     WorkflowJobTemplatesAPI.update.mockImplementation(() =>

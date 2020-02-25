@@ -39,12 +39,15 @@ function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
     related,
     webhook_credential,
   } = template;
+
   const urlOrigin = window.location.origin;
   const history = useHistory();
+
   const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
+
   const renderOptionsField =
-    template.allow_simultaneous || template.webhook_servicee;
+    template.allow_simultaneous || template.webhook_service;
 
   const renderOptions = (
     <TextList component={TextListVariants.ul}>
@@ -75,6 +78,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
     }
     setHasContentLoading(false);
   };
+
   const inventoryValue = (kind, inventoryId) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
@@ -91,6 +95,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
       </Link>
     );
   };
+
   const canLaunch = summary_fields?.user_capabilities?.start;
   const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
     ...job,

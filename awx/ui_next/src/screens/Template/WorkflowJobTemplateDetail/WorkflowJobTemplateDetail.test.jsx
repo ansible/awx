@@ -40,6 +40,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     },
     webhook_service: 'Github',
   };
+
   beforeEach(async () => {
     history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/1/details'],
@@ -75,12 +76,15 @@ describe('<WorkflowJobTemplateDetail/>', () => {
       );
     });
   });
+
   afterEach(() => {
     wrapper.unmount();
   });
+
   test('renders successfully', () => {
     expect(wrapper.find(WorkflowJobTemplateDetail).length).toBe(1);
   });
+
   test('expect detail fields to render properly', () => {
     const renderedValues = [
       {
@@ -147,6 +151,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
 
     renderedValues.map(value => assertValue(value));
   });
+
   test('link out resource have the correct url', () => {
     const inventory = wrapper.find('Detail[label="Inventory"]').find('Link');
     const organization = wrapper

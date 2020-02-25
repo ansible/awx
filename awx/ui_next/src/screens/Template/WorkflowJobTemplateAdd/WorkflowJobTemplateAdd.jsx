@@ -8,8 +8,9 @@ import { WorkflowJobTemplatesAPI } from '@api';
 import WorkflowJobTemplateForm from '../shared/WorkflowJobTemplateForm';
 
 function WorkflowJobTemplateAdd() {
-  const [formSubmitError, setFormSubmitError] = useState();
   const history = useHistory();
+  const [formSubmitError, setFormSubmitError] = useState();
+
   const handleSubmit = async values => {
     const { labels, organizationId, ...remainingValues } = values;
     try {

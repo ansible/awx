@@ -39,9 +39,11 @@ describe('<WorkflowJobTemplateAdd/>', () => {
   afterEach(async () => {
     wrapper.unmount();
   });
+
   test('initially renders successfully', async () => {
     expect(wrapper.length).toBe(1);
   });
+
   test('calls workflowJobTemplatesAPI with correct information on submit', async () => {
     await act(async () => {
       await wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
@@ -55,12 +57,14 @@ describe('<WorkflowJobTemplateAdd/>', () => {
     });
     expect(WorkflowJobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
   });
+
   test('handleCancel navigates the user to the /templates', async () => {
     await act(async () => {
       await wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
     });
     expect(history.location.pathname).toBe('/templates');
   });
+
   test('throwing error renders FormSubmitError component', async () => {
     const error = new Error('oops');
     WorkflowJobTemplatesAPI.create.mockImplementation(() =>
