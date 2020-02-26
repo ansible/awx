@@ -219,7 +219,19 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
                 user.is_superuser = True
                 user.save()
                 break
+                
+            # Auditors Logic
+            if team_map.get('auditors_remove', True):
+                if user.is_system_auditor:
+                    user.is_system_auditor = False
+                    user.save()
 
+            auditors = team_name_map.get('auditors', '')
+            if auditors:
+                user.is_system_auditor = True
+                user.save()
+                break
+                
     if team_map.get('remove', True):
         [t.member_role.members.remove(user) for t in
             Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
