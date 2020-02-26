@@ -194,6 +194,11 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
+# Maximum number of processes the callback receiver or task dispatcher will spawn
+# To avoid errors with high workloads, keep this (at least) lower than the maximum
+# number of database connections available divided by the instance count
+JOB_EVENT_MAX_WORKERS = 100
+
 # The maximum size of the job event worker queue before requests are blocked
 JOB_EVENT_MAX_QUEUE_SIZE = 10000
 

@@ -306,6 +306,9 @@ class AutoscalePool(WorkerPool):
             # 5 workers per GB of total memory
             self.max_workers = (total_memory_gb * 5)
 
+        # Obey the global constraint, mainly for DB connection limit
+        self.max_workers = min(self.max_workers, settings.JOB_EVENT_MAX_WORKERS)
+
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
 
