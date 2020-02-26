@@ -1,82 +1,12 @@
 import React, { useState } from 'react';
 import { string, bool } from 'prop-types';
-import { useField } from 'formik';
-import { Split, SplitItem } from '@patternfly/react-core';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import CodeMirrorInput from './CodeMirrorInput';
-import YamlJsonToggle from './YamlJsonToggle';
-import { JSON_MODE, YAML_MODE } from './constants';
-
-function VariablesField({ id, name, label, readOnly }) {
-  const [field, meta, helpers] = useField(name);
-  const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
-
-  return (
-    <>
-      <Split gutter="sm">
-        <SplitItem>
-          <label htmlFor={id} className="pf-c-form__label">
-            <span className="pf-c-form__label-text">{label}</span>
-          </label>
-        </SplitItem>
-        <SplitItem>
-          <YamlJsonToggle
-            mode={mode}
-            onChange={newMode => {
-              try {
-                const newVal =
-                  newMode === YAML_MODE
-                    ? jsonToYaml(field.value)
-                    : yamlToJson(field.value);
-                helpers.setValue(newVal);
-                setMode(newMode);
-              } catch (err) {
-                helpers.setError(err.message);
-              }
-            }}
-          />
-        </SplitItem>
-      </Split>
-      <CodeMirrorInput
-        mode={mode}
-        readOnly={readOnly}
-        {...field}
-        onChange={newVal => {
-          helpers.setValue(newVal);
-        }}
-        hasErrors={!!meta.error}
-      />
-      {meta.error ? (
-        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
-          {meta.error}
-        </div>
-      ) : null}
-    </>
-  );
-}
-VariablesField.propTypes = {
-  id: string.isRequired,
-  name: string.isRequired,
-  label: string.isRequired,
-  readOnly: bool,
-};
-VariablesField.defaultProps = {
-  readOnly: false,
-};
-
-export default VariablesField;
-
-
-/*
-import React, { useState } from 'react';
-import { string, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Field, useFormikContext } from 'formik';
-import { Split, SplitItem } from '@patternfly/react-core';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import { CheckboxField } from '@components/FormField';
+import { useField } from 'formik';
 import styled from 'styled-components';
+import { Split, SplitItem } from '@patternfly/react-core';
+import { CheckboxField } from '@components/FormField';
+import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
@@ -91,9 +21,8 @@ const StyledCheckboxField = styled(CheckboxField)`
 `;
 
 function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
-  const { values, setFieldError, setFieldValue } = useFormikContext();
-  const value = values[name];
-  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
+  const [field, meta, helpers] = useField(name);
+  const [mode, setMode] = useState(isJson(field.value) ? JSON_MODE : YAML_MODE);
 
   return (
     <div className="pf-c-form__group">
@@ -111,12 +40,12 @@ function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
                 try {
                   const newVal =
                     newMode === YAML_MODE
-                      ? jsonToYaml(value)
-                      : yamlToJson(value);
-                  setFieldValue(name, newVal);
+                      ? jsonToYaml(field.value)
+                      : yamlToJson(field.value);
+                  helpers.setValue(newVal);
                   setMode(newMode);
                 } catch (err) {
-                  setFieldError(name, err.message);
+                  helpers.setError(err.message);
                 }
               }}
             />
@@ -130,29 +59,20 @@ function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
           />
         )}
       </FieldHeader>
-      <Field name={name}>
-        {({ field, form }) => (
-          <>
-            <CodeMirrorInput
-              mode={mode}
-              readOnly={readOnly}
-              {...field}
-              onChange={newVal => {
-                form.setFieldValue(name, newVal);
-              }}
-              hasErrors={!!form.errors[field.name]}
-            />
-            {form.errors[field.name] ? (
-              <div
-                className="pf-c-form__helper-text pf-m-error"
-                aria-live="polite"
-              >
-                {form.errors[field.name]}
-              </div>
-            ) : null}
-          </>
-        )}
-      </Field>
+      <CodeMirrorInput
+        mode={mode}
+        readOnly={readOnly}
+        {...field}
+        onChange={newVal => {
+          helpers.setValue(newVal);
+        }}
+        hasErrors={!!meta.error}
+      />
+      {meta.error ? (
+        <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
+          {meta.error}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -161,10 +81,11 @@ VariablesField.propTypes = {
   name: string.isRequired,
   label: string.isRequired,
   readOnly: bool,
+  promptId: string,
 };
 VariablesField.defaultProps = {
   readOnly: false,
+  promptId: null,
 };
 
 export default withI18n()(VariablesField);
-*/
