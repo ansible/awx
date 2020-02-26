@@ -98,7 +98,9 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     await act(async () => {
       await wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
     });
-    expect(history.location.pathname).toBe('/templates');
+    expect(history.location.pathname).toBe(
+      '/templates/workflow_job_template/6/details'
+    );
   });
 
   test('throwing error renders FormSubmitError component', async () => {

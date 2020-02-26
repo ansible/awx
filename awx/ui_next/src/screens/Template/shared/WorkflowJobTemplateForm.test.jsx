@@ -6,7 +6,7 @@ import { sleep } from '@testUtils/testUtils';
 
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
-import { WorkflowJobTemplatesAPI } from '../../../api';
+import { WorkflowJobTemplatesAPI } from '@api';
 
 jest.mock('@api/models/WorkflowJobTemplates');
 
@@ -137,8 +137,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find('input#wfjt-name').prop('value')).toEqual('new foo');
-
     const assertChanges = ({ element, value }) => {
       expect(wrapper.find(`input#${element}`).prop('value')).toEqual(
         `${value.value}`
@@ -146,20 +144,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
     };
 
     inputsToChange.map(input => assertChanges(input));
-    expect(wrapper.find('input#wfjt-name').prop('value')).toEqual('new foo');
-    expect(wrapper.find('InventoryLookup').prop('value')).toEqual({
-      id: 3,
-      name: 'inventory',
-    });
-    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
-      id: 3,
-      name: 'organization',
-    });
-    expect(wrapper.find('LabelSelect').prop('value')).toEqual([
-      { name: 'new label', id: 5 },
-      { name: 'Label 1', id: 1 },
-      { name: 'Label 2', id: 2 },
-    ]);
   });
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
@@ -185,11 +169,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
         .find('Button[variant="tertiary"]')
         .prop('onClick')()
     );
-
     expect(WorkflowJobTemplatesAPI.updateWebhookKey).toBeCalledWith('6');
     expect(
       wrapper.find('TextInputBase[name="webhook_url"]').prop('value')
-    ).toBe('http://127.0.0.1:3001/api/v2/workflow_job_templates/57/gitlab/');
+    ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
 
     wrapper.update();
 

@@ -8,7 +8,7 @@ import { WorkflowJobTemplateForm } from '../shared';
 
 function WorkflowJobTemplateEdit({ template, webhook_key }) {
   const history = useHistory();
-  const [formSubmitError, setFormSubmitError] = useState();
+  const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
     const { labels, ...remainingValues } = values;
@@ -57,21 +57,19 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
   };
 
   const handleCancel = () => {
-    history.push(`/templates`);
+    history.push(`/templates/workflow_job_template/${template.id}/details`);
   };
 
   return (
-    <>
-      <CardBody>
-        <WorkflowJobTemplateForm
-          handleSubmit={handleSubmit}
-          handleCancel={handleCancel}
-          template={template}
-          webhook_key={webhook_key}
-          submitError={formSubmitError}
-        />
-      </CardBody>
-    </>
+    <CardBody>
+      <WorkflowJobTemplateForm
+        handleSubmit={handleSubmit}
+        handleCancel={handleCancel}
+        template={template}
+        webhook_key={webhook_key}
+        submitError={formSubmitError}
+      />
+    </CardBody>
   );
 }
 export default WorkflowJobTemplateEdit;

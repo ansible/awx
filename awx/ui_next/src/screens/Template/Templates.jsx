@@ -90,7 +90,6 @@ class Templates extends Component {
               <Config>
                 {({ me }) => (
                   <WorkflowJobTemplate
-                    history={history}
                     location={location}
                     setBreadcrumb={this.setBreadCrumbConfig}
                     me={me || {}}

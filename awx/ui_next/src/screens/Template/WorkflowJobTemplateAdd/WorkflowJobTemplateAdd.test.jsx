@@ -82,8 +82,11 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         variables: '---',
       });
     });
+    expect(wrapper.find('ContentError').length).toBe(0);
+    expect(wrapper.length).toBe(1);
     wrapper.update();
     expect(WorkflowJobTemplatesAPI.create).toBeCalled();
+    expect(wrapper.find('ContentError').length).toBe(1);
     expect(wrapper.find('WorkflowJobTemplateForm').prop('submitError')).toEqual(
       error
     );
