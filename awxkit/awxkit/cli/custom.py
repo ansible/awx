@@ -90,6 +90,8 @@ class Launchable(object):
             )
             if status:
                 response.json['status'] = status
+                if status in ('failed', 'error'):
+                    setattr(response, 'rc', 1)
         return response
 
     def perform(self, **kwargs):

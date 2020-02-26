@@ -200,6 +200,8 @@ class CLI(object):
             )
             if formatted:
                 print(utils.to_str(formatted), file=self.stdout)
+            if hasattr(response, 'rc'):
+                raise SystemExit(response.rc)
         else:
             if six.PY3:
                 self.parser.print_help()
