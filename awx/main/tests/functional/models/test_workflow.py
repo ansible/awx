@@ -418,3 +418,19 @@ def test_workflow_ancestors_recursion_prevention(organization):
     )
     # mostly, we just care that this assertion finishes in finite time
     assert wfj.get_ancestor_workflows() == []
+
+
+@pytest.mark.django_db
+def test_deleted_template_race_condition():
+    wfj = WorkflowJob.objects.create()
+    jt = JobTemplate.objects.create(name='test-jt')
+    # FIXME: running and successful status also results in node
+    # considered failed when it has not UJT
+    job = jt.create_job(_eager_fields=dict(status='failed'))
+    WorkflowJobNode.objects.create(
+        workflow_job=wfj, unified_job_template=jt, job=job
+    )
+    dag = WorkflowDAG(workflow_job=wfj)
+    JobTemplate.objects.get(pk=jt.pk).delete()
+    has_failed, reason = dag.has_workflow_failed()
+    assert has_failed is True, reason

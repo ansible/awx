@@ -1,6 +1,7 @@
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
+from django.core.exceptions import ObjectDoesNotExist
 
 # Python
 from awx.main.models import (
@@ -106,7 +107,7 @@ class WorkflowDAG(SimpleDAG):
                 elif obj.job.status == 'successful':
                     nodes.extend(self.get_children(obj, 'success_nodes') +
                                  self.get_children(obj, 'always_nodes'))
-            elif obj.unified_job_template is None:
+            elif self.get_node_ujt(obj) is None:
                 nodes.extend(self.get_children(obj, 'failure_nodes') +
                              self.get_children(obj, 'always_nodes'))
             else:
@@ -136,11 +137,19 @@ class WorkflowDAG(SimpleDAG):
     def is_workflow_done(self):
         for node in self.nodes:
             obj = node['node_object']
-            if obj.do_not_run is False and not obj.job and obj.unified_job_template:
+            if obj.do_not_run is False and not obj.job and self.get_node_ujt(obj):
                 return False
             elif obj.job and obj.job.status not in ['successful', 'failed', 'canceled', 'error']:
                 return False
         return True
+
+    def get_node_ujt(self, obj):
+        """If a JT is deleted while task manager is running, DNE must be handled
+        """
+        try:
+            return obj.unified_job_template
+        except ObjectDoesNotExist:
+            return None
 
     def has_workflow_failed(self):
         failed_nodes = []
@@ -150,7 +159,7 @@ class WorkflowDAG(SimpleDAG):
 
         for node in self.nodes:
             obj = node['node_object']
-            if obj.do_not_run is False and obj.unified_job_template is None:
+            if obj.do_not_run is False and self.get_node_ujt(obj) is None:
                 failed_nodes.append(node)
             elif obj.job and obj.job.status in ['failed', 'canceled', 'error']:
                 failed_nodes.append(node)
@@ -159,7 +168,7 @@ class WorkflowDAG(SimpleDAG):
             obj = node['node_object']
             if (len(self.get_children(obj, 'failure_nodes')) +
                     len(self.get_children(obj, 'always_nodes'))) == 0:
-                if obj.unified_job_template is None:
+                if self.get_node_ujt(obj) is None:
                     res = True
                     failed_unified_job_template_node_ids.append(str(obj.id))
                 else:
