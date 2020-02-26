@@ -69,6 +69,8 @@ Below is another example of a SAML attribute that contains a Team membership in 
 {
   "saml_attr": "eduPersonAffiliation",
   "remove": true,
+  "admins_remove": true,
+  "superusers_remove": true,
   "team_org_map": [
     {
       "team": "member",
@@ -76,7 +78,9 @@ Below is another example of a SAML attribute that contains a Team membership in 
     },
     {
       "team": "staff",
-      "organization": "Default2"
+      "organization": "Default2",
+      "admins": true,
+      "superusers": true
     }
   ]
 }
@@ -84,5 +88,9 @@ Below is another example of a SAML attribute that contains a Team membership in 
 **saml_attr:** The SAML attribute name where the team array can be found.
 
 **remove:** Set this to `true` to remove user from all Teams before adding the user to the list of Teams. Set this to `false` to keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute.
+
+**admins_remove:** Set this to `true` to remove a user from all Teams that they are administrators of before adding the user to the list of Team admins. Set it to `false` to keep the user in whatever Team(s) they are in as admin while adding the user as an Team aministrator in the SAML attribute.
+
+**superusers_remove:** Set this to `true` to remove a user Superuser status before adding the user to the list of Superusers. Set it to `false` to keep the user Superuser status.
 
 **team_org_map:** An array of dictionaries of the form `{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }` which defines mapping from AWX Team -> AWX Organization. This is needed because the same named Team can exist in multiple Organizations in Tower. The organization to which a team listed in a SAML attribute belongs to would be ambiguous without this mapping.
