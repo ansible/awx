@@ -39,7 +39,7 @@ export default ['$scope', '$stateParams', 'Rest', 'GetBasePath', '$state', 'OrgJ
                                 }
                                 break;
                             }
-                        };
+                        }
                     }
                 }
             }
