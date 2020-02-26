@@ -123,11 +123,12 @@ def main():
     # Create the data that gets sent for create and update
     host_fields = {
         'name': new_name if new_name else name,
-        'description': description,
         'inventory': inventory_id,
         'enabled': enabled,
     }
-    if variables:
+    if description is not None:
+        host_fields['description'] = description
+    if variables is not None:
         host_fields['variables'] = json.dumps(variables)
 
     if state == 'absent':

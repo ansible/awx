@@ -209,11 +209,11 @@ def main():
     }
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    if credential:
+    if credential is not None:
         inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
-    if source_project:
+    if source_project is not None:
         inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
-    if source_script:
+    if source_script is not None:
         inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
     OPTIONAL_VARS = (

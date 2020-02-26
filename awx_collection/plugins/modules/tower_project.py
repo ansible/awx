@@ -238,7 +238,6 @@ def main():
     # Create the data that gets sent for create and update
     project_fields = {
         'name': name,
-        'description': description,
         'scm_type': scm_type,
         'scm_url': scm_url,
         'scm_branch': scm_branch,
@@ -251,6 +250,8 @@ def main():
         'scm_update_cache_timeout': scm_update_cache_timeout,
         'custom_virtualenv': custom_virtualenv,
     }
+    if description is not None:
+        project_fields['description'] = description
     if scm_credential is not None:
         project_fields['credential'] = scm_credential_id
     if scm_allow_override is not None:

@@ -107,9 +107,10 @@ def main():
     # Create the data that gets sent for create and update
     team_fields = {
         'name': new_name if new_name else name,
-        'description': description,
         'organization': org_id
     }
+    if description is not None:
+        team_fields['description'] = description
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

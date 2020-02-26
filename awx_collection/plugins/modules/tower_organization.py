@@ -112,11 +112,11 @@ def main():
 
     # Create the data that gets sent for create and update
     org_fields = {'name': name}
-    if description:
+    if description is not None:
         org_fields['description'] = description
-    if custom_virtualenv:
+    if custom_virtualenv is not None:
         org_fields['custom_virtualenv'] = custom_virtualenv
-    if max_hosts:
+    if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
 
     if state == 'absent':

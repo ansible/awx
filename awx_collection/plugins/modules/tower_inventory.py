@@ -82,6 +82,7 @@ EXAMPLES = '''
 
 
 from ..module_utils.tower_api import TowerModule
+import json
 
 
 def main():
@@ -122,12 +123,14 @@ def main():
     # Create the data that gets sent for create and update
     inventory_fields = {
         'name': name,
-        'description': description,
         'organization': org_id,
-        'variables': variables,
         'kind': kind,
         'host_filter': host_filter,
     }
+    if description is not None:
+        inventory_fields['description'] = description
+    if variables is not None:
+        inventory_fields['variables'] = json.dumps(variables)
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

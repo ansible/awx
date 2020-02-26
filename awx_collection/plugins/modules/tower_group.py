@@ -115,9 +115,9 @@ def main():
         'name': new_name if new_name else name,
         'inventory': inventory_id,
     }
-    if description:
+    if description is not None:
         group_fields['description'] = description
-    if variables:
+    if variables is not None:
         group_fields['variables'] = json.dumps(variables)
 
     if state == 'absent':

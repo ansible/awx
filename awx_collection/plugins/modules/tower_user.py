@@ -118,7 +118,7 @@ def main():
         first_name=dict(),
         last_name=dict(),
         password=dict(no_log=True),
-        email=dict(required=False),
+        email=dict(required=False, default=''),
         superuser=dict(type='bool', default=False),
         auditor=dict(type='bool', default=False),
         state=dict(choices=['present', 'absent'], default='present'),
@@ -129,6 +129,7 @@ def main():
 
     # Extract our parameters
     state = module.params.get('state')
+    email = module.params.get('email')
 
     # Create the data that gets sent for create and update
     user_fields = {
@@ -136,10 +137,11 @@ def main():
         'first_name': module.params.get('first_name'),
         'last_name': module.params.get('last_name'),
         'password': module.params.get('password'),
-        'email': module.params.get('email'),
         'superuser': module.params.get('superuser'),
         'auditor': module.params.get('auditor'),
     }
+    if email is not None:
+        user_fields['email'] = email
 
     # Attempt to look up user based on the provided username
     user = module.get_one('users', **{
