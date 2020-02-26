@@ -55,7 +55,9 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
   return (
     <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
-        <Title size="xl">{template.name}</Title>
+        <Title size="xl" id="visualizer-toolbar-template-name">
+          {template.name}
+        </Title>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">
           <div>{i18n._(t`Total Nodes`)}</div>
           <Badge id="visualizer-total-nodes-badge" isRead>
