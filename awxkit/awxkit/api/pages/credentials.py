@@ -182,7 +182,8 @@ class CredentialType(HasCreate, base.Base):
         response = self.connection.post(urljoin(str(self.url), 'test/'), data)
         exception = exception_from_status_code(response.status_code)
         exc_str = "%s (%s) received" % (
-                http.responses[response.status_code], response.status_code)
+            http.responses[response.status_code], response.status_code
+        )
         if exception:
             raise exception(exc_str, response.json())
         elif response.status_code == http.FORBIDDEN:
@@ -328,7 +329,8 @@ class Credential(HasCopy, HasCreate, base.Base):
         response = self.connection.post(urljoin(str(self.url), 'test/'), data)
         exception = exception_from_status_code(response.status_code)
         exc_str = "%s (%s) received" % (
-                http.responses[response.status_code], response.status_code)
+            http.responses[response.status_code], response.status_code
+        )
         if exception:
             raise exception(exc_str, response.json())
         elif response.status_code == http.FORBIDDEN:
