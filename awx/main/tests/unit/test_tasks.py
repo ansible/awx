@@ -1884,8 +1884,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        # force test to use the ec2 script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+        # force test to use the ec2 plugin logic
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.9')):
             private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
             env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
@@ -1960,8 +1960,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_resource_group': 'no'
         }
 
-        # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+        # avoid subprocess to get Ansible version
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.9')):
             private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
             env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
@@ -1972,16 +1972,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_TENANT'] == 'some-tenant'
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-
-        config = configparser.ConfigParser()
-        config.read(env['AZURE_INI_PATH'])
-        assert config.get('azure', 'include_powerstate') == 'yes'
-        assert config.get('azure', 'group_by_resource_group') == 'no'
-        assert config.get('azure', 'group_by_location') == 'yes'
-        assert 'group_by_security_group' not in config.items('azure')
-        assert config.get('azure', 'group_by_tag') == 'yes'
-        assert config.get('azure', 'locations') == 'north,south,east,west'
-
         assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
 
     def test_azure_rm_source_with_password(self, private_data_dir, inventory_update, mocker):
@@ -2010,8 +2000,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_security_group': 'no'
         }
 
-        # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+        # avoid subprocess to get Ansible version
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.9')):
             private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
             env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
@@ -2021,15 +2011,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-
-        config = configparser.ConfigParser()
-        config.read(env['AZURE_INI_PATH'])
-        assert config.get('azure', 'include_powerstate') == 'yes'
-        assert config.get('azure', 'group_by_resource_group') == 'no'
-        assert config.get('azure', 'group_by_location') == 'yes'
-        assert config.get('azure', 'group_by_security_group') == 'no'
-        assert config.get('azure', 'group_by_tag') == 'yes'
-        assert 'locations' not in config.items('azure')
+        # inventory config items are in inventory file and not tested here
         assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_gce_source(self, inventory_update, private_data_dir, mocker):
@@ -2066,17 +2048,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                         credential, env, safe_env, [], private_data_dir
                     )
 
-            assert env['GCE_ZONE'] == expected_gce_zone
+            # credentials path is still used by gce inventory plugin
+            # but it lost the ini config file
             json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
             assert json_data['type'] == 'service_account'
             assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
             assert json_data['client_email'] == 'bob'
             assert json_data['project_id'] == 'some-project'
-
-            config = configparser.ConfigParser()
-            config.read(env['GCE_INI_PATH'])
-            assert 'cache' in config.sections()
-            assert config.getint('cache', 'cache_max_age') == 0
 
         # Change the initial version of the inventory plugin to force use of script
         with mock.patch('awx.main.models.inventory.gce.initial_version', None):
@@ -2158,17 +2136,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        config = configparser.ConfigParser()
-        config.read(env['FOREMAN_INI_PATH'])
-        assert config.get('foreman', 'url') == 'https://example.org'
-        assert config.get('foreman', 'user') == 'bob'
-        assert config.get('foreman', 'password') == 'secret'
-        assert config.get('ansible', 'group_patterns') == '[a,b,c]'
-        assert config.get('ansible', 'group_prefix') == 'hey_'
-        assert config.get('ansible', 'want_hostcollections') == 'True'
-        assert config.get('ansible', 'want_ansible_ssh_host') == 'True'
-        assert config.get('ansible', 'rich_params') == 'True'
-        assert config.get('ansible', 'want_facts') == 'False'
+        assert env['FOREMAN_PASSWORD'] == 'secret'
+        assert env['FOREMAN_SERVER'] == 'https://example.org'
+        assert env['FOREMAN_USER'] == 'bob'
 
     def test_cloudforms_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
@@ -2229,8 +2199,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        # force tower inventory source to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+        # avoid subprocess to get Ansible version
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.9')):
             env = task.build_env(inventory_update, private_data_dir, False)
 
         safe_env = build_safe_env(env)
@@ -2238,7 +2208,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['TOWER_HOST'] == 'https://tower.example.org'
         assert env['TOWER_USERNAME'] == 'bob'
         assert env['TOWER_PASSWORD'] == 'secret'
-        assert env['TOWER_INVENTORY'] == '12345'
+        # the "config" items, like inventory id are not tested here
         if verify:
             assert env['TOWER_VERIFY_SSL'] == 'True'
         else:
@@ -2293,7 +2263,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
+        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.9')):
             private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
             env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 

@@ -59,7 +59,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.credential.injectors import _openstack_data
-from awx.main.utils import _inventory_updates, region_sorting, get_licenser
+from awx.main.utils import _inventory_updates, region_sorting
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 
@@ -1667,10 +1667,14 @@ class PluginFileInjector(object):
         )
 
     def should_use_plugin(self):
-        return bool(
-            self.plugin_name and self.initial_version and
-            Version(self.ansible_version) >= Version(self.initial_version)
-        )
+        # if plugin_name is set, then it is possible to run with inventory plugin
+        # if there's no initial_version, then it always uses either the script or plugin
+        # ...depending on whether it plugin_name is set
+        if not self.plugin_name:
+            return False  # plugin logic not written
+        if not self.initial_version:
+            return True  # script has been deprecated entirely
+        return bool(Version(self.ansible_version) >= Version(self.initial_version))
 
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
         if self.should_use_plugin():
@@ -1752,8 +1756,6 @@ class PluginFileInjector(object):
 
 class azure_rm(PluginFileInjector):
     plugin_name = 'azure_rm'
-    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars, host names
-    ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
 
     def get_plugin_env(self, *args, **kwargs):
@@ -1862,29 +1864,9 @@ class azure_rm(PluginFileInjector):
             ret['exclude_host_filters'].append("location not in {}".format(repr(python_regions)))
         return ret
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        section = 'azure'
-        cp.add_section(section)
-        cp.set(section, 'include_powerstate', 'yes')
-        cp.set(section, 'group_by_resource_group', 'yes')
-        cp.set(section, 'group_by_location', 'yes')
-        cp.set(section, 'group_by_tag', 'yes')
-
-        if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
-            cp.set(
-                section, 'locations',
-                ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
-            )
-
-        azure_rm_opts = dict(inventory_update.source_vars_dict.items())
-        for k, v in azure_rm_opts.items():
-            cp.set(section, k, str(v))
-        return self.dump_cp(cp, inventory_update.get_cloud_credential())
-
 
 class ec2(PluginFileInjector):
-    plugin_name = 'aws_ec2'
+    # plugin_name = 'aws_ec2'
     # blocked by https://github.com/ansible/ansible/issues/54059
     # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
@@ -2122,7 +2104,6 @@ class ec2(PluginFileInjector):
 
 class gce(PluginFileInjector):
     plugin_name = 'gcp_compute'
-    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
     ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
 
@@ -2215,14 +2196,6 @@ class gce(PluginFileInjector):
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        # by default, the GCE inventory source caches results on disk for
-        # 5 minutes; disable this behavior
-        cp.add_section('cache')
-        cp.set('cache', 'cache_max_age', '0')
-        return self.dump_cp(cp, inventory_update.get_cloud_credential())
-
 
 class vmware(PluginFileInjector):
     # plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
@@ -2261,27 +2234,11 @@ class vmware(PluginFileInjector):
 class openstack(PluginFileInjector):
     ini_env_reference = 'OS_CLIENT_CONFIG_FILE'
     plugin_name = 'openstack'
-    # minimum version of 2.7.8 may be theoretically possible
-    initial_version = '2.8'  # Driven by consistency with other sources
 
-    @property
-    def script_name(self):
-        return 'openstack_inventory.py'  # exception
-
-    def _get_clouds_dict(self, inventory_update, cred, private_data_dir, mk_cache=True):
+    def _get_clouds_dict(self, inventory_update, cred, private_data_dir):
         openstack_data = _openstack_data(cred)
 
         openstack_data['clouds']['devstack']['private'] = inventory_update.source_vars_dict.get('private', True)
-        if mk_cache:
-            # Retrieve cache path from inventory update vars if available,
-            # otherwise create a temporary cache path only for this update.
-            cache = inventory_update.source_vars_dict.get('cache', {})
-            if not isinstance(cache, dict):
-                cache = {}
-            if not cache.get('path', ''):
-                cache_path = tempfile.mkdtemp(prefix='openstack_cache', dir=private_data_dir)
-                cache['path'] = cache_path
-            openstack_data['cache'] = cache
         ansible_variables = {
             'use_hostnames': True,
             'expand_hostvars': False,
@@ -2298,20 +2255,15 @@ class openstack(PluginFileInjector):
             openstack_data['ansible'] = ansible_variables
         return openstack_data
 
-    def build_script_private_data(self, inventory_update, private_data_dir, mk_cache=True):
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
         credential = inventory_update.get_cloud_credential()
         private_data = {'credentials': {}}
 
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=mk_cache)
+        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir)
         private_data['credentials'][credential] = yaml.safe_dump(
             openstack_data, default_flow_style=False, allow_unicode=True
         )
         return private_data
-
-    def build_plugin_private_data(self, inventory_update, private_data_dir):
-        # Credentials can be passed in the same way as the script did
-        # but do not create the tmp cache file
-        return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
         return self.get_script_env(inventory_update, private_data_dir, private_data_files)
@@ -2476,13 +2428,6 @@ class cloudforms(PluginFileInjector):
 class tower(PluginFileInjector):
     plugin_name = 'tower'
     base_injector = 'template'
-    initial_version = '2.8'  # Driven by "include_metadata" hostvars
-
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
-        env = super(tower, self).get_script_env(inventory_update, private_data_dir, private_data_files)
-        env['TOWER_INVENTORY'] = inventory_update.instance_filters
-        env['TOWER_LICENSE_TYPE'] = get_licenser().validate().get('license_type', 'unlicensed')
-        return env
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         # Credentials injected as env vars, same as script

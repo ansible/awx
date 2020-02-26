@@ -253,7 +253,7 @@ class TestInventorySourceInjectors:
         assert set(CLOUD_PROVIDERS) == set(InventorySource.injectors.keys())
 
     @pytest.mark.parametrize('source,filename', [
-        ('ec2', 'aws_ec2.yml'),
+        # ('ec2', 'aws_ec2.yml'),  # not turned on yet
         ('openstack', 'openstack.yml'),
         ('gce', 'gcp_compute.yml')
     ])
@@ -268,9 +268,8 @@ class TestInventorySourceInjectors:
     @pytest.mark.parametrize('source,script_name', [
         ('ec2', 'ec2.py'),
         ('rhv', 'ovirt4.py'),
-        ('satellite6', 'foreman.py'),
-        ('openstack', 'openstack_inventory.py')
-    ], ids=['ec2', 'rhv', 'satellite6', 'openstack'])
+        ('satellite6', 'foreman.py')
+    ], ids=['ec2', 'rhv', 'satellite6'])
     def test_script_filenames(self, source, script_name):
         """Ansible has several exceptions in naming of scripts
         """

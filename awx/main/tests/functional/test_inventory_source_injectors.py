@@ -256,8 +256,11 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
     task = RunInventoryUpdate()
 
     use_plugin = bool(script_or_plugin == 'plugins')
-    if use_plugin and InventorySource.injectors[this_kind].plugin_name is None:
+    cls = InventorySource.injectors[this_kind]
+    if use_plugin and cls.plugin_name is None:
         pytest.skip('Use of inventory plugin is not enabled for this source')
+    elif not use_plugin and cls.plugin_name is not None and cls.initial_version is None:
+        pytest.skip('Use of inventory script was deprecated')
 
     def substitute_run(envvars=None, **_kw):
         """This method will replace run_pexpect
@@ -304,10 +307,6 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         Res = namedtuple('Result', ['status', 'rc'])
         return Res('successful', 0)
 
-    mock_licenser = mock.Mock(return_value=mock.Mock(
-        validate=mock.Mock(return_value={'license_type': 'open'})
-    ))
-
     # Mock this so that it will not send events to the callback receiver
     # because doing so in pytest land creates large explosions
     with mock.patch('awx.main.queue.CallbackQueueDispatcher.dispatch', lambda self, obj: None):
@@ -317,7 +316,5 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
             with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
                 # The point of this test is that we replace run with assertions
                 with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
-                    # mocking the licenser is necessary for the tower source
-                    with mock.patch('awx.main.models.inventory.get_licenser', mock_licenser):
-                        # so this sets up everything for a run and then yields control over to substitute_run
-                        task.run(inventory_update.pk)
+                    # so this sets up everything for a run and then yields control over to substitute_run
+                    task.run(inventory_update.pk)
