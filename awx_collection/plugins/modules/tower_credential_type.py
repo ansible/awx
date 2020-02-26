@@ -64,12 +64,12 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    validate_certs:
+    tower_oauthtoken:
       description:
-        - Tower option to avoid certificates check.
+        - The Tower OAuth token to use.
       required: False
-      type: bool
-      aliases: [ tower_verify_ssl ]
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -93,19 +93,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.ansible_tower import (
-    TowerModule,
-    tower_auth_config,
-    tower_check_mode
-)
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
+from ..module_utils.tower_api import TowerModule
 
 KIND_CHOICES = {
     'ssh': 'Machine',
@@ -118,62 +106,51 @@ KIND_CHOICES = {
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
         description=dict(required=False),
-        kind=dict(required=False, choices=KIND_CHOICES.keys()),
+        kind=dict(required=False, choices=list(KIND_CHOICES.keys())),
         inputs=dict(type='dict', required=False),
         injectors=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=False
-    )
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = None
     kind = module.params.get('kind')
     state = module.params.get('state')
 
-    json_output = {'credential_type': name, 'state': state}
+    # These will be passed into the create/updates
+    credential_type_params = {
+        'name': new_name if new_name else name,
+        'kind': kind,
+        'managed_by_tower': False,
+    }
+    if module.params.get('description'):
+        credential_type_params['description'] = module.params.get('description')
+    if module.params.get('inputs'):
+        credential_type_params['inputs'] = module.params.get('inputs')
+    if module.params.get('injectors'):
+        credential_type_params['injectors'] = module.params.get('injectors')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        credential_type_res = tower_cli.get_resource('credential_type')
+    # Attempt to look up credential_type based on the provided name
+    credential_type = module.get_one('credential_types', **{
+        'data': {
+            'name': name,
+        }
+    })
 
-        params = {}
-        params['name'] = name
-        params['kind'] = kind
-        params['managed_by_tower'] = False
-
-        if module.params.get('description'):
-            params['description'] = module.params.get('description')
-
-        if module.params.get('inputs'):
-            params['inputs'] = module.params.get('inputs')
-
-        if module.params.get('injectors'):
-            params['injectors'] = module.params.get('injectors')
-
-        try:
-            if state == 'present':
-                params['create_on_missing'] = True
-                result = credential_type_res.modify(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                params['fail_on_missing'] = False
-                result = credential_type_res.delete(**params)
-
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(
-                msg='Failed to update credential type: {0}'.format(excinfo),
-                changed=False
-            )
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(credential_type)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing credential type, this will return on its own
+        module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
 
 
 if __name__ == '__main__':

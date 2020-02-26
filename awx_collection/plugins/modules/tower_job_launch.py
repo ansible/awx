@@ -23,11 +23,12 @@ description:
     - Launch an Ansible Tower jobs. See
       U(https://www.ansible.com/tower) for an overview.
 options:
-    job_template:
+    name:
       description:
         - Name of the job template to use.
       required: True
       type: str
+      aliases: ['job_template']
     job_type:
       description:
         - Job_type to use for the job, only used if prompt for job_type is set.
@@ -37,13 +38,15 @@ options:
       description:
         - Inventory to use for the job, only used if prompt for inventory is set.
       type: str
-    credential:
+    credentials:
       description:
         - Credential to use for job, only used if prompt for credential is set.
-      type: str
+      type: list
+      aliases: ['credential']
+      elements: str
     extra_vars:
       description:
-        - extra_vars to use for the Job Template. Prepend C(@) if a file.
+        - extra_vars to use for the Job Template.
         - ask_extra_vars needs to be set to True via tower_job_template module
           when creating the Job Template.
       type: dict
@@ -55,20 +58,49 @@ options:
       description:
         - Specific tags to use for from playbook.
       type: list
+      elements: str
+    scm_branch:
+      description:
+        - A specific of the SCM project to run the template on.
+        - This is only applicable if your project allows for branch override.
+      type: str
+      version_added: "3.7"
+    skip_tags:
+      description:
+        - Specific tags to skip from the playbook.
+      type: list
+      elements: str
+      version_added: "3.7"
+    verbosity:
+      description:
+        - Verbosity level for this job run
+      type: int
+      choices: [ 0, 1, 2, 3, 4, 5 ]
+      version_added: "3.7"
+    diff_mode:
+      description:
+        - Show the changes made by Ansible tasks where supported
+      type: bool
+      version_added: "3.7"
+    credential_passwords:
+      description:
+        - Passwords for credentials which are set to prompt on launch
+      type: dict
+      version_added: "3.7"
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-# Launch a job template
 - name: Launch a job
   tower_job_launch:
     job_template: "My Job Template"
   register: job
-
-- name: Wait for job max 120s
-  tower_job_wait:
-    job_id: "{{ job.id }}"
-    timeout: 120
 
 - name: Launch a job template with extra_vars on remote Tower instance
   tower_job_launch:
@@ -79,7 +111,6 @@ EXAMPLES = '''
       var3: "My Third Variable"
     job_type: run
 
-# Launch job template with inventory and credential for prompt on launch
 - name: Launch a job with inventory and credential
   tower_job_launch:
     job_template: "My Job Template"
@@ -105,91 +136,103 @@ status:
     sample: pending
 '''
 
-import json
-
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
-
-def update_fields(module, p):
-    params = p.copy()
-
-    params_update = {}
-    job_template = params.get('job_template')
-    extra_vars = params.get('extra_vars')
-    try:
-        job_template_to_launch = tower_cli.get_resource('job_template').get(name=job_template)
-    except (exc.NotFound) as excinfo:
-        module.fail_json(msg='Unable to launch job, job_template/{0} was not found: {1}'.format(job_template, excinfo), changed=False)
-
-    ask_extra_vars = job_template_to_launch['ask_variables_on_launch']
-    survey_enabled = job_template_to_launch['survey_enabled']
-
-    if extra_vars and (ask_extra_vars or survey_enabled):
-        params_update['extra_vars'] = [json.dumps(extra_vars)]
-
-    elif extra_vars:
-        module.fail_json(msg="extra_vars is set on launch but the Job Template does not have ask_extra_vars or survey_enabled set to True.")
-
-    params.update(params_update)
-    return params
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        job_template=dict(required=True, type='str'),
-        job_type=dict(choices=['run', 'check']),
+        name=dict(type='str', required=True, aliases=['job_template']),
+        job_type=dict(type='str', choices=['run', 'check']),
         inventory=dict(type='str', default=None),
-        credential=dict(type='str', default=None),
+        # Credentials will be a str instead of a list for backwards compatability
+        credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
         limit=dict(),
-        tags=dict(type='list'),
+        tags=dict(type='list', elements='str'),
         extra_vars=dict(type='dict', required=False),
+        scm_branch=dict(type='str', required=False),
+        skip_tags=dict(type='list', required=False, elements='str'),
+        verbosity=dict(type='int', required=False, choices=[0, 1, 2, 3, 4, 5]),
+        diff_mode=dict(type='bool', required=False),
+        credential_passwords=dict(type='dict', required=False),
     )
 
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True
-    )
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    json_output = {}
-    tags = module.params.get('tags')
+    optional_args = {}
+    # Extract our parameters
+    name = module.params.get('name')
+    optional_args['job_type'] = module.params.get('job_type')
+    inventory = module.params.get('inventory')
+    credentials = module.params.get('credentials')
+    optional_args['limit'] = module.params.get('limit')
+    optional_args['tags'] = module.params.get('tags')
+    optional_args['extra_vars'] = module.params.get('extra_vars')
+    optional_args['scm_branch'] = module.params.get('scm_branch')
+    optional_args['skip_tags'] = module.params.get('skip_tags')
+    optional_args['verbosity'] = module.params.get('verbosity')
+    optional_args['diff_mode'] = module.params.get('diff_mode')
+    optional_args['credential_passwords'] = module.params.get('credential_passwords')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        try:
-            params = module.params.copy()
-            if isinstance(tags, list):
-                params['tags'] = ','.join(tags)
-            job = tower_cli.get_resource('job')
+    # Create a datastructure to pass into our job launch
+    post_data = {}
+    for key in optional_args.keys():
+        if optional_args[key]:
+            post_data[key] = optional_args[key]
 
-            params = update_fields(module, params)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if inventory:
+        post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
-            lookup_fields = ('job_template', 'inventory', 'credential')
-            for field in lookup_fields:
-                try:
-                    name = params.pop(field)
-                    if name:
-                        result = tower_cli.get_resource(field).get(name=name)
-                        params[field] = result['id']
-                except exc.NotFound as excinfo:
-                    module.fail_json(msg='Unable to launch job, {0}/{1} was not found: {2}'.format(field, name, excinfo), changed=False)
+    if credentials:
+        post_data['credentials'] = []
+        for credential in credentials:
+            post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
 
-            result = job.launch(no_input=True, **params)
-            json_output['id'] = result['id']
-            json_output['status'] = result['status']
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Unable to launch job: {0}'.format(excinfo), changed=False)
+    # Attempt to look up job_template based on the provided name
+    job_template = module.get_one('job_templates', **{
+        'data': {
+            'name': name,
+        }
+    })
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if job_template is None:
+        module.fail_json(msg="Unable to find job template by name {0}".format(name))
+
+    # The API will allow you to submit values to a jb launch that are not prompt on launch.
+    # Therefore, we will test to see if anything is set which is not prompt on launch and fail.
+    check_vars_to_prompts = {
+        'scm_branch': 'ask_scm_branch_on_launch',
+        'diff_mode': 'ask_diff_mode_on_launch',
+        'extra_vars': 'ask_variables_on_launch',
+        'limit': 'ask_limit_on_launch',
+        'tags': 'ask_tags_on_launch',
+        'skip_tags': 'ask_skip_tags_on_launch',
+        'job_type': 'ask_job_type_on_launch',
+        'verbosity': 'ask_verbosity_on_launch',
+        'inventory': 'ask_inventory_on_launch',
+        'credentials': 'ask_credential_on_launch',
+    }
+
+    param_errors = []
+    for variable_name in check_vars_to_prompts:
+        if module.params.get(variable_name) and not job_template[check_vars_to_prompts[variable_name]]:
+            param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
+    if len(param_errors) > 0:
+        module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{'errors': param_errors})
+
+    # Launch the job
+    results = module.post_endpoint(job_template['related']['launch'], **{'data': post_data})
+
+    if results['status_code'] != 201:
+        module.fail_json(msg="Failed to launch job, see response for details", **{'response': results})
+
+    module.exit_json(**{
+        'changed': True,
+        'id': results['json']['id'],
+        'status': results['json']['status'],
+    })
 
 
 if __name__ == '__main__':

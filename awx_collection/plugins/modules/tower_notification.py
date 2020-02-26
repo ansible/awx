@@ -64,6 +64,7 @@ options:
         - The recipients email addresses. Required if I(notification_type=email).
       required: False
       type: list
+      elements: str
     use_tls:
       description:
         - The TLS trigger. Required if I(notification_type=email).
@@ -94,6 +95,7 @@ options:
         - The destination Slack channels. Required if I(notification_type=slack).
       required: False
       type: list
+      elements: str
     token:
       description:
         - The access token. Required if I(notification_type=slack), if I(notification_type=pagerduty) or if I(notification_type=hipchat).
@@ -114,6 +116,7 @@ options:
         - The destination phone numbers. Required if I(notification_type=twillio).
       required: False
       type: list
+      elements: str
     account_sid:
       description:
         - The Twillio account SID. Required if I(notification_type=twillio).
@@ -155,6 +158,7 @@ options:
         - HipChat rooms to send the notification to. Required if I(notification_type=hipchat).
       required: False
       type: list
+      elements: str
     notify:
       description:
         - The notify channel trigger. Required if I(notification_type=hipchat).
@@ -185,12 +189,17 @@ options:
         - The destination channels or users. Required if I(notification_type=irc).
       required: False
       type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
       type: str
+
+requirements:
+- ansible-tower-cli >= 3.0.2
+
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -315,17 +324,17 @@ def main():
         notification_configuration=dict(required=False),
         username=dict(required=False),
         sender=dict(required=False),
-        recipients=dict(required=False, type='list'),
+        recipients=dict(required=False, type='list', elements='str'),
         use_tls=dict(required=False, type='bool'),
         host=dict(required=False),
         use_ssl=dict(required=False, type='bool'),
         password=dict(required=False, no_log=True),
         port=dict(required=False, type='int'),
-        channels=dict(required=False, type='list'),
+        channels=dict(required=False, type='list', elements='str'),
         token=dict(required=False, no_log=True),
         account_token=dict(required=False, no_log=True),
         from_number=dict(required=False),
-        to_numbers=dict(required=False, type='list'),
+        to_numbers=dict(required=False, type='list', elements='str'),
         account_sid=dict(required=False),
         subdomain=dict(required=False),
         service_key=dict(required=False, no_log=True),
@@ -333,13 +342,13 @@ def main():
         message_from=dict(required=False),
         api_url=dict(required=False),
         color=dict(required=False, choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
-        rooms=dict(required=False, type='list'),
+        rooms=dict(required=False, type='list', elements='str'),
         notify=dict(required=False, type='bool'),
         url=dict(required=False),
         headers=dict(required=False, type='dict', default={}),
         server=dict(required=False),
         nickname=dict(required=False),
-        targets=dict(required=False, type='list'),
+        targets=dict(required=False, type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

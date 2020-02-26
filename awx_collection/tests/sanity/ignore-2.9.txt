@@ -1,2 +1,0 @@
-plugins/modules/tower_group.py use-argspec-type-path
-plugins/modules/tower_host.py use-argspec-type-path

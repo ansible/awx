@@ -39,12 +39,25 @@ options:
       type: str
       required: False
       default: ''
+    max_hosts:
+      description:
+        - The max hosts allowed in this organizations
+      default: "0"
+      type: int
+      required: False
+      version_added: "3.7"
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -66,49 +79,52 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True),
-        description=dict(),
+        name=dict(type='str', required=True),
+        description=dict(type='str', required=False),
         custom_virtualenv=dict(type='str', required=False),
-        state=dict(choices=['present', 'absent'], default='present'),
+        max_hosts=dict(type='int', required=False, default="0"),
+        state=dict(type='str', choices=['present', 'absent'], default='present', required=False),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
     description = module.params.get('description')
     custom_virtualenv = module.params.get('custom_virtualenv')
+    max_hosts = module.params.get('max_hosts')
+    # instance_group_names = module.params.get('instance_groups')
     state = module.params.get('state')
 
-    json_output = {'organization': name, 'state': state}
+    # Attempt to look up organization based on the provided name
+    organization = module.get_one('organizations', **{
+        'data': {
+            'name': name,
+        }
+    })
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        organization = tower_cli.get_resource('organization')
-        try:
-            if state == 'present':
-                result = organization.modify(name=name, description=description, custom_virtualenv=custom_virtualenv, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = organization.delete(name=name)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update the organization: {0}'.format(excinfo), changed=False)
+    # Create the data that gets sent for create and update
+    org_fields = {'name': name}
+    if description is not None:
+        org_fields['description'] = description
+    if custom_virtualenv is not None:
+        org_fields['custom_virtualenv'] = custom_virtualenv
+    if max_hosts is not None:
+        org_fields['max_hosts'] = max_hosts
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(organization)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing organization, this will return on its own
+        module.create_or_update_if_needed(organization, org_fields, endpoint='organizations', item_type='organization')
 
 
 if __name__ == '__main__':

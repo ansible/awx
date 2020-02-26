@@ -35,12 +35,14 @@ options:
       required: False
       default: []
       type: list
+      elements: str
     prevent:
       description:
         - A list of asset types to prevent import for
       required: false
       default: []
       type: list
+      elements: str
     password_management:
       description:
         - The password management option to use.
@@ -97,12 +99,14 @@ except ImportError:
 def main():
     argument_spec = dict(
         assets=dict(required=False),
-        files=dict(required=False, default=[], type='list'),
-        prevent=dict(required=False, default=[], type='list'),
+        files=dict(required=False, default=[], type='list', elements='str'),
+        prevent=dict(required=False, default=[], type='list', elements='str'),
         password_management=dict(required=False, default='default', choices=['default', 'random']),
     )
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
+
+    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
 
     if not HAS_TOWER_CLI:
         module.fail_json(msg='ansible-tower-cli required for this module')

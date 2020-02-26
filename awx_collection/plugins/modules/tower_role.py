@@ -68,6 +68,10 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+
+requirements:
+- ansible-tower-cli >= 3.0.2
+
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -136,6 +140,8 @@ def main():
     )
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+
+    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
 
     role_type = module.params.pop('role')
     state = module.params.pop('state')

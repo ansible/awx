@@ -65,6 +65,7 @@ options:
       version_added: 2.8
       type: list
       default: []
+      elements: str
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
@@ -219,7 +220,12 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+
+requirements:
+- ansible-tower-cli >= 3.0.2
+
 extends_documentation_fragment: awx.awx.auth
+
 notes:
   - JSON for survey_spec can be found in Tower API Documentation. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)
@@ -333,7 +339,7 @@ def main():
         credential=dict(default=''),
         vault_credential=dict(default=''),
         custom_virtualenv=dict(type='str', required=False),
-        credentials=dict(type='list', default=[]),
+        credentials=dict(type='list', default=[], elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),

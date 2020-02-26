@@ -8,9 +8,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'status': ['preview'],
-                    'supported_by': 'community',
-                    'metadata_version': '1.1'}
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
@@ -20,7 +20,7 @@ author: "Adrien Fleury (@fleu42)"
 version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower inventory source.
 description:
-    - Create, update, or destroy Ansible Tower inventories source. See
+    - Create, update, or destroy Ansible Tower inventory source. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -28,325 +28,222 @@ options:
         - The name to use for the inventory source.
       required: True
       type: str
+    new_name:
+      description:
+        - A new name for this assets (will rename the asset)
+      required: False
+      type: str
+      version_added: "3.7"
     description:
       description:
         - The description to use for the inventory source.
       type: str
     inventory:
       description:
-        - The inventory the source is linked to.
+        - Inventory the group should be made a member of.
       required: True
-      type: str
-    organization:
-      description:
-        - Organization the inventory belongs to.
       type: str
     source:
       description:
-        - Types of inventory source.
-      choices:
-        - file
-        - scm
-        - ec2
-        - gce
-        - azure
-        - azure_rm
-        - vmware
-        - satellite6
-        - cloudforms
-        - openstack
-        - rhv
-        - tower
-        - custom
-      required: True
+        - The source to use for this group.
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
       type: str
-    credential:
+      required: False
+    source_path:
       description:
-        - Credential to use to retrieve the inventory from.
+        - For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
       type: str
+    source_script:
+      description:
+        - Inventory script to be used when group type is C(custom).
+      type: str
+      required: False
     source_vars:
       description:
-        - >-
-          The source_vars allow to Override variables found in the source config
-          file. For example with Openstack, specifying *private: false* would
-          change the output of the openstack.py script. It has to be YAML or
-          JSON.
+        - The variables or environment fields to apply to this source type.
+      type: dict
+    credential:
+      description:
+        - Credential to use for the source.
       type: str
+    source_regions:
+      description:
+        - Regions for cloud provider.
+      type: str
+    instance_filters:
+      description:
+        - Comma-separated list of filter expressions for matching hosts.
+      type: str
+    group_by:
+      description:
+        - Limit groups automatically created from inventory source.
+      type: str
+    overwrite:
+      description:
+        - Delete child groups and hosts not found in source.
+      type: bool
+      default: 'no'
+    overwrite_vars:
+      description:
+        - Override vars in child groups and hosts with those from external source.
+      type: bool
     custom_virtualenv:
       version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
       required: False
+      default: ''
     timeout:
+      description: The amount of time (in seconds) to run before the task is canceled.
+      type: int
+    verbosity:
+      description: The verbosity level to run this inventory source under.
+      type: int
+      choices: [ 0, 1, 2 ]
+    update_on_launch:
       description:
-        - Number in seconds after which the Tower API methods will time out.
+        - Refresh inventory data from its source each time a job is run.
+      type: bool
+      default: 'no'
+    update_cache_timeout:
+      description:
+        - Time in seconds to consider an inventory sync to be current.
       type: int
     source_project:
       description:
-        - Use a *project* as a source for the *inventory*.
-      type: str
-    source_path:
-      description:
-        - Path to the file to use as a source in the selected *project*.
+        - Project to use as source with scm option
       type: str
     update_on_project_update:
-      description:
-        - >-
-          That parameter will sync the inventory when the project is synced. It
-          can only be used with a SCM source.
+      description: Update this source when the related project updates if source is C(scm)
       type: bool
-    source_regions:
-      description:
-        - >-
-          List of regions for your cloud provider. You can include multiple all
-          regions. Only Hosts associated with the selected regions will be
-          updated. Refer to Ansible Tower documentation for more detail.
-      type: str
-    instance_filters:
-      description:
-        - >-
-          Provide a comma-separated list of filter expressions. Hosts are
-          imported when all of the filters match. Refer to Ansible Tower
-          documentation for more detail.
-      type: str
-    group_by:
-      description:
-        - >-
-          Specify which groups to create automatically. Group names will be
-          created similar to the options selected. If blank, all groups above
-          are created. Refer to Ansible Tower documentation for more detail.
-      type: str
-    source_script:
-      description:
-        - >-
-          The source custom script to use to build the inventory. It needs to
-          exist.
-      type: str
-    overwrite:
-      description:
-        - >-
-          If set, any hosts and groups that were previously present on the
-          external source but are now removed will be removed from the Tower
-          inventory. Hosts and groups that were not managed by the inventory
-          source will be promoted to the next manually created group or if
-          there is no manually created group to promote them into, they will be
-          left in the "all" default group for the inventory. When not checked,
-          local child hosts and groups not found on the external source will
-          remain untouched by the inventory update process.
-      type: bool
-    overwrite_vars:
-      description:
-        - >-
-          If set, all variables for child groups and hosts will be removed
-          and replaced by those found on the external source. When not checked,
-          a merge will be performed, combining local variables with those found
-          on the external source.
-      type: bool
-    update_on_launch:
-      description:
-        - >-
-          Each time a job runs using this inventory, refresh the inventory from
-          the selected source before executing job tasks.
-      type: bool
-    update_cache_timeout:
-      description:
-        - >-
-          Time in seconds to consider an inventory sync to be current. During
-          job runs and callbacks the task system will evaluate the timestamp of
-          the latest sync. If it is older than Cache Timeout, it is not
-          considered current, and a new inventory sync will be performed.
-      type: int
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
-
 EXAMPLES = '''
-- name: Add tower inventory source
+- name: Add an inventory source
   tower_inventory_source:
-    name: Inventory source
-    description: My Inventory source
-    inventory: My inventory
-    organization: My organization
-    credential: Devstack_credential
-    source: openstack
-    update_on_launch: true
-    overwrite: true
-    source_vars: '{ private: false }'
-    state: present
-    validate_certs: false
+    name: "source-inventory"
+    description: Source for inventory
+    inventory: previously-created-inventory
+    credential: previously-created-credential
+    overwrite: True
+    update_on_launch: True
+    source_vars:
+      private: false
 '''
 
-
-RETURN = ''' # '''
-
-
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
-
-SOURCE_CHOICES = {
-    'file': 'Directory or Script',
-    'scm': 'Sourced from a Project',
-    'ec2': 'Amazon EC2',
-    'gce': 'Google Compute Engine',
-    'azure': 'Microsoft Azure',
-    'azure_rm': 'Microsoft Azure Resource Manager',
-    'vmware': 'VMware vCenter',
-    'satellite6': 'Red Hat Satellite 6',
-    'cloudforms': 'Red Hat CloudForms',
-    'openstack': 'OpenStack',
-    'rhv': 'Red Hat Virtualization',
-    'tower': 'Ansible Tower',
-    'custom': 'Custom Script',
-}
+from ..module_utils.tower_api import TowerModule
+from json import dumps
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(type='str'),
         description=dict(required=False),
         inventory=dict(required=True),
-        source=dict(required=True,
-                    choices=SOURCE_CHOICES.keys()),
-        credential=dict(required=False),
-        source_vars=dict(required=False),
-        timeout=dict(type='int', required=False),
-        source_project=dict(required=False),
-        source_path=dict(required=False),
-        update_on_project_update=dict(type='bool', required=False),
-        source_regions=dict(required=False),
-        instance_filters=dict(required=False),
-        group_by=dict(required=False),
+        #
+        # How do we handle manual and file? Tower does not seem to be able to activate them
+        #
+        source=dict(choices=["scm", "ec2", "gce",
+                             "azure_rm", "vmware", "satellite6", "cloudforms",
+                             "openstack", "rhv", "tower", "custom"], required=False),
+        source_path=dict(),
         source_script=dict(required=False),
-        overwrite=dict(type='bool', required=False),
-        overwrite_vars=dict(type='bool', required=False),
-        custom_virtualenv=dict(type='str', required=False),
-        update_on_launch=dict(type='bool', required=False),
-        update_cache_timeout=dict(type='int', required=False),
-        organization=dict(type='str'),
+        source_vars=dict(type='dict'),
+        credential=dict(),
+        source_regions=dict(),
+        instance_filters=dict(),
+        group_by=dict(),
+        overwrite=dict(type='bool'),
+        overwrite_vars=dict(type='bool'),
+        custom_virtualenv=dict(type='str', default=''),
+        timeout=dict(type='int'),
+        verbosity=dict(type='int', choices=[0, 1, 2]),
+        update_on_launch=dict(type='bool'),
+        update_cache_timeout=dict(type='int'),
+        source_project=dict(type='str'),
+        update_on_project_update=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
     inventory = module.params.get('inventory')
-    source = module.params.get('source')
+    source_script = module.params.get('source_script')
+    credential = module.params.get('credential')
+    source_project = module.params.get('source_project')
     state = module.params.get('state')
-    organization = module.params.get('organization')
 
-    json_output = {'inventory_source': name, 'state': state}
+    # Attempt to look up inventory source based on the provided name and inventory ID
+    inventory_id = module.resolve_name_to_id('inventories', inventory)
+    inventory_source = module.get_one('inventory_sources', **{
+        'data': {
+            'name': name,
+            'inventory': inventory_id,
+        }
+    })
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        inventory_source = tower_cli.get_resource('inventory_source')
-        try:
-            params = {}
-            params['name'] = name
-            params['source'] = source
+    # Create the data that gets sent for create and update
+    inventory_source_fields = {
+        'name': new_name if new_name else name,
+        'inventory': inventory_id,
+    }
 
-            if module.params.get('description'):
-                params['description'] = module.params.get('description')
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if credential is not None:
+        inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+    if source_project is not None:
+        inventory_source_fields['source_project'] = module.resolve_name_to_id('projects', source_project)
+    if source_script is not None:
+        inventory_source_fields['source_script'] = module.resolve_name_to_id('inventory_scripts', source_script)
 
-            if organization:
-                try:
-                    org_res = tower_cli.get_resource('organization')
-                    org = org_res.get(name=organization)
-                except (exc.NotFound) as excinfo:
-                    module.fail_json(
-                        msg='Failed to get organization,'
-                        'organization not found: {0}'.format(excinfo),
-                        changed=False
-                    )
-                org_id = org['id']
-            else:
-                org_id = None  # interpreted as not provided
+    OPTIONAL_VARS = (
+        'description', 'source', 'source_path', 'source_vars',
+        'source_regions', 'instance_filters', 'group_by',
+        'overwrite', 'overwrite_vars', 'custom_virtualenv',
+        'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
+        'update_on_project_update'
+    )
 
-            if module.params.get('credential'):
-                credential_res = tower_cli.get_resource('credential')
-                try:
-                    credential = credential_res.get(
-                        name=module.params.get('credential'), organization=org_id)
-                    params['credential'] = credential['id']
-                except (exc.NotFound) as excinfo:
-                    module.fail_json(
-                        msg='Failed to update credential source,'
-                        'credential not found: {0}'.format(excinfo),
-                        changed=False
-                    )
+    # Layer in all remaining optional information
+    for field_name in OPTIONAL_VARS:
+        field_val = module.params.get(field_name)
+        if field_val:
+            inventory_source_fields[field_name] = field_val
 
-            if module.params.get('source_project'):
-                source_project_res = tower_cli.get_resource('project')
-                try:
-                    source_project = source_project_res.get(
-                        name=module.params.get('source_project'), organization=org_id)
-                    params['source_project'] = source_project['id']
-                except (exc.NotFound) as excinfo:
-                    module.fail_json(
-                        msg='Failed to update source project,'
-                        'project not found: {0}'.format(excinfo),
-                        changed=False
-                    )
+    # Attempt to JSON encode source vars
+    if inventory_source_fields.get('source_vars', None):
+        inventory_source_fields['source_vars'] = dumps(inventory_source_fields['source_vars'])
 
-            if module.params.get('source_script'):
-                source_script_res = tower_cli.get_resource('inventory_script')
-                try:
-                    script = source_script_res.get(
-                        name=module.params.get('source_script'), organization=org_id)
-                    params['source_script'] = script['id']
-                except (exc.NotFound) as excinfo:
-                    module.fail_json(
-                        msg='Failed to update source script,'
-                        'script not found: {0}'.format(excinfo),
-                        changed=False
-                    )
+    # Sanity check on arguments
+    if state == 'present' and not inventory_source and not inventory_source_fields['source']:
+        module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-            try:
-                inventory_res = tower_cli.get_resource('inventory')
-                params['inventory'] = inventory_res.get(name=inventory, organization=org_id)['id']
-            except (exc.NotFound) as excinfo:
-                module.fail_json(
-                    msg='Failed to update inventory source, '
-                    'inventory not found: {0}'.format(excinfo),
-                    changed=False
-                )
-
-            for key in ('source_vars', 'custom_virtualenv', 'timeout', 'source_path',
-                        'update_on_project_update', 'source_regions',
-                        'instance_filters', 'group_by', 'overwrite',
-                        'overwrite_vars', 'update_on_launch',
-                        'update_cache_timeout'):
-                if module.params.get(key) is not None:
-                    params[key] = module.params.get(key)
-
-            if state == 'present':
-                params['create_on_missing'] = True
-                result = inventory_source.modify(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                params['fail_on_missing'] = False
-                result = inventory_source.delete(**params)
-
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update inventory source: \
-                    {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory_source)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
+        module.create_or_update_if_needed(inventory_source, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source')
 
 
 if __name__ == '__main__':

@@ -10,25 +10,25 @@ from awx.main.models import Organization, Inventory, Group
 def test_create_group(run_module, admin_user):
     org = Organization.objects.create(name='test-org')
     inv = Inventory.objects.create(name='test-inv', organization=org)
+    variables = {"ansible_network_os": "iosxr"}
 
     result = run_module('tower_group', dict(
         name='Test Group',
         inventory='test-inv',
-        variables='ansible_network_os: iosxr',
+        variables=variables,
         state='present'
     ), admin_user)
     assert result.get('changed'), result
 
     group = Group.objects.get(name='Test Group')
     assert group.inventory == inv
-    assert group.variables == 'ansible_network_os: iosxr'
+    assert group.variables == '{"ansible_network_os": "iosxr"}'
 
     result.pop('invocation')
     assert result == {
         'id': group.id,
-        'group': 'Test Group',
+        'name': 'Test Group',
         'changed': True,
-        'state': 'present'
     }
 
 
@@ -40,20 +40,16 @@ def test_tower_group_idempotent(run_module, admin_user):
     group = Group.objects.create(
         name='Test Group',
         inventory=inv,
-        variables='ansible_network_os: iosxr'
     )
 
     result = run_module('tower_group', dict(
         name='Test Group',
         inventory='test-inv',
-        variables='ansible_network_os: iosxr',
         state='present'
     ), admin_user)
 
     result.pop('invocation')
     assert result == {
         'id': group.id,
-        'group': 'Test Group',
         'changed': False,  # idempotency assertion
-        'state': 'present'
     }

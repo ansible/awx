@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
+from unittest import mock
 import json
 
 from awx.main.models import (
@@ -65,7 +66,9 @@ def test_receive_send_jt(run_module, admin_user, mocker):
     # recreate everything
     with mocker.patch('sys.stdin.isatty', return_value=True):
         with mocker.patch('tower_cli.models.base.MonitorableResource.wait'):
-            result = run_module('tower_send', dict(assets=json.dumps(assets)), admin_user)
+            # warns based on password_management param, but not security issue
+            with mock.patch('ansible.module_utils.basic.AnsibleModule.warn'):
+                result = run_module('tower_send', dict(assets=json.dumps(assets)), admin_user)
 
     assert not result.get('failed'), result
 

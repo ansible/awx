@@ -9,18 +9,28 @@ from awx.main.models import Organization
 @pytest.mark.django_db
 def test_create_organization(run_module, admin_user):
 
-    module_args = {'name': 'foo', 'description': 'barfoo', 'state': 'present'}
+    module_args = {
+        'name': 'foo',
+        'description': 'barfoo',
+        'state': 'present',
+        'max_hosts': '0',
+        'tower_host': None,
+        'tower_username': None,
+        'tower_password': None,
+        'validate_certs': None,
+        'tower_oauthtoken': None,
+        'tower_config_file': None,
+        'custom_virtualenv': None
+    }
 
     result = run_module('tower_organization', module_args, admin_user)
     assert result.get('changed'), result
 
     org = Organization.objects.get(name='foo')
-
     assert result == {
-        "organization": "foo",
-        "state": "present",
-        "id": org.id,
+        "name": "foo",
         "changed": True,
+        "id": org.id,
         "invocation": {
             "module_args": module_args
         }
@@ -42,10 +52,8 @@ def test_create_organization_with_venv(run_module, admin_user, mocker):
 
     org = Organization.objects.get(name='foo')
     result.pop('invocation')
-
     assert result == {
-        "organization": "foo",
-        "state": "present",
+        "name": "foo",
         "id": org.id
     }
 

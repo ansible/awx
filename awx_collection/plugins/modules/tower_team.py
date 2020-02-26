@@ -28,9 +28,16 @@ options:
         - Name to use for the team.
       required: True
       type: str
+    new_name:
+      description:
+        - To use when changing a team's name.
+      required: False
+      type: str
+      version_added: "3.7"
     description:
       description:
         - The description to use for the team.
+      required: False
       type: str
     organization:
       description:
@@ -43,6 +50,12 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -57,57 +70,54 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
-
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(),
+        new_name=dict(required=False),
+        description=dict(required=False),
         organization=dict(required=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
     description = module.params.get('description')
     organization = module.params.get('organization')
     state = module.params.get('state')
 
-    json_output = {'team': name, 'state': state}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    org_id = module.resolve_name_to_id('organizations', organization)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        team = tower_cli.get_resource('team')
+    # Attempt to look up team based on the provided name and org ID
+    team = module.get_one('teams', **{
+        'data': {
+            'name': name,
+            'organization': org_id
+        }
+    })
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Create the data that gets sent for create and update
+    team_fields = {
+        'name': new_name if new_name else name,
+        'organization': org_id
+    }
+    if description is not None:
+        team_fields['description'] = description
 
-            if state == 'present':
-                result = team.modify(name=name, organization=org['id'],
-                                     description=description, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = team.delete(name=name, organization=org['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update team, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update team: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(team)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing team, this will return on its own
+        module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
 
 
 if __name__ == '__main__':

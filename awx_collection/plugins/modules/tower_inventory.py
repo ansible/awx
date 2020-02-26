@@ -39,8 +39,9 @@ options:
       type: str
     variables:
       description:
-        - Inventory variables. Use C(@) to get from file.
-      type: str
+        - Inventory variables.
+      required: False
+      type: dict
     kind:
       description:
         - The kind field. Cannot be modified after created.
@@ -59,6 +60,12 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -74,30 +81,26 @@ EXAMPLES = '''
 '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
+import json
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(),
+        description=dict(required=False),
         organization=dict(required=True),
-        variables=dict(),
+        variables=dict(type='dict', required=False),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
     description = module.params.get('description')
     organization = module.params.get('organization')
@@ -106,31 +109,39 @@ def main():
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
 
-    json_output = {'inventory': name, 'state': state}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    org_id = module.resolve_name_to_id('organizations', organization)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        inventory = tower_cli.get_resource('inventory')
+    # Attempt to look up inventory based on the provided name and org ID
+    inventory = module.get_one('inventories', **{
+        'data': {
+            'name': name,
+            'organization': org_id
+        }
+    })
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Create the data that gets sent for create and update
+    inventory_fields = {
+        'name': name,
+        'organization': org_id,
+        'kind': kind,
+        'host_filter': host_filter,
+    }
+    if description is not None:
+        inventory_fields['description'] = description
+    if variables is not None:
+        inventory_fields['variables'] = json.dumps(variables)
 
-            if state == 'present':
-                result = inventory.modify(name=name, organization=org['id'], variables=variables,
-                                          description=description, kind=kind, host_filter=host_filter,
-                                          create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = inventory.delete(name=name, organization=org['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update inventory, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update inventory: {0}'.format(excinfo), changed=False)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory)
+    elif state == 'present':
+        # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
+        if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+            module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+        # If the state was present and we can let the module build or update the existing inventory, this will return on its own
+        module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
 
 
 if __name__ == '__main__':
