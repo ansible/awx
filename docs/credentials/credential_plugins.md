@@ -117,7 +117,7 @@ setuptools.setup(
     entry_points = {
         ...,
         'awx.credential_plugins': [
-            'fancy_plugin = awx.main.credential_plugins.fancy:some_fancy_plugin',
+            'fancy = my_fancy_project.my_fancy_module:some_fancy_plugin',  # some_fancy_plugin = CredentialPlugin(...)
         ]
     }
 )
