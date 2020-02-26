@@ -99,10 +99,9 @@ RUN cd /usr/local/bin && \
 
 ADD rsyslog.repo /etc/yum.repos.d/
 RUN yum install -y rsyslog-omhttp
-RUN echo '$IncludeConfig /var/lib/awx/rsyslog.conf' >> /etc/rsyslog.conf
 
 # Pre-create things that we need to write to
-RUN for dir in /home/awx /var/log/tower /var/log/nginx /var/lib/nginx; \
+RUN for dir in /home/awx /var/run/supervisor /var/lib/awx/rsyslog /var/run/rsyslog /var/log/tower /var/log/nginx /var/lib/nginx; \
     do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done && \
     \
     for file in /etc/passwd /var/run/nginx.pid; \

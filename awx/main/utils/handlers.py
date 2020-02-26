@@ -3,9 +3,19 @@
 
 # Python
 import logging
+import os.path
 
 # Django
 from django.conf import settings
+
+
+class RSysLogHandler(logging.handlers.SysLogHandler):
+
+    def emit(self, msg):
+        if not os.path.exists(settings.LOGGING_SOCK):
+            return
+        return super(RSysLogHandler, self).emit(msg)
+
 
 ColorHandler = logging.StreamHandler
 

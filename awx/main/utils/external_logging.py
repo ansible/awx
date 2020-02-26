@@ -7,6 +7,7 @@ from awx.main.utils.reload import supervisor_service_command
 
 def reconfigure_rsyslog():
     tmpl = ''
+    parts = ['$IncludeConfig /etc/rsyslog.conf']
     if settings.LOG_AGGREGATOR_ENABLED:
         host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
         port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
@@ -26,11 +27,8 @@ def reconfigure_rsyslog():
             except ValueError:
                 port = settings.LOG_AGGREGATOR_PORT
 
-        parts = []
         parts.extend([
-            '$IncludeConfig /etc/rsyslog.conf',
-            '$ModLoad imudp',
-            '$UDPServerRun 51414',
+            'input(type="imuxsock" Socket="/var/run/tower/sockets/rsyslog.sock" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
         if protocol.startswith('http'):
@@ -65,8 +63,8 @@ def reconfigure_rsyslog():
             parts.append(
                 f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
             )
-        tmpl = '\n'.join(parts)
 
-    with open('/var/lib/awx/rsyslog.conf', 'w') as f:
+    tmpl = '\n'.join(parts)
+    with open('/var/lib/awx/rsyslog/rsyslog.conf', 'w') as f:
         f.write(tmpl + '\n')
     supervisor_service_command(command='restart', service='awx-rsyslogd')

@@ -141,6 +141,9 @@ def dispatch_startup():
     # and Tower fall out of use/support, we can probably just _assume_ that
     # everybody has moved to bigint, and remove this code entirely
     enforce_bigint_pk_migration()
+    
+    # Update Tower's rsyslog.conf file based on loggins settings in the db
+    reconfigure_rsyslog()
 
 
 def inform_cluster_of_shutdown():

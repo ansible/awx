@@ -104,7 +104,7 @@ RUN cd /usr/local/bin && \
 
 ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
 RUN yum install -y rsyslog-omhttp
-RUN echo '$IncludeConfig /var/lib/awx/rsyslog.conf' >> /etc/rsyslog.conf
+RUN mkdir -p /var/lib/awx/rsyslog/ && echo '$IncludeConfig /etc/rsyslog.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
 
 RUN dnf -y clean all && rm -rf /root/.cache
 
@@ -123,11 +123,20 @@ ADD tools/docker-compose/entrypoint.sh /
 ADD tools/scripts/awx-python /usr/bin/awx-python
 
 # Pre-create things that we need to write to
+<<<<<<< HEAD
 RUN for dir in /var/lib/awx/ /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
     do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done && \
     \
     for file in /etc/passwd /etc/supervisord.conf /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
     do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
+=======
+RUN for dir in /var/lib/awx/rsyslog /var/run/tower/rsyslog /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+  do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
+
+RUN for file in /etc/passwd /etc/supervisord.conf \
+  /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
+  do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
+>>>>>>> Configure rsyslog to listen over a unix domain socket instead of a port
 
 ENV HOME /var/lib/awx
 ENV PATH="/usr/local/n/versions/node/10.15.0/bin:${PATH}"

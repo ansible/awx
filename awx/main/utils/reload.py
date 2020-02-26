@@ -4,6 +4,7 @@
 # Python
 import subprocess
 import logging
+import os
 
 # Django
 from django.conf import settings
@@ -17,6 +18,11 @@ def supervisor_service_command(command, service='*', communicate=True):
     # supervisorctl restart tower-processes:receiver tower-processes:factcacher
     '''
     args = ['supervisorctl']
+
+    supervisor_config_path = os.getenv('SUPERVISOR_WEB_CONFIG_PATH', None)
+    if supervisor_config_path:
+        args.extend(['-c', supervisor_config_path])
+
     args.extend([command, ':'.join(['tower-processes', service])])
     logger.debug('Issuing command to {} services, args={}'.format(command, args))
     supervisor_process = subprocess.Popen(args, stdin=subprocess.PIPE,
