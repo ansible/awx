@@ -421,7 +421,8 @@ def test_workflow_ancestors_recursion_prevention(organization):
 
 
 @pytest.mark.django_db
-def test_deleted_template_race_condition():
+@pytest.mark.parametrize('related', ['template', 'job'])
+def test_deleted_related_race_condition(related):
     wfj = WorkflowJob.objects.create()
     jt = JobTemplate.objects.create(name='test-jt')
     # FIXME: running and successful status also results in node
@@ -431,6 +432,9 @@ def test_deleted_template_race_condition():
         workflow_job=wfj, unified_job_template=jt, job=job
     )
     dag = WorkflowDAG(workflow_job=wfj)
-    JobTemplate.objects.get(pk=jt.pk).delete()
+    if related == 'template':
+        JobTemplate.objects.get(pk=jt.pk).delete()
+    elif related == 'job':
+        Job.objects.get(pk=job.pk).delete()
     has_failed, reason = dag.has_workflow_failed()
     assert has_failed is True, reason
