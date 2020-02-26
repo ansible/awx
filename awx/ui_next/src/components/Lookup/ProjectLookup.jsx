@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { string, func, bool } from 'prop-types';
+import { node, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -125,7 +125,7 @@ function ProjectLookup({
 
 ProjectLookup.propTypes = {
   value: Project,
-  helperTextInvalid: string,
+  helperTextInvalid: node,
   isValid: bool,
   onBlur: func,
   onChange: func.isRequired,
