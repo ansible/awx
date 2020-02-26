@@ -203,7 +203,7 @@ class ResourceAccessList extends React.Component {
                         onClick={this.handleAddOpen}
                       />,
                     ]
-                  : null
+                  : []
               }
             />
           )}

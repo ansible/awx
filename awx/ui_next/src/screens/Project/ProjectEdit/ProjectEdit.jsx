@@ -13,6 +13,13 @@ function ProjectEdit({ project }) {
     if (values.scm_type === 'manual') {
       values.scm_type = '';
     }
+    if (!values.credential) {
+      // Depending on the permissions of the user submitting the form,
+      // the API might throw an unexpected error if our creation request
+      // has a zero-length string as its credential field. As a work-around,
+      // normalize falsey credential fields by deleting them.
+      delete values.credential;
+    }
     try {
       const {
         data: { id },

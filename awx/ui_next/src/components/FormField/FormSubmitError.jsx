@@ -15,6 +15,8 @@ function FormSubmitError({ error }) {
       setErrors(errorMessages);
       if (errorMessages.__all__) {
         setErrorMessage(errorMessages.__all__);
+      } else if (errorMessages.detail) {
+        setErrorMessage(errorMessages.detail);
       } else {
         setErrorMessage(null);
       }
