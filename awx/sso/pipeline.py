@@ -198,6 +198,27 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
             team_ids.append(team.id)
             team.member_role.members.add(user)
+            
+            # Admin Logic
+            if team_map.get('admins_remove', True):
+                [t.admin_role.members.remove(user) for t in
+                    Team.objects.filter(Q(admin_role__members=user) & ~Q(id__in=team_ids))]
+
+            admins = team_name_map.get('admins', '')
+            if admins:
+                team.admin_role.members.add(user)
+
+            # Super User Logic
+            if team_map.get('superusers_remove', True):
+                if user.is_superuser:
+                    user.is_superuser = False
+                    user.save()
+
+            superuser = team_name_map.get('superusers', '')
+            if superuser:
+                user.is_superuser = True
+                user.save()
+                break
 
     if team_map.get('remove', True):
         [t.member_role.members.remove(user) for t in
