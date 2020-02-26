@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-import traceback
 import logging
 import pdb  # noqa
 import sys
@@ -92,8 +91,8 @@ def main():
                 exc = e
                 raise
     except Exception as e:
-        exc = e
-        rc = 1
+        exc = e  # noqa
+        rc = 1  # noqa
         raise
 
 

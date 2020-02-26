@@ -33,7 +33,6 @@ import subprocess
 import sys
 from io import StringIO
 from time import time
-from random import randint
 from uuid import uuid4
 
 import psycopg2
@@ -200,7 +199,9 @@ def generate_events(events, job):
         cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename='main_jobevent' AND indexname != 'main_jobevent_pkey';")
         indexes = cursor.fetchall()
 
-        cursor.execute("SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey';")
+        cursor.execute(
+            "SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey';"  # noqa
+        )
         constraints = cursor.fetchall()
 
         # drop all indexes for speed
