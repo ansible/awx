@@ -71,6 +71,7 @@ Below is another example of a SAML attribute that contains a Team membership in 
   "remove": true,
   "admins_remove": true,
   "superusers_remove": true,
+  "auditors_remove": true,
   "team_org_map": [
     {
       "team": "member",
@@ -79,6 +80,7 @@ Below is another example of a SAML attribute that contains a Team membership in 
     {
       "team": "staff",
       "organization": "Default2",
+      "auditors": true,
       "admins": true,
       "superusers": true
     }
@@ -90,6 +92,8 @@ Below is another example of a SAML attribute that contains a Team membership in 
 **remove:** Set this to `true` to remove user from all Teams before adding the user to the list of Teams. Set this to `false` to keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute.
 
 **admins_remove:** Set this to `true` to remove a user from all Teams that they are administrators of before adding the user to the list of Team admins. Set it to `false` to keep the user in whatever Team(s) they are in as admin while adding the user as an Team aministrator in the SAML attribute.
+
+**auditors_remove:** Set this to `true` to remove a user from all Teams that they are auditors of before adding the user to the list of Team auditors. Set it to `false` to keep the user in whatever Team(s) they are in as auditor while adding the user as an Team auditors in the SAML attribute.
 
 **superusers_remove:** Set this to `true` to remove a user Superuser status before adding the user to the list of Superusers. Set it to `false` to keep the user Superuser status.
 
