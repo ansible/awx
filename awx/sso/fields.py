@@ -742,6 +742,7 @@ class SAMLTeamAttrTeamOrgMapField(HybridDictField):
     team = fields.CharField(required=True, allow_null=False)
     organization = fields.CharField(required=True, allow_null=False)
     
+    auditors = fields.BooleanField(required=False)    
     superusers = fields.BooleanField(required=False)
     admins = fields.BooleanField(required=False)
     
@@ -754,6 +755,7 @@ class SAMLTeamAttrField(HybridDictField):
     remove = fields.BooleanField(required=False)
     saml_attr = fields.CharField(required=False, allow_null=True)
     
+    auditors_remove = fields.BooleanField(required=False)    
     superusers_remove = fields.BooleanField(required=False)
     admins_remove = fields.BooleanField(required=False)
     
