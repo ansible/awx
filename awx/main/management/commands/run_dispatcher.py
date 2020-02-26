@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
         # spawn a daemon thread to periodically enqueues scheduled tasks
         # (like the node heartbeat)
-        cease_continuous_run = periodic.run_continuously()
+        periodic.run_continuously()
 
         reaper.reap()
         consumer = None
@@ -87,7 +87,6 @@ class Command(BaseCommand):
                 )
                 consumer.run()
             except KeyboardInterrupt:
-                cease_continuous_run.set()
                 logger.debug('Terminating Task Dispatcher')
                 if consumer:
                     consumer.stop()
