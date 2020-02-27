@@ -2,8 +2,6 @@ import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import InventoryHostItem from './InventoryHostItem';
 
-let toggleHost;
-
 const mockHost = {
   id: 1,
   name: 'Host 1',
@@ -17,65 +15,54 @@ const mockHost = {
     user_capabilities: {
       edit: true,
     },
-    recent_jobs: [],
+    recent_jobs: [
+      {
+        id: 123,
+        name: 'Demo Job Template',
+        status: 'failed',
+        finished: '2020-02-26T22:38:41.037991Z',
+      },
+    ],
   },
 };
 
 describe('<InventoryHostItem />', () => {
+  let wrapper;
+
   beforeEach(() => {
-    toggleHost = jest.fn();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('edit button shown to users with edit capabilities', () => {
-    const wrapper = mountWithContexts(
+    wrapper = mountWithContexts(
       <InventoryHostItem
         isSelected={false}
         detailUrl="/host/1"
         onSelect={() => {}}
         host={mockHost}
-        toggleHost={toggleHost}
-        toggleLoading={false}
       />
     );
+  });
+
+  afterEach(() => {
+    wrapper.unmount();
+  });
+
+  test('edit button shown to users with edit capabilities', () => {
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
   });
 
   test('edit button hidden from users without edit capabilities', () => {
     const copyMockHost = Object.assign({}, mockHost);
     copyMockHost.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(
+    wrapper = mountWithContexts(
       <InventoryHostItem
         isSelected={false}
         detailUrl="/host/1"
         onSelect={() => {}}
         host={copyMockHost}
-        toggleHost={toggleHost}
-        toggleLoading={false}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();
   });
 
-  test('handles toggle click when host is enabled', () => {
-    const wrapper = mountWithContexts(
-      <InventoryHostItem
-        isSelected={false}
-        detailUrl="/host/1"
-        onSelect={() => {}}
-        host={mockHost}
-        toggleHost={toggleHost}
-        toggleLoading={false}
-      />
-    );
-    wrapper
-      .find('Switch')
-      .first()
-      .find('input')
-      .simulate('change');
-    expect(toggleHost).toHaveBeenCalledWith(mockHost);
+  test('should display host toggle', () => {
+    expect(wrapper.find('HostToggle').length).toBe(1);
   });
 });

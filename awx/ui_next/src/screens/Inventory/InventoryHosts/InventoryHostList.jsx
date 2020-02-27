@@ -28,8 +28,6 @@ function InventoryHostList({ i18n, location, match }) {
   const [hosts, setHosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState([]);
-  const [toggleError, setToggleError] = useState(null);
-  const [toggleLoading, setToggleLoading] = useState(null);
 
   const fetchHosts = (id, queryString) => {
     const params = parseQueryString(QS_CONFIG, queryString);
@@ -100,24 +98,6 @@ function InventoryHostList({ i18n, location, match }) {
     }
   };
 
-  const handleToggle = async hostToToggle => {
-    setToggleLoading(hostToToggle.id);
-
-    try {
-      const { data: updatedHost } = await HostsAPI.update(hostToToggle.id, {
-        enabled: !hostToToggle.enabled,
-      });
-
-      setHosts(
-        hosts.map(host => (host.id === updatedHost.id ? updatedHost : host))
-      );
-    } catch (error) {
-      setToggleError(error);
-    } finally {
-      setToggleLoading(null);
-    }
-  };
-
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const isAllSelected = selected.length > 0 && selected.length === hosts.length;
@@ -184,8 +164,6 @@ function InventoryHostList({ i18n, location, match }) {
             editUrl={`/inventories/inventory/${match.params.id}/hosts/${o.id}/edit`}
             isSelected={selected.some(row => row.id === o.id)}
             onSelect={() => handleSelect(o)}
-            toggleHost={handleToggle}
-            toggleLoading={toggleLoading === o.id}
           />
         )}
         emptyStateControls={
@@ -197,19 +175,6 @@ function InventoryHostList({ i18n, location, match }) {
           )
         }
       />
-
-      {toggleError && !toggleLoading && (
-        <AlertModal
-          variant="error"
-          title={i18n._(t`Error!`)}
-          isOpen={toggleError && !toggleLoading}
-          onClose={() => setToggleError(false)}
-        >
-          {i18n._(t`Failed to toggle host.`)}
-          <ErrorDetail error={toggleError} />
-        </AlertModal>
-      )}
-
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
