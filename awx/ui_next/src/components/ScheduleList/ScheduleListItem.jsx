@@ -18,7 +18,7 @@ import { DetailList, Detail } from '@components/DetailList';
 import styled from 'styled-components';
 import { Schedule } from '@types';
 import { formatDateString } from '@util/dates';
-import ScheduleToggle from '../shared/ScheduleToggle';
+import ScheduleToggle from './ScheduleToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

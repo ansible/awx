@@ -12,7 +12,7 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import { ScheduleListItem } from '.';
+import ScheduleListItem from './ScheduleListItem';
 
 const QS_CONFIG = getQSConfig('schedule', {
   page: 1,

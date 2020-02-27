@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import Breadcrumbs from '@components/Breadcrumbs';
-import { ScheduleList } from './ScheduleList';
+import ScheduleList from '@components/ScheduleList';
 
 function Schedules({ i18n }) {
   return (
