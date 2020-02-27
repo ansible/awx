@@ -184,8 +184,6 @@ class Project extends Component {
       );
     }
 
-    console.log(project);
-
     return (
       <PageSection>
         <Card>
