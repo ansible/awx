@@ -10,6 +10,7 @@ import ContentError from '@components/ContentError';
 import JobList from '@components/JobList';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
+import ScheduleList from '@components/ScheduleList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
@@ -119,6 +120,13 @@ class Template extends Component {
       }
     );
 
+    if (template) {
+      tabsArray.push({
+        name: i18n._(t`Schedules`),
+        link: `${match.url}/schedules`,
+      });
+    }
+
     tabsArray.forEach((tab, n) => {
       tab.id = n;
     });
@@ -209,6 +217,14 @@ class Template extends Component {
             <Route path="/templates/:templateType/:id/completed_jobs">
               <JobList defaultParams={{ job__job_template: template.id }} />
             </Route>
+          )}
+          {template && (
+            <Route
+              path="/templates/:templateType/:id/schedules"
+              render={() => (
+                <ScheduleList resource={template} apiModel={JobTemplatesAPI} />
+              )}
+            />
           )}
           <Route
             key="not-found"

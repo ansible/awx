@@ -27,6 +27,10 @@ class WorkflowJobTemplates extends Base {
   createNode(id, data) {
     return this.http.post(`${this.baseUrl}${id}/workflow_nodes/`, data);
   }
+
+  readScheduleList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
+  }
 }
 
 export default WorkflowJobTemplates;

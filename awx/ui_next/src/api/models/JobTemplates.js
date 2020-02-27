@@ -61,6 +61,10 @@ class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
       params,
     });
   }
+
+  readScheduleList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
+  }
 }
 
 export default JobTemplates;

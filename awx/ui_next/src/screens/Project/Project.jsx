@@ -9,10 +9,10 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
+import ScheduleList from '@components/ScheduleList';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
-import ProjectSchedules from './ProjectSchedules';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 
 class Project extends Component {
@@ -134,16 +134,17 @@ class Project extends Component {
       });
     }
 
-    tabsArray.push(
-      {
-        name: i18n._(t`Job Templates`),
-        link: `${match.url}/job_templates`,
-      },
-      {
+    tabsArray.push({
+      name: i18n._(t`Job Templates`),
+      link: `${match.url}/job_templates`,
+    });
+
+    if (project?.scm_type && project.scm_type !== '') {
+      tabsArray.push({
         name: i18n._(t`Schedules`),
         link: `${match.url}/schedules`,
-      }
-    );
+      });
+    }
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -182,6 +183,8 @@ class Project extends Component {
         </PageSection>
       );
     }
+
+    console.log(project);
 
     return (
       <PageSection>
@@ -230,10 +233,14 @@ class Project extends Component {
                 <ProjectJobTemplatesList id={Number(match.params.id)} />
               )}
             />
-            <Route
-              path="/projects/:id/schedules"
-              render={() => <ProjectSchedules id={Number(match.params.id)} />}
-            />
+            {project?.scm_type && project.scm_type !== '' && (
+              <Route
+                path="/projects/:id/schedules"
+                render={() => (
+                  <ScheduleList resource={project} apiModel={ProjectsAPI} />
+                )}
+              />
+            )}
             <Route
               key="not-found"
               path="*"

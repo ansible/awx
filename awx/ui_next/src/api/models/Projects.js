@@ -21,6 +21,10 @@ class Projects extends LaunchUpdateMixin(NotificationsMixin(Base)) {
     return this.http.get(`${this.baseUrl}${id}/playbooks/`);
   }
 
+  readScheduleList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
+  }
+
   readSync(id) {
     return this.http.get(`${this.baseUrl}${id}/update/`);
   }

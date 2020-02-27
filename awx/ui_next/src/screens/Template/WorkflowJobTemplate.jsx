@@ -10,6 +10,7 @@ import ContentError from '@components/ContentError';
 import FullPage from '@components/FullPage';
 import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
+import ScheduleList from '@components/ScheduleList';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
@@ -84,6 +85,13 @@ class WorkflowJobTemplate extends Component {
       { name: i18n._(t`Visualizer`), link: `${match.url}/visualizer` },
       { name: i18n._(t`Completed Jobs`), link: `${match.url}/completed_jobs` },
     ];
+
+    if (template) {
+      tabsArray.push({
+        name: i18n._(t`Schedules`),
+        link: `${match.url}/schedules`,
+      });
+    }
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -161,6 +169,17 @@ class WorkflowJobTemplate extends Component {
                 }}
               />
             </Route>
+          )}
+          {template && (
+            <Route
+              path="/templates/:templateType/:id/schedules"
+              render={() => (
+                <ScheduleList
+                  resource={template}
+                  apiModel={WorkflowJobTemplatesAPI}
+                />
+              )}
+            />
           )}
           <Route
             key="not-found"
