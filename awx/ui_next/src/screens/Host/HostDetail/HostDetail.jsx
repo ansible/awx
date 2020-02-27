@@ -44,7 +44,10 @@ function HostDetail({ host, i18n, onUpdateHost }) {
     try {
       await HostsAPI.destroy(id);
       setIsloading(false);
-      history.push(`/inventories/inventory/${inventoryId}/hosts`);
+      const url = pathname.startsWith('/inventories')
+        ? `/inventories/inventory/${inventoryId}/hosts/`
+        : `/hosts`;
+      history.push(url);
     } catch (err) {
       setDeletionError(err);
     }
