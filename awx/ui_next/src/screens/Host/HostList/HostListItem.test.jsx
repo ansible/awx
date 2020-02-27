@@ -3,8 +3,6 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 
 import HostsListItem from './HostListItem';
 
-const onToggleHost = jest.fn();
-
 const mockHost = {
   id: 1,
   name: 'Host 1',
@@ -32,13 +30,12 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={mockHost}
-        onToggleHost={onToggleHost}
       />
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    wrapper.unmount();
   });
 
   test('edit button shown to users with edit capabilities', () => {
@@ -54,7 +51,6 @@ describe('<HostsListItem />', () => {
         detailUrl="/host/1"
         onSelect={() => {}}
         host={copyMockHost}
-        onToggleHost={onToggleHost}
       />
     );
     expect(wrapper.find('PencilAltIcon').exists()).toBeFalsy();

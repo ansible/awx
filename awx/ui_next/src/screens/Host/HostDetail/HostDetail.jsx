@@ -12,7 +12,7 @@ import { VariablesDetail } from '@components/CodeMirrorInput';
 import Sparkline from '@components/Sparkline';
 import DeleteButton from '@components/DeleteButton';
 import { HostsAPI } from '@api';
-import HostToggle from '../shared/HostToggle';
+import HostToggle from '@components/HostToggle';
 
 function HostDetail({ host, i18n, onUpdateHost }) {
   const {

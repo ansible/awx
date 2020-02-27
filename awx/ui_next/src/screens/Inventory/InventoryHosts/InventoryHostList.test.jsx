@@ -60,7 +60,14 @@ const mockHosts = [
         delete: false,
         update: false,
       },
-      recent_jobs: [],
+      recent_jobs: [
+        {
+          id: 123,
+          name: 'Recent Job',
+          status: 'success',
+          finished: '2020-01-27T19:40:36.208728Z',
+        },
+      ],
     },
   },
 ];

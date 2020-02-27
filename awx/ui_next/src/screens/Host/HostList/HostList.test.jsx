@@ -121,7 +121,7 @@ describe('<HostList />', () => {
     expect(wrapper.find('HostListItem')).toHaveLength(3);
   });
 
-  test('should select single item', async () => {
+  test('should select and deselect a single item', async () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<HostList />);
@@ -141,6 +141,19 @@ describe('<HostList />', () => {
         .first()
         .prop('isSelected')
     ).toEqual(true);
+    act(() => {
+      wrapper
+        .find('input#select-host-1')
+        .closest('DataListCheck')
+        .invoke('onChange')();
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('HostListItem')
+        .first()
+        .prop('isSelected')
+    ).toEqual(false);
   });
 
   test('should select all items', async () => {
