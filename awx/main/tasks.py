@@ -1809,7 +1809,7 @@ class RunJob(BaseTask):
                 current_revision = git_repo.head.commit.hexsha
                 if desired_revision == current_revision:
                     job_revision = desired_revision
-                    logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
+                    logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs = all_sync_needs
             except (ValueError, BadGitName):
