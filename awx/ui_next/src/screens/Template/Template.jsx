@@ -3,15 +3,17 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
+
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
+import JobList from '@components/JobList';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import JobTemplateEdit from './JobTemplateEdit';
+import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 
 class Template extends Component {
   constructor(props) {
@@ -109,7 +111,7 @@ class Template extends Component {
       },
       {
         name: i18n._(t`Completed Jobs`),
-        link: '/home',
+        link: `${match.url}/completed_jobs`,
       },
       {
         name: i18n._(t`Survey`),
@@ -202,6 +204,11 @@ class Template extends Component {
                 />
               )}
             />
+          )}
+          {template?.id && (
+            <Route path="/templates/:templateType/:id/completed_jobs">
+              <JobList defaultParams={{ job__job_template: template.id }} />
+            </Route>
           )}
           <Route
             key="not-found"

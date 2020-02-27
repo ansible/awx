@@ -2,8 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, PageSection } from '@patternfly/react-core';
 
+import { Card } from '@patternfly/react-core';
+import AlertModal from '@components/AlertModal';
+import DatalistToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
+import PaginatedDataList, {
+  ToolbarDeleteButton,
+} from '@components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '@util/useRequest';
+import { getQSConfig, parseQueryString } from '@util/qs';
+import JobListItem from './JobListItem';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -13,16 +22,6 @@ import {
   UnifiedJobsAPI,
   WorkflowJobsAPI,
 } from '@api';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
-
-import JobListItem from './JobListItem';
 
 const QS_CONFIG = getQSConfig(
   'job',
@@ -30,12 +29,11 @@ const QS_CONFIG = getQSConfig(
     page: 1,
     page_size: 20,
     order_by: '-finished',
-    not__launch_type: 'sync',
   },
-  ['page', 'page_size', 'id']
+  ['page', 'page_size']
 );
 
-function JobList({ i18n }) {
+function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const [selected, setSelected] = useState([]);
   const location = useLocation();
 
@@ -47,14 +45,16 @@ function JobList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
+
       const {
         data: { count, results },
-      } = await UnifiedJobsAPI.read(params);
+      } = await UnifiedJobsAPI.read({ ...params, ...defaultParams });
+
       return {
         itemCount: count,
         jobs: results,
       };
-    }, [location]),
+    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       jobs: [],
       itemCount: 0,
@@ -119,7 +119,7 @@ function JobList({ i18n }) {
   };
 
   return (
-    <PageSection>
+    <>
       <Card>
         <PaginatedDataList
           contentError={contentError}
@@ -225,9 +225,8 @@ function JobList({ i18n }) {
           renderItem={job => (
             <JobListItem
               key={job.id}
-              value={job.name}
               job={job}
-              detailUrl={`${location.pathname}/${job}/${job.id}`}
+              showTypeColumn={showTypeColumn}
               onSelect={() => handleSelect(job)}
               isSelected={selected.some(row => row.id === job.id)}
             />
@@ -243,7 +242,7 @@ function JobList({ i18n }) {
         {i18n._(t`Failed to delete one or more jobs.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-    </PageSection>
+    </>
   );
 }
 

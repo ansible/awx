@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   Route,
@@ -10,20 +9,21 @@ import {
   useLocation,
   useRouteMatch,
 } from 'react-router-dom';
+
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
 import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
+import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import { ResourceAccessList } from '@components/ResourceAccessList';
-import ContentLoading from '@components/ContentLoading';
 import InventoryDetail from './InventoryDetail';
-
+import InventoryEdit from './InventoryEdit';
 import InventoryGroups from './InventoryGroups';
-import InventoryCompletedJobs from './InventoryCompletedJobs';
+import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
 import { InventoriesAPI } from '@api';
-import InventoryEdit from './InventoryEdit';
-import InventoryHosts from './InventoryHosts/InventoryHosts';
 
 function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);
@@ -172,8 +172,17 @@ function Inventory({ i18n, setBreadcrumb }) {
             <Route
               key="completed_jobs"
               path="/inventories/inventory/:id/completed_jobs"
-              render={() => <InventoryCompletedJobs inventory={inventory} />}
-            />,
+            >
+              <JobList
+                defaultParams={{
+                  or__job__inventory: inventory.id,
+                  or__adhoccommand__inventory: inventory.id,
+                  or__inventoryupdate__inventory_source__inventory:
+                    inventory.id,
+                  or__workflowjob__inventory: inventory.id,
+                }}
+              />
+            </Route>,
             <Route
               key="not-found"
               path="*"

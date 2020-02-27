@@ -17,11 +17,11 @@ import CardCloseButton from '@components/CardCloseButton';
 import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import JobList from '@components/JobList';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
-import HostCompletedJobs from './HostCompletedJobs';
 import { HostsAPI } from '@api';
 
 function Host({ inventory, i18n, setBreadcrumb }) {
@@ -181,11 +181,15 @@ function Host({ inventory, i18n, setBreadcrumb }) {
             render={() => <HostGroups host={host} />}
           />
         )}
-        {host && (
+        {host?.id && (
           <Route
-            path="/hosts/:id/completed_jobs"
-            render={() => <HostCompletedJobs host={host} />}
-          />
+            path={[
+              '/hosts/:id/completed_jobs',
+              '/inventories/inventory/:id/hosts/:hostId/completed_jobs',
+            ]}
+          >
+            <JobList defaultParams={{ job__hosts: host.id }} />
+          </Route>
         )}
         <Route
           key="not-found"

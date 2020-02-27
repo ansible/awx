@@ -65,23 +65,24 @@ class Inventories extends Component {
         t`Create New Host`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
+        nestedResource.id}`]: i18n._(
+        t`${nestedResource && nestedResource.name}`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
         nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
         nestedResource.id}/details`]: i18n._(t`Host Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}`]: i18n._(
-        t`${nestedResource && nestedResource.name}`
-      ),
-
+        nestedResource.id}/completed_jobs`]: i18n._(t`Completed Jobs`),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/add`]: i18n._(
         t`Create New Group`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
+        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
         nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
         nestedResource.id}/details`]: i18n._(t`Group Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
     };
     this.setState({ breadcrumbConfig });
   };
