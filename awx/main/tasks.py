@@ -1180,7 +1180,11 @@ class BaseTask(object):
         '''
         Ansible runner callback to tell the job when/if it is canceled
         '''
-        self.instance = self.update_model(self.instance.pk)
+        unified_job_id = self.instance.pk
+        self.instance = self.update_model(unified_job_id)
+        if not self.instance:
+            logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
+            return True
         if self.instance.cancel_flag or self.instance.status == 'canceled':
             cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
             if cancel_wait > 5:
@@ -1805,7 +1809,7 @@ class RunJob(BaseTask):
                 current_revision = git_repo.head.commit.hexsha
                 if desired_revision == current_revision:
                     job_revision = desired_revision
-                    logger.info('Skipping project sync for {} because commit is locally available'.format(job.log_format))
+                    logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
                     sync_needs = all_sync_needs
             except (ValueError, BadGitName):
