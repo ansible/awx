@@ -76,7 +76,6 @@ function InventorySourcesList({
           name: i18n._(t`Source`),
           key: 'source',
           options: [
-            [``, i18n._(t`Manual`)],
             [`file`, i18n._(t`File, Directory or Script`)],
             [`scm`, i18n._(t`Sourced from a Project`)],
             [`ec2`, i18n._(t`Amazon EC2`)],

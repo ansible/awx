@@ -71,7 +71,6 @@ function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
           name: i18n._(t`Type`),
           key: 'type',
           options: [
-            [``, i18n._(t`Manual`)],
             [`git`, i18n._(t`Git`)],
             [`hg`, i18n._(t`Mercurial`)],
             [`svn`, i18n._(t`Subversion`)],
