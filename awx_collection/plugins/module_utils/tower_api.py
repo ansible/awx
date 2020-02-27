@@ -231,6 +231,7 @@ class TowerModule(AnsibleModule):
             next_response = self.get_endpoint(next_page)
             response['json']['results'] = response['json']['results'] + next_response['json']['results']
             next_page = next_response['json']['next']
+            response['json']['next'] = next_page
         return response
 
     def get_one(self, endpoint, *args, **kwargs):
