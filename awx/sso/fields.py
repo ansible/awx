@@ -187,6 +187,26 @@ class AuthenticationBackendsField(fields.StringListField):
             'SOCIAL_AUTH_GITHUB_TEAM_SECRET',
             'SOCIAL_AUTH_GITHUB_TEAM_ID',
         ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET',
+        ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME',
+        ]),
+        ('social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2', [
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET',
+            'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID',
+        ]),
         ('social_core.backends.azuread.AzureADOAuth2', [
             'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
             'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',

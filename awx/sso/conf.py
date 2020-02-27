@@ -843,6 +843,292 @@ register(
 )
 
 ###############################################################################
+# GITHUB ENTERPRISE OAUTH2 AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL',
+    field_class=fields.CharField,
+    read_only=True,
+    default=SocialAuthCallbackURL('github-enterprise'),
+    label=_('GitHub Enterprise OAuth2 Callback URL'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+    depends_on=['TOWER_URL_BASE'],
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise URL'),
+    help_text=_('The URL for your Github Enteprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise API URL'),
+    help_text=_('The API URL for your GitHub Enterprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise OAuth2 Key'),
+    help_text=_('The OAuth2 key (Client ID) from your GitHub Enterprise developer application.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub OAuth2 Secret'),
+    help_text=_('The OAuth2 secret (Client Secret) from your GitHub Enterprise developer application.'),
+    category=_('GitHub OAuth2'),
+    category_slug='github-enterprise',
+    encrypted=True,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP',
+    field_class=SocialOrganizationMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise OAuth2 Organization Map'),
+    help_text=SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+    placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_MAP',
+    field_class=SocialTeamMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise OAuth2 Team Map'),
+    help_text=SOCIAL_AUTH_TEAM_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise',
+    placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+)
+
+###############################################################################
+# GITHUB ENTERPRISE ORG OAUTH2 AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL',
+    field_class=fields.CharField,
+    read_only=True,
+    default=SocialAuthCallbackURL('github-enterprise-org'),
+    label=_('GitHub Enterprise Organization OAuth2 Callback URL'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+    depends_on=['TOWER_URL_BASE'],
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise URL'),
+    help_text=_('The URL for your Github Enteprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise-org',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise API URL'),
+    help_text=_('The API URL for your GitHub Enterprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise-org',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Organization OAuth2 Key'),
+    help_text=_('The OAuth2 key (Client ID) from your GitHub Enterprise organization application.'),
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Organization OAuth2 Secret'),
+    help_text=_('The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.'),
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+    encrypted=True,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Organization Name'),
+    help_text=_('The name of your GitHub Enterprise organization, as used in your '
+                'organization\'s URL: https://github.com/<yourorg>/.'),
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP',
+    field_class=SocialOrganizationMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise Organization OAuth2 Organization Map'),
+    help_text=SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+    placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_TEAM_MAP',
+    field_class=SocialTeamMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise Organization OAuth2 Team Map'),
+    help_text=SOCIAL_AUTH_TEAM_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise Organization OAuth2'),
+    category_slug='github-enterprise-org',
+    placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+)
+
+###############################################################################
+# GITHUB ENTERPRISE TEAM OAUTH2 AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL',
+    field_class=fields.CharField,
+    read_only=True,
+    default=SocialAuthCallbackURL('github-enterprise-team'),
+    label=_('GitHub Enterprise Team OAuth2 Callback URL'),
+    help_text=_('Create an organization-owned application at '
+                'https://github.com/organizations/<yourorg>/settings/applications '
+                'and obtain an OAuth2 key (Client ID) and secret (Client Secret). '
+                'Provide this URL as the callback URL for your application.'),
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+    depends_on=['TOWER_URL_BASE'],
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise URL'),
+    help_text=_('The URL for your Github Enteprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise-team',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL',
+    field_class=fields.CharField,
+    allow_blank=False,
+    default='',
+    label=_('GitHub Enterprise API URL'),
+    help_text=_('The API URL for your GitHub Enterprise.'),
+    category=_('GitHub Enterprise OAuth2'),
+    category_slug='github-enterprise-team',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Team OAuth2 Key'),
+    help_text=_('The OAuth2 key (Client ID) from your GitHub Enterprise organization application.'),
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Team OAuth2 Secret'),
+    help_text=_('The OAuth2 secret (Client Secret) from your GitHub Enterprise organization application.'),
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+    encrypted=True,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('GitHub Enterprise Team ID'),
+    help_text=_('Find the numeric team ID using the Github Enterprise API: '
+                'http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP',
+    field_class=SocialOrganizationMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise Team OAuth2 Organization Map'),
+    help_text=SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+    placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
+)
+
+register(
+    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_TEAM_MAP',
+    field_class=SocialTeamMapField,
+    allow_null=True,
+    default=None,
+    label=_('GitHub Enterprise Team OAuth2 Team Map'),
+    help_text=SOCIAL_AUTH_TEAM_MAP_HELP_TEXT,
+    category=_('GitHub Enterprise Team OAuth2'),
+    category_slug='github-enterprise-team',
+    placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+)
+
+###############################################################################
 # MICROSOFT AZURE ACTIVE DIRECTORY SETTINGS
 ###############################################################################
 

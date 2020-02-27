@@ -344,6 +344,9 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github.GithubOrganizationOAuth2',
     'social_core.backends.github.GithubTeamOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
+    'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
@@ -519,6 +522,20 @@ SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
 SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
 SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SCOPE = ['user:email', 'read:org']
+
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID = ''
+SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
 SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
