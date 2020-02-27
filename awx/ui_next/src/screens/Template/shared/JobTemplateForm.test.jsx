@@ -140,13 +140,10 @@ describe('<JobTemplateForm />', () => {
       wrapper.find('input#template-description').simulate('change', {
         target: { value: 'new bar', name: 'description' },
       });
-      wrapper.find('AnsibleSelect[name="job_type"]').simulate('change', {
-        target: { value: 'new job type', name: 'job_type' },
-      });
-      wrapper.find('InventoryLookup').invoke('onChange')({
-        id: 3,
-        name: 'inventory',
-      });
+      wrapper.find('AnsibleSelect#template-job-type').prop('onChange')(
+        null,
+        'check'
+      );
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 4,
         name: 'project',
@@ -155,7 +152,14 @@ describe('<JobTemplateForm />', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('input#scm_branch').simulate('change', {
+      wrapper.find('InventoryLookup').invoke('onChange')({
+        id: 3,
+        name: 'inventory',
+      });
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('input#template-scm-branch').simulate('change', {
         target: { value: 'devel', name: 'scm_branch' },
       });
       wrapper.find('AnsibleSelect[name="playbook"]').simulate('change', {
@@ -179,7 +183,7 @@ describe('<JobTemplateForm />', () => {
     );
     expect(
       wrapper.find('AnsibleSelect[name="job_type"]').prop('value')
-    ).toEqual('new job type');
+    ).toEqual('check');
     expect(wrapper.find('InventoryLookup').prop('value')).toEqual({
       id: 3,
       name: 'inventory',
@@ -189,7 +193,9 @@ describe('<JobTemplateForm />', () => {
       name: 'project',
       allow_override: true,
     });
-    expect(wrapper.find('input#scm_branch').prop('value')).toEqual('devel');
+    expect(wrapper.find('input#template-scm-branch').prop('value')).toEqual(
+      'devel'
+    );
     expect(
       wrapper.find('AnsibleSelect[name="playbook"]').prop('value')
     ).toEqual('new baz type');

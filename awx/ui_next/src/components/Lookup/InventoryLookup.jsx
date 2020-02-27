@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { string, func, bool } from 'prop-types';
+import { func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { FormGroup } from '@patternfly/react-core';
 import { InventoriesAPI } from '@api';
 import { Inventory } from '@types';
 import Lookup from '@components/Lookup';
-import { FieldTooltip } from '@components/FormField';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import OptionsList from './shared/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
@@ -18,17 +16,7 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-function InventoryLookup({
-  value,
-  tooltip,
-  onChange,
-  onBlur,
-  required,
-  isValid,
-  helperTextInvalid,
-  i18n,
-  history,
-}) {
+function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
   const [inventories, setInventories] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
@@ -47,14 +35,7 @@ function InventoryLookup({
   }, [history.location]);
 
   return (
-    <FormGroup
-      label={i18n._(t`Inventory`)}
-      isRequired={required}
-      fieldId="inventory-lookup"
-      isValid={isValid}
-      helperTextInvalid={helperTextInvalid}
-    >
-      {tooltip && <FieldTooltip content={tooltip} />}
+    <>
       <Lookup
         id="inventory-lookup"
         header={i18n._(t`Inventory`)}
@@ -100,20 +81,18 @@ function InventoryLookup({
         )}
       />
       <LookupErrorMessage error={error} />
-    </FormGroup>
+    </>
   );
 }
 
 InventoryLookup.propTypes = {
   value: Inventory,
-  tooltip: string,
   onChange: func.isRequired,
   required: bool,
 };
 
 InventoryLookup.defaultProps = {
   value: null,
-  tooltip: '',
   required: false,
 };
 

@@ -6,9 +6,12 @@ import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Form } from '@patternfly/react-core';
+import { Form, FormGroup } from '@patternfly/react-core';
 
-import FormField, { FormSubmitError } from '@components/FormField';
+import FormField, {
+  FormSubmitError,
+  FieldTooltip,
+} from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import { required } from '@util/validators';
@@ -23,7 +26,7 @@ function HostFormFields({ host, i18n }) {
   const hostAddMatch = useRouteMatch('/hosts/add');
   const inventoryFieldArr = useField({
     name: 'inventory',
-    validate: required(i18n._(t`Select aå value for this field`), i18n),
+    validate: required(i18n._(t`Select a value for this field`), i18n),
   });
   const inventoryMeta = inventoryFieldArr[1];
   const inventoryHelpers = inventoryFieldArr[2];
@@ -45,22 +48,35 @@ function HostFormFields({ host, i18n }) {
         label={i18n._(t`Description`)}
       />
       {hostAddMatch && (
-        <InventoryLookup
-          value={inventory}
-          onBlur={() => inventoryHelpers.setTouched()}
-          tooltip={i18n._(
-            t`Select the inventory that this host will belong to.`
-          )}
+        <FormGroup
+          label={i18n._(t`Inventory`)}
+          isRequired
+          fieldId="inventory-lookup"
           isValid={!inventoryMeta.touched || !inventoryMeta.error}
           helperTextInvalid={inventoryMeta.error}
-          onChange={value => {
-            inventoryHelpers.setValuealue(value.id);
-            setInventory(value);
-          }}
-          required
-          touched={inventoryMeta.touched}
-          error={inventoryMeta.error}
-        />
+        >
+          <FieldTooltip
+            content={i18n._(
+              t`Select the inventory that this host will belong to.`
+            )}
+          />
+          <InventoryLookup
+            value={inventory}
+            onBlur={() => inventoryHelpers.setTouched()}
+            tooltip={i18n._(
+              t`Select the inventory that this host will belong to.`
+            )}
+            isValid={!inventoryMeta.touched || !inventoryMeta.error}
+            helperTextInvalid={inventoryMeta.error}
+            onChange={value => {
+              inventoryHelpers.setValue(value.id);
+              setInventory(value);
+            }}
+            required
+            touched={inventoryMeta.touched}
+            error={inventoryMeta.error}
+          />
+        </FormGroup>
       )}
       <FormFullWidthLayout>
         <VariablesField
