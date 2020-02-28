@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { string, node, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
+import Toggle from '@components/Toggle';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
-import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function getValueAsMode(value, mode) {
@@ -50,8 +50,12 @@ function VariablesDetail({ value, label, rows }) {
             </div>
           </SplitItem>
           <SplitItem>
-            <YamlJsonToggle
-              mode={mode}
+            <Toggle
+              leftLabel="YAML"
+              leftMode={YAML_MODE}
+              rightLabel="JSON"
+              rightMode={JSON_MODE}
+              currentMode={mode}
               onChange={newMode => {
                 try {
                   setCurrentValue(getValueAsMode(currentValue, newMode));

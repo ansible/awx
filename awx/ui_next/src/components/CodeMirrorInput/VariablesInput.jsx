@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import { string, func, bool, number } from 'prop-types';
-import { Button, Split, SplitItem } from '@patternfly/react-core';
+import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
+import Toggle from '@components/Toggle';
 import CodeMirrorInput from './CodeMirrorInput';
-import ButtonGroup from './ButtonGroup';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 function formatJson(jsonString) {
   return JSON.stringify(JSON.parse(jsonString), null, 2);
 }
-
-const SmallButton = styled(Button)`
-  padding: 3px 8px;
-  font-size: var(--pf-global--FontSize--xs);
-`;
 
 const SplitItemRight = styled(SplitItem)`
   margin-bottom: 5px;
@@ -47,40 +42,25 @@ function VariablesInput(props) {
           </label>
         </SplitItem>
         <SplitItemRight>
-          <ButtonGroup>
-            <SmallButton
-              onClick={() => {
-                if (mode === YAML_MODE) {
-                  return;
-                }
-                try {
-                  onChange(jsonToYaml(value));
-                  setMode(YAML_MODE);
-                } catch (err) {
-                  onError(err.message);
-                }
-              }}
-              variant={mode === YAML_MODE ? 'primary' : 'secondary'}
-            >
-              YAML
-            </SmallButton>
-            <SmallButton
-              onClick={() => {
+          <Toggle
+            leftLabel="YAML"
+            leftMode={YAML_MODE}
+            rightLabel="JSON"
+            rightMode={JSON_MODE}
+            currentMode={mode}
+            onChange={newMode => {
+              try {
                 if (mode === JSON_MODE) {
-                  return;
-                }
-                try {
+                  onChange(jsonToYaml(value));
+                } else {
                   onChange(yamlToJson(value));
-                  setMode(JSON_MODE);
-                } catch (err) {
-                  onError(err.message);
                 }
-              }}
-              variant={mode === JSON_MODE ? 'primary' : 'secondary'}
-            >
-              JSON
-            </SmallButton>
-          </ButtonGroup>
+                setMode(newMode);
+              } catch (err) {
+                onError(err.message);
+              }
+            }}
+          />
         </SplitItemRight>
       </Split>
       <CodeMirrorInput

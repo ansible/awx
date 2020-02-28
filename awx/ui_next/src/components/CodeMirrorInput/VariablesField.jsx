@@ -6,9 +6,9 @@ import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
 import { CheckboxField } from '@components/FormField';
+import Toggle from '@components/Toggle';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
-import YamlJsonToggle from './YamlJsonToggle';
 import { JSON_MODE, YAML_MODE } from './constants';
 
 const FieldHeader = styled.div`
@@ -34,8 +34,12 @@ function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
             </label>
           </SplitItem>
           <SplitItem>
-            <YamlJsonToggle
-              mode={mode}
+            <Toggle
+              leftLabel="YAML"
+              leftMode={YAML_MODE}
+              rightLabel="JSON"
+              rightMode={JSON_MODE}
+              currentMode={mode}
               onChange={newMode => {
                 try {
                   const newVal =
