@@ -36,16 +36,18 @@ class FixedSlidingWindow():
         self.buckets = dict()
         self.start_time = start_time or now_seconds()
 
-    def cleanup(self, now_bucket=now_seconds()):
-        if self.start_time + 60 >= now_bucket:
-            self.start_time = now_bucket - 60 + 1
+    def cleanup(self, now_bucket=None):
+        now_bucket = now_bucket or now_seconds()
+        if self.start_time + 60 <= now_bucket:
+            self.start_time = now_bucket + 60 + 1
 
             # Delete old entries
-            for k,v in self.buckets.items():
+            for k in list(self.buckets.keys()):
                 if k < self.start_time:
                     del self.buckets[k]
 
-    def record(self, ts=datetime.datetime.now()):
+    def record(self, ts=None):
+        ts = ts or datetime.datetime.now()
         now_bucket = int((ts - datetime.datetime(1970,1,1)).total_seconds())
 
         val = self.buckets.get(now_bucket, 0)
