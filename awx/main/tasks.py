@@ -2252,7 +2252,7 @@ class RunProjectUpdate(BaseTask):
             git_repo = git.Repo(project_path)
             if not os.path.exists(destination_folder):
                 os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
-            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
+            tmp_branch_name = 'awx_internal_{}'.format(uuid4())
             # always clone based on specific job revision
             if not scm_revision:
                 raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
