@@ -1222,7 +1222,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 status_data['finished'] = self.finished
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
-            status_data['unified_job_template_id'] = self.unified_job_template.id
+            if getattr(self, 'unified_job_template_id', None):
+                status_data['unified_job_template_id'] = self.unified_job_template_id
             emit_channel_notification('jobs-status_changed', status_data)
 
             if self.spawned_by_workflow:
