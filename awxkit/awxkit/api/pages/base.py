@@ -140,6 +140,7 @@ class Base(Page):
     load_default_authtoken = load_authtoken
 
     def get_oauth2_token(self, username='', password='', client_id=None,
+                         description='AWX CLI',
                          client_secret=None, scope='write'):
         default_cred = config.credentials.default
         username = username or default_cred.username
@@ -176,7 +177,7 @@ class Base(Page):
             resp = self.connection.post(
                 '/api/v2/users/{}/personal_tokens/'.format(username),
                 json={
-                    "description": "Tower CLI",
+                    "description": description,
                     "application": None,
                     "scope": scope
                 },
