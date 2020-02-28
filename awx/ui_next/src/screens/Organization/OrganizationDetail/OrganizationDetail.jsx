@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useHistory, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, ChipGroup } from '@patternfly/react-core';
+import { Button, ChipGroup, Label } from '@patternfly/react-core';
 import { OrganizationsAPI } from '@api';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { CardBody, CardActionsRow } from '@components/Card';
@@ -98,9 +98,11 @@ function OrganizationDetail({ i18n, organization }) {
             value={
               <ChipGroup numChips={5}>
                 {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>
-                    {ig.name}
-                  </Chip>
+                  <div css="padding-right: 5px" key={ig.id}>
+                    <Link to={`/instance_groups/${ig.id}/details`}>
+                      <Label>{ig.name}</Label>
+                    </Link>
+                  </div>
                 ))}
               </ChipGroup>
             }

@@ -93,7 +93,9 @@ describe('<InventoryDetail />', () => {
             <ForwardRef
               to="/organizations/1/details"
             >
-              The Organization
+              <Label>
+                The Organization
+              </Label>
             </ForwardRef>
         `);
     const vars = wrapper.find('VariablesDetail');
@@ -116,8 +118,11 @@ describe('<InventoryDetail />', () => {
     expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
-    const chip = wrapper.find('Chip').at(0);
-    expect(chip.prop('isReadOnly')).toEqual(true);
-    expect(chip.prop('children')).toEqual('Foo');
+    const chip = wrapper
+      .find('ChipGroup')
+      .find('Link')
+      .at(0);
+    expect(chip.prop('to')).toEqual('/instance_groups/1/details');
+    expect(chip.find('Label').text()).toEqual('Foo');
   });
 });

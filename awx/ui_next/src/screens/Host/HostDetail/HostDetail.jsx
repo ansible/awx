@@ -3,7 +3,7 @@ import { Link, useHistory, useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Host } from '@types';
-import { Button } from '@patternfly/react-core';
+import { Button, Label } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '@components/Card';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
@@ -94,7 +94,7 @@ function HostDetail({ host, i18n, onUpdateHost }) {
                   kind === 'smart' ? 'smart_inventory' : 'inventory'
                 }/${inventoryId}/details`}
               >
-                {inventory.name}
+                <Label>{inventory.name}</Label>
               </Link>
             }
           />

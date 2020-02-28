@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, ChipGroup } from '@patternfly/react-core';
+import { Button, Chip, ChipGroup, Label } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 import AlertModal from '@components/AlertModal';
 import { DetailList, Detail } from '@components/DetailList';
 import { CardBody, CardActionsRow } from '@components/Card';
-import CredentialChip from '@components/CredentialChip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
@@ -144,7 +143,7 @@ function JobDetail({ job, i18n }) {
             label={i18n._(t`Template`)}
             value={
               <Link to={`/templates/job_template/${jobTemplate.id}`}>
-                {jobTemplate.name}
+                <Label>{jobTemplate.name}</Label>
               </Link>
             }
           />
@@ -174,7 +173,9 @@ function JobDetail({ job, i18n }) {
             value={
               <StatusDetailValue>
                 {project.status && <StatusIcon status={project.status} />}
-                <Link to={`/projects/${project.id}`}>{project.name}</Link>
+                <Link to={`/projects/${project.id}`}>
+                  <Label>{project.name}</Label>
+                </Link>
               </StatusDetailValue>
             }
           />
@@ -190,7 +191,7 @@ function JobDetail({ job, i18n }) {
             label={i18n._(t`Instance Group`)}
             value={
               <Link to={`/instance_groups/${instanceGroup.id}`}>
-                {instanceGroup.name}
+                <Label>{instanceGroup.name}</Label>
               </Link>
             }
           />
@@ -209,7 +210,14 @@ function JobDetail({ job, i18n }) {
             value={
               <ChipGroup numChips={5}>
                 {credentials.map(c => (
-                  <CredentialChip key={c.id} credential={c} isReadOnly />
+                  <div css="padding-right: 5px" key={c.id}>
+                    <Link to={`/credentials/${c.id}/details`}>
+                      <Label>
+                        <span>{c.kind}: </span>
+                        {c.name}
+                      </Label>
+                    </Link>
+                  </div>
                 ))}
               </ChipGroup>
             }

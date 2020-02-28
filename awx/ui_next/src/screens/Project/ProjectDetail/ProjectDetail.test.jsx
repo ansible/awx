@@ -95,7 +95,7 @@ describe('<ProjectDetail />', () => {
     assertDetail('SCM Refspec', mockProject.scm_refspec);
     assertDetail(
       'SCM Credential',
-      `Scm: ${mockProject.summary_fields.credential.name}`
+      `scm: ${mockProject.summary_fields.credential.name}`
     );
     assertDetail(
       'Cache Timeout',

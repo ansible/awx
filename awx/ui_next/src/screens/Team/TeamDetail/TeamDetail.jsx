@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
+import { Button, Label } from '@patternfly/react-core';
 
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
@@ -48,7 +48,7 @@ function TeamDetail({ team, i18n }) {
           label={i18n._(t`Organization`)}
           value={
             <Link to={`/organizations/${summary_fields.organization.id}`}>
-              {summary_fields.organization.name}
+              <Label>{summary_fields.organization.name}</Label>
             </Link>
           }
         />

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, ChipGroup } from '@patternfly/react-core';
+import { Button, ChipGroup, Label } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
@@ -66,7 +66,7 @@ function InventoryDetail({ inventory, i18n }) {
           label={i18n._(t`Organization`)}
           value={
             <Link to={`/organizations/${organization.id}/details`}>
-              {organization.name}
+              <Label>{organization.name}</Label>
             </Link>
           }
         />
@@ -76,9 +76,11 @@ function InventoryDetail({ inventory, i18n }) {
           value={
             <ChipGroup numChips={5}>
               {instanceGroups.map(ig => (
-                <Chip key={ig.id} isReadOnly>
-                  {ig.name}
-                </Chip>
+                <div css="padding-right: 5px" key={ig.id} isReadOnly>
+                  <Link to={`/instance_groups/${ig.id}/details`}>
+                    <Label>{ig.name}</Label>
+                  </Link>
+                </div>
               ))}
             </ChipGroup>
           }

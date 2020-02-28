@@ -9,6 +9,7 @@ import {
   TextListItem,
   TextListItemVariants,
   TextListVariants,
+  Label,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
@@ -17,7 +18,6 @@ import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import CredentialChip from '@components/CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
@@ -143,13 +143,13 @@ function JobTemplateDetail({ i18n, template }) {
     return ask_inventory_on_launch ? (
       <Fragment>
         <Link to={`/inventories/${inventorykind}/${id}/details`}>
-          {summary_fields.inventory.name}
+          <Label>{summary_fields.inventory.name}</Label>
         </Link>
         <span> {i18n._(t`(Prompt on Launch)`)}</span>
       </Fragment>
     ) : (
       <Link to={`/inventories/${inventorykind}/${id}/details`}>
-        {summary_fields.inventory.name}
+        <Label>{summary_fields.inventory.name}</Label>{' '}
       </Link>
     );
   };
@@ -185,7 +185,7 @@ function JobTemplateDetail({ i18n, template }) {
             label={i18n._(t`Project`)}
             value={
               <Link to={`/projects/${summary_fields.project.id}/details`}>
-                {summary_fields.project.name}
+                <Label>{summary_fields.project.name}</Label>
               </Link>
             }
           />
@@ -238,7 +238,13 @@ function JobTemplateDetail({ i18n, template }) {
             value={
               <ChipGroup numChips={5}>
                 {summary_fields.credentials.map(c => (
-                  <CredentialChip key={c.id} credential={c} isReadOnly />
+                  <div css="padding-right: 5px;" key={c.id}>
+                    <Link to={`/credentials/${c.id}/details`}>
+                      <Label>
+                        <span>{c.kind}</span>: {c.name}
+                      </Label>
+                    </Link>
+                  </div>
                 ))}
               </ChipGroup>
             }
@@ -266,9 +272,11 @@ function JobTemplateDetail({ i18n, template }) {
             value={
               <ChipGroup numChips={5}>
                 {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>
-                    {ig.name}
-                  </Chip>
+                  <div key={ig.id}>
+                    <Link to={`/instance_groups/${ig.id}/details`}>
+                      <Label>{ig.name}</Label>
+                    </Link>
+                  </div>
                 ))}
               </ChipGroup>
             }

@@ -73,11 +73,11 @@ describe('<JobTemplateDetail />', () => {
   });
 
   test('should render credential chips', () => {
-    const chips = wrapper.find('CredentialChip');
+    const chips = wrapper.find('Detail[label="Credentials"]').find('Link');
     expect(chips).toHaveLength(2);
     chips.forEach((chip, id) => {
-      expect(chip.prop('credential')).toEqual(
-        mockTemplate.summary_fields.credentials[id]
+      expect(chip.prop('to')).toEqual(
+        `/credentials/${mockTemplate.summary_fields.credentials[id].id}/details`
       );
     });
   });

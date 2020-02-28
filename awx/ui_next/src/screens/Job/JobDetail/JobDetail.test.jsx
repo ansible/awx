@@ -46,14 +46,13 @@ describe('<JobDetail />', () => {
       mockJobData.summary_fields.instance_group.name
     );
     assertDetail('Job Slice', '0/1');
-    assertDetail('Credentials', 'SSH: Demo Credential');
+    assertDetail('Credentials', 'ssh: Demo Credential');
   });
 
   test('should display credentials', () => {
-    const credentialChip = wrapper.find('CredentialChip');
-
-    expect(credentialChip.prop('credential')).toEqual(
-      mockJobData.summary_fields.credentials[0]
+    const credentialChip = wrapper.find('ChipGroup').find('Link');
+    expect(credentialChip.prop('to')).toEqual(
+      `/credentials/${mockJobData.summary_fields.credentials[0].id}/details`
     );
   });
 

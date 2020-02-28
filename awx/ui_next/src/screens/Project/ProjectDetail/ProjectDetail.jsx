@@ -5,14 +5,13 @@ import { t } from '@lingui/macro';
 import { Project } from '@types';
 import { Config } from '@contexts/Config';
 
-import { Button, List, ListItem } from '@patternfly/react-core';
+import { Button, List, ListItem, Label } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentLoading from '@components/ContentLoading';
 import DeleteButton from '@components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import ErrorDetail from '@components/ErrorDetail';
-import CredentialChip from '@components/CredentialChip';
 import { ProjectsAPI } from '@api';
 import { toTitleCase } from '@util/strings';
 
@@ -94,7 +93,7 @@ function ProjectDetail({ project, i18n }) {
               <Link
                 to={`/organizations/${summary_fields.organization.id}/details`}
               >
-                {summary_fields.organization.name}
+                <Label>{summary_fields.organization.name}</Label>
               </Link>
             }
           />
@@ -112,11 +111,15 @@ function ProjectDetail({ project, i18n }) {
           <Detail
             label={i18n._(t`SCM Credential`)}
             value={
-              <CredentialChip
+              <Link
                 key={summary_fields.credential.id}
-                credential={summary_fields.credential}
-                isReadOnly
-              />
+                to={`/credentials/${summary_fields.credential.id}/details`}
+              >
+                <Label>
+                  <span>{summary_fields.credential.kind}: </span>
+                  {summary_fields.credential.name}
+                </Label>
+              </Link>
             }
           />
         )}

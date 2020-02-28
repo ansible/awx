@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 
-import { Button, List, ListItem } from '@patternfly/react-core';
+import { Button, List, ListItem, Label } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
@@ -78,7 +78,11 @@ function CredentialDetail({ i18n, credential }) {
         <Detail
           key={id}
           label={i18n._(t`Options`)}
-          value={<List>{inputs[id] && <ListItem>{label}</ListItem>}</List>}
+          value={
+            inputs[id] ? (
+              <List>{inputs[id] && <ListItem>{label}</ListItem>}</List>
+            ) : null
+          }
         />
       );
     } else if (inputs[id] === '$encrypted$') {
@@ -116,7 +120,7 @@ function CredentialDetail({ i18n, credential }) {
             label={i18n._(t`Organization`)}
             value={
               <Link to={`/organizations/${organization.id}/details`}>
-                {organization.name}
+                <Label>{organization.name}</Label>
               </Link>
             }
           />
@@ -128,7 +132,7 @@ function CredentialDetail({ i18n, credential }) {
               credential_type.name
             ) : (
               <Link to={`/credential_types/${credential_type.id}/details`}>
-                {credential_type.name}
+                <Label>{credential_type.name}</Label>
               </Link>
             )
           }
