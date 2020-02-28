@@ -76,6 +76,7 @@ class Login(CustomCommand):
 
     def handle(self, client, parser):
         auth = parser.add_argument_group('OAuth2.0 Options')
+        auth.add_argument('--description', help='description of the generated OAuth2.0 token', metavar='TEXT')
         auth.add_argument('--conf.client_id', metavar='TEXT')
         auth.add_argument('--conf.client_secret', metavar='TEXT')
         auth.add_argument(
@@ -90,6 +91,8 @@ class Login(CustomCommand):
             'client_secret': getattr(parsed, 'conf.client_secret', None),
             'scope': getattr(parsed, 'conf.scope', None),
         }
+        if getattr(parsed, 'description', None):
+            kwargs['description'] = parsed.description
         try:
             token = api.Api().get_oauth2_token(**kwargs)
         except Exception as e:
