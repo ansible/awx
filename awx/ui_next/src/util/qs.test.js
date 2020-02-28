@@ -310,6 +310,21 @@ describe('qs (qs.js)', () => {
         page_size: 15,
       });
     });
+
+    test('should parse empty string values', () => {
+      const config = {
+        namespace: 'bee',
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const query = '?bee.baz=bar&bee.or__source=';
+      expect(parseQueryString(config, query)).toEqual({
+        baz: 'bar',
+        page: 1,
+        page_size: 15,
+        or__source: '',
+      });
+    });
   });
 
   describe('removeParams', () => {
@@ -528,6 +543,21 @@ describe('qs (qs.js)', () => {
       const toRemove = { baz: 'bust', pat: 'pal' };
       expect(removeParams(config, oldParams, toRemove)).toEqual({
         baz: ['bar', 'bang'],
+        page: 3,
+        page_size: 15,
+      });
+    });
+
+    test('should retain empty string', () => {
+      const config = {
+        namespace: null,
+        defaultParams: { page: 1, page_size: 15 },
+        integerFields: ['page', 'page_size'],
+      };
+      const oldParams = { baz: '', page: 3, bag: 'boom', page_size: 15 };
+      const toRemove = { bag: 'boom' };
+      expect(removeParams(config, oldParams, toRemove)).toEqual({
+        baz: '',
         page: 3,
         page_size: 15,
       });

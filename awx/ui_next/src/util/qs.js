@@ -159,7 +159,7 @@ export function removeParams(config, oldParams, paramsToRemove) {
   };
   Object.keys(oldParams).forEach(key => {
     const value = removeParam(oldParams[key], paramsToRemove[key]);
-    if (value) {
+    if (value !== null) {
       updated[key] = value;
     }
   });
@@ -205,7 +205,7 @@ export function mergeParams(oldParams, newParams) {
 }
 
 function mergeParam(oldVal, newVal) {
-  if (!newVal) {
+  if (!newVal && newVal !== '') {
     return oldVal;
   }
   if (!oldVal) {
