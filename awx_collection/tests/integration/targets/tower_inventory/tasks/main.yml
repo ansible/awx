@@ -1,0 +1,78 @@
+- name: Clean up any pre-existing test Inventory
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    state: absent
+  ignore_errors: True
+
+
+- name: Create an Inventory
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Test Inventory module idempotency
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Fail Change Regular to Smart
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    kind: smart
+  register: result
+  ignore_errors: True
+
+- assert:
+    that:
+      - "result is failed"
+
+- name: Delete an Inventory
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Non-Existent Inventory
+  tower_inventory:
+    name: my-inventory
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Check module fails with correct msg
+  tower_inventory:
+    name: test-inventory
+    description: Inventory Description
+    organization: test-non-existing-org
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is not changed"
+      - "result.msg =='Failed to update inventory, organization not found: The requested object could not be found.'
+        or result.msg =='The organizations test-non-existing-org was not found on the Tower server'"

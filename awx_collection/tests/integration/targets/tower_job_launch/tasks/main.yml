@@ -1,0 +1,101 @@
+- name: Launch a Job Template
+  tower_job_launch:
+    job_template: "Demo Job Template"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'pending'"
+
+- name: Wait for a job template to complete
+  tower_job_wait:
+    job_id: "{{ result.id }}"
+    max_interval: 10
+    timeout: 120
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+      - "result.status == 'successful'"
+
+- name: Check module fails with correct msg
+  tower_job_launch:
+     job_template: "Non Existing Job Template"
+     inventory: "Test Inventory"
+     credential: "Test Credential"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result.msg =='Unable to launch job, job_template/Non Existing Job Template was not found: The requested object could not be found.'
+        or result.msg == 'The inventories Test Inventory was not found on the Tower server'"
+
+- name: Create a Job Template for testing prompt on launch
+  tower_job_template:
+    name: "Demo Job Template - ask inventory and credential"
+    project: Demo Project
+    playbook: hello_world.yml
+    job_type: run
+    ask_credential: yes
+    ask_inventory: yes
+    state: present
+  register: result
+
+- name: Launch job template with inventory and credential for prompt on launch
+  tower_job_launch:
+    job_template: "Demo Job Template - ask inventory and credential"
+    inventory: "Demo Inventory"
+    credential: "Demo Credential"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'pending'"
+
+- name: Create a project for testing extra_vars
+  tower_project:
+    name: test-playbooks
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/ansible/test-playbooks
+
+- name: Create a Job Template for testing extra_vars
+  tower_job_template:
+    name: "Demo Job Template - extra_vars"
+    project: test-playbooks
+    playbook: debug.yml
+    job_type: run
+    state: present
+    inventory: "Demo Inventory"
+    extra_vars:
+      foo: bar
+  register: result
+
+- name: Launch job template with inventory and credential for prompt on launch
+  tower_job_launch:
+    job_template: "Demo Job Template - extra_vars"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Get the job
+  tower_job_list:
+    query: {"id": "{{result.id}}" }
+  register: result
+
+- assert:
+    that:
+      - '{"foo": "bar"} | to_json in result.results[0].extra_vars'
+
+- name: Delete the job
+  tower_project:
+    name: "Demo Job Template - extra_vars"
+    organization: Default
+    state: absent
+  ignore_errors: True
