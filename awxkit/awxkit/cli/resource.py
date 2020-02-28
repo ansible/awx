@@ -329,7 +329,10 @@ class Export(CustomCommand):
                 related[k] = [get_natural_key(x) for x in data.results]
 
         related_fields = {'related': related} if related else {}
-        return dict(**fields, **fk_fields, **related_fields)
+
+        fields.update(fk_fields)
+        fields.update(related_fields)
+        return fields
 
     def handle(self, client, parser):
         self.extend_parser(parser)
