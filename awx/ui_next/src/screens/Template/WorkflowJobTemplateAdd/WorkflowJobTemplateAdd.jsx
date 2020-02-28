@@ -17,33 +17,28 @@ function WorkflowJobTemplateAdd() {
       const {
         data: { id },
       } = await WorkflowJobTemplatesAPI.create(remainingValues);
-      await Promise.all([submitLabels(id, labels, organizationId, values)]);
+      await submitLabels(id, labels, organizationId);
       history.push(`/templates/workflow_job_template/${id}/details`);
     } catch (err) {
       setFormSubmitError(err);
     }
   };
 
-  const submitLabels = async (
-    templateId,
-    labels = [],
-    organizationId,
-    values
-  ) => {
-    if (!organizationId && !values.organization) {
+  const submitLabels = async (templateId, labels = [], organizationId) => {
+    if (!organizationId) {
       try {
         const {
           data: { results },
         } = await OrganizationsAPI.read();
         organizationId = results[0].id;
       } catch (err) {
-        setFormSubmitError(err);
+        throw err;
       }
     }
     const associatePromises = labels.map(label =>
       WorkflowJobTemplatesAPI.associateLabel(templateId, label, organizationId)
     );
-    return Promise.all([...associatePromises]);
+    return [...associatePromises];
   };
 
   const handleCancel = () => {

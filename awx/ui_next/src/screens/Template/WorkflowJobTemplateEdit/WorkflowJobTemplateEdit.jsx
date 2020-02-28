@@ -13,46 +13,38 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
   const handleSubmit = async values => {
     const { labels, ...remainingValues } = values;
     try {
+      await submitLabels(labels, values.organization, template.organization);
       await WorkflowJobTemplatesAPI.update(template.id, remainingValues);
-      await Promise.all([submitLabels(labels, values.organization)]);
       history.push(`/templates/workflow_job_template/${template.id}/details`);
     } catch (err) {
       setFormSubmitError(err);
     }
   };
 
-  const submitLabels = async (labels = [], orgId) => {
+  const submitLabels = async (labels = [], formOrgId, templateOrgId) => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.labels.results,
       labels
     );
-    if (!orgId && !template.organization) {
+    let orgId = formOrgId || templateOrgId;
+    if (!orgId) {
       try {
         const {
           data: { results },
         } = await OrganizationsAPI.read();
         orgId = results[0].id;
       } catch (err) {
-        setFormSubmitError(err);
+        throw err;
       }
     }
 
-    const disassociationPromises = removed.map(label =>
+    const disassociationPromises = await removed.map(label =>
       WorkflowJobTemplatesAPI.disassociateLabel(template.id, label)
     );
-
-    const associationPromises = added.map(label => {
-      return WorkflowJobTemplatesAPI.associateLabel(
-        template.id,
-        label,
-        orgId || template.organization
-      );
-    });
-
-    const results = await Promise.all([
-      ...disassociationPromises,
-      ...associationPromises,
-    ]);
+    const associationPromises = await added.map(label =>
+      WorkflowJobTemplatesAPI.associateLabel(template.id, label, orgId)
+    );
+    const results = [...disassociationPromises, ...associationPromises];
     return results;
   };
 

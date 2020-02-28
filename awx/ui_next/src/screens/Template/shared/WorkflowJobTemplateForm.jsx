@@ -97,11 +97,14 @@ function WorkflowJobTemplateForm({
     result: credTypeId,
   } = useRequest(
     useCallback(async () => {
-      const results = await CredentialTypesAPI.read({
-        namespace: `${webhookService}_token`,
-      });
-      // TODO: Consider how to handle the situation where the results returns
-      // and empty array, or any of the other values is undefined or null (data, results, id)
+      let results;
+      if (webhookService) {
+        results = await CredentialTypesAPI.read({
+          namespace: `${webhookService}_token`,
+        });
+        // TODO: Consider how to handle the situation where the results returns
+        // and empty array, or any of the other values is undefined or null (data, results, id)
+      }
       return results?.data?.results[0]?.id;
     }, [webhookService])
   );
@@ -109,10 +112,10 @@ function WorkflowJobTemplateForm({
   useEffect(() => {
     loadCredentialType();
   }, [loadCredentialType]);
-  // TODO: Convert this function below to useRequest. Create a new webhookkey component
-  // that handles all of that api calls.  Will also need to move this api call out of
-  // WorkflowJobTemplate.jsx and add it to workflowJobTemplateDetai.jsx
-  let initialWebhookKey = webhook_key;
+
+  // TODO: Convert this function below to useRequest. Might want to create a new
+  // webhookkey component that handles all of that api calls.  Will also need
+  // to move this api call out of WorkflowJobTemplate.jsx and add it to workflowJobTemplateDetai.jsx
   const changeWebhookKey = async () => {
     try {
       const {
@@ -124,7 +127,9 @@ function WorkflowJobTemplateForm({
     }
   };
 
+  let initialWebhookKey = webhook_key;
   const initialWebhookCredential = template?.summary_fields?.webhook_credential;
+
   const storeWebhookValues = (form, webhookServiceValue) => {
     if (
       webhookServiceValue === form.initialValues.webhook_service ||
@@ -135,12 +140,17 @@ function WorkflowJobTemplateForm({
         form.initialValues.webhook_credential
       );
       setWebhookCredential(initialWebhookCredential);
+
       form.setFieldValue('webhook_url', form.initialValues.webhook_url);
+
       form.setFieldValue('webhook_service', form.initialValues.webhook_service);
+      setWebHookService(form.initialValues.webhook_service);
+
       setWebHookKey(initialWebhookKey);
     } else {
       form.setFieldValue('webhook_credential', null);
       setWebhookCredential(null);
+
       form.setFieldValue(
         'webhook_url',
         `${urlOrigin}/api/v2/workflow_job_templates/${template.id}/${webhookServiceValue}/`
@@ -232,36 +242,37 @@ function WorkflowJobTemplateForm({
               {({ form }) => (
                 <OrganizationLookup
                   helperTextInvalid={form.errors.organization}
-                  onBlur={() => form.setFieldTouched('organization')}
                   onChange={value => {
                     form.setFieldValue('organization', value?.id || null);
                     setOrganization(value);
                   }}
                   value={organization}
-                  isValid={
-                    !(form.touched.organization || form.errors.organization)
-                  }
-                  touched={form.touched.organization}
-                  error={form.errors.organization}
+                  isValid={!form.errors.organization}
                 />
               )}
             </Field>
             <Field name="inventory">
               {({ form }) => (
-                <InventoryLookup
-                  value={inventory}
-                  tooltip={i18n._(
-                    t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
-                  )}
-                  isValid={!(form.touched.inventory || form.errors.inventory)}
-                  helperTextInvalid={form.errors.inventory}
-                  onChange={value => {
-                    form.setFieldValue('inventory', value?.id || null);
-                    setInventory(value);
-                    form.setFieldValue('organizationId', value?.organization);
-                  }}
-                  error={form.errors.inventory}
-                />
+                <FormGroup
+                  label={i18n._(t`Inventory`)}
+                  fieldId="wfjt-inventory"
+                >
+                  <FieldTooltip
+                    content={i18n._(
+                      t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
+                    )}
+                  />
+                  <InventoryLookup
+                    value={inventory}
+                    isValid={!form.errors.inventory}
+                    helperTextInvalid={form.errors.inventory}
+                    onChange={value => {
+                      form.setFieldValue('inventory', value?.id || null);
+                      setInventory(value);
+                      form.setFieldValue('organizationId', value?.organization);
+                    }}
+                  />
+                </FormGroup>
               )}
             </Field>
             <FormField
@@ -459,12 +470,7 @@ function WorkflowJobTemplateForm({
                         );
                         setWebhookCredential(value);
                       }}
-                      isValid={
-                        !(
-                          form.touched.webhook_credential ||
-                          form.errors.webhook_credential
-                        )
-                      }
+                      isValid={!form.errors.webhook_credential}
                       helperTextInvalid={form.errors.webhook_credential}
                       value={webhookCredential}
                     />
@@ -473,7 +479,7 @@ function WorkflowJobTemplateForm({
               )}
             </FormColumnLayout>
           )}
-          <FormSubmitError error={submitError} />
+          {submitError && <FormSubmitError error={submitError} />}
           <FormActionGroup
             onCancel={handleCancel}
             onSubmit={formik.handleSubmit}

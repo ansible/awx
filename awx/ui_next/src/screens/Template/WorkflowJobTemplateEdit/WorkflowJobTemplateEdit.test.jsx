@@ -1,12 +1,14 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI } from '@api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
-jest.mock('@api');
+jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('@api/models/Organizations');
+
 const mockTemplate = {
   id: 6,
   name: 'Foo',
@@ -53,6 +55,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
 
   afterEach(async () => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
 
   test('renders successfully', () => {
@@ -65,8 +68,8 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         id: 6,
         name: 'Alex',
         description: 'Apollo and Athena',
-        inventory: { id: 1, name: 'Inventory 1' },
-        organization: 2,
+        inventory: 1,
+        organization: 1,
         labels: [{ name: 'Label 2', id: 2 }, { name: 'Generated Label' }],
         scm_branch: 'master',
         limit: '5000',
@@ -78,8 +81,8 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       id: 6,
       name: 'Alex',
       description: 'Apollo and Athena',
-      inventory: { id: 1, name: 'Inventory 1' },
-      organization: 2,
+      inventory: 1,
+      organization: 1,
       scm_branch: 'master',
       limit: '5000',
       variables: '---',
@@ -94,9 +97,9 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     await expect(WorkflowJobTemplatesAPI.associateLabel).toBeCalledTimes(1);
   });
 
-  test('handleCancel navigates the user to the /templates', async () => {
-    await act(async () => {
-      await wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
+  test('handleCancel navigates the user to the /templates', () => {
+    act(() => {
+      wrapper.find('WorkflowJobTemplateForm').invoke('handleCancel')();
     });
     expect(history.location.pathname).toBe(
       '/templates/workflow_job_template/6/details'
@@ -105,25 +108,41 @@ describe('<WorkflowJobTemplateEdit/>', () => {
 
   test('throwing error renders FormSubmitError component', async () => {
     const error = new Error('oops');
-    WorkflowJobTemplatesAPI.update.mockImplementation(() =>
-      Promise.reject(error)
-    );
+    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+    WorkflowJobTemplatesAPI.update.mockRejectedValue(error);
     await act(async () => {
-      wrapper.find('WorkflowJobTemplateForm').prop('handleSubmit')({
-        id: 6,
-        name: 'Alex',
-        description: 'Apollo and Athena',
-        inventory: { id: 1, name: 'Inventory 1' },
-        organization: 2,
-        scm_branch: 'master',
-        limit: '5000',
-        variables: '---',
-      });
+      wrapper.find('Button[aria-label="Save"]').simulate('click');
     });
-    wrapper.update();
     expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalled();
+    wrapper.update();
     expect(wrapper.find('WorkflowJobTemplateForm').prop('submitError')).toEqual(
       error
+    );
+  });
+
+  test('throwing error prevents form submission', () => {
+    OrganizationsAPI.read.mockRejectedValue(new Error('An error occurred'));
+    WorkflowJobTemplatesAPI.update.mockResolvedValue();
+
+    act(() => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplateEdit template={mockTemplate} />,
+        {
+          context: {
+            router: {
+              history,
+            },
+          },
+        }
+      );
+    });
+    wrapper.find('Button[aria-label="Save"]').simulate('click');
+
+    expect(wrapper.find('WorkflowJobTemplateForm').length).toBe(1);
+    expect(OrganizationsAPI.read).toBeCalled();
+    expect(WorkflowJobTemplatesAPI.update).not.toBeCalled();
+    expect(history.location.pathname).toBe(
+      '/templates/workflow_job_template/6/edit'
     );
   });
 });
