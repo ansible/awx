@@ -1,7 +1,8 @@
+---
 - name: Test no parameters
   tower_send:
   register: result
-  ignore_errors: yes
+  ignore_errors: true
 
 - assert:
     that:

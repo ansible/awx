@@ -1,3 +1,4 @@
+---
 - name: Launch a Job Template
   tower_job_launch:
     job_template: "Demo Job Template"
@@ -19,9 +20,9 @@
 - name: Cancel an already canceled job (assert failure)
   tower_job_cancel:
     job_id: "{{ job.id }}"
-    fail_if_not_running: True
+    fail_if_not_running: true
   register: results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:

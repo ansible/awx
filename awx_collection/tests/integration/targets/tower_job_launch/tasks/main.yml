@@ -1,3 +1,4 @@
+---
 - name: Launch a Job Template
   tower_job_launch:
     job_template: "Demo Job Template"
@@ -22,9 +23,9 @@
 
 - name: Check module fails with correct msg
   tower_job_launch:
-     job_template: "Non Existing Job Template"
-     inventory: "Test Inventory"
-     credential: "Test Credential"
+    job_template: "Non Existing Job Template"
+    inventory: "Test Inventory"
+    credential: "Test Credential"
   register: result
   ignore_errors: true
 
@@ -39,8 +40,8 @@
     project: Demo Project
     playbook: hello_world.yml
     job_type: run
-    ask_credential: yes
-    ask_inventory: yes
+    ask_credential: true
+    ask_inventory: true
     state: present
   register: result
 
@@ -86,7 +87,7 @@
 
 - name: Get the job
   tower_job_list:
-    query: {"id": "{{result.id}}" }
+    query: {"id": "{{result.id}}"}
   register: result
 
 - assert:
@@ -98,4 +99,4 @@
     name: "Demo Job Template - extra_vars"
     organization: Default
     state: absent
-  ignore_errors: True
+  ignore_errors: true

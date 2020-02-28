@@ -1,6 +1,7 @@
+---
 - name: Export all Tower assets
   tower_receive:
-    all: True
+    all: true
   register: result
 
 - assert:

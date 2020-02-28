@@ -1,3 +1,4 @@
+---
 - name: Create a Label
   tower_label:
     name: important

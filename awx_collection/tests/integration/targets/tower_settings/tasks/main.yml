@@ -1,3 +1,4 @@
+---
 - name: Set the value of AWX_PROOT_SHOW_PATHS to a baseline
   tower_settings:
     name: AWX_PROOT_SHOW_PATHS
@@ -10,7 +11,7 @@
         'not': 'a valid'
         'tower': 'setting'
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -51,10 +52,9 @@
 
 - name: Apply multiple setting via settings with no change
   tower_settings:
-    name: AWX_PROOT_BASE_PATH
-    value: /tmp
-    name: AWX_PROOT_SHOW_PATHS
-    value: '["/var/lib/awx/projects/", "/var/tmp"]'
+    settings:
+      AWX_PROOT_BASE_PATH: /tmp
+      AWX_PROOT_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
   register: result
 
 - debug:
@@ -66,10 +66,9 @@
 
 - name: Apply multiple setting via settings with change
   tower_settings:
-    name: AWX_PROOT_BASE_PATH
-    value: /tmp
-    name: AWX_PROOT_SHOW_PATHS
-    value: '["/var/lib/awx/new_projects/", "/tmp"]'
+    settings:
+      AWX_PROOT_BASE_PATH: /tmp
+      AWX_PROOT_SHOW_PATHS: []
   register: result
 
 - assert:

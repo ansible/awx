@@ -4,7 +4,7 @@
     description: Credential type for Test
     name: test-credential-type
     kind: cloud
-    inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": True, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+    inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
     injectors: {"extra_vars": {"test": "foo"}}
   register: result
 

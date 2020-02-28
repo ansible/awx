@@ -1,10 +1,11 @@
+---
 - name: Attempt to add a Tower team to a non-existant Organization
   tower_team:
     name: Test Team
     organization: Missing Organization
     state: present
   register: result
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Assert a meaningful error was provided for the failed Tower team creation
   assert:

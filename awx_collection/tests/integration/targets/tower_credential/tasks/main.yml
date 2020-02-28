@@ -1,3 +1,4 @@
+---
 - name: create a tempdir for an SSH key
   local_action: shell mktemp -d
   register: tempdir
@@ -105,7 +106,7 @@
     kind: ssh
     username: joe
     ssh_key_data: "{{ ssh_key_data }}"
-  ignore_errors: yes
+  ignore_errors: true
   register: result
 
 - assert:
@@ -120,7 +121,7 @@
     state: present
     kind: ssh
     username: joe
-  ignore_errors: yes
+  ignore_errors: true
   register: result
 
 - assert:

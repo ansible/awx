@@ -1,3 +1,4 @@
+---
 - name: Launch a Job Template
   tower_job_launch:
     job_template: "Demo Job Template"
@@ -29,7 +30,7 @@
 
 - name: Get ALL result pages!
   tower_job_list:
-    all_pages: True
+    all_pages: true
   register: all_page_query
 
 - assert:

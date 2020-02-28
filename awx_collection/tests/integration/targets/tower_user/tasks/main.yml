@@ -1,3 +1,4 @@
+---
 - name: Create a User
   tower_user:
     first_name: Joe

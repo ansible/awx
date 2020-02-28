@@ -1,6 +1,7 @@
+---
 - name: Generate an org name
   set_fact:
-    org_name: "org-{{ lookup('randstr') }}"
+    org_name: "org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Make sure {{ org_name }} is not there
   tower_organization:
@@ -30,7 +31,7 @@
     name: "{{ org_name }}"
     custom_virtualenv: "/does/not/exit"
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -90,9 +91,9 @@
 - name: Check that SSL is available and verify_ssl is enabled (task must fail)
   tower_organization:
     name: Default
+    validate_certs: true
   environment:
     TOWER_CERTIFICATE: /dev/null  # force check failure
-    TOWER_VERIFY_SSL: True
   ignore_errors: true
   register: check_ssl_is_used
 
@@ -101,22 +102,9 @@
     that:
       - check_ssl_is_used is failed
 
-- name: Disable verify_ssl in ~/.tower_cli.cfg
-  copy:
-    dest: ~/.tower_cli.cfg
-    content: |
-      [general]
-      verify_ssl = False
-    force: false  # ensure remote file doesn't exist
-
-- block:
-  - name: Check that verify_ssl is disabled (task must not fail)
-    tower_organization:
-      name: Default
-    environment:
-      TOWER_CERTIFICATE: /dev/null  # should not fail because verify_ssl is disabled
-  always:
-    - name: Delete ~/.tower_cli.cfg
-      file:
-        path: ~/.tower_cli.cfg
-        state: absent
+- name: Check that verify_ssl is disabled (task must not fail)
+  tower_organization:
+    name: Default
+    validate_certs: false
+  environment:
+    TOWER_CERTIFICATE: /dev/null  # should not fail because verify_ssl is disabled

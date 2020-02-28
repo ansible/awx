@@ -1,8 +1,21 @@
+---
+- name: get tower host variable
+  shell: tower-cli config host | cut -d ' ' -f2
+  register: host
+
+- name: get tower username variable
+  shell: tower-cli config username | cut -d ' ' -f2
+  register: username
+
+- name: get tower password variable
+  shell: tower-cli config password | cut -d ' ' -f2
+  register: password
+
 - name: Fetch project_base_dir
   uri:
-    url: "{{ lookup('env', 'TOWER_HOST') }}/api/v2/config/"
-    user: "{{ lookup('env', 'TOWER_USERNAME') }}"
-    password: "{{ lookup('env', 'TOWER_PASSWORD') }}"
+    url: "{{ host.stdout }}/api/v2/config/"
+    user: "{{ username.stdout }}"
+    password: "{{ password.stdout }}"
     validate_certs: false
     return_content: true
     force_basic_auth: true
@@ -38,8 +51,8 @@
       vars:
         project_base_dir: "{{ awx_config.json.project_base_dir }}"
       command: tower-cli ad_hoc launch --wait --inventory localhost
-        --credential dummy --module-name shell
-        --module-args "mkdir -p {{ project_base_dir }}/{{ project_dir_name }} || true"
+        --credential dummy --module-name command
+        --module-args "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
   always:
     - name: enable bubblewrap
       command: tower-cli setting modify AWX_PROOT_ENABLED true

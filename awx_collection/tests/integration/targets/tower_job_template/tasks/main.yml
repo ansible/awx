@@ -1,3 +1,4 @@
+---
 - name: Create an SCM Credential
   tower_credential:
     name: SCM Credential for JT
@@ -13,20 +14,6 @@
     scm_url: https://github.com/ansible/ansible-tower-samples.git
     scm_credential: SCM Credential for JT
   register: result
-
-- name: Wait for the project to be status=successful
-  uri:
-    url: "{{ lookup('ENV', 'TOWER_HOST') }}/api/v2/projects/{{ result.id }}/"
-    method: GET
-    user: "{{ lookup('ENV', 'TOWER_USERNAME') }}"
-    password: "{{ lookup('ENV', 'TOWER_PASSWORD') }}"
-    validate_certs: false
-    force_basic_auth: true
-    return_content: true
-  register: result
-  until: result.json.summary_fields.last_update is defined and result.json.summary_fields.last_update.status == "successful"
-  retries: 60
-  delay: 1
 
 - name: Create a Job Template
   tower_job_template:

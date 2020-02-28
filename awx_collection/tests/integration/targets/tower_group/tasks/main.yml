@@ -1,14 +1,4 @@
-- name: create a tempdir for hostvars
-  local_action: shell mktemp -d
-  register: tempdir
-
-- name: write a file w/ hostvars
-  local_action:
-    module: lineinfile
-    dest: "{{ tempdir.stdout }}/vars"
-    line: '{"foo": "bar"}'
-    create: true
-
+---
 - name: Generate an inventory name
   set_fact:
     inv_name: "inv-for-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
@@ -24,8 +14,8 @@
     name: Some Group
     inventory: "{{ inv_name }}"
     state: present
-    source: ec2
-    variables: "@{{ tempdir.stdout }}/vars"
+    variables:
+      foo: bar
   register: result
 
 - assert:
@@ -54,4 +44,5 @@
 
 - assert:
     that:
-      - "result.msg =='Failed to update the group, inventory not found: The requested object could not be found.'"
+      - "result.msg =='Failed to update the group, inventory not found: The requested object could not be found.' or
+        result.msg =='The inventories test-non-existing-inventory was not found on the Tower server'"

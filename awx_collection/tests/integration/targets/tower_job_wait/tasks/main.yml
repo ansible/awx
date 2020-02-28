@@ -1,3 +1,4 @@
+---
 - name: Launch a Job Template
   tower_job_launch:
     job_template: "Demo Job Template"
