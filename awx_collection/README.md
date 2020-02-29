@@ -37,7 +37,7 @@ To use this collection in AWX, you should create a custom virtual environment in
 to set the job template `extra_vars` to include `ansible_python_interpreter`
 to be the Python in that virtual environment.
 
-## Running Tests
+## Running Unit Tests
 
 Tests to verify compatibility with the most recent AWX code are
 in `awx_collection/test/awx`. These tests require that Python packages
@@ -69,6 +69,30 @@ pip install -e <path to your Ansible>
 pip install -e <path to your tower-cli>
 pip install -e .
 PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
+```
+
+## Running Integration tests Tests
+
+The integration tests require a virtualenv with `ansible` >= 2.9 and `tower_cli`.
+The collection must first be installed, which can be done using `make install_collection`.
+You also need a configuration file at `~/.tower_cli.cfg` or
+`/etc/tower/tower_cli.cfg` with the credentials for accessing tower. This can
+be populated using `tower-cli`:
+
+```
+tower-cli config host $HOST
+tower-cli config username $USERNAME
+tower-cli config password $PASSWORD
+# This tells the tower-cli not to veriffy the ssl certs in the tower, if your tower has good certs you should leave this to true
+tower-cli config verify_ssl false
+```
+
+Finally you can run the tests:
+
+```
+# ansible-test must be run from the directory in which the collection is installed
+cd ~/.ansible/collections/ansible_collections/awx/awx/
+ansible-test integration
 ```
 
 ## Building
