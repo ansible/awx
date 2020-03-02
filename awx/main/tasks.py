@@ -2856,8 +2856,13 @@ def _reconstruct_relationships(copy_mapping):
 @task(queue=get_local_queuename)
 def deep_copy_model_obj(
     model_module, model_name, obj_pk, new_obj_pk,
-    user_pk, sub_obj_list, permission_check_func=None
+    user_pk, uuid, permission_check_func=None
 ):
+    sub_obj_list = cache.get(uuid)
+    if sub_obj_list is None:
+        logger.error('Deep copy {} from {} to {} failed unexpectedly.'.format(model_name, obj_pk, new_obj_pk))
+        return
+
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
     from awx.main.signals import disable_activity_stream
