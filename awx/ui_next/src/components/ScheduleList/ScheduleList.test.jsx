@@ -22,8 +22,11 @@ describe('ScheduleList', () => {
   describe('read call successful', () => {
     beforeAll(async () => {
       SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      const loadSchedules = params => SchedulesAPI.read(params);
       await act(async () => {
-        wrapper = mountWithContexts(<ScheduleList />);
+        wrapper = mountWithContexts(
+          <ScheduleList loadSchedules={loadSchedules} />
+        );
       });
       wrapper.update();
     });

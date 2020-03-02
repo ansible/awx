@@ -28,6 +28,7 @@ class Template extends Component {
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadTemplateAndRoles = this.loadTemplateAndRoles.bind(this);
+    this.loadSchedules = this.loadSchedules.bind(this);
   }
 
   async componentDidMount() {
@@ -80,6 +81,11 @@ class Template extends Component {
     } finally {
       this.setState({ hasContentLoading: false });
     }
+  }
+
+  loadSchedules(params) {
+    const { template } = this.state;
+    return JobTemplatesAPI.readScheduleList(template.id, params);
   }
 
   render() {
@@ -221,9 +227,7 @@ class Template extends Component {
           {template && (
             <Route
               path="/templates/:templateType/:id/schedules"
-              render={() => (
-                <ScheduleList resource={template} apiModel={JobTemplatesAPI} />
-              )}
+              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
             />
           )}
           <Route

@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('schedule', {
   order_by: 'unified_job_template__polymorphic_ctype__model',
 });
 
-function ScheduleList({ i18n, apiModel, resource }) {
+function ScheduleList({ i18n, loadSchedules }) {
   const [selected, setSelected] = useState([]);
 
   const location = useLocation();
@@ -33,17 +33,12 @@ function ScheduleList({ i18n, apiModel, resource }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const response = apiModel
-        ? apiModel.readScheduleList(resource.id, params)
-        : SchedulesAPI.read(params);
+      const response = loadSchedules(params);
       const {
         data: { count, results },
       } = await response;
-      return {
-        itemCount: count,
-        schedules: results,
-      };
-    }, [location, apiModel, resource]),
+      return { itemCount: count, schedules: results };
+    }, [location, loadSchedules]),
     {
       schedules: [],
       itemCount: 0,

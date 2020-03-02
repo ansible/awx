@@ -30,6 +30,7 @@ class Project extends Component {
     };
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
+    this.loadSchedules = this.loadSchedules.bind(this);
   }
 
   async componentDidMount() {
@@ -101,6 +102,11 @@ class Project extends Component {
     } finally {
       this.setState({ hasContentLoading: false });
     }
+  }
+
+  loadSchedules(params) {
+    const { project } = this.state;
+    return ProjectsAPI.readScheduleList(project.id, params);
   }
 
   render() {
@@ -235,7 +241,7 @@ class Project extends Component {
               <Route
                 path="/projects/:id/schedules"
                 render={() => (
-                  <ScheduleList resource={project} apiModel={ProjectsAPI} />
+                  <ScheduleList loadSchedules={this.loadSchedules} />
                 )}
               />
             )}

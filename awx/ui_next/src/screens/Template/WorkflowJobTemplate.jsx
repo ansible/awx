@@ -25,6 +25,7 @@ class WorkflowJobTemplate extends Component {
       template: null,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
+    this.loadSchedules = this.loadSchedules.bind(this);
   }
 
   async componentDidMount() {
@@ -69,6 +70,11 @@ class WorkflowJobTemplate extends Component {
     } finally {
       this.setState({ hasContentLoading: false });
     }
+  }
+
+  loadSchedules(params) {
+    const { template } = this.state;
+    return WorkflowJobTemplatesAPI.readScheduleList(template.id, params);
   }
 
   render() {
@@ -173,12 +179,7 @@ class WorkflowJobTemplate extends Component {
           {template && (
             <Route
               path="/templates/:templateType/:id/schedules"
-              render={() => (
-                <ScheduleList
-                  resource={template}
-                  apiModel={WorkflowJobTemplatesAPI}
-                />
-              )}
+              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
             />
           )}
           <Route

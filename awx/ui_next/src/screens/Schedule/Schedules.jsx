@@ -5,8 +5,13 @@ import { t } from '@lingui/macro';
 
 import Breadcrumbs from '@components/Breadcrumbs';
 import ScheduleList from '@components/ScheduleList';
+import { SchedulesAPI } from '@api';
 
 function Schedules({ i18n }) {
+  const loadSchedules = params => {
+    return SchedulesAPI.read(params);
+  };
+
   return (
     <>
       <Breadcrumbs
@@ -16,7 +21,7 @@ function Schedules({ i18n }) {
       />
       <Switch>
         <Route path="/schedules">
-          <ScheduleList />
+          <ScheduleList loadSchedules={loadSchedules} />
         </Route>
       </Switch>
     </>
