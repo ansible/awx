@@ -58,7 +58,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
       )}
       {template.webhook_service && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`- Webhooks`)}
+          {i18n._(t`- Enable Webhook`)}
         </TextListItem>
       )}
     </TextList>

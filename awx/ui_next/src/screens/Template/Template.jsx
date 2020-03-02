@@ -221,36 +221,34 @@ class Template extends Component {
                 <JobList defaultParams={{ job__job_template: template.id }} />
               </Route>
             )}
-          {template?.id && (
-            <Route path="/templates/:templateType/:id/completed_jobs">
-              <JobList defaultParams={{ job__job_template: template.id }} />
-            </Route>
-          )}
-          {template && (
+            {template && (
+              <Route
+                path="/templates/:templateType/:id/schedules"
+                render={() => (
+                  <ScheduleList loadSchedules={this.loadSchedules} />
+                )}
+              />
+            )}
             <Route
-              path="/templates/:templateType/:id/schedules"
-              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link
+                        to={`/templates/${match.params.templateType}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Template Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
             />
-          )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/${match.params.templateType}/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
-        </Switch>
-      </Card>
+          </Switch>
+        </Card>
+      </PageSection>
     );
   }
 }

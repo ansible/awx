@@ -48,7 +48,7 @@ class WorkflowJobTemplates extends Base {
 
   readScheduleList(id, params) {
     return this.http.get(`${this.baseUrl}${id}/schedules/`, {
-      params
+      params,
     });
   }
 }

@@ -13,7 +13,9 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
   const handleSubmit = async values => {
     const { labels, ...remainingValues } = values;
     try {
-      await submitLabels(labels, values.organization, template.organization);
+      await Promise.all(
+        await submitLabels(labels, values.organization, template.organization)
+      );
       await WorkflowJobTemplatesAPI.update(template.id, remainingValues);
       history.push(`/templates/workflow_job_template/${template.id}/details`);
     } catch (err) {

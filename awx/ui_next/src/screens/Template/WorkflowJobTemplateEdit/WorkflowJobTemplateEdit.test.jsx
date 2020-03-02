@@ -1,13 +1,15 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI, LabelsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
 jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('@api/models/Labels');
 jest.mock('@api/models/Organizations');
+jest.mock('@api/models/Inventories');
 
 const mockTemplate = {
   id: 6,
@@ -27,8 +29,14 @@ const mockTemplate = {
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
   let history;
-
   beforeEach(async () => {
+    LabelsAPI.read.mockResolvedValue({
+      data: {
+        results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+      },
+    });
+    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+
     await act(async () => {
       history = createMemoryHistory({
         initialEntries: ['/templates/workflow_job_template/6/edit'],
@@ -93,7 +101,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       id: 1,
     });
     wrapper.update();
-
     await expect(WorkflowJobTemplatesAPI.associateLabel).toBeCalledTimes(1);
   });
 
@@ -108,7 +115,6 @@ describe('<WorkflowJobTemplateEdit/>', () => {
 
   test('throwing error renders FormSubmitError component', async () => {
     const error = new Error('oops');
-    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
     WorkflowJobTemplatesAPI.update.mockRejectedValue(error);
     await act(async () => {
       wrapper.find('Button[aria-label="Save"]').simulate('click');
@@ -120,13 +126,26 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     );
   });
 
-  test('throwing error prevents form submission', () => {
-    OrganizationsAPI.read.mockRejectedValue(new Error('An error occurred'));
-    WorkflowJobTemplatesAPI.update.mockResolvedValue();
+  test('throwing error prevents form submission', async () => {
+    const templateWithoutOrg = {
+      id: 6,
+      name: 'Foo',
+      description: 'Foo description',
+      summary_fields: {
+        inventory: { id: 1, name: 'Inventory 1' },
+        labels: {
+          results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+        },
+      },
+      scm_branch: 'devel',
+      limit: '5000',
+      variables: '---',
+    };
 
-    act(() => {
-      wrapper = mountWithContexts(
-        <WorkflowJobTemplateEdit template={mockTemplate} />,
+    let newWrapper;
+    await act(async () => {
+      newWrapper = await mountWithContexts(
+        <WorkflowJobTemplateEdit template={templateWithoutOrg} />,
         {
           context: {
             router: {
@@ -136,9 +155,22 @@ describe('<WorkflowJobTemplateEdit/>', () => {
         }
       );
     });
-    wrapper.find('Button[aria-label="Save"]').simulate('click');
+    OrganizationsAPI.read.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'get',
+          },
+          data: 'An error occurred',
+        },
+      })
+    );
+    WorkflowJobTemplatesAPI.update.mockResolvedValue();
 
-    expect(wrapper.find('WorkflowJobTemplateForm').length).toBe(1);
+    await act(async () => {
+      await newWrapper.find('Button[aria-label="Save"]').simulate('click');
+    });
+    expect(newWrapper.find('WorkflowJobTemplateForm').length).toBe(1);
     expect(OrganizationsAPI.read).toBeCalled();
     expect(WorkflowJobTemplatesAPI.update).not.toBeCalled();
     expect(history.location.pathname).toBe(

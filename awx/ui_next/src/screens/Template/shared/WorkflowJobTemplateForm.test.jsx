@@ -6,13 +6,17 @@ import { sleep } from '@testUtils/testUtils';
 
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
-import { WorkflowJobTemplatesAPI } from '@api';
+import {
+  WorkflowJobTemplatesAPI,
+  LabelsAPI,
+  OrganizationsAPI,
+  InventoriesAPI,
+} from '@api';
 
 jest.mock('@api/models/WorkflowJobTemplates');
-
-WorkflowJobTemplatesAPI.updateWebhookKey.mockResolvedValue({
-  data: { webhook_key: 'sdafdghjkl2345678ionbvcxz' },
-});
+jest.mock('@api/models/Labels');
+jest.mock('@api/models/Organizations');
+jest.mock('@api/models/Inventories');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -38,12 +42,31 @@ describe('<WorkflowJobTemplateForm/>', () => {
     },
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    WorkflowJobTemplatesAPI.updateWebhookKey.mockResolvedValue({
+      data: { webhook_key: 'sdafdghjkl2345678ionbvcxz' },
+    });
+    LabelsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { name: 'Label 1', id: 1 },
+          { name: 'Label 2', id: 2 },
+          { name: 'Label 3', id: 3 },
+        ],
+      },
+    });
+    OrganizationsAPI.read.mockResolvedValue({
+      results: [{ id: 1 }, { id: 2 }],
+    });
+    InventoriesAPI.read.mockResolvedValue({
+      results: [{ id: 1, name: 'Foo' }, { id: 2, name: 'Bar' }],
+    });
+
     history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/6/edit'],
     });
-    act(() => {
-      wrapper = mountWithContexts(
+    await act(async () => {
+      wrapper = await mountWithContexts(
         <Route
           path="/templates/workflow_job_template/:id/edit"
           component={() => (
@@ -86,7 +109,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       'Field[name="organization"]',
       'Field[name="inventory"]',
       'FormField[name="limit"]',
-      'FormField[name="scmBranch"]',
+      'FormField[name="scm_branch"]',
       'Field[name="labels"]',
       'VariablesField',
     ];
@@ -108,8 +131,8 @@ describe('<WorkflowJobTemplateForm/>', () => {
       },
       { element: 'wfjt-limit', value: { value: 1234567890, name: 'limit' } },
       {
-        element: 'wfjt-scmBranch',
-        value: { value: 'new branch', name: 'scmBranch' },
+        element: 'wfjt-scm_branch',
+        value: { value: 'new branch', name: 'scm_branch' },
       },
     ];
     const changeInputs = async ({ element, value }) => {
@@ -122,7 +145,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       inputsToChange.map(input => changeInputs(input));
 
       wrapper.find('LabelSelect').invoke('onChange')([
-        { name: 'new label', id: 5 },
+        { name: 'Label 3', id: 3 },
         { name: 'Label 1', id: 1 },
         { name: 'Label 2', id: 2 },
       ]);
@@ -148,13 +171,16 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      wrapper.find('Checkbox[aria-label="Webhooks"]').invoke('onChange')(true, {
-        currentTarget: { value: true, type: 'change', checked: true },
-      });
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
+        true,
+        {
+          currentTarget: { value: true, type: 'change', checked: true },
+        }
+      );
     });
     wrapper.update();
     expect(
-      wrapper.find('Checkbox[aria-label="Webhooks"]').prop('isChecked')
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
 
     expect(
@@ -171,7 +197,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     );
     expect(WorkflowJobTemplatesAPI.updateWebhookKey).toBeCalledWith('6');
     expect(
-      wrapper.find('TextInputBase[name="webhook_url"]').prop('value')
+      wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
     ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
 
     wrapper.update();

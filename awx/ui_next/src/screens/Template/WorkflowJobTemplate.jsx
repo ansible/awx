@@ -195,16 +195,6 @@ class WorkflowJobTemplate extends Component {
                 />
               </Route>
             )}
-
-            {template?.id && (
-              <Route path="/templates/workflow_job_template/:id/completed_jobs">
-                <JobList
-                  defaultParams={{
-                    workflow_job__workflow_job_template: template.id,
-                  }}
-                />
-              </Route>
-            )}
             {template.id && (
               <Route
                 path="/templates/:templateType/:id/schedules"

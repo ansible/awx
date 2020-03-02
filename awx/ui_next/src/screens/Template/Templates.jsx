@@ -21,7 +21,7 @@ class Templates extends Component {
         '/templates': i18n._(t`Templates`),
         '/templates/job_template/add': i18n._(t`Create New Job Template`),
         '/templates/workflow_job_template/add': i18n._(
-          t`Create New Workflow Job Template`
+          t`Create New Workflow Template`
         ),
       },
     };
@@ -35,6 +35,9 @@ class Templates extends Component {
     const breadcrumbConfig = {
       '/templates': i18n._(t`Templates`),
       '/templates/job_template/add': i18n._(t`Create New Job Template`),
+      '/templates/workflow_job_template/add': i18n._(
+        t`Create New Workflow Template`
+      ),
       [`/templates/${template.type}/${template.id}`]: `${template.name}`,
       [`/templates/${template.type}/${template.id}/details`]: i18n._(
         t`Details`

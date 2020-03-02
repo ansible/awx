@@ -1,43 +1,60 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI } from '@api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI, LabelsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
 
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
-jest.mock('@api');
+jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('@api/models/Organizations');
+jest.mock('@api/models/Labels');
+jest.mock('@api/models/Inventories');
 
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;
   let history;
   beforeEach(async () => {
     WorkflowJobTemplatesAPI.create.mockResolvedValue({ data: { id: 1 } });
+    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+    LabelsAPI.read.mockResolvedValue({
+      data: {
+        results: [
+          { name: 'Label 1', id: 1 },
+          { name: 'Label 2', id: 2 },
+          { name: 'Label 3', id: 3 },
+        ],
+      },
+    });
+
     await act(async () => {
       history = createMemoryHistory({
         initialEntries: ['/templates/workflow_job_template/add'],
       });
-      wrapper = mountWithContexts(
-        <Route
-          path="/templates/workflow_job_template/add"
-          component={() => <WorkflowJobTemplateAdd />}
-        />,
-        {
-          context: {
-            router: {
-              history,
-              route: {
-                location: history.location,
+      await act(async () => {
+        wrapper = await mountWithContexts(
+          <Route
+            path="/templates/workflow_job_template/add"
+            component={() => <WorkflowJobTemplateAdd />}
+          />,
+          {
+            context: {
+              router: {
+                history,
+                route: {
+                  location: history.location,
+                },
               },
             },
-          },
-        }
-      );
+          }
+        );
+      });
     });
   });
   afterEach(async () => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
 
   test('initially renders successfully', async () => {
@@ -67,28 +84,39 @@ describe('<WorkflowJobTemplateAdd/>', () => {
 
   test('throwing error renders FormSubmitError component', async () => {
     const error = new Error('oops');
-    WorkflowJobTemplatesAPI.create.mockImplementation(() =>
-      Promise.reject(error)
-    );
+    WorkflowJobTemplatesAPI.create.mockRejectedValue(error);
     await act(async () => {
-      await wrapper.find('WorkflowJobTemplateForm').prop('handleSubmit')({
-        id: 6,
-        name: 'Alex',
-        description: 'Apollo and Athena',
-        inventory: { id: 1, name: 'Inventory 1' },
-        organization: 2,
-        scm_branch: 'master',
-        limit: '5000',
-        variables: '---',
+      wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
+        name: 'Foo',
       });
     });
-    expect(wrapper.find('ContentError').length).toBe(0);
-    expect(wrapper.length).toBe(1);
+    expect(WorkflowJobTemplatesAPI.create).toHaveBeenCalled();
     wrapper.update();
-    expect(WorkflowJobTemplatesAPI.create).toBeCalled();
-    expect(wrapper.find('ContentError').length).toBe(1);
     expect(wrapper.find('WorkflowJobTemplateForm').prop('submitError')).toEqual(
       error
+    );
+  });
+
+  test('throwing error prevents navigation away from form', async () => {
+    OrganizationsAPI.read.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'get',
+          },
+          data: 'An error occurred',
+        },
+      })
+    );
+    WorkflowJobTemplatesAPI.update.mockResolvedValue();
+
+    await act(async () => {
+      await wrapper.find('Button[aria-label="Save"]').simulate('click');
+    });
+    expect(wrapper.find('WorkflowJobTemplateForm').length).toBe(1);
+    expect(OrganizationsAPI.read).toBeCalled();
+    expect(history.location.pathname).toBe(
+      '/templates/workflow_job_template/add'
     );
   });
 });

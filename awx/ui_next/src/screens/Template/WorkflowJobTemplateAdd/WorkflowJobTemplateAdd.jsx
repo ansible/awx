@@ -17,7 +17,7 @@ function WorkflowJobTemplateAdd() {
       const {
         data: { id },
       } = await WorkflowJobTemplatesAPI.create(remainingValues);
-      await submitLabels(id, labels, organizationId);
+      await Promise.all(await submitLabels(id, labels, organizationId));
       history.push(`/templates/workflow_job_template/${id}/details`);
     } catch (err) {
       setFormSubmitError(err);

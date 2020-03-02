@@ -100,6 +100,7 @@ function CredentialLookup({
               },
             ]}
             readOnly={!canDelete}
+            name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
           />

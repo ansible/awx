@@ -49,12 +49,15 @@ function WorkflowJobTemplateForm({
   submitError,
 }) {
   const urlOrigin = window.location.origin;
-
   const { id } = useParams();
   const wfjtAddMatch = useRouteMatch('/templates/workflow_job_template/add');
 
   const [hasContentError, setContentError] = useState(null);
-
+  const [webhook_url, setWebhookUrl] = useState(
+    template?.related?.webhook_receiver
+      ? `${urlOrigin}${template.related.webhook_receiver}`
+      : ''
+  );
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory || null
   );
@@ -141,8 +144,11 @@ function WorkflowJobTemplateForm({
       );
       setWebhookCredential(initialWebhookCredential);
 
-      form.setFieldValue('webhook_url', form.initialValues.webhook_url);
-
+      setWebhookUrl(
+        template?.related?.webhook_receiver
+          ? `${urlOrigin}${template.related.webhook_receiver}`
+          : ''
+      );
       form.setFieldValue('webhook_service', form.initialValues.webhook_service);
       setWebHookService(form.initialValues.webhook_service);
 
@@ -151,8 +157,7 @@ function WorkflowJobTemplateForm({
       form.setFieldValue('webhook_credential', null);
       setWebhookCredential(null);
 
-      form.setFieldValue(
-        'webhook_url',
+      setWebhookUrl(
         `${urlOrigin}/api/v2/workflow_job_templates/${template.id}/${webhookServiceValue}/`
       );
 
@@ -171,7 +176,7 @@ function WorkflowJobTemplateForm({
       initialWebhookKey = webhookKey;
       form.setFieldValue('webhook_credential', null);
       form.setFieldValue('webhook_service', '');
-      form.setFieldValue('webhook_url', '');
+      setWebhookUrl('');
       setWebHookService('');
       setWebHookKey('');
     } else {
@@ -203,11 +208,8 @@ function WorkflowJobTemplateForm({
         labels: template.summary_fields?.labels?.results || [],
         extra_vars: template.variables || '---',
         limit: template.limit || '',
-        scmBranch: template.scm_branch || '',
+        scm_branch: template.scm_branch || '',
         allow_simultaneous: template.allow_simultaneous || false,
-        webhook_url:
-          template?.related?.webhook_receiver &&
-          `${urlOrigin}${template?.related?.webhook_receiver}`,
         webhook_credential:
           template?.summary_fields?.webhook_credential?.id || null,
         webhook_service: template.webhook_service || '',
@@ -290,8 +292,8 @@ function WorkflowJobTemplateForm({
               tooltip={i18n._(
                 t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`
               )}
-              id="wfjt-scmBranch"
-              name="scmBranch"
+              id="wfjt-scm_branch"
+              name="scm_branch"
             />
           </FormColumnLayout>
           <FormFullWidthLayout>
@@ -333,17 +335,13 @@ function WorkflowJobTemplateForm({
             isInline
             label={i18n._(t`Options`)}
           >
-            <Field
-              id="wfjt-webhooks"
-              name="hasWebhooks"
-              label={i18n._(t`Webhooks`)}
-            >
+            <Field id="wfjt-webhooks" name="hasWebhooks">
               {({ form }) => (
                 <Checkbox
-                  aria-label={i18n._(t`Webhooks`)}
+                  aria-label={i18n._(t`Enable Webhook`)}
                   label={
                     <span>
-                      {i18n._(t`Webhooks`)}
+                      {i18n._(t`Enable Webhook`)}
                       &nbsp;
                       <FieldTooltip
                         content={i18n._(
@@ -408,16 +406,24 @@ function WorkflowJobTemplateForm({
               </Field>
               {!wfjtAddMatch && (
                 <>
-                  <FormField
+                  <FormGroup
                     type="text"
+                    fieldId="wfjt-webhookURL"
                     label={i18n._(t`Webhook URL`)}
                     id="wfjt-webhook-url"
                     name="webhook_url"
-                    tooltip={i18n._(
-                      t`Webhook services can launch jobs with this job template by making a POST request to this URL.`
-                    )}
-                    isReadOnly
-                  />
+                  >
+                    <FieldTooltip
+                      content={i18n._(
+                        t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
+                      )}
+                    />
+                    <TextInput
+                      aria-label={i18n._(t`Webhook URL`)}
+                      value={webhook_url}
+                      isReadOnly
+                    />
+                  </FormGroup>
                   <Field>
                     {({ form }) => (
                       <FormGroup
