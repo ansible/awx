@@ -3,6 +3,7 @@
 
 # Python
 from io import StringIO
+import datetime
 import codecs
 import json
 import logging
@@ -1219,7 +1220,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 else:
                     status_data['instance_group_name'] = None
             elif status in ['successful', 'failed', 'canceled']:
-                status_data['finished'] = self.finished
+                status_data['finished'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
             if getattr(self, 'unified_job_template_id', None):
