@@ -3,7 +3,7 @@ import { string, func, bool, number } from 'prop-types';
 import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import Toggle from '@components/Toggle';
+import MultiButtonToggle from '@components/MultiButtonToggle';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -42,12 +42,9 @@ function VariablesInput(props) {
           </label>
         </SplitItem>
         <SplitItemRight>
-          <Toggle
-            leftLabel="YAML"
-            leftMode={YAML_MODE}
-            rightLabel="JSON"
-            rightMode={JSON_MODE}
-            currentMode={mode}
+          <MultiButtonToggle
+            buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
+            currentValue={mode}
             onChange={newMode => {
               try {
                 if (mode === JSON_MODE) {
