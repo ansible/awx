@@ -113,10 +113,6 @@ class Template extends Component {
 
     tabsArray.push(
       {
-        name: i18n._(t`Schedules`),
-        link: '/home',
-      },
-      {
         name: i18n._(t`Completed Jobs`),
         link: `${match.url}/completed_jobs`,
       },

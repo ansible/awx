@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import Breadcrumbs from '@components/Breadcrumbs';
 import ScheduleList from '@components/ScheduleList';
 import { SchedulesAPI } from '@api';
+import { PageSection, Card } from '@patternfly/react-core';
 
 function Schedules({ i18n }) {
   const loadSchedules = params => {
@@ -21,7 +22,11 @@ function Schedules({ i18n }) {
       />
       <Switch>
         <Route path="/schedules">
-          <ScheduleList loadSchedules={loadSchedules} />
+          <PageSection>
+            <Card>
+              <ScheduleList loadSchedules={loadSchedules} />
+            </Card>
+          </PageSection>
         </Route>
       </Switch>
     </>
