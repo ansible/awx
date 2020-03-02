@@ -145,7 +145,7 @@ class Project extends Component {
       link: `${match.url}/job_templates`,
     });
 
-    if (project?.scm_type && project.scm_type !== '') {
+    if (project?.scm_type) {
       tabsArray.push({
         name: i18n._(t`Schedules`),
         link: `${match.url}/schedules`,
