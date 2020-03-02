@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { SchedulesAPI } from '@api';
 import ScheduleList from './ScheduleList';
-import mockSchedules from '../data.schedules.json';
+import mockSchedules from './data.schedules.json';
 
 jest.mock('@api/models/Schedules');
 
@@ -22,8 +22,11 @@ describe('ScheduleList', () => {
   describe('read call successful', () => {
     beforeAll(async () => {
       SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+      const loadSchedules = params => SchedulesAPI.read(params);
       await act(async () => {
-        wrapper = mountWithContexts(<ScheduleList />);
+        wrapper = mountWithContexts(
+          <ScheduleList loadSchedules={loadSchedules} />
+        );
       });
       wrapper.update();
     });

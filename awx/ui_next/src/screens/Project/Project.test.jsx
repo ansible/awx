@@ -68,6 +68,49 @@ describe('<Project />', () => {
     done();
   });
 
+  test('schedules tab shown for scm based projects.', async done => {
+    ProjectsAPI.readDetail.mockResolvedValue({ data: mockDetails });
+    OrganizationsAPI.read.mockResolvedValue({
+      count: 0,
+      next: null,
+      previous: null,
+      data: { results: [] },
+    });
+
+    const wrapper = mountWithContexts(
+      <Project setBreadcrumb={() => {}} me={mockMe} />
+    );
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 4
+    );
+    expect(tabs.at(3).text()).toEqual('Schedules');
+    done();
+  });
+
+  test('schedules tab hidden for manual projects.', async done => {
+    const manualDetails = Object.assign(mockDetails, { scm_type: '' });
+    ProjectsAPI.readDetail.mockResolvedValue({ data: manualDetails });
+    OrganizationsAPI.read.mockResolvedValue({
+      count: 0,
+      next: null,
+      previous: null,
+      data: { results: [] },
+    });
+
+    const wrapper = mountWithContexts(
+      <Project setBreadcrumb={() => {}} me={mockMe} />
+    );
+    const tabs = await waitForElement(
+      wrapper,
+      '.pf-c-tabs__item',
+      el => el.length === 3
+    );
+    tabs.forEach(tab => expect(tab.text()).not.toEqual('Schedules'));
+    done();
+  });
+
   test('should show content error when user attempts to navigate to erroneous route', async () => {
     const history = createMemoryHistory({
       initialEntries: ['/projects/1/foobar'],

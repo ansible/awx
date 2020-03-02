@@ -9,10 +9,10 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
+import ScheduleList from '@components/ScheduleList';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
-import ProjectSchedules from './ProjectSchedules';
 import { OrganizationsAPI, ProjectsAPI } from '@api';
 
 class Project extends Component {
@@ -30,6 +30,7 @@ class Project extends Component {
     };
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
+    this.loadSchedules = this.loadSchedules.bind(this);
   }
 
   async componentDidMount() {
@@ -103,6 +104,11 @@ class Project extends Component {
     }
   }
 
+  loadSchedules(params) {
+    const { project } = this.state;
+    return ProjectsAPI.readScheduleList(project.id, params);
+  }
+
   render() {
     const { location, match, me, i18n } = this.props;
 
@@ -134,16 +140,17 @@ class Project extends Component {
       });
     }
 
-    tabsArray.push(
-      {
-        name: i18n._(t`Job Templates`),
-        link: `${match.url}/job_templates`,
-      },
-      {
+    tabsArray.push({
+      name: i18n._(t`Job Templates`),
+      link: `${match.url}/job_templates`,
+    });
+
+    if (project?.scm_type) {
+      tabsArray.push({
         name: i18n._(t`Schedules`),
         link: `${match.url}/schedules`,
-      }
-    );
+      });
+    }
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -230,10 +237,14 @@ class Project extends Component {
                 <ProjectJobTemplatesList id={Number(match.params.id)} />
               )}
             />
-            <Route
-              path="/projects/:id/schedules"
-              render={() => <ProjectSchedules id={Number(match.params.id)} />}
-            />
+            {project?.scm_type && project.scm_type !== '' && (
+              <Route
+                path="/projects/:id/schedules"
+                render={() => (
+                  <ScheduleList loadSchedules={this.loadSchedules} />
+                )}
+              />
+            )}
             <Route
               key="not-found"
               path="*"

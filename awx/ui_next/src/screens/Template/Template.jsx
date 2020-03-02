@@ -10,6 +10,7 @@ import ContentError from '@components/ContentError';
 import JobList from '@components/JobList';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
+import ScheduleList from '@components/ScheduleList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
@@ -27,6 +28,7 @@ class Template extends Component {
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadTemplateAndRoles = this.loadTemplateAndRoles.bind(this);
+    this.loadSchedules = this.loadSchedules.bind(this);
   }
 
   async componentDidMount() {
@@ -81,6 +83,11 @@ class Template extends Component {
     }
   }
 
+  loadSchedules(params) {
+    const { template } = this.state;
+    return JobTemplatesAPI.readScheduleList(template.id, params);
+  }
+
   render() {
     const { i18n, location, match, me } = this.props;
     const {
@@ -106,10 +113,6 @@ class Template extends Component {
 
     tabsArray.push(
       {
-        name: i18n._(t`Schedules`),
-        link: '/home',
-      },
-      {
         name: i18n._(t`Completed Jobs`),
         link: `${match.url}/completed_jobs`,
       },
@@ -118,6 +121,13 @@ class Template extends Component {
         link: '/home',
       }
     );
+
+    if (template) {
+      tabsArray.push({
+        name: i18n._(t`Schedules`),
+        link: `${match.url}/schedules`,
+      });
+    }
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -209,6 +219,12 @@ class Template extends Component {
             <Route path="/templates/:templateType/:id/completed_jobs">
               <JobList defaultParams={{ job__job_template: template.id }} />
             </Route>
+          )}
+          {template && (
+            <Route
+              path="/templates/:templateType/:id/schedules"
+              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
+            />
           )}
           <Route
             key="not-found"

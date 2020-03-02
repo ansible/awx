@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { SchedulesAPI } from '@api';
-import { Card, PageSection } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import DataListToolbar from '@components/DataListToolbar';
@@ -12,7 +11,7 @@ import PaginatedDataList, {
 } from '@components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import { ScheduleListItem } from '.';
+import ScheduleListItem from './ScheduleListItem';
 
 const QS_CONFIG = getQSConfig('schedule', {
   page: 1,
@@ -20,7 +19,7 @@ const QS_CONFIG = getQSConfig('schedule', {
   order_by: 'unified_job_template__polymorphic_ctype__model',
 });
 
-function ScheduleList({ i18n }) {
+function ScheduleList({ i18n, loadSchedules }) {
   const [selected, setSelected] = useState([]);
 
   const location = useLocation();
@@ -33,14 +32,12 @@ function ScheduleList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
+      const response = loadSchedules(params);
       const {
         data: { count, results },
-      } = await SchedulesAPI.read(params);
-      return {
-        itemCount: count,
-        schedules: results,
-      };
-    }, [location]),
+      } = await response;
+      return { itemCount: count, schedules: results };
+    }, [location, loadSchedules]),
     {
       schedules: [],
       itemCount: 0,
@@ -88,63 +85,61 @@ function ScheduleList({ i18n }) {
   };
 
   return (
-    <PageSection>
-      <Card>
-        <PaginatedDataList
-          contentError={contentError}
-          hasContentLoading={isLoading || isDeleteLoading}
-          items={schedules}
-          itemCount={itemCount}
-          qsConfig={QS_CONFIG}
-          onRowClick={handleSelect}
-          renderItem={item => (
-            <ScheduleListItem
-              isSelected={selected.some(row => row.id === item.id)}
-              key={item.id}
-              onSelect={() => handleSelect(item)}
-              schedule={item}
-            />
-          )}
-          toolbarSearchColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-              isDefault: true,
-            },
-          ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-            {
-              name: i18n._(t`Next Run`),
-              key: 'next_run',
-            },
-            {
-              name: i18n._(t`Type`),
-              key: 'unified_job_template__polymorphic_ctype__model',
-            },
-          ]}
-          renderToolbar={props => (
-            <DataListToolbar
-              {...props}
-              showSelectAll
-              isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
-              qsConfig={QS_CONFIG}
-              additionalControls={[
-                <ToolbarDeleteButton
-                  key="delete"
-                  onDelete={handleDelete}
-                  itemsToDelete={selected}
-                  pluralizedItemName={i18n._(t`Schedules`)}
-                />,
-              ]}
-            />
-          )}
-        />
-      </Card>
+    <>
+      <PaginatedDataList
+        contentError={contentError}
+        hasContentLoading={isLoading || isDeleteLoading}
+        items={schedules}
+        itemCount={itemCount}
+        qsConfig={QS_CONFIG}
+        onRowClick={handleSelect}
+        renderItem={item => (
+          <ScheduleListItem
+            isSelected={selected.some(row => row.id === item.id)}
+            key={item.id}
+            onSelect={() => handleSelect(item)}
+            schedule={item}
+          />
+        )}
+        toolbarSearchColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+            isDefault: true,
+          },
+        ]}
+        toolbarSortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+          },
+          {
+            name: i18n._(t`Next Run`),
+            key: 'next_run',
+          },
+          {
+            name: i18n._(t`Type`),
+            key: 'unified_job_template__polymorphic_ctype__model',
+          },
+        ]}
+        renderToolbar={props => (
+          <DataListToolbar
+            {...props}
+            showSelectAll
+            isAllSelected={isAllSelected}
+            onSelectAll={handleSelectAll}
+            qsConfig={QS_CONFIG}
+            additionalControls={[
+              <ToolbarDeleteButton
+                key="delete"
+                onDelete={handleDelete}
+                itemsToDelete={selected}
+                pluralizedItemName={i18n._(t`Schedules`)}
+              />,
+            ]}
+          />
+        )}
+      />
       {deletionError && (
         <AlertModal
           isOpen={deletionError}
@@ -156,7 +151,7 @@ function ScheduleList({ i18n }) {
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
-    </PageSection>
+    </>
   );
 }
 
