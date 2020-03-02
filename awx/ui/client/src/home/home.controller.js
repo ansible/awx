@@ -108,7 +108,7 @@ export default ['$scope','Wait', '$timeout', 'i18n',
         };
 
         $scope.$on('ws-jobs', function (e, msg) {
-            if (msg.status === 'successful' || msg.status === 'failed' || msg.status === 'canceled') {
+            if (msg.status === 'successful' || msg.status === 'failed' || msg.status === 'canceled' || msg.status === 'error') {
                 newJobs.push(msg.unified_job_id);
                 if (!newJobsTimerRunning) {
                     fetchNewJobs();
