@@ -35,6 +35,10 @@ class Inventories extends InstanceGroupsMixin(Base) {
     return this.http.options(`${this.baseUrl}${id}/groups/`);
   }
 
+  readHostsOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/hosts/`);
+  }
+
   promoteGroup(inventoryId, groupId) {
     return this.http.post(`${this.baseUrl}${inventoryId}/groups/`, {
       id: groupId,
