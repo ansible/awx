@@ -829,8 +829,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                             continue
                         host.ansible_facts = ansible_facts
                         host.ansible_facts_modified = now()
-                        ansible_local_system_id = ansible_facts.get('ansible_local', {}).get('insights', {}).get('system_id', None)
-                        ansible_facts_system_id = ansible_facts.get('insights', {}).get('system_id', None)
+                        ansible_local = ansible_facts.get('ansible_local', {}).get('insights', {})
+                        ansible_facts = ansible_facts.get('insights', {})
+                        ansible_local_system_id = ansible_local.get('system_id', None) if isinstance(ansible_local, dict) else None
+                        ansible_facts_system_id = ansible_facts.get('system_id', None) if isinstance(ansible_facts, dict) else None
                         if ansible_local_system_id:
                             print("Setting local {}".format(ansible_local_system_id))
                             logger.debug("Insights system_id {} found for host <{}, {}> in"
