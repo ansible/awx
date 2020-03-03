@@ -270,7 +270,8 @@ class JobNotificationMixin(object):
                             'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
                             'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
                             'approval_status', 'approval_node_name', 'workflow_url',
-                            {'host_status_counts': ['skipped', 'ok', 'changed', 'failures', 'dark']},
+                            {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark'
+                                                    'processed', 'rescued', 'ignored']},
                             {'playbook_counts': ['play_count', 'task_count']},
                             {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
                                                                'total_hosts', 'hosts_with_active_failures', 'total_groups',
@@ -303,7 +304,7 @@ class JobNotificationMixin(object):
                            'finished': False,
                            'force_handlers': False,
                            'forks': 0,
-                           'host_status_counts': {'skipped': 1, 'ok': 5, 'changed': 3, 'failures': 0, 'dark': 0},
+                           'host_status_counts': {'skipped': 1, 'ok': 5, 'changed': 3, 'failures': 0, 'dark': 0, 'failed': False, 'processed': 0, 'rescued': 0},
                            'id': 42,
                            'job_explanation': 'Sample job explanation',
                            'job_slice_count': 1,
@@ -392,10 +393,20 @@ class JobNotificationMixin(object):
         The context will contain whitelisted content retrieved from a serialized job object
         (see JobNotificationMixin.JOB_FIELDS_WHITELIST), the job's friendly name,
         and a url to the job run."""
-        context = {'job': {},
-                   'job_friendly_name': self.get_notification_friendly_name(),
-                   'url': self.get_ui_url(),
-                   'job_metadata': json.dumps(self.notification_data(), indent=4)}
+        job_context = {'host_status_counts': {}}
+        summary = None
+        if hasattr(self, 'job_host_summaries'):
+            summary = self.job_host_summaries.first()
+        if summary:
+            from awx.api.serializers import JobHostSummarySerializer
+            summary_data = JobHostSummarySerializer(summary).to_representation(summary)
+            job_context['host_status_counts'] = summary_data
+        context = {
+            'job': job_context,
+            'job_friendly_name': self.get_notification_friendly_name(),
+            'url': self.get_ui_url(),
+            'job_metadata': json.dumps(self.notification_data(), indent=4)
+        }
 
         def build_context(node, fields, whitelisted_fields):
             for safe_field in whitelisted_fields:
