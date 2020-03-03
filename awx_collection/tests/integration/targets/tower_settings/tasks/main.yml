@@ -1,0 +1,76 @@
+---
+- name: Set the value of AWX_PROOT_SHOW_PATHS to a baseline
+  tower_settings:
+    name: AWX_PROOT_SHOW_PATHS
+    value: '["/var/lib/awx/projects/"]'
+
+- name: Set the value of AWX_PROOT_SHOW_PATHS to get an error back from Tower
+  tower_settings:
+    settings:
+      AWX_PROOT_SHOW_PATHS:
+        'not': 'a valid'
+        'tower': 'setting'
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+
+- name: Set the value of AWX_PROOT_SHOW_PATHS
+  tower_settings:
+    name: AWX_PROOT_SHOW_PATHS
+    value: '["/var/lib/awx/projects/", "/tmp"]'
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Attempt to set the value of AWX_PROOT_BASE_PATH to what it already is
+  tower_settings:
+    name: AWX_PROOT_BASE_PATH
+    value: /tmp
+  register: result
+
+- debug:
+    msg: "{{ result }}"
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Apply a single setting via settings
+  tower_settings:
+    name: AWX_PROOT_SHOW_PATHS
+    value: '["/var/lib/awx/projects/", "/var/tmp"]'
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Apply multiple setting via settings with no change
+  tower_settings:
+    settings:
+      AWX_PROOT_BASE_PATH: /tmp
+      AWX_PROOT_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
+  register: result
+
+- debug:
+    msg: "{{ result }}"
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Apply multiple setting via settings with change
+  tower_settings:
+    settings:
+      AWX_PROOT_BASE_PATH: /tmp
+      AWX_PROOT_SHOW_PATHS: []
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

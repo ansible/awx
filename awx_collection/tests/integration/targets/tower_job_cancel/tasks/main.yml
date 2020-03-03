@@ -1,0 +1,40 @@
+---
+- name: Launch a Job Template
+  tower_job_launch:
+    job_template: "Demo Job Template"
+  register: job
+
+- assert:
+    that:
+      - "job is changed"
+
+- name: Cancel the job
+  tower_job_cancel:
+    job_id: "{{ job.id }}"
+  register: results
+
+- assert:
+    that:
+      - results is changed
+
+- name: Cancel an already canceled job (assert failure)
+  tower_job_cancel:
+    job_id: "{{ job.id }}"
+    fail_if_not_running: true
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+
+- name: Check module fails with correct msg
+  tower_job_cancel:
+    job_id: 9999999999
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result.msg =='Unable to cancel job_id/9999999999: The requested object could not be found.'
+        or result.msg =='Unable to find job with id 9999999999'"

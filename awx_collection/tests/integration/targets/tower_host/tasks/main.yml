@@ -1,0 +1,48 @@
+---
+- name: Generate an inventory name
+  set_fact:
+    inv_name: "inv-for-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create an Inventory
+  tower_inventory:
+    name: "{{ inv_name }}"
+    organization: Default
+    state: present
+
+- name: Create a Host
+  tower_host:
+    name: "some-host"
+    inventory: "{{ inv_name }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Host
+  tower_host:
+    name: "some-host"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg
+  tower_host:
+    name: test-host
+    description: Host Description
+    inventory: test-non-existing-inventory
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result.msg =='The inventories test-non-existing-inventory was not found on the Tower server' or
+        result.msg =='Failed to update host, inventory not found: The requested object could not be found.'"

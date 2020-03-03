@@ -1,0 +1,31 @@
+---
+- name: Create an SCM Credential
+  tower_credential:
+    name: SCM Credential for JT
+    organization: Default
+    kind: scm
+
+- name: Create a Demo Project
+  tower_project:
+    name: Job Template Test Project
+    organization: Default
+    state: present
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+    scm_credential: SCM Credential for JT
+  register: result
+
+- name: Create a Job Template
+  tower_job_template:
+    name: "hello-world {{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project: Job Template Test Project
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    credential: Demo Credential
+    job_type: run
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

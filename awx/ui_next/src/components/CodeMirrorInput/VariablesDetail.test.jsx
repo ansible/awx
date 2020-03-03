@@ -31,12 +31,12 @@ describe('<VariablesDetail>', () => {
     const wrapper = shallow(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
-    wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+    wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     const input = wrapper.find('Styled(CodeMirrorInput)');
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "foo": "bar"\n}');
 
-    wrapper.find('YamlJsonToggle').invoke('onChange')('yaml');
+    wrapper.find('MultiButtonToggle').invoke('onChange')('yaml');
     const input2 = wrapper.find('Styled(CodeMirrorInput)');
     expect(input2.prop('mode')).toEqual('yaml');
     expect(input2.prop('value')).toEqual('foo: bar\n');
@@ -53,7 +53,7 @@ describe('<VariablesDetail>', () => {
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     act(() => {
-      wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+      wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     });
     wrapper.setProps({
       value: '---bar: baz',
@@ -73,7 +73,7 @@ describe('<VariablesDetail>', () => {
   test('should default empty json to "{}"', () => {
     const wrapper = mount(<VariablesDetail value="" label="Variables" />);
     act(() => {
-      wrapper.find('YamlJsonToggle').invoke('onChange')('javascript');
+      wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     });
     wrapper.setProps({ value: '' });
     const input = wrapper.find('Styled(CodeMirrorInput)');
