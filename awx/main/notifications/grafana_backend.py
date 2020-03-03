@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import datetime
+import json
 import logging
 import requests
 import dateutil.parser as dp
@@ -23,6 +24,33 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     recipient_parameter = "grafana_url"
     sender_parameter = None
 
+    DEFAULT_BODY = "{{ job_metadata }}"
+    default_messages = {
+        "started": {
+            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
+        },
+        "success": {
+            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
+        },
+        "error": {
+            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
+        },
+        "workflow_approval": {
+            "running": {
+                "message": CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_MSG, "body": None
+            },
+            "approved": {
+                "message": CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_MSG, "body": None
+            },
+            "timed_out": {
+                "message": CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_MSG, "body": None
+            },
+            "denied": {
+                "message": CustomNotificationBase.DEFAULT_APPROVAL_DENIED_MSG, "body": None
+            }
+        }
+    }
+
     def __init__(self, grafana_key,dashboardId=None, panelId=None, annotation_tags=None, grafana_no_verify_ssl=False, isRegion=True,
                  fail_silently=False, **kwargs):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
@@ -34,6 +62,13 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
         self.isRegion = isRegion
 
     def format_body(self, body):
+        # expect body to be a string representing a dict
+        try:
+            potential_body = json.loads(body)
+            if isinstance(potential_body, dict):
+                body = potential_body
+        except json.JSONDecodeError:
+            body = {}
         return body
 
     def send_messages(self, messages):
@@ -41,14 +76,16 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
         for m in messages:
             grafana_data = {}
             grafana_headers = {}
-            try:
-                epoch=datetime.datetime.utcfromtimestamp(0)
-                grafana_data['time'] = int((dp.parse(m.body['started']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
-                grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
-            except ValueError:
-                logger.error(smart_text(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'],m.body['finished'])))
-                if not self.fail_silently:
-                    raise Exception(smart_text(_("Error converting time {} and/or timeEnd {} to int.").format(m.body['started'],m.body['finished'])))
+            if 'started' in m.body:
+                try:
+                    epoch=datetime.datetime.utcfromtimestamp(0)
+                    grafana_data['time'] = grafana_data['timeEnd'] = int((dp.parse(m.body['started']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                    if m.body.get('finished'):
+                        grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                except ValueError:
+                    logger.error(smart_text(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'],m.body['finished'])))
+                    if not self.fail_silently:
+                        raise Exception(smart_text(_("Error converting time {} and/or timeEnd {} to int.").format(m.body['started'],m.body['finished'])))
             grafana_data['isRegion'] = self.isRegion
             grafana_data['dashboardId'] = self.dashboardId
             grafana_data['panelId'] = self.panelId
