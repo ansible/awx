@@ -83,7 +83,16 @@ describe('<WorkflowJobTemplateAdd/>', () => {
   });
 
   test('throwing error renders FormSubmitError component', async () => {
-    const error = new Error('oops');
+    const error = {
+      response: {
+        config: {
+          method: 'post',
+          url: '/api/v2/workflow_job_templates/',
+        },
+        data: { detail: 'An error occurred' },
+      },
+    };
+
     WorkflowJobTemplatesAPI.create.mockRejectedValue(error);
     await act(async () => {
       wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
@@ -98,16 +107,15 @@ describe('<WorkflowJobTemplateAdd/>', () => {
   });
 
   test('throwing error prevents navigation away from form', async () => {
-    OrganizationsAPI.read.mockRejectedValue(
-      new Error({
-        response: {
-          config: {
-            method: 'get',
-          },
-          data: 'An error occurred',
+    OrganizationsAPI.read.mockRejectedValue({
+      response: {
+        config: {
+          method: 'get',
+          url: '/api/v2/organizations/',
         },
-      })
-    );
+        data: 'An error occurred',
+      },
+    });
     WorkflowJobTemplatesAPI.update.mockResolvedValue();
 
     await act(async () => {
