@@ -32,8 +32,10 @@ class Inventories extends Component {
     if (!inventory) {
       return;
     }
+
     const inventoryKind =
       inventory.kind === 'smart' ? 'smart_inventory' : 'inventory';
+
     const breadcrumbConfig = {
       '/inventories': i18n._(t`Inventories`),
       '/inventories/inventory/add': i18n._(t`Create New Inventory`),
@@ -65,9 +67,7 @@ class Inventories extends Component {
         t`Create New Host`
       ),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}`]: i18n._(
-        t`${nestedResource && nestedResource.name}`
-      ),
+        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
         nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
@@ -83,6 +83,10 @@ class Inventories extends Component {
         nestedResource.id}/edit`]: i18n._(t`Edit Details`),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
         nestedResource.id}/details`]: i18n._(t`Group Details`),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
+        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
+        nestedResource.id}/nested_hosts`]: i18n._(t`Hosts`),
     };
     this.setState({ breadcrumbConfig });
   };

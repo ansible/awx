@@ -19,6 +19,8 @@ import ContentLoading from '@components/ContentLoading';
 import { TabbedCardHeader } from '@components/Card';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
+import InventoryGroupHosts from '../InventoryGroupHosts';
+
 import { GroupsAPI } from '@api';
 
 function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
@@ -142,6 +144,12 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
             }}
           />,
         ]}
+        <Route
+          key="hosts"
+          path="/inventories/inventory/:id/groups/:groupId/nested_hosts"
+        >
+          <InventoryGroupHosts />
+        </Route>
         <Route
           key="not-found"
           path="*"
