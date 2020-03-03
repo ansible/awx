@@ -104,11 +104,13 @@ function HostDetail({ host, i18n, onUpdateHost }) {
           date={created}
           label={i18n._(t`Created`)}
           user={created_by}
+          dataCy="host-created-by"
         />
         <UserDateDetail
           label={i18n._(t`Last Modified`)}
           user={modified_by}
           date={modified}
+          dataCy="host-last-modified-by"
         />
         <VariablesDetail
           value={host.variables}
