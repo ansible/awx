@@ -1,0 +1,48 @@
+---
+- name: Generate an inventory name
+  set_fact:
+    inv_name: "inv-for-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create an Inventory
+  tower_inventory:
+    name: "{{ inv_name }}"
+    organization: Default
+    state: present
+
+- name: Create a Group
+  tower_group:
+    name: Some Group
+    inventory: "{{ inv_name }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Group
+  tower_group:
+    name: Some Group
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg
+  tower_group:
+    name: test-group
+    description: Group Description
+    inventory: test-non-existing-inventory
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result.msg =='Failed to update the group, inventory not found: The requested object could not be found.' or
+        result.msg =='The inventories test-non-existing-inventory was not found on the Tower server'"
