@@ -78,8 +78,7 @@ class HostManager(models.Manager):
                 self.core_filters = {}
 
                 qs = qs & q
-                unique_by_name = qs.order_by('name', 'pk').distinct('name')
-                return qs.filter(pk__in=unique_by_name)
+                return qs.order_by('name', 'pk').distinct('name')
         return qs
 
 
