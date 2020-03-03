@@ -9,24 +9,25 @@ const SmallButton = styled(Button)`
   font-size: var(--pf-global--FontSize--xs);
 `;
 
-function MultiButtonToggle({ buttons, currentValue, onChange }) {
+function MultiButtonToggle({ buttons, value, onChange }) {
   const setValue = newValue => {
-    if (currentValue !== newValue) {
+    if (value !== newValue) {
       onChange(newValue);
     }
   };
 
   return (
     <ButtonGroup>
-      {buttons.map(([value, label]) => (
-        <SmallButton
-          key={label}
-          onClick={() => setValue(value)}
-          variant={currentValue === value ? 'primary' : 'secondary'}
-        >
-          {label}
-        </SmallButton>
-      ))}
+      {buttons &&
+        buttons.map(([buttonValue, buttonLabel]) => (
+          <SmallButton
+            key={buttonLabel}
+            onClick={() => setValue(buttonValue)}
+            variant={buttonValue === value ? 'primary' : 'secondary'}
+          >
+            {buttonLabel}
+          </SmallButton>
+        ))}
     </ButtonGroup>
   );
 }
@@ -59,7 +60,7 @@ const buttonsPropType = {
 
 MultiButtonToggle.propTypes = {
   buttons: buttonsPropType.isRequired,
-  currentValue: string.isRequired,
+  value: string.isRequired,
   onChange: func.isRequired,
 };
 

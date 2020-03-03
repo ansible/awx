@@ -52,7 +52,7 @@ function VariablesDetail({ value, label, rows }) {
           <SplitItem>
             <MultiButtonToggle
               buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
-              currentValue={mode}
+              value={mode}
               onChange={newMode => {
                 try {
                   setCurrentValue(getValueAsMode(currentValue, newMode));

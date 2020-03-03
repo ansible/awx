@@ -36,7 +36,7 @@ function VariablesField({ i18n, id, name, label, readOnly, promptId }) {
           <SplitItem>
             <MultiButtonToggle
               buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
-              currentValue={mode}
+              value={mode}
               onChange={newMode => {
                 try {
                   const newVal =

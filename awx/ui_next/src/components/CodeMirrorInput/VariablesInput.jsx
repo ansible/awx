@@ -44,7 +44,7 @@ function VariablesInput(props) {
         <SplitItemRight>
           <MultiButtonToggle
             buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
-            currentValue={mode}
+            value={mode}
             onChange={newMode => {
               try {
                 if (mode === JSON_MODE) {
