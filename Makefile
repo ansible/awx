@@ -402,7 +402,7 @@ prepare_collection_venv:
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
-COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/awx
+COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
 
 test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -428,7 +428,7 @@ build_collection:
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
-	ansible-galaxy collection install awx_collection/$(COLLECTION_NAMESPACE)-awx-$(VERSION).tar.gz
+	ansible-galaxy collection install awx_collection/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
 
 test_collection_sanity: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity
