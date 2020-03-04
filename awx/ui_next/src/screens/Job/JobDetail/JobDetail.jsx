@@ -164,7 +164,15 @@ function JobDetail({ job, i18n }) {
           <Detail
             label={i18n._(t`Inventory`)}
             value={
-              <Link to={`/inventory/${inventory.id}`}>{inventory.name}</Link>
+              <Link
+                to={
+                  inventory.kind === 'smart'
+                    ? `/inventories/smart_inventory/${inventory.id}`
+                    : `/inventories/inventory/${inventory.id}`
+                }
+              >
+                {inventory.name}
+              </Link>
             }
           />
         )}
