@@ -8,6 +8,15 @@ inside the folder `lib/ansible/modules/web_infrastructure/ansible_tower`
 as well as other folders for the inventory plugin, module utils, and
 doc fragment.
 
+## Building and Installing
+
+This collection templates the `galaxy.yml` file it uses.
+Run `make build_collection` from the root folder of the AWX source tree.
+This will create the `tar.gz` file inside the `awx_collection` folder
+with the current AWX version, for example: `awx_collection/awx-awx-9.2.0.tar.gz`.
+
+Installing the `tar.gz` involves no special instructions.
+
 ## Release and Upgrade Notes
 
 The release 7.0.0 of the `awx.awx` collection is intended to be identical
@@ -94,12 +103,6 @@ Finally you can run the tests:
 cd ~/.ansible/collections/ansible_collections/awx/awx/
 ansible-test integration
 ```
-
-## Building
-
-The build target `make build_collection` will template out a `galaxy.yml` file
-with automatic detection of the current AWX version. Then it builds the
-collection with the `ansible-galaxy` CLI.
 
 ## Licensing
 
