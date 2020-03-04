@@ -106,7 +106,7 @@ def could_be_inventory(project_path, dir_path, filename):
 def read_ansible_config(project_path, variables_of_interest):
     fnames = ['/etc/ansible/ansible.cfg']
     if project_path:
-        fnames.insert(0, os.path.join(project_path, 'ansible.cfg'))
+        fnames.append(os.path.join(project_path, 'ansible.cfg'))
     values = {}
     try:
         parser = ConfigParser()
