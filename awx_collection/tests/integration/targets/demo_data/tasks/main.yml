@@ -1,0 +1,24 @@
+---
+- name: Assure that default organization exists
+  tower_organization:
+    name: Default
+
+- name: Assure that demo project exists
+  tower_project:
+    name: "Demo Project"
+    scm_type: 'git'
+    scm_url: 'https://github.com/ansible/ansible-tower-samples'
+    scm_update_on_launch: true
+    organization: Default
+
+- name: Assure that demo inventory exists
+  tower_inventory:
+    name: "Demo Inventory"
+    organization: Default
+
+- name: Assure that demo job template exists
+  tower_job_template:
+    name: "Demo Job Template"
+    project: "Demo Project"
+    inventory: "Demo Inventory"
+    playbook: "hello_world.yml"
