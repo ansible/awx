@@ -27,7 +27,7 @@ class Templates extends Component {
     };
   }
 
-  setBreadCrumbConfig = template => {
+  setBreadCrumbConfig = (template, nestedResource) => {
     const { i18n } = this.props;
     if (!template) {
       return;
@@ -53,6 +53,13 @@ class Templates extends Component {
         t`Completed Jobs`
       ),
       [`/templates/${template.type}/${template.id}/survey`]: i18n._(t`Survey`),
+      [`/templates/${template.type}/${template.id}/schedules`]: i18n._(
+        t`Schedules`
+      ),
+      [`/templates/${template.type}/${template.id}/schedules/${nestedResource &&
+        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
+      [`/templates/${template.type}/${template.id}/schedules/${nestedResource &&
+        nestedResource.id}/details`]: i18n._(t`Schedule Details`),
     };
     this.setState({ breadcrumbConfig });
   };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import ScheduleListItem from './ScheduleListItem';
+import { ScheduleListItem } from '@components/Schedule';
 
 const mockSchedule = {
   rrule:

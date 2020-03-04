@@ -5,6 +5,14 @@ class Schedules extends Base {
     super(http);
     this.baseUrl = '/api/v2/schedules/';
   }
+
+  createPreview(data) {
+    return this.http.post(`${this.baseUrl}preview/`, data);
+  }
+
+  readCredentials(resourceId, params) {
+    return this.http.get(`${this.baseUrl}${resourceId}/credentials/`, params);
+  }
 }
 
 export default Schedules;

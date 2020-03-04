@@ -10,7 +10,7 @@ import ContentError from '@components/ContentError';
 import FullPage from '@components/FullPage';
 import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
-import ScheduleList from '@components/ScheduleList';
+import { ScheduleList } from '@components/Schedule';
 import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';

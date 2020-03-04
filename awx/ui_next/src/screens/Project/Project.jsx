@@ -9,7 +9,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
-import ScheduleList from '@components/ScheduleList';
+import { ScheduleList } from '@components/Schedule';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
