@@ -17,6 +17,16 @@ with the current AWX version, for example: `awx_collection/awx-awx-9.2.0.tar.gz`
 
 Installing the `tar.gz` involves no special instructions.
 
+## Running
+
+Modules in this collection may have any of the following python requirements:
+
+ - the official [AWX CLI](https://docs.ansible.com/ansible-tower/latest/html/towercli/index.html)
+ - the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/)
+ - no requirements
+
+See requirements in the `DOCUMENTATION` string specific to each module.
+
 ## Release and Upgrade Notes
 
 The release 7.0.0 of the `awx.awx` collection is intended to be identical
@@ -35,16 +45,6 @@ The following notes are changes that may require changes to playbooks:
  - Specified `tower_config` file used to handle `k=v` pairs on a single line; this is no longer supported. Please use a file formatted as `yaml`, `json` or `ini` only.
  - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules are now in `dict` format and no longer supports the use of the `C(@)` syntax (for an external `vars` file).
  - Some return values (e.g., `credential_type`) have been removed. Use of `id` is recommended.
-
-## Running
-
-To use this collection, the "old" `tower-cli` needs to be installed
-in the virtual environment where the collection runs.
-You can install it from [PyPI](https://pypi.org/project/ansible-tower-cli/).
-
-To use this collection in AWX, you should create a custom virtual environment into which to install the requirements. NOTE: running locally, you will also need
-to set the job template `extra_vars` to include `ansible_python_interpreter`
-to be the Python in that virtual environment.
 
 ## Running Unit Tests
 
