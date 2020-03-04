@@ -98,7 +98,7 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
               </LaunchButton>
             </Tooltip>
           )}
-          {template.summary_fields.user_capabilities.edit && (
+          {template.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Template`)} position="top">
               <Button
                 css="grid-column: 2"
@@ -109,6 +109,8 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
                 <PencilAltIcon />
               </Button>
             </Tooltip>
+          ) : (
+            ''
           )}
         </DataListAction>
       </DataListItemRow>

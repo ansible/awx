@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import {
   Badge as PFBadge,
   Button,
-  DataListAction,
+  DataListAction as _DataListAction,
   DataListCell,
   DataListCheck,
   DataListItem,
@@ -29,6 +29,13 @@ const ListGroup = styled.span`
   &:first-of-type {
     margin-left: 0;
   }
+`;
+
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: 40px;
 `;
 
 function OrganizationListItem({
@@ -82,7 +89,7 @@ function OrganizationListItem({
           aria-labelledby={labelId}
           id={labelId}
         >
-          {organization.summary_fields.user_capabilities.edit && (
+          {organization.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Organization`)} position="top">
               <Button
                 variant="plain"
@@ -92,6 +99,8 @@ function OrganizationListItem({
                 <PencilAltIcon />
               </Button>
             </Tooltip>
+          ) : (
+            ''
           )}
         </DataListAction>
       </DataListItemRow>
