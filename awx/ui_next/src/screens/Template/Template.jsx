@@ -15,6 +15,7 @@ import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import SurveyList from './shared/SurveyList';
 
 class Template extends Component {
   constructor(props) {
@@ -131,7 +132,7 @@ class Template extends Component {
       },
       {
         name: i18n._(t`Survey`),
-        link: '/home',
+        link: `${match.url}/survey`,
       }
     );
 
@@ -236,6 +237,12 @@ class Template extends Component {
                     loadScheduleOptions={this.loadScheduleOptions}
                   />
                 )}
+              />
+            )}
+            {template && (
+              <Route
+                path="/templates/:templateType/:id/survey"
+                render={() => <SurveyList template={template} />}
               />
             )}
             <Route

@@ -64,6 +64,16 @@ class JobTemplates extends SchedulesMixin(
       params,
     });
   }
+
+  readScheduleList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/schedules/`, {
+      params,
+    });
+  }
+
+  readSurvey(id) {
+    return this.http.get(`${this.baseUrl}${id}/survey_spec/`);
+  }
 }
 
 export default JobTemplates;
