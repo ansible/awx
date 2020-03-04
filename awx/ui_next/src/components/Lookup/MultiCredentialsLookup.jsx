@@ -18,9 +18,24 @@ const QS_CONFIG = getQSConfig('credentials', {
 });
 
 async function loadCredentialTypes() {
-  const { data } = await CredentialTypesAPI.read();
-  const acceptableTypes = ['machine', 'cloud', 'net', 'ssh', 'vault'];
-  return data.results.filter(type => acceptableTypes.includes(type.kind));
+  const pageSize = 200;
+  const acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault'];
+  // The number of credential types a user can have is unlimited. In practice, it is unlikely for
+  // users to have more than a page at the maximum request size.
+  const {
+    data: { next, results },
+  } = await CredentialTypesAPI.read({ page_size: pageSize });
+  let nextResults = [];
+  if (next) {
+    const { data } = await CredentialTypesAPI.read({
+      page_size: pageSize,
+      page: 2,
+    });
+    nextResults = data.results;
+  }
+  return results
+    .concat(nextResults)
+    .filter(type => acceptableKinds.includes(type.kind));
 }
 
 async function loadCredentials(params, selectedCredentialTypeId) {
