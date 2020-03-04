@@ -52,10 +52,12 @@ const schedule = {
   next_run: '2020-03-16T04:00:00Z',
 };
 
-const preview = {
-  local: [],
-  utc: [],
-};
+SchedulesAPI.createPreview.mockResolvedValue({
+  data: {
+    local: [],
+    utc: [],
+  },
+});
 
 describe('<ScheduleDetail />', () => {
   let wrapper;
@@ -76,9 +78,7 @@ describe('<ScheduleDetail />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/templates/job_template/:id/schedules/:scheduleId"
-          component={() => (
-            <ScheduleDetail schedule={schedule} preview={preview} />
-          )}
+          component={() => <ScheduleDetail schedule={schedule} />}
         />,
         {
           context: {
@@ -159,9 +159,7 @@ describe('<ScheduleDetail />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/templates/job_template/:id/schedules/:scheduleId"
-          component={() => (
-            <ScheduleDetail schedule={scheduleWithPrompts} preview={preview} />
-          )}
+          component={() => <ScheduleDetail schedule={scheduleWithPrompts} />}
         />,
         {
           context: {
@@ -243,9 +241,7 @@ describe('<ScheduleDetail />', () => {
       wrapper = mountWithContexts(
         <Route
           path="/templates/job_template/:id/schedules/:scheduleId"
-          component={() => (
-            <ScheduleDetail schedule={schedule} preview={preview} />
-          )}
+          component={() => <ScheduleDetail schedule={schedule} />}
         />,
         {
           context: {

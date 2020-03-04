@@ -22,7 +22,6 @@ import { SchedulesAPI } from '@api';
 
 function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
   const [jobTemplateSchedule, setJobTemplateSchedule] = useState(null);
-  const [schedulePreview, setSchedulePreview] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
   const { id: jobTemplateId, scheduleId } = useParams();
@@ -32,12 +31,7 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
     const loadData = async () => {
       try {
         const { data } = await SchedulesAPI.readDetail(scheduleId);
-        const { data: preview } = await SchedulesAPI.createPreview({
-          rrule: data.rrule,
-        });
-
         setJobTemplateSchedule(data);
-        setSchedulePreview(preview);
         setBreadcrumb(jobTemplate, data);
       } catch (err) {
         setContentError(err);
@@ -122,12 +116,7 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
             key="details"
             path="/templates/job_template/:id/schedules/:scheduleId/details"
             render={() => {
-              return (
-                <ScheduleDetail
-                  schedule={jobTemplateSchedule}
-                  preview={schedulePreview}
-                />
-              );
+              return <ScheduleDetail schedule={jobTemplateSchedule} />;
             }}
           />,
         ]}

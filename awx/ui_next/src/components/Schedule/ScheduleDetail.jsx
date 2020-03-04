@@ -2,7 +2,6 @@ import React, { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 import styled from 'styled-components';
-import { shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Schedule } from '@types';
@@ -21,7 +20,7 @@ const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
 `;
 
-function ScheduleDetail({ preview, schedule, i18n }) {
+function ScheduleDetail({ schedule, i18n }) {
   const {
     id,
     created,
@@ -44,21 +43,26 @@ function ScheduleDetail({ preview, schedule, i18n }) {
   } = schedule;
 
   const {
-    result: credentials,
+    result: [credentials, preview],
     isLoading,
     error,
-    request: fetchCredentials,
+    request: fetchCredentialsAndPreview,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await SchedulesAPI.readCredentials(id);
-      return data.results;
-    }, [id]),
+      const [{ data }, { data: schedulePreview }] = await Promise.all([
+        SchedulesAPI.readCredentials(id),
+        SchedulesAPI.createPreview({
+          rrule,
+        }),
+      ]);
+      return [data.results, schedulePreview];
+    }, [id, rrule]),
     []
   );
 
   useEffect(() => {
-    fetchCredentials();
-  }, [fetchCredentials]);
+    fetchCredentialsAndPreview();
+  }, [fetchCredentialsAndPreview]);
 
   const rule = rrulestr(rrule);
   const repeatFrequency =
@@ -192,12 +196,7 @@ function ScheduleDetail({ preview, schedule, i18n }) {
 }
 
 ScheduleDetail.propTypes = {
-  preview: shape(),
   schedule: Schedule.isRequired,
-};
-
-ScheduleDetail.defaultProps = {
-  preview: { local: [], utc: [] },
 };
 
 export default withI18n()(ScheduleDetail);
