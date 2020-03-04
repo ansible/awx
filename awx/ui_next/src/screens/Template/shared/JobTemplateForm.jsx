@@ -368,9 +368,11 @@ class JobTemplateForm extends Component {
               label={i18n._(t`Credentials`)}
               promptId="template-ask-credential-on-launch"
               promptName="ask_credential_on_launch"
-              tooltip={i18n._(
-                t`Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`
-              )}
+              tooltip={i18n._(t`Select credentials that allow Tower to access the nodes this job will be ran
+                against. You can only select one credential of each type. For machine credentials (SSH),
+                checking "Prompt on launch" without selecting credentials will require you to select a machine
+                credential at run time. If you select credentials and check "Prompt on launch", the selected
+                credential(s) become the defaults that can be updated at run time.`)}
             >
               <Field name="credentials" fieldId="template-credentials">
                 {({ field }) => {
