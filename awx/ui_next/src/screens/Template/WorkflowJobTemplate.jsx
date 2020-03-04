@@ -11,8 +11,10 @@ import FullPage from '@components/FullPage';
 import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import ScheduleList from '@components/ScheduleList';
+import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
+import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
 class WorkflowJobTemplate extends Component {
@@ -23,6 +25,7 @@ class WorkflowJobTemplate extends Component {
       contentError: null,
       hasContentLoading: true,
       template: null,
+      webhook_key: null,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
@@ -50,19 +53,20 @@ class WorkflowJobTemplate extends Component {
         const {
           data: { webhook_key },
         } = await WorkflowJobTemplatesAPI.readWebhookKey(id);
-        this.setState({ webHookKey: webhook_key });
+        this.setState({ webhook_key });
       }
       if (data?.summary_fields?.webhook_credential) {
         const {
           data: {
-            summary_fields: { credential_type: name },
+            summary_fields: {
+              credential_type: { name },
+            },
           },
         } = await CredentialsAPI.readDetail(
           data.summary_fields.webhook_credential.id
         );
         data.summary_fields.webhook_credential.kind = name;
       }
-
       this.setState({ template: data });
       setBreadcrumb(data);
     } catch (err) {
@@ -83,7 +87,7 @@ class WorkflowJobTemplate extends Component {
       contentError,
       hasContentLoading,
       template,
-      webHookKey,
+      webhook_key,
     } = this.state;
 
     const tabsArray = [
@@ -115,7 +119,9 @@ class WorkflowJobTemplate extends Component {
     if (location.pathname.endsWith('edit')) {
       cardHeader = null;
     }
-
+    if (hasContentLoading) {
+      return <ContentLoading />;
+    }
     if (!hasContentLoading && contentError) {
       return (
         <PageSection>
@@ -134,73 +140,89 @@ class WorkflowJobTemplate extends Component {
     }
 
     return (
-      <Card>
-        {cardHeader}
-        <Switch>
-          <Redirect
-            from="/templates/workflow_job_template/:id"
-            to="/templates/workflow_job_template/:id/details"
-            exact
-          />
-          {template && (
-            <Route
-              key="wfjt-details"
-              path="/templates/workflow_job_template/:id/details"
-              render={() => (
-                <WorkflowJobTemplateDetail
-                  template={template}
-                  webHookKey={webHookKey}
-                />
-              )}
+      <PageSection>
+        <Card>
+          {cardHeader}
+          <Switch>
+            <Redirect
+              from="/templates/workflow_job_template/:id"
+              to="/templates/workflow_job_template/:id/details"
+              exact
             />
-          )}
-          {template && (
-            <Route
-              key="wfjt-visualizer"
-              path="/templates/workflow_job_template/:id/visualizer"
-              render={() => (
-                <AppendBody>
-                  <FullPage>
-                    <Visualizer template={template} />
-                  </FullPage>
-                </AppendBody>
-              )}
-            />
-          )}
-          {template?.id && (
-            <Route path="/templates/workflow_job_template/:id/completed_jobs">
-              <JobList
-                defaultParams={{
-                  workflow_job__workflow_job_template: template.id,
-                }}
+            {template && (
+              <Route
+                key="wfjt-details"
+                path="/templates/workflow_job_template/:id/details"
+                render={() => (
+                  <WorkflowJobTemplateDetail
+                    template={template}
+                    webhook_key={webhook_key}
+                  />
+                )}
               />
-            </Route>
-          )}
-          {template && (
+            )}
+            {template && (
+              <Route
+                key="wfjt-edit"
+                path="/templates/workflow_job_template/:id/edit"
+                render={() => (
+                  <WorkflowJobTemplateEdit
+                    template={template}
+                    webhook_key={webhook_key}
+                  />
+                )}
+              />
+            )}
+            {template && (
+              <Route
+                key="wfjt-visualizer"
+                path="/templates/workflow_job_template/:id/visualizer"
+                render={() => (
+                  <AppendBody>
+                    <FullPage>
+                      <Visualizer template={template} />
+                    </FullPage>
+                  </AppendBody>
+                )}
+              />
+            )}
+            {template?.id && (
+              <Route path="/templates/workflow_job_template/:id/completed_jobs">
+                <JobList
+                  defaultParams={{
+                    workflow_job__workflow_job_template: template.id,
+                  }}
+                />
+              </Route>
+            )}
+            {template.id && (
+              <Route
+                path="/templates/:templateType/:id/schedules"
+                render={() => (
+                  <ScheduleList loadSchedules={this.loadSchedules} />
+                )}
+              />
+            )}
             <Route
-              path="/templates/:templateType/:id/schedules"
-              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link
+                        to={`/templates/workflow_job_template/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Template Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
             />
-          )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/workflow_job_template/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
-        </Switch>
-      </Card>
+          </Switch>
+        </Card>
+      </PageSection>
     );
   }
 }

@@ -164,87 +164,91 @@ class Template extends Component {
     }
 
     return (
-      <Card>
-        {cardHeader}
-        <Switch>
-          <Redirect
-            from="/templates/:templateType/:id"
-            to="/templates/:templateType/:id/details"
-            exact
-          />
-          {template && (
-            <Route
-              key="details"
-              path="/templates/:templateType/:id/details"
-              render={() => (
-                <JobTemplateDetail
-                  hasTemplateLoading={hasContentLoading}
-                  template={template}
-                />
-              )}
+      <PageSection>
+        <Card>
+          {cardHeader}
+          <Switch>
+            <Redirect
+              from="/templates/:templateType/:id"
+              to="/templates/:templateType/:id/details"
+              exact
             />
-          )}
-          {template && (
+            {template && (
+              <Route
+                key="details"
+                path="/templates/:templateType/:id/details"
+                render={() => (
+                  <JobTemplateDetail
+                    hasTemplateLoading={hasContentLoading}
+                    template={template}
+                  />
+                )}
+              />
+            )}
+            {template && (
+              <Route
+                key="edit"
+                path="/templates/:templateType/:id/edit"
+                render={() => <JobTemplateEdit template={template} />}
+              />
+            )}
+            {template && (
+              <Route
+                key="access"
+                path="/templates/:templateType/:id/access"
+                render={() => (
+                  <ResourceAccessList
+                    resource={template}
+                    apiModel={JobTemplatesAPI}
+                  />
+                )}
+              />
+            )}
+            {canSeeNotificationsTab && (
+              <Route
+                path="/templates/:templateType/:id/notifications"
+                render={() => (
+                  <NotificationList
+                    id={Number(match.params.id)}
+                    canToggleNotifications={isNotifAdmin}
+                    apiModel={JobTemplatesAPI}
+                  />
+                )}
+              />
+            )}
+            {template?.id && (
+              <Route path="/templates/:templateType/:id/completed_jobs">
+                <JobList defaultParams={{ job__job_template: template.id }} />
+              </Route>
+            )}
+            {template && (
+              <Route
+                path="/templates/:templateType/:id/schedules"
+                render={() => (
+                  <ScheduleList loadSchedules={this.loadSchedules} />
+                )}
+              />
+            )}
             <Route
-              key="edit"
-              path="/templates/:templateType/:id/edit"
-              render={() => <JobTemplateEdit template={template} />}
+              key="not-found"
+              path="*"
+              render={() =>
+                !hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link
+                        to={`/templates/${match.params.templateType}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Template Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )
+              }
             />
-          )}
-          {template && (
-            <Route
-              key="access"
-              path="/templates/:templateType/:id/access"
-              render={() => (
-                <ResourceAccessList
-                  resource={template}
-                  apiModel={JobTemplatesAPI}
-                />
-              )}
-            />
-          )}
-          {canSeeNotificationsTab && (
-            <Route
-              path="/templates/:templateType/:id/notifications"
-              render={() => (
-                <NotificationList
-                  id={Number(match.params.id)}
-                  canToggleNotifications={isNotifAdmin}
-                  apiModel={JobTemplatesAPI}
-                />
-              )}
-            />
-          )}
-          {template?.id && (
-            <Route path="/templates/:templateType/:id/completed_jobs">
-              <JobList defaultParams={{ job__job_template: template.id }} />
-            </Route>
-          )}
-          {template && (
-            <Route
-              path="/templates/:templateType/:id/schedules"
-              render={() => <ScheduleList loadSchedules={this.loadSchedules} />}
-            />
-          )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/${match.params.templateType}/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
-        </Switch>
-      </Card>
+          </Switch>
+        </Card>
+      </PageSection>
     );
   }
 }

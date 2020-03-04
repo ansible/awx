@@ -1,0 +1,69 @@
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+
+import { CardBody } from '@components/Card';
+import { getAddedAndRemoved } from '@util/lists';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
+import { WorkflowJobTemplateForm } from '../shared';
+
+function WorkflowJobTemplateEdit({ template, webhook_key }) {
+  const history = useHistory();
+  const [formSubmitError, setFormSubmitError] = useState(null);
+
+  const handleSubmit = async values => {
+    const { labels, ...remainingValues } = values;
+    try {
+      await Promise.all(
+        await submitLabels(labels, values.organization, template.organization)
+      );
+      await WorkflowJobTemplatesAPI.update(template.id, remainingValues);
+      history.push(`/templates/workflow_job_template/${template.id}/details`);
+    } catch (err) {
+      setFormSubmitError(err);
+    }
+  };
+
+  const submitLabels = async (labels = [], formOrgId, templateOrgId) => {
+    const { added, removed } = getAddedAndRemoved(
+      template.summary_fields.labels.results,
+      labels
+    );
+    let orgId = formOrgId || templateOrgId;
+    if (!orgId) {
+      try {
+        const {
+          data: { results },
+        } = await OrganizationsAPI.read();
+        orgId = results[0].id;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    const disassociationPromises = await removed.map(label =>
+      WorkflowJobTemplatesAPI.disassociateLabel(template.id, label)
+    );
+    const associationPromises = await added.map(label =>
+      WorkflowJobTemplatesAPI.associateLabel(template.id, label, orgId)
+    );
+    const results = [...disassociationPromises, ...associationPromises];
+    return results;
+  };
+
+  const handleCancel = () => {
+    history.push(`/templates/workflow_job_template/${template.id}/details`);
+  };
+
+  return (
+    <CardBody>
+      <WorkflowJobTemplateForm
+        handleSubmit={handleSubmit}
+        handleCancel={handleCancel}
+        template={template}
+        webhook_key={webhook_key}
+        submitError={formSubmitError}
+      />
+    </CardBody>
+  );
+}
+export default WorkflowJobTemplateEdit;
