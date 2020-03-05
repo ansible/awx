@@ -421,7 +421,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
-BROKER_URL = 'redis://localhost:6379'
+BROKER_URL = 'unix:///var/run/redis/redis.sock'
 BROKER_TRANSPORT_OPTIONS = {}
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
@@ -956,7 +956,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [BROKER_URL],
             "capacity": 10000,
         },
     },

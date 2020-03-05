@@ -2,8 +2,6 @@
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
 redis_image: "redis"
-redis_hostname: "redis"
-redis_port: "6379"
 
 postgresql_version: "10"
 postgresql_image: "postgres:{{postgresql_version}}"

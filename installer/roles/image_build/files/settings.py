@@ -85,16 +85,4 @@ DATABASES = {
 if os.getenv("DATABASE_SSLMODE", False):
     DATABASES['default']['OPTIONS'] = {'sslmode': os.getenv("DATABASE_SSLMODE")}
 
-BROKER_URL = 'redis://{}:{}'.format(
-    os.getenv("REDIS_HOST", None),
-    os.getenv("REDIS_PORT", "6379"),)
-
-CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'channels_redis.core.RedisChannelLayer',
-                'CONFIG': {
-                    'hosts': [(os.getenv("REDIS_HOST", None), int(os.getenv("REDIS_PORT", 6379)))]
-                    'capacity': 10000,
-                }}
-}
-
 USE_X_FORWARDED_PORT = True

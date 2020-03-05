@@ -25,8 +25,7 @@ redis_cpu_request: 500
 
 kubernetes_redis_image: "redis"
 kubernetes_redis_image_tag: "latest"
-kubernetes_redis_hostname: "localhost"
-kubernetes_redis_port: "6379"
+kubernetes_redis_config_mount_path: "/usr/local/etc/redis/redis.conf"
 
 memcached_hostname: localhost
 memcached_mem_request: 1

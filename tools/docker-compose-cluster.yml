@@ -24,7 +24,6 @@ services:
     #entrypoint: ["bash"]
     environment:
       CURRENT_UID:
-      BROKER_URL: "redis://redis_1:63791"
       SDB_HOST: 0.0.0.0
       SDB_PORT: 5899
       AWX_GROUP_QUEUES: alpha,tower
@@ -32,6 +31,7 @@ services:
     working_dir: "/awx_devel"
     volumes:
       - "../:/awx_devel"
+      - "./redis/redis_socket_ha_1:/var/run/redis/"
     ports:
       - "5899-5999:5899-5999"
   awx-2:
@@ -44,12 +44,12 @@ services:
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      BROKER_URL: "redis://redis_2:63792"
       SDB_HOST: 0.0.0.0
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: bravo,tower
     volumes:
       - "../:/awx_devel"
+      - "./redis/redis_socket_ha_2:/var/run/redis/"
     ports:
       - "7899-7999:7899-7999"
   awx-3:
@@ -63,39 +63,42 @@ services:
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
-      BROKER_URL: "redis://redis_3:63793"
       SDB_HOST: 0.0.0.0
       SDB_PORT: 8899
       AWX_GROUP_QUEUES: charlie,tower
     volumes:
       - "../:/awx_devel"
+      - "./redis/redis_socket_ha_3:/var/run/redis/"
     ports:
       - "8899-8999:8899-8999"
   redis_1:
+    user: ${CURRENT_UID}
     image: redis:latest
-    hostname: redis_1
     container_name: tools_redis_1_1
-    command: "redis-server /usr/local/etc/redis/redis.conf"
+    command: ["/usr/local/etc/redis/redis.conf"]
     volumes:
-      - "./redis/redis_1.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis_socket_ha_1:/var/run/redis/"
     ports:
       - "63791:63791"
   redis_2:
+    user: ${CURRENT_UID}
     image: redis:latest
-    hostname: redis_2
     container_name: tools_redis_2_1
-    command: "redis-server /usr/local/etc/redis/redis.conf"
+    command: ["/usr/local/etc/redis/redis.conf"]
     volumes:
-      - "./redis/redis_2.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis_socket_ha_2:/var/run/redis/"
     ports:
       - "63792:63792"
   redis_3:
+    user: ${CURRENT_UID}
     image: redis:latest
-    hostname: redis_3
     container_name: tools_redis_3_1
-    command: "redis-server /usr/local/etc/redis/redis.conf"
+    command: ["/usr/local/etc/redis/redis.conf"]
     volumes:
-      - "./redis/redis_3.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/redis_socket_ha_3:/var/run/redis/"
     ports:
       - "63793:63793"
   postgres:

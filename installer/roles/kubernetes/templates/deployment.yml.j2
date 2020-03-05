@@ -40,6 +40,7 @@ spec:
         service: django
         app: {{ kubernetes_deployment_name }}
     spec:
+      serviceAccountName: awx
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
@@ -127,6 +128,9 @@ spec:
               subPath: SECRET_KEY
               readOnly: true
 
+            - name: {{ kubernetes_deployment_name }}-redis-socket
+              mountPath: "/var/run/redis"
+
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -170,6 +174,9 @@ spec:
               mountPath: "/etc/tower/SECRET_KEY"
               subPath: SECRET_KEY
               readOnly: true
+
+            - name: {{ kubernetes_deployment_name }}-redis-socket
+              mountPath: "/var/run/redis"
           env:
             - name: AWX_SKIP_MIGRATIONS
               value: "1"
@@ -197,10 +204,19 @@ spec:
         - name: {{ kubernetes_deployment_name }}-redis
           image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
+          args: ["/usr/local/etc/redis/redis.conf"]
           ports:
             - name: redis
               protocol: TCP
               containerPort: 6379
+          volumeMounts:
+            - name: {{ kubernetes_deployment_name }}-redis-config
+              mountPath: "{{ kubernetes_redis_config_mount_path }}"
+              subPath: redis.conf
+              readOnly: true
+
+            - name: {{ kubernetes_deployment_name }}-redis-socket
+              mountPath: "/var/run/redis"
           resources:
             requests:
               memory: "{{ redis_mem_request }}Gi"
@@ -273,6 +289,13 @@ spec:
               - key: {{ kubernetes_deployment_name }}_nginx_conf
                 path: nginx.conf
 
+        - name: {{ kubernetes_deployment_name }}-redis-config
+          configMap:
+            name: {{ kubernetes_deployment_name }}-config
+            items:
+              - key: {{ kubernetes_deployment_name }}_redis_conf
+                path: redis.conf
+
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
             secretName: "{{ kubernetes_deployment_name }}-secrets"
@@ -288,6 +311,9 @@ spec:
             items:
               - key: secret_key
                 path: SECRET_KEY
+
+        - name: {{ kubernetes_deployment_name }}-redis-socket
+          emptyDir: {}
 
 ---
 apiVersion: v1

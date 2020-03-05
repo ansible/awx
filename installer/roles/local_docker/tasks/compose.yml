@@ -4,6 +4,12 @@
     path: "{{ docker_compose_dir }}"
     state: directory
 
+- name: Create Redis socket directory
+  file:
+    path: "{{ docker_compose_dir }}/redis_socket"
+    state: directory
+    mode: 0777
+
 - name: Create Docker Compose Configuration
   template:
     src: "{{ item }}.j2"
@@ -14,7 +20,13 @@
     - credentials.py
     - docker-compose.yml
     - nginx.conf
+    - redis.conf
   register: awx_compose_config
+
+- name: Set redis config to other group readable to satisfy redis-server
+  file:
+    path: "{{ docker_compose_dir }}/redis.conf"
+    mode: 0666
 
 - name: Render SECRET_KEY file
   copy:

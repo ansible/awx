@@ -12,9 +12,7 @@
 # MISC PROJECT SETTINGS
 ###############################################################################
 import os
-import urllib.parse
 import sys
-from urllib import parse
 
 # Enable the following lines and install the browser extension to use Django debug toolbar
 # if your deployment method is not VMWare of Docker-for-Mac you may
@@ -49,22 +47,6 @@ if "pytest" in sys.modules:
             },
         }
     }
-
-# Use Redis as the message bus for now
-# Default to "just works" for single tower docker
-BROKER_URL = os.environ.get('BROKER_URL', "redis://redis_1:6379")
-
-redis_parts = parse.urlparse(BROKER_URL)
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(redis_parts.hostname, redis_parts.port)],
-            "capacity": 10000,
-        },
-    },
-}
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.
