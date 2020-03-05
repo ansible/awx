@@ -710,6 +710,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                                           skipped=h.skipped,
                                           rescued=h.rescued,
                                           ignored=h.ignored)
+           
+        # get joboutput for data
+        joboutput = ""
+        try:
+            # check if information is available
+            joboutput = self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
+        except:
+            pass
+        
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
                          playbook=self.playbook,
@@ -717,7 +726,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                          limit=self.limit,
                          extra_vars=self.display_extra_vars(),
                          hosts=all_hosts,
-                         stdout=self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)))
+                         stdout=joboutput))
         return data
 
     def _resources_sufficient_for_launch(self):
