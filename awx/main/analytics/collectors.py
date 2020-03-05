@@ -276,7 +276,7 @@ def copy_tables(since, full_path):
                                  main_unifiedjob.instance_group_id
                                  FROM main_unifiedjob
                                  JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
-                                 JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
+                                 LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
                                  WHERE main_unifiedjob.modified > {} 
                                  AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
