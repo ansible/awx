@@ -20,7 +20,7 @@ describe('<HostAdd />', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory({
-      initialEntries: ['/hosts/1/add'],
+      initialEntries: ['/hosts/add'],
     });
     await act(async () => {
       wrapper = mountWithContexts(<HostAdd />, {
