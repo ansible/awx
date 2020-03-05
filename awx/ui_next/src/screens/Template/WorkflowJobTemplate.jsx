@@ -46,7 +46,7 @@ class WorkflowJobTemplate extends Component {
     const { setBreadcrumb, match } = this.props;
     const { id } = match.params;
 
-    this.setState({ contentError: null, hasContentLoading: true });
+    this.setState({ contentError: null });
     try {
       const { data } = await WorkflowJobTemplatesAPI.readDetail(id);
       if (data?.related?.webhook_key) {
@@ -107,22 +107,17 @@ class WorkflowJobTemplate extends Component {
       tab.id = n;
     });
 
-    let cardHeader = hasContentLoading ? null : (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/templates" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
-
-    if (location.pathname.endsWith('edit')) {
-      cardHeader = null;
-    }
     if (hasContentLoading) {
-      return <ContentLoading />;
+      return (
+        <PageSection>
+          <Card>
+            <ContentLoading />
+          </Card>
+        </PageSection>
+      );
     }
-    if (!hasContentLoading && contentError) {
+
+    if (contentError) {
       return (
         <PageSection>
           <Card>
@@ -139,10 +134,19 @@ class WorkflowJobTemplate extends Component {
       );
     }
 
+    const cardHeader = (
+      <TabbedCardHeader>
+        <RoutedTabs tabsArray={tabsArray} />
+        <CardActions>
+          <CardCloseButton linkTo="/templates" />
+        </CardActions>
+      </TabbedCardHeader>
+    );
+
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {location.pathname.endsWith('edit') ? null : cardHeader}
           <Switch>
             <Redirect
               from="/templates/workflow_job_template/:id"
@@ -195,7 +199,7 @@ class WorkflowJobTemplate extends Component {
                 />
               </Route>
             )}
-            {template.id && (
+            {template?.id && (
               <Route
                 path="/templates/:templateType/:id/schedules"
                 render={() => (
@@ -206,19 +210,17 @@ class WorkflowJobTemplate extends Component {
             <Route
               key="not-found"
               path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link
-                        to={`/templates/workflow_job_template/${match.params.id}/details`}
-                      >
-                        {i18n._(`View Template Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
+              render={() => (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link
+                      to={`/templates/workflow_job_template/${match.params.id}/details`}
+                    >
+                      {i18n._(`View Template Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
             />
           </Switch>
         </Card>
