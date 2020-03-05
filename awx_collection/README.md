@@ -35,15 +35,20 @@ have it function as a collection.
 
 The following notes are changes that may require changes to playbooks:
 
- - Specifying `inputs` or `injectors` as strings in the
-   `tower_credential_type` module is no longer supported. Provide them as dictionaries instead.
+
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
  - Creating a "scan" type job template is no longer supported.
- - `extra_vars` in the `tower_job_launch` module worked with a list previously, but is now configured to work solely in a `dict` format.
- - When the `extra_vars` parameter is used with the `tower_job_launch` module, the Job Template launch will fail unless `add_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
+ - Type changes of variable fields
+   - `extra_vars` in the `tower_job_launch` module worked with a list previously, but is now configured to work solely in a `dict` format.
+   - `extra_vars` in the `tower_workflow_job_template` module worked with a string previously but now expects a dict.
+   - When the `extra_vars` parameter is used with the `tower_job_launch` module, the Job Template launch will fail unless `add_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
+   - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules are now in `dict` format and no longer supports the use of the `C(@)` syntax (for an external `vars` file).
+ - Type changes of other types of fields
+   - Specifying `inputs` or `injectors` as strings in the
+     `tower_credential_type` module is no longer supported. Provide them as dictionaries instead.
+   - Specifying `schema` as in the `tower_workflow_job_template` module is no longer supported. Use a list of dicts instead.
  - `tower_group` used to also service inventory sources, but this functionality has been removed from this module; use `tower_inventory_source` instead.
  - Specified `tower_config` file used to handle `k=v` pairs on a single line; this is no longer supported. Please use a file formatted as `yaml`, `json` or `ini` only.
- - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules are now in `dict` format and no longer supports the use of the `C(@)` syntax (for an external `vars` file).
  - Some return values (e.g., `credential_type`) have been removed. Use of `id` is recommended.
 
 ## Running Unit Tests
