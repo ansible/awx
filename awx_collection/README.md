@@ -80,7 +80,7 @@ pip install -e .
 PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
 ```
 
-## Running Integration tests Tests
+## Running Integration Tests
 
 The integration tests require a virtualenv with `ansible` >= 2.9 and `tower_cli`.
 The collection must first be installed, which can be done using `make install_collection`.
