@@ -1,8 +1,11 @@
 import Base from '../Base';
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+import SchedulesMixin from '../mixins/Schedules.mixin';
 
-class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
+class JobTemplates extends SchedulesMixin(
+  InstanceGroupsMixin(NotificationsMixin(Base))
+) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/job_templates/';
@@ -60,10 +63,6 @@ class JobTemplates extends InstanceGroupsMixin(NotificationsMixin(Base)) {
     return this.http.get(`${this.baseUrl}${id}/access_list/`, {
       params,
     });
-  }
-
-  readScheduleList(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
   }
 }
 
