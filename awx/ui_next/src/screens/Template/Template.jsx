@@ -10,11 +10,10 @@ import ContentError from '@components/ContentError';
 import JobList from '@components/JobList';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
-import { ScheduleList } from '@components/Schedule';
+import { Schedules } from '@components/Schedule';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
-import JobTemplateSchedules from './JobTemplateSchedules';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import SurveyList from './shared/SurveyList';
 
@@ -221,12 +220,14 @@ class Template extends Component {
             )}
             {template && (
               <Route
-                key="groups"
+                key="schedules"
                 path="/templates/:templateType/:id/schedules"
                 render={() => (
-                  <JobTemplateSchedules
+                  <Schedules
                     setBreadcrumb={setBreadcrumb}
-                    jobTemplate={template}
+                    unifiedJobTemplate={template}
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
                   />
                 )}
               />
@@ -247,17 +248,6 @@ class Template extends Component {
               <Route path="/templates/:templateType/:id/completed_jobs">
                 <JobList defaultParams={{ job__job_template: template.id }} />
               </Route>
-            )}
-            {template && (
-              <Route
-                path="/templates/:templateType/:id/schedules"
-                render={() => (
-                  <ScheduleList
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
             )}
             {template && (
               <Route

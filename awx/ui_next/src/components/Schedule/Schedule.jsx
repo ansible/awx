@@ -20,19 +20,21 @@ import { TabbedCardHeader } from '@components/Card';
 import { ScheduleDetail } from '@components/Schedule';
 import { SchedulesAPI } from '@api';
 
-function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
-  const [jobTemplateSchedule, setJobTemplateSchedule] = useState(null);
+function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
+  const [schedule, setSchedule] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
-  const { id: jobTemplateId, scheduleId } = useParams();
+  const { scheduleId } = useParams();
   const location = useLocation();
+  const { pathname } = location;
+  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const { data } = await SchedulesAPI.readDetail(scheduleId);
-        setJobTemplateSchedule(data);
-        setBreadcrumb(jobTemplate, data);
+        setSchedule(data);
+        setBreadcrumb(unifiedJobTemplate, data);
       } catch (err) {
         setContentError(err);
       } finally {
@@ -41,7 +43,7 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
     };
 
     loadData();
-  }, [location.pathname, scheduleId, jobTemplate, setBreadcrumb]);
+  }, [location.pathname, scheduleId, unifiedJobTemplate, setBreadcrumb]);
 
   const tabsArray = [
     {
@@ -51,14 +53,12 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
           {i18n._(t`Back to Schedules`)}
         </>
       ),
-      link: `/templates/job_template/${jobTemplate.id}/schedules`,
+      link: `${pathRoot}schedules`,
       id: 99,
     },
     {
       name: i18n._(t`Details`),
-      link: `/templates/job_template/${
-        jobTemplate.id
-      }/schedules/${jobTemplateSchedule && jobTemplateSchedule.id}/details`,
+      link: `${pathRoot}schedules/${schedule && schedule.id}/details`,
       id: 0,
     },
   ];
@@ -68,15 +68,13 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
   }
 
   if (
-    jobTemplateSchedule.summary_fields.unified_job_template.id !==
-    parseInt(jobTemplateId, 10)
+    schedule.summary_fields.unified_job_template.id !==
+    parseInt(unifiedJobTemplate.id, 10)
   ) {
     return (
       <ContentError>
-        {jobTemplateSchedule && (
-          <Link to={`/templates/job_template/${jobTemplate.id}/schedules`}>
-            {i18n._(t`View Template Schedules`)}
-          </Link>
+        {schedule && (
+          <Link to={`${pathRoot}schedules`}>{i18n._(t`View Schedules`)}</Link>
         )}
       </ContentError>
     );
@@ -95,9 +93,7 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
       <TabbedCardHeader>
         <RoutedTabs tabsArray={tabsArray} />
         <CardActions>
-          <CardCloseButton
-            linkTo={`/templates/job_template/${jobTemplate.id}/schedules`}
-          />
+          <CardCloseButton linkTo={`${pathRoot}schedules`} />
         </CardActions>
       </TabbedCardHeader>
     );
@@ -107,16 +103,16 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
       {cardHeader}
       <Switch>
         <Redirect
-          from="/templates/job_template/:id/schedules/:scheduleId"
-          to="/templates/job_template/:id/schedules/:scheduleId/details"
+          from={`${pathRoot}schedules/:scheduleId`}
+          to={`${pathRoot}schedules/:scheduleId/details`}
           exact
         />
-        {jobTemplateSchedule && [
+        {schedule && [
           <Route
             key="details"
-            path="/templates/job_template/:id/schedules/:scheduleId/details"
+            path={`${pathRoot}schedules/:scheduleId/details`}
             render={() => {
-              return <ScheduleDetail schedule={jobTemplateSchedule} />;
+              return <ScheduleDetail schedule={schedule} />;
             }}
           />,
         ]}
@@ -126,11 +122,9 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
           render={() => {
             return (
               <ContentError>
-                {jobTemplate && (
-                  <Link
-                    to={`/templates/job_template/${jobTemplate.id}/details`}
-                  >
-                    {i18n._(t`View Template Details`)}
+                {unifiedJobTemplate && (
+                  <Link to={`${pathRoot}details`}>
+                    {i18n._(t`View Details`)}
                   </Link>
                 )}
               </ContentError>
@@ -142,5 +136,5 @@ function JobTemplateSchedule({ i18n, setBreadcrumb, jobTemplate }) {
   );
 }
 
-export { JobTemplateSchedule as _JobTemplateSchedule };
-export default withI18n()(JobTemplateSchedule);
+export { Schedule as _Schedule };
+export default withI18n()(Schedule);

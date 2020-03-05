@@ -9,7 +9,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
-import { ScheduleList } from '@components/Schedule';
+import { Schedules } from '@components/Schedule';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
@@ -116,7 +116,7 @@ class Project extends Component {
   }
 
   render() {
-    const { location, match, me, i18n } = this.props;
+    const { location, match, me, i18n, setBreadcrumb } = this.props;
 
     const {
       project,
@@ -175,7 +175,10 @@ class Project extends Component {
       cardHeader = null;
     }
 
-    if (location.pathname.endsWith('edit')) {
+    if (
+      location.pathname.endsWith('edit') ||
+      location.pathname.includes('schedules/')
+    ) {
       cardHeader = null;
     }
 
@@ -247,7 +250,9 @@ class Project extends Component {
               <Route
                 path="/projects/:id/schedules"
                 render={() => (
-                  <ScheduleList
+                  <Schedules
+                    setBreadcrumb={setBreadcrumb}
+                    unifiedJobTemplate={project}
                     loadSchedules={this.loadSchedules}
                     loadScheduleOptions={this.loadScheduleOptions}
                   />

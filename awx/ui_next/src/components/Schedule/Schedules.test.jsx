@@ -2,9 +2,9 @@ import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import JobTemplateSchedules from './JobTemplateSchedules';
+import Schedules from './Schedules';
 
-describe('<JobTemplateSchedules />', () => {
+describe('<Schedules />', () => {
   test('initially renders successfully', async () => {
     let wrapper;
     const history = createMemoryHistory({
@@ -14,10 +14,7 @@ describe('<JobTemplateSchedules />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <JobTemplateSchedules
-          setBreadcrumb={() => {}}
-          jobTemplate={jobTemplate}
-        />,
+        <Schedules setBreadcrumb={() => {}} jobTemplate={jobTemplate} />,
 
         {
           context: {

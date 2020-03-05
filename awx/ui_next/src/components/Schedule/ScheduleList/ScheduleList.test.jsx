@@ -2,8 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { SchedulesAPI } from '@api';
-import { ScheduleList } from '@components/Schedule';
-import mockSchedules from './data.schedules.json';
+import ScheduleList from './ScheduleList';
+import mockSchedules from '../data.schedules.json';
 
 jest.mock('@api/models/Schedules');
 

@@ -7,13 +7,13 @@ import { SchedulesAPI } from '@api';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import DataListToolbar from '@components/DataListToolbar';
-import { ScheduleListItem } from '@components/Schedule';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
+import ScheduleListItem from './ScheduleListItem';
 
 const QS_CONFIG = getQSConfig('schedule', {
   page: 1,

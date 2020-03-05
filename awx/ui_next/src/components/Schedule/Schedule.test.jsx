@@ -4,8 +4,7 @@ import { Route } from 'react-router-dom';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-
-import JobTemplateSchedule from './JobTemplateSchedule';
+import Schedule from './Schedule';
 
 jest.mock('@api/models/Schedules');
 
@@ -60,10 +59,10 @@ SchedulesAPI.readCredentials.mockResolvedValue({
   },
 });
 
-describe('<JobTemplateSchedule />', () => {
+describe('<Schedule />', () => {
   let wrapper;
   let history;
-  const jobTemplate = { id: 1, name: 'Mock JT' };
+  const unifiedJobTemplate = { id: 1, name: 'Mock JT' };
   beforeAll(async () => {
     history = createMemoryHistory({
       initialEntries: ['/templates/job_template/1/schedules/1/details'],
@@ -73,9 +72,9 @@ describe('<JobTemplateSchedule />', () => {
         <Route
           path="/templates/job_template/:id/schedules"
           component={() => (
-            <JobTemplateSchedule
+            <Schedule
               setBreadcrumb={() => {}}
-              jobTemplate={jobTemplate}
+              unifiedJobTemplate={unifiedJobTemplate}
             />
           )}
         />,
