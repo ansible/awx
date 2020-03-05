@@ -358,21 +358,22 @@ class JobNotificationMixin(object):
                    'approval_status': 'approved',
                    'approval_node_name': 'Approve Me',
                    'workflow_url': 'https://towerhost/#/workflows/1010',
-                   'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
- 'traceback': '',
- 'status': 'running',
- 'started': '2019-08-07T21:46:38.362630+00:00',
- 'project': 'Stub project',
- 'playbook': 'ping.yml',
- 'name': 'Stub Job Template',
- 'limit': '',
- 'inventory': 'Stub Inventory',
- 'id': 42,
- 'hosts': {},
- 'friendly_name': 'Job',
- 'finished': False,
- 'credential': 'Stub credential',
- 'created_by': 'admin'}"""}
+                   'job_metadata': {'url': 'https://towerhost/$/jobs/playbook/13',
+                                    'traceback': '',
+                                    'status': 'running',
+                                    'started': '2019-08-07T21:46:38.362630+00:00',
+                                    'project': 'Stub project',
+                                    'playbook': 'ping.yml',
+                                    'name': 'Stub Job Template',
+                                    'limit': '',
+                                    'inventory': 'Stub Inventory',
+                                    'id': 42,
+                                    'hosts': {},
+                                    'friendly_name': 'Job',
+                                    'finished': False,
+                                    'credential': 'Stub credential',
+                                    'created_by': 'admin',
+                                    'stdout': 'Job output'}}
 
         return context
 
@@ -393,7 +394,7 @@ class JobNotificationMixin(object):
             'job': job_context,
             'job_friendly_name': self.get_notification_friendly_name(),
             'url': self.get_ui_url(),
-            'job_metadata': json.dumps(self.notification_data(), indent=4)
+            'job_metadata': self.notification_data()
         }
 
         def build_context(node, fields, whitelisted_fields):

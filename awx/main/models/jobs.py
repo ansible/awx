@@ -716,7 +716,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                          credential=getattr(self.machine_credential, 'name', None),
                          limit=self.limit,
                          extra_vars=self.display_extra_vars(),
-                         hosts=all_hosts))
+                         hosts=all_hosts,
+                         stdout=self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)))
         return data
 
     def _resources_sufficient_for_launch(self):
