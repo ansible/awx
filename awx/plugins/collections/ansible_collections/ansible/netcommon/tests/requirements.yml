@@ -1,0 +1,4 @@
+integration_tests_dependencies:
+- junipernetworks.junos
+- cisco.iosxr
+unit_tests_dependencies: []

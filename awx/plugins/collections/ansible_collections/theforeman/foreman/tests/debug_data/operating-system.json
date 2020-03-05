@@ -1,0 +1,12 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "validate_certs":false,
+  "name":"Debian",
+  "major":"9",
+  "minor":"2",
+  "family":"Debian",
+  "password_hash":"SHA256",
+  "state":"present",
+}

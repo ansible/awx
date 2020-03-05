@@ -1,0 +1,46 @@
+---
+- name: "Ensure Hostrgoup '{{ hostgroup_name }}' is {{ hostgroup_state }} change {{ expected_change }} "
+  vars:
+    hostgroup_name: "test_hostgroup"
+    hostgroup_state: present
+  foreman_hostgroup:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ hostgroup_name }}"
+    updated_name: "{{ hostgroup_updated_name | default(omit) }}"
+    parent: "{{ hostgroup_parent | default(omit) }}"
+    locations: "{{ hostgroup_locations | default(omit) }}"
+    organizations: "{{ hostgroup_organizations | default(omit) }}"
+    compute_resource: "{{ hostgroup_compute_resource | default(omit) }}"
+    compute_profile: "{{ hostgroup_compute_profile | default(omit) }}"
+    domain: "{{ hostgroup_domain | default(omit) }}"
+    subnet: "{{ hostgroup_subnet | default(omit) }}"
+    subnet6: "{{ hostgroup_subnet6 | default(omit) }}"
+    realm: "{{ hostgroup_realm | default(omit) }}"
+    description: "{{ hostgroup_description | default(omit) }}"
+    architecture: "{{ hostgroup_architecture | default(omit) }}"
+    operatingsystem: "{{ hostgroup_operatingsystem | default(omit) }}"
+    medium: "{{ hostgroup_installation_medium | default(omit) }}"
+    ptable: "{{ hostgroup_ptable | default(omit) }}"
+    pxe_loader: "{{ hostgroup_pxe_loader | default(omit) }}"
+    root_pass: "{{ hostgroup_root_pass | default(omit) }}"
+    environment: "{{ hostgroup_environment | default(omit) }}"
+    config_groups: "{{ hostgroup_config_groups | default(omit) }}"
+    puppet_proxy: "{{ hostgroup_puppet_proxy | default(omit) }}"
+    puppet_ca_proxy: "{{ hostgroup_puppet_ca_proxy | default(omit) }}"
+    openscap_proxy: "{{ hostgroup_openscap_proxy | default(omit) }}"
+    organization: "{{ hostgroup_organization | default(omit) }}"
+    content_source: "{{ hostgroup_content_source | default(omit) }}"
+    lifecycle_environment: "{{ hostgroup_lifecycle_environment | default(omit) }}"
+    content_view: "{{ hostgroup_content_view | default(omit) }}"
+    parameters: "{{ hostgroup_parameters | default(omit) }}"
+    state: "{{ hostgroup_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring hostgroup is {{ hostgroup_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

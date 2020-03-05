@@ -1,0 +1,3 @@
+apypie>=0.0.5
+ansible>=2.3
+-r requirements-common.txt

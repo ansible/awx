@@ -1,0 +1,46 @@
+---
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - name: Load server config
+    # To remove this task it is probably necessary to rerecord
+    include_vars:
+      file: vars/server.yml
+  - include: tasks/redhat_manifest.yml
+    vars:
+      expected_change: true
+      pool_state: present
+      manifest_state: present
+      pool_quantity: 1
+    # Check independence
+  - include: tasks/redhat_manifest.yml
+    vars:
+      expected_change: false
+      pool_state: present
+      manifest_state: present
+      pool_quantity: 1
+    # Test adding more subs
+  - include: tasks/redhat_manifest.yml
+    vars:
+      expected_change: true
+      pool_state: present
+      manifest_state: present
+      pool_quantity: 3
+    # Test removing subs & export
+  - include: tasks/redhat_manifest.yml
+    vars:
+      expected_change: true
+      pool_state: present
+      manifest_state: present
+      pool_quantity: 2
+      manifest_export_path: "/tmp/manifest_export.zip"
+    # Delete manifest
+  - include: tasks/redhat_manifest.yml
+    vars:
+      expected_change: true
+      pool_state: absent
+      manifest_state: absent
+      pool_quantity: 2
+...

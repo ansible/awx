@@ -1,0 +1,717 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/api/status
+  response:
+    body:
+      string: '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '63'
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"7462024e111aafa1fe0b7de16a6757f0"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=10000
+      Server:
+      - Apache
+      Set-Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 3e341910-4dea-492d-ac32-7b09333b34b0
+      X-Runtime:
+      - '0.032405'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/katello/api/organizations?search=name%3D%22Test+Organization%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\":
+        4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n  \"sort\":
+        {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"label\":\"Test_Organization\",\"created_at\":\"2019-10-04
+        11:24:14 UTC\",\"updated_at\":\"2019-10-04 11:24:14 UTC\",\"id\":3,\"name\":\"Test
+        Organization\",\"title\":\"Test Organization\",\"description\":\"A test organization\"}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"8ff36d79f0bb898b12ca72bd95e96914-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9999
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - e771ce51-4923-4d3d-8584-0fe6e8b775a4
+      X-Runtime:
+      - '0.019215'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '388'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/katello/api/organizations/3/products?search=name%3D%22Test+Product%22&per_page=4294967296
+  response:
+    body:
+      string: '{"total":1,"subtotal":1,"page":1,"per_page":"4294967296","error":null,"search":"name=\"Test
+        Product\"","sort":{"by":"name","order":"asc"},"results":[{"id":1,"cp_id":"890145443220","name":"Test
+        Product","label":"Test_Product","description":"A happy little test product","provider_id":3,"sync_plan_id":null,"sync_summary":{},"gpg_key_id":null,"ssl_ca_cert_id":null,"ssl_client_cert_id":null,"ssl_client_key_id":null,"sync_state":null,"last_sync":null,"last_sync_words":null,"organization_id":3,"organization":{"name":"Test
+        Organization","label":"Test_Organization","id":3},"sync_plan":null,"repository_count":3}]}
+
+        '
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"ef6c5aa7f76ff5ef4cbd967a3d7bb507-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9998
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 0b8dfdba-0606-440a-9b51-f77427fe3135
+      X-Runtime:
+      - '0.045733'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '612'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/katello/api/products/1/repositories?search=name%3D%22Test+File+Repository%22&per_page=4294967296
+  response:
+    body:
+      string: '{"total":3,"subtotal":1,"page":1,"per_page":"4294967296","error":null,"search":"name=\"Test
+        File Repository\"","sort":{"by":"name","order":"asc"},"results":[{"backend_identifier":"b825f0a6-69db-4c4a-b324-f8c9eebd1621","relative_path":"Test_Organization/Library/custom/Test_Product/Test_File_Repository","container_repository_name":null,"full_path":"http://centos7-katello-3-12.anubis.example.com/pulp/isos/Test_Organization/Library/custom/Test_Product/Test_File_Repository/","id":12,"name":"Test
+        File Repository","label":"Test_File_Repository","description":null,"last_sync":null,"content_view":{"id":2,"name":"Default
+        Organization View"},"content_type":"file","url":"https://repos.fedorapeople.org/pulp/pulp/demo_repos/zoo/","arch":"noarch","content_id":"1570193666143","major":null,"minor":null,"product":{"id":1,"cp_id":"890145443220","name":"Test
+        Product","orphaned":false,"redhat":false,"sync_plan":null},"content_label":"Test_Organization_Test_Product_Test_File_Repository","content_counts":{"ostree_branch":0,"docker_manifest":0,"docker_manifest_list":0,"docker_tag":0,"rpm":0,"srpm":0,"package":0,"package_group":0,"erratum":0,"puppet_module":0,"file":0,"deb":0,"module_stream":0},"last_sync_words":null}]}
+
+        '
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"e7eacde293997d6aeb0d46c7165b5af2-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9997
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 971519f3-6529-4141-8cd0-4e3cc121930b
+      X-Runtime:
+      - '0.046826'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '1215'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/katello/api/repositories/12
+  response:
+    body:
+      string: '  {"ostree_branches":[],"relative_path":"Test_Organization/Library/custom/Test_Product/Test_File_Repository","promoted":false,"content_view_version_id":2,"library_instance_id":null,"organization":{"name":"Test
+        Organization","label":"Test_Organization","id":3},"created_at":"2019-10-04
+        12:54:25 UTC","updated_at":"2019-10-04 12:54:26 UTC","backend_identifier":"b825f0a6-69db-4c4a-b324-f8c9eebd1621","container_repository_name":null,"full_path":"http://centos7-katello-3-12.anubis.example.com/pulp/isos/Test_Organization/Library/custom/Test_Product/Test_File_Repository/","id":12,"name":"Test
+        File Repository","label":"Test_File_Repository","description":null,"last_sync":null,"content_view":{"id":2,"name":"Default
+        Organization View"},"content_type":"file","url":"https://repos.fedorapeople.org/pulp/pulp/demo_repos/zoo/","arch":"noarch","content_id":"1570193666143","major":null,"minor":null,"product":{"id":1,"cp_id":"890145443220","name":"Test
+        Product","orphaned":false,"redhat":false,"sync_plan":null},"content_label":"Test_Organization_Test_Product_Test_File_Repository","content_counts":{"ostree_branch":0,"docker_manifest":0,"docker_manifest_list":0,"docker_tag":0,"rpm":0,"srpm":0,"package":0,"package_group":0,"erratum":0,"puppet_module":0,"file":0,"deb":0,"module_stream":0},"last_sync_words":null,"environment":{"id":2,"registry_unauthenticated_pull":false},"docker_upstream_name":null,"docker_tags_whitelist":null,"mirror_on_sync":true,"verify_ssl_on_sync":true,"unprotected":true,"checksum_type":null,"download_policy":null,"gpg_key_id":null,"ssl_ca_cert_id":null,"ssl_client_cert_id":null,"ssl_client_key_id":null,"upstream_username":null,"ostree_upstream_sync_policy":null,"ostree_upstream_sync_depth":null,"computed_ostree_upstream_sync_depth":0,"deb_releases":null,"deb_components":null,"deb_architectures":null,"ignore_global_proxy":false,"ignorable_content":null,"gpg_key":null,"ssl_ca_cert":{"id":null,"name":null},"ssl_client_cert":{"id":null,"name":null},"ssl_client_key":{"id":null,"name":null},"permissions":{"deletable":true},"upstream_password_exists":false,"upstream_auth_exists":false}
+
+        '
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"477b831cdc1079505c4cdd7a339f3278-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9996
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - e764c81c-43d9-4b66-8a7a-98739d229262
+      X-Runtime:
+      - '0.040492'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '2113'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: GET
+    uri: https://centos7-katello-3-12/katello/api/repositories/12/files?search=name+%3D+%22file_repo_test.txt%22+and+checksum+%3D+%22c2e8413929f47c7ce4b23855eda63442f323279455d35dadebf44892503bde3b%22&per_page=4294967296
+  response:
+    body:
+      string: '{"total":0,"subtotal":0,"page":1,"per_page":"4294967296","error":null,"search":"name
+        = \"file_repo_test.txt\" and checksum = \"c2e8413929f47c7ce4b23855eda63442f323279455d35dadebf44892503bde3b\"","sort":{"by":"name","order":"asc"},"results":[]}
+
+        '
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"7e45b1d1b9bcbe8a9db97c28b8111b1f-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9995
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - e1f32942-151e-4d58-8912-cf8c41c03e4d
+      X-Runtime:
+      - '0.024123'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '244'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: POST
+    uri: https://centos7-katello-3-12/katello/api/repositories/12/content_uploads
+  response:
+    body:
+      string: '{"upload_id":"4b1d6341-ef67-4bb2-9487-85f97339b009","_href":"/pulp/api/v2/content/uploads/4b1d6341-ef67-4bb2-9487-85f97339b009/"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      ETag:
+      - W/"6268a00f3558bbbd6c9d60681a5bbc02-gzip"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9994
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 66d8183c-2637-44ca-ad46-0e3eb1f87f81
+      X-Runtime:
+      - '0.027657'
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '129'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: content=This+file+is+used+for+testing+file+repository+upload.%0A&offset=0
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265; request_method=POST
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: PUT
+    uri: https://centos7-katello-3-12/katello/api/repositories/12/content_uploads/4b1d6341-ef67-4bb2-9487-85f97339b009
+  response:
+    body:
+      string: ''
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9993
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=PUT; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 204 No Content
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 1e42d7c9-abad-4c56-ab29-6cf5eb18fc63
+      X-Runtime:
+      - '0.027236'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: '{"uploads": [{"id": "4b1d6341-ef67-4bb2-9487-85f97339b009", "name": "file_repo_test.txt",
+      "size": 54, "checksum": "c2e8413929f47c7ce4b23855eda63442f323279455d35dadebf44892503bde3b"}]}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '183'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265; request_method=PUT
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: PUT
+    uri: https://centos7-katello-3-12/katello/api/repositories/12/import_uploads
+  response:
+    body:
+      string: '  {"id":"069e53cd-b40d-4c68-9c1d-660ae67b8400","label":"Actions::Katello::Repository::ImportUpload","pending":false,"action":"Upload
+        into repository ''Test File Repository''; product ''Test Product''; organization
+        ''Test Organization''","username":"admin","started_at":"2019-10-04 12:54:31
+        UTC","ended_at":"2019-10-04 12:54:34 UTC","state":"stopped","result":"success","progress":1.0,"input":{"repository":{"id":12,"name":"Test
+        File Repository","label":"Test_File_Repository"},"product":{"id":1,"name":"Test
+        Product","label":"Test_Product","cp_id":"890145443220"},"provider":{"id":3,"name":"Anonymous"},"organization":{"id":3,"name":"Test
+        Organization","label":"Test_Organization"},"services_checked":["pulp","pulp_auth"],"repository_id":12,"sync_capsule":true,"upload_results":[{"pulp_tasks":[{"exception":null,"task_type":"pulp.server.managers.content.upload.import_uploaded_unit","_href":"/pulp/api/v2/tasks/138254df-d35b-4cd9-9dc9-4237928f4035/","task_id":"138254df-d35b-4cd9-9dc9-4237928f4035","tags":["pulp:repository:b825f0a6-69db-4c4a-b324-f8c9eebd1621","pulp:action:import_upload"],"finish_time":"2019-10-04T12:54:32Z","_ns":"task_status","start_time":"2019-10-04T12:54:32Z","traceback":null,"spawned_tasks":[],"progress_report":{},"queue":"reserved_resource_worker-1@centos7-katello-3-12.anubis.example.com.dq2","state":"finished","worker_name":"reserved_resource_worker-1@centos7-katello-3-12.anubis.example.com","result":{"details":null,"success_flag":true,"summary":null},"error":null,"_id":{"$oid":"5d974108f564257d8d7b44f9"},"id":"5d974108f564257d8d7b44f9"}],"poll_attempts":{"total":1,"failed":0}}],"current_request_id":null,"current_timezone":"UTC","current_user_id":4,"current_organization_id":null,"current_location_id":null},"output":{"upload_results":[{"type":"file"}]},"humanized":{"action":"Upload
+        into","input":[["repository",{"text":"repository ''Test File Repository''","link":null}],["product",{"text":"product
+        ''Test Product''","link":"/products/1/"}],["organization",{"text":"organization
+        ''Test Organization''","link":"/organizations/3/edit"}]],"output":"","errors":[]},"cli_example":null}
+
+        '
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 04 Oct 2019 12:54:31 GMT
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9992
+      Server:
+      - Apache
+      Status:
+      - 202 Accepted
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 07c37096-02fd-4aeb-855e-b4342dcd4d4d
+      X-Runtime:
+      - '3.022947'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Cookie:
+      - _session_id=8622e8fd56eb59de697f80de75364265; request_method=PUT
+      User-Agent:
+      - apypie (https://github.com/Apipie/apypie)
+    method: DELETE
+    uri: https://centos7-katello-3-12/katello/api/repositories/12/content_uploads/4b1d6341-ef67-4bb2-9487-85f97339b009
+  response:
+    body:
+      string: ''
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Date:
+      - Fri, 04 Oct 2019 12:54:34 GMT
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Keep-Alive:
+      - timeout=5, max=9991
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 204 No Content
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 16051103-f24e-4f64-a8fc-68c8c49c2b2f
+      X-Runtime:
+      - '0.030533'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 204
+      message: No Content
+version: 1

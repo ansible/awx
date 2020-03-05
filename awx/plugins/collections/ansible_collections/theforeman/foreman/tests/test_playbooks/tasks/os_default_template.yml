@@ -1,0 +1,23 @@
+---
+- name: "Ensure os default template '{{ os_default_template_kind }}' for '{{ operatingsystem_name }}' is '{{ provisioning_template_name }}' ({{ os_default_template_state }})"
+  vars:
+    - operatingsystem_name: "famos"
+    - provisioning_template_name: "Timetravel finish"
+    - os_default_template_kind: "finish"
+    - os_default_template_state: present
+  foreman_os_default_template:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    operatingsystem: "{{ operatingsystem_name }}"
+    template_kind: "{{ os_default_template_kind }}"
+    provisioning_template: "{{ (os_default_template_state == 'absent') | ternary(omit, provisioning_template_name) }}"
+    state: "{{ os_default_template_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring os_default_template is {{ os_default_template_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

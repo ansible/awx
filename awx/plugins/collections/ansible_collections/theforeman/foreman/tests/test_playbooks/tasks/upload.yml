@@ -1,0 +1,23 @@
+---
+- name: "Upload content unit"
+  vars:
+    upload_organization: "Test Organization"
+    upload_src: "{{ playbook_dir }}/data/bear-4.1-1.noarch.rpm"
+    upload_repository: "Test Repository"
+    upload_product: "Test Product"
+  katello_upload:
+     username: "{{ foreman_username }}"
+     password: "{{ foreman_password }}"
+     server_url: "{{ foreman_server_url }}"
+     validate_certs: "{{ foreman_validate_certs }}"
+     organization: "{{ upload_organization }}"
+     src: "{{ upload_src }}"
+     repository: "{{ upload_repository }}"
+     product: "{{ upload_product }}"
+  register: result
+- assert:
+    fail_msg: "Uploading Content unit failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

@@ -1,0 +1,88 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_state: present
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: "Timetravel {{ item }}"
+      provisioning_template_kind: "{{ item }}"
+      provisioning_template_state: present
+    loop:
+      - provision
+      - finish
+  - include: tasks/os_default_template.yml
+    vars:
+      os_default_template_state: absent
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/os_default_template.yml
+    vars:
+      os_default_template_kind: "{{ item }}"
+      provisioning_template_name: "Timetravel {{ item }}"
+      os_default_template_state: present
+      expected_change: true
+    loop:
+      - provision
+      - finish
+  - include: tasks/os_default_template.yml
+    vars:
+      os_default_template_kind: "{{ item }}"
+      provisioning_template_name: "Timetravel {{ item }}"
+      os_default_template_state: present
+      expected_change: false
+    loop:
+      - provision
+      - finish
+  - include: tasks/os_default_template.yml
+    vars:
+      os_default_template_kind: "{{ item }}"
+      os_default_template_state: absent
+      expected_change: true
+    loop:
+      - provision
+      - finish
+  - include: tasks/os_default_template.yml
+    vars:
+      os_default_template_kind: "{{ item }}"
+      os_default_template_state: absent
+      expected_change: false
+    loop:
+      - provision
+      - finish
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: absent
+    loop:
+      - Timetravel provision
+      - Timetravel finish
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_state: absent
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

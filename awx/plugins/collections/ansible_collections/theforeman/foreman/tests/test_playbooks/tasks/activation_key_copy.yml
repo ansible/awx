@@ -1,0 +1,31 @@
+---
+- name: "copy katello activation key"
+  vars:
+    activation_key_name: "Test Activation Key"
+    activation_key_new_name: "Test Activation Key Copy"
+    activation_key_organization: "Test Organization"
+    activation_key_lifecycle_environment: "Library"
+    activation_key_content_view: "Default Organization View"
+    activation_key_subscriptions:
+      - name: "Test Product"
+    activation_key_auto_attach: False
+  katello_activation_key:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ activation_key_name }}"
+    new_name: "{{ activation_key_new_name }}"
+    organization: "{{ activation_key_organization }}"
+    lifecycle_environment: "{{ activation_key_lifecycle_environment }}"
+    content_view: "{{  activation_key_content_view }}"
+    subscriptions: "{{ activation_key_subscriptions }}"
+    auto_attach: "{{ activation_key_auto_attach }}"
+    state: 'copied'
+  register: result
+- assert:
+    fail_msg: "copy activation key failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

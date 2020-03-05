@@ -1,0 +1,38 @@
+---
+- name: "Create katello repository"
+  vars:
+    organization_name: "Test Organization"
+    product_name: "Test Product"
+    repository_name: "Test Repository"
+    repository_content_type: "yum"
+    repository_state: present
+    repository_url: "https://repos.fedorapeople.org/pulp/pulp/demo_repos/zoo/"
+  katello_repository:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    organization: "{{ organization_name }}"
+    name: "{{ repository_name }}"
+    label: "{{ repository_label | default(omit) }}"
+    mirror_on_sync: "{{ repository_mirror_on_sync | default(omit) }}"
+    state: "{{ repository_state }}"
+    product: "{{ product_name }}"
+    content_type: "{{ repository_content_type }}"
+    url: "{{ repository_url }}"
+    upstream_username: "{{ repository_upstream_username | default(omit) }}"
+    upstream_password: "{{ repository_upstream_password | default(omit) }}"
+    deb_releases: "{{ repository_deb_releases | default(omit) }}"
+    deb_components: "{{ repository_deb_componentes | default(omit) }}"
+    deb_architectures: "{{ repository_deb_architectures | default(omit) }}"
+    docker_upstream_name: "{{ repository_docker_upstream_name | default(omit) }}"
+    docker_tags_whitelist: "{{ repository_docker_tags_whitelist | default(omit) }}"
+    download_policy: "{{ repository_download_policy | default(omit) }}"
+    gpg_key: "{{ repository_gpg_key | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring repositroy is {{ repository_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

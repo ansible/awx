@@ -1,0 +1,23 @@
+---
+- name: "Ensure compute_profile '{{ compute_profile_name }}' is {{ compute_profile_state }}"
+  vars:
+    - compute_profile_name: "Test Compute Profile"
+    - compute_profile_state: "present"
+  foreman_compute_profile:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ compute_profile_name }}"
+    compute_attributes: "{{ compute_profile_attributes | default(omit) }}"
+    state: "{{ compute_profile_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring compute profile is {{ compute_profile_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: compute_profile
+...

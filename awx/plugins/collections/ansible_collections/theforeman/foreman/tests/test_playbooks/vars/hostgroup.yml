@@ -1,0 +1,39 @@
+---
+hostgroup:
+  organizations:
+    - Test Org1
+    - Test Org2
+  locations:
+    - Foo
+    - Foo/Baz
+    - Bar
+  arch: x86_64
+  ptable: "Part table"
+  os:
+    family: Redhat
+    name: TestOS
+    major: 7
+    minor: 6
+  compute_resource:
+    name: 'libvirt-cr'
+    params:
+      url: "qemu:///system"
+  compute_profile:
+    name: 'myprofile'
+  domains:
+    - foo.example.com
+    - bar.example.com
+  subnet: Test subnet4
+  subne6: Test subnet6
+  puppet_server: "{{ foreman_proxy }}"
+  puppet_ca: "{{ foreman_proxy }}"
+  dns_proxy: "{{ foreman_proxy }}"
+  openscap_proxy: "{{ foreman_proxy }}"
+  content_source: "{{ foreman_proxy }}"
+  lifecycle_environment: "Library"
+  content_view:
+    name: my_content
+    version: '1.0'
+  config_groups:
+    - cfg_group1
+    - cfg_group2

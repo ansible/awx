@@ -1,0 +1,9 @@
+pbr
+ansible
+pycodestyle
+flake8
+pylint
+voluptuous
+yamllint
+rstcheck
+ruamel.yaml

@@ -1,0 +1,12 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "validate_certs":false,
+  "name":"Production",
+  "organization":"Default Organization",
+  "label": "production",
+  "description": "The production environment",
+  "prior": "Library",
+  "state":"present",
+}

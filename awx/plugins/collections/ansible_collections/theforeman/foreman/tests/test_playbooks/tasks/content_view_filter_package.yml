@@ -1,0 +1,38 @@
+---
+- name: "Create/Update/Delete Package Content View Filter"
+  vars:
+    content_view_filter_name: "Test Package Content View Filter"
+    content_view_name: "Test Content View"
+    organization_name: "Test Organization"
+    repositories:
+      - name: "Test Repository"
+        product: "Test Product"
+    package_name: "bear"
+    filter_state: present
+  katello_content_view_filter:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ content_view_filter_name }}"
+    organization: "{{ organization_name }}"
+    content_view: "{{ content_view_name }}"
+    filter_type: "rpm"
+    repositories: "{{ repositories }}"
+    package_name: "{{ package_name }}"
+    version: "{{ version | default(omit) }}"
+    min_version: "{{ min_version | default(omit) }}"
+    max_version: "{{ max_version | default(omit) }}"
+    inclusion: "{{ inclusion | default(omit) }}"
+    original_packages: "{{ original_packages | default(omit) }}"
+    filter_state: "{{ filter_state }}"
+    rule_state: "{{ rule_state | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring content view filter is {{ filter_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+  vars:
+    filter_state: present
+...

@@ -1,0 +1,37 @@
+---
+- name: "Create/update katello activation key"
+  vars:
+    activation_key_name: "Test Activation Key"
+    activation_key_state: "present"
+    activation_key_organization: "Test Organization"
+    activation_key_lifecycle_environment: "Library"
+    activation_key_content_view: "Default Organization View"
+    activation_key_subscriptions:
+      - name: "Test Product"
+    activation_key_content_overrides:
+      - label: "Test_Organization_Test_Product_Test_Repository"
+        override: disabled
+  katello_activation_key:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ activation_key_name }}"
+    organization: "{{ activation_key_organization }}"
+    lifecycle_environment: "{{ activation_key_lifecycle_environment }}"
+    content_view: "{{  activation_key_content_view }}"
+    subscriptions: "{{ activation_key_subscriptions }}"
+    content_overrides: "{{ activation_key_content_overrides }}"
+    auto_attach: "{{ activation_key_auto_attach | default(omit) }}"
+    host_collections: "{{ activation_key_host_collections | default(omit) }}"
+    state: "{{ activation_key_state }}"
+  register: result
+- assert:
+    fail_msg: "Creating/updating activation key failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: activation_key
+...

@@ -1,0 +1,62 @@
+---
+- name: Create keypair (non-existing)
+  openstack.cloud.os_keypair:
+     cloud: "{{ cloud }}"
+     name: "{{ keypair_name }}"
+     state: present
+  register:
+    keypair
+
+# This assert verifies that Ansible is capable serializing data returned by SDK
+- name: Ensure private key is returned
+  assert:
+    that:
+      - keypair.key.public_key is defined and keypair.key.public_key
+
+- name: Delete keypair (non-existing)
+  openstack.cloud.os_keypair:
+      cloud: "{{ cloud }}"
+      name: "{{ keypair_name }}"
+      state: absent
+
+- name: Generate test key file
+  user:
+      name: "{{ ansible_env.USER }}"
+      generate_ssh_key: yes
+      ssh_key_file: .ssh/shade_id_rsa
+
+- name: Create keypair (file)
+  openstack.cloud.os_keypair:
+      cloud: "{{ cloud }}"
+      name: "{{ keypair_name }}"
+      state: present
+      public_key_file: "{{ ansible_env.HOME }}/.ssh/shade_id_rsa.pub"
+
+- name: Delete keypair (file)
+  openstack.cloud.os_keypair:
+      cloud: "{{ cloud }}"
+      name: "{{ keypair_name }}"
+      state: absent
+
+- name: Create keypair (key)
+  openstack.cloud.os_keypair:
+      cloud: "{{ cloud }}"
+      name: "{{ keypair_name }}"
+      state: present
+      public_key: "{{ lookup('file', '~/.ssh/shade_id_rsa.pub') }}"
+
+- name: Delete keypair (key)
+  openstack.cloud.os_keypair:
+      cloud: "{{ cloud }}"
+      name: "{{ keypair_name }}"
+      state: absent
+
+- name: Delete test key pub file
+  file:
+      name: "{{ ansible_env.HOME }}/.ssh/shade_id_rsa.pub"
+      state: absent
+
+- name: Delete test key pvt file
+  file:
+      name: "{{ ansible_env.HOME }}/.ssh/shade_id_rsa"
+      state: absent

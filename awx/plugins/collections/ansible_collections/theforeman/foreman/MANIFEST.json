@@ -1,0 +1,64 @@
+{
+ "collection_info": {
+  "namespace": "theforeman",
+  "name": "foreman",
+  "version": "0.2.0",
+  "authors": [
+   "Andrew Kofink <ajkofink@gmail.com>",
+   "Anthony Green <green@moxielogic.com>",
+   "Anton <nesanton@gmail.com>",
+   "Baptiste Agasse <baptiste.agasse@gmail.com>",
+   "Bernhard Hopfenm\u00fcller <hopfenmueller@atix.de>",
+   "Bernhard Suttner <sbernhard@users.noreply.github.com>",
+   "Bryan Kearney <bkearney@redhat.com>",
+   "Chris Forkner <gen2fish@gmail.com>",
+   "Christoffer Reijer <ephracis@gmail.com>",
+   "Eric D. Helms <ericdhelms@gmail.com>",
+   "Evgeni Golov <evgeni@golov.de>",
+   "Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>",
+   "Greg Swift <gregswift@gmail.com>",
+   "Ismael Puerto <ismaelpuerto@users.noreply.github.com>",
+   "John Berninger <john.berninger@gmail.com>",
+   "Kirill Shirinkin <fodojyko@gmail.com>",
+   "Lester Claudio <claudiol@redhat.com>",
+   "Manisha Singhal <manisha1595@gmail.com>",
+   "Manuel Bonk <githubMB@bonkii.com>",
+   "Marek Czernek <mczernek@redhat.com>",
+   "Mark Hlawatschek <hlawatschek@atix.de>",
+   "Markus Bucher <bucher@atix.de>",
+   "Matthias Dellweg <dellweg@atix.de>",
+   "Patrick Creech <pcreech@redhat.com>",
+   "Philipp <philipp98.joos@gmail.com>",
+   "Quirin Pamp <Q.Pamp.2009@my.bristol.ac.uk>",
+   "Sam <samcalvert@me.com>",
+   "Sean O'Keeffe <seanokeeffe797@gmail.com>",
+   "William Bradford Clark <wclark@redhat.com>",
+   "furhouse <furhouse@users.noreply.github.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "foreman",
+   "katello",
+   "satellite",
+   "orcharhino"
+  ],
+  "description": "Ansible Modules to manage Foreman and Katello installations",
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/theforeman/foreman-ansible-modules",
+  "documentation": "https://theforeman.org/plugins/foreman-ansible-modules/",
+  "homepage": "https://theforeman.org/",
+  "issues": "https://github.com/theforeman/foreman-ansible-modules/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "7329a871ed1aea0a5abf7de7e3cb19bb793f978c1bb12fd5e19f22e728fa85ab",
+  "format": 1
+ },
+ "format": 1
+}

@@ -1,0 +1,145 @@
+---
+- hosts: localhost
+  tags:
+    - setup
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include_tasks: tasks/organization.yml
+      vars:
+        organization_state: present
+    - include_tasks: tasks/product.yml
+      vars:
+        product_state: present
+    - include_tasks: tasks/repository.yml
+      vars:
+        repository_state: present
+    - include_tasks: tasks/host_collection.yml
+      vars:
+        host_collection_state: present
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        activation_key_name: Test Activation Key Copy
+
+- hosts: tests
+  tags:
+    - test
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - name: create minimal AK
+      include_tasks: tasks/activation_key.yml
+      vars:
+        expected_change: true
+        expected_diff: true
+        expected_diff_before: "content_overrides.*{}"
+        expected_diff_after: "Test_Organization_Test_Product_Test_Repository.*false"
+    - name: create minimal AK again, no change
+      include_tasks: tasks/activation_key.yml
+      vars:
+        expected_change: false
+    - name: remove minimal AK
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        expected_change: true
+    - name: create AK with auto_attach=true
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: True
+        expected_change: true
+        expected_diff: true
+        expected_diff_before: "subscriptions.*\\[\\]"
+        expected_diff_after: "subscriptions.*\\[[^\\]]"
+    - name: create AK with auto_attach=true again, no change
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: True
+        expected_change: false
+    - name: remove AK with auto_attach=true
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        expected_change: true
+    - name: create AK with auto_attach=false
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: False
+        expected_change: true
+    - name: create AK with auto_attach=false again, no change
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: False
+        expected_change: false
+    - name: remote AK with auto_attach=false
+      include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        expected_change: true
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_host_collections:
+          - "TheAnswer"
+        expected_change: true
+        expected_diff: true
+        expected_diff_before: ""
+        expected_diff_after: "activation_keys/host_collections"
+    - include_tasks: tasks/activation_key_minimal.yml
+      vars:
+        expected_change: false
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        expected_change: false
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: False
+        expected_change: true
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_auto_attach: False
+        expected_change: false
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: present_with_defaults
+        expected_change: false
+    - include_tasks: tasks/activation_key_copy.yml
+      vars:
+        expected_change: true
+    - include_tasks: tasks/activation_key_copy.yml
+      vars:
+        expected_change: false
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_host_collections: []
+        expected_change: true
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        expected_change: true
+    - include_tasks: tasks/activation_key.yml
+      vars:
+        activation_key_state: absent
+        expected_change: false
+
+- hosts: localhost
+  tags:
+    - teardown
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include_tasks: tasks/repository.yml
+      vars:
+        repository_state: absent
+    - include_tasks: tasks/product.yml
+      vars:
+        product_state: absent
+    - include_tasks: tasks/organization.yml
+      vars:
+        organization_state: absent

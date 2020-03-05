@@ -1,0 +1,25 @@
+---
+- name: "Ensure bookmark '{{ bookmark_name }}' is {{ bookmark_state }}"
+  vars:
+    bookmark_controller: job_invocations
+    bookmark_name: test
+    bookmark_public: true
+    bookmark_query: "started_at > 24 hours ago"
+    bookmark_state: present
+  foreman_bookmark:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    controller: "{{ bookmark_controller }}"
+    name: "{{ bookmark_name }}"
+    public: "{{ bookmark_public }}"
+    query: "{{ bookmark_query }}"
+    state: "{{ bookmark_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring bookmark is {{ bookmark_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

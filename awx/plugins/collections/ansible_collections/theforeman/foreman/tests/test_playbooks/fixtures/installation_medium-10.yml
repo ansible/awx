@@ -1,0 +1,888 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:52 GMT']
+      etag: [W/"7462024e111aafa1fe0b7de16a6757f0"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [c6875324-542d-4149-9491-e04ec723fc35]
+      x-runtime: ['0.027840']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media?per_page=4294967296
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 10,\n  \"subtotal\": 10,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": [{\"path\":\"http://example.org/another.iso\",\"os_family\":\"Debian\",\"created_at\":\"2019-09-27
+        15:24:51 UTC\",\"updated_at\":\"2019-09-27 15:24:51 UTC\",\"id\":13,\"name\":\"another
+        os\"},{\"path\":\"http://mirror.centos.org/centos/$major/os/$arch\",\"os_family\":\"Redhat\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":1,\"name\":\"CentOS
+        mirror\"},{\"path\":\"http://$release.release.core-os.net\",\"os_family\":\"Coreos\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":8,\"name\":\"CoreOS
+        mirror\"},{\"path\":\"http://ftp.debian.org/debian\",\"os_family\":\"Debian\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":2,\"name\":\"Debian
+        mirror\"},{\"path\":\"http://dl.fedoraproject.org/pub/alt/atomic/stable/Cloud_Atomic/$arch/os/\",\"os_family\":\"Redhat\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":4,\"name\":\"Fedora
+        Atomic mirror\"},{\"path\":\"http://dl.fedoraproject.org/pub/fedora/linux/releases/$major/Server/$arch/os/\",\"os_family\":\"Redhat\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":3,\"name\":\"Fedora
+        mirror\"},{\"path\":\"http://ftp.freebsd.org/pub/FreeBSD/releases/$arch/$version-RELEASE/\",\"os_family\":\"Freebsd\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":5,\"name\":\"FreeBSD
+        mirror\"},{\"path\":\"http://download.opensuse.org/distribution/leap/$version/repo/oss\",\"os_family\":\"Suse\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":6,\"name\":\"OpenSUSE
+        mirror\"},{\"path\":\"https://github.com/rancher/os/releases/download/v$version\",\"os_family\":\"Rancheros\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":9,\"name\":\"RancherOS
+        mirror\"},{\"path\":\"http://archive.ubuntu.com/ubuntu\",\"os_family\":\"Debian\",\"created_at\":\"2019-09-26
+        17:18:02 UTC\",\"updated_at\":\"2019-09-26 17:18:02 UTC\",\"id\":7,\"name\":\"Ubuntu
+        mirror\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"b86c51d02c1445fa4f3cd23676a39bf5"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [faf7c917-322c-4e4e-86cd-b5ff5fee5848]
+      x-runtime: ['0.022460']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/13
+  response:
+    body: {string: !!python/unicode '{"path":"http://example.org/another.iso","os_family":"Debian","created_at":"2019-09-27
+        15:24:51 UTC","updated_at":"2019-09-27 15:24:51 UTC","id":13,"name":"another
+        os","operatingsystems":[{"id":3,"name":"TempleOS","title":"TempleOS 1.2"}],"locations":[],"organizations":[{"id":11,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"96b1ca9ae5d9715b857bf60c52efeb77"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9733abb6-ba53-4df6-aa18-e27bb0f963a2]
+      x-runtime: ['0.021107']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/1
+  response:
+    body: {string: !!python/unicode '{"path":"http://mirror.centos.org/centos/$major/os/$arch","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":1,"name":"CentOS
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"9269e250092cea23f21782326431ca89"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [48233885-80ce-4dbc-aa00-875d76a1ade8]
+      x-runtime: ['0.021053']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/8
+  response:
+    body: {string: !!python/unicode '{"path":"http://$release.release.core-os.net","os_family":"Coreos","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":8,"name":"CoreOS
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"cf3d7b60865e87e3dd91f451ef273825"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [0dbfa744-f02c-4514-a237-bd1ee5a2e1bc]
+      x-runtime: ['0.021134']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/2
+  response:
+    body: {string: !!python/unicode '{"path":"http://ftp.debian.org/debian","os_family":"Debian","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":2,"name":"Debian
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"b57ca4b68d151dd2224dbbffa80b4877"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [40e67e63-5a9c-4671-9673-b958b0da6ed4]
+      x-runtime: ['0.020728']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/4
+  response:
+    body: {string: !!python/unicode '{"path":"http://dl.fedoraproject.org/pub/alt/atomic/stable/Cloud_Atomic/$arch/os/","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":4,"name":"Fedora
+        Atomic mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null}],"organizations":[{"id":1,"name":"Default
+        Organization","title":"Default Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"764f8fd41f32904d81a2c4ebebd0366a"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [f00b1275-b084-4f85-bbb2-06cbcbd8773d]
+      x-runtime: ['0.020585']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/3
+  response:
+    body: {string: !!python/unicode '{"path":"http://dl.fedoraproject.org/pub/fedora/linux/releases/$major/Server/$arch/os/","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":3,"name":"Fedora
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"c4c3c3cb6e8e0ae8174488f28611b24f"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [e13ced01-e8f5-447f-90fd-f5d92b60f28b]
+      x-runtime: ['0.020565']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/5
+  response:
+    body: {string: !!python/unicode '{"path":"http://ftp.freebsd.org/pub/FreeBSD/releases/$arch/$version-RELEASE/","os_family":"Freebsd","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":5,"name":"FreeBSD
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"68b22ec12ddc060da4230d497a8cd2cb"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [16bc6ba2-f435-41f4-95be-0e25a16c0b31]
+      x-runtime: ['0.020534']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/6
+  response:
+    body: {string: !!python/unicode '{"path":"http://download.opensuse.org/distribution/leap/$version/repo/oss","os_family":"Suse","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":6,"name":"OpenSUSE
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"1eaccebb3b3802ee9a22f1b6acf3d2dc"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [7fa86868-edbe-4fc3-84e5-e4c08888e2cd]
+      x-runtime: ['0.022815']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/9
+  response:
+    body: {string: !!python/unicode '{"path":"https://github.com/rancher/os/releases/download/v$version","os_family":"Rancheros","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":9,"name":"RancherOS
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"1e258d72e438ddd6f3e7fb0b06355b78"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9a9599d5-0a20-4d80-b506-e1e28819043a]
+      x-runtime: ['0.022843']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/media/7
+  response:
+    body: {string: !!python/unicode '{"path":"http://archive.ubuntu.com/ubuntu","os_family":"Debian","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":7,"name":"Ubuntu
+        mirror","operatingsystems":[],"locations":[{"id":2,"name":"Default Location","title":"Default
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"3b2226afed21a2afcd95b8319bbc6f49"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [20e023b1-fedc-4ef8-837c-afa9ce0ea432]
+      x-runtime: ['0.021509']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: GET
+    uri: https://foreman.example.com/api/locations?per_page=4294967296&search=title%3D%22Test+Location%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"title=\\\"Test Location\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"ancestry\":null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-09-27
+        15:24:46 UTC\",\"updated_at\":\"2019-09-27 15:24:46 UTC\",\"id\":12,\"name\":\"Test
+        Location\",\"title\":\"Test Location\",\"description\":null}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"91344b4afe741ed725297871c2569f08"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9d0a0b5b-8237-4ff4-bdf4-5918d9ea2c38]
+      x-runtime: ['0.017301']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [_session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/13
+  response:
+    body: {string: !!python/unicode '{"path":"http://example.org/another.iso","os_family":"Debian","created_at":"2019-09-27
+        15:24:51 UTC","updated_at":"2019-09-27 15:24:51 UTC","id":13,"name":"another
+        os","operatingsystems":[{"id":3,"name":"TempleOS","title":"TempleOS 1.2"}],"locations":[{"id":12,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":11,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"009d3fa932de4d61c4ac5946173cdcd2"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [request_method=PUT; path=/; secure; HttpOnly; SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [f7b3bc75-0e8a-4631-ae66-b48658be74c9]
+      x-runtime: ['0.051737']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/1
+  response:
+    body: {string: !!python/unicode '{"path":"http://mirror.centos.org/centos/$major/os/$arch","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":1,"name":"CentOS
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"a7f9ab58e45929d023655fd11c109110"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [810e41aa-0fbc-4531-abd0-3411f31f972b]
+      x-runtime: ['0.048498']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/8
+  response:
+    body: {string: !!python/unicode '{"path":"http://$release.release.core-os.net","os_family":"Coreos","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":8,"name":"CoreOS
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"3a4598282e079b9810efcbfb45085382"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9be7dc10-8f4d-48ac-b994-1220d8738e2a]
+      x-runtime: ['0.049267']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/2
+  response:
+    body: {string: !!python/unicode '{"path":"http://ftp.debian.org/debian","os_family":"Debian","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":2,"name":"Debian
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"f233a3438d1c75d68cca620583afe3a0"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [ba955fe2-4263-4d96-9cf2-e8dc9b73e57d]
+      x-runtime: ['0.049549']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/4
+  response:
+    body: {string: !!python/unicode '{"path":"http://dl.fedoraproject.org/pub/alt/atomic/stable/Cloud_Atomic/$arch/os/","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":4,"name":"Fedora
+        Atomic mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"845dfcf9854a2f43a94fd83a8cdf897f"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9e2a9ccc-895e-438b-b393-09c962de1146]
+      x-runtime: ['0.049707']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/3
+  response:
+    body: {string: !!python/unicode '{"path":"http://dl.fedoraproject.org/pub/fedora/linux/releases/$major/Server/$arch/os/","os_family":"Redhat","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":3,"name":"Fedora
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"5f86c626cafc7c424704c8d77bca5b6c"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [f28f64d9-74dd-4a32-ae58-6541d3539d7d]
+      x-runtime: ['0.052918']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/5
+  response:
+    body: {string: !!python/unicode '{"path":"http://ftp.freebsd.org/pub/FreeBSD/releases/$arch/$version-RELEASE/","os_family":"Freebsd","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":5,"name":"FreeBSD
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"f8b19d5407ee8da305166f7ade0a54a4"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [13f253fa-3ed3-4b1f-935d-202cf975dc3d]
+      x-runtime: ['0.055979']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/6
+  response:
+    body: {string: !!python/unicode '{"path":"http://download.opensuse.org/distribution/leap/$version/repo/oss","os_family":"Suse","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":6,"name":"OpenSUSE
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"190f40960a1b6121ba5a2769bc9fb819"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [2754775e-d764-42ec-a946-95571725bf0a]
+      x-runtime: ['0.051354']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/9
+  response:
+    body: {string: !!python/unicode '{"path":"https://github.com/rancher/os/releases/download/v$version","os_family":"Rancheros","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":9,"name":"RancherOS
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"c7bc1572f0efaf9b3f184245ab8100fa"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [964c2563-4c97-4728-93d0-75312cfb99f6]
+      x-runtime: ['0.051591']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"medium": {"location_ids": [12]}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['34']
+      Content-Type: [application/json]
+      Cookie: [request_method=PUT; _session_id=80d34c81be320b2559d16a496c32a4f4]
+    method: PUT
+    uri: https://foreman.example.com/api/media/7
+  response:
+    body: {string: !!python/unicode '{"path":"http://archive.ubuntu.com/ubuntu","os_family":"Debian","created_at":"2019-09-26
+        17:18:02 UTC","updated_at":"2019-09-26 17:18:02 UTC","id":7,"name":"Ubuntu
+        mirror","operatingsystems":[],"locations":[{"id":12,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":1,"name":"Default Organization","title":"Default
+        Organization","description":null}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:24:53 GMT']
+      etag: [W/"62812b208fa3b3e34baf12c9b5b4281f"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [fccca3f5-846e-4609-a2e9-3a0664ec1797]
+      x-runtime: ['0.050648']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

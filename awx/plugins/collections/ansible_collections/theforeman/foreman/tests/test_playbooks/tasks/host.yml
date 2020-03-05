@@ -1,0 +1,24 @@
+---
+- name: "Ensure host '{{ host_name }}' is {{ host_state }}"
+  foreman_host:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ host_name }}"
+    location: "{{ host_location | default(omit) }}"
+    organization: "{{ host_organization | default(omit) }}"
+    hostgroup: "{{ host_hostgroup | default(omit) }}"
+    enabled: "{{ host_enabled | default(omit) }}"
+    managed: "{{ host_managed | default(omit) }}"
+    build: "{{ host_build | default(omit) }}"
+    state: "{{ host_state | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring host is {{ host_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+  vars:
+    host_state: present
+...

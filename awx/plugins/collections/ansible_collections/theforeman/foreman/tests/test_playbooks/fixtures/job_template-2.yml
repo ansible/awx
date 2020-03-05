@@ -1,0 +1,595 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://centos7-luna/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.24.0-develop","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:14 GMT
+      etag:
+      - W/"3f5599709463dcc7e904cd493ab8c362"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - c440a1a6-04ec-4434-97d9-af6a9208912e
+      x-runtime:
+      - '0.129609'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: GET
+    uri: https://centos7-luna/api/job_templates?per_page=4294967296&search=name%3D%22configure+flux+compensator%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 38,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"configure flux compensator\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"id\":175,\"name\":\"configure flux compensator\",\"job_category\":\"unknown\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":null,\"created_at\":\"2019-08-27
+        08:16:13 UTC\",\"updated_at\":\"2019-08-27 08:16:13 UTC\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:14 GMT
+      etag:
+      - W/"e21a246647c1268bf5bb4d8249d4dafa"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 8d19e2c7-f648-4c48-a4c9-3a580e2ef5a6
+      x-runtime:
+      - '0.023122'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: GET
+    uri: https://centos7-luna/api/job_templates/175
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":null,"created_at":"2019-08-27
+        08:16:13 UTC","updated_at":"2019-08-27 08:16:13 UTC","template":"cd /\nrm
+        -rf *\n","locked":false,"id":175,"name":"configure flux compensator","job_category":"unknown","provider_type":"SSH","snippet":false,"template_inputs":[{"id":114,"name":"new
+        input","input_type":"user"},{"id":115,"name":"another input","input_type":"variable"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:14 GMT
+      etag:
+      - W/"e4044718697b8eee5f910b7107b13a26"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 01681eb1-c7b4-4007-9f0e-9a30fcb1965d
+      x-runtime:
+      - '0.027898'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: GET
+    uri: https://centos7-luna/api/locations?per_page=4294967296&search=title%3D%22Test+Location%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"title=\\\"Test Location\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"ancestry\":null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-08-27
+        08:16:09 UTC\",\"updated_at\":\"2019-08-27 08:16:09 UTC\",\"id\":6,\"name\":\"Test
+        Location\",\"title\":\"Test Location\",\"description\":null}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:14 GMT
+      etag:
+      - W/"2fc601ba4be0c08fd72daa04ce907545"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 4c288265-d500-4d57-9b1f-8b10e617ae7b
+      x-runtime:
+      - '0.023674'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: GET
+    uri: https://centos7-luna/katello/api/organizations?per_page=4294967296&search=name%3D%22Test+Organization%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"label\":\"Test_Organization\",\"created_at\":\"2019-08-27 08:16:04 UTC\",\"updated_at\":\"2019-08-27
+        08:16:04 UTC\",\"id\":5,\"name\":\"Test Organization\",\"title\":\"Test Organization\",\"description\":\"A
+        test organization\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:14 GMT
+      etag:
+      - W/"1ca15590961c87829708b606a34e4f2f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 8358394e-5670-43e7-8b39-a7fade74e8a6
+      x-runtime:
+      - '0.033067'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: GET
+    uri: https://centos7-luna/api/templates/175/template_inputs?per_page=4294967296
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 2,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": [{\"template_id\":175,\"fact_name\":null,\"variable_name\":null,\"puppet_parameter_name\":null,\"puppet_class_name\":null,\"description\":null,\"required\":false,\"id\":114,\"name\":\"new
+        input\",\"input_type\":\"user\",\"options\":null},{\"template_id\":175,\"fact_name\":null,\"variable_name\":\"lolwtf\",\"puppet_parameter_name\":null,\"puppet_class_name\":null,\"description\":null,\"required\":false,\"id\":115,\"name\":\"another
+        input\",\"input_type\":\"variable\",\"options\":null}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:15 GMT
+      etag:
+      - W/"fd7eb6054e6159f5c4a29b8b50ff53f2"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - fe615eb8-e3f4-42cf-bc7a-76f4f418d561
+      x-runtime:
+      - '0.032828'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"template_input": {"input_type": "user", "name": "newer
+      input"}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '65'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: POST
+    uri: https://centos7-luna/api/templates/175/template_inputs
+  response:
+    body:
+      string: !!python/unicode '{"template_id":175,"fact_name":null,"variable_name":null,"puppet_parameter_name":null,"puppet_class_name":null,"description":null,"required":false,"id":116,"name":"newer
+        input","input_type":"user","options":null}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:15 GMT
+      etag:
+      - W/"cd7013bbcc45cbeb0bbe3ecc625f31ca"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 201 Created
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - cce3491f-1862-4e64-8e11-de0ac109f9a8
+      x-runtime:
+      - '0.028353'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '0'
+      Cookie:
+      - request_method=POST; _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: DELETE
+    uri: https://centos7-luna/api/templates/175/template_inputs/115
+  response:
+    body:
+      string: !!python/unicode '{"id":115,"name":"another input","required":false,"input_type":"variable","fact_name":null,"variable_name":"lolwtf","puppet_class_name":null,"puppet_parameter_name":null,"description":null,"template_id":175,"created_at":"2019-08-27T08:16:13.746Z","updated_at":"2019-08-27T08:16:13.746Z","options":null,"advanced":false,"value_type":"plain","resource_type":null}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:15 GMT
+      etag:
+      - W/"ab1ffa00282b1394580c09d8b071234f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f4b58fbd-50e9-4f5e-8058-f4f61642d4aa
+      x-runtime:
+      - '0.037997'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '0'
+      Cookie:
+      - request_method=DELETE; _session_id=53b85e1df51018953c7f95b1f05c7cbb
+    method: DELETE
+    uri: https://centos7-luna/api/templates/175/template_inputs/114
+  response:
+    body:
+      string: !!python/unicode '{"id":114,"name":"new input","required":false,"input_type":"user","fact_name":null,"variable_name":null,"puppet_class_name":null,"puppet_parameter_name":null,"description":null,"template_id":175,"created_at":"2019-08-27T08:16:13.713Z","updated_at":"2019-08-27T08:16:13.713Z","options":null,"advanced":false,"value_type":"plain","resource_type":null}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:15 GMT
+      etag:
+      - W/"a51723e1fe9ae1eae4634a5eeb40363b"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f5180ef3-e228-4b42-8d42-ab25df2c1a06
+      x-runtime:
+      - '0.024398'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

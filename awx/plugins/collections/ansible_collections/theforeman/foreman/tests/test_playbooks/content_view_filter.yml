@@ -1,0 +1,187 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/product.yml
+    vars:
+      product_state: present
+  - include: tasks/repository.yml
+    vars:
+      repository_state: present
+  - include: tasks/repository.yml
+    vars:
+      repository_state: present
+  - include: tasks/repository.yml
+    vars:
+      repository_state: present
+      repository_name: Test Docker Repository
+      repository_content_type: docker
+      repository_url: https://registry.hub.docker.com
+      repository_docker_upstream_name: library/busybox
+  - include: tasks/katello_sync.yml
+  - include: tasks/katello_sync.yml
+    vars:
+      repository: Test Docker Repository
+  - include: tasks/content_view.yml
+    vars:
+      repositories:
+        - name: "Test Repository"
+          product: "Test Product"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - name: Test Content View Filter Package
+    block:
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          original_packages: true
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          original_packages: true
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          original_packages: false
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          original_packages: false
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          version: 1
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          version: 1
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          max_version: 1
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          max_version: 1
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          min_version: 1
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          min_version: 1
+          expected_change: false
+
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          inclusion: true
+          expected_change: true
+      - include: tasks/content_view_filter_package.yml
+        vars:
+          filter_state: absent
+          rule_state: absent
+          expected_change: true
+
+  - name: Test Content View Filter Errata ID
+    block:
+      - include: tasks/content_view_filter_errata_id.yml
+        vars:
+          expected_change: true
+      - include: tasks/content_view_filter_errata_id.yml
+        vars:
+          expected_change: false
+      - include: tasks/content_view_filter_errata_id.yml
+        vars:
+          filter_state: absent
+          rule_state: absent
+          expected_change: true
+
+  - name: Test Content View Filter Errata Date
+    block:
+      - include: tasks/content_view_filter_errata_date.yml
+        vars:
+          expected_change: true
+      - include: tasks/content_view_filter_errata_date.yml
+        vars:
+          expected_change: false
+      - include: tasks/content_view_filter_errata_date.yml
+        vars:
+          date_type: issued
+          expected_change: true
+      - include: tasks/content_view_filter_errata_date.yml
+        vars:
+          types: security
+          expected_change: true
+      - include: tasks/content_view_filter_errata_date.yml
+        vars:
+          filter_state: absent
+          rule_state: absent
+          expected_change: true
+
+  - name: Test Content View Filter Package Groups
+    block:
+      - include: tasks/content_view_filter_package_group.yml
+        vars:
+          expected_change: true
+      - include: tasks/content_view_filter_package_group.yml
+        vars:
+          expected_change: false
+      - include: tasks/content_view_filter_package_group.yml
+        vars:
+          filter_state: absent
+          rule_state: absent
+          expected_change: true
+
+  - name: Test Content View Filter Docker
+    block:
+      - include: tasks/content_view_filter_docker.yml
+        vars:
+          expected_change: true
+      - include: tasks/content_view_filter_docker.yml
+        vars:
+          expected_change: false
+      - include: tasks/content_view_filter_docker.yml
+        vars:
+          filter_state: absent
+          rule_state: absent
+          expected_change: true
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/repository.yml
+    vars:
+      repository_name: Test Docker Repository
+      repository_state: absent
+  - include: tasks/repository.yml
+    vars:
+      repository_state: absent
+  - include: tasks/product.yml
+    vars:
+      product_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

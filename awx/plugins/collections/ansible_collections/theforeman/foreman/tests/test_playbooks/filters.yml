@@ -1,0 +1,15 @@
+---
+- hosts: tests
+  tags:
+    - test
+  gather_facts: false
+  tasks:
+    - debug:
+        msg: "{{ 'Test__String)' | cp_label }}"
+    - assert:
+        that:
+          - "{{ 'Test String' | cp_label == 'Test_String' }}"
+          - "{{ 'Test__String' | cp_label == 'Test__String' }}"
+          - "{{ 'Test--String' | cp_label == 'Test--String' }}"
+          - "{{ 'Test (String) 1234' | cp_label == 'Test_String_1234' }}"
+...

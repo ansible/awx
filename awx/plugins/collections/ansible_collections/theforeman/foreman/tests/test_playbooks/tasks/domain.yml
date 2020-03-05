@@ -1,0 +1,26 @@
+---
+- name: "Create/Update/Delete domain"
+  vars:
+    domain_state: "present"
+  foreman_domain:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ domain_name }}"
+    updated_name: "{{ domain_updated_name | default(omit) }}"
+    dns_proxy: "{{ domain_dns_proxy | default(omit) }}"
+    locations: "{{ domain_locations }}"
+    organizations: "{{ domain_organizations }}"
+    parameters: "{{ domain_parameters | default(omit) }}"
+    state: "{{ domain_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring domain is {{ domain_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: domain
+...

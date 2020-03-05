@@ -1,0 +1,38 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+      organization_description: test
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: ""
+      expected_diff_after: "description.*test"
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "description.*test"
+      expected_diff_after: "description.*A test organization"
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+      expected_change: false
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+      expected_change: true
+...

@@ -1,0 +1,179 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/status
+  response:
+    body:
+      string: '{"result":"ok","status":200,"version":"1.21.3","api_version":2}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '63'
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 30 Jul 2019 10:17:08 GMT
+      ETag:
+      - W/"8ae0d3efe0e232e2a73486dc1f2e0fbb"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Set-Cookie:
+      - _session_id=418de405ff3dcb06ff08f64ec4e6ea6b; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - 4e6a4746-eb56-49b7-8d4e-12b9ee05ec6d
+      X-Runtime:
+      - '0.084777'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=418de405ff3dcb06ff08f64ec4e6ea6b
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/hosts?thin=True&search=name%3D%22dave-bracy.proxy6.dev.atix%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 5,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"dave-bracy.proxy6.dev.atix\\\"\",\n\
+        \  \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\"\
+        : [{\"id\":40,\"name\":\"dave-bracy.proxy6.dev.atix\"}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 30 Jul 2019 10:17:08 GMT
+      ETag:
+      - W/"f8db26e9a1d7154a222118c7eaeee729"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - 209b854f-c157-4c0e-8eaf-f0140eb0fcdc
+      X-Runtime:
+      - '0.061795'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=418de405ff3dcb06ff08f64ec4e6ea6b
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/hosts/40/snapshots
+  response:
+    body:
+      string: "{\n  \"total\": 0,\n  \"subtotal\": 0,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"ansible\\\"\",\n  \"sort\": {\n  \
+        \  \"by\": null,\n    \"order\": null\n  },\n  \"results\": []\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 30 Jul 2019 10:17:08 GMT
+      ETag:
+      - W/"a35bfbc5d892da1f1ed4813e0263acd1"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - bb9073c0-8bcd-4b82-ab93-c4b70651c12f
+      X-Runtime:
+      - '0.229122'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

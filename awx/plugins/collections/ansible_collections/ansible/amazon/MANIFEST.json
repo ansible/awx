@@ -1,0 +1,30 @@
+{
+ "collection_info": {
+  "namespace": "ansible",
+  "name": "amazon",
+  "version": "0.1.0",
+  "authors": [],
+  "readme": "README.md",
+  "tags": [],
+  "description": null,
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": "COPYING",
+  "dependencies": {
+   "ansible.netcommon": "*"
+  },
+  "repository": "git@github.com:ansible-collection-migration/ansible.amazon.git",
+  "documentation": "https://github.com/ansible-collection-migration/ansible.amazon/tree/master/docs",
+  "homepage": "https://github.com/ansible-collection-migration/ansible.amazon",
+  "issues": "https://github.com/ansible-collection-migration/ansible.amazon/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "1bcb3681f43f49808d614e9637667b44416f7bfd72c2512fdb1901b5664a4a61",
+  "format": 1
+ },
+ "format": 1
+}

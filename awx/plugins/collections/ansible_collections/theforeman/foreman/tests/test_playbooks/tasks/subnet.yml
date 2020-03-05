@@ -1,0 +1,45 @@
+---
+- name: "Ensure subnet '{{ subnet_name }}' is {{ subnet_state }}"
+  vars:
+    subnet_name: "Test Subnet"
+    subnet_network: '192.168.200.0'
+    subnet_state: present
+  foreman_subnet:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ subnet_name }}"
+    description: "{{ subnet_description | default(omit) }}"
+    updated_name: "{{ subnet_updated_name | default(omit) }}"
+    network_type: "{{ subnet_network_type | default(omit) }}"
+    dns_primary: "{{ subnet_dns_primary | default(omit) }}"
+    dns_secondary: "{{ subnet_dns_secondary | default(omit) }}"
+    domains: "{{ subnet_domains | default(omit) }}"
+    gateway: "{{ subnet_gateway | default(omit) }}"
+    network: "{{ subnet_network }}"
+    cidr: "{{ subnet_cidr | default(omit) }}"
+    mask: "{{ subnet_mask | default(omit) }}"
+    from_ip: "{{ subnet_from | default(omit) }}"
+    to_ip: "{{ subnet_to | default(omit) }}"
+    boot_mode: "{{ subnet_boot_mode | default(omit) }}"
+    ipam: "{{ subnet_ipam | default(omit) }}"
+    dhcp_proxy: "{{ subnet_dhcp_proxy | default(omit) }}"
+    httpboot_proxy: "{{ subnet_httpboot_proxy | default(omit) }}"
+    tftp_proxy: "{{ subnet_tftp_proxy | default(omit) }}"
+    discovery_proxy: "{{ subnet_discovery_proxy | default(omit) }}"
+    dns_proxy: "{{ subnet_dns_proxy | default(omit) }}"
+    remote_execution_proxies: "{{ subnet_remote_execution_proxies | default(omit) }}"
+    vlanid: "{{ subnet_vlanid | default(omit) }}"
+    mtu: "{{ subnet_mtu | default(omit) }}"
+    organizations: "{{ subnet_organizations | default(omit) }}"
+    locations: "{{ subnet_locations | default(omit) }}"
+    parameters: "{{ subnet_parameters | default(omit) }}"
+    state: "{{ subnet_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring subnet is {{ subnet_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

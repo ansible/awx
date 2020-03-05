@@ -1,0 +1,62 @@
+---
+libvirt:
+  compute_resource:
+    name: libvirt-cr01
+    organizations:
+      - Test Organization
+    locations:
+      - Test Location
+    params:
+      url: qemu+ssh://libvirtuser@localhost/system
+  compute_profile:
+    name: app-small
+    attrs:
+      cpus: 1
+      memory: 2147483648
+      nics_attributes:
+        0:
+          type: bridge
+          bridge: ""
+          model: virtio
+      volumes_attributes:
+        0:
+          pool_name: default
+          capacity: 10G
+          allocation: 0G
+          format_type: raw
+ovirt:
+  compute_resource:
+    name: ovirt-cr01
+    organizations:
+      - Test Organization
+    locations:
+      - Test Location
+    params:
+      url: "https://ovirt.example.com/ovirt-engine/api"
+      user: compute-user@internal
+      password: ovirtcompute123
+      use_v4: true
+      datacenter: c1479626-99a2-44eb-8401-14b5630f417f
+      ovirt_quota: 502a76bb-a3fe-42f1-aed6-2a7c892a6786
+  compute_profile:
+    name: app-small
+    attrs:
+      cluster: c95c55f3-705e-4182-92a6-f66754aadf02
+      cores: 2
+      sockets: 1
+      memory: 1073741824
+      ha: 0
+      interfaces_attributes:
+        0:
+          name: ""
+          network: 390666e1-dab3-4c99-9f96-006b2e2fd801
+          interface: virtio
+      volumes_attributes:
+        0:
+          size_gb: 16
+          storage_domain: 19c50090-1ab4-4023-a63f-75ee1018ed5e
+          preallocate: '1'
+          wipe_after_delete: '0'
+          interface: virtio_scsi
+          bootable: 'true'
+...

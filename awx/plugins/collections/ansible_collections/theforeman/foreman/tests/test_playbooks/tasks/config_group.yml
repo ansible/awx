@@ -1,0 +1,20 @@
+---
+- name: "Ensure config group '{{ config_group_name }}' is '{{ config_group_state }}' }}'"
+  vars:
+    - config_group_name: "Test config group"
+  foreman_config_group:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ config_group_name }}"
+    updated_name: "{{ config_group_updated_name | default(omit) }}"
+    puppetclasses: "{{ config_group_puppetclasses | default(omit) }}"
+    state: "{{ config_group_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring config group is {{ config_group_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

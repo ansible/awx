@@ -1,0 +1,130 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - name: 'Libvirt compute resource'
+    block:
+    - name: Create libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr01"
+        compute_resource_description: 'Libvirt compute resource'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+        compute_resource_state: present
+        expected_change: true
+    - name: Update libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr01"
+        compute_resource_description: 'Libvirt compute resource'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+        compute_resource_state: present
+        expected_change: false
+    - name: Update libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr01"
+        compute_resource_updated_name: "libvirt-cr"
+        compute_resource_description: 'A compute_resource with an updated description'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+        compute_resource_state: present
+        expected_change: true
+    - name: Update libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr"
+        compute_resource_description: 'A compute_resource with an updated description'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+        compute_resource_state: present
+        expected_change: false
+    - name: Update libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr"
+        compute_resource_description: 'A compute_resource with an updated description and params'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+          display_type: spice
+        compute_resource_state: present
+        expected_change: true
+    - name: Update libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr"
+        compute_resource_description: 'A compute_resource with an updated description and params'
+        compute_resource_organizations:
+          - Test Organization
+        compute_resource_locations:
+          - Test Location
+        compute_resource_provider: 'libvirt'
+        compute_resource_provider_params:
+          url: qemu+ssh://root@libvirt.example.com/system
+          display_type: spice
+        compute_resource_state: present
+        expected_change: false
+    - name: Delete libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr"
+        compute_resource_state: absent
+        expected_change: true
+    - name: Delete libvirt compute resource
+      include: tasks/compute_resource.yml
+      vars:
+        compute_resource_name: "libvirt-cr"
+        compute_resource_state: absent
+        expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+...

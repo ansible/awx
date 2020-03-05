@@ -1,0 +1,98 @@
+---
+- hosts: localhost
+  tags:
+    - setup
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_state: "present"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: "present"
+
+- hosts: tests
+  tags:
+    - test
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+
+  # create user
+  - include: tasks/user.yml
+    vars:
+      user_state: present
+      user_password: s3cret
+      expected_change: true
+
+  # verify idempotence
+  - include: tasks/user.yml
+    vars:
+      user_state: present
+      expected_change: false
+
+  # change user
+  - include: tasks/user.yml
+    vars:
+      user_state: present
+      user_locale: "{{ omit }}"
+      user_mail: "{{ omit }}"
+      user_description: A great manager
+      expected_change: true
+
+  # try to auth as new user
+  - include: tasks/user.yml
+    vars:
+      foreman_username: test
+      foreman_password: s3cret
+      user_state: present
+      user_mail: "{{ omit }}"
+      expected_change: true
+
+  # change password
+  - include: tasks/user.yml
+    vars:
+      user_state: present
+      user_password: newp@ass
+      user_mail: "{{ omit }}"
+      expected_change: true
+
+  # try to auth as new user with new password
+  - include: tasks/user.yml
+    vars:
+      foreman_username: test
+      foreman_password: newp@ass
+      user_state: present
+      user_mail: test.user@example.com
+      expected_change: true
+
+  # remove user
+  - include: tasks/user.yml
+    vars:
+      user_state: absent
+      expected_change: true
+
+  # verify idempotence for absence
+  - include: tasks/user.yml
+    vars:
+      user_state: absent
+      expected_change: false
+
+- hosts: localhost
+  tags:
+    - teardown
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_state: "absent"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: "absent"
+
+...

@@ -1,0 +1,150 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/product.yml
+    vars:
+      product_state: present
+  - include: tasks/repository.yml
+    vars:
+      repository_state: present
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: present
+      lifecycle_environment_name: "{{ item.name }}"
+      lifecycle_environment_label: "{{ item.label }}"
+      lifecycle_environment_prior: "{{ item.prior }}"
+    loop:
+      - name: Test
+        label: test
+        prior: Library
+      - name: QA
+        label: qa
+        prior: Test
+      - name: Prod
+        label: prod
+        prior: QA
+  - include: tasks/content_view_version.yml
+    vars:
+      state: absent
+      version: 1.0
+    ignore_errors: true
+  - include: tasks/content_view.yml
+    vars:
+      content_view_state: present
+      repositories:
+        - name: "Test Repository"
+          product: "Test Product"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - name: publish CV version 1.0
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        description: version-1.0
+        version: 1.0
+        expected_change: true
+    - name: publish CV version 1.0 again, no change
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        description: version-1.0
+        version: 1.0
+        lifecycle_environments:
+          - Library
+        expected_change: false
+    - name: publish CV to Library again, no change
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        description: version-1.0
+        version: 1.0
+        lifecycle_environments:
+          - Library
+        expected_change: false
+    - name: publish CV version 2.0
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        description: version-2.0
+        version: 2.0
+        expected_change: true
+    - name: remove cv version 1.0
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        version: 1.0
+        state: absent
+        expected_change: true
+    - name: remove cv version 1.0 again, no change
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        version: 1.0
+        state: absent
+        expected_change: false
+    - name: promote CV from Library to Test
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        current_lifecycle_environment: Library
+        lifecycle_environments:
+          - Library
+          - Test
+        expected_change: true
+    - name: promote CV from Library to Test again, no change
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        current_lifecycle_environment: Library
+        lifecycle_environments:
+          - Library
+          - Test
+        expected_change: false
+    - name: force promote CV from Test to Prod
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        current_lifecycle_environment: Test
+        lifecycle_environments:
+          - Library
+          - Test
+          - Prod
+        force_promote: true
+        expected_change: true
+    - name: force promote CV from Test to Prod again, no change
+      include_tasks: tasks/content_view_version.yml
+      vars:
+        current_lifecycle_environment: Test
+        lifecycle_environments:
+          - Library
+          - Test
+          - Prod
+        force_promote: true
+        expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/content_view_version.yml
+    vars:
+      state: absent
+      version: 1.0
+    ignore_errors: true
+  - include: tasks/content_view.yml
+    vars:
+      content_view_state: absent
+    ignore_errors: true
+  - include: tasks/repository.yml
+    vars:
+      repository_state: absent
+    ignore_errors: true
+  - include: tasks/product.yml
+    vars:
+      product_state: absent
+    ignore_errors: true
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent

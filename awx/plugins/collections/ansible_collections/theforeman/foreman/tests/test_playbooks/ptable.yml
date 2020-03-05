@@ -1,0 +1,176 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      expected_change: false
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      locked_state: false
+      expected_change: false
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      locked_state: true
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      locked_state: true
+      expected_change: false
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      expected_change: false
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: present
+      locked_state: false
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_layout: 'A partition table with a changed layout'
+      ptable_state: present
+      expected_change: true
+  - name: add ptable
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: 'A partition table 2'
+      ptable_layout: |
+        zerombr
+        clearpart --all --initlabel
+        autopart
+      ptable_state: present
+      expected_change: true
+  - name: change ptable name
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: 'A partition table 2'
+      ptable_updated_name: 'A partition table 3'
+      ptable_layout: |
+        zerombr
+        clearpart --all --initlabel
+        autopart
+      ptable_state: present
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_name: 'A partition table 3'
+      ptable_layout: |
+        zerombr
+        clearpart --all --initlabel
+        autopart
+      ptable_state: present
+      expected_change: false
+  - include: tasks/ptable.yml
+    vars:
+      ptable_name: 'A partition table 3'
+      ptable_state: absent
+      expected_change: true
+  - name: add ptable without location
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: 'A second partition table'
+      ptable_locations: "{{ omit }}"
+      ptable_layout: |
+        zerombr
+        clearpart --all --initlabel
+        autopart
+      ptable_state: present
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: absent
+      expected_change: true
+  - include: tasks/ptable.yml
+    vars:
+      ptable_state: absent
+      expected_change: false
+  - name: set location of all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: present
+      expected_change: true
+  - name: set location of all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: present
+      expected_change: false
+  - name: unlock all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      locked_state: false
+      ptable_location: "{{ omit }}"
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: present
+      expected_change: true
+  - name: unlock all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      locked_state: false
+      ptable_location: "{{ omit }}"
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: present
+      expected_change: false
+  - name: delete all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      ptable_locations: "{{ omit }}"
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: absent
+      expected_change: true
+  - name: delete all ptables
+    include: tasks/ptable.yml
+    vars:
+      ptable_name: '*'
+      ptable_locations: "{{ omit }}"
+      ptable_organizations: "{{ omit }}"
+      ptable_layout: "{{ omit }}"
+      ptable_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

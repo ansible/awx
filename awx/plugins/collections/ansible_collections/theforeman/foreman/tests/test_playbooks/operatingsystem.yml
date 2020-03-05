@@ -1,0 +1,118 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: absent
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_description: "{{ operatingsystem_name}} SP1"
+        operatingsystem_minor: 1
+        operatingsystem_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_description: "{{ operatingsystem_name}} SP1"
+        operatingsystem_minor: 1
+        operatingsystem_state: present
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        expected_change: false
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        operatingsystem_parameters:
+          - name: param1
+            value: value1
+          - name: param2
+            value: value2
+            parameter_type: json
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        operatingsystem_parameters:
+          - name: param1
+            value: value1
+          - name: param2
+            value: value2
+            parameter_type: json
+        expected_change: false
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        operatingsystem_parameters:
+          - name: param1
+            value: new_value1
+          - name: param3
+            value: value3
+            parameter_type: json
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        operatingsystem_parameters:
+          - name: param1
+            value: new_value1
+          - name: param3
+            value: value3
+            parameter_type: json
+        expected_change: false
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: present
+        operatingsystem_parameters: []
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_name: "SuperOS"
+        operatingsystem_state: present
+        operatingsystem_parameters: []
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_name: "SuperOS"
+        operatingsystem_updated_name: "SuperOS-NG"
+        operatingsystem_state: present
+        operatingsystem_parameters: []
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_name: "SuperOS-NG"
+        operatingsystem_state: present
+        operatingsystem_parameters: []
+        expected_change: false
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_name: "SuperOS-NG"
+        operatingsystem_state: absent
+        operatingsystem_parameters: []
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: absent
+        expected_change: true
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_state: absent
+        expected_change: false
+    - include: tasks/operatingsystem.yml
+      vars:
+        operatingsystem_description: "{{ operatingsystem_name}} SP1"
+        operatingsystem_minor: 1
+        operatingsystem_state: absent
+        expected_change: true
+...

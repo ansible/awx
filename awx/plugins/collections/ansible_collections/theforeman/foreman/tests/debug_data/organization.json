@@ -1,0 +1,8 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://foreman.example.com",
+  "validate_certs":false,
+  "name":"My Cool New Organization",
+  "state":"present",
+}

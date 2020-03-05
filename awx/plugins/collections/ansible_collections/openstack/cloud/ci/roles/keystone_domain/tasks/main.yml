@@ -1,0 +1,19 @@
+---
+- name: Create keystone domain
+  openstack.cloud.os_keystone_domain:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ domain_name }}"
+     description: "test description"
+
+- name: Update keystone domain
+  openstack.cloud.os_keystone_domain:
+     cloud: "{{ cloud }}"
+     name: "{{ domain_name }}"
+     description: "updated description"
+
+- name: Delete keystone domain
+  openstack.cloud.os_keystone_domain:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ domain_name }}"

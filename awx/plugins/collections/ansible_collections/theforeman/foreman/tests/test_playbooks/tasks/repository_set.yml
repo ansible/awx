@@ -1,0 +1,37 @@
+---
+- name: "Enable/Disable katello repository set"
+  vars:
+    organization: Test Organization
+    state: enabled
+    repositories:
+      - releasever: "7.0"
+        basearch: "x86_64"
+      - releasever: "7.1"
+        basearch: "x86_64"
+      - releasever: "7.2"
+        basearch: "x86_64"
+      - releasever: "7.3"
+        basearch: "x86_64"
+  katello_repository_set:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ name | default(omit) }}"
+    organization: "{{ organization }}"
+    product: "{{ product | default(omit) }}"
+    state: "{{ state }}"
+    repositories: "{{ repositories }}"
+    label: "{{ label | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring Repository Set is {{ state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+  vars:
+    state: present
+- include_tasks: _assert_diff.yml
+  vars:
+    module: repository_set
+...

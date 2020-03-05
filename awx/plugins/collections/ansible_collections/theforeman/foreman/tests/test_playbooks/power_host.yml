@@ -1,0 +1,13 @@
+---
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/host_power.yml
+    vars:
+      expected_change: true
+  - include: tasks/host_power.yml
+    vars:
+      expected_change: false
+...

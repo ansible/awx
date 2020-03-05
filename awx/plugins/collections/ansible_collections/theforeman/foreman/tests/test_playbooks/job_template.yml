@@ -1,0 +1,181 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+  - include: tasks/job_template.yml
+    vars:
+      job_template_state: absent
+  - include: tasks/job_template.yml
+    vars:
+      job_template_name: "{{ item }}"
+      job_template_state: absent
+    loop:
+      - "configure flux compensator"
+      - "Ansible Roles - Hello World"
+      - "delete file"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/job_template.yml
+    vars:
+      job_template_state: present
+      expected_change: true
+  - include: tasks/job_template.yml
+    vars:
+      job_template_state: present
+      expected_change: false
+  - include: tasks/job_template.yml
+    vars:
+      template_inputs:
+        - name: "newer input"
+          input_type: "user"
+      job_template_state: present
+      expected_change: true
+  - include: tasks/job_template.yml
+    vars:
+      job_template_template: 'A job template with an template'
+      job_template_state: present
+      expected_change: true
+  - include: tasks/job_template.yml
+    vars:
+      job_template_state: absent
+      expected_change: true
+  - include: tasks/job_template.yml
+    vars:
+      job_template_state: absent
+      expected_change: false
+
+  - include: tasks/job_template_from_file.yml
+    vars:
+      job_template_state: present
+      job_template_file_name: "data/delete_file.erb"
+      job_template_locations:
+        - "Test Location"
+      job_template_organizations:
+        - "Test Organization"
+      expected_change: true
+
+  - name: Add the same template input via direct input
+    include: tasks/job_template.yml
+    vars:
+      job_template_name: delete file
+      job_template_job_category: Commands
+      job_template_description_format: "delete %{file}"
+      job_template_provider_type: SSH
+      template_inputs:
+      - name: file
+        description: file to delete
+        input_type: user
+        required: true
+      job_template_template: |
+        <%#
+        kind: job_template
+        name: delete file
+        job_category: Commands
+        description_format: "delete %{file}"
+        provider_type: SSH
+        template_inputs:
+        - name: file
+          description: file to delete
+          input_type: user
+          required: true
+        %>
+        rm -rf --no-preserve-root <%= input("file") %>
+      job_template_state: present
+      expected_change: false
+
+  - include: tasks/job_template.yml
+    vars:
+      job_template_name: delete file
+      job_template_state: absent
+      expected_change: true
+
+  - name: Add Ansible template with implicit provider_type
+    include: tasks/job_template_from_file.yml
+    vars:
+      job_template_state: present
+      job_template_file_name: "data/ansible_hello.erb"
+      job_template_locations:
+        - "Test Location"
+      expected_change: true
+
+  - name: Add the same template input via direct input with explicit provider_type
+    include: tasks/job_template.yml
+    vars:
+      job_template_name: Ansible Roles - Hello World
+      job_template_job_category: Ansible Playbook
+      job_template_description_format: "Test Ansible Roles"
+      job_template_provider_type: Ansible
+      job_template_organizations: "{{ omit }}"
+      template_inputs:
+      job_template_template: |
+        <%#
+        name: Ansible Roles - Hello World
+        job_category: Ansible Playbook
+        description_format: Test Ansible Roles
+        feature: ansible_run_host
+        snippet: false
+        provider_type: Ansible
+        kind: job_template
+        model: JobTemplate
+        %>
+
+        ---
+        - hosts: all
+          tasks:
+            - name: Hello
+              debug:
+                msg: Hello World
+        ...
+      job_template_state: present
+      expected_change: false
+  - name: assign all job templates the same organization
+    include: tasks/job_template.yml
+    vars:
+      job_template_name: '*'
+      job_template_locations: "{{ omit }}"
+      job_template_provider_type: "{{ omit }}"
+      job_template_template: "{{ omit }}"
+      template_inputs: "{{ omit }}"
+      job_template_state: present
+      expected_change: true
+  - name: assign all job templates the same organization
+    include: tasks/job_template.yml
+    vars:
+      job_template_name: '*'
+      job_template_locations: "{{ omit }}"
+      job_template_provider_type: "{{ omit }}"
+      job_template_template: "{{ omit }}"
+      template_inputs: "{{ omit }}"
+      job_template_state: present
+      expected_change: false
+
+  - include: tasks/job_template.yml
+    vars:
+      job_template_name: Ansible Roles - Hello World
+      job_template_state: absent
+      expected_change: true
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

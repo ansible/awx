@@ -1,0 +1,240 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [fc562df9-64f2-4fe9-bae6-711afe04648c]
+      x-runtime: ['0.027099']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220]
+    method: GET
+    uri: https://foreman.example.com/katello/api/organizations?per_page=4294967296&search=name%3D%22Test+Organization%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"\
+        page\": 1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\
+        \"\",\n  \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\"\
+        : [{\"label\":\"Test_Organization\",\"created_at\":\"2019-08-21 10:59:55 UTC\"\
+        ,\"updated_at\":\"2019-08-21 11:01:05 UTC\",\"id\":31,\"name\":\"Test Organization\"\
+        ,\"title\":\"Test Organization\",\"description\":\"A test organization\"}]\n\
+        }\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"a59b71087e13f147176551508f4dff06"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [50ebd846-30cf-41b7-9279-24847cc0d860]
+      x-runtime: ['0.019790']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220]
+    method: GET
+    uri: https://foreman.example.com/katello/api/organizations/31/products?per_page=4294967296&search=name%3D%22Red+Hat+Enterprise+Linux+Server%22
+  response:
+    body: {string: !!python/unicode '{"total":93,"subtotal":1,"page":1,"per_page":"4294967296","error":null,"search":"name=\"Red
+        Hat Enterprise Linux Server\"","sort":{"by":"name","order":"asc"},"results":[{"id":478,"cp_id":"69","name":"Red
+        Hat Enterprise Linux Server","label":"Red_Hat_Enterprise_Linux_Server","description":null,"provider_id":28,"sync_plan_id":null,"sync_summary":{},"gpg_key_id":null,"ssl_ca_cert_id":null,"ssl_client_cert_id":null,"ssl_client_key_id":null,"sync_state":null,"last_sync":null,"last_sync_words":null,"organization_id":31,"organization":{"name":"Test
+        Organization","label":"Test_Organization","id":31},"sync_plan":null,"repository_count":0}]}
+
+        '}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"315e28ffff50c00aa66192aa924b4473"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [a4e57780-9325-4eb1-bc92-3d2e94c06159]
+      x-runtime: ['0.084322']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220]
+    method: GET
+    uri: https://foreman.example.com/katello/api/products/478/repository_sets?organization_id=31&per_page=4294967296&search=name%3D%22Red+Hat+Enterprise+Linux+7+Server+%28RPMs%29%22
+  response:
+    body: {string: !!python/unicode '{"total":377,"subtotal":1,"page":1,"per_page":"4294967296","error":null,"search":"name=\"Red
+        Hat Enterprise Linux 7 Server (RPMs)\"","sort":{"by":"name","order":"asc"},"results":[{"enabled":true,"product":{"id":478,"name":"Red
+        Hat Enterprise Linux Server"},"repositories":[],"name":"Red Hat Enterprise
+        Linux 7 Server (RPMs)","vendor":"Red Hat","label":"rhel-7-server-rpms","id":"2456","type":"yum","gpgUrl":"file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release","contentUrl":"/content/dist/rhel/server/7/$releasever/$basearch/os"}]}
+
+        '}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"8df7bb45aee8d35c3d257127a1ff6eb9"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9fa2bc1d-b81f-4038-9f0b-7dc304e9ce8a]
+      x-runtime: ['0.048700']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220]
+    method: GET
+    uri: https://foreman.example.com/katello/api/products/478/repository_sets/2456?organization_id=31
+  response:
+    body: {string: !!python/unicode '  {"enabled":true,"product":{"id":478,"name":"Red
+        Hat Enterprise Linux Server"},"repositories":[],"name":"Red Hat Enterprise
+        Linux 7 Server (RPMs)","vendor":"Red Hat","label":"rhel-7-server-rpms","id":"2456","type":"yum","gpgUrl":"file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release","contentUrl":"/content/dist/rhel/server/7/$releasever/$basearch/os"}
+
+        '}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"d52a20f8dbffe9bdd0a633ebdbacb313"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [1201d2de-6ed0-4ddf-9b62-416f6bbdba43]
+      x-runtime: ['0.027639']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=dd0ba7cd1503957c26a8bf19d027f220]
+    method: GET
+    uri: https://foreman.example.com/katello/api/products/478/repository_sets/2456/available_repositories?organization_id=31
+  response:
+    body: {string: !!python/unicode '{"total":9,"subtotal":9,"page":null,"per_page":null,"error":null,"search":null,"sort":{"by":null,"order":null},"results":[{"substitutions":{"releasever":"7Server","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7Server/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7Server","pulp_id":"dc712c79-b2b3-4db1-b0ab-b3d1653705d6","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.7","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.7/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.7","pulp_id":"0d25fc4a-27cf-4142-af6f-694d8a3c94e0","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.6","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.6/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.6","pulp_id":"87c98301-dfd6-4339-8dca-d973d05136bc","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.5","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.5/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.5","pulp_id":"2e9c0a65-31f2-4359-95c2-f81875150765","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.4","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.4/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.4","pulp_id":"caf2ce73-d284-48bf-9226-51bac264e91a","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.3","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.3/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.3","pulp_id":"f50fe47b-6c43-4c8e-b215-81cc815063e8","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.2","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.2/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.2","pulp_id":"051bdf5d-6e70-4a2c-af19-a721226905a5","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.1","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.1/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.1","pulp_id":"c7fadc30-c824-483a-be08-2d6f57c510be","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null},{"substitutions":{"releasever":"7.0","basearch":"x86_64"},"path":"/content/dist/rhel/server/7/7.0/x86_64/os","repo_name":"Red
+        Hat Enterprise Linux 7 Server RPMs x86_64 7.0","pulp_id":"a43da26d-2d62-4f1b-9e22-cac7e2e08fe0","name":"Red
+        Hat Enterprise Linux 7 Server (RPMs)","enabled":false,"promoted":false,"repository_id":null}]}
+
+        '}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Aug 2019 11:01:50 GMT']
+      etag: [W/"1806e0398d1ee99d783c050b6dcddfb4"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [052eb21e-5bcb-4005-9dd4-e8e6342b3ee0]
+      x-runtime: ['3.136884']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

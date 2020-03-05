@@ -1,0 +1,12 @@
+---
+- name: Create keystone role
+  openstack.cloud.os_keystone_role:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ role_name }}"
+
+- name: Delete keystone role
+  openstack.cloud.os_keystone_role:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ role_name }}"

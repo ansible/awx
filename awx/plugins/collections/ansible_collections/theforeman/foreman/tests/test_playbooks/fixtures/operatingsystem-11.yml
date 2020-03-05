@@ -1,0 +1,109 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:27:51 GMT']
+      etag: [W/"7462024e111aafa1fe0b7de16a6757f0"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [_session_id=9d2ae51ec8b807f8599be4221442bc4d; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [dc34958b-f8ce-403c-8d9a-1e4ef62e075f]
+      x-runtime: ['0.027422']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=9d2ae51ec8b807f8599be4221442bc4d]
+    method: GET
+    uri: https://foreman.example.com/api/operatingsystems?per_page=4294967296&search=name%3D%22SuperOS-NG%22%2Cmajor%3D%221%22%2Cminor%3D%222%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 5,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"SuperOS-NG\\\",major=\\\"1\\\",minor=\\\"2\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"description\":null,\"major\":\"1\",\"minor\":\"2\",\"family\":\"Debian\",\"release_name\":\"reverse
+        whip\",\"password_hash\":\"SHA256\",\"created_at\":\"2019-09-27 15:27:49 UTC\",\"updated_at\":\"2019-09-27
+        15:27:50 UTC\",\"id\":6,\"name\":\"SuperOS-NG\",\"title\":\"SuperOS-NG 1.2\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:27:51 GMT']
+      etag: [W/"fbd46576b427d3697b0a66e398f94e76"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [cd6f3bb3-79bf-48db-9fe6-3375e5ce4d3c]
+      x-runtime: ['0.017797']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['0']
+      Cookie: [_session_id=9d2ae51ec8b807f8599be4221442bc4d]
+    method: DELETE
+    uri: https://foreman.example.com/api/operatingsystems/6
+  response:
+    body: {string: !!python/unicode '{"id":6,"major":"1","name":"SuperOS-NG","minor":"2","nameindicator":null,"created_at":"2019-09-27T15:27:49.891Z","updated_at":"2019-09-27T15:27:50.382Z","release_name":"reverse
+        whip","description":null,"password_hash":"SHA256","title":"SuperOS-NG 1.2"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:27:51 GMT']
+      etag: [W/"e78bb036394175d6ca468b1ec8504ee3"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [f57664eb-fcae-4823-b8d2-ab5ff9b12562]
+      x-runtime: ['0.029321']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

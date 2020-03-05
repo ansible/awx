@@ -1,0 +1,6 @@
+network_name: ansible_port_network
+network_external: true
+subnet_name: ansible_port_subnet
+port_name: ansible_port
+secgroup_name: ansible_port_secgroup
+no_security_groups: True

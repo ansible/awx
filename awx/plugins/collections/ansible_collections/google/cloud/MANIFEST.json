@@ -1,0 +1,30 @@
+{
+ "collection_info": {
+  "namespace": "google",
+  "name": "cloud",
+  "version": "0.0.7",
+  "authors": [
+   "Google <alexstephen@google.com>"
+  ],
+  "readme": "README.md",
+  "tags": [],
+  "description": "The Google Cloud Platform collection.",
+  "license": [
+   "GPL-2.0-or-later"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "http://github.com/ansible/ansible_collections_google",
+  "documentation": null,
+  "homepage": "http://cloud.google.com",
+  "issues": null
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "4a4856a5d38dbff6ad3fe86dee7a284f7f33b0f8bed00659666e5bdc5466b0bf",
+  "format": 1
+ },
+ "format": 1
+}

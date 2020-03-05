@@ -1,0 +1,37 @@
+---
+- name: Create a test object file
+  shell: mktemp
+  register: tmp_file
+
+- name: Create container
+  openstack.cloud.os_object:
+     cloud: "{{ cloud }}"
+     state: present
+     container: ansible_container
+     container_access: private
+
+- name: Put object
+  openstack.cloud.os_object:
+     cloud: "{{ cloud }}"
+     state: present
+     name: ansible_object
+     filename: "{{ tmp_file.stdout }}"
+     container: ansible_container
+
+- name: Delete object
+  openstack.cloud.os_object:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: ansible_object
+     container: ansible_container
+
+- name: Delete container
+  openstack.cloud.os_object:
+     cloud: "{{ cloud }}"
+     state: absent
+     container: ansible_container
+
+- name: Delete test object file
+  file:
+     name: "{{ tmp_file.stdout }}"
+     state: absent

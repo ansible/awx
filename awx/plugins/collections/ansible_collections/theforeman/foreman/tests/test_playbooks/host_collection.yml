@@ -1,0 +1,76 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_state: present
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: ""
+      expected_diff_after: "name.*TheAnswer"
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_state: present
+      expected_change: false
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_name: "mycollection"
+      host_collection_state: present
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: ""
+      expected_diff_after: "name.*mycollection"
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_name: "mycollection"
+      host_collection_updated_name: "mycollection2"
+      host_collection_state: present
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "name.*mycollection"
+      expected_diff_after: "name.*mycollection2"
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_name: "mycollection2"
+      host_collection_state: present
+      expected_change: false
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_name: "mycollection2"
+      host_collection_state: present
+      expected_change: false
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_name: "mycollection2"
+      host_collection_state: absent
+      expected_change: true
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_state: absent
+      expected_change: true
+  - include: tasks/host_collection.yml
+    vars:
+      host_collection_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

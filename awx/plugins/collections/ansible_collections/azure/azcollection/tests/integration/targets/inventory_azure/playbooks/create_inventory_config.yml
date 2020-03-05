@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    template_name: "../templates/{{ template | default('basic.yml') }}"
+  tasks:
+    - name: write inventory config file
+      copy:
+        dest: ../test.azure_rm.yml
+        content: "{{ lookup('template', template_name) }}"

@@ -1,0 +1,144 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:26:22 GMT']
+      etag: [W/"7462024e111aafa1fe0b7de16a6757f0"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [_session_id=118d4aafd798f13c830baaa7862e524c; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [509dd022-0d66-460a-bd82-0645dd1b7fad]
+      x-runtime: ['0.026255']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=118d4aafd798f13c830baaa7862e524c]
+    method: GET
+    uri: https://foreman.example.com/api/common_parameters?per_page=4294967296&search=name%3D%22TheAnswer%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 1,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"TheAnswer\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"created_at\":\"2019-09-27 15:26:18 UTC\",\"updated_at\":\"2019-09-27 15:26:21
+        UTC\",\"hidden_value?\":false,\"hidden_value\":\"*****\",\"id\":4,\"name\":\"TheAnswer\",\"parameter_type\":\"integer\",\"value\":42}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:26:22 GMT']
+      etag: [W/"0dcc5fbf337f3d3333c44ae8c5d7313e"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9e319a0b-c080-464d-a827-6227fe5e1310]
+      x-runtime: ['0.017911']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=118d4aafd798f13c830baaa7862e524c]
+    method: GET
+    uri: https://foreman.example.com/api/common_parameters/4
+  response:
+    body: {string: !!python/unicode '{"created_at":"2019-09-27 15:26:18 UTC","updated_at":"2019-09-27
+        15:26:21 UTC","hidden_value?":false,"hidden_value":"*****","id":4,"name":"TheAnswer","parameter_type":"integer","value":42}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:26:22 GMT']
+      etag: [W/"c004c202b366dbb667c9058186eb7f4f"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [8322ed8f-86c8-485d-9de7-44293dc12c28]
+      x-runtime: ['0.015809']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"common_parameter": {"parameter_type": "real", "value":
+      "3.14"}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['65']
+      Content-Type: [application/json]
+      Cookie: [_session_id=118d4aafd798f13c830baaa7862e524c]
+    method: PUT
+    uri: https://foreman.example.com/api/common_parameters/4
+  response:
+    body: {string: !!python/unicode '{"created_at":"2019-09-27 15:26:18 UTC","updated_at":"2019-09-27
+        15:26:22 UTC","hidden_value?":false,"hidden_value":"*****","id":4,"name":"TheAnswer","parameter_type":"real","value":3.14}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 27 Sep 2019 15:26:22 GMT']
+      etag: [W/"d068847273849f6ee933fae3412be966"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [request_method=PUT; path=/; secure; HttpOnly; SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [4c853f9d-c612-45c2-a7bc-1f9d997fa1a7]
+      x-runtime: ['0.028823']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

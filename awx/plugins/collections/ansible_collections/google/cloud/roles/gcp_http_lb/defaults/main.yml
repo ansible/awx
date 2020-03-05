@@ -1,0 +1,14 @@
+---
+# defaults file for gcp-http-lb
+gcp_http_lb_state: present
+gcp_http_lb_cdn: true
+gcp_http_lb_name_prefix: 'gcp'
+
+# Name schemes for resources being created
+gcp_http_lb_globaladdress: "{{gcp_lb_name_prefix}}-globaladdress"
+gcp_http_lb_instancegroup: "{{gcp_lb_name_prefix}}-instancegroup"
+gcp_http_lb_healthcheck: "{{gcp_lb_name_prefix}}-healthcheck"
+gcp_http_lb_backendservice: "{{gcp_lb_name_prefix}}-backendservice"
+gcp_http_lb_urlmap: "{{gcp_lb_name_prefix}}-urlmap"
+gcp_http_lb_httpproxy: "{{gcp_lb_name_prefix}}-httpproxy"
+gcp_http_lb_forwardingrule: "{{gcp_lb_name_prefix}}-forwardingrule"

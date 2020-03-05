@@ -1,0 +1,19 @@
+---
+- name: "Ensure Snapshot '{{ snapshot_name }}' is {{ snapshot_state }} change {{ expected_change }} "
+  vars:
+    snapshot_name: "ansible"
+    snapshot_state: present
+  foreman_snapshot:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ snapshot_name }}"
+    description: "{{ snapshot_description | default(omit) }}"
+    host: "{{ snapshot_host_name }}"
+    state: "{{ snapshot_state }}"
+  register: result
+- fail:
+    msg: "Ensuring snapshot is {{ snapshot_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+  when: (expected_change is defined) and (result.changed != expected_change)
+...

@@ -1,0 +1,9 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://katello.example.com",
+  "validate_certs": false,
+  "organization":"Default Organization",
+  "repository_url":"https://cdn.redhat.com",
+  "state":"refreshed",
+}

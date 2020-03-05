@@ -1,0 +1,24 @@
+---
+- name: "Ensure usergroup '{{ usergroup_name }}' is {{ usergroup_state }}"
+  vars:
+    usergroup_name: "testgroup"
+    usergroup__state: present
+  foreman_usergroup:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ usergroup_name }}"
+    updated_name: "{{ usergroup_updated_name | default(omit) }}"
+    admin: "{{ usergroup_admin | default(omit) }}"
+    users: "{{ usergroup_users | default(omit) }}"
+    usergroups: "{{ usergroup_usergroups | default(omit) }}"
+    roles: "{{ usergroup_roles | default(omit) }}"
+    state: "{{ usergroup_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring usergroup is {{ usergroup_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

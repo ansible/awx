@@ -1,0 +1,72 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/organization.yml
+      vars:
+        organization_state: present
+    - include: tasks/katello_manifest.yml
+      vars:
+        manifest_state: absent
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - name: "import manifest"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_path: "{{ katello_manifest_path }}"
+      manifest_state: "present"
+      expected_change: true
+  - name: "import manifest again, no change"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_path: "{{ katello_manifest_path }}"
+      manifest_state: "present"
+      expected_change: false
+  - name: "update url"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_path: "{{ katello_manifest_path }}"
+      manifest_state: "present"
+      manifest_repository_url: "http://cdn.example.com"
+      expected_change: true
+  - name: "update url again, no change"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_path: "{{ katello_manifest_path }}"
+      manifest_state: "present"
+      manifest_repository_url: "http://cdn.example.com"
+      expected_change: false
+# the manifest we provide in localhost cannot be refreshed because it's been deleted from the portal
+# if you want to test manifest_state: "refreshed", you will have to provide an own manifest
+# please don't record/commit the result, as the manifest allows access to your portal account
+#  - name: "refresh manifest"
+#    include_tasks: tasks/katello_manifest.yml
+#    vars:
+#      manifest_state: "refreshed"
+#      expected_change: true
+  - name: "drop manifest"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_state: "absent"
+      expected_change: true
+  - name: "drop manifest again, no change"
+    include_tasks: tasks/katello_manifest.yml
+    vars:
+      manifest_state: "absent"
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/organization.yml
+      vars:
+        organization_state: absent
+...

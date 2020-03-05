@@ -1,0 +1,22 @@
+---
+- name: "Ensure realm '{{ realm_name }}' is {{ realm_state }}"
+  vars:
+    - realm_name: "EXAMPLE.LOCAL"
+    - realm_proxy: "{{ foreman_proxy }}"
+    - realm_type: "FreeIPA"
+  foreman_realm:
+    server_url: "{{ foreman_server_url }}"
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ realm_name }}"
+    realm_proxy: '{{ realm_proxy }}'
+    realm_type: "{{ realm_type }}"
+    state: "{{ realm_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring realm is {{ realm_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

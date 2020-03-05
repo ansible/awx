@@ -1,0 +1,21 @@
+---
+- name: "Create/Update/Delete manifest"
+  vars:
+    organization_name: "Test Organization"
+    manifest_state: "present"
+  katello_manifest:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    verify_ssl: "{{ foreman_validate_certs }}"
+    organization: "{{ organization_name }}"
+    manifest_path: "{{ manifest_path | default(omit) }}"
+    repository_url: "{{ manifest_repository_url | default(omit) }}"
+    state: "{{ manifest_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring manifest is {{ manifest_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

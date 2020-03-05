@@ -1,0 +1,39 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: setup
+    include_tasks: setup.yml
+
+  - name: Create minimal VM with defaults
+    azure_rm_virtualmachine:
+      resource_group: "{{ resource_group }}"
+      name: "{{ vm_name }}"
+      admin_username: "testuser"
+      admin_password: "Pass123$$$abx!"
+      vm_size: Standard_B1ms
+      virtual_network: "{{ network_name }}"
+      image:
+        offer: UbuntuServer
+        publisher: Canonical
+        sku: 16.04-LTS
+        version: latest
+    register: vm_output
+
+  - meta: refresh_inventory
+
+  - name: Test Inventory 
+    assert:
+      that:
+        - vm_name in hostvars
+
+  - name: Delete VM
+    azure_rm_virtualmachine:
+      resource_group: "{{ resource_group }}"
+      name: "{{ vm_name }}"
+      remove_on_absent: all_autocreated
+      state: absent
+
+  - name: teardown
+    include_tasks: teardown.yml

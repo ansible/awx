@@ -1,0 +1,14 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "name":"Katello Clients",
+  "organization":"Default Organization",
+  "lifecycle_environment":"Library",
+  "content_view":"client content view",
+  "subscriptions":[
+    {
+      "name":"Employee SKU"
+    }
+  ]
+}

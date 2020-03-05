@@ -1,0 +1,123 @@
+---
+- name: Create security group
+  openstack.cloud.os_security_group:
+     cloud: "{{ cloud }}"
+     name: "{{ secgroup_name }}"
+     state: present
+     description: Created from Ansible playbook
+
+- name: Create empty ICMP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: icmp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Create -1 ICMP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: icmp
+     port_range_min: -1
+     port_range_max: -1
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Create empty TCP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: tcp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Create empty UDP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: udp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Create HTTP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: tcp
+     port_range_min: 80
+     port_range_max: 80
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Create egress rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: present
+     protocol: tcp
+     port_range_min: 30000
+     port_range_max: 30001
+     remote_ip_prefix: 0.0.0.0/0
+     direction: egress
+
+- name: Delete empty ICMP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: icmp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Delete -1 ICMP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: icmp
+     port_range_min: -1
+     port_range_max: -1
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Delete empty TCP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: tcp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Delete empty UDP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: udp
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Delete HTTP rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: tcp
+     port_range_min: 80
+     port_range_max: 80
+     remote_ip_prefix: 0.0.0.0/0
+
+- name: Delete egress rule
+  openstack.cloud.os_security_group_rule:
+     cloud: "{{ cloud }}"
+     security_group: "{{ secgroup_name }}"
+     state: absent
+     protocol: tcp
+     port_range_min: 30000
+     port_range_max: 30001
+     remote_ip_prefix: 0.0.0.0/0
+     direction: egress
+
+- name: Delete security group
+  openstack.cloud.os_security_group:
+     cloud: "{{ cloud }}"
+     name: "{{ secgroup_name }}"
+     state: absent

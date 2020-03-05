@@ -1,0 +1,26 @@
+---
+- name: "Ensure location '{{ location_name }}' is {{ location_state }}"
+  vars:
+    - location_name: "Test Location"
+  foreman_location:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ location_name }}"
+    parent: "{{ location_parent | default(omit) }}"
+    organizations: "{{ location_organizations | default(omit) }}"
+    state: "{{ location_state }}"
+  register: result
+  ignore_errors: true
+- assert:
+    fail_msg: "Ensuring location is {{ location_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- assert:
+    fail_msg: "Ensuring location is {{ location_state }} didn't fail! (expected_error: {{ expected_error | default('unknown') }})"
+    that:
+      - result is failed
+  when: expected_error is defined
+...

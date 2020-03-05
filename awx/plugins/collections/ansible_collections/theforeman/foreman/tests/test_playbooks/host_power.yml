@@ -1,0 +1,82 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  vars:
+    host_name: vm01.example.com
+  tasks:
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "off"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  vars:
+    host_name: vm01.example.com
+  tasks:
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "state"
+      expected_change: false
+      expected_power_state: "off"
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_hostname: "{{ host_name }}"
+      host_power_state: "state"
+      expected_change: false
+      expected_power_state: "off"
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "on"
+      expected_change: true
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "on"
+      expected_change: false
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "start"
+      expected_change: false
+
+  # Sometime host power state change is not reflected instantaneously
+  # and make this playbook fail when recording tests
+  - pause:
+      seconds: 5
+    when: recording is defined
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "off"
+      expected_change: true
+
+  # Sometime host power state change is not reflected instantaneously
+  # and make this playbook fail when recording tests
+  - pause:
+      seconds: 5
+    when: recording is defined
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "off"
+      expected_change: false
+
+  - include: tasks/host_power.yml
+    vars:
+      host_power_name: "{{ host_name }}"
+      host_power_state: "stop"
+      expected_change: false
+...

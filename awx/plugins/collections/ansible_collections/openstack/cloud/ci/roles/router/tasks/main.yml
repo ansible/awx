@@ -1,0 +1,123 @@
+---
+# Regular user operation
+- name: Create internal network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ network_name }}"
+     external: false
+
+- name: Create subnet1
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: present
+     network_name: "{{ network_name }}"
+     name: shade_subnet1
+     cidr: 10.7.7.0/24
+
+- name: Create router
+  openstack.cloud.os_router:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ router_name }}"
+
+- name: Update router (add interface)
+  openstack.cloud.os_router:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ router_name }}"
+     interfaces:
+         - shade_subnet1
+
+- name: Gather routers info
+  openstack.cloud.os_routers_info:
+     cloud: "{{ cloud }}"
+     name: "{{ router_name }}"
+     filters:
+       admin_state_up: true
+  register: result
+
+- name: Verify routers info
+  assert:
+    that:
+      - "result.openstack_routers.0.name == router_name"
+      - (result.openstack_routers.0.interfaces_info|length) == 1
+
+# Admin operation
+- name: Create external network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ external_network_name }}"
+     external: "{{ network_external }}"
+  when:
+    - network_external
+
+- name: Create subnet2
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: present
+     network_name: "{{ external_network_name }}"
+     name: shade_subnet2
+     cidr: 10.6.6.0/24
+  when:
+    - network_external
+
+- name: Update router (add external gateway)
+  openstack.cloud.os_router:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ router_name }}"
+     network: "{{ external_network_name }}"
+     interfaces:
+         - shade_subnet1
+  when:
+    - network_external
+
+- name: Gather routers info
+  openstack.cloud.os_routers_info:
+     cloud: "{{ cloud }}"
+     name: "{{ router_name }}"
+     filters:
+       admin_state_up: true
+  register: result
+
+- name: Verify routers info
+  assert:
+    that:
+      - "result.openstack_routers.0.name == router_name"
+      - (result.openstack_routers.0.interfaces_info|length) == 1
+
+- name: Delete router
+  openstack.cloud.os_router:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ router_name }}"
+
+- name: Delete subnet1
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: shade_subnet1
+
+- name: Delete subnet2
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: shade_subnet2
+  when:
+    - network_external
+
+- name: Delete internal network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ network_name }}"
+
+- name: Delete external network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ external_network_name }}"
+  when:
+    - network_external

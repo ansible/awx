@@ -1,0 +1,308 @@
+name: Collection test suite
+
+on:
+  push:
+  pull_request:
+  schedule:
+  - cron: 3 0 * * *  # Run daily at 0:03 UTC
+
+jobs:
+  build-collection-artifact:
+    name: Build collection
+    runs-on: ${{ matrix.runner-os }}
+    strategy:
+      matrix:
+        runner-os:
+        - ubuntu-latest
+        ansible-version:
+        - git+https://github.com/ansible/ansible.git@devel
+        runner-python-version:
+        - 3.8
+    steps:
+    - name: Check out ${{ github.repository }} on disk
+      uses: actions/checkout@master
+    - name: Set up Python ${{ matrix.runner-python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.runner-python-version }}
+    - name: Set up pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('tests/sanity/requirements.txt') }}-${{ hashFiles('tests/unit/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install Ansible ${{ matrix.ansible-version }}
+      run: >-
+        python -m
+        pip
+        install
+        --user
+        ${{ matrix.ansible-version }}
+    - name: Build a collection tarball
+      run: >-
+        ~/.local/bin/ansible-galaxy
+        collection
+        build
+        --output-path
+        "${GITHUB_WORKSPACE}/.cache/collection-tarballs"
+    - name: Store migrated collection artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: >-
+          collection
+        path: .cache/collection-tarballs
+
+  sanity-test-collection-via-vms:
+    name: Sanity in VM ${{ matrix.os.vm || 'ubuntu-latest' }}
+    needs:
+    - build-collection-artifact
+    runs-on: ${{ matrix.os.vm || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible-version:
+        - git+https://github.com/ansible/ansible.git@devel
+        os:
+        - vm: ubuntu-latest
+        - vm: ubuntu-16.04
+        - vm: macos-latest
+        python-version:
+        - 3.8
+        - 3.7
+        - 3.6
+        - 3.5
+        - 2.7
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ github.ref }}-sanity-VMs
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install Ansible ${{ matrix.ansible-version }}
+      run: >-
+        python -m
+        pip
+        install
+        --user
+        ${{ matrix.ansible-version }}
+    - name: Download migrated collection artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: >-
+          collection
+        path: .cache/collection-tarballs
+    - name: Install the collection tarball
+      run: >-
+        ~/.local/bin/ansible-galaxy
+        collection
+        install
+        .cache/collection-tarballs/*.tar.gz
+    - name: Run collection sanity tests
+      run: >-
+        ~/.local/bin/ansible-test
+        sanity
+        --color
+        --requirements
+        --venv
+        --python
+        "${{ matrix.python-version }}"
+        -vvv
+      working-directory: >-
+        /${{ runner.os == 'Linux' && 'home' || 'Users' }}/runner/.ansible/collections/ansible_collections/ansible/amazon
+
+  sanity-test-collection-via-containers:
+    name: Sanity in container via Python ${{ matrix.python-version }}
+    needs:
+    - build-collection-artifact
+    runs-on: ${{ matrix.runner-os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner-os:
+        - ubuntu-latest
+        runner-python-version:
+        - 3.8
+        ansible-version:
+        - git+https://github.com/ansible/ansible.git@devel
+        python-version:
+        - 3.8
+        - 2.7
+        - 3.7
+        - 3.6
+        - 3.5
+        - 2.6
+    steps:
+    - name: Set up Python ${{ matrix.runner-python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.runner-python-version }}
+    - name: Set up pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ github.ref }}-sanity-containers
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install Ansible ${{ matrix.ansible-version }}
+      run: >-
+        python -m
+        pip
+        install
+        --user
+        ${{ matrix.ansible-version }}
+    - name: Download migrated collection artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: >-
+          collection
+        path: .cache/collection-tarballs
+    - name: Install the collection tarball
+      run: >-
+        ~/.local/bin/ansible-galaxy
+        collection
+        install
+        .cache/collection-tarballs/*.tar.gz
+    - name: Run collection sanity tests
+      run: >-
+        ~/.local/bin/ansible-test
+        sanity
+        --color
+        --requirements
+        --docker
+        --python
+        "${{ matrix.python-version }}"
+        -vvv
+      working-directory: >-
+        /home/runner/.ansible/collections/ansible_collections/ansible/amazon
+
+  unit-test-collection-via-vms:
+    name: Units in VM ${{ matrix.os.vm || 'ubuntu-latest' }}
+    needs:
+    - build-collection-artifact
+    runs-on: ${{ matrix.os.vm || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible-version:
+        - git+https://github.com/ansible/ansible.git@devel
+        os:
+        - vm: ubuntu-latest
+        - vm: ubuntu-16.04
+        - vm: macos-latest
+        python-version:
+        - 3.8
+        - 3.7
+        - 3.6
+        - 3.5
+        - 2.7
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ github.ref }}-units-VMs
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install Ansible ${{ matrix.ansible-version }}
+      run: >-
+        python -m
+        pip
+        install
+        --user
+        ${{ matrix.ansible-version }}
+    - name: Download migrated collection artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: >-
+          collection
+        path: .cache/collection-tarballs
+    - name: Install the collection tarball
+      run: >-
+        ~/.local/bin/ansible-galaxy
+        collection
+        install
+        .cache/collection-tarballs/*.tar.gz
+    - name: Run collection unit tests
+      run: |
+        [[ ! -d 'tests/unit' ]] && echo This collection does not have unit tests. Skipping... || \
+        ~/.local/bin/ansible-test units --color --coverage --requirements --venv --python "${{ matrix.python-version }}" -vvv
+      working-directory: >-
+        /${{ runner.os == 'Linux' && 'home' || 'Users' }}/runner/.ansible/collections/ansible_collections/ansible/amazon
+
+  unit-test-collection-via-containers:
+    name: Units in container ${{ matrix.container-image }}
+    needs:
+    - build-collection-artifact
+    runs-on: ${{ matrix.runner-os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner-os:
+        - ubuntu-latest
+        runner-python-version:
+        - 3.8
+        ansible-version:
+        - git+https://github.com/ansible/ansible.git@devel
+        container-image:
+        - fedora31
+        - ubuntu1804
+        - centos8
+        - opensuse15
+        - fedora30
+        - centos7
+        - opensuse15py2
+        - ubuntu1604
+        - centos6
+    steps:
+    - name: Set up Python ${{ matrix.runner-python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.runner-python-version }}
+    - name: Set up pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ github.ref }}-units-containers
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install Ansible ${{ matrix.ansible-version }}
+      run: >-
+        python -m
+        pip
+        install
+        --user
+        ${{ matrix.ansible-version }}
+    - name: Download migrated collection artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: >-
+          collection
+        path: .cache/collection-tarballs
+    - name: Install the collection tarball
+      run: >-
+        ~/.local/bin/ansible-galaxy
+        collection
+        install
+        .cache/collection-tarballs/*.tar.gz
+    - name: Run collection unit tests
+      run: |
+        [[ ! -d 'tests/unit' ]] && echo This collection does not have unit tests. Skipping... || \
+        ~/.local/bin/ansible-test units --color --coverage --requirements --docker "${{ matrix.container-image }}" -vvv
+      working-directory: >-
+        /home/runner/.ansible/collections/ansible_collections/ansible/amazon

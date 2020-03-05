@@ -1,0 +1,14 @@
+---
+uid: "{{ (resource_group ~ inventory_hostname) | hash('md5') | truncate(18, True, '') }}"
+uid_short: "{{ (resource_group ~ inventory_hostname) | hash('md5') | truncate(10, True, '') }}"
+
+storage_account: "{{ 'stor' ~ uid }}"
+availability_set: "{{ 'avbs' ~ uid_short }}"
+vm_name: "{{ 'vm' ~ uid_short }}"
+network_name: "{{ 'vnet' ~ uid_short }}"
+subnet_name: "{{ 'snet' ~ uid_short }}"
+security_group: "{{ 'sg' ~ uid_short }}"
+public_ip_name: "{{ 'ip' ~ uid_short }}"
+interface_name: "{{ 'int' ~ uid_short }}"
+network: 10.42.0.0/24
+subnet: 10.42.0.0/28

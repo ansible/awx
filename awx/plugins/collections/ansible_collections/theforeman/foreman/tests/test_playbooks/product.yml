@@ -1,0 +1,111 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/content_credential.yml
+    vars:
+      content_credential_state: present
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_state: present
+  - include: tasks/product.yml
+    vars:
+      product_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - name: 'Test product'
+    block:
+    - include: tasks/product.yml
+      vars:
+        product_state: present
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_state: present
+        expected_change: false
+    - include: tasks/product.yml
+      vars:
+        product_description: 'A product with an updated description'
+        product_state: present
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_state: absent
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_state: absent
+        expected_change: false
+
+  - name: 'Test product with content GPG key'
+    block:
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 2"
+        product_gpg_key: "Test GPG key"
+        product_state: present
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 2"
+        product_gpg_key: "Test GPG key"
+        product_state: present
+        expected_change: false
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 2"
+        product_state: absent
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 2"
+        product_state: absent
+        expected_change: false
+
+  - name: 'Test product with sync plan'
+    block:
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 3"
+        product_sync_plan: "Test Sync Plan"
+        product_state: present
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 3"
+        product_sync_plan: "Test Sync Plan"
+        product_state: present
+        expected_change: false
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 3"
+        product_state: absent
+        expected_change: true
+    - include: tasks/product.yml
+      vars:
+        product_name: "Test Product 3"
+        product_state: absent
+        expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_state: absent
+  - include: tasks/content_credential.yml
+    vars:
+      content_credential_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

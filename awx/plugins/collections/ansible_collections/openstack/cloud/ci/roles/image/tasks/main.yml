@@ -1,0 +1,54 @@
+---
+- name: Create a test image file
+  shell: mktemp
+  register: tmp_file
+
+- name: Fill test image file to 1MB
+  shell: truncate -s 1048576 {{ tmp_file.stdout }}
+
+- name: Create raw image (defaults)
+  openstack.cloud.os_image:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ image_name }}"
+     filename: "{{ tmp_file.stdout }}"
+     disk_format: raw
+  register: image
+
+- debug: var=image
+
+- name: Delete raw image (defaults)
+  openstack.cloud.os_image:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ image_name }}"
+
+- name: Create raw image (complex)
+  openstack.cloud.os_image:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ image_name }}"
+     filename: "{{ tmp_file.stdout }}"
+     disk_format: raw
+     is_public: True
+     min_disk: 10
+     min_ram: 1024
+     kernel: cirros-vmlinuz
+     ramdisk: cirros-initrd
+     properties:
+        cpu_arch: x86_64
+        distro: ubuntu
+  register: image
+
+- debug: var=image
+
+- name: Delete raw image (complex)
+  openstack.cloud.os_image:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ image_name }}"
+
+- name: Delete test image file
+  file:
+     name: "{{ tmp_file.stdout }}"
+     state: absent

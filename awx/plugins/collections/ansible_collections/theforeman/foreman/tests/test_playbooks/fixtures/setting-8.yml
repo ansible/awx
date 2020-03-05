@@ -1,0 +1,110 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:04 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=2f5c83b0e019fc1250e63f376076dcd2; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [d6d5b265-6162-4693-b9c0-5c1711afec7f]
+      x-runtime: ['0.080632']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=2f5c83b0e019fc1250e63f376076dcd2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings?per_page=4294967296&search=name%3D%22token_duration%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 109,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"token_duration\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"value\":99,\"description\":\"Time in minutes installation tokens should
+        be valid for, 0 to disable token generation\",\"category\":\"Setting::Provisioning\",\"settings_type\":\"integer\",\"default\":360,\"created_at\":\"2019-07-15
+        16:12:03 UTC\",\"updated_at\":\"2019-07-24 18:30:03 UTC\",\"id\":68,\"name\":\"token_duration\",\"full_name\":\"Token
+        duration\",\"category_name\":\"Provisioning\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:04 GMT']
+      etag: [W/"8d6c47878c631e97f1440800121f93b6"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [195aa7f1-6d6d-4a66-b8ec-a3202fb7e4e9]
+      x-runtime: ['0.029245']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=2f5c83b0e019fc1250e63f376076dcd2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings/68
+  response:
+    body: {string: !!python/unicode '{"value":99,"description":"Time in minutes installation
+        tokens should be valid for, 0 to disable token generation","category":"Setting::Provisioning","settings_type":"integer","default":360,"created_at":"2019-07-15
+        16:12:03 UTC","updated_at":"2019-07-24 18:30:03 UTC","id":68,"name":"token_duration","full_name":"Token
+        duration","category_name":"Provisioning"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:04 GMT']
+      etag: [W/"20616e44dc8f4aba35fd09c0cbc8576d"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [0aa09823-09f6-4d4e-ad3d-68f67b206cb9]
+      x-runtime: ['0.023880']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

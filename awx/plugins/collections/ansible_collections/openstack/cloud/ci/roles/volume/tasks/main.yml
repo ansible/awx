@@ -1,0 +1,17 @@
+---
+- name: Create volume
+  openstack.cloud.os_volume:
+     cloud: "{{ cloud }}"
+     state: present
+     size: 1
+     display_name: ansible_volume
+     display_description: Test volume
+  register: vol
+
+- debug: var=vol
+
+- name: Delete volume
+  openstack.cloud.os_volume:
+     cloud: "{{ cloud }}"
+     state: absent
+     display_name: ansible_volume

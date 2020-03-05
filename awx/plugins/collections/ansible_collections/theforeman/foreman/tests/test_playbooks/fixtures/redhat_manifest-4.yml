@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: !!python/unicode '{}'
+    headers:
+      Accept: [application/json]
+      Connection: [close]
+      Content-Length: ['2']
+      Content-Type: [application/json]
+      Host: [subscription.rhn.redhat.com]
+      User-Agent: [ansible-httpget]
+    method: GET
+    uri: https://subscription.rhn.redhat.com/subscription/users/john-smith/owners
+  response:
+    body: {string: !!python/unicode '[{"created":"2018-10-17T10:43:12+0000","updated":"2018-10-17T11:14:16+0000","parentOwner":null,"id":"8a99f9aa661baad10166819f4af56235","key":"11612516","displayName":"11612516","contentPrefix":null,"lastRefreshed":"2018-10-17T11:14:16+0000","defaultServiceLevel":null,"upstreamConsumer":null,"logLevel":null,"contentAccessMode":"entitlement","contentAccessModeList":"entitlement","href":"/owners/11612516","autobindDisabled":false}]'}
+    headers:
+      connection: [close]
+      content-type: [application/json]
+      date: ['Wed, 17 Oct 2018 11:29:22 GMT']
+      server: [Apache-Coyote/1.1]
+      transfer-encoding: [chunked]
+      x-candlepin-request-uuid: [e04e9fb5-fce1-46b1-92f4-b390bf227fc0]
+      x-version: [2.3.9-1]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{}'
+    headers:
+      Accept: [application/json]
+      Connection: [close]
+      Content-Length: ['2']
+      Content-Type: [application/json]
+      Host: [!!python/unicode 'subscription.rhn.redhat.com']
+      User-Agent: [ansible-httpget]
+    method: GET
+    uri: https://subscription.rhn.redhat.com/subscription/owners/11612516/consumers?type=satellite
+  response:
+    body: {string: !!python/unicode '[{"created":"2018-10-17T11:28:43+0000","updated":"2018-10-17T11:29:15+0000","id":"8a99f9ab661ba83a016681c8f8e23591","uuid":"5349d1d0-5bda-480a-b7bd-ff41e2c29e03","name":"katello.example.com","username":"john-smith","entitlementStatus":null,"serviceLevel":"","owner":{"id":"8a99f9aa661baad10166819f4af56235","key":"11612516","displayName":"11612516","href":"/owners/11612516"},"environment":null,"entitlementCount":2,"lastCheckin":null,"installedProducts":[],"canActivate":false,"capabilities":[{"created":null,"updated":null,"id":"8a99f9ab661ba83a016681c8f8e23595","name":"cert_v3"},{"created":null,"updated":null,"id":"8a99f9ab661ba83a016681c8f8e23592","name":"cores"},{"created":null,"updated":null,"id":"8a99f9ab661ba83a016681c8f8e23593","name":"instance_multiplier"},{"created":null,"updated":null,"id":"8a99f9ab661ba83a016681c8f8e23594","name":"derived_product"},{"created":null,"updated":null,"id":"8a99f9ab661ba83a016681c8f8e23596","name":"ram"}],"hypervisorId":null,"contentTags":[],"autoheal":true,"recipientOwnerKey":null,"annotations":null,"contentAccessMode":null,"type":{"id":"9","label":"satellite","manifest":true},"guestIds":[],"href":"/consumers/5349d1d0-5bda-480a-b7bd-ff41e2c29e03","releaseVer":{"releaseVer":null}}]'}
+    headers:
+      connection: [close]
+      content-type: [application/json]
+      date: ['Wed, 17 Oct 2018 11:29:24 GMT']
+      server: [Apache-Coyote/1.1]
+      transfer-encoding: [chunked]
+      x-candlepin-request-uuid: [3559f6f6-35e6-4a92-94bb-08a76097d6b7]
+      x-version: [2.3.9-1]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{}'
+    headers:
+      Accept: [application/json]
+      Connection: [close]
+      Content-Length: ['2']
+      Content-Type: [application/json]
+      Host: [!!python/unicode 'subscription.rhn.redhat.com']
+      User-Agent: [ansible-httpget]
+    method: DELETE
+    uri: https://subscription.rhn.redhat.com/subscription/consumers/5349d1d0-5bda-480a-b7bd-ff41e2c29e03
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      connection: [close]
+      date: ['Wed, 17 Oct 2018 11:29:27 GMT']
+      server: [Apache-Coyote/1.1]
+      x-candlepin-request-uuid: [1fbb5998-075a-4ada-9b6b-5b458ede8f66]
+      x-version: [2.3.9-1]
+    status: {code: 204, message: No Content}
+version: 1

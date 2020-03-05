@@ -1,0 +1,5 @@
+server_network: private
+server_name: ansible_server
+flavor: m1.tiny
+floating_ip_pool_name: public
+boot_volume_size: 5

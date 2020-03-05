@@ -1,0 +1,10 @@
+{
+  "server_url": "https://satellite.redhat.local",
+  "username": "admin",
+  "password": "redhat",
+  "validate_certs": false,
+  "name": "EXAMPLE.COM",
+  "realm_proxy": 1,
+  "realm_type": "Red Hat Identity Management",
+  "state": "present",
+}

@@ -1,0 +1,22 @@
+---
+- name: "Ensure {{ manifest_name }} is {{ manifest_state }} with {{ pool_quantity }} of {{ rhsm_pool_id }} subs {{ pool_state }}"
+  vars:
+    - manifest_name: "test.katello.org"
+    - rhsm_validate_certs: false
+  redhat_manifest:
+    name: "{{ manifest_name }}"
+    username: "{{ rhsm_username }}"
+    password: "{{ rhsm_password }}"
+    pool_id: "{{ rhsm_pool_id }}"
+    quantity: "{{ pool_quantity }}"
+    pool_state: "{{ pool_state }}"
+    state: "{{ manifest_state }}"
+    validate_certs: "{{ rhsm_validate_certs }}"
+    path: "{{ manifest_export_path | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring Manifest is {{ manifest_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

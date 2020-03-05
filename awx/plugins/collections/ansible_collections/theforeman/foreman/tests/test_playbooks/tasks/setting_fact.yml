@@ -1,0 +1,16 @@
+---
+- name: "Read setting '{{ setting_name }}'"
+  foreman_search_facts:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    verify_ssl: "{{ foreman_validate_certs }}"
+    resource: 'settings'
+    search: "{{ setting_name | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Verification that setting is '{{ setting_value }}' failed!"
+    that:
+      - result.resources[0].value == setting_value
+  when: (setting_name is defined) and (setting_value is defined)
+...

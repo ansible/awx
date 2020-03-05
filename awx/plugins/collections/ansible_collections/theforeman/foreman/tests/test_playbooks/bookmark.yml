@@ -1,0 +1,39 @@
+---
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: present_with_defaults
+      expected_change: true
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: present
+      expected_change: false
+
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: present_with_defaults
+      bookmark_query: "started_at > 12 hours ago"
+      expected_change: false
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: present
+      bookmark_query: "started_at > 12 hours ago"
+      expected_change: true
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: present
+      bookmark_public: false
+      expected_change: true
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: absent
+      expected_change: true
+  - include: tasks/bookmark.yml
+    vars:
+      bookmark_state: absent
+      expected_change: false
+...

@@ -1,0 +1,17 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "placeholder": "Password123!",
+            "_justification": "Mock secret used for tests and samples."
+        },
+        {
+            "file": "cert1.txt", 
+            "_justification": "Legitimate IT certificate file with private key"
+        },
+        {
+            "file": "cert2.txt", 
+            "_justification": "Legitimate IT certificate file with private key"
+        }
+    ]
+}

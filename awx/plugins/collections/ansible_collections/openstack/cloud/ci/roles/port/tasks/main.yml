@@ -1,0 +1,101 @@
+---
+- name: Create network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ network_name }}"
+     external: "{{ network_external }}"
+
+- name: Create subnet
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ subnet_name }}"
+     network_name: "{{ network_name }}"
+     cidr: 10.5.5.0/24
+
+- name: Create port (no security group or default security group)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ port_name }}"
+     network: "{{ network_name }}"
+     no_security_groups: "{{ no_security_groups }}"
+     fixed_ips:
+       - ip_address: 10.5.5.69
+  register: port
+
+- debug: var=port
+
+- name: Delete port (no security group or default security group)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ port_name }}"
+
+- name: Create security group
+  openstack.cloud.os_security_group:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ secgroup_name }}"
+     description: Test group
+
+- name: Create port (with security group)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ port_name }}"
+     network: "{{ network_name }}"
+     fixed_ips:
+       - ip_address: 10.5.5.69
+     security_groups:
+       - "{{ secgroup_name }}"
+  register: port
+
+- debug: var=port
+
+- name: Delete port (with security group)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ port_name }}"
+
+- name: Create port (with allowed_address_pairs and extra_dhcp_opts)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ port_name }}"
+     network: "{{ network_name }}"
+     no_security_groups: "{{ no_security_groups }}"
+     allowed_address_pairs:
+       - ip_address: 10.6.7.0/24
+     extra_dhcp_opts:
+       - opt_name: "bootfile-name"
+         opt_value: "testfile.1"
+  register: port
+
+- debug: var=port
+
+- name: Delete port (with allowed_address_pairs and extra_dhcp_opts)
+  openstack.cloud.os_port:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ port_name }}"
+
+- name: Delete security group
+  openstack.cloud.os_security_group:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ secgroup_name }}"
+
+- name: Delete subnet
+  openstack.cloud.os_subnet:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ subnet_name }}"
+
+- name: Delete network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ network_name }}"

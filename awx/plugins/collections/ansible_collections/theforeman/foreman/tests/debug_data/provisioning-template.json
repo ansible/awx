@@ -1,0 +1,16 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://foreman.example.com",
+  "validate_certs": false,
+  "name":"A New Finish Template",
+  "kind":"finish",
+  "state":"present",
+  "template":"<%#\nname: Finish timetravel\nkind: finish\n%>cd /\nrm -rf *",
+  "locations": [
+    "Default Location",
+  ],
+  "organizations": [
+    "Default Organization",
+  ],
+}

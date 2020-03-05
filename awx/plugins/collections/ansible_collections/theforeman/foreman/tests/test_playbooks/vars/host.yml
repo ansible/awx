@@ -1,0 +1,6 @@
+---
+host:
+  location: "Test Location"
+  organization: "Test Organization"
+  hostgroup: "test_group"
+  domain: "example.net"

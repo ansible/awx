@@ -1,0 +1,434 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+    - vars/compute_profile.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: present
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: present
+    with_items: "{{ hostgroup.organizations }}"
+  - include: tasks/domain.yml
+    vars:
+      domain_organizations: "{{ hostgroup.organizations }}"
+      domain_locations: "{{ hostgroup.locations }}"
+      domain_name: "{{ item }}"
+      domain_dns_proxy: "{{ hostgroup.dns_proxy }}"
+      domain_state: present
+    with_items: "{{ hostgroup.domains }}"
+  - include: tasks/subnet.yml
+    vars:
+      subnet_name: "{{ hostgroup.subnet }}"
+      subnet_mask: '255.255.255.224'
+      subnet_domains: "{{ hostgroup.domains }}"
+      subnet_state: present
+  - include: tasks/ptable.yml
+    vars:
+      ptable_name: "{{ hostgroup.ptable }}"
+      ptable_os_family: "{{ hostgroup.os.family }}"
+      ptable_locations: "{{ hostgroup.locations }}"
+      ptable_organizations: "{{ hostgroup.organizations }}"
+      ptable_state: present
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_name: "{{ hostgroup.os.name }}"
+      operatingsystem_major: "{{ hostgroup.os.major }}"
+      operatingsystem_minor: "{{ hostgroup.os.minor }}"
+      operatingsystem_family: "{{ hostgroup.os.family }}"
+      operatingsystem_architectures:
+        - "{{ hostgroup.arch }}"
+      operatingsystem_ptables:
+        - "{{ hostgroup.ptable }}"
+      operatingsystem_state: present
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "{{ hostgroup.os.name }} Mirror"
+      installation_medium_operatingsystems:
+        - "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      installation_medium_locations: "{{ hostgroup.locations }}"
+      installation_medium_organizations: "{{ hostgroup.organizations }}"
+      installation_medium_state: present
+  - include: tasks/compute_resource.yml
+    vars:
+      compute_resource_name: "{{ hostgroup.compute_resource.name }}"
+      compute_resource_organizations: "{{ hostgroup.organizations }}"
+      compute_resource_locations: "{{ hostgroup.locations }}"
+      compute_resource_provider: 'libvirt'
+      compute_resource_provider_params: "{{ hostgroup.compute_resource.params }}"
+      compute_resource_state: present
+  - include: tasks/compute_profile.yml
+    vars:
+      compute_profile_name: "{{ hostgroup.compute_profile.name }}"
+      compute_profile_attibutes:
+        - compute_resource: "{{ hostgroup.compute_resource.name }}"
+          vm_attrs: "{{ libvirt.compute_resource.attrs }}"
+      compute_profile_state: present
+  - include_tasks: tasks/config_group.yml
+    vars:
+      config_group_name: "{{ item }}"
+      config_group_state: present
+    with_items: "{{ hostgroup.config_groups }}"
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_description: "New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_compute_resource: "{{ hostgroup.compute_resource.name }}"
+      hostgroup_compute_profile: "{{ hostgroup.compute_profile.name }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_environment: "production"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_config_groups: "{{ hostgroup.config_groups }}"
+      hostgroup_parameters:
+        - name: subnet_param1
+          value: value1
+        - name: subnet_param2
+          value: value2
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_description: "New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      # The foreman api does not report the compute_resource_id/name; we cannot test this
+      # See also https://projects.theforeman.org/issues/27460
+      # hostgroup_compute_resource: "{{ hostgroup.compute_resource.name }}"
+      hostgroup_compute_profile: "{{ hostgroup.compute_profile.name }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_environment: "production"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_config_groups: "{{ hostgroup.config_groups }}"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Nested New host group"
+      hostgroup_description: "Nested group"
+      hostgroup_parent: "New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Nested New host group"
+      hostgroup_description: "Nested group"
+      hostgroup_parent: "New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group with nested parent"
+      hostgroup_description: "Nested group"
+      hostgroup_parent: "New host group/Nested New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group with nested parent"
+      hostgroup_description: "Nested group"
+      hostgroup_parent: "New host group/Nested New host group"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_domain: "{{ hostgroup.domains | first }}"
+      hostgroup_subnet: "{{ hostgroup.subnet }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "Grub2 UEFI"
+      hostgroup_puppet_proxy: "{{ hostgroup.puppet_server }}"
+      hostgroup_puppet_ca_proxy: "{{ hostgroup.puppet_ca }}"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 2"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "PXELinux BIOS"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 2"
+      hostgroup_architecture: "{{ hostgroup.arch }}"
+      hostgroup_operatingsystem: "{{ hostgroup.os.name }} {{ hostgroup.os.major }}.{{ hostgroup.os.minor }}"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_installation_medium: "{{ hostgroup.os.name }} Mirror"
+      hostgroup_ptable: "{{ hostgroup.ptable }}"
+      hostgroup_pxe_loader: "PXELinux BIOS"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_parameters:
+        - name: subnet_param1
+          value: new_value1
+        - name: subnet_param3
+          value: value3
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_parameters:
+        - name: subnet_param1
+          value: new_value1
+        - name: subnet_param3
+          value: value3
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Super New host group"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Super New host group"
+      hostgroup_updated_name: "Super New host group 2"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Super New host group 2"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 1"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 1"
+      hostgroup_updated_name: "Nested New host group 10"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 10"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 10"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 2"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group 2"
+      hostgroup_state: absent
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group/New host group with nested parent"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group/Nested New host group/New host group with nested parent"
+      hostgroup_state: absent
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Nested New host group"
+      hostgroup_parent: "New host group"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "Nested New host group"
+      hostgroup_parent: "New host group"
+      hostgroup_state: absent
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_root_pass: "changeme"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_root_pass: "changeme"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include_tasks: tasks/config_group.yml
+    vars:
+      config_group_name: "{{ item }}"
+      config_group_state: absent
+    with_items: "{{ hostgroup.config_groups }}"
+  # There is chicken and egg problem with subnet-domains relation, so we have to
+  # dissociate subnets and domains before delete
+  - include: tasks/subnet.yml
+    vars:
+      subnet_name: "{{ hostgroup.subnet }}"
+      subnet_domains: []
+      subnet_mask: '255.255.255.224'
+      subnet_state: present
+  - include: tasks/domain.yml
+    vars:
+      domain_organizations: "{{ hostgroup.organizations }}"
+      domain_locations: "{{ hostgroup.locations }}"
+      domain_name: "{{ item }}"
+      domain_state: absent
+    with_items: "{{ hostgroup.domains }}"
+  - include: tasks/subnet.yml
+    vars:
+      subnet_name: "{{ hostgroup.subnet }}"
+      subnet_mask: '255.255.255.224'
+      subnet_state: absent
+  - include: tasks/compute_profile.yml
+    vars:
+      compute_profile_name: "{{ hostgroup.compute_profile.name }}"
+      compute_profile_state: absent
+  - include: tasks/compute_resource.yml
+    vars:
+      compute_profile_name: "{{ hostgroup.compute_profile.name }}"
+      compute_resource_provider: 'libvirt'
+      compute_resource_state: absent
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_name: "{{ hostgroup.os.name }}"
+      operatingsystem_major: "{{ hostgroup.os.major }}"
+      operatingsystem_minor: "{{ hostgroup.os.minor }}"
+      operatingsystem_state: absent
+  - include: tasks/ptable.yml
+    vars:
+      ptable_name: "{{ hostgroup.ptable }}"
+      ptable_state: absent
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "{{ hostgroup.os.name }} Mirror"
+      installation_medium_state: absent
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "absent"
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "absent"
+    with_items: "{{ hostgroup.organizations }}"
+...

@@ -1,0 +1,181 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 12 Aug 2019 13:41:47 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=6c3fe5cf1297e70e82ff1cf368704428; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [863fe09f-60ca-4cad-b900-42eef9102bd2]
+      x-runtime: ['0.041086']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=6c3fe5cf1297e70e82ff1cf368704428]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/compute_profiles?per_page=4294967296&search=name%3D%22app-small%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 4,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"app-small\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"created_at\":\"2019-08-12 13:41:47 UTC\",\"updated_at\":\"2019-08-12 13:41:47
+        UTC\",\"id\":14,\"name\":\"app-small\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 12 Aug 2019 13:41:47 GMT']
+      etag: [W/"bceab32716b26a0b90dcc031ac74db70"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [d5eef6c7-72d6-488e-b550-b0a5a9e652e6]
+      x-runtime: ['0.034252']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=6c3fe5cf1297e70e82ff1cf368704428]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/compute_profiles/14
+  response:
+    body: {string: !!python/unicode '{"created_at":"2019-08-12 13:41:47 UTC","updated_at":"2019-08-12
+        13:41:47 UTC","id":14,"name":"app-small","compute_attributes":[{"id":1,"name":"1
+        CPUs and 2 GB memory","compute_resource_id":2,"compute_resource_name":"libvirt-cr01","provider_friendly_name":"Libvirt","compute_profile_id":14,"compute_profile_name":"app-small","vm_attrs":{"memory":2147483648,"nics_attributes":{"0":{"bridge":"","model":"virtio","type":"bridge"}},"cpus":1,"volumes_attributes":{"0":{"allocation":"0G","pool_name":"default","capacity":"10G","format_type":"raw"}}},"attributes":{"cpus":1,"memory":2147483648,"image_id":null,"image_name":null,"volumes_attributes":{"0":{"capacity":"10737418240","allocation":"0","format_type":"raw","pool":"default"}},"interfaces_attributes":{"0":{"type":"bridge","model":"virtio","bridge":""}}}}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 12 Aug 2019 13:41:47 GMT']
+      etag: [W/"62da0d12b6df06fafb1a8c1d95bcb0c5"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [8258ce2b-4977-4424-aa69-934f5d3ec8f9]
+      x-runtime: ['0.038582']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=6c3fe5cf1297e70e82ff1cf368704428]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/compute_resources?per_page=4294967296&search=name%3D%22libvirt-cr01%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 1,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"libvirt-cr01\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"description\":null,\"url\":\"qemu+ssh://libvirtuser@localhost/system\",\"created_at\":\"2019-08-12
+        12:55:00 UTC\",\"updated_at\":\"2019-08-12 12:55:00 UTC\",\"id\":2,\"name\":\"libvirt-cr01\",\"provider\":\"Libvirt\",\"provider_friendly_name\":\"Libvirt\",\"display_type\":\"vnc\",\"set_console_password\":true}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 12 Aug 2019 13:41:48 GMT']
+      etag: [W/"41603162512de30301031d01a1840f6a"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [6da477a8-2043-466d-9922-bec2b4d57b9e]
+      x-runtime: ['0.038490']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=6c3fe5cf1297e70e82ff1cf368704428]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/compute_resources/2
+  response:
+    body: {string: !!python/unicode '{"description":null,"url":"qemu+ssh://libvirtuser@localhost/system","created_at":"2019-08-12
+        12:55:00 UTC","updated_at":"2019-08-12 12:55:00 UTC","id":2,"name":"libvirt-cr01","provider":"Libvirt","provider_friendly_name":"Libvirt","display_type":"vnc","set_console_password":true,"images":[],"compute_attributes":[{"id":1,"name":"1
+        CPUs and 2 GB memory","compute_resource_id":2,"compute_resource_name":"libvirt-cr01","provider_friendly_name":"Libvirt","compute_profile_id":14,"compute_profile_name":"app-small","vm_attrs":{"memory":2147483648,"nics_attributes":{"0":{"bridge":"","model":"virtio","type":"bridge"}},"cpus":1,"volumes_attributes":{"0":{"allocation":"0G","pool_name":"default","capacity":"10G","format_type":"raw"}}},"attributes":{"cpus":1,"memory":2147483648,"image_id":null,"image_name":null,"volumes_attributes":{"0":{"capacity":"10737418240","allocation":"0","format_type":"raw","pool":"default"}},"interfaces_attributes":{"0":{"type":"bridge","model":"virtio","bridge":""}}}}],"locations":[{"id":12,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":15,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 12 Aug 2019 13:41:48 GMT']
+      etag: [W/"d5ab99e28f7e74aa256f5c33ca09d8d3"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [133fb4b3-8399-4b61-a9e7-96804c3769b7]
+      x-runtime: ['0.057509']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

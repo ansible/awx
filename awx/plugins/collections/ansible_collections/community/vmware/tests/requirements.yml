@@ -1,0 +1,3 @@
+integration_tests_dependencies:
+- community.general
+unit_tests_dependencies: []

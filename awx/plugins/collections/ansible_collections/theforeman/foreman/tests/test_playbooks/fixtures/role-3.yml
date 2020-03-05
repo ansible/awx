@@ -1,0 +1,436 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://127.0.0.1:4433/api/status
+  response:
+    body:
+      string: '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '63'
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:52 GMT
+      ETag:
+      - W/"7462024e111aafa1fe0b7de16a6757f0"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Set-Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - e9f754c9-9d32-424f-8153-858e6b902b9b
+      X-Runtime:
+      - '0.101271'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: GET
+    uri: https://127.0.0.1:4433/api/roles?search=name%3D%22test%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 18,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"test\\\"\",\n  \"sort\": {\n    \"\
+        by\": \"name\",\n    \"order\": \"ASC\"\n  },\n  \"results\": [{\"builtin\"\
+        :0,\"cloned_from_id\":null,\"name\":\"test\",\"id\":39,\"description\":\"\
+        test role\",\"origin\":null}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"0859631137cdb71777c1b46a715113a0"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 1a45f2b3-a4df-4a47-adf6-13ce7cdb86c0
+      X-Runtime:
+      - '0.056689'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: GET
+    uri: https://127.0.0.1:4433/api/roles/39
+  response:
+    body:
+      string: '{"builtin":0,"cloned_from_id":null,"name":"test","id":39,"description":"test
+        role","origin":null,"filters":[],"locations":[{"id":32,"name":"Test Location","title":"Test
+        Location","description":null}],"organizations":[{"id":33,"name":"Test Organization","title":"Test
+        Organization","description":"A test organization"}]}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"4accb557563e1ea839655e9355d4733f"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - cd035e0b-7550-40b9-888a-2c8e382f7164
+      X-Runtime:
+      - '0.077386'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: GET
+    uri: https://127.0.0.1:4433/api/locations?search=title%3D%22Test+Location%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"title=\\\"Test Location\\\"\",\n  \"sort\"\
+        : {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"ancestry\"\
+        :null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-10-19\
+        \ 03:55:36 UTC\",\"updated_at\":\"2019-10-19 03:55:36 UTC\",\"id\":32,\"name\"\
+        :\"Test Location\",\"title\":\"Test Location\",\"description\":null}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"490aea8f7ca4db0f379b2f57e5ebee46"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 30867db5-fc33-4cf6-9471-0ee6d950f53f
+      X-Runtime:
+      - '0.063137'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: GET
+    uri: https://127.0.0.1:4433/api/organizations?search=name%3D%22Test+Organization%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n  \"sort\"\
+        : {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"ancestry\"\
+        :null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-10-19\
+        \ 03:55:40 UTC\",\"updated_at\":\"2019-10-19 03:55:40 UTC\",\"id\":33,\"name\"\
+        :\"Test Organization\",\"title\":\"Test Organization\",\"description\":\"\
+        A test organization\"}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"933514c61ec7f1b990a79d064c1932dd"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 6ee2250d-2232-4ddf-bf39-29e1598bba74
+      X-Runtime:
+      - '0.060473'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: GET
+    uri: https://127.0.0.1:4433/api/permissions?search=name%3D%22view_hosts%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 238,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"view_hosts\\\"\",\n  \"sort\": {\n\
+        \    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"name\":\"\
+        view_hosts\",\"id\":60,\"resource_type\":\"Host\"}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"a63270bbeda2d918ae530ec6833f4af0"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - e6204168-da98-46eb-bf68-9c8e5454e697
+      X-Runtime:
+      - '0.058584'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"filter": {"role_id": 39, "search": "owner_type = Usergroup and owner_id
+      = 4", "permission_ids": [60]}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '104'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=50dd22c1869c4b18a494b1941def9fd7
+    method: POST
+    uri: https://127.0.0.1:4433/api/filters
+  response:
+    body:
+      string: '{"search":"owner_type = Usergroup and owner_id = 4","resource_type":"Host","unlimited?":false,"created_at":"2019-10-19
+        03:58:53 UTC","updated_at":"2019-10-19 03:58:53 UTC","override?":false,"id":354,"role":{"name":"test","id":39,"description":"test
+        role","origin":null},"permissions":[{"name":"view_hosts","id":60,"resource_type":"Host"}],"locations":[{"id":32,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":33,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sat, 19 Oct 2019 03:58:53 GMT
+      ETag:
+      - W/"d38004cc2e76317e1c49fdc56f4e2ad6"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 201 Created
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 1a139926-185d-4e3f-80ca-84b44252ee5a
+      X-Runtime:
+      - '0.212986'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+version: 1

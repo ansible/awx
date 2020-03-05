@@ -1,0 +1,133 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/usergroup.yml
+  tasks:
+  - include_tasks: tasks/user.yml
+    vars:
+      user_name: "{{ item }}"
+      user_password: "mysecret"
+      user_default_location: "{{ omit }}"
+      user_default_organization: "{{ omit }}"
+      user_locations: "{{ omit }}"
+      user_organizations: "{{ omit }}"
+    with_items: "{{ group.users }}"
+  - include_tasks: tasks/role.yml
+    vars:
+      role_name: "{{ item }}"
+      role_locations: "{{ omit }}"
+      role_organizations: "{{ omit }}"
+      role_state: present
+    with_items: "{{ group.roles }}"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/usergroup.yml
+  tasks:
+    - name: 'Test usergroup with minimal params (name)'
+      block:
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: present
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: present
+            expected_change: false
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: absent
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: absent
+            expected_change: false
+    - name: 'Test usergroup rename'
+      block:
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: present
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_updated_name: "{{ group.name }}2"
+            usergroup_state: present
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}2"
+            usergroup_state: present
+            expected_change: false
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}2"
+            usergroup_state: absent
+            expected_change: true
+    - name: 'Test usergroup with users/roles/groups'
+      block:
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: nestedgroup
+            usergroup_state: present
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_users : "{{ group.users }}"
+            usergroup_usergroups :
+              - nestedgroup
+            usergroup_roles : "{{ group.roles }}"
+            usergroup_state: present
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_users : "{{ group.users }}"
+            usergroup_usergroups :
+              - nestedgroup
+            usergroup_roles : "{{ group.roles }}"
+            usergroup_state: present
+            expected_change: false
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: "{{ group.name }}"
+            usergroup_state: absent
+            expected_change: true
+        - include: tasks/usergroup.yml
+          vars:
+            usergroup_name: nestedgroup
+            usergroup_state: absent
+            expected_change: true
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/usergroup.yml
+  tasks:
+  - include_tasks: tasks/user.yml
+    vars:
+      user_name: "{{ item }}"
+      user_default_location: "{{ omit }}"
+      user_default_organization: "{{ omit }}"
+      user_locations: "{{ omit }}"
+      user_organizations: "{{ omit }}"
+      user_state: absent
+    with_items: "{{ group.users }}"
+  - include_tasks: tasks/role.yml
+    vars:
+      role_name: "{{ item }}"
+      role_locations: "{{ omit }}"
+      role_organizations: "{{ omit }}"
+      role_state: absent
+    with_items: "{{ group.roles }}"

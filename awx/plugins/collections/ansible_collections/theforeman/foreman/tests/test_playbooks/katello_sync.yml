@@ -1,0 +1,52 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include_tasks: tasks/product.yml
+    vars:
+      product_state: present
+  - include_tasks: tasks/repository.yml
+    vars:
+      repository_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - name: sync product, synchronous
+      include_tasks: tasks/katello_sync.yml
+    - name: sync product, async
+      include_tasks: tasks/katello_sync.yml
+      vars:
+        synchronous: false
+    - name: sync repository, synchronous
+      include_tasks: tasks/katello_sync.yml
+      vars:
+        repository: "Test Repository"
+    - name: sync repository, async
+      include_tasks: tasks/katello_sync.yml
+      vars:
+        repository: "Test Repository"
+        synchronous: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/repository.yml
+    vars:
+      repository_state: absent
+  - include_tasks: tasks/product.yml
+    vars:
+      product_state: absent
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

@@ -1,0 +1,16 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "validate_certs":false,
+  "name":"Red Hat Enterprise Linux 7 Server (RPMs)",
+  "organization":"Default Organization",
+  "product": "Red Hat Enterprise Linux Server",
+  "repositories": [
+    {"releasever": "7.0", "basearch":"x86_64"},
+    {"releasever": "7.1", "basearch":"x86_64"},
+    {"releasever": "7.2", "basearch":"x86_64"},
+    {"releasever": "7.3", "basearch":"x86_64"},
+  ],
+  "state":"disabled",
+}

@@ -1,0 +1,28 @@
+---
+- name: "Create katello content view"
+  vars:
+    - content_view_name: "Test Content View"
+    - organization_name: "Test Organization"
+  katello_content_view:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    state: "{{ content_view_state | default(omit) }}"
+    name: "{{ content_view_name }}"
+    organization: "{{ organization_name }}"
+    repositories: "{{ repositories | default(omit) }}"
+    composite: "{{ composite | default(omit) }}"
+    components: "{{ components | default(omit) }}"
+    auto_publish: "{{ auto_publish | default(omit) }}"
+  register: result
+
+- assert:
+    fail_msg: "Ensuring content_view is {{ content_view_state | default('present') }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: content_view
+...

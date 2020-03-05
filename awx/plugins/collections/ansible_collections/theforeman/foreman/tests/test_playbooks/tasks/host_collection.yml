@@ -1,0 +1,27 @@
+---
+- name: "Ensure Host Collection '{{ host_collection_name }}' is {{ host_collection_state }}"
+  vars:
+    - host_collection_name: "TheAnswer"
+    - host_collection_description: "Foo host collection for Foo servers"
+    - host_collection_state: present
+    - host_collection_organization: "Test Organization"
+  katello_host_collection:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ host_collection_name }}"
+    updated_name: "{{ host_collection_updated_name | default(omit) }}"
+    description: "{{ host_collection_description }}"
+    organization: "{{ host_collection_organization }}"
+    state: "{{ host_collection_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring host collection is {{ host_collection_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: host_collection
+...

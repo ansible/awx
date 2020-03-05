@@ -1,0 +1,14 @@
+---
+- name: Create network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     name: "{{ network_name }}"
+     state: present
+     shared: "{{ network_shared }}"
+     external: "{{ network_external }}"
+
+- name: Delete network
+  openstack.cloud.os_network:
+     cloud: "{{ cloud }}"
+     name: "{{ network_name }}"
+     state: absent

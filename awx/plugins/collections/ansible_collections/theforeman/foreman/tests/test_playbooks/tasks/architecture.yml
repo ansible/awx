@@ -1,0 +1,19 @@
+---
+- name: "Ensure Architecture '{{ architecture_name }}' is {{ architecture_state }}"
+  vars:
+    architecture_name: "Test_Architecture"
+    architecture_state: present
+  foreman_architecture:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ architecture_name }}"
+    updated_name: "{{ architecture_updated_name | default(omit) }}"
+    operatingsystems: "{{ operatingsystems | default(omit) }}"
+    state: "{{ architecture_state }}"
+  register: result
+- fail:
+    msg: "Ensuring architecture is {{ architecture_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+  when: (expected_change is defined) and (result.changed != expected_change)
+...

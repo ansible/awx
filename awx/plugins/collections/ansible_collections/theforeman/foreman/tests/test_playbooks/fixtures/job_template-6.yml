@@ -1,0 +1,478 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://centos7-luna/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.24.0-develop","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"3f5599709463dcc7e904cd493ab8c362"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 42f62458-e2ef-45ac-b18f-e47c957d8899
+      x-runtime:
+      - '0.106608'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: GET
+    uri: https://centos7-luna/api/job_templates?per_page=4294967296&search=name%3D%22delete+file%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 37,\n  \"subtotal\": 0,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"delete file\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        []\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"2ad98f28e2f6c3e39550cc35448deb00"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - e54cf2bf-489b-48eb-a4ba-9505a022eaa9
+      x-runtime:
+      - '0.015741'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: GET
+    uri: https://centos7-luna/api/locations?per_page=4294967296&search=title%3D%22Test+Location%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"title=\\\"Test Location\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"ancestry\":null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-08-27
+        08:16:09 UTC\",\"updated_at\":\"2019-08-27 08:16:09 UTC\",\"id\":6,\"name\":\"Test
+        Location\",\"title\":\"Test Location\",\"description\":null}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"2fc601ba4be0c08fd72daa04ce907545"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 510185ae-4d5e-40e3-be67-721626e9bb10
+      x-runtime:
+      - '0.014627'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: GET
+    uri: https://centos7-luna/katello/api/organizations?per_page=4294967296&search=name%3D%22Test+Organization%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"label\":\"Test_Organization\",\"created_at\":\"2019-08-27 08:16:04 UTC\",\"updated_at\":\"2019-08-27
+        08:16:04 UTC\",\"id\":5,\"name\":\"Test Organization\",\"title\":\"Test Organization\",\"description\":\"A
+        test organization\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"1ca15590961c87829708b606a34e4f2f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 305f09e7-b46d-45c8-8542-bf024f06e543
+      x-runtime:
+      - '0.014924'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"job_template": {"locked": false, "name": "delete file",
+      "description_format": "delete %{file}", "template": "<%#\nkind: job_template\nname:
+      delete file\njob_category: Commands\ndescription_format: \"delete %{file}\"\nprovider_type:
+      SSH\ntemplate_inputs:\n- name: file\n  description: file to delete\n  input_type:
+      user\n  required: true\n%>\nrm -rf --no-preserve-root <%= input(\"file\") %>\n",
+      "job_category": "Commands", "location_ids": [6], "organization_ids": [5], "provider_type":
+      "SSH"}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '495'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: POST
+    uri: https://centos7-luna/api/job_templates
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"delete
+        %{file}","created_at":"2019-08-27 08:16:17 UTC","updated_at":"2019-08-27 08:16:17
+        UTC","template":"<%#\nkind: job_template\nname: delete file\njob_category:
+        Commands\ndescription_format: \"delete %{file}\"\nprovider_type: SSH\ntemplate_inputs:\n-
+        name: file\n  description: file to delete\n  input_type: user\n  required:
+        true\n%>\nrm -rf --no-preserve-root <%= input(\"file\") %>\n","locked":false,"id":176,"name":"delete
+        file","job_category":"Commands","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"0d769317049128c1193515a19432196d"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 201 Created
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 79c69d76-15d4-4003-ba4d-3d4c97af75f7
+      x-runtime:
+      - '0.056085'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - request_method=POST; _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: GET
+    uri: https://centos7-luna/api/templates/176/template_inputs?per_page=4294967296
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 0,\n  \"subtotal\": 0,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": []\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"b0ebd79c430c4781172af39880582aed"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 -0000;
+        secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 2823c68b-47ac-446f-8496-40f6a3e96c51
+      x-runtime:
+      - '0.014606'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"template_input": {"input_type": "user", "required":
+      true, "name": "file", "description": "file to delete"}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '109'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=94ab63d8d0075dc750eed720a68ee7c3
+    method: POST
+    uri: https://centos7-luna/api/templates/176/template_inputs
+  response:
+    body:
+      string: !!python/unicode '{"template_id":176,"fact_name":null,"variable_name":null,"puppet_parameter_name":null,"puppet_class_name":null,"description":"file
+        to delete","required":true,"id":119,"name":"file","input_type":"user","options":null}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:17 GMT
+      etag:
+      - W/"235220d82a5869dff5d465336e920235"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 201 Created
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 00393d78-4792-4d46-8e1d-70d9b327f321
+      x-runtime:
+      - '0.017514'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+version: 1

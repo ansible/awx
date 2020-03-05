@@ -1,0 +1,18 @@
+---
+- name: "Ensure job template from file '{{ job_template_file_name }}' is '{{ job_template_state }}'"
+  foreman_job_template:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    file_name: "{{ job_template_file_name }}"
+    locations: "{{ job_template_locations | default(omit) }}"
+    organizations: "{{ job_template_organizations | default(omit) }}"
+    state: "{{ job_template_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring job template is {{ job_template_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

@@ -1,0 +1,49 @@
+---
+- name: "Ensure user '{{ user_name }}' is {{ user_state }}"
+  vars:
+    user_name: test
+    user_firstname: Test
+    user_lastname: Userson
+    user_mail: test.userson@example.com
+    user_description: Dr. Test Userson
+    user_admin: no
+    user_default_location: Test Location
+    user_default_organization: Test Organization
+    user_auth_source: Internal
+    user_timezone: Stockholm
+    user_locale: sv_SE
+    user_roles:
+      - Manager
+    user_locations:
+      - Test Location
+    user_organizations:
+      - Test Organization
+    user_state: present
+  foreman_user:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ user_name }}"
+    firstname: "{{ user_firstname }}"
+    lastname: "{{ user_lastname }}"
+    mail: "{{ user_mail }}"
+    description: "{{ user_description }}"
+    admin: "{{ user_admin }}"
+    user_password: "{{ user_password | default(omit) }}"
+    default_location: "{{ user_default_location }}"
+    default_organization: "{{ user_default_organization }}"
+    auth_source: "{{ user_auth_source }}"
+    timezone: "{{ user_timezone }}"
+    locale: "{{ user_locale }}"
+    roles: "{{ user_roles }}"
+    locations: "{{ user_locations }}"
+    organizations: "{{ user_organizations }}"
+    state: "{{ user_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring user is {{ user_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

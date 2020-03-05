@@ -1,0 +1,3064 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://centos7-luna/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.24.0-develop","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:20 GMT
+      etag:
+      - W/"3f5599709463dcc7e904cd493ab8c362"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - dfcb4aa5-b74f-4fa0-8ac3-851bdd517042
+      x-runtime:
+      - '0.113715'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates?per_page=4294967296
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 38,\n  \"subtotal\": 38,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": [{\"id\":143,\"name\":\"Ansible
+        Roles - Ansible Default\",\"job_category\":\"Ansible Playbook\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Run
+        Ansible roles\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":177,\"name\":\"Ansible Roles - Hello World\",\"job_category\":\"Ansible
+        Playbook\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Test
+        Ansible Roles\",\"created_at\":\"2019-08-27 08:16:19 UTC\",\"updated_at\":\"2019-08-27
+        08:16:19 UTC\"},{\"id\":144,\"name\":\"Ansible Roles - Install from Galaxy\",\"job_category\":\"Ansible
+        Galaxy\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Install
+        roles '%{ansible_roles_list}' from Galaxy\",\"created_at\":\"2019-08-26 13:13:51
+        UTC\",\"updated_at\":\"2019-08-26 13:13:51 UTC\"},{\"id\":145,\"name\":\"Ansible
+        Roles - Install from git\",\"job_category\":\"Ansible Roles Installation\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Clone
+        roles from git repository to %{location}\",\"created_at\":\"2019-08-26 13:13:51
+        UTC\",\"updated_at\":\"2019-08-26 13:13:51 UTC\"},{\"id\":146,\"name\":\"Ansible
+        - Run insights maintenance plan\",\"job_category\":\"Ansible Playbook\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Insights
+        maintenance plan for host\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":128,\"name\":\"Install Errata - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Install
+        errata %{errata}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":127,\"name\":\"Install Errata - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        errata %{errata}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":130,\"name\":\"Install Group - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Install
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":129,\"name\":\"Install Group - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":132,\"name\":\"Install Package - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Install
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":131,\"name\":\"Install Package - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":147,\"name\":\"Module Action - Ansible Default\",\"job_category\":\"Ansible
+        Modules\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Module
+        %{action} %{module_spec}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":117,\"name\":\"Module Action - SSH Default\",\"job_category\":\"Modules\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Module
+        %{action} %{module_spec}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":148,\"name\":\"Package Action - Ansible Default\",\"job_category\":\"Ansible
+        Packages\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Package
+        %{name}: %{state}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":118,\"name\":\"Package Action - SSH Default\",\"job_category\":\"Packages\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"%{action}
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":149,\"name\":\"Power Action - Ansible Default\",\"job_category\":\"Ansible
+        Power\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"%{action}
+        host\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":119,\"name\":\"Power Action - SSH Default\",\"job_category\":\"Power\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"%{action}
+        host\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":120,\"name\":\"Puppet Agent Disable - SSH Default\",\"job_category\":\"Puppet\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Disable
+        Puppet agent\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":121,\"name\":\"Puppet Agent Enable - SSH Default\",\"job_category\":\"Puppet\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Enable
+        Puppet agent\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":122,\"name\":\"Puppet Module - Install from forge
+        - SSH Default\",\"job_category\":\"Puppet\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        Puppet Module \\\"%{puppet_module}\\\" from forge\",\"created_at\":\"2019-08-26
+        13:13:50 UTC\",\"updated_at\":\"2019-08-26 13:13:50 UTC\"},{\"id\":123,\"name\":\"Puppet
+        Module - Install from git - SSH Default\",\"job_category\":\"Puppet\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        Puppet Module \\\"%{puppet_module}\\\" from git\",\"created_at\":\"2019-08-26
+        13:13:50 UTC\",\"updated_at\":\"2019-08-26 13:13:50 UTC\"},{\"id\":150,\"name\":\"Puppet
+        Run Once - Ansible Default\",\"job_category\":\"Ansible Puppet\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Run
+        Puppet once with \\\"%{puppet_options}\\\"\",\"created_at\":\"2019-08-26 13:13:51
+        UTC\",\"updated_at\":\"2019-08-26 13:13:51 UTC\"},{\"id\":124,\"name\":\"Puppet
+        Run Once - SSH Default\",\"job_category\":\"Puppet\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Run
+        Puppet once with \\\"%{puppet_options}\\\"\",\"created_at\":\"2019-08-26 13:13:50
+        UTC\",\"updated_at\":\"2019-08-26 13:13:50 UTC\"},{\"id\":134,\"name\":\"Remove
+        Group - Katello Ansible Default\",\"job_category\":\"Katello via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Remove
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":133,\"name\":\"Remove Group - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Remove
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":136,\"name\":\"Remove Package - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Remove
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":135,\"name\":\"Remove Package - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Remove
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":138,\"name\":\"Restart Services - Katello Ansible
+        Default\",\"job_category\":\"Katello via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Restart
+        Services\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":137,\"name\":\"Restart Services - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Restart
+        Services\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":151,\"name\":\"Run Command - Ansible Default\",\"job_category\":\"Ansible
+        Commands\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Run
+        %{command}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":125,\"name\":\"Run Command - SSH Default\",\"job_category\":\"Commands\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Run
+        %{command}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":157,\"name\":\"Run OpenSCAP scans\",\"job_category\":\"OpenSCAP\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Run
+        scan for all OpenSCAP policies on host\",\"created_at\":\"2019-08-26 13:22:36
+        UTC\",\"updated_at\":\"2019-08-26 13:22:36 UTC\"},{\"id\":152,\"name\":\"Service
+        Action - Ansible Default\",\"job_category\":\"Ansible Services\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"%{state}
+        service %{name}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":126,\"name\":\"Service Action - SSH Default\",\"job_category\":\"Services\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"%{action}
+        service %{service}\",\"created_at\":\"2019-08-26 13:13:50 UTC\",\"updated_at\":\"2019-08-26
+        13:13:50 UTC\"},{\"id\":140,\"name\":\"Update Group - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Install
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":139,\"name\":\"Update Group - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Install
+        package group(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":142,\"name\":\"Update Package - Katello Ansible Default\",\"job_category\":\"Katello
+        via Ansible\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Update
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"},{\"id\":141,\"name\":\"Update Package - Katello SSH Default\",\"job_category\":\"Katello\",\"provider_type\":\"SSH\",\"snippet\":false,\"description_format\":\"Update
+        package(s) %{package}\",\"created_at\":\"2019-08-26 13:13:51 UTC\",\"updated_at\":\"2019-08-26
+        13:13:51 UTC\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:20 GMT
+      etag:
+      - W/"bd70236a3999c5a62f3aec83bff07ed2"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - ab2f62df-5593-47d2-b82b-55cd1a904f9c
+      x-runtime:
+      - '0.072469'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/143
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run Ansible
+        roles","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26 13:13:51
+        UTC","template":"---\n- hosts: all\n  pre_tasks:\n    - name: Display all
+        parameters known for the Foreman host\n      debug:\n        var: foreman\n  roles:\n<%-
+        if @host.all_ansible_roles.present? -%>\n<%=   @host.all_ansible_roles.map
+        { |role| \"    - #{role.name.strip}\" }.join(\"\\n\") %>\n<%- end -%>","locked":false,"id":143,"name":"Ansible
+        Roles - Ansible Default","job_category":"Ansible Playbook","provider_type":"Ansible","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:20 GMT
+      etag:
+      - W/"164f82ad274b450763d949f61f92e0b8"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 40793c8a-7a8c-4d3a-afc5-19c9fccc6907
+      x-runtime:
+      - '0.023649'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/177
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Test Ansible
+        Roles","created_at":"2019-08-27 08:16:19 UTC","updated_at":"2019-08-27 08:16:19
+        UTC","template":"<%#\nname: Ansible Roles - Hello World\njob_category: Ansible
+        Playbook\ndescription_format: Test Ansible Roles\nfeature: ansible_run_host\nsnippet:
+        false\nprovider_type: Ansible\nkind: job_template\nmodel: JobTemplate\n%>\n\n---\n-
+        hosts: all\n  tasks:\n    - name: Hello\n      debug:\n        msg: Hello
+        World\n...\n","locked":false,"id":177,"name":"Ansible Roles - Hello World","job_category":"Ansible
+        Playbook","provider_type":"Ansible","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:20 GMT
+      etag:
+      - W/"7466ddcb49aa75c7b0b717994962caf7"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5333298b-c770-436c-b60b-e80794b85479
+      x-runtime:
+      - '0.024813'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/144
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        roles ''%{ansible_roles_list}'' from Galaxy","created_at":"2019-08-26 13:13:51
+        UTC","updated_at":"2019-08-26 13:13:51 UTC","template":"---\n- hosts: all\n  tasks:\n    -
+        command: ansible-galaxy install {{ item }} <% \"-p #{input(''location'')}\"
+        if input(''location'').present? %>\n      register: out\n      with_items:\n        -
+        <%= input(''ansible_roles_list'') %>\n    - debug: var=out","locked":false,"id":144,"name":"Ansible
+        Roles - Install from Galaxy","job_category":"Ansible Galaxy","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":43,"name":"ansible_roles_list","input_type":"user"},{"id":44,"name":"location","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:20 GMT
+      etag:
+      - W/"0f59265bf5a4fe51509d4a970e4c1972"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - ecb76e54-a2e3-421b-8fdb-047a92df6c5f
+      x-runtime:
+      - '0.030480'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/145
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Clone
+        roles from git repository to %{location}","created_at":"2019-08-26 13:13:51
+        UTC","updated_at":"2019-08-26 13:13:51 UTC","template":"---\n- hosts: all\n  tasks:\n    -
+        command: git clone <%= input(''git_repository'') %> <%= input(''location'')
+        %>\n      register: out\n    - debug: var=out","locked":false,"id":145,"name":"Ansible
+        Roles - Install from git","job_category":"Ansible Roles Installation","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":45,"name":"git_repository","input_type":"user"},{"id":46,"name":"location","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"7d397ab6655052c1caddd8b746384b9f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5d18719d-ee5d-435d-a580-f09b829c3a92
+      x-runtime:
+      - '0.043861'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/146
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Insights
+        maintenance plan for host","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= insights_remediation(input(:plan_id), input(:organization_id))
+        %>","locked":false,"id":146,"name":"Ansible - Run insights maintenance plan","job_category":"Ansible
+        Playbook","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":47,"name":"plan_id","input_type":"user"},{"id":48,"name":"organization_id","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"736f89452196ce3b58e84d278351d8bb"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 8e1dc7dc-b836-4fad-bcba-d89d17949d95
+      x-runtime:
+      - '0.028435'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/128
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        errata %{errata}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<% advisories = input(:errata).split('','').map
+        { |e| \"--advisory=#{e}\" }.join('' '') %>\n<%= render_template(''Run Command
+        - Ansible Default'', :command => \"yum update-minimal #{advisories}\") %>","locked":false,"id":128,"name":"Install
+        Errata - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":34,"name":"errata","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"461a7231e203ac6eec0a4b2b99ae1d3d"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - bf30f890-72b6-43ec-9401-03d1f08f5010
+      x-runtime:
+      - '0.022062'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/127
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        errata %{errata}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<% if @host.operatingsystem.family == ''Suse'' -%>\n    <%
+        advisories = input(:errata).split('','').join('' '') %>\n    <%= render_template(''Package
+        Action - SSH Default'', :action => ''install -n -t patch'', :package => advisories)
+        %>\n<% else %>\n    <% advisories = input(:errata).split('','').map { |e|
+        \"--advisory=#{e}\" }.join('' '') %>\n    <%= render_template(''Package Action
+        - SSH Default'', :action => ''update-minimal'', :package => advisories) %>\n<%
+        end %>","locked":false,"id":127,"name":"Install Errata - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[{"id":33,"name":"errata","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"9ffb634de22ad0e147a8c806e4f8393f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 2e65f084-3f78-4c73-8589-181b87130e84
+      x-runtime:
+      - '0.028044'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/130
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package group(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%= render_template(''Run Command - Ansible Default'',
+        :command => \"yum group install #{input(''package'')}\") %>","locked":false,"id":130,"name":"Install
+        Group - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":35,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"6d2bb1e922ff89acd099f947ac606208"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 8a8b82b2-aa64-434c-8337-03684d998698
+      x-runtime:
+      - '0.021881'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/129
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package group(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''group install'') %>","locked":false,"id":129,"name":"Install
+        Group - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"9be60135fa0dbf1f1965a4c39422dda0"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 69417432-f8a9-4845-92e5-e4d64f41886e
+      x-runtime:
+      - '0.021115'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/132
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%= render_template(''Package Action - Ansible Default'',
+        :state => ''latest'', :name => input(''package'')) %>","locked":false,"id":132,"name":"Install
+        Package - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":36,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"3067af3028fc26304d9f10fca4bc92d3"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 68f25970-5f3d-4d64-8c98-67a35e4b4ec4
+      x-runtime:
+      - '0.021739'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/131
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''install'') %>","locked":false,"id":131,"name":"Install Package
+        - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"8ed25420b4e36c5eedf42a155d514436"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - a7afe08c-edf7-4368-b5f9-ed3c54aa0cca
+      x-runtime:
+      - '0.022673'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/147
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Module
+        %{action} %{module_spec}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<% command = \"dnf -y module #{input(:action)} #{input(:module_spec)}
+        #{input(:options)}\" %>\n\n---\n- hosts: all\n  <%- if input(''pre_script'').present?
+        -%>\n  pre_tasks:\n    - shell: \"<%= input(''pre_script'') %>\"\n  <%- end
+        -%>\n  tasks:\n    - shell: |\n<%=     indent(8) { command } %>\n      register:
+        out\n      args:\n        warn: false\n    - debug: var=out\n  <%- if input(''post_script'').present?
+        -%>\n  post_tasks:\n    - shell: \"<%= input(''post_script'') %>\"\n  <%-
+        end -%>","locked":false,"id":147,"name":"Module Action - Ansible Default","job_category":"Ansible
+        Modules","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":49,"name":"pre_script","input_type":"user"},{"id":50,"name":"action","input_type":"user"},{"id":51,"name":"module_spec","input_type":"user"},{"id":52,"name":"options","input_type":"user"},{"id":53,"name":"post_script","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"9ac6e3c7d6f97b89b4244bb4026515c0"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - c7772dd3-0d67-44cf-8e06-88cc742c371a
+      x-runtime:
+      - '0.022478'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/117
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Module
+        %{action} %{module_spec}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%\n  supported_families = [''Redhat'']\n  render_error(N_(''Unsupported
+        or no operating system found for this host.'')) unless @host.operatingsystem
+        && supported_families.include?(@host.operatingsystem.family)\n-%>\n#!/bin/bash\n\n#
+        Helper function that exits with a particular message and code.\n#\n# Usage:\n#   exit_with_message
+        \"Could not do a thing\" 2\n#\nfunction exit_with_message {\n  echo \"${1},
+        exiting...\"\n  exit $2\n}\n\n<% unless input(\"pre_script\").blank? -%>\n  #
+        Pre Script\n  <%= input(\"pre_script\") %>\n  RETVAL=$?\n  [ $RETVAL -eq 0
+        ] || exit_with_message \"Pre script failed\" $RETVAL\n<% end -%>\n\n# Action\ndnf
+        -y module <%= input(\"action\") %> <%= input(\"module_spec\") %> <%= input(\"options\")
+        %>\nRETVAL=$?\n[ $RETVAL -eq 0 ] || exit_with_message \" module action failed\"
+        $RETVAL\n\n<% unless input(\"post_script\").blank? -%>\n  # Post Script\n  <%=
+        input(\"post_script\") %>\n  RETVAL=$?\n  [ $RETVAL -eq 0 ] || exit_with_message
+        \"Post script failed\" $RETVAL\n<% end -%>","locked":false,"id":117,"name":"Module
+        Action - SSH Default","job_category":"Modules","provider_type":"SSH","snippet":false,"template_inputs":[{"id":11,"name":"pre_script","input_type":"user"},{"id":12,"name":"action","input_type":"user"},{"id":13,"name":"module_spec","input_type":"user"},{"id":14,"name":"options","input_type":"user"},{"id":15,"name":"post_script","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"6fb0074261ba019f00482d31404d43c2"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 95ab725c-bc51-45f7-9299-b7d83ba7d809
+      x-runtime:
+      - '0.025850'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/148
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Package
+        %{name}: %{state}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"# For Windows targets use the win_package module
+        instead.\n---\n- hosts: all\n  <%- if input(''pre_script'').present? -%>\n  pre_tasks:\n    -
+        shell: \"<%= input(''pre_script'') %>\"\n  <%- end -%>\n  tasks:\n    - package:\n        name:
+        <%= input(''name'') %>\n        state: <%= input(''state'') %>\n  <%- if input(''post_script'').present?
+        -%>\n  post_tasks:\n    - shell: \"<%= input(''post_script'') %>\"\n  <%-
+        end -%>","locked":false,"id":148,"name":"Package Action - Ansible Default","job_category":"Ansible
+        Packages","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":54,"name":"state","input_type":"user"},{"id":55,"name":"name","input_type":"user"},{"id":56,"name":"pre_script","input_type":"user"},{"id":57,"name":"post_script","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"9a6db07a5f68705bff25840e201f8f90"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 39b40899-76d1-42bb-a4a1-407fd3dd8fa3
+      x-runtime:
+      - '0.025962'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/118
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"%{action}
+        package(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%\n  supported_families = [''Redhat'', ''Debian'',
+        ''Suse'']\n  render_error(N_(''Unsupported or no operating system found for
+        this host.'')) unless @host.operatingsystem && supported_families.include?(@host.operatingsystem.family)\n  action
+        = input(\"action\")\n\n  if @host.operatingsystem.family == ''Redhat''\n    package_manager
+        = ''yum''\n  elsif @host.operatingsystem.family == ''Debian''\n    package_manager
+        = ''apt''\n  elsif @host.operatingsystem.family == ''Suse''\n    package_manager
+        = ''zypper''\n  end\n-%>\n#!/bin/bash\n\n# Helper function that exits with
+        a particular message and code.\n#\n# Usage:\n#   exit_with_message \"Could
+        not do a thing\" 2\n#\nexit_with_message () {\n  echo \"${1}, exiting...\"\n  exit
+        $2\n}\n\n<% unless input(\"pre_script\").blank? -%>\n  # Pre Script\n  <%=
+        input(\"pre_script\") %>\n  RETVAL=$?\n  [ $RETVAL -eq 0 ] || exit_with_message
+        \"Pre script failed\" $RETVAL\n<% end -%>\n\n# Action\n<% if package_manager
+        == ''yum'' -%>\n  yum -y <%= action %> <%= input(\"package\") %>\n<% elsif
+        package_manager == ''apt'' -%>\n  <%-\n    action = ''install'' if action
+        == ''group install''\n    action = ''remove'' if action == ''group remove''\n    if
+        action == ''group update'' || action == ''update''\n      if input(''package'').blank?\n        action
+        = ''upgrade''\n      else\n        action = ''--only-upgrade install''\n      end\n    end\n  -%>\n  apt-get
+        -y update\n  apt-get -y <%= action %> <%= input(\"package\") %>\n<% elsif
+        package_manager == ''zypper'' -%>\n  <%-\n    if action == \"group install\"\n      action
+        = \"install -t pattern\"\n    elsif action == \"group remove\"\n      action
+        = \"remove -t pattern\"\n    end\n  -%>\n  zypper -n <%= action %> <%= input(\"package\")
+        %>\n<% end -%>\nRETVAL=$?\n[ $RETVAL -eq 0 ] || exit_with_message \"Package
+        action failed\" $RETVAL\n\n<% unless input(\"post_script\").blank? -%>\n  #
+        Post Script\n  <%= input(\"post_script\") %>\n  RETVAL=$?\n  [ $RETVAL -eq
+        0 ] || exit_with_message \"Post script failed\" $RETVAL\n<% end -%>","locked":false,"id":118,"name":"Package
+        Action - SSH Default","job_category":"Packages","provider_type":"SSH","snippet":false,"template_inputs":[{"id":16,"name":"pre_script","input_type":"user"},{"id":17,"name":"action","input_type":"user"},{"id":18,"name":"package","input_type":"user"},{"id":19,"name":"post_script","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"19cf5205a3ee0758444e2d7e83cd693d"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - c89b8770-075a-46cb-aae6-6bd88d4bfbee
+      x-runtime:
+      - '0.026684'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/149
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"%{action}
+        host","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26 13:13:51
+        UTC","template":"---\n- hosts: all\n  tasks:\n    - command: |\n        echo
+        <%= input(''action'') %> host && sleep 3\n        <%= case input(''action'')\n          when
+        ''restart''\n            ''shutdown -r +1''\n          else\n            ''shutdown
+        -h +1''\n          end %>","locked":false,"id":149,"name":"Power Action -
+        Ansible Default","job_category":"Ansible Power","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":58,"name":"action","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"99df48327e2d7a6aa7878518136f231f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - ab20f516-97d5-4637-b788-f44ff855da76
+      x-runtime:
+      - '0.024299'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/119
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"%{action}
+        host","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26 13:13:50
+        UTC","template":"echo <%= input(''action'') %> host && sleep 3\n<%= case input(''action'')\n      when
+        ''restart''\n        ''shutdown -r +1''\n      else\n        ''shutdown -h
+        now''\n      end %>","locked":false,"id":119,"name":"Power Action - SSH Default","job_category":"Power","provider_type":"SSH","snippet":false,"template_inputs":[{"id":20,"name":"action","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"a301df24282c95d10012ba6dc7c75367"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 90a8569a-4577-4286-9572-e4571913de48
+      x-runtime:
+      - '0.026221'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/120
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Disable
+        Puppet agent","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"puppet agent --disable \"<%= input(\"comment\").present?
+        ? input(\"comment\") : \"Disabled using Foreman Remote Execution\"  %> - <%=
+        current_user %> - $(date \"+%d/%m/%Y %H:%M\")\"","locked":false,"id":120,"name":"Puppet
+        Agent Disable - SSH Default","job_category":"Puppet","provider_type":"SSH","snippet":false,"template_inputs":[{"id":21,"name":"comment","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"028de34f799dcb79637a8075a5ee1cac"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 075f42dd-6da5-47ae-b853-d2ef16e34e3f
+      x-runtime:
+      - '0.024475'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/121
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Enable
+        Puppet agent","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"puppet agent --enable","locked":false,"id":121,"name":"Puppet
+        Agent Enable - SSH Default","job_category":"Puppet","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"e2ce102b87c47a834394392514f7bf68"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - db47faaf-e6f5-498e-aeb5-2ba0748f8ad7
+      x-runtime:
+      - '0.025285'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/122
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        Puppet Module \"%{puppet_module}\" from forge","created_at":"2019-08-26 13:13:50
+        UTC","updated_at":"2019-08-26 13:13:50 UTC","template":"puppet module install
+        <%= input(''puppet_module'') %> <%= \"--target-dir #{input(''target_dir'')}\"
+        if input(''target_dir'').present? %> <%= \"--version #{input(''version'')}\"
+        if input(''version'').present? %> <%= \"--force\" if input(''force'') == \"true\"
+        %> <%= \"--ignore-dependencies\" if input(''ignore_dependencies'') == \"true\"
+        %>","locked":false,"id":122,"name":"Puppet Module - Install from forge - SSH
+        Default","job_category":"Puppet","provider_type":"SSH","snippet":false,"template_inputs":[{"id":22,"name":"puppet_module","input_type":"user"},{"id":23,"name":"target_dir","input_type":"user"},{"id":24,"name":"version","input_type":"user"},{"id":25,"name":"force","input_type":"user"},{"id":26,"name":"ignore_dependencies","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"ad50b55734322585a48664b442b56398"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 7733b163-69c1-4b3e-9a8f-7c96df7cd989
+      x-runtime:
+      - '0.025336'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/123
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        Puppet Module \"%{puppet_module}\" from git","created_at":"2019-08-26 13:13:50
+        UTC","updated_at":"2019-08-26 13:13:50 UTC","template":"git clone <%= input(''git_repository'')
+        %> <%= input(''target_dir'') %>","locked":false,"id":123,"name":"Puppet Module
+        - Install from git - SSH Default","job_category":"Puppet","provider_type":"SSH","snippet":false,"template_inputs":[{"id":27,"name":"git_repository","input_type":"user"},{"id":28,"name":"target_dir","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"5ec8f77fff1b0245973a7c2dfddff508"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5b025c50-8c1d-4118-862f-d1df7835e8d9
+      x-runtime:
+      - '0.022464'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/150
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run Puppet
+        once with \"%{puppet_options}\"","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"---\n- hosts: all\n  tasks:\n    - command: |\n        puppet
+        agent --onetime --no-usecacheonfailure --no-daemonize <%= input(\"puppet_options\")
+        %>","locked":false,"id":150,"name":"Puppet Run Once - Ansible Default","job_category":"Ansible
+        Puppet","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":59,"name":"puppet_options","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"3b7426f40fd88ae064173a6965da6012"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 7d2b7b22-fccd-45cd-8b0b-ef2fb86b82bf
+      x-runtime:
+      - '0.021914'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/124
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run Puppet
+        once with \"%{puppet_options}\"","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"puppet agent --onetime --no-usecacheonfailure --no-daemonize
+        <%= input(\"puppet_options\") %>","locked":false,"id":124,"name":"Puppet Run
+        Once - SSH Default","job_category":"Puppet","provider_type":"SSH","snippet":false,"template_inputs":[{"id":29,"name":"puppet_options","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"0be32be06f82d7d58611c3ccfe0447d6"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - ee6a7d11-2fd9-4762-9cd4-177f9540c214
+      x-runtime:
+      - '0.025781'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/134
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Remove
+        package group(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Run Command - Ansible Default'',
+        :command => \"yum group remove #{input(''package'')}\") %>","locked":false,"id":134,"name":"Remove
+        Group - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":37,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"a7d63812ea15776dc04f8aa7a4954ab4"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 1577ddc2-034e-4bee-aeaa-15fefee7904f
+      x-runtime:
+      - '0.024797'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/133
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Remove
+        package group(s) %{package}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''group remove'') %>","locked":false,"id":133,"name":"Remove Group
+        - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"dc5b19b55cf4a186c9d327a374a25bbf"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 499c160b-4eb5-48ef-9d4b-f0d91eb26c46
+      x-runtime:
+      - '0.024482'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/136
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Remove
+        package(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Package Action - Ansible Default'',
+        :state => ''absent'', :name => input(''package'')) %>","locked":false,"id":136,"name":"Remove
+        Package - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":38,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"d5151f8bbddf52da9a3fe90b4a55b4e5"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - d2d40685-604b-4cfb-99ef-628ffdbb0557
+      x-runtime:
+      - '0.026785'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/135
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Remove
+        package(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''remove'') %>","locked":false,"id":135,"name":"Remove Package
+        - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"0b3aa0479819df7e605b03410a68ce66"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 11b9c3df-041b-4d93-bb37-9bd0e4ed26f4
+      x-runtime:
+      - '0.022181'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/138
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Restart
+        Services","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%\ncommands = input(:helper).split('','').map {
+        |split| split.strip }\nreboot = commands.delete(''reboot'')\n-%>\n<%= render_template(\n    ''Run
+        Command - Ansible Default'',\n    :command => (commands.push(''katello-tracer-upload'')).join(\"\\n\")\n)
+        %>\n<% if reboot %>\n    - reboot:\n<% end %>","locked":false,"id":138,"name":"Restart
+        Services - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":40,"name":"helper","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"d687a1f6990ba6a974d125a62cf83ab2"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - de97664f-06f2-49e0-9741-bfabf223d378
+      x-runtime:
+      - '0.021797'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/137
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Restart
+        Services","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%\ncommands = input(:helper).split('','').map {
+        |split| split.strip }\nreboot = commands.delete(''reboot'')\n-%>\n<%= commands.join(\"\\n\")
+        %>\nkatello-tracer-upload\n<% if reboot -%>\n<%= render_template(''Power Action
+        - SSH Default'', action: ''restart'') %>\n<% end %>","locked":false,"id":137,"name":"Restart
+        Services - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[{"id":39,"name":"helper","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"ab2ab95823214e67fc8cd218758ae41b"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - e7b59128-40ae-47f7-83f1-96f1eb47b01c
+      x-runtime:
+      - '0.021238'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/151
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run %{command}","created_at":"2019-08-26
+        13:13:51 UTC","updated_at":"2019-08-26 13:13:51 UTC","template":"---\n- hosts:
+        all\n  tasks:\n    - shell:\n        cmd: |\n<%=       indent(10) { input(''command'')
+        } %>\n      register: out\n    - debug: var=out","locked":false,"id":151,"name":"Run
+        Command - Ansible Default","job_category":"Ansible Commands","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":60,"name":"command","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"c86aefa4d0e2aba8db8508a6e1269a19"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 15e7fc2d-7151-4ca2-8028-56dd018835f9
+      x-runtime:
+      - '0.022460'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/125
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run %{command}","created_at":"2019-08-26
+        13:13:50 UTC","updated_at":"2019-08-26 13:13:50 UTC","template":"<%= input(\"command\")
+        %>","locked":false,"id":125,"name":"Run Command - SSH Default","job_category":"Commands","provider_type":"SSH","snippet":false,"template_inputs":[{"id":30,"name":"command","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"93f6b2a8f1b62520c7b1ce2b631d63dd"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 070d71d6-b980-40d9-9a05-10f334daa548
+      x-runtime:
+      - '0.022114'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/157
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Run scan
+        for all OpenSCAP policies on host","created_at":"2019-08-26 13:22:36 UTC","updated_at":"2019-08-26
+        13:22:36 UTC","template":"<% raise \"Create and assign a policy to this host
+        before proceeding\" unless input(''policies'').respond_to? :map %>\n\n<% input(''policies'').map
+        { |policy_config| policy_config[''id''] }.each do |id| -%>\n/usr/bin/foreman_scap_client
+        <%= id %>\n<% end -%>","locked":false,"id":157,"name":"Run OpenSCAP scans","job_category":"OpenSCAP","provider_type":"SSH","snippet":false,"template_inputs":[{"id":67,"name":"policies","input_type":"puppet_parameter"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"8c9ed7c488f54d02403cc73bfea1897e"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 86793394-d006-401d-89f7-833cec8948b5
+      x-runtime:
+      - '0.025684'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/152
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"%{state}
+        service %{name}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"# For Windows targets, we should use win_service\n---\n-
+        hosts: all\n  tasks:\n  - service:\n      name: <%= input(''name'') %>\n      state:
+        <%= input(''state'') %>\n      <%= \"enabled: #{input(''enabled'')}\" if input(''enabled'').present?
+        %>\n      <%= \"args: #{input(''args'')}\" if input(''args'').present? %>\n      <%=
+        \"pattern: #{input(''pattern'')}\" if input(''pattern'').present? %>\n      <%=
+        \"sleep: #{input(''sleep'')}\" if input(''sleep'').present? %>","locked":false,"id":152,"name":"Service
+        Action - Ansible Default","job_category":"Ansible Services","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":61,"name":"state","input_type":"user"},{"id":62,"name":"name","input_type":"user"},{"id":63,"name":"pattern","input_type":"user"},{"id":64,"name":"sleep","input_type":"user"},{"id":65,"name":"enabled","input_type":"user"},{"id":66,"name":"args","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:21 GMT
+      etag:
+      - W/"2096128e88804087038c15040a8300aa"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 0f235435-920a-401f-ba95-fded6a845131
+      x-runtime:
+      - '0.031384'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/126
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"%{action}
+        service %{service}","created_at":"2019-08-26 13:13:50 UTC","updated_at":"2019-08-26
+        13:13:50 UTC","template":"<% if @host.operatingsystem.family == \"Redhat\"
+        && @host.operatingsystem.major.to_i > 6 %>\nsystemctl <%= input(\"action\")
+        %> <%= input(\"service\") %>\n<% else %>\n  <% case input(\"action\")\n  when
+        ''enable'' %>\nchkconfig --add <%= input(\"service\") %>\n  <% when ''disable''
+        %>\nchkconfig --del <%= input(\"service\") %>\n  <% else %>\nservice <%= input(\"service\")
+        %> <%= input(\"action\") %>\n  <% end %>\n<% end -%>","locked":false,"id":126,"name":"Service
+        Action - SSH Default","job_category":"Services","provider_type":"SSH","snippet":false,"template_inputs":[{"id":31,"name":"action","input_type":"user"},{"id":32,"name":"service","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"246ed18f47c922ac71a3e4954a892cff"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5c815b20-ae46-491a-ac0b-ac5e3c548fc4
+      x-runtime:
+      - '0.026171'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/140
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package group(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Run Command - Ansible Default'',
+        :command => \"yum group update #{input(''package'')}\") %>","locked":false,"id":140,"name":"Update
+        Group - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":41,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"b3baa08111e338b4dbeb14f8e9413633"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f12cfc47-dee1-4c56-8906-156f4fc049f5
+      x-runtime:
+      - '0.026720'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/139
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Install
+        package group(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''group update'') %>","locked":false,"id":139,"name":"Update Group
+        - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"4d40fd8e6c3288eec2262f5f09882f2a"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 4acbbd4d-7f0e-419c-b6eb-e7c4f743d63a
+      x-runtime:
+      - '0.023263'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/142
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Update
+        package(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Run Command - Ansible Default'',
+        :command => \"yum update #{input(''package'')}\") %>","locked":false,"id":142,"name":"Update
+        Package - Katello Ansible Default","job_category":"Katello via Ansible","provider_type":"Ansible","snippet":false,"template_inputs":[{"id":42,"name":"package","input_type":"user"}],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"1215fe0f8c5aa4d6a3890068f4dbc39e"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 4d054997-b148-4ce6-ad2d-53dff0da6524
+      x-runtime:
+      - '0.022537'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/api/job_templates/141
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Update
+        package(s) %{package}","created_at":"2019-08-26 13:13:51 UTC","updated_at":"2019-08-26
+        13:13:51 UTC","template":"<%= render_template(''Package Action - SSH Default'',
+        :action => ''update'') %>","locked":false,"id":141,"name":"Update Package
+        - Katello SSH Default","job_category":"Katello","provider_type":"SSH","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":2,"name":"Default
+        Location","title":"Default Location","description":null},{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"3c311e119344cbd7220a9104c3c4255d"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 640c00e5-adab-42b0-9277-766c1c820031
+      x-runtime:
+      - '0.022540'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: GET
+    uri: https://centos7-luna/katello/api/organizations?per_page=4294967296&search=name%3D%22Test+Organization%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"label\":\"Test_Organization\",\"created_at\":\"2019-08-27 08:16:04 UTC\",\"updated_at\":\"2019-08-27
+        08:16:04 UTC\",\"id\":5,\"name\":\"Test Organization\",\"title\":\"Test Organization\",\"description\":\"A
+        test organization\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"1ca15590961c87829708b606a34e4f2f"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 8c26d550-89cb-4fb7-a5d7-32a4271746a0
+      x-runtime:
+      - '0.017153'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/unicode '{"job_template": {"organization_ids": [5]}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '43'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=bd08147cf788d6700c83ae5dde0682dd
+    method: PUT
+    uri: https://centos7-luna/api/job_templates/177
+  response:
+    body:
+      string: !!python/unicode '{"audit_comment":null,"description_format":"Test Ansible
+        Roles","created_at":"2019-08-27 08:16:19 UTC","updated_at":"2019-08-27 08:16:19
+        UTC","template":"<%#\nname: Ansible Roles - Hello World\njob_category: Ansible
+        Playbook\ndescription_format: Test Ansible Roles\nfeature: ansible_run_host\nsnippet:
+        false\nprovider_type: Ansible\nkind: job_template\nmodel: JobTemplate\n%>\n\n---\n-
+        hosts: all\n  tasks:\n    - name: Hello\n      debug:\n        msg: Hello
+        World\n...\n","locked":false,"id":177,"name":"Ansible Roles - Hello World","job_category":"Ansible
+        Playbook","provider_type":"Ansible","snippet":false,"template_inputs":[],"effective_user":{"value":null,"current_user":false,"overridable":true},"locations":[{"id":6,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":5,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:22 GMT
+      etag:
+      - W/"f88a0399fa21a70486bfb2669e5f1fe3"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=PUT; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 81eb6af7-551c-4cb3-9ab0-0066a79fcedf
+      x-runtime:
+      - '0.061071'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

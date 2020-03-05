@@ -1,0 +1,216 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"7462024e111aafa1fe0b7de16a6757f0"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [_session_id=5092b93bf40d9313b996ebbbb4deb385; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [c5138a6f-0417-4527-8a2d-7d2dcb23fefa]
+      x-runtime: ['0.025319']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=5092b93bf40d9313b996ebbbb4deb385]
+    method: GET
+    uri: https://foreman.example.com/api/subnets?per_page=4294967296&search=name%3D%22Test+Subnet%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 1,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Test Subnet\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"network\":\"192.168.200.0\",\"network_type\":\"IPv4\",\"cidr\":27,\"mask\":\"255.255.255.224\",\"priority\":null,\"vlanid\":null,\"mtu\":1500,\"gateway\":null,\"dns_primary\":null,\"dns_secondary\":null,\"from\":null,\"to\":null,\"created_at\":\"2019-10-02
+        16:08:21 UTC\",\"updated_at\":\"2019-10-02 16:08:21 UTC\",\"ipam\":\"DHCP\",\"boot_mode\":\"DHCP\",\"id\":29,\"name\":\"Test
+        Subnet\",\"description\":null,\"network_address\":\"192.168.200.0/27\",\"dhcp_id\":null,\"dhcp_name\":null,\"tftp_id\":null,\"tftp_name\":null,\"httpboot_id\":null,\"httpboot_name\":null,\"dns_id\":null,\"template_id\":null,\"template_name\":null,\"dhcp\":null,\"tftp\":null,\"httpboot\":null,\"dns\":null,\"template\":null}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"4072f1491e85c394bfc77d455540b683"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [80431989-d721-4aba-910d-1bd5a9b47b98]
+      x-runtime: ['0.016314']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=5092b93bf40d9313b996ebbbb4deb385]
+    method: GET
+    uri: https://foreman.example.com/api/subnets/29
+  response:
+    body: {string: !!python/unicode '{"network":"192.168.200.0","network_type":"IPv4","cidr":27,"mask":"255.255.255.224","priority":null,"vlanid":null,"mtu":1500,"gateway":null,"dns_primary":null,"dns_secondary":null,"from":null,"to":null,"created_at":"2019-10-02
+        16:08:21 UTC","updated_at":"2019-10-02 16:08:21 UTC","ipam":"DHCP","boot_mode":"DHCP","id":29,"name":"Test
+        Subnet","description":null,"network_address":"192.168.200.0/27","dhcp_id":null,"dhcp_name":null,"tftp_id":null,"tftp_name":null,"httpboot_id":null,"httpboot_name":null,"dns_id":null,"template_id":null,"template_name":null,"dhcp":null,"tftp":null,"httpboot":null,"dns":null,"template":null,"domains":[],"interfaces":[],"parameters":[{"priority":40,"created_at":"2019-10-02
+        16:08:22 UTC","updated_at":"2019-10-02 16:08:23 UTC","id":44,"name":"subnet_param1","parameter_type":"string","value":"new_value1"},{"priority":40,"created_at":"2019-10-02
+        16:08:23 UTC","updated_at":"2019-10-02 16:08:23 UTC","id":45,"name":"subnet_param3","parameter_type":"string","value":"value3"}],"locations":[],"organizations":[]}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"8f4a502164361270c9f27b4adda70e0a"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [dc5a9c08-f081-4939-983a-9ee86dc4bc87]
+      x-runtime: ['0.023974']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=5092b93bf40d9313b996ebbbb4deb385]
+    method: GET
+    uri: https://foreman.example.com/api/subnets/29/parameters?per_page=4294967296
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 2,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": [{\"priority\":40,\"created_at\":\"2019-10-02
+        16:08:22 UTC\",\"updated_at\":\"2019-10-02 16:08:23 UTC\",\"id\":44,\"name\":\"subnet_param1\",\"parameter_type\":\"string\",\"value\":\"new_value1\"},{\"priority\":40,\"created_at\":\"2019-10-02
+        16:08:23 UTC\",\"updated_at\":\"2019-10-02 16:08:23 UTC\",\"id\":45,\"name\":\"subnet_param3\",\"parameter_type\":\"string\",\"value\":\"value3\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"e9b0f308940361049054c27e987e9b46"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [d52d2f69-d9c6-47e1-916b-264749301bff]
+      x-runtime: ['0.017259']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['0']
+      Cookie: [_session_id=5092b93bf40d9313b996ebbbb4deb385]
+    method: DELETE
+    uri: https://foreman.example.com/api/subnets/29/parameters/45
+  response:
+    body: {string: !!python/unicode '{"id":45,"name":"subnet_param3","value":"value3","reference_id":29,"created_at":"2019-10-02T16:08:23.487Z","updated_at":"2019-10-02T16:08:23.487Z","priority":40,"hidden_value":"*****","key_type":"string"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"53a7933b22ef097894744a9c7f704ec7"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      set-cookie: [request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [c242b39e-57de-48a2-867a-00fa4e0b746a]
+      x-runtime: ['0.027595']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['0']
+      Cookie: [request_method=DELETE; _session_id=5092b93bf40d9313b996ebbbb4deb385]
+    method: DELETE
+    uri: https://foreman.example.com/api/subnets/29/parameters/44
+  response:
+    body: {string: !!python/unicode '{"id":44,"name":"subnet_param1","value":"new_value1","reference_id":29,"created_at":"2019-10-02T16:08:22.036Z","updated_at":"2019-10-02T16:08:23.532Z","priority":40,"hidden_value":"*****","key_type":"string"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 02 Oct 2019 16:08:24 GMT']
+      etag: [W/"e8c785880255daa7a90588cffd10829a"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.1]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [78596363-c55d-48b6-8d48-6b2108d41b68]
+      x-runtime: ['0.029545']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

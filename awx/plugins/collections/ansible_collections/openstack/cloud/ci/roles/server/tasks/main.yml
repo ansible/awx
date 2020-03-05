@@ -1,0 +1,92 @@
+---
+- name: Create server with meta as CSV
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ server_name }}"
+     image: "{{ image }}"
+     flavor: "{{ flavor }}"
+     network: "{{ server_network }}"
+     auto_floating_ip: false
+     meta: "key1=value1,key2=value2"
+     wait: true
+  register: server
+
+- debug: var=server
+
+- name: Delete server with meta as CSV
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ server_name }}"
+     wait: true
+
+- name: Create server with meta as dict
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ server_name }}"
+     image: "{{ image }}"
+     flavor: "{{ flavor }}"
+     auto_floating_ip: false
+     network: "{{ server_network }}"
+     meta:
+       key1: value1
+       key2: value2
+     wait: true
+  register: server
+
+- debug: var=server
+
+- name: Delete server with meta as dict
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ server_name }}"
+     wait: true
+
+- name: Create server (FIP from pool/network)
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ server_name }}"
+     image: "{{ image }}"
+     flavor: "{{ flavor }}"
+     network: "{{ server_network }}"
+     floating_ip_pools:
+       - "{{ floating_ip_pool_name }}"
+     wait: true
+  register: server
+
+- debug: var=server
+
+- name: Delete server (FIP from pool/network)
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ server_name }}"
+     wait: true
+
+- name: Create server from volume
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ server_name }}"
+     image: "{{ image }}"
+     flavor: "{{ flavor }}"
+     network: "{{ server_network }}"
+     auto_floating_ip: false
+     boot_from_volume: true
+     volume_size: "{{ boot_volume_size }}"
+     terminate_volume: true
+     wait: true
+  register: server
+
+- debug: var=server
+
+- name: Delete server with volume
+  openstack.cloud.os_server:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ server_name }}"
+     wait: true

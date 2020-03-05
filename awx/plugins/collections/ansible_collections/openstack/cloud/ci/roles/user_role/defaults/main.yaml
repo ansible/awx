@@ -1,0 +1,4 @@
+domain_name: ansible_domain
+user_name: ansible_user
+group_name: ansible_group
+keystone_role_name: anotherrole

@@ -1,0 +1,8 @@
+group:
+  name: mytestgroup
+  users:
+    - foo
+    - bar
+  roles:
+    - role1
+    - role2

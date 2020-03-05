@@ -1,0 +1,6 @@
+*retry
+.tox
+*.tar.gz
+output/
+ovirt-ansible-collection.spec
+exported-artifacts/

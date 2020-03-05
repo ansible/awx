@@ -1,0 +1,19 @@
+---
+- name: Create group
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ group_name }}"
+
+- name: Update group
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ group_name }}"
+     description: "updated description"
+
+- name: Delete group
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ group_name }}"

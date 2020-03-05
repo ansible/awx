@@ -1,0 +1,15 @@
+{
+  "name":"example.org",
+  "dns_proxy": "foreman.example.com",
+  "locations": [
+    "munich"
+  ],
+  "organizations": [
+    "atix"
+  ],
+  "description": "Example Domain",
+  "server_url":"https://foreman.example.com",
+  "username":"admin",
+  "password":"secret",
+  "state": "present"
+}

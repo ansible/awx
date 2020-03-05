@@ -1,0 +1,25 @@
+---
+- name: "Ensure lifecycle environment '{{ lifecycle_environment_name }}' is {{ lifecycle_environment_state }}"
+  vars:
+    - lifecycle_environment_name: "Dev"
+    - lifecycle_environment_label: "dev"
+    - lifecycle_environment_description: "The dev environment"
+    - organization_name: "Test Organization"
+  katello_lifecycle_environment:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ lifecycle_environment_name }}"
+    label: "{{ lifecycle_environment_label | default(omit) }}"
+    organization: "{{ organization_name }}"
+    description: "{{ lifecycle_environment_description | default(omit) }}"
+    prior: "{{ lifecycle_environment_prior | default(omit) }}"
+    state: "{{ lifecycle_environment_state | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring lifecycle environment is {{ lifecycle_environment_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

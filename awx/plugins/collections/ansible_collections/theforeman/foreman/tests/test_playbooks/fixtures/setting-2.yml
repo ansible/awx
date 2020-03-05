@@ -1,0 +1,110 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:29:59 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=a49b13dd057b1a58838f2730c2015673; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [dad68b66-503c-4847-a070-30221fd6d0b6]
+      x-runtime: ['0.031168']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=a49b13dd057b1a58838f2730c2015673]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings?per_page=4294967296&search=name%3D%22login_text%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 109,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"login_text\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"value\":\"Welcome!\",\"description\":\"Text to be shown in the login-page
+        footer\",\"category\":\"Setting::General\",\"settings_type\":null,\"default\":null,\"created_at\":\"2019-07-15
+        16:12:03 UTC\",\"updated_at\":\"2019-07-24 18:29:58 UTC\",\"id\":9,\"name\":\"login_text\",\"full_name\":\"Login
+        page footer text\",\"category_name\":\"General\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:29:59 GMT']
+      etag: [W/"47471d4b9d27e47f699432ac399bbb9e"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [9d8a7c77-79ac-48ae-82ca-54bbb4b73e78]
+      x-runtime: ['0.018102']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=a49b13dd057b1a58838f2730c2015673]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings/9
+  response:
+    body: {string: !!python/unicode '{"value":"Welcome!","description":"Text to be
+        shown in the login-page footer","category":"Setting::General","settings_type":null,"default":null,"created_at":"2019-07-15
+        16:12:03 UTC","updated_at":"2019-07-24 18:29:58 UTC","id":9,"name":"login_text","full_name":"Login
+        page footer text","category_name":"General"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:29:59 GMT']
+      etag: [W/"854cfe1d797e0f7d5b309b915f57eaba"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [8a6071c6-a5a4-40bf-b984-84f58c6524cf]
+      x-runtime: ['0.014532']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

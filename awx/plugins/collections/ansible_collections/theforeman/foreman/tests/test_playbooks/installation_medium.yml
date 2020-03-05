@@ -1,0 +1,132 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_state: present
+      operatingsystem_name: "TempleOS"
+
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_state: present
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_state: present
+      installation_medium_os_family: Debian
+      expected_change: false
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "SuperOS OS 1.0"
+      installation_medium_path: "https://superos.org/"
+      installation_medium_state: present
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "SuperOS OS 1.0"
+      installation_medium_updated_name: "SuperOS-NG OS 1.0"
+      installation_medium_path: "https://superos.org/"
+      installation_medium_state: present
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "SuperOS-NG OS 1.0"
+      installation_medium_path: "https://superos.org/"
+      installation_medium_state: present
+      expected_change: false
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: "SuperOS-NG OS 1.0"
+      installation_medium_state: absent
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: 'another os'
+      installation_medium_path: 'http://example.org/another.iso'
+      installation_medium_locations: "{{ omit }}"
+      installation_medium_state: present
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_path: 'http://example.org/iso'
+      installation_medium_state: present
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_state: absent
+      expected_change: true
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_state: absent
+      expected_change: false
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: '*'
+      installation_medium_operatingsystems: "{{ omit }}"
+      installation_medium_organizations: "{{ omit }}"
+      installation_medium_path: "{{ omit }}"
+      installation_medium_state: present
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: ""
+      expected_diff_after: "location_ids"
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: '*'
+      installation_medium_operatingsystems: "{{ omit }}"
+      installation_medium_organizations: "{{ omit }}"
+      installation_medium_path: "{{ omit }}"
+      installation_medium_state: present
+      expected_change: false
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: '*'
+      installation_medium_operatingsystems: "{{ omit }}"
+      installation_medium_locations: "{{ omit }}"
+      installation_medium_organizations: "{{ omit }}"
+      installation_medium_path: "{{ omit }}"
+      installation_medium_state: absent
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "name"
+      expected_diff_after: "{}"
+  - include: tasks/installation_medium.yml
+    vars:
+      installation_medium_name: '*'
+      installation_medium_operatingsystems: "{{ omit }}"
+      installation_medium_locations: "{{ omit }}"
+      installation_medium_organizations: "{{ omit }}"
+      installation_medium_path: "{{ omit }}"
+      installation_medium_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/operatingsystem.yml
+    vars:
+      operatingsystem_state: absent
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

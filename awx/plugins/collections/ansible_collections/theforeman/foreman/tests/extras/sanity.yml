@@ -1,0 +1,15 @@
+---
+# this playbook runs `ansible-test sanity` against our collection
+- hosts: localhost
+  gather_subset: min
+  tasks:
+    - name: Run ansible-test
+      command: "ansible-test sanity --venv --python {{ ansible_python['version']['major'] }}.{{ ansible_python['version']['minor'] }} plugins/"
+      args:
+        chdir: "{{ test_collection_path }}"
+      register: sanity_result
+
+    - name: Print results
+      debug:
+        var: sanity_result
+...

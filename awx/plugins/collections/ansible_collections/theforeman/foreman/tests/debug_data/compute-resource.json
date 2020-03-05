@@ -1,0 +1,20 @@
+{
+  "name":"example_compute_resource",
+  "datacenter": "ax01",
+  "locations": [
+    "Munich"
+  ],
+  "organizations": [
+    "ATIX"
+  ],
+  "provider": "vmware",
+  "provider_auth": {
+    "url": "https://vsphere.example.com",
+    "user": "admin",
+    "password": "changeme"
+  },
+  "server_url":"https://foreman.example.com",
+  "username":"admin",
+  "password":"changeme",
+  "state": "present"
+}

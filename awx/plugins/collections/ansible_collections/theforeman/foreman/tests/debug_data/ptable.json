@@ -1,0 +1,15 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://foreman.example.com",
+  "validate_certs": false,
+  "name":"A New Partition Template",
+  "state":"present",
+  "layout":"<%#\n  name: A Partition Template\n %>\nzerombr\nclearpart --all --initlabel\nautopart",
+  "locations": [
+    "Default Location",
+  ],
+  "organizations": [
+    "Default Organization",
+  ],
+}

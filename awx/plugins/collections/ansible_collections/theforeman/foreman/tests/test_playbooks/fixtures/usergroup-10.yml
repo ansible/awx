@@ -1,0 +1,490 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://foreman.example.com/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-length:
+      - '63'
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"7462024e111aafa1fe0b7de16a6757f0"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5b52acb5-b5c6-4e5d-8906-ef1f9f1adb86
+      x-runtime:
+      - '0.024766'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/usergroups?per_page=4294967296&search=name%3D%22mytestgroup%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"mytestgroup\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"admin\":false,\"created_at\":\"2019-10-18 12:44:24 UTC\",\"updated_at\":\"2019-10-18
+        12:44:24 UTC\",\"name\":\"mytestgroup\",\"id\":8}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"d632751faff1904a17e3b0c7134882ec"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - a6e2cc5b-529d-45d8-a85f-3ef3d10888be
+      x-runtime:
+      - '0.016038'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/usergroups/8
+  response:
+    body:
+      string: !!python/unicode '{"admin":false,"created_at":"2019-10-18 12:44:24 UTC","updated_at":"2019-10-18
+        12:44:24 UTC","name":"mytestgroup","id":8,"external_usergroups":[],"usergroups":[{"name":"nestedgroup","id":7,"created_at":"2019-10-18
+        12:44:23 UTC","updated_at":"2019-10-18 12:44:23 UTC"}],"users":[{"id":7,"login":"foo","description":"Dr.
+        Test Userson"},{"id":8,"login":"bar","description":"Dr. Test Userson"}],"roles":[{"name":"role2","id":21,"description":"test
+        role","origin":null},{"name":"role1","id":20,"description":"test role","origin":null}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"5e47398633216cd5cb3330186bf26dbe"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - c640a578-9e5f-4dd0-ad57-ff909478c375
+      x-runtime:
+      - '0.019561'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/roles?per_page=4294967296&search=name%3D%22role1%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 19,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"role1\\\"\",\n  \"sort\":
+        {\n    \"by\": \"name\",\n    \"order\": \"ASC\"\n  },\n  \"results\": [{\"builtin\":0,\"cloned_from_id\":null,\"name\":\"role1\",\"id\":20,\"description\":\"test
+        role\",\"origin\":null}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"841a77473d75cd10c2e0c8bd81f1b4b6"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 4f5a4b02-c519-4278-8075-30b024ba0634
+      x-runtime:
+      - '0.016482'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/roles?per_page=4294967296&search=name%3D%22role2%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 19,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"role2\\\"\",\n  \"sort\":
+        {\n    \"by\": \"name\",\n    \"order\": \"ASC\"\n  },\n  \"results\": [{\"builtin\":0,\"cloned_from_id\":null,\"name\":\"role2\",\"id\":21,\"description\":\"test
+        role\",\"origin\":null}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"a6b95edc049c1b84460368579d5583fc"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 2291d668-d7cc-4804-98a0-335da895d98d
+      x-runtime:
+      - '0.013242'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/users?per_page=4294967296&search=login%3D%22foo%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"login=\\\"foo\\\"\",\n  \"sort\":
+        {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"firstname\":\"Test\",\"lastname\":\"Userson\",\"mail\":\"test.userson@example.com\",\"admin\":false,\"auth_source_id\":1,\"auth_source_name\":\"Internal\",\"timezone\":\"Stockholm\",\"locale\":\"sv_SE\",\"last_login_on\":null,\"created_at\":\"2019-10-18
+        12:44:16 UTC\",\"updated_at\":\"2019-10-18 12:44:16 UTC\",\"id\":7,\"login\":\"foo\",\"description\":\"Dr.
+        Test Userson\",\"ssh_keys\":[],\"default_location\":null,\"locations\":[],\"default_organization\":null,\"organizations\":[],\"effective_admin\":false}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"f83200e1c738edd10bb5398791b43b79"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - b3c09bee-3ca9-40f3-a45e-fd74b5939e3f
+      x-runtime:
+      - '0.021088'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/users?per_page=4294967296&search=login%3D%22bar%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"login=\\\"bar\\\"\",\n  \"sort\":
+        {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"firstname\":\"Test\",\"lastname\":\"Userson\",\"mail\":\"test.userson@example.com\",\"admin\":false,\"auth_source_id\":1,\"auth_source_name\":\"Internal\",\"timezone\":\"Stockholm\",\"locale\":\"sv_SE\",\"last_login_on\":null,\"created_at\":\"2019-10-18
+        12:44:17 UTC\",\"updated_at\":\"2019-10-18 12:44:17 UTC\",\"id\":8,\"login\":\"bar\",\"description\":\"Dr.
+        Test Userson\",\"ssh_keys\":[],\"default_location\":null,\"locations\":[],\"default_organization\":null,\"organizations\":[],\"effective_admin\":false}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"555f2a5a653c5c798cb3690b21be2838"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - a1b52e89-71c1-4131-a7cc-e9c992fb280a
+      x-runtime:
+      - '0.021167'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=190780e223709b2f29971c2de536ff1a
+    method: GET
+    uri: https://foreman.example.com/api/usergroups?per_page=4294967296&search=name%3D%22nestedgroup%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"nestedgroup\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"admin\":false,\"created_at\":\"2019-10-18 12:44:23 UTC\",\"updated_at\":\"2019-10-18
+        12:44:23 UTC\",\"name\":\"nestedgroup\",\"id\":7}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Oct 2019 12:44:25 GMT
+      etag:
+      - W/"86cb64176e264193edd2afe8aadaf713"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.1
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - d84e8aee-736e-46fd-8129-2ce082a4d012
+      x-runtime:
+      - '0.013601'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

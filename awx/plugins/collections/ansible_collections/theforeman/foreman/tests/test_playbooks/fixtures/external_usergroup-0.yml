@@ -1,0 +1,246 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://127.0.0.1:4433/api/status
+  response:
+    body:
+      string: '{"result":"ok","status":200,"version":"1.22.1","api_version":2}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '63'
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 18 Oct 2019 23:53:37 GMT
+      ETag:
+      - W/"7462024e111aafa1fe0b7de16a6757f0"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Set-Cookie:
+      - _session_id=dfc28ccf04de216a9192cb53e220b603; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 93189557-3f69-455b-aa35-ecd89655db8a
+      X-Runtime:
+      - '0.095905'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=dfc28ccf04de216a9192cb53e220b603
+    method: GET
+    uri: https://127.0.0.1:4433/api/usergroups/internal_group/external_usergroups
+  response:
+    body:
+      string: "{\n  \"total\": 0,\n  \"subtotal\": 0,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\": null,\n   \
+        \ \"order\": null\n  },\n  \"results\": []\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 18 Oct 2019 23:53:37 GMT
+      ETag:
+      - W/"b0ebd79c430c4781172af39880582aed"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 7185b298-67d4-4947-98c4-88dd7648bda0
+      X-Runtime:
+      - '0.077446'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=dfc28ccf04de216a9192cb53e220b603
+    method: GET
+    uri: https://127.0.0.1:4433/api/auth_sources?search=name%3D%22Example+LDAP%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"Example LDAP\\\"\",\n  \"sort\": {\n\
+        \    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"created_at\"\
+        :\"2019-10-18 23:53:34 UTC\",\"updated_at\":\"2019-10-18 23:53:34 UTC\",\"\
+        id\":12,\"type\":\"AuthSourceLdap\",\"name\":\"Example LDAP\",\"locations\"\
+        :[{\"id\":30,\"name\":\"Test Location\",\"title\":\"Test Location\",\"description\"\
+        :null}],\"organizations\":[{\"id\":31,\"name\":\"Test Organization\",\"title\"\
+        :\"Test Organization\",\"description\":\"A test organization\"}]}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 18 Oct 2019 23:53:37 GMT
+      ETag:
+      - W/"d2adbb9a4da57f44e0bcbe9d321d4aed"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 9ef99f5b-1248-4103-9d13-b2d42c77e261
+      X-Runtime:
+      - '0.087817'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"external_usergroup": {"name": "admins", "auth_source_id": 12}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '64'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=dfc28ccf04de216a9192cb53e220b603
+    method: POST
+    uri: https://127.0.0.1:4433/api/usergroups/internal_group/external_usergroups
+  response:
+    body:
+      string: '{"id":12,"name":"admins","auth_source_ldap":{"id":12,"type":"AuthSourceLdap","name":"Example
+        LDAP"}}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 18 Oct 2019 23:53:37 GMT
+      ETag:
+      - W/"3c16b00bffb7b814fe6c37e2be65500d"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.22.1
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 201 Created
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.53
+      X-Request-Id:
+      - 2263451f-9264-40eb-aa72-6f198d00ab2b
+      X-Runtime:
+      - '0.242476'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+version: 1

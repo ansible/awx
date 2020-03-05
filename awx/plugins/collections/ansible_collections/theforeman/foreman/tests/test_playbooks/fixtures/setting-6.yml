@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:02 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=635f7ba688b8dc7b5e902bef8d79abe9; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [d159d876-9c46-4f23-aa66-21c4cde54b37]
+      x-runtime: ['0.095540']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=635f7ba688b8dc7b5e902bef8d79abe9]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings?per_page=4294967296&search=name%3D%22excluded_facts%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 109,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"excluded_facts\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"value\":[\"foo\",\"bar\"],\"description\":\"Exclude pattern for all types
+        of imported facts (rhsm, puppet e.t.c.). Those facts won't be stored in foreman's
+        database. You can use * wildcard to match names with indexes e.g. macvtap*\",\"category\":\"Setting::Provisioning\",\"settings_type\":\"array\",\"default\":[\"lo\",\"en*v*\",\"usb*\",\"vnet*\",\"macvtap*\",\"_vdsmdummy_\",\"veth*\",\"docker*\",\"tap*\",\"qbr*\",\"qvb*\",\"qvo*\",\"qr-*\",\"qg-*\",\"vlinuxbr*\",\"vovsbr*\"],\"created_at\":\"2019-07-15
+        16:12:03 UTC\",\"updated_at\":\"2019-07-24 18:30:02 UTC\",\"id\":80,\"name\":\"excluded_facts\",\"full_name\":\"Exclude
+        pattern for facts stored in foreman\",\"category_name\":\"Provisioning\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:02 GMT']
+      etag: [W/"9c310a61016f7163fc2a9fc7393cf496"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [12694aa1-1ee5-474e-a336-12d097db3030]
+      x-runtime: ['0.041441']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=635f7ba688b8dc7b5e902bef8d79abe9]
+    method: GET
+    uri: https://centos7-foreman-1-22/api/settings/80
+  response:
+    body: {string: !!python/unicode '{"value":["foo","bar"],"description":"Exclude
+        pattern for all types of imported facts (rhsm, puppet e.t.c.). Those facts
+        won''t be stored in foreman''s database. You can use * wildcard to match names
+        with indexes e.g. macvtap*","category":"Setting::Provisioning","settings_type":"array","default":["lo","en*v*","usb*","vnet*","macvtap*","_vdsmdummy_","veth*","docker*","tap*","qbr*","qvb*","qvo*","qr-*","qg-*","vlinuxbr*","vovsbr*"],"created_at":"2019-07-15
+        16:12:03 UTC","updated_at":"2019-07-24 18:30:02 UTC","id":80,"name":"excluded_facts","full_name":"Exclude
+        pattern for facts stored in foreman","category_name":"Provisioning"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jul 2019 18:30:02 GMT']
+      etag: [W/"d1b6450a369d88f3ee834b124591b5e1"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [d392a73e-f004-4101-bb56-f1318ecc2475]
+      x-runtime: ['0.020986']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

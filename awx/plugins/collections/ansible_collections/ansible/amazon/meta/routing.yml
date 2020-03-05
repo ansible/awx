@@ -1,0 +1,46 @@
+plugin_routing:
+  modules:
+    aws_az_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    aws_caller_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    cloudformation_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_ami_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_eni_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_group_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_snapshot_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_vol_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_vpc_dhcp_option_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_vpc_net_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    ec2_vpc_subnet_facts:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details

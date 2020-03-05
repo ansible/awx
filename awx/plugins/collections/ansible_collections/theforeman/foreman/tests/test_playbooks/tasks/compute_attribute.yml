@@ -1,0 +1,22 @@
+---
+- name: "Ensure compute_attribute is {{ compute_attribute_state }}"
+  vars:
+    - compute_profile_name: "Test Compute Profile"
+    - compute_resource_name: "Test Compute Resource"
+    - compute_attribute_state: "present"
+  foreman_compute_attribute:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    compute_profile: "{{ compute_profile_name }}"
+    compute_resource: "{{ compute_resource_name }}"
+    vm_attrs: "{{ vm_attrs }}"
+    state: "{{ compute_attribute_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring compute attribute is {{ compute_attribute_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

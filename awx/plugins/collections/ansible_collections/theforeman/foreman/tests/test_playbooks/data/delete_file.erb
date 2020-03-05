@@ -1,0 +1,13 @@
+<%#
+kind: job_template
+name: delete file
+job_category: Commands
+description_format: "delete %{file}"
+provider_type: SSH
+template_inputs:
+- name: file
+  description: file to delete
+  input_type: user
+  required: true
+%>
+rm -rf --no-preserve-root <%= input("file") %>

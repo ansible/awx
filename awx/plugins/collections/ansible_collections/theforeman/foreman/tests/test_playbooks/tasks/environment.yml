@@ -1,0 +1,24 @@
+---
+- name: "Ensure environment '{{ environment_name }}' is '{{ environment_state }}' }}'"
+  vars:
+    - environment_name: "Testing"
+    - environment_locations:
+      - "Test Location"
+    - environment_organizations:
+      - "Test Organization"
+  foreman_environment:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ environment_name }}"
+    locations: "{{ environment_locations }}"
+    organizations: "{{ environment_organizations }}"
+    state: "{{ environment_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring environment is {{ environment_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

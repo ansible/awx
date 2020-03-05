@@ -1,0 +1,126 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/domain.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "present"
+    with_items: "{{ domain_locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "present"
+    with_items: "{{ domain_organizations }}"
+  #TODO create smart_proxy, when ansible-module exists
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/domain.yml
+  tasks:
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_locations: []
+      domain_organizations: []
+      domain_parameters:
+        - name: subnet_param1
+          value: value1
+        - name: subnet_param2
+          value: value2
+      domain_state: "present"
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "{}"
+      expected_diff_after: "subnet_param1"
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_state: "present"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_parameters:
+        - name: subnet_param1
+          value: value1
+        - name: subnet_param2
+          value: value2
+      domain_state: "present"
+      expected_change: false
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_parameters:
+        - name: subnet_param1
+          value: new_value1
+        - name: subnet_param3
+          value: value3
+      domain_state: "present"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_parameters:
+        - name: subnet_param1
+          value: new_value1
+        - name: subnet_param3
+          value: value3
+      domain_state: "present"
+      expected_change: false
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_parameters: []
+      domain_state: "present"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_parameters: []
+      domain_state: "present"
+      expected_change: false
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_name: "foobar.example.com"
+      domain_state: "present"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_name: "foobar.example.com"
+      domain_updated_name: "barbaz.example.com"
+      domain_state: "present"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_name: "barbaz.example.com"
+      domain_state: "present"
+      expected_change: false
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_name: "barbaz.example.com"
+      domain_state: "absent"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_state: "absent"
+      expected_change: true
+  - include_tasks: tasks/domain.yml
+    vars:
+      domain_state: "absent"
+      expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/domain.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "absent"
+    with_items: "{{ domain_locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "absent"
+    with_items: "{{ domain_organizations }}"
+  #TODO remove smart_proxy, when ansible-module exists
+...

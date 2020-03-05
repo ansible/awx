@@ -1,0 +1,87 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_state: "present"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: "present"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/role.yml
+    vars:
+      role_name: "role_with_filters"
+      role_state: present
+      expected_change: true
+      role_filters:
+        - resource: 'Host'
+          permissions:
+            - view_hosts
+          search: "owner_type = Usergroup and owner_id = 4"
+  - include: tasks/role.yml
+    vars:
+      role_state: present
+      expected_change: true
+
+  - include: tasks/role.yml
+    vars:
+      role_state: present
+      expected_change: false
+
+  - include: tasks/role.yml
+    vars:
+      role_state: present
+      expected_change: true
+      role_filters:
+        - resource: 'Host'
+          permissions:
+            - view_hosts
+          search: "owner_type = Usergroup and owner_id = 4"
+
+  - include: tasks/role.yml
+    vars:
+      role_state: present
+      expected_change: false
+      role_filters:
+        - resource: 'Host'
+          permissions:
+            - view_hosts
+          search: "owner_type = Usergroup and owner_id = 4"
+
+  - include: tasks/role.yml
+    vars:
+      role_state: present
+      role_description: new description
+      expected_change: true
+
+  - include: tasks/role.yml
+    vars:
+      role_state: absent
+      expected_change: true
+
+  - include: tasks/role.yml
+    vars:
+      role_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_state: "absent"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_state: "absent"
+
+...

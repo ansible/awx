@@ -1,0 +1,20 @@
+namespace: openstack
+name: cloud
+version: 1.0.0
+readme: README.md
+authors: Openstack
+description: Openstack Ansible modules
+license: GPLv3
+license_file: LICENSE
+tags:
+  - cloud
+  - openstack
+dependencies: {}
+repository: https://opendev.org/openstack/ansible-collections-openstack.git
+documentation: https://docs.openstack.org/ansible-collections-openstack
+homepage: https://opendev.org
+issues: https://review.opendev.org/q/project:openstack/ansible-collections-openstack
+build_ignore:
+  - build_artifact/
+  - "*.tar.gz"
+  - zuul.yaml

@@ -1,0 +1,71 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: present
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: present
+      lifecycle_environment_name: "Test"
+      lifecycle_environment_label: "test"
+      lifecycle_environment_prior: "Dev"
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: present
+      lifecycle_environment_name: "Production"
+      lifecycle_environment_label: "production"
+      lifecycle_environment_prior: "Test"
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: present
+      lifecycle_environment_name: "Test"
+      lifecycle_environment_description: "The new test environment"
+      lifecycle_environment_label:
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: absent
+      lifecycle_environment_name: "Production"
+      lifecycle_environment_description:
+      lifecycle_environment_label:
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: absent
+      lifecycle_environment_name: "Test"
+      lifecycle_environment_description:
+      lifecycle_environment_label:
+      expected_change: true
+  - include: tasks/lifecycle_environment.yml
+    vars:
+      lifecycle_environment_state: absent
+      lifecycle_environment_name: "Dev"
+      lifecycle_environment_description:
+      lifecycle_environment_label:
+      expected_change: true
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

@@ -1,0 +1,103 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: present
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: present
+    with_items: "{{ hostgroup.organizations }}"
+  - include: tasks/content_view.yml
+    vars:
+      organization_name: "{{ hostgroup.organizations | first }}"
+      content_view_name: "{{ hostgroup.content_view.name }}"
+  - include: tasks/content_view_version.yml
+    vars:
+      organization_name: "{{ hostgroup.organizations | first }}"
+      content_view_name: "{{ hostgroup.content_view.name }}"
+      lifecycle_environments: "{{ hostgroup.lifecycle_environment }}"
+      version: "{{ hostgroup.content_view.version }}"
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_organization: "{{ hostgroup.organizations | first }}"
+      hostgroup_content_source: "{{ hostgroup.content_source }}"
+      hostgroup_lifecycle_environment: "{{ hostgroup.lifecycle_environment }}"
+      hostgroup_content_view: "{{ hostgroup.content_view.name }}"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_organization: "{{ hostgroup.organizations | first }}"
+      hostgroup_content_source: "{{ hostgroup.content_source }}"
+      hostgroup_lifecycle_environment: "{{ hostgroup.lifecycle_environment }}"
+      hostgroup_content_view: "{{ hostgroup.content_view.name }}"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+    # There is no way for now to un publish content view version via ansible
+    # so we cannot cleanup content related stuff
+    #  - include: tasks/content_view_version.yml
+    #    vars:
+    #      organization_name: "{{ hostgroup.organizations | first }}"
+    #      content_view_name: "{{ hostgroup.content_view.name }}"
+    #      version: "{{ hostgroup.content_view.version }}"
+    #      state: absent
+    #  - include: tasks/content_view.yml
+    #    vars:
+    #      organization_name: "{{ hostgroup.organizations | first }}"
+    #      content_view_name: "{{ hostgroup.content_view.name }}"
+    #      content_view_state: absent
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "absent"
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "absent"
+    # As we cannot cleanup content stuff we have to let the org used for it in place
+    #with_items: "{{ hostgroup.organizations }}"
+    with_items: "{{  hostgroup.organizations | difference([hostgroup.organizations | first]) }}"
+...

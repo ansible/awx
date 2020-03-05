@@ -1,0 +1,33 @@
+# To run this playbook, you need to prepare a foreman-proxy with the realm feature.
+# Use e.g. the centos7-freeipa-server in forklift. Due to limitations in Vagrant you
+# might need to run its provisioning playbook by hand.
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/realm.yml
+    vars:
+      realm_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/realm.yml
+    vars:
+      realm_state: present
+      expected_change: True
+  - include: tasks/realm.yml
+    vars:
+      realm_state: present
+      expected_change: False
+  - include: tasks/realm.yml
+    vars:
+      realm_state: absent
+      expected_change: True
+  - include: tasks/realm.yml
+    vars:
+      realm_state: absent
+      expected_change: False

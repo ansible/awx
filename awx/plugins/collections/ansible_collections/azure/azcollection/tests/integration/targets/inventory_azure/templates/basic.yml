@@ -1,0 +1,3 @@
+---
+plugin: azure.azcollection.azure_rm
+plain_host_names: yes

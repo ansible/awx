@@ -1,0 +1,203 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://centos7-luna/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.24.0-develop","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:24 GMT
+      etag:
+      - W/"3f5599709463dcc7e904cd493ab8c362"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=8cb0777114106e7bdeb968c21ec07b1d; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 00d746fa-4714-42f6-b437-e5193ca043d5
+      x-runtime:
+      - '0.160458'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=8cb0777114106e7bdeb968c21ec07b1d
+    method: GET
+    uri: https://centos7-luna/api/job_templates?per_page=4294967296&search=name%3D%22Ansible+Roles+-+Hello+World%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 38,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Ansible Roles -
+        Hello World\\\"\",\n  \"sort\": {\n    \"by\": null,\n    \"order\": null\n
+        \ },\n  \"results\": [{\"id\":177,\"name\":\"Ansible Roles - Hello World\",\"job_category\":\"Ansible
+        Playbook\",\"provider_type\":\"Ansible\",\"snippet\":false,\"description_format\":\"Test
+        Ansible Roles\",\"created_at\":\"2019-08-27 08:16:19 UTC\",\"updated_at\":\"2019-08-27
+        08:16:19 UTC\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:24 GMT
+      etag:
+      - W/"85c654f08be7e029296aabcaf2dec990"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 2b6c15c8-db6d-4e90-b600-0ca61363fc33
+      x-runtime:
+      - '0.032962'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '0'
+      Cookie:
+      - _session_id=8cb0777114106e7bdeb968c21ec07b1d
+    method: DELETE
+    uri: https://centos7-luna/api/job_templates/177
+  response:
+    body:
+      string: !!python/unicode '{"id":177,"name":"Ansible Roles - Hello World","template":"\u003c%#\nname:
+        Ansible Roles - Hello World\njob_category: Ansible Playbook\ndescription_format:
+        Test Ansible Roles\nfeature: ansible_run_host\nsnippet: false\nprovider_type:
+        Ansible\nkind: job_template\nmodel: JobTemplate\n%\u003e\n\n---\n- hosts:
+        all\n  tasks:\n    - name: Hello\n      debug:\n        msg: Hello World\n...\n","snippet":false,"template_kind_id":null,"created_at":"2019-08-27T08:16:19.727Z","updated_at":"2019-08-27T08:16:19.727Z","locked":false,"default":false,"vendor":null,"os_family":null,"job_category":"Ansible
+        Playbook","provider_type":"Ansible","description_format":"Test Ansible Roles","execution_timeout_interval":null}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 08:16:24 GMT
+      etag:
+      - W/"21809c357725359277ac99456c475cbc"
+      foreman_api_version:
+      - '2'
+      foreman_current_location:
+      - ; ANY
+      foreman_current_organization:
+      - ; ANY
+      foreman_version:
+      - 1.24.0-develop
+      server:
+      - Apache
+      set-cookie:
+      - request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f89ef7fb-e2c0-43be-a202-c170a6fb23a9
+      x-runtime:
+      - '0.063699'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

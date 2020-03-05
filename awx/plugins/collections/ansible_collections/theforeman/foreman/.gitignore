@@ -1,0 +1,13 @@
+.tmp
+.cache
+*.retry
+tests/test_playbooks/vars/server.yml
+__pycache__
+*.pyc
+*.pyo
+*.swp
+.pytest_cache/
+.mypy_cache/
+venv/
+docs/modules/
+docs/_build/

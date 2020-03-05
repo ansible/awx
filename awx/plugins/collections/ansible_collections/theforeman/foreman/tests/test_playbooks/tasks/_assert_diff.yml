@@ -1,0 +1,13 @@
+---
+- assert:
+    fail_msg: "Ensuring {{ module | default('module') }} supports diff output"
+    that:
+      - result.diff is defined
+      - result.diff.before is defined
+      - result.diff.after is defined
+      - result.diff.before|to_json is search(expected_diff_before)
+      - result.diff.after|to_json is search(expected_diff_after)
+  when:
+    - expected_diff is defined
+    - expected_diff
+...

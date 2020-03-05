@@ -1,0 +1,12 @@
+---
+# vars file for gcp-http-lb
+vars:
+  # The backend this LB will be supporting. This will typically be a Instance Group:
+  # example: projects/sample-project/zones/us-central1-c/instanceGroups/sample-instance-group
+  gcp_http_lb_backend: your-backend
+  # The name of your GCP project
+  gcp_project: your-project
+  # The kind of authentication you will use (serviceaccount is recommended)
+  auth_kind: serviceaccount
+  # The path to your service account file (if using the serviceaccount auth kind)
+  service_account_file: path-to-service-account-file

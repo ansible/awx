@@ -1,0 +1,56 @@
+---
+- name: "Create/Update/Delete LDAP auth source"
+  vars:
+    auth_source_ldap_state: "present"
+    auth_source_ldap_name: Example LDAP
+    auth_source_ldap_host: ldap.example.com
+    auth_source_ldap_port: 389
+    auth_source_ldap_account: ansible
+    auth_source_ldap_account_password: changeme
+    auth_source_ldap_base_dn: dc=example,dc=com
+    auth_source_ldap_attr_login: uid
+    auth_source_ldap_attr_firstname: givenName
+    auth_source_ldap_attr_lastname: sn
+    auth_source_ldap_attr_mail: mail
+    auth_source_ldap_onthefly_register: True
+    auth_source_ldap_usergroup_sync: True
+    auth_source_ldap_tls: True
+    auth_source_ldap_groups_base: cn=groups,cn=accounts,dc=example,dc=com
+    auth_source_ldap_server_type: free_ipa
+    auth_source_ldap_ldap_filter: "(uid=%s)"
+    auth_source_ldap_locations:
+      - 'Test Location'
+    auth_source_ldap_organizations:
+      - 'Test Organization'
+  foreman_auth_source_ldap:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ auth_source_ldap_name }}"
+    host: "{{ auth_source_ldap_host }}"
+    port: "{{ auth_source_ldap_port }}"
+    account: "{{ auth_source_ldap_account }}"
+    account_password: "{{ auth_source_ldap_account_password }}"
+    base_dn: "{{ auth_source_ldap_attr_login }}"
+    attr_login: "{{ auth_source_ldap_attr_login }}"
+    attr_firstname: "{{ auth_source_ldap_attr_firstname }}"
+    attr_lastname: "{{ auth_source_ldap_attr_lastname }}"
+    attr_mail: "{{ auth_source_ldap_attr_mail }}"
+    attr_photo: "{{ auth_source_ldap_attr_photo | default(omit) }}"
+    onthefly_register: "{{ auth_source_ldap_onthefly_register }}"
+    usergroup_sync: "{{ auth_source_ldap_usergroup_sync }}"
+    tls: "{{ auth_source_ldap_tls }}"
+    groups_base: "{{ auth_source_ldap_groups_base }}"
+    server_type: "{{ auth_source_ldap_server_type }}"
+    ldap_filter: "{{ auth_source_ldap_ldap_filter }}"
+    organizations: "{{ auth_source_ldap_organizations }}"
+    locations: "{{ auth_source_ldap_locations }}"
+    state: "{{ auth_source_ldap_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring LDAP auth source is {{ auth_source_ldap_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

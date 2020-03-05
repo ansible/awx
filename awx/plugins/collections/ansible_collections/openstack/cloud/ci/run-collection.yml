@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+
+  roles:
+    - { role: auth, tags: auth }
+    - { role: client_config, tags: client_config }
+    - { role: group, tags: group }
+    # TODO(mordred) Reenable this once the fixed os_image winds up in an
+    # upstream ansible release.
+    # - { role: image, tags: image }
+    - { role: keypair, tags: keypair }
+    - { role: keystone_domain, tags: keystone_domain }
+    - { role: keystone_role, tags: keystone_role }
+    - { role: network, tags: network }
+    - { role: nova_flavor, tags: nova_flavor }
+    - { role: object, tags: object }
+    - { role: port, tags: port }
+    - { role: router, tags: router }
+    - { role: security_group, tags: security_group }
+    - { role: server, tags: server }
+    - { role: subnet, tags: subnet }
+    - { role: user, tags: user }
+    - { role: user_group, tags: user_group }
+    - { role: user_role, tags: user_role }
+    - { role: volume, tags: volume }

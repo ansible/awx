@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: write inventory config file
+      copy:
+        dest: ../test.azure_rm.yml
+        content: ""

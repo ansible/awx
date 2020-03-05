@@ -1,0 +1,30 @@
+{
+ "collection_info": {
+  "namespace": "ovirt",
+  "name": "ovirt_collection",
+  "version": "1.0.0",
+  "authors": [
+   "Martin Necas <mnecas@redhat.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "collection"
+  ],
+  "description": "The oVirt ansible collection.",
+  "license": [],
+  "license_file": "./LICENSE",
+  "dependencies": {},
+  "repository": "https://github.com/ovirt/ovirt-ansible-collection",
+  "documentation": null,
+  "homepage": "https://www.ovirt.org/",
+  "issues": null
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "506eed53c0c566463806516ad26988d7ae39302a212c0af399e687f91ffea359",
+  "format": 1
+ },
+ "format": 1
+}

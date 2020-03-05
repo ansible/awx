@@ -1,0 +1,36 @@
+---
+- name: "Ensure installation medium '{{ installation_medium_name }}' is '{{ installation_medium_state }}'"
+  vars:
+    - installation_medium_name: "Temple OS 1.0"
+    - installation_medium_locations:
+      - "Test Location"
+    - installation_medium_operatingsystems:
+      - "TempleOS"
+    - installation_medium_organizations:
+      - "Test Organization"
+    - installation_medium_path: "https://templeos.org/TempleOS.ISO"
+    - installation_medium_os_family: "{{ omit }}"
+  foreman_installation_medium:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+
+    name: "{{ installation_medium_name }}"
+    updated_name: "{{ installation_medium_updated_name | default(omit) }}"
+    locations: "{{ installation_medium_locations }}"
+    organizations: "{{ installation_medium_organizations }}"
+    os_family: "{{ installation_medium_os_family }}"
+    operatingsystems: "{{ installation_medium_operatingsystems }}"
+    path: "{{ installation_medium_path }}"
+    state: "{{ installation_medium_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring installation medium is {{ installation_medium_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: installation_medium
+...

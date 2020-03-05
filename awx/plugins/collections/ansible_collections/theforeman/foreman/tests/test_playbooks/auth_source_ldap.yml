@@ -1,0 +1,65 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/domain.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "present"
+    with_items: "{{ domain_locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "present"
+    with_items: "{{ domain_organizations }}"
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/auth_source_ldap.yml
+    vars:
+      auth_source_ldap_state: present
+      expected_change: true
+  - include: tasks/auth_source_ldap.yml
+    vars:
+      auth_source_ldap_state: present
+      auth_source_ldap_account_password: "{{ omit }}"
+      expected_change: false
+  - include: tasks/auth_source_ldap.yml
+    vars:
+      auth_source_ldap_state: present
+      auth_source_ldap_account: test
+      auth_source_ldap_account_password: "{{ omit }}"
+      expected_change: true
+  - include: tasks/auth_source_ldap.yml
+    vars:
+      auth_source_ldap_state: absent
+      expected_change: true
+  - include: tasks/auth_source_ldap.yml
+    vars:
+      auth_source_ldap_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/domain.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "absent"
+    with_items: "{{ domain_locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "absent"
+    with_items: "{{ domain_organizations }}"
+
+...

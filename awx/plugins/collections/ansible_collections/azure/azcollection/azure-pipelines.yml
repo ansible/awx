@@ -1,0 +1,45 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - "*"
+
+jobs:
+- job: CG
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+  - task: ComponentGovernanceComponentDetection@0
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'Medium'
+      failOnAlert: true
+
+- job: CredScan
+  pool:
+    vmImage: "windows-2019"
+
+  steps:
+    - task: ea576cd4-c61f-48f8-97e7-a3cb07b90a6f@2
+      inputs:
+        toolMajorVersion: 'V2'
+        suppressionsFile: 'CredScanSuppressions.json'
+
+    - task: PostAnalysis@1
+      inputs:
+        AllTools: false
+        APIScan: false
+        BinSkim: false
+        CodesignValidation: false
+        CredScan: true
+        FortifySCA: false
+        FxCop: false
+        ModernCop: false
+        PoliCheck: false
+        RoslynAnalyzers: false
+        SDLNativeRules: false
+        Semmle: false
+        TSLint: false
+        ToolLogsNotFoundAction: 'Standard'

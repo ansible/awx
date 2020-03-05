@@ -1,0 +1,28 @@
+---
+- name: "Ensure role '{{ role_name }}' is {{ role_state }}"
+  vars:
+    role_name: test
+    role_description: test role
+    role_locations:
+      - Test Location
+    role_organizations:
+      - Test Organization
+    role_state: present
+  foreman_role:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ role_name }}"
+    description: "{{ role_description }}"
+    locations: "{{ role_locations }}"
+    organizations: "{{ role_organizations }}"
+    filters: "{{ role_filters | default(omit) }}"
+    state: "{{ role_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring role is {{ role_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

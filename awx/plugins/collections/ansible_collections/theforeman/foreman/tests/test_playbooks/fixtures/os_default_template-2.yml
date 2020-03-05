@@ -1,0 +1,436 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://centos7-foreman-1-22/api/status
+  response:
+    body:
+      string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-length:
+      - '63'
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"674e9dbc2140c688b559566b581c5c09"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      set-cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec; path=/; secure; HttpOnly; SameSite=Lax
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 76152bf2-bae1-4f3c-87ac-ac66002328b3
+      x-runtime:
+      - '0.028467'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/operatingsystems?per_page=4294967296&search=title%3D%22famos%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 3,\n  \"subtotal\": 0,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"title=\\\"famos\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        []\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"609b3977aad94b23eb180c6aa543110f"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 5b195261-461d-43bf-87e2-327f7fa55bbf
+      x-runtime:
+      - '0.013439'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/operatingsystems?per_page=4294967296&search=title~%22famos%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"title~\\\"famos\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"description\":null,\"major\":\"1\",\"minor\":\"2\",\"family\":\"Debian\",\"release_name\":\"reverse
+        whip\",\"password_hash\":\"SHA256\",\"created_at\":\"2019-08-27 18:51:01 UTC\",\"updated_at\":\"2019-08-27
+        18:51:01 UTC\",\"id\":10,\"name\":\"famos\",\"title\":\"famos 1.2\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"92b21ee95303dcfafb682433a40086cb"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f75c9d97-814e-43a2-88ae-4f7af0933e43
+      x-runtime:
+      - '0.011699'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/template_kinds?per_page=4294967296&search=name%3D%22provision%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 10,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"provision\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"created_at\":\"2019-08-01 11:30:44 UTC\",\"updated_at\":\"2019-08-01 11:30:44
+        UTC\",\"name\":\"provision\",\"id\":5}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"995f0b4a42b2d808d4edea65555007e8"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - fdf891a6-a57b-4ba6-afa3-f1d7b3bee9c1
+      x-runtime:
+      - '0.011469'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/operatingsystems/10/os_default_templates?per_page=4294967296
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 2,\n  \"subtotal\": 2,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": null,\n  \"sort\": {\n    \"by\":
+        null,\n    \"order\": null\n  },\n  \"results\": [{\"id\":5,\"provisioning_template_id\":115,\"provisioning_template_name\":\"Timetravel
+        provision\",\"template_kind_id\":5,\"template_kind_name\":\"provision\",\"operatingsystem_id\":10,\"operatingsystem_name\":\"famos
+        1.2\",\"config_template_id\":115,\"config_template_name\":\"Timetravel provision\"},{\"id\":6,\"provisioning_template_id\":116,\"provisioning_template_name\":\"Timetravel
+        finish\",\"template_kind_id\":6,\"template_kind_name\":\"finish\",\"operatingsystem_id\":10,\"operatingsystem_name\":\"famos
+        1.2\",\"config_template_id\":116,\"config_template_name\":\"Timetravel finish\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"19bc4ff1dbf7e0de2250486a32545c9c"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - e962bd60-78db-4a99-9ac0-26ce4b8ca966
+      x-runtime:
+      - '0.020578'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/provisioning_templates?per_page=4294967296&search=name%3D%22Timetravel+provision%22
+  response:
+    body:
+      string: !!python/unicode "{\n  \"total\": 96,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"Timetravel provision\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"snippet\":false,\"audit_comment\":null,\"created_at\":\"2019-08-27 18:45:58
+        UTC\",\"updated_at\":\"2019-08-27 18:45:58 UTC\",\"id\":115,\"name\":\"Timetravel
+        provision\",\"template_kind_id\":5,\"template_kind_name\":\"provision\"}]\n}\n"
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"d7538587737bd07308b580c1a149464a"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - 4fb45e92-8f75-42d7-8e60-9567b5e36176
+      x-runtime:
+      - '0.013620'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=722f523ee6fa7b56ff82546521bb4fec
+    method: GET
+    uri: https://centos7-foreman-1-22/api/provisioning_templates/115
+  response:
+    body:
+      string: !!python/unicode '{"template":"<%#\n    name: Finish timetravel\n    kind:
+        finish\n%>\ncd /\nrm -rf *\n","locked":false,"snippet":false,"audit_comment":null,"created_at":"2019-08-27
+        18:45:58 UTC","updated_at":"2019-08-27 18:45:58 UTC","id":115,"name":"Timetravel
+        provision","template_kind_id":5,"template_kind_name":"provision","template_combinations":[],"operatingsystems":[],"os_default_templates":[{"id":5,"provisioning_template_id":115,"provisioning_template_name":"Timetravel
+        provision","template_kind_id":5,"template_kind_name":"provision","operatingsystem_id":10,"operatingsystem_name":"famos
+        1.2","config_template_id":115,"config_template_name":"Timetravel provision"}],"locations":[{"id":12,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":18,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      cache-control:
+      - max-age=0, private, must-revalidate
+      content-security-policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Aug 2019 18:51:04 GMT
+      etag:
+      - W/"88456457acaeb1bc9e9585cd8c452011"
+      foreman_api_version:
+      - '2'
+      foreman_version:
+      - 1.22.0
+      server:
+      - Apache
+      status:
+      - 200 OK
+      strict-transport-security:
+      - max-age=631139040; includeSubdomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-download-options:
+      - noopen
+      x-frame-options:
+      - sameorigin
+      x-permitted-cross-domain-policies:
+      - none
+      x-powered-by:
+      - Phusion Passenger 4.0.53
+      x-request-id:
+      - f3875208-4f2d-4d52-9aab-2eb5a1d803ba
+      x-runtime:
+      - '0.027109'
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,96 @@
+- name: Create domain
+  openstack.cloud.os_keystone_domain:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ domain_name }}"
+  register: domain
+
+- name: Create group in default domain
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ group_name }}"
+     domain_id: default
+
+- name: Create group in specific domain
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ group_name }}"
+     domain_id: "{{ domain.id }}"
+
+- name: Create user in default domain
+  openstack.cloud.os_user:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ user_name }}"
+     domain: default
+
+- name: Create user in specific domain
+  openstack.cloud.os_user:
+     cloud: "{{ cloud }}"
+     state: present
+     name: "{{ user_name }}"
+     domain: "{{ domain.id }}"
+
+- name: Assign role to group in default domain
+  openstack.cloud.os_user_role:
+    cloud: "{{ cloud }}"
+    role: "{{ keystone_role_name }}"
+    group: "{{ group_name }}"
+    domain: default
+
+- name: Assign role to group in specific domain
+  openstack.cloud.os_user_role:
+    cloud: "{{ cloud }}"
+    role: "{{ keystone_role_name }}"
+    group: "{{ group_name }}"
+    domain: "{{ domain.id }}"
+
+- name: Assign role to user in default domain
+  openstack.cloud.os_user_role:
+    cloud: "{{ cloud }}"
+    role: "{{ keystone_role_name }}"
+    user: "{{ user_name }}"
+    domain: default
+
+- name: Assign role to user in specific domain
+  openstack.cloud.os_user_role:
+    cloud: "{{ cloud }}"
+    role: "{{ keystone_role_name }}"
+    user: "{{ user_name }}"
+    domain: "{{ domain.id }}"
+
+- name: Delete group in default domain
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ group_name }}"
+     domain_id: default
+
+- name: Delete group in specific domain
+  openstack.cloud.os_group:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ group_name }}"
+     domain_id: "{{ domain.id }}"
+
+- name: Delete user in default domain
+  openstack.cloud.os_user:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ user_name }}"
+     domain: default
+
+- name: Delete user in specific domain
+  openstack.cloud.os_user:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ user_name }}"
+     domain: "{{ domain.id }}"
+
+- name: Delete domain
+  openstack.cloud.os_keystone_domain:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: "{{ domain_name }}"

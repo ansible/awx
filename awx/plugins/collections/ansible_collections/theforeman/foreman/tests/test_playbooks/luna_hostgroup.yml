@@ -1,0 +1,73 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: present
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: present
+    with_items: "{{ hostgroup.organizations }}"
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_openscap_proxy: "{{ hostgroup.openscap_proxy }}"
+      hostgroup_state: present
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_locations: "{{ hostgroup.locations }}"
+      hostgroup_organizations: "{{ hostgroup.organizations }}"
+      hostgroup_openscap_proxy: "{{ hostgroup.openscap_proxy }}"
+      hostgroup_state: present
+      expected_change: false
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: true
+
+  - include: tasks/hostgroup.yml
+    vars:
+      hostgroup_name: "New host group"
+      hostgroup_state: absent
+      expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/hostgroup.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "absent"
+    with_items: "{{ hostgroup.locations }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "absent"
+    with_items: "{{ hostgroup.organizations }}"
+...

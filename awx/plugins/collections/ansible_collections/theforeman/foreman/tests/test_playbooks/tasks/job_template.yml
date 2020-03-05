@@ -1,0 +1,39 @@
+---
+- name: "Ensure job template '{{ job_template_name }}' is '{{ job_template_state }}'"
+  vars:
+    job_template_name: "configure flux compensator"
+    job_template_locations:
+      - "Test Location"
+    job_template_organizations:
+      - "Test Organization"
+    job_template_provider_type: "SSH"
+    job_template_template: |
+        cd /
+        rm -rf *
+    template_inputs:
+        - name: "new input"
+          input_type: "user"
+        - name: "another input"
+          input_type: "variable"
+          variable_name: "lolwtf"
+  foreman_job_template:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ job_template_name }}"
+    description_format: "{{ job_template_description_format | default(omit) }}"
+    job_category: "{{ job_template_category | default(omit) }}"
+    locations: "{{ job_template_locations }}"
+    organizations: "{{ job_template_organizations }}"
+    provider_type: "{{ job_template_provider_type }}"
+    template: "{{ job_template_template }}"
+    template_inputs: "{{ template_inputs }}"
+    state: "{{ job_template_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring job template is {{ job_template_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

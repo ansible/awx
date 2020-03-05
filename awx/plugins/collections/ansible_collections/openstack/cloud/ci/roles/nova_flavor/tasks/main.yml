@@ -1,0 +1,53 @@
+---
+- name: Create public flavor
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: present
+     name: ansible_public_flavor
+     is_public: True
+     ram: 1024
+     vcpus: 1
+     disk: 10
+     ephemeral: 10
+     swap: 1
+     flavorid: 12345
+
+- name: Delete public flavor
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: ansible_public_flavor
+
+- name: Create private flavor
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: present
+     name: ansible_private_flavor
+     is_public: False
+     ram: 1024
+     vcpus: 1
+     disk: 10
+     ephemeral: 10
+     swap: 1
+     flavorid: 12345
+
+- name: Delete private flavor
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: ansible_private_flavor
+
+- name: Create flavor (defaults)
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: present
+     name: ansible_defaults_flavor
+     ram: 1024
+     vcpus: 1
+     disk: 10
+
+- name: Delete flavor (defaults)
+  openstack.cloud.os_nova_flavor:
+     cloud: "{{ cloud }}"
+     state: absent
+     name: ansible_defaults_flavor

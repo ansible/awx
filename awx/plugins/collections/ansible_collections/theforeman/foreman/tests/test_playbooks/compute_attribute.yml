@@ -1,0 +1,80 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/compute_profile.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+  - include: tasks/compute_profile.yml
+    vars:
+      compute_profile_state: present
+  - include: tasks/compute_resource.yml
+    vars:
+      compute_resource_organizations: "{{ libvirt.compute_resource.organizations }}"
+      compute_resource_locations: "{{ libvirt.compute_resource.locations }}"
+      compute_resource_provider: 'libvirt'
+      compute_resource_provider_params: "{{ libvirt.compute_resource.params }}"
+      compute_resource_state: present
+- hosts: tests
+  gather_facts: false
+  tasks:
+  - name: Load server config
+    include_vars:
+      file: vars/server.yml
+
+  - include: tasks/compute_attribute.yml
+    vars:
+      vm_attrs:
+        memory: 2147483648
+        cpus: 2
+      compute_attribute_state: present
+      expected_change: true
+
+  - include: tasks/compute_attribute.yml
+    vars:
+      vm_attrs:
+        memory: 2147483648
+        cpus: 2
+      compute_attribute_state: present
+      expected_change: false
+
+  - include: tasks/compute_attribute.yml
+    vars:
+      vm_attrs:
+        memory_mb: 1073741824
+        cpu: 1
+      compute_attribute_state: present
+      expected_change: true
+
+  - include: tasks/compute_attribute.yml
+    vars:
+      vm_attrs:
+        memory_mb: 1073741824
+        cpu: 1
+      compute_attribute_state: present
+      expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/compute_profile.yml
+  tasks:
+  - include: tasks/compute_profile.yml
+    vars:
+      compute_profile_state: absent
+  - include: tasks/compute_resource.yml
+    vars:
+      compute_resource_state: absent
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

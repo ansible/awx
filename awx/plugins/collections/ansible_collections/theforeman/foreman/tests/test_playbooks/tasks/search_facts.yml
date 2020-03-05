@@ -1,0 +1,16 @@
+---
+- name: "Find '{{ resource }}' resources"
+  foreman_search_facts:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    resource: "{{ resource }}"
+    search: "{{ search | default(omit) }}"
+    full_details: "{{ full_details | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Verification that '{{ return_length }}' '{{ resource }}' resources are found"
+    that: result.resources | length == return_length
+  when: return_length is defined
+...

@@ -1,0 +1,83 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/product.yml
+    vars:
+      product_state: present
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_state: absent
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/sync_plan.yml
+    vars:
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "{}"
+      expected_diff_after: "name.*Test Sync Plan"
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_products:
+        - Test Product
+      expected_change: true
+      expected_diff: true
+      expected_diff_before: "product_ids.*\\[\\]"
+      expected_diff_after: "product_ids.*\\["
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_products:
+        - Test Product
+      expected_change: false
+  - include: tasks/sync_plan.yml
+    vars:
+      expected_change: true
+      sync_plan_products: []
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_description: Sync daily, not weekly
+      sync_plan_interval: "daily"
+      expected_change: true
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_interval: custom cron
+      sync_plan_cron_expression: "* * * * */5"
+      expected_change: true
+  - include: tasks/product.yml
+    vars:
+      product_sync_plan: Test Sync Plan
+      product_state: present
+      expected_change: true
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_description: This will not be updated
+      sync_plan_products:
+        - And this too
+      sync_plan_state: present_with_defaults
+      expected_change: false
+  - include: tasks/sync_plan.yml
+    vars:
+      sync_plan_state: absent
+      expected_change: true
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/product.yml
+    vars:
+      product_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

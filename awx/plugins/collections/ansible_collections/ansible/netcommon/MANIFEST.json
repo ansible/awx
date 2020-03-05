@@ -1,0 +1,28 @@
+{
+ "collection_info": {
+  "namespace": "ansible",
+  "name": "netcommon",
+  "version": "0.1.0",
+  "authors": [],
+  "readme": "README.md",
+  "tags": [],
+  "description": null,
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": "COPYING",
+  "dependencies": {},
+  "repository": "git@github.com:ansible-collection-migration/ansible.netcommon.git",
+  "documentation": "https://github.com/ansible-collection-migration/ansible.netcommon/tree/master/docs",
+  "homepage": "https://github.com/ansible-collection-migration/ansible.netcommon",
+  "issues": "https://github.com/ansible-collection-migration/ansible.netcommon/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "963d2d91102d381770db7d6992c91343e01fbaaa6362d64c7c6ef9f52c91cd22",
+  "format": 1
+ },
+ "format": 1
+}

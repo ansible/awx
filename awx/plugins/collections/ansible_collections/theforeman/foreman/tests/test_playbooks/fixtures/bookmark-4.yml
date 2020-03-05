@@ -1,0 +1,144 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+    method: GET
+    uri: https://centos7-katello-3-12/api/status
+  response:
+    body: {string: !!python/unicode '{"result":"ok","status":200,"version":"1.22.0","api_version":2}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-length: ['63']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 06 Jun 2019 09:26:48 GMT']
+      etag: [W/"674e9dbc2140c688b559566b581c5c09"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [_session_id=7f8850a9e33e70d394bd04729a3f72c0; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [cf12396a-a7a6-4dd1-9310-40a50614780b]
+      x-runtime: ['0.036224']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=7f8850a9e33e70d394bd04729a3f72c0]
+    method: GET
+    uri: https://centos7-katello-3-12/api/bookmarks?per_page=4294967296&search=name%3D%22test%22%2Ccontroller%3D%22job_invocations%22
+  response:
+    body: {string: !!python/unicode "{\n  \"total\": 19,\n  \"subtotal\": 1,\n  \"page\":
+        1,\n  \"per_page\": 4294967296,\n  \"search\": \"name=\\\"test\\\",controller=\\\"job_invocations\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"name\":\"test\",\"controller\":\"job_invocations\",\"query\":\"started_at
+        > 12 hours ago\",\"public\":true,\"id\":19,\"owner_id\":4,\"owner_type\":\"User\"}]\n}\n"}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 06 Jun 2019 09:26:48 GMT']
+      etag: [W/"9fba0fe2ce8afc9bb2fa2e6e7f77d74e"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [3fb44487-5773-4e4c-9bd2-7a776492637c]
+      x-runtime: ['0.017385']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Cookie: [_session_id=7f8850a9e33e70d394bd04729a3f72c0]
+    method: GET
+    uri: https://centos7-katello-3-12/api/bookmarks/19
+  response:
+    body: {string: !!python/unicode '{"name":"test","controller":"job_invocations","query":"started_at
+        > 12 hours ago","public":true,"id":19,"owner_id":4,"owner_type":"User"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 06 Jun 2019 09:26:48 GMT']
+      etag: [W/"b00b58d0d7a74cb949fefb3c26886941"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [af676a6f-73ee-429c-b4f5-336e6f519054]
+      x-runtime: ['0.013930']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+- request:
+    body: !!python/unicode '{"bookmark": {"query": "started_at > 24 hours ago", "public":
+      false}}'
+    headers:
+      Accept: [application/json;version=2]
+      Content-Length: ['69']
+      Content-Type: [application/json]
+      Cookie: [_session_id=7f8850a9e33e70d394bd04729a3f72c0]
+    method: PUT
+    uri: https://centos7-katello-3-12/api/bookmarks/19
+  response:
+    body: {string: !!python/unicode '{"name":"test","controller":"job_invocations","query":"started_at
+        > 24 hours ago","public":false,"id":19,"owner_id":4,"owner_type":"User"}'}
+    headers:
+      cache-control: ['max-age=0, private, must-revalidate']
+      content-security-policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 06 Jun 2019 09:26:48 GMT']
+      etag: [W/"bf2a631d653e21520f3adba45fd68b0f"]
+      foreman_api_version: ['2']
+      foreman_version: [1.22.0]
+      server: [Apache]
+      set-cookie: [request_method=PUT; path=/; secure; HttpOnly; SameSite=Lax]
+      status: [200 OK]
+      strict-transport-security: [max-age=631139040; includeSubdomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-download-options: [noopen]
+      x-frame-options: [sameorigin]
+      x-permitted-cross-domain-policies: [none]
+      x-powered-by: [Phusion Passenger 4.0.53]
+      x-request-id: [15f44369-9353-4d69-ae0b-786b79020f20]
+      x-runtime: ['0.028549']
+      x-xss-protection: [1; mode=block]
+    status: {code: 200, message: OK}
+version: 1

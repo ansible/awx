@@ -1,0 +1,376 @@
+{
+ "files": [
+  {
+   "format": 1, 
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": ".", 
+   "chksum_type": null
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "7c50cd9b85e2b7eebaea2b5618b402862b01d5a66befff8e41401ef3f14e471a", 
+   "name": "COPYING", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "ddbf05ecbdfa5c0752ca1d0e33263409a4ca262a37715d913b986caf10227fd0", 
+   "name": "README.md", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "d4b4ea80af28097871fda01d678079e968716ba28de5da893b2122ba694f000f", 
+   "name": "galaxy.yml.j2", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/doc_fragments", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "099c5bad7e7bd368e68121c2ac47d1f520250e7a784f339cab8628a0f4bf8b3c", 
+   "name": "plugins/doc_fragments/auth.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/inventory", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "21912d3b3b83811ea81c1a417754134e20cdad9972742b0cbb4dbf6f774d632c", 
+   "name": "plugins/inventory/tower.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/module_utils", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "ca3d5cc667c15024eb545a2b49618314eed8f07202f75451e578c97cb3423d3b", 
+   "name": "plugins/module_utils/ansible_tower.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "plugins/modules", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 
+   "name": "plugins/modules/__init__.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "d5f5737fa05420119bc5f4488bc7ddaff41cbb2006c0586836c63523d5d7020c", 
+   "name": "plugins/modules/tower_credential.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "e5b30c1c2a687d1aca367f8494b2e5d45653de42d7e22fd947f548ea1e546eb8", 
+   "name": "plugins/modules/tower_credential_type.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "f20ca1e77c6e8183c3230ef1bf9d03037066df4647973d5f84867dbd659621fd", 
+   "name": "plugins/modules/tower_group.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "271bc45874641af69caeb277056ca15b5983755bfd03ef24ce6d166b91c46241", 
+   "name": "plugins/modules/tower_host.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "6e2c22cfa938f1189d5a15cfa00ba989a4a4378ed6ef8a8ba9c2efec9829af63", 
+   "name": "plugins/modules/tower_inventory.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "532ea860ca35b0869e82a9811a556641b062e19475f7ae8fd8beb7ff92819789", 
+   "name": "plugins/modules/tower_inventory_source.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "a8a656d453cc77d1d1ff31109a401bcf55b4a46ab17e2ecd772907160feb663a", 
+   "name": "plugins/modules/tower_job_cancel.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "b3ce9aecc086b6104a2fb791f82e8f7e7d068c76be020893c29e31b5aa5ffb88", 
+   "name": "plugins/modules/tower_job_launch.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "ff6ac53cb839e8df7458436b280db18b7696c3d31e95b5424f071fc27115dbdc", 
+   "name": "plugins/modules/tower_job_list.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "46fa2aca0ed1490f9d8731dbcc78c5d2362dd5da1e877981b1fed415fb8bfca6", 
+   "name": "plugins/modules/tower_job_template.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "7f8f635dd6c556975a5308dda6da0cff0dc94463fabd3c0180a18f27b075e8c2", 
+   "name": "plugins/modules/tower_job_wait.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "3bfbb9b24a58573003066178c27f42c0b1ff32b6360d26aee18e0a6853673236", 
+   "name": "plugins/modules/tower_label.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "0ed0efcb471952a26e422bc1ca4f1739be7f198846ebe49dfb93487ad02d4f76", 
+   "name": "plugins/modules/tower_notification.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "69d5a6fa74e54524d75b995e8ed01ce282d7bff3dc2f2e7544aa1ef97125520e", 
+   "name": "plugins/modules/tower_organization.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "d5ccaa42572842051347360d3dc8436013bcdbe8130f27554885657ed836a57e", 
+   "name": "plugins/modules/tower_project.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "d5267f4d9d00d787b3021df4439984e7fc4ee7aa5eae124d5cda5a18bfa43f3d", 
+   "name": "plugins/modules/tower_receive.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "7de1de5a8342943015952037f425d7f2172fcc04c01a28f1897a11ed4462c87b", 
+   "name": "plugins/modules/tower_role.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "bebe8358f3797896aca88280579395688d6e71e7737b187f41bdac73c596ddaa", 
+   "name": "plugins/modules/tower_send.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "bfc12c6eb9230ef4e0561974722932c0c68f31e596518748c3e92597faae64cb", 
+   "name": "plugins/modules/tower_settings.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "6c72e64a12bf6e88e31e394dfc687ec04bcf6429af2f831b63b75df1d0d1b041", 
+   "name": "plugins/modules/tower_team.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "f4107c7b414e51cc643bd664a7d87919c9407e87304d0b8ef975010ea370c083", 
+   "name": "plugins/modules/tower_user.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "97069e76dbc4729ecf16e21b739e920324edc190db096938c7761dd627ecfcf7", 
+   "name": "plugins/modules/tower_workflow_launch.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "0dc33436de969d313190a2f3a989a5a85198da31f3e336fdcff36628350ce54b", 
+   "name": "plugins/modules/tower_workflow_template.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "05955e13ceb24a7db106aff7d1242bc4ed62f832b13e183731f1fddc0dbf6449", 
+   "name": "setup.cfg", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "6575fd3192006e55c6d54e109c7618c93c0fac2b66cbe286a05354e4d1556457", 
+   "name": "template_galaxy.yml", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "test", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "test/awx", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "e53a503b1e6bcdfd427afa4a7b15693a1501dbdbc8385b9702d7c2bf66098b87", 
+   "name": "test/awx/conftest.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "74e47159c9b3f48861b54103de6873bc9cb8318d8104484099fdb4e5aff3f226", 
+   "name": "test/awx/test_credential.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "bee5983d98cadc18b57bc5e61288caaa9f6188dcaab9b6d21b1bbc7e4fd3b359", 
+   "name": "test/awx/test_group.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "564dab8533255df7a0bdfa6d254b0a341fe57a9c3d9b1e3f811994f415282c7f", 
+   "name": "test/awx/test_inventory_source.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "35a5efbec6d0af73fbc7262c4ffbec1043e5f71022b9e17f3711c4c8b11f8d78", 
+   "name": "test/awx/test_job.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "9464336c5a8c468d3cb0f5de350ca2e77fbe4a1843102e32e17c1e38dd6476b5", 
+   "name": "test/awx/test_job_template.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "03f3c258f998c295409a8447c5e6c7fc5d4ed252eb48c4c48efe6fd1e51d2d42", 
+   "name": "test/awx/test_organization.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "dc7882179807d7205ea30257f93d60b30112677aa7fa4a81ed796ecdb677f60a", 
+   "name": "test/awx/test_project.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "077ad716165eb41b4c322b2fc9f3cbdafce566f6482a20c8067d7e0e6be9fa31", 
+   "name": "test/awx/test_send_receive.py", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "tests", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "dir", 
+   "chksum_sha256": null, 
+   "name": "tests/sanity", 
+   "chksum_type": null, 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "972f28028183c3e21e8fa7fb948e2b9a5ae01f072b3930b06fd7c7b7362c7886", 
+   "name": "tests/sanity/ignore-2.10.txt", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }, 
+  {
+   "ftype": "file", 
+   "chksum_sha256": "972f28028183c3e21e8fa7fb948e2b9a5ae01f072b3930b06fd7c7b7362c7886", 
+   "name": "tests/sanity/ignore-2.9.txt", 
+   "chksum_type": "sha256", 
+   "format": 1
+  }
+ ], 
+ "format": 1
+}

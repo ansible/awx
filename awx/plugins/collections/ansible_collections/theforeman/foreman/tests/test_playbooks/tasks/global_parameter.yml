@@ -1,0 +1,24 @@
+---
+- vars:
+    global_parameter_name: "TheAnswer"
+    global_parameter_value: 42
+    global_parameter_state: present
+  block:
+  - name: "Ensure Global Parameter '{{ global_parameter_name }}' is {{ global_parameter_state }}"
+    foreman_global_parameter:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      validate_certs: "{{ foreman_validate_certs }}"
+      name: "{{ global_parameter_name }}"
+      updated_name: "{{ global_parameter_updated_name | default(omit) }}"
+      value: "{{ global_parameter_value }}"
+      parameter_type: "{{ global_parameter_type | default(omit) }}"
+      state: "{{ global_parameter_state }}"
+    register: result
+  - assert:
+      fail_msg: "Ensuring global parameter is {{ global_parameter_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+      that:
+        - result.changed == expected_change
+    when: expected_change is defined
+...

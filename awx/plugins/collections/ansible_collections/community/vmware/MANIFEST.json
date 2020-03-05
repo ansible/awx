@@ -1,0 +1,28 @@
+{
+ "collection_info": {
+  "namespace": "community",
+  "name": "vmware",
+  "version": "0.1.0",
+  "authors": [],
+  "readme": "README.md",
+  "tags": [],
+  "description": null,
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": "COPYING",
+  "dependencies": {},
+  "repository": "git@github.com:ansible-collection-migration/community.vmware.git",
+  "documentation": "https://github.com/ansible-collection-migration/community.vmware/tree/master/docs",
+  "homepage": "https://github.com/ansible-collection-migration/community.vmware",
+  "issues": "https://github.com/ansible-collection-migration/community.vmware/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "fd331201bb83373cd5a149849d12ee385b130f09ae932ee16e884fd664d3c1cd",
+  "format": 1
+ },
+ "format": 1
+}

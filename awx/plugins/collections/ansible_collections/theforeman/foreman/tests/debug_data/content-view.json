@@ -1,0 +1,13 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "name":"cv3",
+  "organization":'"Default Organization"',
+  "repositories":[
+    {
+      "name":"repo1",
+      "product":"product1"
+    }
+  ]
+}

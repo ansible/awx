@@ -1,0 +1,14 @@
+---
+collections:
+- awx.awx
+- azure.azcollection
+- google.cloud
+- ovirt.ovirt_collection
+# # These are not available on Galaxy in the right format, were built from source
+# - ansible.amazon
+# - community.vmware
+# - openstack.cloud
+# - theforeman.foreman
+
+# install from base of awx repo with
+# ansible-galaxy collection install -r awx/plugins/collections/requirements.yml -p awx/plugins/collections

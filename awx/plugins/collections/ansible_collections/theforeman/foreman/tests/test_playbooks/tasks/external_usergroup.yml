@@ -1,0 +1,21 @@
+---
+- name: "Ensure external usergroup '{{ external_usergroup_name }}' is {{ external_usergroup_state }}"
+  vars:
+    external_usergroup_name: "admins"
+    external_usergroup_state: present
+  foreman_external_usergroup:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ external_usergroup_name }}"
+    auth_source_ldap: "{{ auth_source_ldap }}"
+    usergroup: "{{ usergroup }}"
+    state: "{{ external_usergroup_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring external usergroup is {{ external_usergroup_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

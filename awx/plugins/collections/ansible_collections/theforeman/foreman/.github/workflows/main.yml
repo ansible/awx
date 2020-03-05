@@ -1,0 +1,76 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["2.7", "3.5", "3.6", "3.7"]
+        ansible:
+          - stable-2.7
+          - stable-2.8
+          - stable-2.9
+          - devel
+        exclude:
+          - python: "2.7"
+            ansible: "stable-2.7"
+          - python: "2.7"
+            ansible: "stable-2.8"
+          - python: "2.7"
+            ansible: "stable-2.9"
+          - python: "3.5"
+            ansible: "stable-2.7"
+          - python: "3.5"
+            ansible: "stable-2.8"
+          - python: "3.5"
+            ansible: "stable-2.9"
+          - python: "3.6"
+            ansible: "stable-2.7"
+          - python: "3.6"
+            ansible: "stable-2.8"
+          - python: "3.6"
+            ansible: "stable-2.9"
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Ansible
+        run: pip install git+https://github.com/ansible/ansible.git@${{ matrix.ansible }}#egg=ansible
+      - name: Install dependencies
+        run: make test-setup
+      - name: Run tests
+        run: make test
+      - name: Run Ansible devel specific tests
+        run: make sanity dist-test
+        if: matrix.ansible == 'devel'
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.7"
+      - name: Install dependencies
+        run: make doc-setup
+      - name: Run tests
+        run: make doc
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.7"
+      - name: Install dependencies
+        run: pip install flake8
+      - name: Run lint
+        run: make lint

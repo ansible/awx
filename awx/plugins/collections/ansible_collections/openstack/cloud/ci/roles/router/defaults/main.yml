@@ -1,0 +1,3 @@
+external_network_name: ansible_external_net
+network_external: true
+router_name: ansible_router

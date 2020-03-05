@@ -1,0 +1,34 @@
+---
+- name: "Create/Update/Delete operating system"
+  vars:
+    - operatingsystem_name: "famos"
+    - operatingsystem_release_name: "reverse whip"
+    - operatingsystem_major: 1
+    - operatingsystem_minor: 2
+    - operatingsystem_family: "Debian"
+    - operatingsystem_password_hash: "SHA256"
+    - operatingsystem_state: "present"
+  foreman_operatingsystem:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ operatingsystem_name }}"
+    updated_name: "{{ operatingsystem_updated_name | default(omit) }}"
+    description: "{{ operatingsystem_description | default(omit) }}"
+    release_name: "{{ operatingsystem_release_name }}"
+    major: "{{ operatingsystem_major }}"
+    minor: "{{ operatingsystem_minor }}"
+    family: "{{ operatingsystem_family }}"
+    architectures: "{{ operatingsystem_architectures | default(omit) }}"
+    ptables: "{{ operatingsystem_ptables | default(omit) }}"
+    password_hash: "{{ operatingsystem_password_hash }}"
+    parameters: "{{ operatingsystem_parameters | default(omit) }}"
+    state: "{{ operatingsystem_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring operating system is {{ operatingsystem_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

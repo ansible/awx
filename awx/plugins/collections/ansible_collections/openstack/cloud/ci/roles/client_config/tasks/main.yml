@@ -1,0 +1,7 @@
+---
+- name: List all profiles
+  openstack.cloud.os_client_config:
+  register: list
+
+# WARNING: This will output sensitive authentication information!!!!
+- debug: var=list

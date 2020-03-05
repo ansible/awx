@@ -1,0 +1,35 @@
+---
+- name: "Ensure ptable '{{ ptable_name }}' is '{{ ptable_state }}' and locked state is '{{ locked_state | default('undefined') }}'"
+  vars:
+    - ptable_name: "Timetravel finish"
+    - ptable_locations:
+      - "Test Location"
+    - ptable_organizations:
+      - "Test Organization"
+    - ptable_layout: |
+        <%#
+            name: A Partition Template
+        %>
+        zerombr
+        clearpart --all --initlabel
+        autopart
+  foreman_ptable:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ ptable_name }}"
+    updated_name: "{{ ptable_updated_name | default(omit) }}"
+    locations: "{{ ptable_locations }}"
+    organizations: "{{ ptable_organizations }}"
+    os_family: "{{ ptable_os_family | default(omit) }}"
+    locked: "{{ locked_state | default(omit) }}"
+    layout: "{{ ptable_layout }}"
+    state: "{{ ptable_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring ptable is {{ ptable_state }} and locked state {{ locked_state | default ('undefined') }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

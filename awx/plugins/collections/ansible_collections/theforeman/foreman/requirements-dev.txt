@@ -1,0 +1,9 @@
+flake8
+pytest
+vcrpy
+ansible_runner
+python-debian
+rpm-py-installer
+git+https://github.com/Apipie/apypie.git@master#egg=apypie
+-r requirements-common.txt
+-r https://github.com/ansible/ansible/raw/devel/test/lib/ansible_test/_data/requirements/sanity.txt

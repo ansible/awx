@@ -1,0 +1,274 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/subnet.yml
+  tasks:
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: "present"
+    with_items: "{{ subnet_locs }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: "present"
+    with_items: "{{ subnet_orgs }}"
+  - include: tasks/domain.yml
+    vars:
+      domain_organizations: "{{ subnet_orgs }}"
+      domain_locations: "{{ subnet_locs }}"
+      domain_name: "{{ item }}"
+      domain_dns_proxy: "{{ subnet_proxy }}"
+      domain_state: present
+    with_items: "{{ subnet_doms }}"
+  - include: tasks/subnet.yml
+    vars:
+      subnet_mask: '255.255.255.224'
+      subnet_state: absent
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/subnet.yml
+  tasks:
+  - name: 'Test Subnet with minimal params (netmask)'
+    block:
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        subnet_parameters:
+          - name: subnet_param1
+            value: value1
+          - name: subnet_param2
+            value: value2
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        subnet_parameters:
+          - name: subnet_param1
+            value: value1
+          - name: subnet_param2
+            value: value2
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        subnet_parameters:
+          - name: subnet_param1
+            value: new_value1
+          - name: subnet_param3
+            value: value3
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        subnet_parameters:
+          - name: subnet_param1
+            value: new_value1
+          - name: subnet_param3
+            value: value3
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        subnet_parameters: []
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: absent
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_mask: '255.255.255.224'
+        subnet_state: absent
+        expected_change: false
+  - name: 'Test Subnet with minimal params (cidr)'
+    block:
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_cidr: 27
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_cidr: 27
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_cidr: 27
+        subnet_state: absent
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: absent
+        subnet_cidr: 27
+        expected_change: false
+  - name: 'Test Subnet with proxies'
+    block:
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_cidr: 27
+        subnet_httpboot_proxy: "{{ subnet_proxy }}"
+        subnet_tftp_proxy: "{{ subnet_proxy }}"
+        subnet_dns_proxy: "{{ subnet_proxy }}"
+        subnet_template_proxy: "{{ subnet_proxy }}"
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_cidr: 27
+        subnet_httpboot_proxy: "{{ subnet_proxy }}"
+        subnet_tftp_proxy: "{{ subnet_proxy }}"
+        subnet_dns_proxy: "{{ subnet_proxy }}"
+        subnet_template_proxy: "{{ subnet_proxy }}"
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_cidr: 27
+        subnet_state: absent
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: absent
+        subnet_cidr: 27
+        expected_change: false
+  - name: 'Test Subnet name change'
+    block:
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: "My test subnet"
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: "My test subnet"
+        subnet_updated_name: "My new test subnet"
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: "My new test subnet"
+        subnet_mask: '255.255.255.224'
+        subnet_state: present
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: "My new test subnet"
+        subnet_mask: '255.255.255.224'
+        subnet_state: absent
+        expected_change: true
+  - name: 'Test Subnet with full params except smart proxies and cidr'
+    block:
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_name: Test Subnet 2
+        subnet_description: My subnet description
+        subnet_dns_primary: '1.1.1.1'
+        subnet_dns_secondary: '1.1.1.2'
+        subnet_domains: "{{ subnet_doms }}"
+        subnet_gateway: '192.168.200.1'
+        subnet_network: '192.168.200.0'
+        subnet_mask: '255.255.255.224'
+        subnet_from: '192.168.200.10'
+        subnet_to: '192.168.200.20'
+        subnet_boot_mode: 'Static'
+        subnet_ipam: 'Internal DB'
+        subnet_vlanid: 42
+        subnet_mtu: 9000
+        subnet_organizations: "{{ subnet_orgs }}"
+        subnet_locations: "{{ subnet_locs }}"
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_name: Test Subnet 2
+        subnet_description: My subnet description
+        subnet_dns_primary: '1.1.1.1'
+        subnet_dns_secondary: '1.1.1.2'
+        subnet_domains: []
+        subnet_gateway: '192.168.200.1'
+        subnet_network: '192.168.200.0'
+        subnet_mask: '255.255.255.224'
+        subnet_from: '192.168.200.10'
+        subnet_to: '192.168.200.20'
+        subnet_boot_mode: 'Static'
+        subnet_ipam: 'Internal DB'
+        subnet_vlanid: 42
+        subnet_mtu: 9000
+        subnet_organizations: "{{ subnet_orgs }}"
+        subnet_locations: "{{ subnet_locs }}"
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_state: present
+        subnet_name: Test Subnet 2
+        subnet_dns_primary: '1.1.1.1'
+        subnet_dns_secondary: '1.1.1.2'
+        subnet_domains: []
+        subnet_gateway: '192.168.200.1'
+        subnet_network: '192.168.200.0'
+        subnet_mask: '255.255.255.224'
+        subnet_from: '192.168.200.10'
+        subnet_to: '192.168.200.20'
+        subnet_boot_mode: 'Static'
+        subnet_ipam: 'Internal DB'
+        subnet_vlanid: 42
+        subnet_mtu: 9000
+        subnet_organizations: "{{ subnet_orgs }}"
+        subnet_locations: "{{ subnet_locs }}"
+        expected_change: false
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: Test Subnet 2
+        subnet_state: absent
+        subnet_mask: '255.255.255.224'
+        expected_change: true
+    - include: tasks/subnet.yml
+      vars:
+        subnet_name: Test Subnet 2
+        subnet_mask: '255.255.255.224'
+        subnet_state: absent
+        expected_change: false
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+    - vars/subnet.yml
+  tasks:
+  - include: tasks/domain.yml
+    vars:
+      domain_organizations: "{{ subnet_orgs }}"
+      domain_locations: "{{ subnet_locs }}"
+      domain_name: "{{ item }}"
+      domain_state: absent
+    with_items: "{{ subnet_doms }}"
+  - include_tasks: tasks/location.yml
+    vars:
+      location_name: "{{ item }}"
+      location_state: absent
+    with_items: "{{ subnet_locs | reverse | list }}"
+  - include_tasks: tasks/organization.yml
+    vars:
+      organization_name: "{{ item }}"
+      organization_state: absent
+    with_items: "{{ subnet_orgs }}"
+...

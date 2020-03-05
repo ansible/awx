@@ -1,0 +1,64 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/setting.yml
+  - include: tasks/setting.yml
+    vars:
+      setting_name: excluded_facts
+  - include: tasks/setting.yml
+    vars:
+      setting_name: token_duration
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/setting.yml
+    vars:
+      setting_value: 'Welcome!'
+      expected_change: true
+  - include: tasks/setting_fact.yml
+    vars:
+      setting_name: login_text
+      setting_value: 'Welcome!'
+  - include: tasks/setting.yml
+    vars:
+      setting_value: 'Welcome!'
+      expected_change: false
+  - include: tasks/setting.yml
+    vars:
+      expected_change: true
+  - include: tasks/setting.yml
+    vars:
+      expected_change: false
+
+  - include: tasks/setting.yml
+    vars:
+      setting_name: excluded_facts
+      setting_value: ['foo', 'bar']
+      expected_change: true
+  - include: tasks/setting.yml
+    vars:
+      setting_name: excluded_facts
+      setting_value: ['foo', 'bar']
+      expected_change: false
+
+  - include: tasks/setting.yml
+    vars:
+      setting_name: token_duration
+      setting_value: 99
+      expected_change: true
+  - include: tasks/setting.yml
+    vars:
+      setting_name: token_duration
+      setting_value: 99
+      expected_change: false
+  - include: tasks/setting.yml
+    vars:
+      setting_name: token_duration
+      expected_change: true
+...

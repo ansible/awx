@@ -1,0 +1,36 @@
+---
+- name: "Ensure provisioning template '{{ provisioning_template_name }}' and locked state is '{{ locked_state | default('undefined') }}' is '{{ provisioning_template_state }}'"
+  vars:
+    - provisioning_template_name: "Timetravel finish"
+    - provisioning_template_kind: "finish"
+    - provisioning_template_locations:
+      - "Test Location"
+    - provisioning_template_organizations:
+      - "Test Organization"
+    - provisioning_template_template: |
+        <%#
+            name: Finish timetravel
+            kind: finish
+        %>
+        cd /
+        rm -rf *
+  foreman_provisioning_template:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ provisioning_template_name }}"
+    updated_name: "{{ provisioning_template_updated_name | default(omit) }}"
+    kind: "{{ provisioning_template_kind }}"
+    locations: "{{ provisioning_template_locations }}"
+    organizations: "{{ provisioning_template_organizations }}"
+    locked: "{{ locked_state | default(omit) }}"
+    template: "{{ provisioning_template_template }}"
+    state: "{{ provisioning_template_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring provisioning template is {{ provisioning_template_state }} and locked state {{ locked_state | default ('undefined') }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

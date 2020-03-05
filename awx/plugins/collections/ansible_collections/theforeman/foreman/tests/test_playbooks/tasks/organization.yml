@@ -1,0 +1,24 @@
+---
+- name: "Ensure organization '{{ organization_name }}' is {{ organization_state }}"
+  vars:
+    - organization_name: "Test Organization"
+    - organization_description: "A test organization"
+  foreman_organization:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{ organization_name }}"
+    description: "{{ organization_description }}"
+    label: "{{ organization_label | default(omit) }}"
+    state: "{{ organization_state }}"
+  register: result
+- assert:
+    fail_msg: "Ensuring organization is {{ organization_state }} failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+- include_tasks: _assert_diff.yml
+  vars:
+    module: organization
+...

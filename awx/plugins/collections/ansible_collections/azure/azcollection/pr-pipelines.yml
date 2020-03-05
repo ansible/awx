@@ -1,0 +1,95 @@
+trigger: none
+
+pr:
+- dev
+
+pool:
+  vmImage: 'ubuntu-18.04'
+
+jobs:
+  - job: CreateResourceGroups
+    steps:
+      - bash: |
+          echo "##vso[task.setvariable variable=resource_group;isOutput=true]ansibletest-$(uuidgen)"
+          echo "##vso[task.setvariable variable=resource_group_secondary;isOutput=true]ansibletest2-$(uuidgen)"
+        name: setvar
+      - bash: |
+          echo "Generate test resource group $(setvar.resource_group), $(setvar.resource_group_secondary)"
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: '$(SUBSCRIPTION_FULL_NAME)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+              az group create -l eastus -n $(setvar.resource_group)
+              az group create -l eastus -n $(setvar.resource_group_secondary)
+
+  - job: RunTests
+    dependsOn: CreateResourceGroups 
+    variables:
+      TEST_RESOURCE_GROUP: $[ dependencies.CreateResourceGroups.outputs['setvar.resource_group'] ]
+      TEST_RESOURCE_GROUP_SECONDARY: $[ dependencies.CreateResourceGroups.outputs['setvar.resource_group_secondary'] ]
+    strategy:
+      matrix:
+        Python27_sanity:
+          python.version: '2.7'
+          test.key: 'sanity'
+        Python27_1:
+          python.version: '2.7'
+          test.key: '1'
+        Python27_2:
+          python.version: '2.7'
+          test.key: '2'
+        Python27_3:
+          python.version: '2.7'
+          test.key: '3'
+        Python27_4:
+          python.version: '2.7'
+          test.key: '4'
+        Python27_5:
+          python.version: '2.7'
+          test.key: '5'
+        Python27_6:
+          python.version: '2.7'
+          test.key: '6'
+        Python27_7:
+          python.version: '2.7'
+          test.key: '7'
+        Python27_9:
+          python.version: '2.7'
+          test.key: '9'
+
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+
+    - script: tests/utils/ado/ado.sh $(test.key)
+      env:
+        SHIPPABLE_BUILD_DIR: $(Build.Repository.LocalPath)
+        AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+        AZURE_SECRET: $(AZURE_SECRET)
+        AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+        AZURE_TENANT: $(AZURE_TENANT)
+        RESOURCE_GROUP: $(TEST_RESOURCE_GROUP)
+        RESOURCE_GROUP_SECONDARY: $(TEST_RESOURCE_GROUP_SECONDARY)
+      displayName: 'Running Tests'
+
+  - job: CleanupResourceGroups
+    dependsOn: 
+      - CreateResourceGroups
+      - RunTests
+    condition: always()
+    variables:
+      TEST_RESOURCE_GROUP: $[ dependencies.CreateResourceGroups.outputs['setvar.resource_group'] ]
+      TEST_RESOURCE_GROUP_SECONDARY: $[ dependencies.CreateResourceGroups.outputs['setvar.resource_group_secondary'] ]
+    steps:
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: '$(SUBSCRIPTION_FULL_NAME)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+              az group delete -n $(TEST_RESOURCE_GROUP) --yes --no-wait
+              az group delete -n $(TEST_RESOURCE_GROUP_SECONDARY) --yes --no-wait

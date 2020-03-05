@@ -1,0 +1,10 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://foreman.example.com",
+  "validate_certs":false,
+  "name":"Fedora CV",
+  "organization":"Default Organization",
+  "from_environment":"Library",
+  "to_environment":"Development",
+}

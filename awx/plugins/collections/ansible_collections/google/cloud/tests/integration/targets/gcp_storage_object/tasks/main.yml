@@ -1,0 +1,75 @@
+---
+# Pre-test setup
+- name: create a temp file for uploading
+  tempfile:
+    state: file
+  register: upload_temp
+- name: create a temp file for downloading
+  tempfile:
+    state: file
+  register: download_temp
+- name: put content in the tempfile
+  copy:
+    content: "Ansible GCS test file"
+    dest: "{{ upload_temp.path }}"
+- name: create a bucket
+  google.cloud.gcp_storage_bucket:
+    name: "{{ resource_name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+  register: bucket
+#----------------------------------------------------------
+- name: upload the object to gcs
+  google.cloud.gcp_storage_object:
+    action: 'upload'
+    bucket: "{{ bucket.name }}"
+    src: "{{ upload_temp.path }}"
+    dest: "ansible/{{ resource_name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+  register: result
+- name: assert changed is true
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: download the object to disk
+  google.cloud.gcp_storage_object:
+    action: 'download'
+    bucket: "{{ bucket.name }}"
+    src: "ansible/{{ resource_name }}"
+    dest: "{{ download_temp.path }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+  register: result
+- name: assert changed is true
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: delete the object
+  google.cloud.gcp_storage_object:
+    action: 'delete'
+    bucket: "{{ bucket.name }}"
+    src: "ansible/{{ resource_name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+  register: result
+- name: assert changed is true
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: delete the bucket
+  google.cloud.gcp_storage_bucket:
+    name: "{{ resource_name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: absent
+  register: bucket

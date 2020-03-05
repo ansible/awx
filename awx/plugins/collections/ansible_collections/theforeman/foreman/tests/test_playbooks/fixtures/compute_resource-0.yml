@@ -1,0 +1,312 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/status
+  response:
+    body:
+      string: '{"result":"ok","status":200,"version":"1.21.3","api_version":2}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '63'
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 07 Aug 2019 09:36:14 GMT
+      ETag:
+      - W/"8ae0d3efe0e232e2a73486dc1f2e0fbb"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Set-Cookie:
+      - _session_id=076153df9c229201e7d425f109e3c9e6; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - c2d8484f-f3c5-472c-acde-437ae3f5b9fe
+      X-Runtime:
+      - '0.063894'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=076153df9c229201e7d425f109e3c9e6
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/compute_resources?search=name%3D%22libvirt-cr01%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 1,\n  \"subtotal\": 0,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"libvirt-cr01\\\"\",\n  \"sort\": {\n\
+        \    \"by\": null,\n    \"order\": null\n  },\n  \"results\": []\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 07 Aug 2019 09:36:14 GMT
+      ETag:
+      - W/"f2aef56a9895fd875be08686adec3ee5"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - 2eaddb55-17e8-4500-b084-4ea0d6297a34
+      X-Runtime:
+      - '0.038128'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=076153df9c229201e7d425f109e3c9e6
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/organizations?search=name%3D%22Test+Organization%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"name=\\\"Test Organization\\\"\",\n  \"sort\"\
+        : {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"ancestry\"\
+        :null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-08-07\
+        \ 09:36:06 UTC\",\"updated_at\":\"2019-08-07 09:36:06 UTC\",\"id\":28,\"name\"\
+        :\"Test Organization\",\"title\":\"Test Organization\",\"description\":\"\
+        A test organization\"}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 07 Aug 2019 09:36:14 GMT
+      ETag:
+      - W/"0de85668e21677da0f20786bf09acaaa"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - 9eff10ca-c542-4841-82e6-6616c9dc8c51
+      X-Runtime:
+      - '0.037965'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json;version=2
+      Cookie:
+      - _session_id=076153df9c229201e7d425f109e3c9e6
+    method: GET
+    uri: https://or.deploy6.dev.atix/api/locations?search=title%3D%22Test+Location%22&per_page=4294967296
+  response:
+    body:
+      string: "{\n  \"total\": 2,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\"\
+        : 4294967296,\n  \"search\": \"title=\\\"Test Location\\\"\",\n  \"sort\"\
+        : {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\": [{\"ancestry\"\
+        :null,\"parent_id\":null,\"parent_name\":null,\"created_at\":\"2019-08-07\
+        \ 09:36:10 UTC\",\"updated_at\":\"2019-08-07 09:36:10 UTC\",\"id\":29,\"name\"\
+        :\"Test Location\",\"title\":\"Test Location\",\"description\":null}]\n}\n"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 07 Aug 2019 09:36:14 GMT
+      ETag:
+      - W/"f2db052700b6caeae2fb0254e42699c3"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - dab5ca83-2ddd-48a2-b1d2-ed22aad4f1e9
+      X-Runtime:
+      - '0.046631'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"compute_resource": {"name": "libvirt-cr01", "provider": "Libvirt", "url":
+      "qemu+ssh://root@libvirt.example.com/system", "description": "Libvirt compute
+      resource", "location_ids": [29], "organization_ids": [28]}}'
+    headers:
+      Accept:
+      - application/json;version=2
+      Content-Length:
+      - '213'
+      Content-Type:
+      - application/json
+      Cookie:
+      - _session_id=076153df9c229201e7d425f109e3c9e6
+    method: POST
+    uri: https://or.deploy6.dev.atix/api/compute_resources
+  response:
+    body:
+      string: '{"description":"Libvirt compute resource","url":"qemu+ssh://root@libvirt.example.com/system","created_at":"2019-08-07
+        09:36:14 UTC","updated_at":"2019-08-07 09:36:14 UTC","id":36,"name":"libvirt-cr01","provider":"Libvirt","provider_friendly_name":"Libvirt","display_type":"vnc","set_console_password":true,"images":[],"compute_attributes":[],"locations":[{"id":29,"name":"Test
+        Location","title":"Test Location","description":null}],"organizations":[{"id":28,"name":"Test
+        Organization","title":"Test Organization","description":"A test organization"}]}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Security-Policy:
+      - 'default-src ''self''; child-src ''self''; connect-src ''self'' ws: wss:;
+        img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval'' ''unsafe-inline''
+        ''self''; style-src ''unsafe-inline'' ''self'''
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 07 Aug 2019 09:36:14 GMT
+      ETag:
+      - W/"c13b4ce5ce2c808f6077076f3f80fbf5"
+      Foreman_api_version:
+      - '2'
+      Foreman_version:
+      - 1.21.3
+      Server:
+      - Apache
+      Set-Cookie:
+      - request_method=POST; path=/; secure; HttpOnly; SameSite=Lax
+      Status:
+      - 201 Created
+      Strict-Transport-Security:
+      - max-age=631139040; includeSubdomains
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Frame-Options:
+      - sameorigin
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Powered-By:
+      - Phusion Passenger 4.0.18
+      X-Request-Id:
+      - 79ffd3e0-9a47-48e2-af7b-6a395476f505
+      X-Runtime:
+      - '0.168047'
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+version: 1

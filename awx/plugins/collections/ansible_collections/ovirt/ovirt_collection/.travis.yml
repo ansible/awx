@@ -1,0 +1,31 @@
+---
+sudo: required
+language: python
+python:
+    - "2.7"
+
+services:
+  - docker
+
+env:
+  global:
+    - ANSIBLE_HOST_KEY_CHECKING="False"
+
+# Install python-pip
+addons:
+  apt:
+    packages:
+      - python-pip
+
+install:
+  - pip install tox ansible docker-py yamllint
+
+  # Check ansible version
+  - ansible --version
+
+script:
+  # Run sytax checks and linters
+  - tox
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

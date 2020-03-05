@@ -1,0 +1,9 @@
+{
+  "username":"admin",
+  "password":"changeme",
+  "server_url":"https://centos7-devel.example.com",
+  "validate_certs": false,
+  "name": "Foreman's finest",
+  "organization": "Default Organization",
+  "state": "present",
+}

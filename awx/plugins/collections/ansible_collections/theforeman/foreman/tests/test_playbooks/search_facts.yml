@@ -1,0 +1,52 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/organization.yml
+      vars:
+        organization_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/search_facts.yml
+    vars:
+      resource: settings
+      search: name = http_proxy
+      return_length: 1
+  - include: tasks/search_facts.yml
+    vars:
+      resource: subnets
+      return_length: 0
+  - include: tasks/search_facts.yml
+    vars:
+      resource: organizations
+      search: name="Test Organization"
+      full_details: true
+      return_length: 1
+  - name: Run with invalid resource
+    foreman_search_facts:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      validate_certs: "{{ foreman_validate_certs }}"
+      resource: foo
+    register: result
+    ignore_errors: yes
+  - fail:
+       msg: "{{ result.msg }} should have contained all available resources"
+    when: "'config_groups' not in result.msg"
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+    - include: tasks/organization.yml
+      vars:
+        organization_state: absent
+...

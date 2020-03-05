@@ -1,0 +1,139 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/organization.yml
+    vars:
+      organization_state: present
+  - include: tasks/location.yml
+    vars:
+      location_state: present
+
+- hosts: tests
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      locked_state: false
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      locked_state: true
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      locked_state: true
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: "my template"
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: "my template"
+      provisioning_template_updated_name: "my template 2"
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: "my template 2"
+      provisioning_template_state: present
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: "my template 2"
+      provisioning_template_state: absent
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: present
+      locked_state: false
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_template: 'A provisioning template with an template'
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: 'A second provisioning template'
+      provisioning_template_locations: '{{ omit }}'
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: absent
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_state: absent
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: '*'
+      locked_state: 'false'
+      provisioning_template_kind: '{{ omit }}'
+      provisioning_template_organizations: '{{ omit }}'
+      provisioning_template_template: '{{ omit }}'
+      provisioning_template_state: present
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: '*'
+      locked_state: 'false'
+      provisioning_template_kind: '{{ omit }}'
+      provisioning_template_organizations: '{{ omit }}'
+      provisioning_template_template: '{{ omit }}'
+      provisioning_template_state: present
+      expected_change: false
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: '*'
+      provisioning_template_kind: '{{ omit }}'
+      provisioning_template_locations: '{{ omit }}'
+      provisioning_template_organizations: '{{ omit }}'
+      provisioning_template_template: '{{ omit }}'
+      provisioning_template_state: absent
+      expected_change: true
+  - include: tasks/provisioning_template.yml
+    vars:
+      provisioning_template_name: '*'
+      provisioning_template_kind: '{{ omit }}'
+      provisioning_template_locations: '{{ omit }}'
+      provisioning_template_organizations: '{{ omit }}'
+      provisioning_template_template: '{{ omit }}'
+      provisioning_template_state: absent
+      expected_change: false
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/server.yml
+  tasks:
+  - include: tasks/location.yml
+    vars:
+      location_state: absent
+  - include: tasks/organization.yml
+    vars:
+      organization_state: absent
+...

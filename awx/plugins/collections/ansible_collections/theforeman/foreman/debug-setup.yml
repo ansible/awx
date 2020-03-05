@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Ensure ./.tmp/ exists
+      file:
+        path: ./.tmp/
+        state: directory
+    - name: Clone ansible
+      git:
+        repo: 'https://github.com/ansible/ansible.git'
+        dest: ./.tmp/ansible
+    - name: Install ansible pip dependencies
+      pip:
+        requirements: "{{ playbook_dir }}/.tmp/ansible/requirements.txt"

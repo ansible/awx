@@ -1,0 +1,20 @@
+---
+- name: "Create/update minimal katello activation key"
+  vars:
+    activation_key_name: "Test Activation Key"
+    activation_key_organization: "Test Organization"
+  katello_activation_key:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    name: "{{activation_key_name }}"
+    organization: "{{ activation_key_organization }}"
+  register: result
+- assert:
+    fail_msg: "Creating/updating activation key failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...
+

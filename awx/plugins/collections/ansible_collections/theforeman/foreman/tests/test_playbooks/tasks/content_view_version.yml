@@ -1,0 +1,28 @@
+---
+- name: "Create katello content view version"
+  vars:
+    - content_view_name: "Test Content View"
+    - organization_name: "Test Organization"
+    - lifecycle_environments: Library
+  katello_content_view_version:
+    username: "{{ foreman_username }}"
+    password: "{{ foreman_password }}"
+    server_url: "{{ foreman_server_url }}"
+    validate_certs: "{{ foreman_validate_certs }}"
+    content_view: "{{ content_view_name }}"
+    organization: "{{ organization_name }}"
+    description: "{{ description | default(omit)}}"
+    version: "{{ version | default(omit)}}"
+    lifecycle_environments: "{{ lifecycle_environments }}"
+    force_promote: "{{ force_promote | default(omit) }}"
+    force_yum_metadata_regeneration: "{{ force_yum_metadata_regeneration | default(omit) }}"
+    synchronous: "{{ synchronous | default(omit) }}"
+    current_lifecycle_environment: "{{ current_lifecycle_environment | default(omit) }}"
+    state: "{{ state | default(omit) }}"
+  register: result
+- assert:
+    fail_msg: "Creating/publishing/promoting content view version failed! (expected_change: {{ expected_change | default('unknown') }})"
+    that:
+      - result.changed == expected_change
+  when: expected_change is defined
+...

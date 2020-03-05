@@ -1,0 +1,187 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: ['apypie (https://github.com/Apipie/apypie)']
+    method: GET
+    uri: https://centos7-foreman-nightly.desktop.example.com/api/status
+  response:
+    body: {string: '{"result":"ok","status":200,"version":"1.25.0-develop","api_version":2}'}
+    headers:
+      Cache-Control: ['max-age=0, private, must-revalidate']
+      Connection: [Keep-Alive]
+      Content-Security-Policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 06 Nov 2019 19:10:31 GMT']
+      ETag: [W/"557e0fd7e4a7e8a98a13de495e96f89e-gzip"]
+      Foreman_api_version: ['2']
+      Foreman_current_location: [; ANY]
+      Foreman_current_organization: [; ANY]
+      Foreman_version: [1.25.0-develop]
+      Keep-Alive: ['timeout=5, max=100']
+      Server: [Apache]
+      Set-Cookie: [_session_id=6e54366e011629b6a7f00b61d3846fa1; path=/; secure; HttpOnly;
+          SameSite=Lax]
+      Status: [200 OK]
+      Strict-Transport-Security: [max-age=631139040; includeSubdomains]
+      Vary: [Accept-Encoding]
+      X-Content-Type-Options: [nosniff]
+      X-Download-Options: [noopen]
+      X-Frame-Options: [sameorigin]
+      X-Permitted-Cross-Domain-Policies: [none]
+      X-Powered-By: [Phusion Passenger 4.0.53]
+      X-Request-Id: [73265bbc-0161-4ba1-b29b-34166719bc75]
+      X-Runtime: ['0.111513']
+      X-XSS-Protection: [1; mode=block]
+      content-length: ['71']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Cookie: [_session_id=6e54366e011629b6a7f00b61d3846fa1]
+      User-Agent: ['apypie (https://github.com/Apipie/apypie)']
+    method: GET
+    uri: https://centos7-foreman-nightly.desktop.example.com/api/hostgroups?search=title%3D%22New+host+group%2FNested+New+host+group%22&per_page=4294967296
+  response:
+    body: {string: "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\":
+        4294967296,\n  \"search\": \"title=\\\"New host group/Nested New host group\\\"\",\n
+        \ \"sort\": {\n    \"by\": null,\n    \"order\": null\n  },\n  \"results\":
+        [{\"subnet_id\":4,\"subnet_name\":\"Test subnet4\",\"operatingsystem_id\":5,\"operatingsystem_name\":\"TestOS
+        7.6\",\"domain_id\":9,\"domain_name\":\"foo.example.com\",\"environment_id\":null,\"environment_name\":\"production\",\"compute_profile_id\":null,\"compute_profile_name\":\"myprofile\",\"ancestry\":\"45\",\"parent_id\":45,\"parent_name\":\"New
+        host group\",\"ptable_id\":116,\"ptable_name\":\"Part table\",\"medium_id\":13,\"medium_name\":\"TestOS
+        Mirror\",\"pxe_loader\":\"Grub2 UEFI\",\"subnet6_id\":null,\"subnet6_name\":null,\"compute_resource_id\":null,\"compute_resource_name\":\"libvirt-cr\",\"architecture_id\":1,\"architecture_name\":\"x86_64\",\"realm_id\":null,\"realm_name\":null,\"created_at\":\"2019-11-06
+        19:10:15 UTC\",\"updated_at\":\"2019-11-06 19:10:15 UTC\",\"id\":46,\"name\":\"Nested
+        New host group\",\"title\":\"New host group/Nested New host group\",\"description\":\"Nested
+        group\",\"puppet_proxy_id\":1,\"puppet_proxy_name\":\"centos7-foreman-nightly.desktop.example.com\",\"puppet_ca_proxy_id\":1,\"puppet_ca_proxy_name\":\"centos7-foreman-nightly.desktop.example.com\",\"puppet_proxy\":{\"name\":\"centos7-foreman-nightly.desktop.example.com\",\"id\":1,\"url\":\"https://centos7-foreman-nightly.desktop.example.com:8443\"},\"puppet_ca_proxy\":{\"name\":\"centos7-foreman-nightly.desktop.example.com\",\"id\":1,\"url\":\"https://centos7-foreman-nightly.desktop.example.com:8443\"}}]\n}\n"}
+    headers:
+      Cache-Control: ['max-age=0, private, must-revalidate']
+      Connection: [Keep-Alive]
+      Content-Security-Policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 06 Nov 2019 19:10:31 GMT']
+      ETag: [W/"3c35671fca9a1377b89444a8eadb57ec-gzip"]
+      Foreman_api_version: ['2']
+      Foreman_current_location: [; ANY]
+      Foreman_current_organization: [; ANY]
+      Foreman_version: [1.25.0-develop]
+      Keep-Alive: ['timeout=5, max=99']
+      Server: [Apache]
+      Status: [200 OK]
+      Strict-Transport-Security: [max-age=631139040; includeSubdomains]
+      Vary: [Accept-Encoding]
+      X-Content-Type-Options: [nosniff]
+      X-Download-Options: [noopen]
+      X-Frame-Options: [sameorigin]
+      X-Permitted-Cross-Domain-Policies: [none]
+      X-Powered-By: [Phusion Passenger 4.0.53]
+      X-Request-Id: [f931f85f-ca2d-4bb0-894a-35d41cb0b425]
+      X-Runtime: ['0.039706']
+      X-XSS-Protection: [1; mode=block]
+      content-length: ['1486']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Cookie: [_session_id=6e54366e011629b6a7f00b61d3846fa1]
+      User-Agent: ['apypie (https://github.com/Apipie/apypie)']
+    method: GET
+    uri: https://centos7-foreman-nightly.desktop.example.com/api/hostgroups?search=title%3D%22New+host+group%2FNested+New+host+group%2FNew+host+group+with+nested+parent%22&per_page=4294967296
+  response:
+    body: {string: "{\n  \"total\": 3,\n  \"subtotal\": 1,\n  \"page\": 1,\n  \"per_page\":
+        4294967296,\n  \"search\": \"title=\\\"New host group/Nested New host group/New
+        host group with nested parent\\\"\",\n  \"sort\": {\n    \"by\": null,\n    \"order\":
+        null\n  },\n  \"results\": [{\"subnet_id\":4,\"subnet_name\":\"Test subnet4\",\"operatingsystem_id\":5,\"operatingsystem_name\":\"TestOS
+        7.6\",\"domain_id\":9,\"domain_name\":\"foo.example.com\",\"environment_id\":null,\"environment_name\":\"production\",\"compute_profile_id\":null,\"compute_profile_name\":\"myprofile\",\"ancestry\":\"45/46\",\"parent_id\":46,\"parent_name\":\"New
+        host group/Nested New host group\",\"ptable_id\":116,\"ptable_name\":\"Part
+        table\",\"medium_id\":13,\"medium_name\":\"TestOS Mirror\",\"pxe_loader\":\"Grub2
+        UEFI\",\"subnet6_id\":null,\"subnet6_name\":null,\"compute_resource_id\":null,\"compute_resource_name\":\"libvirt-cr\",\"architecture_id\":1,\"architecture_name\":\"x86_64\",\"realm_id\":null,\"realm_name\":null,\"created_at\":\"2019-11-06
+        19:10:18 UTC\",\"updated_at\":\"2019-11-06 19:10:18 UTC\",\"id\":47,\"name\":\"New
+        host group with nested parent\",\"title\":\"New host group/Nested New host
+        group/New host group with nested parent\",\"description\":\"Nested group\",\"puppet_proxy_id\":1,\"puppet_proxy_name\":\"centos7-foreman-nightly.desktop.example.com\",\"puppet_ca_proxy_id\":1,\"puppet_ca_proxy_name\":\"centos7-foreman-nightly.desktop.example.com\",\"puppet_proxy\":{\"name\":\"centos7-foreman-nightly.desktop.example.com\",\"id\":1,\"url\":\"https://centos7-foreman-nightly.desktop.example.com:8443\"},\"puppet_ca_proxy\":{\"name\":\"centos7-foreman-nightly.desktop.example.com\",\"id\":1,\"url\":\"https://centos7-foreman-nightly.desktop.example.com:8443\"}}]\n}\n"}
+    headers:
+      Cache-Control: ['max-age=0, private, must-revalidate']
+      Connection: [Keep-Alive]
+      Content-Security-Policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 06 Nov 2019 19:10:31 GMT']
+      ETag: [W/"8664ed2c371cc7bd91cba17492050fb6-gzip"]
+      Foreman_api_version: ['2']
+      Foreman_current_location: [; ANY]
+      Foreman_current_organization: [; ANY]
+      Foreman_version: [1.25.0-develop]
+      Keep-Alive: ['timeout=5, max=98']
+      Server: [Apache]
+      Status: [200 OK]
+      Strict-Transport-Security: [max-age=631139040; includeSubdomains]
+      Vary: [Accept-Encoding]
+      X-Content-Type-Options: [nosniff]
+      X-Download-Options: [noopen]
+      X-Frame-Options: [sameorigin]
+      X-Permitted-Cross-Domain-Policies: [none]
+      X-Powered-By: [Phusion Passenger 4.0.53]
+      X-Request-Id: [a05bb48a-4834-44c5-8d68-bfc772ef5406]
+      X-Runtime: ['0.040465']
+      X-XSS-Protection: [1; mode=block]
+      content-length: ['1591']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;version=2]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Cookie: [_session_id=6e54366e011629b6a7f00b61d3846fa1]
+      User-Agent: ['apypie (https://github.com/Apipie/apypie)']
+    method: DELETE
+    uri: https://centos7-foreman-nightly.desktop.example.com/api/hostgroups/47
+  response:
+    body: {string: '{"id":47,"name":"New host group with nested parent","created_at":"2019-11-06T19:10:18.407Z","updated_at":"2019-11-06T19:10:18.407Z","environment_id":null,"operatingsystem_id":5,"architecture_id":1,"medium_id":13,"ptable_id":116,"root_pass":null,"puppet_ca_proxy_id":1,"use_image":null,"image_file":"","ancestry":"45/46","vm_defaults":null,"subnet_id":4,"domain_id":9,"puppet_proxy_id":1,"title":"New
+        host group/Nested New host group/New host group with nested parent","realm_id":null,"compute_profile_id":null,"grub_pass":"","lookup_value_matcher":"hostgroup=New
+        host group/Nested New host group/New host group with nested parent","subnet6_id":null,"pxe_loader":"Grub2
+        UEFI","description":"Nested group","compute_resource_id":null}'}
+    headers:
+      Cache-Control: ['max-age=0, private, must-revalidate']
+      Connection: [Keep-Alive]
+      Content-Security-Policy: ['default-src ''self''; child-src ''self''; connect-src
+          ''self'' ws: wss:; img-src ''self'' data: *.gravatar.com; script-src ''unsafe-eval''
+          ''unsafe-inline'' ''self''; style-src ''unsafe-inline'' ''self''']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Wed, 06 Nov 2019 19:10:31 GMT']
+      ETag: [W/"8f40c6564c2a9836687d1477af2e48fd-gzip"]
+      Foreman_api_version: ['2']
+      Foreman_current_location: [; ANY]
+      Foreman_current_organization: [; ANY]
+      Foreman_version: [1.25.0-develop]
+      Keep-Alive: ['timeout=5, max=97']
+      Server: [Apache]
+      Set-Cookie: [request_method=DELETE; path=/; secure; HttpOnly; SameSite=Lax]
+      Status: [200 OK]
+      Strict-Transport-Security: [max-age=631139040; includeSubdomains]
+      Vary: [Accept-Encoding]
+      X-Content-Type-Options: [nosniff]
+      X-Download-Options: [noopen]
+      X-Frame-Options: [sameorigin]
+      X-Permitted-Cross-Domain-Policies: [none]
+      X-Powered-By: [Phusion Passenger 4.0.53]
+      X-Request-Id: [f8fd864a-ebe3-4da6-9b44-e55751b2263b]
+      X-Runtime: ['0.054392']
+      X-XSS-Protection: [1; mode=block]
+      content-length: ['731']
+    status: {code: 200, message: OK}
+version: 1
