@@ -101,8 +101,10 @@ class Metadata(metadata.SimpleMetadata):
                 (choice_value, choice_name) for choice_value, choice_name in field.choices.items()
             ]
             if not any(choice in ('', None) for choice, _ in choices):
-                if field.allow_blank or (field.allow_null and not isinstance(field, ChoiceNullField)):
+                if field.allow_blank:
                     choices = [("", "---------")] + choices
+                if field.allow_null and not isinstance(field, ChoiceNullField):
+                    choices = [(None, "---------")] + choices
             field_info['choices'] = choices
 
         # Indicate if a field is write-only.
