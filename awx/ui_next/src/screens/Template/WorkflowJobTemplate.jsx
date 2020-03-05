@@ -29,6 +29,7 @@ class WorkflowJobTemplate extends Component {
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
+    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
   }
 
   async componentDidMount() {
@@ -76,9 +77,14 @@ class WorkflowJobTemplate extends Component {
     }
   }
 
+  loadScheduleOptions() {
+    const { template } = this.state;
+    return WorkflowJobTemplatesAPI.readScheduleOptions(template.id);
+  }
+
   loadSchedules(params) {
     const { template } = this.state;
-    return WorkflowJobTemplatesAPI.readScheduleList(template.id, params);
+    return WorkflowJobTemplatesAPI.readSchedules(template.id, params);
   }
 
   render() {
@@ -199,7 +205,10 @@ class WorkflowJobTemplate extends Component {
               <Route
                 path="/templates/:templateType/:id/schedules"
                 render={() => (
-                  <ScheduleList loadSchedules={this.loadSchedules} />
+                  <ScheduleList
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
+                  />
                 )}
               />
             )}

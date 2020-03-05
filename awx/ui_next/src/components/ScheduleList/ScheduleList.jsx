@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { SchedulesAPI } from '@api';
@@ -7,6 +8,7 @@ import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import DataListToolbar from '@components/DataListToolbar';
 import PaginatedDataList, {
+  ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '@util/useRequest';
@@ -19,28 +21,40 @@ const QS_CONFIG = getQSConfig('schedule', {
   order_by: 'unified_job_template__polymorphic_ctype__model',
 });
 
-function ScheduleList({ i18n, loadSchedules }) {
+function ScheduleList({
+  i18n,
+  loadSchedules,
+  loadScheduleOptions,
+  hideAddButton,
+}) {
   const [selected, setSelected] = useState([]);
 
   const location = useLocation();
 
   const {
-    result: { schedules, itemCount },
+    result: { schedules, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchSchedules,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const response = loadSchedules(params);
-      const {
-        data: { count, results },
-      } = await response;
-      return { itemCount: count, schedules: results };
-    }, [location, loadSchedules]),
+      const [
+        {
+          data: { count, results },
+        },
+        scheduleActions,
+      ] = await Promise.all([loadSchedules(params), loadScheduleOptions()]);
+      return {
+        schedules: results,
+        itemCount: count,
+        actions: scheduleActions.data.actions,
+      };
+    }, [location, loadSchedules, loadScheduleOptions]),
     {
       schedules: [],
       itemCount: 0,
+      actions: {},
     }
   );
 
@@ -83,6 +97,11 @@ function ScheduleList({ i18n, loadSchedules }) {
     await deleteJobs();
     setSelected([]);
   };
+
+  const canAdd =
+    actions &&
+    Object.prototype.hasOwnProperty.call(actions, 'POST') &&
+    !hideAddButton;
 
   return (
     <>
@@ -130,6 +149,14 @@ function ScheduleList({ i18n, loadSchedules }) {
             onSelectAll={handleSelectAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      linkTo={`${location.pathname}/add`}
+                    />,
+                  ]
+                : []),
               <ToolbarDeleteButton
                 key="delete"
                 onDelete={handleDelete}
@@ -154,5 +181,14 @@ function ScheduleList({ i18n, loadSchedules }) {
     </>
   );
 }
+
+ScheduleList.propTypes = {
+  hideAddButton: bool,
+  loadSchedules: func.isRequired,
+  loadScheduleOptions: func.isRequired,
+};
+ScheduleList.defaultProps = {
+  hideAddButton: false,
+};
 
 export default withI18n()(ScheduleList);

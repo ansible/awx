@@ -29,6 +29,7 @@ class Template extends Component {
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadTemplateAndRoles = this.loadTemplateAndRoles.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
+    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
   }
 
   async componentDidMount() {
@@ -83,9 +84,14 @@ class Template extends Component {
     }
   }
 
+  loadScheduleOptions() {
+    const { template } = this.state;
+    return JobTemplatesAPI.readScheduleOptions(template.id);
+  }
+
   loadSchedules(params) {
     const { template } = this.state;
-    return JobTemplatesAPI.readScheduleList(template.id, params);
+    return JobTemplatesAPI.readSchedules(template.id, params);
   }
 
   render() {
@@ -111,6 +117,13 @@ class Template extends Component {
       });
     }
 
+    if (template) {
+      tabsArray.push({
+        name: i18n._(t`Schedules`),
+        link: `${match.url}/schedules`,
+      });
+    }
+
     tabsArray.push(
       {
         name: i18n._(t`Completed Jobs`),
@@ -121,13 +134,6 @@ class Template extends Component {
         link: '/home',
       }
     );
-
-    if (template) {
-      tabsArray.push({
-        name: i18n._(t`Schedules`),
-        link: `${match.url}/schedules`,
-      });
-    }
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -225,7 +231,10 @@ class Template extends Component {
               <Route
                 path="/templates/:templateType/:id/schedules"
                 render={() => (
-                  <ScheduleList loadSchedules={this.loadSchedules} />
+                  <ScheduleList
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
+                  />
                 )}
               />
             )}

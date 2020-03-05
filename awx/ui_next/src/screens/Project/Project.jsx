@@ -31,6 +31,7 @@ class Project extends Component {
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
+    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
   }
 
   async componentDidMount() {
@@ -104,9 +105,14 @@ class Project extends Component {
     }
   }
 
+  loadScheduleOptions() {
+    const { project } = this.state;
+    return ProjectsAPI.readScheduleOptions(project.id);
+  }
+
   loadSchedules(params) {
     const { project } = this.state;
-    return ProjectsAPI.readScheduleList(project.id, params);
+    return ProjectsAPI.readSchedules(project.id, params);
   }
 
   render() {
@@ -241,7 +247,10 @@ class Project extends Component {
               <Route
                 path="/projects/:id/schedules"
                 render={() => (
-                  <ScheduleList loadSchedules={this.loadSchedules} />
+                  <ScheduleList
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
+                  />
                 )}
               />
             )}

@@ -9,6 +9,10 @@ import { SchedulesAPI } from '@api';
 import { PageSection, Card } from '@patternfly/react-core';
 
 function Schedules({ i18n }) {
+  const loadScheduleOptions = () => {
+    return SchedulesAPI.readOptions();
+  };
+
   const loadSchedules = params => {
     return SchedulesAPI.read(params);
   };
@@ -24,7 +28,11 @@ function Schedules({ i18n }) {
         <Route path="/schedules">
           <PageSection>
             <Card>
-              <ScheduleList loadSchedules={loadSchedules} />
+              <ScheduleList
+                loadSchedules={loadSchedules}
+                loadScheduleOptions={loadScheduleOptions}
+                hideAddButton
+              />
             </Card>
           </PageSection>
         </Route>
