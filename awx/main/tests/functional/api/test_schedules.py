@@ -365,3 +365,43 @@ def test_zoneinfo(get, admin_user):
     url = reverse('api:schedule_zoneinfo')
     r = get(url, admin_user, expect=200)
     assert {'name': 'America/New_York'} in r.data
+
+
+@pytest.mark.django_db
+def test_normal_user_can_create_ujt_schedule(options, post, project, inventory, alice):
+    jt1 = JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        playbook='helloworld.yml',
+        inventory=inventory
+    )
+    jt1.save()
+    url = reverse('api:schedule_list')
+
+    # can't create a schedule on JT1 because we don't have execute rights
+    params = {
+        'name': 'My Example Schedule',
+        'rrule': RRULE_EXAMPLE,
+        'unified_job_template': jt1.id,
+    }
+    assert 'POST' not in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=403)
+
+    # now we can, because we're allowed to execute JT1
+    jt1.execute_role.members.add(alice)
+    assert 'POST' in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=201)
+
+    # can't create a schedule on JT2 because we don't have execute rights
+    jt2 = JobTemplate.objects.create(
+        name='test-jt-2',
+        project=project,
+        playbook='helloworld.yml',
+        inventory=inventory
+    )
+    jt2.save()
+    post(url, {
+        'name': 'My Example Schedule',
+        'rrule': RRULE_EXAMPLE,
+        'unified_job_template': jt2.id,
+    }, alice, expect=403)
