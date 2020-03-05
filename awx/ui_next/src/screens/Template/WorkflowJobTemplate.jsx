@@ -12,7 +12,13 @@ import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
 import { Schedules } from '@components/Schedule';
 import ContentLoading from '@components/ContentLoading';
-import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
+import { ResourceAccessList } from '@components/ResourceAccessList';
+import NotificationList from '@components/NotificationList';
+import {
+  WorkflowJobTemplatesAPI,
+  CredentialsAPI,
+  OrganizationsAPI,
+} from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
@@ -26,6 +32,9 @@ class WorkflowJobTemplate extends Component {
       hasContentLoading: true,
       template: null,
       webhook_key: null,
+      isNotifAdmin: false,
+      isAuditorOfThisOrg: false,
+      isAdminOfThisOrg: false,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
@@ -68,8 +77,28 @@ class WorkflowJobTemplate extends Component {
         );
         data.summary_fields.webhook_credential.kind = name;
       }
+      const [notifAdminRes, auditorRes, adminRes] = await Promise.all([
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'notification_admin_role',
+        }),
+        OrganizationsAPI.read({
+          id: data.organization,
+          role_level: 'auditor_role',
+        }),
+        OrganizationsAPI.read({
+          id: data.organization,
+          role_level: 'admin_role',
+        }),
+      ]);
       this.setState({ template: data });
       setBreadcrumb(data);
+      this.setState({
+        template: data,
+        isNotifAdmin: notifAdminRes.data.results.length > 0,
+        isAuditorOfThisOrg: auditorRes.data.results.length > 0,
+        isAdminOfThisOrg: adminRes.data.results.length > 0,
+      });
     } catch (err) {
       this.setState({ contentError: err });
     } finally {
@@ -88,19 +117,34 @@ class WorkflowJobTemplate extends Component {
   }
 
   render() {
-    const { i18n, location, match, setBreadcrumb } = this.props;
+    const { i18n, me, location, match, setBreadcrumb } = this.props;
     const {
       contentError,
       hasContentLoading,
       template,
       webhook_key,
+      isNotifAdmin,
+      isAuditorOfThisOrg,
+      isAdminOfThisOrg,
     } = this.state;
+
+    const canSeeNotificationsTab =
+      me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
+    const canToggleNotifications =
+      isNotifAdmin &&
+      (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },
-      { name: i18n._(t`Visualizer`), link: `${match.url}/visualizer` },
-      { name: i18n._(t`Completed Jobs`), link: `${match.url}/completed_jobs` },
+      { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
+
+    if (canSeeNotificationsTab) {
+      tabsArray.push({
+        name: i18n._(t`Notifications`),
+        link: `${match.url}/notifications`,
+      });
+    }
 
     if (template) {
       tabsArray.push({
@@ -108,6 +152,15 @@ class WorkflowJobTemplate extends Component {
         link: `${match.url}/schedules`,
       });
     }
+
+    tabsArray.push({
+      name: i18n._(t`Visualizer`),
+      link: `${match.url}/visualizer`,
+    });
+    tabsArray.push({
+      name: i18n._(t`Completed Jobs`),
+      link: `${match.url}/completed_jobs`,
+    });
 
     tabsArray.forEach((tab, n) => {
       tab.id = n;
@@ -170,6 +223,29 @@ class WorkflowJobTemplate extends Component {
                   <WorkflowJobTemplateDetail
                     template={template}
                     webhook_key={webhook_key}
+                  />
+                )}
+              />
+            )}
+            {template && (
+              <Route
+                path="/templates/workflow_job_template/:id/access"
+                render={() => (
+                  <ResourceAccessList
+                    resource={template}
+                    apiModel={WorkflowJobTemplatesAPI}
+                  />
+                )}
+              />
+            )}
+            {canSeeNotificationsTab && (
+              <Route
+                path="/templates/workflow_job_template/:id/notifications"
+                render={() => (
+                  <NotificationList
+                    id={Number(match.params.id)}
+                    canToggleNotifications={canToggleNotifications}
+                    apiModel={WorkflowJobTemplatesAPI}
                   />
                 )}
               />

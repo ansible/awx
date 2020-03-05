@@ -127,12 +127,15 @@ class Project extends Component {
       isAuditorOfThisOrg,
       isAdminOfThisOrg,
     } = this.state;
-
     const canSeeNotificationsTab =
-      me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
+      me.is_superuser ||
+      me.is_system_auditor ||
+      isNotifAdmin ||
+      isAuditorOfThisOrg;
     const canToggleNotifications =
-      isNotifAdmin &&
-      (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
+      me.is_superuser ||
+      (isNotifAdmin &&
+        (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg));
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },

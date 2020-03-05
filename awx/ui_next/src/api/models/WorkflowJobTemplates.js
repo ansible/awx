@@ -1,7 +1,8 @@
 import Base from '../Base';
 import SchedulesMixin from '../mixins/Schedules.mixin';
+import NotificationsMixin from '../mixins/Notifications.mixin';
 
-class WorkflowJobTemplates extends SchedulesMixin(Base) {
+class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/workflow_job_templates/';
@@ -45,6 +46,10 @@ class WorkflowJobTemplates extends SchedulesMixin(Base) {
     return this.http.get(`${this.baseUrl}${id}/workflow_nodes/`, {
       params,
     });
+  }
+
+  readAccessList(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/access_list/`, { params });
   }
 }
 
