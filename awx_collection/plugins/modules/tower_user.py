@@ -140,15 +140,31 @@ def main():
     first_name = module.params.get('first_name')
     last_name = module.params.get('last_name')
     email = module.params.get('email')
-    is_superuser = module.params.get('is_superuser')
-    is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
-    state = module.params.get('state')
+    first_name = module.params.get('first_name')
+    last_name = module.params.get('last_name')
+    superuser = module.params.get('superuser')
+    auditor = module.params.get('auditor')
 
-    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    # Create the data that gets sent for create and update
+    user_fields = {
+        'username': module.params.get('username'),
+    }
+    if email is not None:
+        user_fields['email'] = email
+    if password is not None:
+        user_fields['password'] = password
+    if first_name is not None:
+        user_fields['first_name'] = first_name
+    if last_name is not None:
+        user_fields['last_name'] = last_name
+    if superuser is not None:
+        user_fields['superuser'] = superuser
+    if auditor is not None:
+        user_fields['auditor'] = auditor
 
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('users', **{
+    # Attempt to look up user based on the provided username
+    user = module.get_one('users', **{
         'data': {
             'username': username,
         }
