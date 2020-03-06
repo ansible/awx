@@ -3,7 +3,12 @@ import { withI18n } from '@lingui/react';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import { Schedule, ScheduleList } from '@components/Schedule';
 
-function Schedules({ setBreadcrumb, unifiedJobTemplate, loadSchedules }) {
+function Schedules({
+  setBreadcrumb,
+  unifiedJobTemplate,
+  loadSchedules,
+  loadScheduleOptions,
+}) {
   const match = useRouteMatch();
 
   return (
@@ -22,7 +27,12 @@ function Schedules({ setBreadcrumb, unifiedJobTemplate, loadSchedules }) {
         key="list"
         path={`${match.path}`}
         render={() => {
-          return <ScheduleList loadSchedules={loadSchedules} />;
+          return (
+            <ScheduleList
+              loadSchedules={loadSchedules}
+              loadScheduleOptions={loadScheduleOptions}
+            />
+          );
         }}
       />
     </Switch>

@@ -14,7 +14,12 @@ describe('<Schedules />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Schedules setBreadcrumb={() => {}} jobTemplate={jobTemplate} />,
+        <Schedules
+          setBreadcrumb={() => {}}
+          jobTemplate={jobTemplate}
+          loadSchedules={() => {}}
+          loadScheduleOptions={() => {}}
+        />,
 
         {
           context: {
