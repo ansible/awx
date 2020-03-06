@@ -291,7 +291,7 @@ export const Schedule = shape({
   skip_tags: string,
   limit: string,
   diff_mode: bool,
-  verbosity: string,
+  verbosity: number,
   unified_job_template: number,
   enabled: bool,
   dtstart: string,

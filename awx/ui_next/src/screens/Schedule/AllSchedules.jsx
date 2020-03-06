@@ -4,11 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import Breadcrumbs from '@components/Breadcrumbs';
-import ScheduleList from '@components/ScheduleList';
+import { ScheduleList } from '@components/Schedule';
 import { SchedulesAPI } from '@api';
 import { PageSection, Card } from '@patternfly/react-core';
 
-function Schedules({ i18n }) {
+function AllSchedules({ i18n }) {
   const loadScheduleOptions = () => {
     return SchedulesAPI.readOptions();
   };
@@ -41,4 +41,4 @@ function Schedules({ i18n }) {
   );
 }
 
-export default withI18n()(Schedules);
+export default withI18n()(AllSchedules);

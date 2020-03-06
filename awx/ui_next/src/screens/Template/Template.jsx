@@ -10,7 +10,7 @@ import ContentError from '@components/ContentError';
 import JobList from '@components/JobList';
 import NotificationList from '@components/NotificationList';
 import RoutedTabs from '@components/RoutedTabs';
-import ScheduleList from '@components/ScheduleList';
+import { Schedules } from '@components/Schedule';
 import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
@@ -96,7 +96,7 @@ class Template extends Component {
   }
 
   render() {
-    const { i18n, location, match, me } = this.props;
+    const { i18n, location, match, me, setBreadcrumb } = this.props;
     const {
       contentError,
       hasContentLoading,
@@ -127,6 +127,10 @@ class Template extends Component {
 
     tabsArray.push(
       {
+        name: i18n._(t`Schedules`),
+        link: `${match.url}/schedules`,
+      },
+      {
         name: i18n._(t`Completed Jobs`),
         link: `${match.url}/completed_jobs`,
       },
@@ -149,7 +153,10 @@ class Template extends Component {
       </TabbedCardHeader>
     );
 
-    if (location.pathname.endsWith('edit')) {
+    if (
+      location.pathname.endsWith('edit') ||
+      location.pathname.includes('schedules/')
+    ) {
       cardHeader = null;
     }
 
@@ -211,6 +218,20 @@ class Template extends Component {
                 )}
               />
             )}
+            {template && (
+              <Route
+                key="schedules"
+                path="/templates/:templateType/:id/schedules"
+                render={() => (
+                  <Schedules
+                    setBreadcrumb={setBreadcrumb}
+                    unifiedJobTemplate={template}
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
+                  />
+                )}
+              />
+            )}
             {canSeeNotificationsTab && (
               <Route
                 path="/templates/:templateType/:id/notifications"
@@ -227,17 +248,6 @@ class Template extends Component {
               <Route path="/templates/:templateType/:id/completed_jobs">
                 <JobList defaultParams={{ job__job_template: template.id }} />
               </Route>
-            )}
-            {template && (
-              <Route
-                path="/templates/:templateType/:id/schedules"
-                render={() => (
-                  <ScheduleList
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
             )}
             {template && (
               <Route

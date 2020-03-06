@@ -10,7 +10,7 @@ import ContentError from '@components/ContentError';
 import FullPage from '@components/FullPage';
 import JobList from '@components/JobList';
 import RoutedTabs from '@components/RoutedTabs';
-import ScheduleList from '@components/ScheduleList';
+import { Schedules } from '@components/Schedule';
 import ContentLoading from '@components/ContentLoading';
 import { WorkflowJobTemplatesAPI, CredentialsAPI } from '@api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
@@ -88,7 +88,7 @@ class WorkflowJobTemplate extends Component {
   }
 
   render() {
-    const { i18n, location, match } = this.props;
+    const { i18n, location, match, setBreadcrumb } = this.props;
     const {
       contentError,
       hasContentLoading,
@@ -152,7 +152,10 @@ class WorkflowJobTemplate extends Component {
     return (
       <PageSection>
         <Card>
-          {location.pathname.endsWith('edit') ? null : cardHeader}
+          {location.pathname.endsWith('edit') ||
+          location.pathname.includes('schedules/')
+            ? null
+            : cardHeader}
           <Switch>
             <Redirect
               from="/templates/workflow_job_template/:id"
@@ -207,9 +210,11 @@ class WorkflowJobTemplate extends Component {
             )}
             {template?.id && (
               <Route
-                path="/templates/:templateType/:id/schedules"
+                path="/templates/workflow_job_template/:id/schedules"
                 render={() => (
-                  <ScheduleList
+                  <Schedules
+                    setBreadcrumb={setBreadcrumb}
+                    unifiedJobTemplate={template}
                     loadSchedules={this.loadSchedules}
                     loadScheduleOptions={this.loadScheduleOptions}
                   />

@@ -58,10 +58,11 @@ describe('<Template />', () => {
     const wrapper = mountWithContexts(
       <Template setBreadcrumb={() => {}} me={mockMe} />
     );
+
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 6
+      el => el.length === 7
     );
     expect(tabs.at(2).text()).toEqual('Notifications');
     done();
