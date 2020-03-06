@@ -1,66 +1,88 @@
 import React from 'react';
-
+import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-
 import HostDetail from './HostDetail';
+import { HostsAPI } from '@api';
+
+import mockHost from '../data.host.json';
 
 jest.mock('@api');
 
 describe('<HostDetail />', () => {
-  const mockHost = {
-    id: 1,
-    name: 'Foo',
-    description: 'Bar',
-    inventory: 1,
-    created: '2015-07-07T17:21:26.429745Z',
-    modified: '2019-08-11T19:47:37.980466Z',
-    variables: '---',
-    summary_fields: {
-      inventory: {
-        id: 1,
-        name: 'test inventory',
-      },
-      user_capabilities: {
-        edit: true,
-      },
-      recent_jobs: [],
-    },
-  };
+  let wrapper;
 
-  test('initially renders succesfully', () => {
-    mountWithContexts(<HostDetail host={mockHost} />);
+  describe('User has edit permissions', () => {
+    beforeAll(() => {
+      wrapper = mountWithContexts(<HostDetail host={mockHost} />);
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+    });
+
+    test('should render Details', async () => {
+      function assertDetail(label, value) {
+        expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+        expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+      }
+
+      assertDetail('Name', 'localhost');
+      assertDetail('Description', 'a good description');
+      assertDetail('Inventory', 'Mikes Inventory');
+      assertDetail('Created', '10/28/2019, 9:26:54 PM');
+      assertDetail('Last Modified', '10/29/2019, 8:18:41 PM');
+    });
+
+    test('should show edit button for users with edit permission', () => {
+      const editButton = wrapper.find('Button[aria-label="edit"]');
+      expect(editButton.text()).toEqual('Edit');
+      expect(editButton.prop('to')).toBe('/hosts/2/edit');
+    });
+
+    test('expected api call is made for delete', async () => {
+      await act(async () => {
+        wrapper.find('DeleteButton').invoke('onConfirm')();
+      });
+      expect(HostsAPI.destroy).toHaveBeenCalledTimes(1);
+    });
+
+    test('Error dialog shown for failed deletion', async () => {
+      HostsAPI.destroy.mockImplementationOnce(() =>
+        Promise.reject(new Error())
+      );
+      await act(async () => {
+        wrapper.find('DeleteButton').invoke('onConfirm')();
+      });
+      await waitForElement(
+        wrapper,
+        'Modal[title="Error!"]',
+        el => el.length === 1
+      );
+      await act(async () => {
+        wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+      });
+      await waitForElement(
+        wrapper,
+        'Modal[title="Error!"]',
+        el => el.length === 0
+      );
+    });
   });
 
-  test('should render Details', async () => {
-    const wrapper = mountWithContexts(<HostDetail host={mockHost} />);
-    const testParams = [
-      { label: 'Name', value: 'Foo' },
-      { label: 'Description', value: 'Bar' },
-      { label: 'Inventory', value: 'test inventory' },
-      { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
-      { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
-    ];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const { label, value } of testParams) {
-      // eslint-disable-next-line no-await-in-loop
-      const detail = await waitForElement(wrapper, `Detail[label="${label}"]`);
-      expect(detail.find('dt').text()).toBe(label);
-      expect(detail.find('dd').text()).toBe(value);
-    }
-  });
+  describe('User has read-only permissions', () => {
+    beforeAll(() => {
+      const readOnlyHost = { ...mockHost };
+      readOnlyHost.summary_fields.user_capabilities.edit = false;
 
-  test('should show edit button for users with edit permission', async () => {
-    const wrapper = mountWithContexts(<HostDetail host={mockHost} />);
-    const editButton = wrapper.find('Button[aria-label="edit"]');
-    expect(editButton.text()).toEqual('Edit');
-    expect(editButton.prop('to')).toBe('/hosts/1/edit');
-  });
+      wrapper = mountWithContexts(<HostDetail host={mockHost} />);
+    });
 
-  test('should hide edit button for users without edit permission', async () => {
-    const readOnlyHost = { ...mockHost };
-    readOnlyHost.summary_fields.user_capabilities.edit = false;
-    const wrapper = mountWithContexts(<HostDetail host={readOnlyHost} />);
-    await waitForElement(wrapper, 'HostDetail');
-    expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
+    afterAll(() => {
+      wrapper.unmount();
+    });
+
+    test('should hide edit button for users without edit permission', async () => {
+      expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
+    });
   });
 });

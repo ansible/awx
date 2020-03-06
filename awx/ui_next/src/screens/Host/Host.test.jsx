@@ -3,53 +3,41 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { HostsAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockDetails from './data.host.json';
+import mockHost from './data.host.json';
 import Host from './Host';
 
 jest.mock('@api');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useRouteMatch: () => ({
+    url: '/hosts/1',
+    params: { id: 1 },
+  }),
+}));
+
+HostsAPI.readDetail.mockResolvedValue({
+  data: { ...mockHost },
+});
 
 describe('<Host />', () => {
   let wrapper;
   let history;
 
-  HostsAPI.readDetail.mockResolvedValue({
-    data: { ...mockDetails },
+  beforeEach(async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />);
+    });
   });
 
   afterEach(() => {
     wrapper.unmount();
   });
 
-  test('initially renders succesfully', async () => {
-    history = createMemoryHistory({
-      initialEntries: ['/hosts/1/edit'],
+  test('should render expected tabs', async () => {
+    const expectedTabs = ['Details', 'Facts', 'Groups', 'Completed Jobs'];
+    wrapper.find('RoutedTabs li').forEach((tab, index) => {
+      expect(tab.text()).toEqual(expectedTabs[index]);
     });
-
-    await act(async () => {
-      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
-        context: { router: { history } },
-      });
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(wrapper.find('Host').length).toBe(1);
-  });
-
-  test('should render "Back to Hosts" tab when navigating from inventories', async () => {
-    history = createMemoryHistory({
-      initialEntries: ['/inventories/inventory/1/hosts/1'],
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(<Host setBreadcrumb={() => {}} />, {
-        context: { router: { history } },
-      });
-    });
-    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    expect(
-      wrapper
-        .find('RoutedTabs li')
-        .first()
-        .text()
-    ).toBe('Back to Hosts');
   });
 
   test('should show content error when api throws error on initial render', async () => {

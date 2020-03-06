@@ -51,18 +51,6 @@
           "id": 1,
           "failed": false
       },
-      "created_by": {
-          "id": 1,
-          "username": "admin",
-          "first_name": "",
-          "last_name": ""
-      },
-      "modified_by": {
-          "id": 1,
-          "username": "admin",
-          "first_name": "",
-          "last_name": ""
-      },
       "user_capabilities": {
           "edit": true,
           "delete": true
