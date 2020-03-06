@@ -725,6 +725,50 @@ clean-elk:
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
 
+awx/plugins/collections/ansible_collections/azure/azcollection:
+	mkdir -p awx/plugins/collections/ansible_collections/azure
+	git clone https://github.com/ansible-collections/azure.git awx/plugins/collections/ansible_collections/azure/azcollection
+
+awx/plugins/collections/ansible_collections/ansible/amazon:
+	mkdir -p awx/plugins/collections/ansible_collections/ansible
+	git clone https://github.com/ansible-collections/ansible.amazon.git awx/plugins/collections/ansible_collections/ansible/amazon
+
+awx/plugins/collections/ansible_collections/theforeman/foreman:
+	mkdir -p awx/plugins/collections/ansible_collections/theforeman
+	git clone https://github.com/theforeman/foreman-ansible-modules.git awx/plugins/collections/ansible_collections/theforeman/foreman
+
+awx/plugins/collections/ansible_collections/google/cloud:
+	mkdir -p awx/plugins/collections/ansible_collections/google
+	git clone https://github.com/ansible-collections/ansible_collections_google.git awx/plugins/collections/ansible_collections/google/cloud
+
+awx/plugins/collections/ansible_collections/openstack/cloud:
+	mkdir -p awx/plugins/collections/ansible_collections/openstack
+	git clone https://github.com/openstack/ansible-collections-openstack.git awx/plugins/collections/ansible_collections/openstack/cloud
+
+awx/plugins/collections/ansible_collections/community/vmware:
+	mkdir -p awx/plugins/collections/ansible_collections/community
+	git clone https://github.com/ansible-collections/vmware.git awx/plugins/collections/ansible_collections/community/vmware
+
+awx/plugins/collections/ansible_collections/ovirt/ovirt_collection:
+	mkdir -p awx/plugins/collections/ansible_collections/ovirt
+	git clone https://github.com/ovirt/ovirt-ansible-collection.git awx/plugins/collections/ansible_collections/ovirt/ovirt_collection
+
+awx/plugins/collections/ansible_collections/awx/awx:
+	mkdir -p awx/plugins/collections/ansible_collections/awx
+	ln -s $(shell pwd)/awx_collection awx/plugins/collections/ansible_collections/awx/awx
+
+# this is for development purposes only
+develop_inventory: awx/plugins/collections/ansible_collections/google/cloud\
+									 awx/plugins/collections/ansible_collections/azure/azcollection\
+									 awx/plugins/collections/ansible_collections/ansible/amazon\
+									 awx/plugins/collections/ansible_collections/theforeman/foreman\
+									 awx/plugins/collections/ansible_collections/google/cloud\
+									 awx/plugins/collections/ansible_collections/openstack/cloud\
+									 awx/plugins/collections/ansible_collections/community/vmware\
+									 awx/plugins/collections/ansible_collections/ovirt/ovirt_collection\
+									 awx/plugins/collections/ansible_collections/awx/awx
+	ANSIBLE_COLLECTIONS_PATHS=awx/plugins/collections ansible-galaxy collection list
+
 psql-container:
 	docker run -it --net tools_default --rm postgres:10 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 

@@ -140,6 +140,9 @@ use_dev_supervisor.txt
 /awx_collection/galaxy.yml
 /sanity/
 
+# Inventory plugin collection testing
+/awx/plugins/collections/
+
 .idea/*
 *.unison.tmp
 *.#
