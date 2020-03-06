@@ -25,8 +25,6 @@ class Project extends Component {
       contentError: null,
       isInitialized: false,
       isNotifAdmin: false,
-      isAuditorOfThisOrg: false,
-      isAdminOfThisOrg: false,
     };
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
@@ -65,22 +63,10 @@ class Project extends Component {
           role_level: 'notification_admin_role',
         }),
       ]);
-      const [auditorRes, adminRes] = await Promise.all([
-        OrganizationsAPI.read({
-          id: data.organization,
-          role_level: 'auditor_role',
-        }),
-        OrganizationsAPI.read({
-          id: data.organization,
-          role_level: 'admin_role',
-        }),
-      ]);
       setBreadcrumb(data);
       this.setState({
         project: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
-        isAuditorOfThisOrg: auditorRes.data.results.length > 0,
-        isAdminOfThisOrg: adminRes.data.results.length > 0,
       });
     } catch (err) {
       this.setState({ contentError: err });
@@ -124,18 +110,9 @@ class Project extends Component {
       hasContentLoading,
       isInitialized,
       isNotifAdmin,
-      isAuditorOfThisOrg,
-      isAdminOfThisOrg,
     } = this.state;
-    const canSeeNotificationsTab =
-      me.is_superuser ||
-      me.is_system_auditor ||
-      isNotifAdmin ||
-      isAuditorOfThisOrg;
-    const canToggleNotifications =
-      me.is_superuser ||
-      (isNotifAdmin &&
-        (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg));
+    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+    const canToggleNotifications = isNotifAdmin;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },

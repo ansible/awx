@@ -33,8 +33,6 @@ class WorkflowJobTemplate extends Component {
       template: null,
       webhook_key: null,
       isNotifAdmin: false,
-      isAuditorOfThisOrg: false,
-      isAdminOfThisOrg: false,
     };
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
@@ -77,27 +75,14 @@ class WorkflowJobTemplate extends Component {
         );
         data.summary_fields.webhook_credential.kind = name;
       }
-      const [notifAdminRes, auditorRes, adminRes] = await Promise.all([
-        OrganizationsAPI.read({
-          page_size: 1,
-          role_level: 'notification_admin_role',
-        }),
-        OrganizationsAPI.read({
-          id: data.organization,
-          role_level: 'auditor_role',
-        }),
-        OrganizationsAPI.read({
-          id: data.organization,
-          role_level: 'admin_role',
-        }),
-      ]);
-      this.setState({ template: data });
+      const notifAdminRes = await OrganizationsAPI.read({
+        page_size: 1,
+        role_level: 'notification_admin_role',
+      });
       setBreadcrumb(data);
       this.setState({
         template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
-        isAuditorOfThisOrg: auditorRes.data.results.length > 0,
-        isAdminOfThisOrg: adminRes.data.results.length > 0,
       });
     } catch (err) {
       this.setState({ contentError: err });
@@ -124,15 +109,10 @@ class WorkflowJobTemplate extends Component {
       template,
       webhook_key,
       isNotifAdmin,
-      isAuditorOfThisOrg,
-      isAdminOfThisOrg,
     } = this.state;
 
-    const canSeeNotificationsTab =
-      me.is_system_auditor || isNotifAdmin || isAuditorOfThisOrg;
-    const canToggleNotifications =
-      isNotifAdmin &&
-      (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
+    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+    const canToggleNotifications = isNotifAdmin;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },
