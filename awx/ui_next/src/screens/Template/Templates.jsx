@@ -52,6 +52,7 @@ class Templates extends Component {
       [`/templates/${template.type}/${template.id}/completed_jobs`]: i18n._(
         t`Completed Jobs`
       ),
+      [`/templates/${template.type}/${template.id}/survey`]: i18n._(t`Survey`),
     };
     this.setState({ breadcrumbConfig });
   };
