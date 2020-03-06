@@ -121,6 +121,10 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
                 create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
                 create_kwargs[field_name] = getattr(self, field_name)
+        if isinstance(self, WorkflowJobNode):
+            create_kwargs['template_node_id'] = self.template_node_id
+        else:
+            create_kwargs['template_node'] = self
         new_node = WorkflowJobNode.objects.create(**create_kwargs)
         if self.pk:
             allowed_creds = self.credentials.all()
@@ -212,6 +216,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         help_text=_("Indicates that a job will not be created when True. Workflow runtime "
                     "semantics will mark this True if the node is in a path that will "
                     "decidedly not be ran. A value of False means the node may not run."),
+    )
+    template_node = models.ForeignKey(
+        WorkflowJobTemplateNode,
+        related_name='job_nodes',
+        null=True,
+        on_delete=models.SET_NULL
     )
 
     def get_absolute_url(self, request=None):

@@ -3723,7 +3723,7 @@ class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
         model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job', '-name', '-description', 'id', 'url', 'related',
                   'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
-                  'all_parents_must_converge', 'do_not_run',)
+                  'all_parents_must_converge', 'do_not_run', 'template_node',)
 
     def get_related(self, obj):
         res = super(WorkflowJobNodeSerializer, self).get_related(obj)
