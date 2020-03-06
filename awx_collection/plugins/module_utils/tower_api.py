@@ -482,7 +482,7 @@ class TowerModule(AnsibleModule):
             try:
                 existing_item['url']
             except KeyError as ke:
-                self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
+                self.fail_json(msg="Unable to process create of item due to missing data {0}".format(ke))
             if not handle_response:
                 return None
             else:
