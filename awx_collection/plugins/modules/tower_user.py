@@ -159,9 +159,9 @@ def main():
     if last_name is not None:
         user_fields['last_name'] = last_name
     if superuser is not None:
-        user_fields['superuser'] = superuser
+        user_fields['is_superuser'] = superuser
     if auditor is not None:
-        user_fields['auditor'] = auditor
+        user_fields['is_system_auditor'] = auditor
 
     # Attempt to look up user based on the provided username
     user = module.get_one('users', **{
