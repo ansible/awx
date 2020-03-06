@@ -9,7 +9,11 @@ import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { required } from '@util/validators';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+  SubFormLayout,
+} from '@components/FormLayout';
 import { ManualSubForm, SourceControlSubForm } from './CredentialSubForms';
 
 function CredentialFormFields({
@@ -46,7 +50,7 @@ function CredentialFormFields({
   };
 
   return (
-    <>
+    <FormFullWidthLayout>
       <FormField
         id="credential-name"
         label={i18n._(t`Name`)}
@@ -109,7 +113,7 @@ function CredentialFormFields({
             }
           </SubFormLayout>
         )}
-    </>
+    </FormFullWidthLayout>
   );
 }
 
