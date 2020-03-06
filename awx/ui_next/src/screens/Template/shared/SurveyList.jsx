@@ -95,7 +95,50 @@ function SurveyList({
       </DataList>
     );
   }
-
+  if (isDeleteModalOpen) {
+    return (
+      <AlertModal
+        variant="danger"
+        title={
+          isAllSelected ? i18n._(t`Delete Survey`) : i18n._(t`Delete Questions`)
+        }
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelected([]);
+        }}
+        actions={[
+          <Button
+            key="delete"
+            variant="danger"
+            aria-label={i18n._(t`confirm delete`)}
+            onClick={handleDelete}
+          >
+            {i18n._(t`Delete`)}
+          </Button>,
+          <Button
+            key="cancel"
+            variant="secondary"
+            aria-label={i18n._(t`cancel delete`)}
+            onClick={() => {
+              setIsDeleteModalOpen(false);
+              setSelected([]);
+            }}
+          >
+            {i18n._(t`Cancel`)}
+          </Button>,
+        ]}
+      >
+        <div>{i18n._(t`This action will delete the following:`)}</div>
+        {selected.map(question => (
+          <span key={question.id}>
+            <strong>{question.question_name}</strong>
+            <br />
+          </span>
+        ))}
+      </AlertModal>
+    );
+  }
   return (
     <>
       <SurveyToolbar
