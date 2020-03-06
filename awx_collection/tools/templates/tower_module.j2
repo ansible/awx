@@ -1,0 +1,177 @@
+#!/usr/bin/python
+# coding: utf-8 -*-
+
+{# The following is set by the generate.yml file:
+ #   item_type: the type of item i.e. 'teams'
+ #   human_readable: the type with _ replaced with spaces i.e. worflow job template
+ #   singular_item_type: the type of an item replace singularized i.e. team
+ #   type_map: a mapping of things like string to str
+ #}
+
+# (c) {{ ansible_date_time['year'] }}, John Westcott IV <john.westcott.iv@redhat.com>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = '''
+---
+module: tower_{{ item_type }}
+author: "John Westcott IV (@john-westcott-iv)"
+version_added: "2.3"
+short_description: create, update, or destroy Ansible Tower {{ human_readable }}.
+description:
+    - Create, update, or destroy Ansible Tower {{ human_readable }}. See
+      U(https://www.ansible.com/tower) for an overview.
+options:
+{% for option in item['json']['actions']['POST'] %}
+    {{ option }}:
+{% if 'help_text' in item['json']['actions']['POST'][option] %}
+      description:
+        - {{ item['json']['actions']['POST'][option]['help_text'] }}
+{% endif %}
+      required: {{ item['json']['actions']['POST'][option]['required'] }}
+      type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
+{% if 'default' in item['json']['actions']['POST'][option] %}
+      default: '{{ item['json']['actions']['POST'][option]['default'] }}'
+{% endif %}
+{% if 'choices' in item['json']['actions']['POST'][option] %}
+      choices:
+{% for choice in item['json']['actions']['POST'][option]['choices'] %}
+        - '{{ choice[0] }}'
+{% endfor %}
+{%endif %}
+{% if option == 'name' %}
+    new_name:
+      description:
+        - To use when changing a team's name.
+      required: True
+      type: str
+{% endif %}
+{% endfor %}
+    state:
+      description:
+        - Desired state of the resource.
+      choices: ["present", "absent"]
+      default: "present"
+      type: str
+extends_documentation_fragment: awx.awx.auth
+'''
+
+EXAMPLES = '''
+'''
+
+from ..module_utils.tower_api import TowerModule
+
+def main():
+    # Any additional arguments that are not fields of the item can be added here
+    argument_spec = dict(
+{% for option in item['json']['actions']['POST'] %}
+        {{ option }}=dict(
+            required={{ item['json']['actions']['POST'][option]['required'] }},
+            type='{{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}',
+{% if item['json']['actions']['POST'][option]['type'] == 'password' %}
+            no_log=True,
+{% endif %}
+{% if 'choices' in item['json']['actions']['POST'][option] %}
+            choices=[
+{% for choice in item['json']['actions']['POST'][option]['choices'] %}
+              '{{ choice[0] }}',
+{% endfor %}
+            ],
+{% endif %}
+{% if 'default' in item['json']['actions']['POST'][option] %}
+            default='{{ item['json']['actions']['POST'][option]['default'] }}',
+{% endif %}
+        ),
+{% if option == 'name' %}
+        new_name=dict(required=False, type='str'),
+{% endif %}
+{% endfor %}
+        state=dict(choices=['present', 'absent'], default='present'),
+    )
+
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+
+    # Extract our parameters
+{% for option in item['json']['actions']['POST'] %}
+    {{ option }} = module.params.get('{{ option }}')
+{% if 'min_value' in item['json']['actions']['POST'][option] %}
+    if {{ option }} < {{ item['json']['actions']['POST'][option]['min_value'] }}:
+        module.fail_msg(msg="The value for {{ option }} can not be less than {{ item['json']['actions']['POST'][option]['min_value'] }}")
+{% endif %}
+{% if 'max_value' in item['json']['actions']['POST'][option] %}
+    if {{ option }} > {{ item['json']['actions']['POST'][option]['max_value'] }}:
+        module.fail_msg(msg="The value for {{ option }} can not be larger than {{ item['json']['actions']['POST'][option]['max_value'] }}")
+{% endif %}
+{% if 'max_length' in item['json']['actions']['POST'][option] %}
+    if len({{ option }}) > {{ item['json']['actions']['POST'][option]['max_length'] }}:
+        module.fail_msg(msg="The value for {{ option }} can not be longer than {{ item['json']['actions']['POST'][option]['max_length'] }}")
+{% endif %}
+{% if option == 'name' %}
+    new_name = module.params.get("new_name")
+{% endif %}
+{% endfor %}
+    state = module.params.get('state')
+
+{% if item['json']['actions']['POST'] | length() > 0 %}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+{% for option in item['json']['actions']['POST'] %}
+{% if item['json']['actions']['POST'][option]['type'] == 'id' %}
+    {{ option }}_id = None
+    if {{ option }}:
+        {{ option }}_id = module.resolve_name_to_id('{{ option }}', {{ option }})
+{% endif %}
+{% endfor %}
+{% endif %}
+
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('{{ item_type }}', **{
+        'data': {
+{% if 'name' in item['json']['actions']['POST'] %}
+            'name': name,
+{% endif %}
+{% if item_type == 'users' %}
+            'username': username,
+{% endif %}
+{% if 'organization' in item['json']['actions']['POST'] and item['json']['actions']['POST']['organization']['type'] == 'id' %}
+            'organization': org_id,
+{% endif %}
+{% if item_type in ['hosts', 'groups', 'inventory_sources'] %}
+            'inventory': inventory_id,
+{% endif %}
+        }
+    })
+
+    # Create the data that gets sent for create and update
+    new_fields = {}
+{% for option in item['json']['actions']['POST'] %}
+{% if option == 'name' %}
+    new_fields['name'] = new_name if new_name else name
+{% else %}
+    if {{ option }}:
+{% if item['json']['actions']['POST'][option]['type'] == 'id' %}
+        new_fields['{{ option }}'] = {{ option }}_id
+{% else %}
+        new_fields['{{ option }}'] == {{ option }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(existing_item, new_fields, endpoint='{{ item_type }}', item_type='{{ singular_item_type }}')
+
+
+if __name__ == '__main__':
+    main()
+
