@@ -14,7 +14,7 @@ import DeleteButton from '@components/DeleteButton';
 import { HostsAPI } from '@api';
 import HostToggle from '@components/HostToggle';
 
-function HostDetail({ i18n, host }) {
+function InventoryHostDetail({ i18n, host }) {
   const {
     created,
     description,
@@ -39,7 +39,7 @@ function HostDetail({ i18n, host }) {
     setIsloading(true);
     try {
       await HostsAPI.destroy(id);
-      history.push('/hosts');
+      history.push(`/inventories/inventory/${inventory.id}/hosts`);
     } catch (err) {
       setDeletionError(err);
     } finally {
@@ -62,6 +62,7 @@ function HostDetail({ i18n, host }) {
   }
 
   const recentPlaybookJobs = recent_jobs.map(job => ({ ...job, type: 'job' }));
+
   return (
     <CardBody>
       <HostToggle host={host} css="padding-bottom: 40px" />
@@ -72,14 +73,6 @@ function HostDetail({ i18n, host }) {
           value={<Sparkline jobs={recentPlaybookJobs} />}
         />
         <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail
-          label={i18n._(t`Inventory`)}
-          value={
-            <Link to={`/inventories/inventory/${inventory.id}/details`}>
-              {inventory.name}
-            </Link>
-          }
-        />
         <UserDateDetail
           date={created}
           label={i18n._(t`Created`)}
@@ -101,16 +94,16 @@ function HostDetail({ i18n, host }) {
           <Button
             aria-label={i18n._(t`edit`)}
             component={Link}
-            to={`/hosts/${id}/edit`}
+            to={`/inventories/inventory/${inventory.id}/hosts/${id}/edit`}
           >
             {i18n._(t`Edit`)}
           </Button>
         )}
         {user_capabilities?.delete && (
           <DeleteButton
-            onConfirm={() => handleHostDelete()}
-            modalTitle={i18n._(t`Delete Host`)}
             name={name}
+            modalTitle={i18n._(t`Delete Host`)}
+            onConfirm={() => handleHostDelete()}
           />
         )}
       </CardActionsRow>
@@ -129,8 +122,8 @@ function HostDetail({ i18n, host }) {
   );
 }
 
-HostDetail.propTypes = {
+InventoryHostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(HostDetail);
+export default withI18n()(InventoryHostDetail);

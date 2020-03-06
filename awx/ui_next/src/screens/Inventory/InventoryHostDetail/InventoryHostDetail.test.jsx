@@ -1,19 +1,18 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import HostDetail from './HostDetail';
+import InventoryHostDetail from './InventoryHostDetail';
 import { HostsAPI } from '@api';
-
-import mockHost from '../data.host.json';
+import mockHost from '../shared/data.host.json';
 
 jest.mock('@api');
 
-describe('<HostDetail />', () => {
+describe('<InventoryHostDetail />', () => {
   let wrapper;
 
   describe('User has edit permissions', () => {
     beforeAll(() => {
-      wrapper = mountWithContexts(<HostDetail host={mockHost} />);
+      wrapper = mountWithContexts(<InventoryHostDetail host={mockHost} />);
     });
 
     afterAll(() => {
@@ -27,8 +26,7 @@ describe('<HostDetail />', () => {
       }
 
       assertDetail('Name', 'localhost');
-      assertDetail('Description', 'a good description');
-      assertDetail('Inventory', 'Mikes Inventory');
+      assertDetail('Description', 'localhost description');
       assertDetail('Created', '10/28/2019, 9:26:54 PM');
       assertDetail('Last Modified', '10/29/2019, 8:18:41 PM');
     });
@@ -36,7 +34,9 @@ describe('<HostDetail />', () => {
     test('should show edit button for users with edit permission', () => {
       const editButton = wrapper.find('Button[aria-label="edit"]');
       expect(editButton.text()).toEqual('Edit');
-      expect(editButton.prop('to')).toBe('/hosts/2/edit');
+      expect(editButton.prop('to')).toBe(
+        '/inventories/inventory/3/hosts/2/edit'
+      );
     });
 
     test('expected api call is made for delete', async () => {
@@ -74,7 +74,7 @@ describe('<HostDetail />', () => {
       const readOnlyHost = { ...mockHost };
       readOnlyHost.summary_fields.user_capabilities.edit = false;
 
-      wrapper = mountWithContexts(<HostDetail host={mockHost} />);
+      wrapper = mountWithContexts(<InventoryHostDetail host={mockHost} />);
     });
 
     afterAll(() => {

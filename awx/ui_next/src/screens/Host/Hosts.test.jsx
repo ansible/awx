@@ -30,4 +30,23 @@ describe('<Hosts />', () => {
     expect(wrapper.find('BreadcrumbHeading').length).toBe(1);
     wrapper.unmount();
   });
+
+  test('should render Host component', () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/hosts/1'],
+    });
+
+    const match = {
+      path: '/hosts/:id',
+      url: '/hosts/1',
+      isExact: true,
+    };
+
+    const wrapper = mountWithContexts(<Hosts />, {
+      context: { router: { history, route: { match } } },
+    });
+
+    expect(wrapper.find('Host').length).toBe(1);
+    wrapper.unmount();
+  });
 });

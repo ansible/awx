@@ -10,7 +10,6 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { Card, CardActions } from '@patternfly/react-core';
-import { CaretLeftIcon } from '@patternfly/react-icons';
 
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
@@ -24,20 +23,13 @@ import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
 import { HostsAPI } from '@api';
 
-function Host({ inventory, i18n, setBreadcrumb }) {
+function Host({ i18n, setBreadcrumb }) {
   const [host, setHost] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
 
   const location = useLocation();
-  const hostsMatch = useRouteMatch('/hosts/:id');
-  const inventoriesMatch = useRouteMatch(
-    '/inventories/inventory/:id/hosts/:hostId'
-  );
-  const baseUrl = hostsMatch ? hostsMatch.url : inventoriesMatch.url;
-  const hostListUrl = hostsMatch
-    ? '/hosts'
-    : `/inventories/inventory/${inventoriesMatch.params.id}/hosts`;
+  const match = useRouteMatch('/hosts/:id');
 
   useEffect(() => {
     (async () => {
@@ -45,17 +37,10 @@ function Host({ inventory, i18n, setBreadcrumb }) {
       setHasContentLoading(true);
 
       try {
-        const hostId = hostsMatch
-          ? hostsMatch.params.id
-          : inventoriesMatch.params.hostId;
-        const { data } = await HostsAPI.readDetail(hostId);
-        setHost(data);
+        const { data } = await HostsAPI.readDetail(match.params.id);
 
-        if (hostsMatch) {
-          setBreadcrumb(data);
-        } else if (inventoriesMatch) {
-          setBreadcrumb(inventory, data);
-        }
+        setHost(data);
+        setBreadcrumb(data);
       } catch (error) {
         setContentError(error);
       } finally {
@@ -67,44 +52,31 @@ function Host({ inventory, i18n, setBreadcrumb }) {
   const tabsArray = [
     {
       name: i18n._(t`Details`),
-      link: `${baseUrl}/details`,
+      link: `${match.url}/details`,
       id: 0,
     },
     {
       name: i18n._(t`Facts`),
-      link: `${baseUrl}/facts`,
+      link: `${match.url}/facts`,
       id: 1,
     },
     {
       name: i18n._(t`Groups`),
-      link: `${baseUrl}/groups`,
+      link: `${match.url}/groups`,
       id: 2,
     },
     {
       name: i18n._(t`Completed Jobs`),
-      link: `${baseUrl}/completed_jobs`,
+      link: `${match.url}/completed_jobs`,
       id: 3,
     },
   ];
-
-  if (inventoriesMatch) {
-    tabsArray.unshift({
-      name: (
-        <>
-          <CaretLeftIcon />
-          {i18n._(t`Back to Hosts`)}
-        </>
-      ),
-      link: hostListUrl,
-      id: 99,
-    });
-  }
 
   let cardHeader = (
     <TabbedCardHeader>
       <RoutedTabs tabsArray={tabsArray} />
       <CardActions>
-        <CardCloseButton linkTo={hostListUrl} />
+        <CardCloseButton linkTo="/hosts" />
       </CardActions>
     </TabbedCardHeader>
   );
@@ -124,7 +96,7 @@ function Host({ inventory, i18n, setBreadcrumb }) {
           {contentError.response && contentError.response.status === 404 && (
             <span>
               {i18n._(`Host not found.`)}{' '}
-              <Link to={hostListUrl}>{i18n._(`View all Hosts.`)}</Link>
+              <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
             </span>
           )}
         </ContentError>
@@ -132,72 +104,35 @@ function Host({ inventory, i18n, setBreadcrumb }) {
     );
   }
 
-  const redirect = hostsMatch ? (
-    <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
-  ) : (
-    <Redirect
-      from="/inventories/inventory/:id/hosts/:hostId"
-      to="/inventories/inventory/:id/hosts/:hostId/details"
-      exact
-    />
-  );
-
   return (
     <Card>
       {cardHeader}
       <Switch>
-        {redirect}
-        {host && (
-          <Route
-            path={[
-              '/hosts/:id/details',
-              '/inventories/inventory/:id/hosts/:hostId/details',
-            ]}
-          >
-            <HostDetail
-              host={host}
-              onUpdateHost={newHost => setHost(newHost)}
-            />
-          </Route>
-        )}
-        {host && (
-          <Route
-            path={[
-              '/hosts/:id/edit',
-              '/inventories/inventory/:id/hosts/:hostId/edit',
-            ]}
-            render={() => <HostEdit host={host} />}
-          />
-        )}
-        {host && (
-          <Route
-            path="/hosts/:id/facts"
-            render={() => <HostFacts host={host} />}
-          />
-        )}
-        {host && (
-          <Route
-            path="/hosts/:id/groups"
-            render={() => <HostGroups host={host} />}
-          />
-        )}
-        {host?.id && (
-          <Route
-            path={[
-              '/hosts/:id/completed_jobs',
-              '/inventories/inventory/:id/hosts/:hostId/completed_jobs',
-            ]}
-          >
+        <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
+        {host && [
+          <Route path="/hosts/:id/details" key="details">
+            <HostDetail host={host} />
+          </Route>,
+          <Route path="/hosts/:id/edit" key="edit">
+            <HostEdit host={host} />
+          </Route>,
+          <Route path="/hosts/:id/facts" key="facts">
+            <HostFacts host={host} />
+          </Route>,
+          <Route path="/hosts/:id/groups" key="groups">
+            <HostGroups host={host} />
+          </Route>,
+          <Route path="/hosts/:id/completed_jobs" key="completed-jobs">
             <JobList defaultParams={{ job__hosts: host.id }} />
-          </Route>
-        )}
+          </Route>,
+        ]}
         <Route
           key="not-found"
           path="*"
           render={() =>
             !hasContentLoading && (
               <ContentError isNotFound>
-                <Link to={`${baseUrl}/details`}>
+                <Link to={`${match.url}/details`}>
                   {i18n._(`View Host Details`)}
                 </Link>
               </ContentError>

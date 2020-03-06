@@ -3,12 +3,12 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { HostsAPI } from '@api';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import mockHost from '../data.host.json';
-import HostEdit from './HostEdit';
+import InventoryHostEdit from './InventoryHostEdit';
+import mockHost from '../shared/data.host.json';
 
 jest.mock('@api');
 
-describe('<HostEdit />', () => {
+describe('<InventoryHostEdit />', () => {
   let wrapper;
   let history;
 
@@ -21,9 +21,12 @@ describe('<HostEdit />', () => {
   beforeAll(async () => {
     history = createMemoryHistory();
     await act(async () => {
-      wrapper = mountWithContexts(<HostEdit host={mockHost} />, {
-        context: { router: { history } },
-      });
+      wrapper = mountWithContexts(
+        <InventoryHostEdit host={mockHost} inventory={{ id: 123 }} />,
+        {
+          context: { router: { history } },
+        }
+      );
     });
   });
 
@@ -39,19 +42,23 @@ describe('<HostEdit />', () => {
     expect(HostsAPI.update).toHaveBeenCalledWith(2, updatedHostData);
   });
 
-  test('should navigate to host detail when cancel is clicked', async () => {
+  test('should navigate to inventory host detail when cancel is clicked', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
     });
-    expect(history.location.pathname).toEqual('/hosts/2/details');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/123/hosts/2/details'
+    );
   });
 
-  test('should navigate to host detail after successful submission', async () => {
+  test('should navigate to inventory host detail after successful submission', async () => {
     await act(async () => {
       wrapper.find('HostForm').invoke('handleSubmit')(updatedHostData);
     });
     expect(wrapper.find('FormSubmitError').length).toBe(0);
-    expect(history.location.pathname).toEqual('/hosts/2/details');
+    expect(history.location.pathname).toEqual(
+      '/inventories/inventory/123/hosts/2/details'
+    );
   });
 
   test('failed form submission should show an error message', async () => {
