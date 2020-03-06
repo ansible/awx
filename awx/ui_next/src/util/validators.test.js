@@ -1,4 +1,4 @@
-import { required, maxLength } from './validators';
+import { required, maxLength, noWhiteSpace, combine } from './validators';
 
 const i18n = { _: val => val };
 
@@ -50,5 +50,32 @@ describe('validators', () => {
       id: 'This field must not exceed {max} characters',
       values: { max: 8 },
     });
+  });
+
+  test('noWhiteSpace returns error', () => {
+    expect(noWhiteSpace(i18n)('this has spaces')).toEqual({
+      id: 'This field must not contain spaces',
+    });
+    expect(noWhiteSpace(i18n)('this has\twhitespace')).toEqual({
+      id: 'This field must not contain spaces',
+    });
+    expect(noWhiteSpace(i18n)('this\nhas\nnewlines')).toEqual({
+      id: 'This field must not contain spaces',
+    });
+  });
+
+  test('noWhiteSpace should accept valid string', () => {
+    expect(noWhiteSpace(i18n)('this_has_no_whitespace')).toBeUndefined();
+  });
+
+  test('combine should run all validators', () => {
+    const validators = [required(null, i18n), noWhiteSpace(i18n)];
+    expect(combine(validators)('')).toEqual({
+      id: 'This field must not be blank',
+    });
+    expect(combine(validators)('one two')).toEqual({
+      id: 'This field must not contain spaces',
+    });
+    expect(combine(validators)('ok')).toBeUndefined();
   });
 });
