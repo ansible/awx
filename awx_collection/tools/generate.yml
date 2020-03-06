@@ -4,7 +4,7 @@
   connection: local
   gather_facts: False
   vars:
-    api_url: "https://192.168.56.109"
+    api_url: "https://localhost:8043"
     generate_for:
 #      - credential_types
 #      - groups
@@ -36,7 +36,7 @@
       file:
         state: directory
         name: "modules"
-    
+
     - name: Load api/v2
       uri:
         method: GET

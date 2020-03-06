@@ -21,7 +21,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: tower_{{ item_type }}
+module: tower_{{ singular_item_type }}
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower {{ human_readable }}.
@@ -31,9 +31,11 @@ description:
 options:
 {% for option in item['json']['actions']['POST'] %}
     {{ option }}:
-{% if 'help_text' in item['json']['actions']['POST'][option] %}
       description:
+{% if 'help_text' in item['json']['actions']['POST'][option] %}
         - {{ item['json']['actions']['POST'][option]['help_text'] }}
+{% else %}
+        - NO DESCRIPTION GIVEN IN THE TOWER API
 {% endif %}
       required: {{ item['json']['actions']['POST'][option]['required'] }}
       type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
@@ -60,6 +62,12 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -90,11 +98,15 @@ def main():
 {% endif %}
         ),
 {% if option == 'name' %}
+# TODO: Update the "if" case of username vs a name
         new_name=dict(required=False, type='str'),
 {% endif %}
 {% endfor %}
         state=dict(choices=['present', 'absent'], default='present'),
     )
+
+# TODO: Implement a way to also generate proper aliases for backwards compatibility
+# and also add the aliases to documentation!
 
     # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
@@ -111,7 +123,7 @@ def main():
         module.fail_msg(msg="The value for {{ option }} can not be larger than {{ item['json']['actions']['POST'][option]['max_value'] }}")
 {% endif %}
 {% if 'max_length' in item['json']['actions']['POST'][option] %}
-    if len({{ option }}) > {{ item['json']['actions']['POST'][option]['max_length'] }}:
+    if {{ option }} and len({{ option }}) > {{ item['json']['actions']['POST'][option]['max_length'] }}:
         module.fail_msg(msg="The value for {{ option }} can not be longer than {{ item['json']['actions']['POST'][option]['max_length'] }}")
 {% endif %}
 {% if option == 'name' %}
@@ -159,7 +171,7 @@ def main():
 {% if item['json']['actions']['POST'][option]['type'] == 'id' %}
         new_fields['{{ option }}'] = {{ option }}_id
 {% else %}
-        new_fields['{{ option }}'] == {{ option }}
+        new_fields['{{ option }}'] = {{ option }}
 {% endif %}
 {% endif %}
 {% endfor %}
@@ -174,4 +186,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
