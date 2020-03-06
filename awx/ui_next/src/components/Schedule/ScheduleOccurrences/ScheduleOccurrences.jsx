@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
 import { shape } from 'prop-types';
+import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { formatDateString, formatDateStringUTC } from '@util/dates';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { DetailName, DetailValue } from '@components/DetailList';
 import MultiButtonToggle from '@components/MultiButtonToggle';
+
+const OccurrencesLabel = styled.div`
+  display: inline-block;
+  font-size: var(--pf-c-form__label--FontSize);
+  font-weight: var(--pf-c-form__label--FontWeight);
+  line-height: var(--pf-c-form__label--LineHeight);
+  color: var(--pf-c-form__label--Color);
+
+  span:first-of-type {
+    font-weight: var(--pf-global--FontWeight--bold);
+    margin-right: 10px;
+  }
+`;
 
 function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
   const [mode, setMode] = useState('local');
@@ -23,17 +37,10 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
       >
         <Split gutter="sm">
           <SplitItem>
-            <div className="pf-c-form__label">
-              <span
-                className="pf-c-form__label-text"
-                css="font-weight: var(--pf-global--FontWeight--bold)"
-              >
-                {i18n._(t`Occurrences`)}
-              </span>
-              <span css="margin-left: 10px">
-                {i18n._(t`(Limited to first 10)`)}
-              </span>
-            </div>
+            <OccurrencesLabel>
+              <span>{i18n._(t`Occurrences`)}</span>
+              <span>{i18n._(t`(Limited to first 10)`)}</span>
+            </OccurrencesLabel>
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
