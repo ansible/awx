@@ -123,6 +123,16 @@ setuptools.setup(
 )
 ```
 
+Enable Custom Credential Plugins
+--------------------------------
+
+Once the Python package has been installed, `awx-manage` must be used in order
+to take in account the new credential plugin:
+
+```shell
+# awx-manage setup_managed_credential_types
+```
+
 Programmatic Secret Fetching
 ----------------------------
 If you want to programmatically fetch secrets from a supported external secret
