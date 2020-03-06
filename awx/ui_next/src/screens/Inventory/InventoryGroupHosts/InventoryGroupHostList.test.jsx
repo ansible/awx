@@ -108,6 +108,45 @@ describe('<InventoryGroupHostList />', () => {
     expect(wrapper.find('AddHostDropdown').length).toBe(0);
   });
 
+  test('expected api calls are made for multi-delete', async () => {
+    expect(GroupsAPI.disassociateHost).toHaveBeenCalledTimes(0);
+    expect(GroupsAPI.readAllHosts).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      wrapper.find('Checkbox#select-all').invoke('onChange')(true);
+    });
+    wrapper.update();
+    wrapper.find('button[aria-label="Disassociate"]').simulate('click');
+    expect(wrapper.find('AlertModal Title').text()).toEqual(
+      'Disassociate host from group?'
+    );
+    await act(async () => {
+      wrapper
+        .find('button[aria-label="confirm disassociate"]')
+        .simulate('click');
+    });
+    expect(GroupsAPI.disassociateHost).toHaveBeenCalledTimes(3);
+    expect(GroupsAPI.readAllHosts).toHaveBeenCalledTimes(2);
+  });
+
+  test('should show error modal for failed disassociation', async () => {
+    GroupsAPI.disassociateHost.mockRejectedValue(new Error());
+    await act(async () => {
+      wrapper.find('Checkbox#select-all').invoke('onChange')(true);
+    });
+    wrapper.update();
+    wrapper.find('button[aria-label="Disassociate"]').simulate('click');
+    expect(wrapper.find('AlertModal Title').text()).toEqual(
+      'Disassociate host from group?'
+    );
+    await act(async () => {
+      wrapper
+        .find('button[aria-label="confirm disassociate"]')
+        .simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
+  });
+
   test('should show associate host modal when adding an existing host', () => {
     const dropdownToggle = wrapper.find(
       'DropdownToggle button[aria-label="add host"]'
