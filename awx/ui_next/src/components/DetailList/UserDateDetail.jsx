@@ -6,7 +6,7 @@ import { formatDateString } from '@util/dates';
 import Detail from './Detail';
 import { SummaryFieldUser } from '../../types';
 
-function UserDateDetail({ label, date, user, dataCy = null}) {
+function UserDateDetail({ label, date, user, dataCy = null }) {
   const dateStr = formatDateString(date);
   const username = user ? user.username : '';
   return (

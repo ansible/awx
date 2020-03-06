@@ -79,12 +79,12 @@ function HostDetail({ host, i18n, onUpdateHost }) {
         css="padding-bottom: 40px"
       />
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} dataCy="host-name"/>
+        <Detail label={i18n._(t`Name`)} value={name} dataCy="host-name" />
         <Detail
           value={<Sparkline jobs={recentPlaybookJobs} />}
           label={i18n._(t`Activity`)}
         />
-        <Detail label={i18n._(t`Description`)} value={description}/>
+        <Detail label={i18n._(t`Description`)} value={description} />
         {inventory && (
           <Detail
             label={i18n._(t`Inventory`)}
