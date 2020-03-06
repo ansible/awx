@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CardBody } from '@components/Card';
+import HostForm from '@components/HostForm';
 import { HostsAPI } from '@api';
 import HostForm from '../shared';
 

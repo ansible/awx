@@ -6,43 +6,43 @@ import HostForm from './HostForm';
 
 jest.mock('@api');
 
+const mockData = {
+  id: 1,
+  name: 'Foo',
+  description: 'Bar',
+  variables: '---',
+  inventory: 1,
+  summary_fields: {
+    inventory: {
+      id: 1,
+      name: 'Test Inv',
+    },
+  },
+};
+
 describe('<HostForm />', () => {
-  const meConfig = {
-    me: {
-      is_superuser: false,
-    },
-  };
-  const mockData = {
-    id: 1,
-    name: 'Foo',
-    description: 'Bar',
-    variables: '---',
-    inventory: 1,
-    summary_fields: {
-      inventory: {
-        id: 1,
-        name: 'Test Inv',
-      },
-    },
-  };
+  let wrapper;
+  const handleSubmit = jest.fn();
+  const handleCancel = jest.fn();
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('changing inputs should update form values', async () => {
-    let wrapper;
+  beforeEach(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <HostForm
           host={mockData}
-          handleSubmit={jest.fn()}
-          handleCancel={jest.fn()}
-          me={meConfig.me}
+          handleSubmit={handleSubmit}
+          handleCancel={handleCancel}
         />
       );
     });
+  });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
+
+  test('changing inputs should update form values', async () => {
     await act(async () => {
       wrapper.find('input#host-name').simulate('change', {
         target: { value: 'new foo', name: 'name' },
@@ -59,35 +59,30 @@ describe('<HostForm />', () => {
   });
 
   test('calls handleSubmit when form submitted', async () => {
-    const handleSubmit = jest.fn();
-    const wrapper = mountWithContexts(
-      <HostForm
-        host={mockData}
-        handleSubmit={handleSubmit}
-        handleCancel={jest.fn()}
-        me={meConfig.me}
-      />
-    );
     expect(handleSubmit).not.toHaveBeenCalled();
     await act(async () => {
       wrapper.find('button[aria-label="Save"]').simulate('click');
     });
-    expect(handleSubmit).toHaveBeenCalled();
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
   });
 
   test('calls "handleCancel" when Cancel button is clicked', () => {
-    const handleCancel = jest.fn();
-
-    const wrapper = mountWithContexts(
-      <HostForm
-        host={mockData}
-        handleSubmit={jest.fn()}
-        handleCancel={handleCancel}
-        me={meConfig.me}
-      />
-    );
     expect(handleCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').prop('onClick')();
-    expect(handleCancel).toBeCalled();
+    expect(handleCancel).toHaveBeenCalledTimes(1);
+  });
+
+  test('should hide inventory lookup field', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <HostForm
+          host={mockData}
+          handleSubmit={jest.fn()}
+          handleCancel={jest.fn()}
+          isInventoryVisible={false}
+        />
+      );
+    });
+    expect(wrapper.find('InventoryLookupField').length).toBe(0);
   });
 });

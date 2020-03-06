@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
-import { func, shape } from 'prop-types';
-
-import { useRouteMatch } from 'react-router-dom';
+import { bool, func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Form, FormGroup } from '@patternfly/react-core';
-
 import FormField, {
   FormSubmitError,
   FieldTooltip,
 } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import { VariablesField } from '@components/CodeMirrorInput';
-import { required } from '@util/validators';
 import { InventoryLookup } from '@components/Lookup';
 import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
+import { required } from '@util/validators';
 
 const InventoryLookupField = withI18n()(({ i18n, host }) => {
   const [inventory, setInventory] = useState(
@@ -57,9 +54,14 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
   );
 });
 
-const HostForm = ({ handleCancel, handleSubmit, host, i18n, submitError }) => {
-  const hostAddMatch = useRouteMatch('/hosts/add');
-
+const HostForm = ({
+  handleCancel,
+  handleSubmit,
+  host,
+  isInventoryVisible,
+  i18n,
+  submitError,
+}) => {
   return (
     <Formik
       initialValues={{
@@ -87,7 +89,7 @@ const HostForm = ({ handleCancel, handleSubmit, host, i18n, submitError }) => {
               type="text"
               label={i18n._(t`Description`)}
             />
-            {hostAddMatch && <InventoryLookupField host={host} />}
+            {isInventoryVisible && <InventoryLookupField host={host} />}
             <FormFullWidthLayout>
               <VariablesField
                 id="host-variables"
@@ -95,7 +97,7 @@ const HostForm = ({ handleCancel, handleSubmit, host, i18n, submitError }) => {
                 label={i18n._(t`Variables`)}
               />
             </FormFullWidthLayout>
-            <FormSubmitError error={submitError} />
+            {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={handleCancel}
               onSubmit={formik.handleSubmit}
@@ -111,6 +113,7 @@ HostForm.propTypes = {
   handleCancel: func.isRequired,
   handleSubmit: func.isRequired,
   host: shape({}),
+  isInventoryVisible: bool,
   submitError: shape({}),
 };
 
@@ -124,6 +127,7 @@ HostForm.defaultProps = {
       inventory: null,
     },
   },
+  isInventoryVisible: true,
   submitError: null,
 };
 
