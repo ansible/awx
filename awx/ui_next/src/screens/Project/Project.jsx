@@ -9,7 +9,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import NotificationList from '@components/NotificationList';
 import { ResourceAccessList } from '@components/ResourceAccessList';
-import ScheduleList from '@components/ScheduleList';
+import { Schedules } from '@components/Schedule';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
@@ -31,6 +31,7 @@ class Project extends Component {
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
+    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
   }
 
   async componentDidMount() {
@@ -104,13 +105,18 @@ class Project extends Component {
     }
   }
 
+  loadScheduleOptions() {
+    const { project } = this.state;
+    return ProjectsAPI.readScheduleOptions(project.id);
+  }
+
   loadSchedules(params) {
     const { project } = this.state;
-    return ProjectsAPI.readScheduleList(project.id, params);
+    return ProjectsAPI.readSchedules(project.id, params);
   }
 
   render() {
-    const { location, match, me, i18n } = this.props;
+    const { location, match, me, i18n, setBreadcrumb } = this.props;
 
     const {
       project,
@@ -169,7 +175,10 @@ class Project extends Component {
       cardHeader = null;
     }
 
-    if (location.pathname.endsWith('edit')) {
+    if (
+      location.pathname.endsWith('edit') ||
+      location.pathname.includes('schedules/')
+    ) {
       cardHeader = null;
     }
 
@@ -241,7 +250,12 @@ class Project extends Component {
               <Route
                 path="/projects/:id/schedules"
                 render={() => (
-                  <ScheduleList loadSchedules={this.loadSchedules} />
+                  <Schedules
+                    setBreadcrumb={setBreadcrumb}
+                    unifiedJobTemplate={project}
+                    loadSchedules={this.loadSchedules}
+                    loadScheduleOptions={this.loadScheduleOptions}
+                  />
                 )}
               />
             )}

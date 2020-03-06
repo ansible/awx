@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { SchedulesAPI } from '@api';
 import ScheduleList from './ScheduleList';
-import mockSchedules from './data.schedules.json';
+import mockSchedules from '../data.schedules.json';
 
 jest.mock('@api/models/Schedules');
 
@@ -11,6 +11,18 @@ SchedulesAPI.destroy = jest.fn();
 SchedulesAPI.update.mockResolvedValue({
   data: mockSchedules.results[0],
 });
+SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
+SchedulesAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: {
+      GET: {},
+      POST: {},
+    },
+  },
+});
+
+const loadSchedules = params => SchedulesAPI.read(params);
+const loadScheduleOptions = () => SchedulesAPI.readOptions();
 
 describe('ScheduleList', () => {
   let wrapper;
@@ -21,11 +33,12 @@ describe('ScheduleList', () => {
 
   describe('read call successful', () => {
     beforeAll(async () => {
-      SchedulesAPI.read.mockResolvedValue({ data: mockSchedules });
-      const loadSchedules = params => SchedulesAPI.read(params);
       await act(async () => {
         wrapper = mountWithContexts(
-          <ScheduleList loadSchedules={loadSchedules} />
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+          />
         );
       });
       wrapper.update();
@@ -38,6 +51,10 @@ describe('ScheduleList', () => {
     test('should fetch schedules from api and render the list', () => {
       expect(SchedulesAPI.read).toHaveBeenCalled();
       expect(wrapper.find('ScheduleListItem').length).toBe(5);
+    });
+
+    test('should show add button', () => {
+      expect(wrapper.find('ToolbarAddButton').length).toBe(1);
     });
 
     test('should check and uncheck the row item', async () => {
@@ -153,11 +170,32 @@ describe('ScheduleList', () => {
     });
   });
 
+  describe('hidden add button', () => {
+    test('should hide add button when flag is passed', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+            hideAddButton
+          />
+        );
+      });
+      wrapper.update();
+      expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    });
+  });
+
   describe('read call unsuccessful', () => {
     test('should show content error when read call unsuccessful', async () => {
       SchedulesAPI.read.mockRejectedValue(new Error());
       await act(async () => {
-        wrapper = mountWithContexts(<ScheduleList />);
+        wrapper = mountWithContexts(
+          <ScheduleList
+            loadSchedules={loadSchedules}
+            loadScheduleOptions={loadScheduleOptions}
+          />
+        );
       });
       wrapper.update();
       expect(wrapper.find('ContentError').length).toBe(1);

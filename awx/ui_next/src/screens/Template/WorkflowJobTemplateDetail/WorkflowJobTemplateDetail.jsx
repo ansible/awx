@@ -25,7 +25,7 @@ import LaunchButton from '@components/LaunchButton';
 import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
-function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
+function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
   const {
     id,
     ask_inventory_on_launch,
@@ -39,12 +39,15 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
     related,
     webhook_credential,
   } = template;
+
   const urlOrigin = window.location.origin;
   const history = useHistory();
+
   const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
+
   const renderOptionsField =
-    template.allow_simultaneous || template.webhook_servicee;
+    template.allow_simultaneous || template.webhook_service;
 
   const renderOptions = (
     <TextList component={TextListVariants.ul}>
@@ -55,7 +58,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
       )}
       {template.webhook_service && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`- Webhooks`)}
+          {i18n._(t`- Enable Webhook`)}
         </TextListItem>
       )}
     </TextList>
@@ -75,6 +78,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
     }
     setHasContentLoading(false);
   };
+
   const inventoryValue = (kind, inventoryId) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
@@ -91,6 +95,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
       </Link>
     );
   };
+
   const canLaunch = summary_fields?.user_capabilities?.start;
   const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
     ...job,
@@ -143,7 +148,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webHookKey }) {
             value={`${urlOrigin}${template.related.webhook_receiver}`}
           />
         )}
-        <Detail label={i18n._(t`Webhook Key`)} value={webHookKey} />
+        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
         {webhook_credential && (
           <Detail
             fullWidth

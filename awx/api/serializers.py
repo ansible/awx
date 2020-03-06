@@ -4054,6 +4054,13 @@ class JobLaunchSerializer(BaseSerializer):
             **attrs)
         self._ignored_fields = rejected
 
+        # Basic validation - cannot run a playbook without a playbook
+        if not template.project:
+            errors['project'] = _("A project is required to run a job.")
+        elif template.project.status in ('error', 'failed'):
+            errors['playbook'] = _("Missing a revision to run due to failed project update.")
+
+        # cannot run a playbook without an inventory
         if template.inventory and template.inventory.pending_deletion is True:
             errors['inventory'] = _("The inventory associated with this Job Template is being deleted.")
         elif 'inventory' in accepted and accepted['inventory'].pending_deletion:

@@ -1,0 +1,86 @@
+{
+  "id": 2,
+  "type": "host",
+  "url": "/api/v2/hosts/2/",
+  "related": {
+      "created_by": "/api/v2/users/1/",
+      "modified_by": "/api/v2/users/1/",
+      "variable_data": "/api/v2/hosts/2/variable_data/",
+      "groups": "/api/v2/hosts/2/groups/",
+      "all_groups": "/api/v2/hosts/2/all_groups/",
+      "job_events": "/api/v2/hosts/2/job_events/",
+      "job_host_summaries": "/api/v2/hosts/2/job_host_summaries/",
+      "activity_stream": "/api/v2/hosts/2/activity_stream/",
+      "inventory_sources": "/api/v2/hosts/2/inventory_sources/",
+      "smart_inventories": "/api/v2/hosts/2/smart_inventories/",
+      "ad_hoc_commands": "/api/v2/hosts/2/ad_hoc_commands/",
+      "ad_hoc_command_events": "/api/v2/hosts/2/ad_hoc_command_events/",
+      "insights": "/api/v2/hosts/2/insights/",
+      "ansible_facts": "/api/v2/hosts/2/ansible_facts/",
+      "inventory": "/api/v2/inventories/3/",
+      "last_job": "/api/v2/jobs/3/",
+      "last_job_host_summary": "/api/v2/job_host_summaries/1/"
+  },
+  "summary_fields": {
+      "inventory": {
+          "id": 3,
+          "name": "Mikes Inventory",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 3,
+          "hosts_with_active_failures": 0,
+          "total_groups": 0,
+          "groups_with_active_failures": 0,
+          "has_inventory_sources": true,
+          "total_inventory_sources": 1,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 3,
+          "kind": ""
+      },
+      "last_job": {
+          "id": 3,
+          "name": "Ping",
+          "description": "",
+          "finished": "2019-10-28T21:29:08.880572Z",
+          "status": "successful",
+          "failed": false,
+          "job_template_id": 9,
+          "job_template_name": "Ping"
+      },
+      "last_job_host_summary": {
+          "id": 1,
+          "failed": false
+      },
+      "user_capabilities": {
+          "edit": true,
+          "delete": true
+      },
+      "groups": {
+          "count": 0,
+          "results": []
+      },
+      "recent_jobs": [
+          {
+              "id": 3,
+              "name": "Ping",
+              "status": "successful",
+              "finished": "2019-10-28T21:29:08.880572Z",
+              "type": "job"
+          }
+      ]
+  },
+  "created": "2019-10-28T21:26:54.508081Z",
+  "modified": "2019-10-29T20:18:41.915796Z",
+  "name": "localhost",
+  "description": "localhost description",
+  "inventory": 3,
+  "enabled": true,
+  "instance_id": "",
+  "variables": "---\nansible_connection: local",
+  "has_active_failures": false,
+  "has_inventory_sources": false,
+  "last_job": 3,
+  "last_job_host_summary": 1,
+  "insights_system_id": null,
+  "ansible_facts_modified": null
+}

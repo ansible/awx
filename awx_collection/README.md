@@ -8,6 +8,25 @@ inside the folder `lib/ansible/modules/web_infrastructure/ansible_tower`
 as well as other folders for the inventory plugin, module utils, and
 doc fragment.
 
+## Building and Installing
+
+This collection templates the `galaxy.yml` file it uses.
+Run `make build_collection` from the root folder of the AWX source tree.
+This will create the `tar.gz` file inside the `awx_collection` folder
+with the current AWX version, for example: `awx_collection/awx-awx-9.2.0.tar.gz`.
+
+Installing the `tar.gz` involves no special instructions.
+
+## Running
+
+Modules in this collection may have any of the following python requirements:
+
+ - the official [AWX CLI](https://docs.ansible.com/ansible-tower/latest/html/towercli/index.html)
+ - the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/)
+ - no requirements
+
+See requirements in the `DOCUMENTATION` string specific to each module.
+
 ## Release and Upgrade Notes
 
 The release 7.0.0 of the `awx.awx` collection is intended to be identical
@@ -26,16 +45,6 @@ The following notes are changes that may require changes to playbooks:
  - Specified `tower_config` file used to handle `k=v` pairs on a single line; this is no longer supported. Please use a file formatted as `yaml`, `json` or `ini` only.
  - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules are now in `dict` format and no longer supports the use of the `C(@)` syntax (for an external `vars` file).
  - Some return values (e.g., `credential_type`) have been removed. Use of `id` is recommended.
-
-## Running
-
-To use this collection, the "old" `tower-cli` needs to be installed
-in the virtual environment where the collection runs.
-You can install it from [PyPI](https://pypi.org/project/ansible-tower-cli/).
-
-To use this collection in AWX, you should create a custom virtual environment into which to install the requirements. NOTE: running locally, you will also need
-to set the job template `extra_vars` to include `ansible_python_interpreter`
-to be the Python in that virtual environment.
 
 ## Running Unit Tests
 
@@ -71,7 +80,7 @@ pip install -e .
 PYTHONPATH=awx_collection:$PYTHONPATH py.test awx_collection/test/awx/
 ```
 
-## Running Integration tests Tests
+## Running Integration Tests
 
 The integration tests require a virtualenv with `ansible` >= 2.9 and `tower_cli`.
 The collection must first be installed, which can be done using `make install_collection`.
@@ -94,12 +103,6 @@ Finally you can run the tests:
 cd ~/.ansible/collections/ansible_collections/awx/awx/
 ansible-test integration
 ```
-
-## Building
-
-The build target `make build_collection` will template out a `galaxy.yml` file
-with automatic detection of the current AWX version. Then it builds the
-collection with the `ansible-galaxy` CLI.
 
 ## Licensing
 

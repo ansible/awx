@@ -2429,6 +2429,9 @@ class ScheduleAccess(BaseAccess):
     def can_add(self, data):
         if not JobLaunchConfigAccess(self.user).can_add(data):
             return False
+        if not data:
+            return Role.objects.filter(role_field__in=['update_role', 'execute_role'], ancestors__in=self.user.roles.all()).exists()
+
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
 
     @check_superuser

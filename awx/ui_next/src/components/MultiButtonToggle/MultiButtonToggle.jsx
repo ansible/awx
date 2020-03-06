@@ -21,6 +21,7 @@ function MultiButtonToggle({ buttons, value, onChange }) {
       {buttons &&
         buttons.map(([buttonValue, buttonLabel]) => (
           <SmallButton
+            aria-label={buttonLabel}
             key={buttonLabel}
             onClick={() => setValue(buttonValue)}
             variant={buttonValue === value ? 'primary' : 'secondary'}

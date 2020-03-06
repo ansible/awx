@@ -1,9 +1,9 @@
 import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
-import Schedules from './Schedules';
+import AllSchedules from './AllSchedules';
 
-describe('<Schedules />', () => {
+describe('<AllSchedules />', () => {
   let wrapper;
 
   afterEach(() => {
@@ -11,7 +11,7 @@ describe('<Schedules />', () => {
   });
 
   test('initially renders succesfully', () => {
-    wrapper = mountWithContexts(<Schedules />);
+    wrapper = mountWithContexts(<AllSchedules />);
   });
 
   test('should display schedule list breadcrumb heading', () => {
@@ -19,7 +19,7 @@ describe('<Schedules />', () => {
       initialEntries: ['/schedules'],
     });
 
-    wrapper = mountWithContexts(<Schedules />, {
+    wrapper = mountWithContexts(<AllSchedules />, {
       context: {
         router: {
           history,

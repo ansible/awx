@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
-  DataListAction,
+  DataListAction as _DataListAction,
   DataListCell,
   DataListCheck,
   DataListItem,
@@ -18,6 +18,14 @@ import StatusIcon from '@components/StatusIcon';
 import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '@constants';
+import styled from 'styled-components';
+
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: 40px;
+`;
 
 function JobListItem({
   i18n,
@@ -63,24 +71,26 @@ function JobListItem({
             </DataListCell>,
           ]}
         />
-        {job.type !== 'system_job' &&
-          job.summary_fields?.user_capabilities?.start && (
-            <DataListAction
-              aria-label="actions"
-              aria-labelledby={labelId}
-              id={labelId}
-            >
-              <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
-                <LaunchButton resource={job}>
-                  {({ handleRelaunch }) => (
-                    <Button variant="plain" onClick={handleRelaunch}>
-                      <RocketIcon />
-                    </Button>
-                  )}
-                </LaunchButton>
-              </Tooltip>
-            </DataListAction>
+        <DataListAction
+          aria-label="actions"
+          aria-labelledby={labelId}
+          id={labelId}
+        >
+          {job.type !== 'system_job' &&
+          job.summary_fields?.user_capabilities?.start ? (
+            <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
+              <LaunchButton resource={job}>
+                {({ handleRelaunch }) => (
+                  <Button variant="plain" onClick={handleRelaunch}>
+                    <RocketIcon />
+                  </Button>
+                )}
+              </LaunchButton>
+            </Tooltip>
+          ) : (
+            ''
           )}
+        </DataListAction>
       </DataListItemRow>
     </DataListItem>
   );

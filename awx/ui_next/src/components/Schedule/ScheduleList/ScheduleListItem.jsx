@@ -15,16 +15,16 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { DetailList, Detail } from '@components/DetailList';
+import { ScheduleToggle } from '@components/Schedule';
 import styled from 'styled-components';
 import { Schedule } from '@types';
 import { formatDateString } from '@util/dates';
-import ScheduleToggle from './ScheduleToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 16px;
-  grid-template-columns: auto 40px;
+  grid-template-columns: 92px 40px;
 `;
 
 function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
@@ -104,7 +104,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
               key="actions"
             >
               <ScheduleToggle schedule={schedule} />
-              {schedule.summary_fields.user_capabilities.edit && (
+              {schedule.summary_fields.user_capabilities.edit ? (
                 <Tooltip content={i18n._(t`Edit Schedule`)} position="top">
                   <Button
                     css="grid-column: 2"
@@ -115,6 +115,8 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
                     <PencilAltIcon />
                   </Button>
                 </Tooltip>
+              ) : (
+                ''
               )}
             </DataListAction>,
           ]}

@@ -24,7 +24,7 @@ const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 24px;
-  grid-template-columns: min-content 40px;
+  grid-template-columns: 92px 40px;
 `;
 
 function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
@@ -77,7 +77,7 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
           id={labelId}
         >
           <HostToggle host={host} />
-          {host.summary_fields.user_capabilities.edit && (
+          {host.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Host`)} position="top">
               <Button
                 variant="plain"
@@ -87,6 +87,8 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
                 <PencilAltIcon />
               </Button>
             </Tooltip>
+          ) : (
+            ''
           )}
         </DataListAction>
       </DataListItemRow>

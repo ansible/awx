@@ -1,8 +1,11 @@
 import Base from '../Base';
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import LaunchUpdateMixin from '../mixins/LaunchUpdate.mixin';
+import SchedulesMixin from '../mixins/Schedules.mixin';
 
-class Projects extends LaunchUpdateMixin(NotificationsMixin(Base)) {
+class Projects extends SchedulesMixin(
+  LaunchUpdateMixin(NotificationsMixin(Base))
+) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/projects/';
@@ -19,10 +22,6 @@ class Projects extends LaunchUpdateMixin(NotificationsMixin(Base)) {
 
   readPlaybooks(id) {
     return this.http.get(`${this.baseUrl}${id}/playbooks/`);
-  }
-
-  readScheduleList(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
   }
 
   readSync(id) {

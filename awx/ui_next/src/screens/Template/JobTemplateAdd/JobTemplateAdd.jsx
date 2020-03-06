@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Card } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
 import JobTemplateForm from '../shared/JobTemplateForm';
 import { JobTemplatesAPI } from '@api';
@@ -61,15 +61,17 @@ function JobTemplateAdd() {
   }
 
   return (
-    <Card>
-      <CardBody>
-        <JobTemplateForm
-          handleCancel={handleCancel}
-          handleSubmit={handleSubmit}
-          submitError={formSubmitError}
-        />
-      </CardBody>
-    </Card>
+    <PageSection>
+      <Card>
+        <CardBody>
+          <JobTemplateForm
+            handleCancel={handleCancel}
+            handleSubmit={handleSubmit}
+            submitError={formSubmitError}
+          />
+        </CardBody>
+      </Card>
+    </PageSection>
   );
 }
 

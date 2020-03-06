@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Button,
-  DataListAction,
+  DataListAction as _DataListAction,
   DataListCell,
   DataListCheck,
   DataListItem,
@@ -12,10 +12,18 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 import { Team } from '@types';
+
+const DataListAction = styled(_DataListAction)`
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: 40px;
+`;
 
 class TeamListItem extends React.Component {
   static propTypes = {
@@ -64,7 +72,7 @@ class TeamListItem extends React.Component {
             aria-labelledby={labelId}
             id={labelId}
           >
-            {team.summary_fields.user_capabilities.edit && (
+            {team.summary_fields.user_capabilities.edit ? (
               <Tooltip content={i18n._(t`Edit Team`)} position="top">
                 <Button
                   variant="plain"
@@ -74,6 +82,8 @@ class TeamListItem extends React.Component {
                   <PencilAltIcon />
                 </Button>
               </Tooltip>
+            ) : (
+              ''
             )}
           </DataListAction>
         </DataListItemRow>

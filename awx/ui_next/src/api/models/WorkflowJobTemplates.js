@@ -1,9 +1,36 @@
 import Base from '../Base';
+import SchedulesMixin from '../mixins/Schedules.mixin';
 
-class WorkflowJobTemplates extends Base {
+class WorkflowJobTemplates extends SchedulesMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/workflow_job_templates/';
+  }
+
+  readWebhookKey(id) {
+    return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
+  }
+
+  updateWebhookKey(id) {
+    return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
+  }
+
+  associateLabel(id, label, orgId) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      name: label.name,
+      organization: orgId,
+    });
+  }
+
+  createNode(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/workflow_nodes/`, data);
+  }
+
+  disassociateLabel(id, label) {
+    return this.http.post(`${this.baseUrl}${id}/labels/`, {
+      id: label.id,
+      disassociate: true,
+    });
   }
 
   launch(id, data) {
@@ -18,18 +45,6 @@ class WorkflowJobTemplates extends Base {
     return this.http.get(`${this.baseUrl}${id}/workflow_nodes/`, {
       params,
     });
-  }
-
-  readWebhookKey(id) {
-    return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
-  }
-
-  createNode(id, data) {
-    return this.http.post(`${this.baseUrl}${id}/workflow_nodes/`, data);
-  }
-
-  readScheduleList(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/schedules/`, { params });
   }
 }
 
