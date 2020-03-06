@@ -230,6 +230,8 @@ def query_info(since, collection_type):
 @table_version('events_table.csv', '1.1')
 @table_version('unified_jobs_table.csv', '1.0')
 @table_version('unified_job_template_table.csv', '1.0')
+@table_version('workflow_job_node_table.csv', '1.0')
+@table_version('workflow_job_template_node_table.csv', '1.0')
 def copy_tables(since, full_path):
     def _copy_table(table, query, path):
         file_path = os.path.join(path, table + '_table.csv')
@@ -311,4 +313,66 @@ def copy_tables(since, full_path):
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
                                  ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
     _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
+
+    workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
+                                 main_workflowjobnode.created,
+                                 main_workflowjobnode.modified, 
+                                 main_workflowjobnode.job_id, 
+                                 main_workflowjobnode.unified_job_template_id, 
+                                 main_workflowjobnode.workflow_job_id, 
+                                 main_workflowjobnode.inventory_id, 
+                                 success_nodes.nodes AS success_nodes,
+                                 failure_nodes.nodes AS failure_nodes,
+                                 always_nodes.nodes AS always_nodes,
+                                 main_workflowjobnode.do_not_run, 
+                                 main_workflowjobnode.all_parents_must_converge
+                                 FROM main_workflowjobnode
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_success_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) success_nodes ON main_workflowjobnode.id = success_nodes.from_workflowjobnode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_failure_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) failure_nodes ON main_workflowjobnode.id = failure_nodes.from_workflowjobnode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_always_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
+                                 WHERE main_workflowjobnode.modified > {}
+                                 ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+    _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
+
+    workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
+                                 main_workflowjobtemplatenode.created,
+                                 main_workflowjobtemplatenode.modified, 
+                                 main_workflowjobtemplatenode.unified_job_template_id, 
+                                 main_workflowjobtemplatenode.workflow_job_template_id, 
+                                 main_workflowjobtemplatenode.inventory_id, 
+                                 success_nodes.nodes AS success_nodes,
+                                 failure_nodes.nodes AS failure_nodes,
+                                 always_nodes.nodes AS always_nodes,
+                                 main_workflowjobtemplatenode.all_parents_must_converge
+                                 FROM main_workflowjobtemplatenode
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_success_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) success_nodes ON main_workflowjobtemplatenode.id = success_nodes.from_workflowjobtemplatenode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_failure_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) failure_nodes ON main_workflowjobtemplatenode.id = failure_nodes.from_workflowjobtemplatenode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_always_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) always_nodes ON main_workflowjobtemplatenode.id = always_nodes.from_workflowjobtemplatenode_id
+                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+    _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)
+
     return
