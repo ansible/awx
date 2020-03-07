@@ -48,6 +48,12 @@ options:
         - '{{ choice[0] }}'
 {% endfor %}
 {%endif %}
+{% if aliases[item_type][option] | default(False) %}
+      aliases:
+{% for alias_name in aliases[item_type][option] %}
+        - {{ alias_name }}
+{% endfor %}
+{% endif %}
 {% if option == 'name' %}
     new_name:
       description:
@@ -96,6 +102,13 @@ def main():
 {% if 'default' in item['json']['actions']['POST'][option] %}
             default='{{ item['json']['actions']['POST'][option]['default'] }}',
 {% endif %}
+{% if aliases[item_type][option] | default(False) %}
+            aliases=[
+{% for alias_name in aliases[item_type][option] %}
+                '{{ alias_name }}',
+{% endfor %}
+            ],
+{% endif %}
         ),
 {% if option == 'name' %}
 # TODO: Update the "if" case of username vs a name
@@ -104,9 +117,6 @@ def main():
 {% endfor %}
         state=dict(choices=['present', 'absent'], default='present'),
     )
-
-# TODO: Implement a way to also generate proper aliases for backwards compatibility
-# and also add the aliases to documentation!
 
     # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)

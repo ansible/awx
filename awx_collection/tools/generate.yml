@@ -4,22 +4,10 @@
   connection: local
   gather_facts: False
   vars:
-    api_url: "https://localhost:8043"
-    generate_for:
-#      - credential_types
-#      - groups
-#      - hosts
-#      - inventorues
-#      - inventory_sources
-#      - organizations
-#      - projects
-#      - teams
-#      - users
-      - job_templates
-      - credentials
-      - notification_templates
-      - labels
-
+    api_url: "https://192.168.56.109"
+  vars_files:
+    - vars/generate_for.yml
+    - vars/aliases.yml
   module_defaults:
     uri:
       validate_certs: False
@@ -51,26 +39,19 @@
       loop_control:
         label: "{{ item.key }}"
       register: end_point_options
-      when: "item.key in generate_for"
+      when: "generate_for is not defined or item.key in generate_for"
 
-    #- name: Scan POST options for different things
-    #  #set_fact:
-    #  #  all_options: "{{ all_options | default({}) | combine(options) }}"
-    #  debug:
-    #    msg: "{{ options }}"
-    #  loop: "{{ end_point_options.results }}"
-    #  vars:
-    #    options: "{{ item | json_query('json.actions.POST.[*]') }}"
-    #  loop_control:
-    #    label: "{{ item['item']['key'] }}"
-    #  when:
-    #    - item is not skipped
-    #    - options is defined
-
-    #- debug:
-    #    msg: "{{ all_options }}"
-
-    #- meta: end_play
+    - name: Scan POST options for different things
+      set_fact:
+        all_options: "{{ all_options | default({}) | combine(options) }}"
+      loop: "{{ end_point_options.results }}"
+      vars:
+        options: "{{ item | json_query('json.actions.POST.[*]') }}"
+      loop_control:
+        label: "{{ item['item']['key'] }}"
+      when:
+        - item is not skipped
+        - options is defined
 
     - name: Process endpoint
       template:
