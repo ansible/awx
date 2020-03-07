@@ -7,6 +7,7 @@
  #   singular_item_type: the type of an item replace singularized i.e. team
  #   type_map: a mapping of things like string to str
  #}
+{% set name_option = 'username' if item_type == 'users' else 'name' %}
 
 # (c) {{ ansible_date_time['year'] }}, John Westcott IV <john.westcott.iv@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -54,10 +55,10 @@ options:
         - {{ alias_name }}
 {% endfor %}
 {% endif %}
-{% if option == 'name' %}
-    new_name:
+{% if option == name_option %}
+    new_{{ name_option }}:
       description:
-        - To use when changing a team's name.
+        - Setting this option will change the existing name (looed up via the {{ name_option }} field.
       required: True
       type: str
 {% endif %}
@@ -86,33 +87,32 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
 {% for option in item['json']['actions']['POST'] %}
-        {{ option }}=dict(
-            required={{ item['json']['actions']['POST'][option]['required'] }},
-            type='{{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}',
-{% if item['json']['actions']['POST'][option]['type'] == 'password' %}
-            no_log=True,
-{% endif %}
-{% if 'choices' in item['json']['actions']['POST'][option] %}
-            choices=[
-{% for choice in item['json']['actions']['POST'][option]['choices'] %}
-              '{{ choice[0] }}',
-{% endfor %}
-            ],
-{% endif %}
-{% if 'default' in item['json']['actions']['POST'][option] %}
-            default='{{ item['json']['actions']['POST'][option]['default'] }}',
-{% endif %}
-{% if aliases[item_type][option] | default(False) %}
-            aliases=[
-{% for alias_name in aliases[item_type][option] %}
-                '{{ alias_name }}',
-{% endfor %}
-            ],
-{% endif %}
-        ),
-{% if option == 'name' %}
-# TODO: Update the "if" case of username vs a name
-        new_name=dict(required=False, type='str'),
+{%   set option_data = [] %}
+{{   option_data.append('required={}'.format(item['json']['actions']['POST'][option]['required'])) -}}
+{{   option_data.append('type={}'.format(type_map[item['json']['actions']['POST'][option]['type']])) -}}
+{%   if item['json']['actions']['POST'][option]['type'] == 'password' %}
+{{     option_data.append('no_log=True') -}}
+{%   endif %}
+{%   if 'choices' in item['json']['actions']['POST'][option] %}
+{%     set all_choices = [] %}
+{%     for choice in item['json']['actions']['POST'][option]['choices'] %}
+{{       all_choices.append("'{}'".format(choice[0])) -}}
+{%     endfor %}
+{{     option_data.append('choices=[{}]'.format(all_choices | join(', '))) -}}
+{%   endif %}
+{%   if 'default' in item['json']['actions']['POST'][option] %}
+{{     option_data.append("default='{}'".format(item['json']['actions']['POST'][option]['default'])) -}}
+{%   endif %}
+{%   if aliases[item_type][option] | default(False) %}
+{%     set alias_list = [] %}
+{%     for alias_name in aliases[item_type][option] %}
+{{       alias_list.append("'{}'".format(alias_name)) -}}
+{%     endfor %}
+{{     option_data.append('aliases=[{}]'.format(alias_list | join(', '))) -}}
+{%   endif %}
+        {{ option }}=dict({{ option_data | join(', ') }}),
+{% if option == name_option %}
+        new_{{ name_option }}=dict(required=False, type='str'),
 {% endif %}
 {% endfor %}
         state=dict(choices=['present', 'absent'], default='present'),
@@ -136,8 +136,8 @@ def main():
     if {{ option }} and len({{ option }}) > {{ item['json']['actions']['POST'][option]['max_length'] }}:
         module.fail_msg(msg="The value for {{ option }} can not be longer than {{ item['json']['actions']['POST'][option]['max_length'] }}")
 {% endif %}
-{% if option == 'name' %}
-    new_name = module.params.get("new_name")
+{% if option == name_option %}
+    new_{{ name_option }} = module.params.get("new_{{ name_option }}")
 {% endif %}
 {% endfor %}
     state = module.params.get('state')
@@ -156,12 +156,7 @@ def main():
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('{{ item_type }}', **{
         'data': {
-{% if 'name' in item['json']['actions']['POST'] %}
-            'name': name,
-{% endif %}
-{% if item_type == 'users' %}
-            'username': username,
-{% endif %}
+            '{{ name_option }}': {{ name_option }},
 {% if 'organization' in item['json']['actions']['POST'] and item['json']['actions']['POST']['organization']['type'] == 'id' %}
             'organization': org_id,
 {% endif %}
@@ -174,8 +169,8 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
 {% for option in item['json']['actions']['POST'] %}
-{% if option == 'name' %}
-    new_fields['name'] = new_name if new_name else name
+{% if option == name_option %}
+    new_fields['{{ name_option }}'] = new_{{ name_option }} if new_{{ name_option }} else {{ name_option }}
 {% else %}
     if {{ option }}:
 {% if item['json']['actions']['POST'][option]['type'] == 'id' %}
