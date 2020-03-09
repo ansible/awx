@@ -66,7 +66,7 @@ function HostDetail({ i18n, host }) {
     <CardBody>
       <HostToggle host={host} css="padding-bottom: 40px" />
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={name} />
+        <Detail label={i18n._(t`Name`)} value={name} dataCy="host-name" />
         <Detail
           label={i18n._(t`Activity`)}
           value={<Sparkline jobs={recentPlaybookJobs} />}
@@ -74,6 +74,7 @@ function HostDetail({ i18n, host }) {
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail
           label={i18n._(t`Inventory`)}
+          dataCy="host-inventory"
           value={
             <Link to={`/inventories/inventory/${inventory.id}/details`}>
               {inventory.name}
@@ -84,11 +85,13 @@ function HostDetail({ i18n, host }) {
           date={created}
           label={i18n._(t`Created`)}
           user={created_by}
+          dataCy="host-created-by"
         />
         <UserDateDetail
           date={modified}
           label={i18n._(t`Last Modified`)}
           user={modified_by}
+          dataCy="host-last-modified-by"
         />
         <VariablesDetail
           label={i18n._(t`Variables`)}
