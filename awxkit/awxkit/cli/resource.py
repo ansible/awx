@@ -201,8 +201,6 @@ class Import(CustomCommand):
         options = self._options[resource]
         for asset in assets:
             post_data = {}
-            if resource == 'users' and 'password' not in asset:
-                post_data['password'] = 'password'
             for field, value in asset.items():
                 if field in ('related', 'natural_key'):
                     continue
@@ -213,6 +211,9 @@ class Import(CustomCommand):
 
             page = self.get_by_natural_key(asset['natural_key'], fetch=False)
             if page is None:
+                if resource == 'users':
+                    # We should only impose a default password if the resource doesn't exist.
+                    post_data.setdefault('password', 'password')
                 page = endpoint.post(post_data)
             else:
                 page = page.put(post_data)
