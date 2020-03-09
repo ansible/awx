@@ -9,7 +9,7 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions } from '@patternfly/react-core';
+import { Card, CardActions, PageSection } from '@patternfly/react-core';
 
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
@@ -34,10 +34,8 @@ function Host({ i18n, setBreadcrumb }) {
   useEffect(() => {
     (async () => {
       setContentError(null);
-
       try {
         const { data } = await HostsAPI.readDetail(match.params.id);
-
         setHost(data);
         setBreadcrumb(data);
       } catch (error) {
@@ -46,7 +44,7 @@ function Host({ i18n, setBreadcrumb }) {
         setHasContentLoading(false);
       }
     })();
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [match.params.id, location, setBreadcrumb]);
 
   const tabsArray = [
     {
@@ -71,75 +69,73 @@ function Host({ i18n, setBreadcrumb }) {
     },
   ];
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/hosts" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
-
-  if (location.pathname.endsWith('edit')) {
-    cardHeader = null;
-  }
-
   if (hasContentLoading) {
-    return <ContentLoading />;
+    return (
+      <PageSection>
+        <Card>
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
   }
 
-  if (!hasContentLoading && contentError) {
+  if (contentError) {
     return (
-      <Card>
-        <ContentError error={contentError}>
-          {contentError.response && contentError.response.status === 404 && (
-            <span>
-              {i18n._(`Host not found.`)}{' '}
-              <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
-            </span>
-          )}
-        </ContentError>
-      </Card>
+      <PageSection>
+        <Card>
+          <ContentError error={contentError}>
+            {contentError?.response?.status === 404 && (
+              <span>
+                {i18n._(`Host not found.`)}{' '}
+                <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
+              </span>
+            )}
+          </ContentError>
+        </Card>
+      </PageSection>
     );
   }
 
   return (
-    <Card>
-      {cardHeader}
-      <Switch>
-        <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
-        {host && [
-          <Route path="/hosts/:id/details" key="details">
-            <HostDetail host={host} />
-          </Route>,
-          <Route path="/hosts/:id/edit" key="edit">
-            <HostEdit host={host} />
-          </Route>,
-          <Route path="/hosts/:id/facts" key="facts">
-            <HostFacts host={host} />
-          </Route>,
-          <Route path="/hosts/:id/groups" key="groups">
-            <HostGroups host={host} />
-          </Route>,
-          <Route path="/hosts/:id/completed_jobs" key="completed-jobs">
-            <JobList defaultParams={{ job__hosts: host.id }} />
-          </Route>,
-        ]}
-        <Route
-          key="not-found"
-          path="*"
-          render={() =>
-            !hasContentLoading && (
-              <ContentError isNotFound>
-                <Link to={`${match.url}/details`}>
-                  {i18n._(`View Host Details`)}
-                </Link>
-              </ContentError>
-            )
-          }
-        />
-      </Switch>
-    </Card>
+    <PageSection>
+      <Card>
+        {location.pathname.endsWith('edit') ? null : (
+          <TabbedCardHeader>
+            <RoutedTabs tabsArray={tabsArray} />
+            <CardActions>
+              <CardCloseButton linkTo="/hosts" />
+            </CardActions>
+          </TabbedCardHeader>
+        )}
+        <Switch>
+          <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
+          {host && [
+            <Route path="/hosts/:id/details" key="details">
+              <HostDetail host={host} />
+            </Route>,
+            <Route path="/hosts/:id/edit" key="edit">
+              <HostEdit host={host} />
+            </Route>,
+            <Route path="/hosts/:id/facts" key="facts">
+              <HostFacts host={host} />
+            </Route>,
+            <Route path="/hosts/:id/groups" key="groups">
+              <HostGroups host={host} />
+            </Route>,
+            <Route path="/hosts/:id/completed_jobs" key="completed-jobs">
+              <JobList defaultParams={{ job__hosts: host.id }} />
+            </Route>,
+          ]}
+          <Route key="not-found" path="*">
+            <ContentError isNotFound>
+              <Link to={`${match.url}/details`}>
+                {i18n._(`View Host Details`)}
+              </Link>
+            </ContentError>
+          </Route>
+        </Switch>
+      </Card>
+    </PageSection>
   );
 }
 
