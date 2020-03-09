@@ -1,5 +1,13 @@
 ---
 collections:
   - name: awx.awx
-    version: 9.2.0
+    version: 9.3.0
     source: https://galaxy.ansible.com
+  - name: azure.azcollection
+    version: 0.1.1  # https://github.com/ansible-collections/azure/issues/55
+  # - name: ansible.amazon  # needs to be published
+  - name: theforeman.foreman  # needs inventory plugin published
+  - name: google.cloud  # https://github.com/ansible-collections/ansible_collections_google/pull/167
+  # - name: openstack.cloud  # needs to be published
+  # - name: community.vmware  # not published
+  - name: ovirt.ovirt_collection  # new fix published

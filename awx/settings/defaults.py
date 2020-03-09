@@ -120,6 +120,10 @@ LOGIN_URL = '/api/login/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
+# Absolute filesystem path to the directory to host collections for
+# running inventory imports
+INVENTORY_COLLECTIONS_ROOT = os.path.join(BASE_DIR, 'vendor', 'inventory_collections')
+
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This
 # directory should not be web-accessible

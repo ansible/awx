@@ -52,6 +52,9 @@ if "pytest" in sys.modules:
 # This directory should NOT be web-accessible.
 PROJECTS_ROOT = '/var/lib/awx/projects/'
 
+# Location for cross-development of inventory plugins
+# INVENTORY_COLLECTIONS_ROOT = '/awx_devel/awx/plugins/collections'
+
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible
 JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_status')

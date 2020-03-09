@@ -1612,6 +1612,11 @@ class PluginFileInjector(object):
     # base injector should be one of None, "managed", or "template"
     # this dictates which logic to borrow from playbook injectors
     base_injector = None
+    # every source should have collection, but these are set here
+    # so that a source without a collection will have null values
+    namespace = None
+    collection = None
+    collection_migration = '2.10'  # In this version, content moved to collections
 
     def __init__(self, ansible_version):
         # This is InventoryOptions instance, could be source or inventory update
@@ -1638,7 +1643,11 @@ class PluginFileInjector(object):
         """
         if self.plugin_name is None:
             raise NotImplementedError('At minimum the plugin name is needed for inventory plugin use.')
-        return {'plugin': self.plugin_name}
+        if self.initial_version is None or Version(self.ansible_version) >= Version(self.collection_migration):
+            proper_name = f'{self.namespace}.{self.collection}.{self.plugin_name}'
+        else:
+            proper_name = self.plugin_name
+        return {'plugin': proper_name}
 
     def inventory_contents(self, inventory_update, private_data_dir):
         """Returns a string that is the content for the inventory file for the inventory plugin
@@ -1693,7 +1702,10 @@ class PluginFileInjector(object):
         return injected_env
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self._get_shared_env(inventory_update, private_data_dir, private_data_files)
+        env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
+        if self.initial_version is None or Version(self.ansible_version) >= Version(self.collection_migration):
+            env['ANSIBLE_COLLECTIONS_PATHS'] = settings.INVENTORY_COLLECTIONS_ROOT
+        return env
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         injected_env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
@@ -1738,6 +1750,8 @@ class azure_rm(PluginFileInjector):
     initial_version = '2.8'  # Driven by unsafe group names issue, hostvars, host names
     ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'azure'
+    collection = 'azcollection'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(azure_rm, self).get_plugin_env(*args, **kwargs)
@@ -1872,6 +1886,8 @@ class ec2(PluginFileInjector):
     # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
     base_injector = 'managed'
+    namespace = 'ansible'
+    collection = 'amazon'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(ec2, self).get_plugin_env(*args, **kwargs)
@@ -2108,6 +2124,8 @@ class gce(PluginFileInjector):
     initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
     ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'google'
+    collection = 'cloud'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(gce, self).get_plugin_env(*args, **kwargs)
@@ -2211,6 +2229,8 @@ class vmware(PluginFileInjector):
     # plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
     ini_env_reference = 'VMWARE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'community'
+    collection = 'vmware'
 
     @property
     def script_name(self):
@@ -2246,6 +2266,8 @@ class openstack(PluginFileInjector):
     plugin_name = 'openstack'
     # minimum version of 2.7.8 may be theoretically possible
     initial_version = '2.8'  # Driven by consistency with other sources
+    namespace = 'openstack'
+    collection = 'cloud'
 
     @property
     def script_name(self):
@@ -2309,12 +2331,10 @@ class openstack(PluginFileInjector):
             else:
                 return 'uuid'
 
-        ret = dict(
-            plugin=self.plugin_name,
-            fail_on_errors=True,
-            expand_hostvars=True,
-            inventory_hostname=use_host_name_for_name(False),
-        )
+        ret = super(openstack, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['fail_on_errors'] = True
+        ret['expand_hostvars'] = True
+        ret['inventory_hostname'] = use_host_name_for_name(False)
         # Note: mucking with defaults will break import integrity
         # For the plugin, we need to use the same defaults as the old script
         # or else imports will conflict. To find script defaults you have
@@ -2341,6 +2361,8 @@ class rhv(PluginFileInjector):
     """
     # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
     base_injector = 'template'
+    namespace = 'ovirt'
+    collection = 'ovirt_collection'
 
     @property
     def script_name(self):
@@ -2352,6 +2374,8 @@ class satellite6(PluginFileInjector):
     ini_env_reference = 'FOREMAN_INI_PATH'
     # initial_version = '2.8'  # FIXME: turn on after plugin is validated
     # No base injector, because this does not work in playbooks. Bug??
+    namespace = 'theforeman'
+    collection = 'foreman'
 
     @property
     def script_name(self):
@@ -2425,6 +2449,8 @@ class cloudforms(PluginFileInjector):
     # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
     ini_env_reference = 'CLOUDFORMS_INI_PATH'
     # Also no base_injector because this does not work in playbooks
+    # namespace = ''  # does not have a collection
+    # collection = ''
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2460,6 +2486,8 @@ class tower(PluginFileInjector):
     plugin_name = 'tower'
     base_injector = 'template'
     initial_version = '2.8'  # Driven by "include_metadata" hostvars
+    namespace = 'awx'
+    collection = 'awx'
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(tower, self).get_script_env(inventory_update, private_data_dir, private_data_files)
@@ -2468,6 +2496,7 @@ class tower(PluginFileInjector):
         return env
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(tower, self).inventory_as_dict(inventory_update, private_data_dir)
         # Credentials injected as env vars, same as script
         try:
             # plugin can take an actual int type
@@ -2475,11 +2504,9 @@ class tower(PluginFileInjector):
         except ValueError:
             # inventory_id could be a named URL
             identifier = iri_to_uri(inventory_update.instance_filters)
-        return {
-            'plugin': self.plugin_name,
-            'inventory_id': identifier,
-            'include_metadata': True  # used for license check
-        }
+        ret['inventory_id'] = identifier
+        ret['include_metadata'] = True  # used for license check
+        return ret
 
 
 for cls in PluginFileInjector.__subclasses__():

@@ -1,4 +1,4 @@
 expand_hostvars: true
 fail_on_errors: true
 inventory_hostname: uuid
-plugin: openstack
+plugin: openstack.cloud.openstack
