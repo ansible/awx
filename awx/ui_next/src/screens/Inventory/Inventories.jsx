@@ -66,27 +66,32 @@ class Inventories extends Component {
       [`/inventories/${inventoryKind}/${inventory.id}/hosts/add`]: i18n._(
         t`Create New Host`
       ),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}/details`]: i18n._(t`Host Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource &&
-        nestedResource.id}/completed_jobs`]: i18n._(t`Completed Jobs`),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource?.id}`]: `${nestedResource?.name}`,
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource?.id}/edit`]: i18n._(
+        t`Edit Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource?.id}/details`]: i18n._(
+        t`Host Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/hosts/${nestedResource?.id}/completed_jobs`]: i18n._(
+        t`Completed Jobs`
+      ),
       [`/inventories/${inventoryKind}/${inventory.id}/groups/add`]: i18n._(
         t`Create New Group`
       ),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}/edit`]: i18n._(t`Edit Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}/details`]: i18n._(t`Group Details`),
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}`]: `${nestedResource && nestedResource.name}`,
-      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource &&
-        nestedResource.id}/nested_hosts`]: i18n._(t`Hosts`),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource?.id}`]: `${nestedResource?.name}`,
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource?.id}/edit`]: i18n._(
+        t`Edit Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource?.id}/details`]: i18n._(
+        t`Group Details`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource?.id}/nested_hosts`]: i18n._(
+        t`Hosts`
+      ),
+      [`/inventories/${inventoryKind}/${inventory.id}/groups/${nestedResource?.id}/nested_hosts/add`]: i18n._(
+        t`Create New Host`
+      ),
     };
     this.setState({ breadcrumbConfig });
   };
