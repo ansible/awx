@@ -75,10 +75,13 @@
                  class: 'Form-resetAll'
              },
              testLogging: {
+                 ngClass: "{'Form-button--disabled': vm.disableTestButton}",
                  ngClick: 'vm.testLogging()',
                  label: i18n._('Test'),
-                 class: 'btn-primary',
-                 ngDisabled: 'configuration_logging_template_form.$pending'
+                 class: 'Form-primaryButton',
+                 awToolTip: '{{vm.testTooltip}}',
+                 dataTipWatch: 'vm.testTooltip',
+                 dataPlacement: 'top',
              },
              cancel: {
                  ngClick: 'vm.formCancel()',

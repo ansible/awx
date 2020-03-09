@@ -1690,6 +1690,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     if (button.ngClick) {
                                         html += this.attr(button, 'ngClick');
                                     }
+                                    if (button.ngClass) {
+                                        html += this.attr(button, 'ngClass');
+                                    }
                                     if (button.ngDisabled) {
                                         ngDisabled = (button.ngDisabled===true) ? `${this.form.name}_form.$invalid ||  ${this.form.name}_form.$pending`: button.ngDisabled;
                                         if (btn !== 'reset') {
