@@ -62,7 +62,7 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 7
+      el => el.length === 6
     );
     expect(tabs.at(2).text()).toEqual('Notifications');
     done();
