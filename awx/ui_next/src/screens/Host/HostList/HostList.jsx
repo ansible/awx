@@ -1,8 +1,8 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card } from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 
 import { HostsAPI } from '@api';
 import AlertModal from '@components/AlertModal';
@@ -95,7 +95,7 @@ function HostList({ i18n }) {
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   return (
-    <Fragment>
+    <PageSection>
       <Card>
         <PaginatedDataList
           contentError={contentError}
@@ -173,7 +173,7 @@ function HostList({ i18n }) {
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
-    </Fragment>
+    </PageSection>
   );
 }
 

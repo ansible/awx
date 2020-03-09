@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
@@ -95,7 +95,7 @@ class Inventories extends Component {
     const { match, history, location } = this.props;
     const { breadcrumbConfig } = this.state;
     return (
-      <Fragment>
+      <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
           <Route
@@ -134,7 +134,7 @@ class Inventories extends Component {
           />
           <Route path={`${match.path}`} render={() => <InventoryList />} />
         </Switch>
-      </Fragment>
+      </>
     );
   }
 }

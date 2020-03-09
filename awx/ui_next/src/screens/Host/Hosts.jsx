@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Config } from '@contexts/Config';
-import { PageSection, Card } from '@patternfly/react-core';
 import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
 
 import HostList from './HostList';
@@ -39,25 +38,21 @@ function Hosts({ i18n }) {
   return (
     <>
       <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-      <PageSection>
-        <Card>
-          <Switch>
-            <Route path="/hosts/add">
-              <HostAdd />
-            </Route>
-            <Route path="/hosts/:id">
-              <Config>
-                {({ me }) => (
-                  <Host setBreadcrumb={buildBreadcrumbConfig} me={me || {}} />
-                )}
-              </Config>
-            </Route>
-            <Route path="/hosts">
-              <HostList />
-            </Route>
-          </Switch>
-        </Card>
-      </PageSection>
+      <Switch>
+        <Route path="/hosts/add">
+          <HostAdd />
+        </Route>
+        <Route path="/hosts/:id">
+          <Config>
+            {({ me }) => (
+              <Host setBreadcrumb={buildBreadcrumbConfig} me={me || {}} />
+            )}
+          </Config>
+        </Route>
+        <Route path="/hosts">
+          <HostList />
+        </Route>
+      </Switch>
     </>
   );
 }
