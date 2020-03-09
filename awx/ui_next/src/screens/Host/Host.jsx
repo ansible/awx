@@ -34,7 +34,6 @@ function Host({ i18n, setBreadcrumb }) {
   useEffect(() => {
     (async () => {
       setContentError(null);
-      setHasContentLoading(true);
 
       try {
         const { data } = await HostsAPI.readDetail(match.params.id);
