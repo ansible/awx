@@ -35,6 +35,8 @@ function SurveyListItem({
   isFirst,
   isChecked,
   onSelect,
+  onMoveUp,
+  onMoveDown,
 }) {
   return (
     <DataList aria-label={i18n._(t`Survey List`)}>
@@ -51,6 +53,7 @@ function SurveyListItem({
                   variant="plain"
                   aria-label={i18n._(t`move up`)}
                   isDisabled={isFirst}
+                  onClick={() => onMoveUp(question)}
                 >
                   <CaretUpIcon />
                 </Button>
@@ -60,6 +63,7 @@ function SurveyListItem({
                   variant="plain"
                   aria-label={i18n._(t`move down`)}
                   isDisabled={isLast}
+                  onClick={() => onMoveDown(question)}
                 >
                   <CaretDownIcon />
                 </Button>

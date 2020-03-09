@@ -56,7 +56,7 @@ export default function useRequest(makeRequest, initialValue) {
 
 export function useDeleteItems(
   makeRequest,
-  { qsConfig, allItemsSelected, fetchItems }
+  { qsConfig = null, allItemsSelected = false, fetchItems = null } = {}
 ) {
   const location = useLocation();
   const history = useHistory();
@@ -71,6 +71,9 @@ export function useDeleteItems(
 
   const deleteItems = async () => {
     await request();
+    if (!qsConfig) {
+      return;
+    }
     const params = parseQueryString(qsConfig, location.search);
     if (params.page > 1 && allItemsSelected) {
       const newParams = encodeNonDefaultQueryString(

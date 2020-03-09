@@ -10,23 +10,20 @@ import ContentLoading from '@components/ContentLoading';
 import ErrorDetail from '@components/ErrorDetail';
 import { JobTemplatesAPI } from '@api';
 import ContentEmpty from '@components/ContentEmpty';
-import { getQSConfig } from '@util/qs';
 import AlertModal from '@components/AlertModal';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 
-const QS_CONFIG = getQSConfig('survey', {
-  page: 1,
-});
-
 function SurveyList({ template, i18n }) {
   const [selected, setSelected] = useState([]);
+  // const [updated, setUpdated] = useState(null);
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
-  const [showToggleError, setShowToggleError] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [questions, setQuestions] = useState(null);
 
   const {
-    result: { questions, name, description },
+    result: { fetchedQuestions, name, description },
     error: contentError,
     isLoading,
     request: fetchSurvey,
@@ -35,8 +32,9 @@ function SurveyList({ template, i18n }) {
       const {
         data: { spec = [], description: surveyDescription, name: surveyName },
       } = await JobTemplatesAPI.readSurvey(template.id);
+
       return {
-        questions: spec?.map((s, index) => ({ ...s, id: index })),
+        fetchedQuestions: spec?.map((s, index) => ({ ...s, id: index })),
         description: surveyDescription,
         name: surveyName,
       };
@@ -45,40 +43,26 @@ function SurveyList({ template, i18n }) {
   );
 
   useEffect(() => {
+    setQuestions(fetchedQuestions);
+  }, [fetchedQuestions]);
+
+  useEffect(() => {
     fetchSurvey();
   }, [fetchSurvey]);
 
   const isAllSelected =
     selected.length === questions?.length && selected.length > 0;
-
   const {
     isLoading: isDeleteLoading,
-    deleteItems: deleteQuestions,
+    deleteItems: deleteSurvey,
     deletionError,
-    clearDeletionError,
   } = useDeleteItems(
     useCallback(async () => {
-      if (isAllSelected) {
-        return JobTemplatesAPI.destroySurvey(template.id);
-      }
-      const surveyQuestions = [];
-      questions.forEach(q => {
-        if (!selected.some(s => s.id === q.id)) {
-          surveyQuestions.push(q);
-        }
-      });
-      return JobTemplatesAPI.updateSurvey(template.id, {
-        name,
-        description,
-        spec: surveyQuestions,
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selected]),
-    {
-      qsConfig: QS_CONFIG,
-      fetchItems: fetchSurvey,
-    }
+      await JobTemplatesAPI.destroySurvey(template.id);
+      fetchSurvey();
+    }, [template.id, fetchSurvey])
   );
+
   const {
     isToggleLoading,
     error: toggleError,
@@ -93,12 +77,6 @@ function SurveyList({ template, i18n }) {
     template.survey_enabled
   );
 
-  useEffect(() => {
-    if (toggleError) {
-      setShowToggleError(true);
-    }
-  }, [toggleError]);
-
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...questions] : []);
   };
@@ -112,15 +90,56 @@ function SurveyList({ template, i18n }) {
   };
 
   const handleDelete = async () => {
-    await deleteQuestions();
-    setIsDeleteModalOpen(false);
+    if (isAllSelected) {
+      await deleteSurvey();
+      setIsDeleteModalOpen(false);
+    } else {
+      setQuestions(questions.filter(q => !selected.includes(q)));
+      setIsDeleteModalOpen(false);
+    }
     setSelected([]);
   };
-  const canEdit = template.summary_fields.user_capabilities.edit;
-  const canDelete = template.summary_fields.user_capabilities.delete;
+
+  const {
+    isLoading: isUpdateLoading,
+    error: updateError,
+    // request: updateSurvey,
+  } = useRequest(
+    useCallback(async () => {
+      return JobTemplatesAPI.updateSurvey(template.id, {
+        name,
+        description,
+        spec: questions,
+      });
+    }, [template.id, name, description, questions])
+  );
+
+  const moveUp = question => {
+    const index = questions.indexOf(question);
+    if (index < 1) {
+      return;
+    }
+    const beginning = questions.slice(0, index - 1);
+    const swapWith = questions[index - 1];
+    const end = questions.slice(index + 1);
+    setQuestions([...beginning, question, swapWith, ...end]);
+  };
+  const moveDown = question => {
+    const index = questions.indexOf(question);
+    if (index === -1 || index > questions.length - 1) {
+      return;
+    }
+    const beginning = questions.slice(0, index);
+    const swapWith = questions[index + 1];
+    const end = questions.slice(index + 2);
+    setQuestions([...beginning, swapWith, question, ...end]);
+  };
 
   let content;
-  if (isLoading || isToggleLoading || isDeleteLoading) {
+  if (
+    (isLoading || isToggleLoading || isDeleteLoading || isUpdateLoading) &&
+    questions?.length <= 0
+  ) {
     content = <ContentLoading />;
   } else if (contentError) {
     content = <ContentError error={contentError} />;
@@ -140,9 +159,29 @@ function SurveyList({ template, i18n }) {
         question={question}
         isChecked={selected.some(s => s.id === question.id)}
         onSelect={() => handleSelect(question)}
+        onMoveUp={moveUp}
+        onMoveDown={moveDown}
       />
     ));
   }
+
+  const error = deletionError || toggleError || updateError;
+  let errorMessage = '';
+  if (updateError) {
+    errorMessage = i18n._(t`Failed to update survey`);
+  }
+  if (toggleError) {
+    errorMessage = i18n._(t`Failed to toggle survey`);
+  }
+  if (deletionError) {
+    errorMessage = i18n._(t`Failed to delete survey`);
+  }
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+    }
+  }, [error]);
+
   return (
     <>
       <SurveyToolbar
@@ -150,7 +189,7 @@ function SurveyList({ template, i18n }) {
         onSelectAll={handleSelectAll}
         surveyEnabled={surveyEnabled}
         onToggleSurvey={toggleSurvey}
-        isDeleteDisabled={selected?.length === 0 || !canEdit || !canDelete}
+        isDeleteDisabled={selected?.length === 0}
         onToggleDeleteModal={() => setIsDeleteModalOpen(true)}
       />
       {content}
@@ -198,26 +237,15 @@ function SurveyList({ template, i18n }) {
           ))}
         </AlertModal>
       )}
-      {deletionError && (
+      {showError && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={showError}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={clearDeletionError}
+          onClose={() => setShowError(false)}
         >
-          {i18n._(t`Failed to delete one or more jobs.`)}
-          <ErrorDetail error={deletionError} />
-        </AlertModal>
-      )}
-      {toggleError && (
-        <AlertModal
-          variant="error"
-          title={i18n._(t`Error!`)}
-          isOpen={showToggleError && !isLoading}
-          onClose={() => setShowToggleError(false)}
-        >
-          {i18n._(t`Failed to toggle host.`)}
-          <ErrorDetail error={toggleError} />
+          {errorMessage}
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </>
