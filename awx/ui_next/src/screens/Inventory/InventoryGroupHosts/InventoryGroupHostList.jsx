@@ -7,10 +7,12 @@ import { GroupsAPI, InventoriesAPI } from '@api';
 
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
+import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList from '@components/PaginatedDataList';
-import useRequest from '@util/useRequest';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import AddHostDropdown from './AddHostDropdown';
+import DisassociateButton from './DisassociateButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -67,6 +69,30 @@ function InventoryGroupHostList({ i18n }) {
   };
 
   const isAllSelected = selected.length > 0 && selected.length === hosts.length;
+
+  const {
+    isLoading: isDisassociateLoading,
+    deleteItems: disassociateHosts,
+    deletionError: disassociateError,
+    clearDeletionError: clearDisassociateError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(host => GroupsAPI.disassociateHost(groupId, host))
+      );
+    }, [groupId, selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchHosts,
+    }
+  );
+
+  const handleDisassociate = async () => {
+    await disassociateHosts();
+    setSelected([]);
+  };
+
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
@@ -75,7 +101,7 @@ function InventoryGroupHostList({ i18n }) {
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isDisassociateLoading}
         items={hosts}
         itemCount={hostCount}
         pluralizedItemName={i18n._(t`Hosts`)}
@@ -113,12 +139,23 @@ function InventoryGroupHostList({ i18n }) {
               ...(canAdd
                 ? [
                     <AddHostDropdown
+                      key="associate"
                       onAddExisting={() => setIsModalOpen(true)}
                       onAddNew={() => history.push(addFormUrl)}
                     />,
                   ]
                 : []),
-              // TODO HOST DISASSOCIATE BUTTON
+              <DisassociateButton
+                key="disassociate"
+                onDisassociate={handleDisassociate}
+                itemsToDisassociate={selected}
+                modalTitle={i18n._(t`Disassociate host from group?`)}
+                modalNote={i18n._(t`
+                        Note that only hosts directly in this group can
+                        be disassociated. Hosts in sub-groups must be disassociated
+                        directly from the sub-group level that they belong.
+                      `)}
+              />,
             ]}
           />
         )}
@@ -141,9 +178,6 @@ function InventoryGroupHostList({ i18n }) {
           )
         }
       />
-
-      {/* DISASSOCIATE HOST MODAL PLACEHOLDER */}
-
       {isModalOpen && (
         <AlertModal
           isOpen={isModalOpen}
@@ -153,6 +187,17 @@ function InventoryGroupHostList({ i18n }) {
         >
           {/* ADD/ASSOCIATE HOST MODAL PLACEHOLDER */}
           {i18n._(t`Host Select Modal`)}
+        </AlertModal>
+      )}
+      {disassociateError && (
+        <AlertModal
+          isOpen={disassociateError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={clearDisassociateError}
+        >
+          {i18n._(t`Failed to disassociate one or more hosts.`)}
+          <ErrorDetail error={disassociateError} />
         </AlertModal>
       )}
     </>
