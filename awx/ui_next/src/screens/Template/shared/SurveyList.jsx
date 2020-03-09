@@ -36,7 +36,7 @@ function SurveyList({ template, i18n }) {
         data: { spec = [], description: surveyDescription, name: surveyName },
       } = await JobTemplatesAPI.readSurvey(template.id);
       return {
-        questions: spec.map((s, index) => ({ ...s, id: index })),
+        questions: spec?.map((s, index) => ({ ...s, id: index })),
         description: surveyDescription,
         name: surveyName,
       };

@@ -75,7 +75,9 @@ export function useDeleteItems(
     if (params.page > 1 && allItemsSelected) {
       const newParams = encodeNonDefaultQueryString(
         qsConfig,
-        replaceParams(params, { page: params.page - 1 })
+        replaceParams(params, {
+          page: params.page - 1,
+        })
       );
       history.push(`${location.pathname}?${newParams}`);
     } else {

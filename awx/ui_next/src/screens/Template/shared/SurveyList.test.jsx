@@ -36,6 +36,7 @@ describe('<SurveyList />', () => {
     expect(JobTemplatesAPI.readSurvey).toBeCalledWith(7);
 
     wrapper.update();
+
     expect(wrapper.find('SurveyListItem').length).toBe(1);
   });
   test('error in retrieving the survey throws an error', async () => {
@@ -55,7 +56,11 @@ describe('<SurveyList />', () => {
     JobTemplatesAPI.update.mockResolvedValue();
     let wrapper;
     await act(async () => {
+<<<<<<< HEAD
       wrapper = mountWithContexts(
+=======
+      wrapper = await mountWithContexts(
+>>>>>>> Adds SurveyList tool bar
         <SurveyList
           template={{ ...mockJobTemplateData, survey_enabled: false }}
         />
@@ -65,7 +70,11 @@ describe('<SurveyList />', () => {
     expect(wrapper.find('Switch').length).toBe(1);
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
     await act(async () => {
+<<<<<<< HEAD
       wrapper.find('Switch').invoke('onChange')(true);
+=======
+      await wrapper.find('Switch').invoke('onChange')(true);
+>>>>>>> Adds SurveyList tool bar
     });
 
     wrapper.update();
@@ -79,7 +88,11 @@ describe('<SurveyList />', () => {
   test('selectAll enables delete button and calls the api to delete properly', async () => {
     let wrapper;
     await act(async () => {
+<<<<<<< HEAD
       wrapper = mountWithContexts(
+=======
+      wrapper = await mountWithContexts(
+>>>>>>> Adds SurveyList tool bar
         <SurveyList
           template={{ ...mockJobTemplateData, survey_enabled: false }}
         />
@@ -126,7 +139,11 @@ describe('Survey with no questions', () => {
     JobTemplatesAPI.readSurvey.mockResolvedValue({});
     let wrapper;
     await act(async () => {
+<<<<<<< HEAD
       wrapper = mountWithContexts(
+=======
+      wrapper = await mountWithContexts(
+>>>>>>> Adds SurveyList tool bar
         <SurveyList template={mockJobTemplateData} />
       );
     });
