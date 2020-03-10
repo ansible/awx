@@ -152,7 +152,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
 
     let newWrapper;
     await act(async () => {
-      newWrapper = await mountWithContexts(
+      newWrapper = mountWithContexts(
         <WorkflowJobTemplateEdit template={templateWithoutOrg} />,
         {
           context: {

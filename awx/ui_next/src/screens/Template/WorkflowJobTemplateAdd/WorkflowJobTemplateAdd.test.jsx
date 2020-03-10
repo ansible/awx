@@ -33,7 +33,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         initialEntries: ['/templates/workflow_job_template/add'],
       });
       await act(async () => {
-        wrapper = await mountWithContexts(
+        wrapper = mountWithContexts(
           <Route
             path="/templates/workflow_job_template/add"
             component={() => <WorkflowJobTemplateAdd />}
