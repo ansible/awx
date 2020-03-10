@@ -40,7 +40,6 @@ function CredentialsResolve (
     return $q.all(promises)
         .then(models => {
             const typeId = models.credential.get('credential_type');
-            const orgId = models.credential.get('organization');
 
             Rest.setUrl(GetBasePath('credentials'));
             const params = { target_input_sources__target_credential: id };
@@ -48,7 +47,9 @@ function CredentialsResolve (
 
             const dependents = {
                 credentialType: new CredentialType('get', typeId),
-                organization: new Organization('get', orgId),
+                organization: new Organization('get', {
+                    resource: models.credential.get('summary_fields.organization')
+                }),
                 credentialInputSources: models.credential.extend('GET', 'input_sources'),
                 sourceCredentials: sourceCredentialsPromise
             };

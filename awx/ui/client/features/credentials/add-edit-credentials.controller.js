@@ -72,7 +72,7 @@ function AddEditCredentialsController (
         vm.form.credential_type._displayValue = credentialType.get('name');
         vm.isTestable = (isEditable && credentialType.get('kind') === 'external');
 
-        if (credential.get('related.input_sources.results.length' > 0)) {
+        if (credential.get('related.input_sources.results').length > 0) {
             vm.form.credential_type._disabled = true;
         }
 
