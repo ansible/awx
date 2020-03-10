@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { HostsAPI } from '@api';
+import { InventoriesAPI } from '@api';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import mockHost from '../shared/data.host.json';
 import InventoryHost from './InventoryHost';
@@ -15,7 +15,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-HostsAPI.readDetail.mockResolvedValue({
+InventoriesAPI.readHostDetail.mockResolvedValue({
   data: { ...mockHost },
 });
 
@@ -54,7 +54,7 @@ describe('<InventoryHost />', () => {
   });
 
   test('should show content error when api throws error on initial render', async () => {
-    HostsAPI.readDetail.mockRejectedValueOnce(new Error());
+    InventoriesAPI.readHostDetail.mockRejectedValueOnce(new Error());
     await act(async () => {
       wrapper = mountWithContexts(
         <InventoryHost inventory={mockInventory} setBreadcrumb={() => {}} />
@@ -72,6 +72,15 @@ describe('<InventoryHost />', () => {
       wrapper = mountWithContexts(
         <InventoryHost inventory={mockInventory} setBreadcrumb={() => {}} />,
         { context: { router: { history } } }
+      );
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('should show content error when inventory id does not match host inventory', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryHost inventory={{ id: 99 }} setBreadcrumb={() => {}} />
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
