@@ -28,11 +28,18 @@ const Button = styled(_Button)`
   padding-bottom: 0;
   padding-left: 0;
 `;
-function SurveyListItem({ question, i18n, isLast, isFirst }) {
+function SurveyListItem({
+  question,
+  i18n,
+  isLast,
+  isFirst,
+  isChecked,
+  onSelect,
+}) {
   return (
     <DataList aria-label={i18n._(t`Survey List`)}>
       <DataListItem aria-labelledby={i18n._(t`Survey questions`)}>
-        <DataListItemRow>
+        <DataListItemRow css="padding-left:16px">
           <DataListAction
             id="sortQuestions"
             aria-labelledby={i18n._(t`Sort question order`)}
@@ -59,7 +66,11 @@ function SurveyListItem({ question, i18n, isLast, isFirst }) {
               </StackItem>
             </Stack>
           </DataListAction>
-          <DataListCheck checked={false} aria-labelledby="survey check" />
+          <DataListCheck
+            checked={isChecked}
+            onChange={onSelect}
+            aria-labelledby="survey check"
+          />
           <DataListItemCells
             dataListCells={[
               <DataListCell key={question.question_name}>

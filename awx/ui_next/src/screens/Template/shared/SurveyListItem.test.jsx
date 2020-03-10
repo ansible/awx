@@ -4,7 +4,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import SurveyListItem from './SurveyListItem';
 
 describe('<SurveyListItem />', () => {
-  const item = { question_name: 'Foo', default: 'Bar', type: 'text' };
+  const item = { question_name: 'Foo', default: 'Bar', type: 'text', id: 1 };
   test('renders successfully', () => {
     let wrapper;
     act(() => {
@@ -32,7 +32,7 @@ describe('<SurveyListItem />', () => {
     let wrapper;
     act(() => {
       wrapper = mountWithContexts(
-        <SurveyListItem question={item} isFirst isLast />
+        <SurveyListItem question={item} isChecked={false} isFirst isLast />
       );
     });
     const moveUp = wrapper
