@@ -531,8 +531,11 @@ class TowerModule(AnsibleModule):
             # If we have an item, we can see if it needs an update
             try:
                 item_url = existing_item['url']
-                item_name = existing_item['name']
-                item_type = existing_item['url']
+                item_type = existing_item['type']
+                if item_type == 'user':
+                    item_name = existing_item['username']
+                else:
+                    item_name = existing_item['name']
                 item_id = existing_item['id']
             except KeyError as ke:
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
