@@ -163,8 +163,9 @@ class App extends Component {
     const sidebar = (
       <PageSidebar
         isNavOpen={isNavOpen}
+        theme="dark"
         nav={
-          <Nav aria-label={navLabel}>
+          <Nav aria-label={navLabel} theme="dark">
             <NavList>
               {routeGroups.map(({ groupId, groupTitle, routes }) => (
                 <NavExpandableGroup
