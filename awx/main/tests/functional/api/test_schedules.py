@@ -368,40 +368,74 @@ def test_zoneinfo(get, admin_user):
 
 
 @pytest.mark.django_db
-def test_normal_user_can_create_ujt_schedule(options, post, project, inventory, alice):
-    jt1 = JobTemplate.objects.create(
+def test_normal_user_can_create_jt_schedule(options, post, project, inventory, alice):
+    jt = JobTemplate.objects.create(
         name='test-jt',
         project=project,
         playbook='helloworld.yml',
         inventory=inventory
     )
-    jt1.save()
+    jt.save()
     url = reverse('api:schedule_list')
 
-    # can't create a schedule on JT1 because we don't have execute rights
+    # can't create a schedule on the JT because we don't have execute rights
     params = {
         'name': 'My Example Schedule',
         'rrule': RRULE_EXAMPLE,
-        'unified_job_template': jt1.id,
+        'unified_job_template': jt.id,
     }
     assert 'POST' not in options(url, user=alice).data['actions'].keys()
     post(url, params, alice, expect=403)
 
-    # now we can, because we're allowed to execute JT1
-    jt1.execute_role.members.add(alice)
+    # now we can, because we're allowed to execute the JT
+    jt.execute_role.members.add(alice)
     assert 'POST' in options(url, user=alice).data['actions'].keys()
     post(url, params, alice, expect=201)
 
-    # can't create a schedule on JT2 because we don't have execute rights
-    jt2 = JobTemplate.objects.create(
-        name='test-jt-2',
-        project=project,
-        playbook='helloworld.yml',
-        inventory=inventory
-    )
-    jt2.save()
-    post(url, {
+
+@pytest.mark.django_db
+def test_normal_user_can_create_project_schedule(options, post, project, alice):
+    url = reverse('api:schedule_list')
+
+    # can't create a schedule on the project because we don't have update rights
+    params = {
         'name': 'My Example Schedule',
         'rrule': RRULE_EXAMPLE,
-        'unified_job_template': jt2.id,
-    }, alice, expect=403)
+        'unified_job_template': project.id,
+    }
+    assert 'POST' not in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=403)
+
+    # use role does *not* grant the ability to schedule
+    project.use_role.members.add(alice)
+    assert 'POST' not in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=403)
+
+    # now we can, because we're allowed to update project
+    project.update_role.members.add(alice)
+    assert 'POST' in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=201)
+
+
+@pytest.mark.django_db
+def test_normal_user_can_create_inventory_update_schedule(options, post, inventory_source, alice):
+    url = reverse('api:schedule_list')
+
+    # can't create a schedule on the project because we don't have update rights
+    params = {
+        'name': 'My Example Schedule',
+        'rrule': RRULE_EXAMPLE,
+        'unified_job_template': inventory_source.id,
+    }
+    assert 'POST' not in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=403)
+
+    # use role does *not* grant the ability to schedule
+    inventory_source.inventory.use_role.members.add(alice)
+    assert 'POST' not in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=403)
+
+    # now we can, because we're allowed to update project
+    inventory_source.inventory.update_role.members.add(alice)
+    assert 'POST' in options(url, user=alice).data['actions'].keys()
+    post(url, params, alice, expect=201)
