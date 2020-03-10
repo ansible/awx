@@ -48,14 +48,14 @@ options:
         - User is a system wide administrator.
       required: False
       type: bool
-      default: 'False'
+      default: False
       aliases: ['superuser']
     is_system_auditor:
       description:
         - User is a system wide auditor.
       required: False
       type: bool
-      default: 'False'
+      default: False
       aliases: ['auditor']
     password:
       description:
@@ -126,31 +126,20 @@ def main():
         first_name=dict(required=False, type='str'),
         last_name=dict(required=False, type='str'),
         email=dict(required=False, type='str'),
-        is_superuser=dict(required=False, type='bool', default='False', aliases=['superuser']),
-        is_system_auditor=dict(required=False, type='bool', default='False', aliases=['auditor']),
+        is_superuser=dict(required=False, type='bool', default=False, aliases=['superuser']),
+        is_system_auditor=dict(required=False, type='bool', default=False, aliases=['auditor']),
         password=dict(required=False, type='str', default=''),
         state=dict(choices=['present', 'absent'], default='present'),
     )
-
-# TODO: Implement a way to also generate proper aliases for backwards compatibility
-# and also add the aliases to documentation!
 
     # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
     # Extract our parameters
     username = module.params.get('username')
-    if username and len(username) > 150:
-        module.fail_msg(msg="The value for username can not be longer than 150")
     first_name = module.params.get('first_name')
-    if first_name and len(first_name) > 30:
-        module.fail_msg(msg="The value for first_name can not be longer than 30")
     last_name = module.params.get('last_name')
-    if last_name and len(last_name) > 150:
-        module.fail_msg(msg="The value for last_name can not be longer than 150")
     email = module.params.get('email')
-    if email and len(email) > 254:
-        module.fail_msg(msg="The value for email can not be longer than 254")
     is_superuser = module.params.get('is_superuser')
     is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
