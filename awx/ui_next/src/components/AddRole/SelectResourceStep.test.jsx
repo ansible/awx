@@ -77,7 +77,7 @@ describe('<SelectResourceStep />', () => {
         '/organizations/1/access?resource.page=1&resource.order_by=-username',
       ],
     });
-    const wrapper = await mountWithContexts(
+    const wrapper = mountWithContexts(
       <SelectResourceStep
         searchColumns={searchColumns}
         sortColumns={sortColumns}

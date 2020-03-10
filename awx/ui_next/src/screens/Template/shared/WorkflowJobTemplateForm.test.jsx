@@ -66,7 +66,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
       initialEntries: ['/templates/workflow_job_template/6/edit'],
     });
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <Route
           path="/templates/workflow_job_template/:id/edit"
           component={() => (
