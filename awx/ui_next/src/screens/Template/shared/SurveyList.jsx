@@ -120,10 +120,7 @@ function SurveyList({ template, i18n }) {
   const canDelete = template.summary_fields.user_capabilities.delete;
 
   let content;
-  if (
-    (isLoading || isToggleLoading || isDeleteLoading) &&
-    questions?.length <= 0
-  ) {
+  if (isLoading || isToggleLoading || isDeleteLoading) {
     content = <ContentLoading />;
   } else if (contentError) {
     content = <ContentError error={contentError} />;

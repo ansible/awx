@@ -6,11 +6,11 @@ import SurveyToolbar from './SurveyToolbar';
 jest.mock('@api/models/JobTemplates');
 
 describe('<SurveyToolbar />', () => {
-  test('delete Button is disabled', async () => {
+  test('delete Button is disabled', () => {
     let wrapper;
 
-    await act(async () => {
-      wrapper = await mountWithContexts(
+    act(() => {
+      wrapper = mountWithContexts(
         <SurveyToolbar
           isDeleteDisabled
           onSelectAll={jest.fn()}
@@ -26,10 +26,10 @@ describe('<SurveyToolbar />', () => {
     );
   });
 
-  test('delete Button is enabled', async () => {
+  test('delete Button is enabled', () => {
     let wrapper;
-    await act(async () => {
-      wrapper = await mountWithContexts(
+    act(() => {
+      wrapper = mountWithContexts(
         <SurveyToolbar
           isDeleteDisabled={false}
           onSelectAll={jest.fn()}
@@ -47,10 +47,10 @@ describe('<SurveyToolbar />', () => {
     );
   });
 
-  test('switch is off', async () => {
+  test('switch is off', () => {
     let wrapper;
-    await act(async () => {
-      wrapper = await mountWithContexts(
+    act(() => {
+      wrapper = mountWithContexts(
         <SurveyToolbar
           surveyEnabled={false}
           isDeleteDisabled={false}
@@ -66,10 +66,10 @@ describe('<SurveyToolbar />', () => {
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
   });
 
-  test('switch is on', async () => {
+  test('switch is on', () => {
     let wrapper;
-    await act(async () => {
-      wrapper = await mountWithContexts(
+    act(() => {
+      wrapper = mountWithContexts(
         <SurveyToolbar
           surveyEnabled
           isDeleteDisabled={false}

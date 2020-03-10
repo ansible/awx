@@ -20,7 +20,7 @@ describe('<SurveyList />', () => {
   test('expect component to mount successfully', async () => {
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList template={mockJobTemplateData} />
       );
     });
@@ -29,21 +29,20 @@ describe('<SurveyList />', () => {
   test('expect api to be called to get survey', async () => {
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList template={mockJobTemplateData} />
       );
     });
     expect(JobTemplatesAPI.readSurvey).toBeCalledWith(7);
 
     wrapper.update();
-
     expect(wrapper.find('SurveyListItem').length).toBe(1);
   });
   test('error in retrieving the survey throws an error', async () => {
     JobTemplatesAPI.readSurvey.mockRejectedValue(new Error());
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList template={{ ...mockJobTemplateData, id: 'a' }} />
       );
     });
@@ -56,7 +55,7 @@ describe('<SurveyList />', () => {
     JobTemplatesAPI.update.mockResolvedValue();
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList
           template={{ ...mockJobTemplateData, survey_enabled: false }}
         />
@@ -66,7 +65,7 @@ describe('<SurveyList />', () => {
     expect(wrapper.find('Switch').length).toBe(1);
     expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
     await act(async () => {
-      await wrapper.find('Switch').invoke('onChange')(true);
+      wrapper.find('Switch').invoke('onChange')(true);
     });
 
     wrapper.update();
@@ -80,7 +79,7 @@ describe('<SurveyList />', () => {
   test('selectAll enables delete button and calls the api to delete properly', async () => {
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList
           template={{ ...mockJobTemplateData, survey_enabled: false }}
         />
@@ -127,7 +126,7 @@ describe('Survey with no questions', () => {
     JobTemplatesAPI.readSurvey.mockResolvedValue({});
     let wrapper;
     await act(async () => {
-      wrapper = await mountWithContexts(
+      wrapper = mountWithContexts(
         <SurveyList template={mockJobTemplateData} />
       );
     });
