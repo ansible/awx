@@ -23,6 +23,11 @@ import JobList from '@components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
 
+const checkHostInventory = (host, inventory) =>
+  host &&
+  inventory &&
+  host.summary_fields?.inventory?.id === parseInt(inventory.id, 10);
+
 function InventoryHost({ i18n, setBreadcrumb, inventory }) {
   const location = useLocation();
   const match = useRouteMatch('/inventories/inventory/:id/hosts/:hostId');
@@ -40,7 +45,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
       return {
         host: data,
       };
-    }, [match.params.hostId]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [match.params.hostId]),
     {
       host: null,
     }
@@ -48,7 +53,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
 
   useEffect(() => {
     fetchHost();
-  }, [fetchHost]);
+  }, [fetchHost, location.pathname]);
 
   useEffect(() => {
     if (inventory && host) {
@@ -89,24 +94,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     },
   ];
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo={hostListUrl} />
-      </CardActions>
-    </TabbedCardHeader>
-  );
-
-  if (location.pathname.endsWith('edit')) {
-    cardHeader = null;
-  }
-
-  if (isLoading) {
-    return <ContentLoading />;
-  }
-
-  if (!isLoading && contentError) {
+  if (contentError) {
     return (
       <Card>
         <ContentError error={contentError}>
@@ -123,50 +111,62 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     );
   }
 
+  const isInventoryValid = checkHostInventory(host, inventory);
+  if (!isLoading && !isInventoryValid) {
+    return (
+      <ContentError isNotFound>
+        <Link to={hostListUrl}>{i18n._(t`View all Inventory Hosts.`)}</Link>
+      </ContentError>
+    );
+  }
+
   return (
     <>
-      {cardHeader}
-      <Switch>
-        <Redirect
-          from="/inventories/inventory/:id/hosts/:hostId"
-          to="/inventories/inventory/:id/hosts/:hostId/details"
-          exact
-        />
-        {host &&
-          inventory && [
-            <Route
-              key="details"
-              path="/inventories/inventory/:id/hosts/:hostId/details"
-            >
-              <InventoryHostDetail host={host} />
-            </Route>,
-            <Route
-              key="edit"
-              path="/inventories/inventory/:id/hosts/:hostId/edit"
-            >
-              <InventoryHostEdit host={host} inventory={inventory} />
-            </Route>,
-            <Route
-              key="completed-jobs"
-              path="/inventories/inventory/:id/hosts/:hostId/completed_jobs"
-            >
-              <JobList defaultParams={{ job__hosts: host.id }} />
-            </Route>,
-          ]}
-        <Route
-          key="not-found"
-          path="*"
-          render={() =>
-            !isLoading && (
-              <ContentError isNotFound>
-                <Link to={`${match.url}/details`}>
-                  {i18n._(`View Inventory Host Details`)}
-                </Link>
-              </ContentError>
-            )
-          }
-        />
-      </Switch>
+      {['edit'].some(name => location.pathname.includes(name)) ? null : (
+        <TabbedCardHeader>
+          <RoutedTabs tabsArray={tabsArray} />
+          <CardActions>
+            <CardCloseButton linkTo={hostListUrl} />
+          </CardActions>
+        </TabbedCardHeader>
+      )}
+
+      {isLoading && <ContentLoading />}
+
+      {!isLoading && isInventoryValid && (
+        <Switch>
+          <Redirect
+            from="/inventories/inventory/:id/hosts/:hostId"
+            to="/inventories/inventory/:id/hosts/:hostId/details"
+            exact
+          />
+          <Route
+            key="details"
+            path="/inventories/inventory/:id/hosts/:hostId/details"
+          >
+            <InventoryHostDetail host={host} />
+          </Route>
+          <Route
+            key="edit"
+            path="/inventories/inventory/:id/hosts/:hostId/edit"
+          >
+            <InventoryHostEdit host={host} inventory={inventory} />
+          </Route>
+          <Route
+            key="completed-jobs"
+            path="/inventories/inventory/:id/hosts/:hostId/completed_jobs"
+          >
+            <JobList defaultParams={{ job__hosts: host.id }} />
+          </Route>
+          <Route key="not-found" path="*">
+            <ContentError isNotFound>
+              <Link to={`${match.url}/details`}>
+                {i18n._(`View Inventory Host Details`)}
+              </Link>
+            </ContentError>
+          </Route>
+        </Switch>
+      )}
     </>
   );
 }

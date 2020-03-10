@@ -76,4 +76,13 @@ describe('<InventoryHost />', () => {
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
+
+  test('should show content error when inventory id does not match host inventory', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryHost inventory={{ id: 99 }} setBreadcrumb={() => {}} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
 });
