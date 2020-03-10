@@ -74,6 +74,14 @@ class JobTemplates extends SchedulesMixin(
   readSurvey(id) {
     return this.http.get(`${this.baseUrl}${id}/survey_spec/`);
   }
+
+  updateSurvey(id, survey = null) {
+    return this.http.post(`${this.baseUrl}${id}/survey_spec/`, survey);
+  }
+
+  destroySurvey(id) {
+    return this.http.delete(`${this.baseUrl}${id}/survey_spec/`);
+  }
 }
 
 export default JobTemplates;
