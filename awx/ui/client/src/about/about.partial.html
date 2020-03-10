@@ -19,7 +19,11 @@
 </pre>
                 </div>
                 <div class="About-modalFooter">
-                    <img class="About-brandImg img-responsive" src="/static/assets/logo-login.svg" />
+                    <img
+                        ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? 'Ansible Tower Logo' : 'Ansible AWX Logo' }}"
+                        class="About-brandImg img-responsive"
+                        src="/static/assets/logo-login.svg"
+                    />
                     <p class="About-footerText">
                       <span class="About-ansibleVersion">
                           Ansible {{ ansible_version }}

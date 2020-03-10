@@ -22,7 +22,11 @@
   </head>
   <body>
     <div class="at-Upgrade--panel">
-      <img src="{% static 'assets/logo-header.svg' %}" width="200"/>
+      <img
+        ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? 'Ansible Tower Logo' : 'Ansible AWX Logo' }}"
+        src="{% static 'assets/logo-header.svg' %}"
+        width="200"
+      />
       <span class="at-Upgrade--header at-Upgrade--loading"><span class="at-Upgrade--brand" ng-bind="BRAND_NAME"></span> is Upgrading</span>
       <span class="fa-4x at-Upgrade--icon"><i class="fa fa-refresh fa-spin"></i></span>
       <span class="at-Upgrade--text">

@@ -68,13 +68,13 @@
     </div>
     <div class="InsightsRow" ng-repeat="report in reports">
         <div class="InsightsRow-title">
-            <img class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
+            <img aria-label="Insights: Critical Risk" class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
                 aw-tool-tip="Critical Risk" data-placement="right" data-original-title="" title="">
-            <img class="InsightsIcon" src="/static/assets/i_severity_high.svg" ng-show="report.rule.severity === 'ERROR'"
+            <img aria-label="Insights: High Risk" class="InsightsIcon" src="/static/assets/i_severity_high.svg" ng-show="report.rule.severity === 'ERROR'"
                 aw-tool-tip="High Risk" data-placement="top" data-original-title="" title="">
-            <img class="InsightsIcon" src="/static/assets/i_severity_med.svg" ng-show="report.rule.severity === 'WARN'"
+            <img aria-label="Insights: Medium Risk" class="InsightsIcon" src="/static/assets/i_severity_med.svg" ng-show="report.rule.severity === 'WARN'"
                 aw-tool-tip="Medium Risk" data-placement="top">
-            <img class="InsightsIcon" src="/static/assets/i_severity_low.svg" ng-show="report.rule.severity === 'INFO'"
+            <img aria-label="Insights: Low Risk" class="InsightsIcon" src="/static/assets/i_severity_low.svg" ng-show="report.rule.severity === 'INFO'"
                 aw-tool-tip="Low Risk" data-placement="top">
             <div class="InsightsRow-description"><translate>ISSUE: {{report.rule.description}}</translate></div>
             <span class="Form-title--is_superuser">{{report.rule.category}}</span>
