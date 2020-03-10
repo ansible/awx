@@ -8,6 +8,7 @@ class Inventories extends InstanceGroupsMixin(Base) {
 
     this.readAccessList = this.readAccessList.bind(this);
     this.readHosts = this.readHosts.bind(this);
+    this.readHostDetail = this.readHostDetail.bind(this);
     this.readGroups = this.readGroups.bind(this);
     this.readGroupsOptions = this.readGroupsOptions.bind(this);
     this.promoteGroup = this.promoteGroup.bind(this);
@@ -25,6 +26,22 @@ class Inventories extends InstanceGroupsMixin(Base) {
 
   readHosts(id, params) {
     return this.http.get(`${this.baseUrl}${id}/hosts/`, { params });
+  }
+
+  async readHostDetail(inventoryId, hostId) {
+    const {
+      data: { results },
+    } = await this.http.get(
+      `${this.baseUrl}${inventoryId}/hosts/?id=${hostId}`
+    );
+
+    if (Array.isArray(results) && results.length) {
+      return results[0];
+    }
+
+    throw new Error(
+      `How did you get here? Host not found for Inventory ID: ${inventoryId}`
+    );
   }
 
   readGroups(id, params) {

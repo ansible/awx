@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom';
 import useRequest from '@util/useRequest';
 
-import { HostsAPI } from '@api';
+import { InventoriesAPI } from '@api';
 import { Card, CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { TabbedCardHeader } from '@components/Card';
@@ -22,11 +22,6 @@ import RoutedTabs from '@components/RoutedTabs';
 import JobList from '@components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
-
-const checkHostInventory = (host, inventory) =>
-  host &&
-  inventory &&
-  host.summary_fields?.inventory?.id === parseInt(inventory.id, 10);
 
 function InventoryHost({ i18n, setBreadcrumb, inventory }) {
   const location = useLocation();
@@ -40,12 +35,14 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     request: fetchHost,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await HostsAPI.readDetail(match.params.hostId);
-
+      const response = await InventoriesAPI.readHostDetail(
+        inventory.id,
+        match.params.hostId
+      );
       return {
-        host: data,
+        host: response,
       };
-    }, [match.params.hostId]),
+    }, [inventory.id, match.params.hostId]),
     {
       host: null,
     }
@@ -111,15 +108,6 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     );
   }
 
-  const isInventoryValid = checkHostInventory(host, inventory);
-  if (!isLoading && !isInventoryValid) {
-    return (
-      <ContentError isNotFound>
-        <Link to={hostListUrl}>{i18n._(t`View all Inventory Hosts.`)}</Link>
-      </ContentError>
-    );
-  }
-
   return (
     <>
       {['edit'].some(name => location.pathname.includes(name)) ? null : (
@@ -133,7 +121,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
 
       {isLoading && <ContentLoading />}
 
-      {!isLoading && isInventoryValid && (
+      {!isLoading && host && (
         <Switch>
           <Redirect
             from="/inventories/inventory/:id/hosts/:hostId"
