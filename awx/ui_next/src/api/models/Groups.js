@@ -5,8 +5,13 @@ class Groups extends Base {
     super(http);
     this.baseUrl = '/api/v2/groups/';
 
+    this.createHost = this.createHost.bind(this);
     this.readAllHosts = this.readAllHosts.bind(this);
     this.disassociateHost = this.disassociateHost.bind(this);
+  }
+
+  createHost(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/hosts/`, data);
   }
 
   readAllHosts(id, params) {
