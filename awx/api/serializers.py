@@ -1600,7 +1600,7 @@ class InventorySerializer(BaseSerializerWithVariables):
                         })
                 SmartFilter().query_from_string(host_filter)
             except RuntimeError as e:
-                raise models.base.ValidationError(e)
+                raise models.base.ValidationError(str(e))
         return host_filter
 
     def validate(self, attrs):
