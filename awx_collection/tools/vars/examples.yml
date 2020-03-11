@@ -1,0 +1,52 @@
+---
+examples:
+  users: |
+    - name: Add tower user
+      tower_user:
+        username: jdoe
+        password: foobarbaz
+        email: jdoe@example.org
+        first_name: John
+        last_name: Doe
+        state: present
+        tower_config_file: "~/tower_cli.cfg"
+
+    - name: Add tower user as a system administrator
+      tower_user:
+        username: jdoe
+        password: foobarbaz
+        email: jdoe@example.org
+        superuser: yes
+        state: present
+        tower_config_file: "~/tower_cli.cfg"
+
+    - name: Add tower user as a system auditor
+      tower_user:
+        username: jdoe
+        password: foobarbaz
+        email: jdoe@example.org
+        auditor: yes
+        state: present
+        tower_config_file: "~/tower_cli.cfg"
+
+    - name: Delete tower user
+      tower_user:
+        username: jdoe
+        email: jdoe@example.org
+        state: absent
+        tower_config_file: "~/tower_cli.cfg"
+
+  job_templates: |
+    - name: Create tower Ping job template
+      tower_job_template:
+        name: "Ping"
+        job_type: "run"
+        inventory: "Local"
+        project: "Demo"
+        playbook: "ping.yml"
+        credential: "Local"
+        state: "present"
+        tower_config_file: "~/tower_cli.cfg"
+        survey_enabled: yes
+        survey_spec: "{{ '{{' }} lookup('file', 'my_survey.json') {{ '}}' }}"
+        custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
