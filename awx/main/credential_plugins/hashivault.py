@@ -114,7 +114,7 @@ def handle_auth(**kwargs):
     elif kwargs.get('role_id') and kwargs.get('secret_id'):
         token = approle_auth(**kwargs)
     else:
-        raise Exception('Either Vault token or Auth parameters must be set')
+        raise Exception('Either token or AppRole parameters must be set')
 
     return token
 
