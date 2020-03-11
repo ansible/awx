@@ -209,7 +209,11 @@ requirements_awx: virtualenv_awx
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
 
-requirements: requirements_ansible requirements_awx
+requirements_collections:
+	mkdir -p $(COLLECTION_BASE)
+	ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE)
+
+requirements: requirements_ansible requirements_awx requirements_collections
 
 requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
 
