@@ -121,10 +121,7 @@ def handle_auth(**kwargs):
 def approle_auth(**kwargs):
     role_id = kwargs['role_id']
     secret_id = kwargs['secret_id']
-    auth_path = "approle"
-
-    if kwargs.get('auth_path'):
-      auth_path = kwargs.get('auth_path', "approle")
+    auth_path = kwargs.get('auth_path') or 'approle'
 
     url = urljoin(kwargs['url'], 'v1')
     cacert = kwargs.get('cacert', None)
