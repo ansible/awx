@@ -106,6 +106,7 @@ hashi_ssh_inputs['metadata'] = [{
 }]
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
+
 def handle_auth(**kwargs):
     token = None
 
@@ -117,6 +118,7 @@ def handle_auth(**kwargs):
         raise Exception('Either token or AppRole parameters must be set')
 
     return token
+
 
 def approle_auth(**kwargs):
     role_id = kwargs['role_id']
@@ -138,6 +140,7 @@ def approle_auth(**kwargs):
     resp.raise_for_status()
     token = resp.json()['auth']['client_token']
     return token
+
 
 def kv_backend(**kwargs):
     token = handle_auth(**kwargs)
