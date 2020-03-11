@@ -57,7 +57,7 @@
     - name: Process endpoint
       template:
         src: "templates/tower_module.j2"
-        dest: "modules/{{ file_name }}"
+        dest: "{{ playbook_dir | dirname }}/plugins/modules/{{ file_name }}"
       loop: "{{ end_point_options['results'] }}"
       loop_control:
         label: "{{ item['item']['key'] }}"

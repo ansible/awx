@@ -41,8 +41,8 @@ options:
 {% endif %}
       required: {{ item['json']['actions']['POST'][option]['required'] }}
       type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
-{% if 'default' in item['json']['actions']['POST'][option] %}
-      default: '{{ item['json']['actions']['POST'][option]['default'] }}'
+{% if item['json']['actions']['POST'][option].get('default', '') != '' %}
+      default: {{ item['json']['actions']['POST'][option]['default'] }}
 {% endif %}
 {% if 'choices' in item['json']['actions']['POST'][option] %}
       choices:
@@ -94,7 +94,7 @@ def main():
 {% for option in item['json']['actions']['POST'] %}
 {%   set option_data = [] %}
 {{   option_data.append('required={}'.format(item['json']['actions']['POST'][option]['required'])) -}}
-{{   option_data.append('type={}'.format(type_map[item['json']['actions']['POST'][option]['type']])) -}}
+{{   option_data.append('type=\'{}\''.format(type_map[item['json']['actions']['POST'][option]['type']])) -}}
 {%   if item['json']['actions']['POST'][option]['type'] == 'password' %}
 {{     option_data.append('no_log=True') -}}
 {%   endif %}
@@ -105,7 +105,7 @@ def main():
 {%     endfor %}
 {{     option_data.append('choices=[{}]'.format(all_choices | join(', '))) -}}
 {%   endif %}
-{%   if 'default' in item['json']['actions']['POST'][option] %}
+{%   if item['json']['actions']['POST'][option].get('default', '') != '' %}
 {{     option_data.append("default='{}'".format(item['json']['actions']['POST'][option]['default'])) -}}
 {%   endif %}
 {%   if aliases[item_type][option] | default(False) %}
@@ -129,18 +129,6 @@ def main():
     # Extract our parameters
 {% for option in item['json']['actions']['POST'] %}
     {{ option }} = module.params.get('{{ option }}')
-{% if 'min_value' in item['json']['actions']['POST'][option] %}
-    if {{ option }} < {{ item['json']['actions']['POST'][option]['min_value'] }}:
-        module.fail_msg(msg="The value for {{ option }} can not be less than {{ item['json']['actions']['POST'][option]['min_value'] }}")
-{% endif %}
-{% if 'max_value' in item['json']['actions']['POST'][option] %}
-    if {{ option }} > {{ item['json']['actions']['POST'][option]['max_value'] }}:
-        module.fail_msg(msg="The value for {{ option }} can not be larger than {{ item['json']['actions']['POST'][option]['max_value'] }}")
-{% endif %}
-{% if 'max_length' in item['json']['actions']['POST'][option] %}
-    if {{ option }} and len({{ option }}) > {{ item['json']['actions']['POST'][option]['max_length'] }}:
-        module.fail_msg(msg="The value for {{ option }} can not be longer than {{ item['json']['actions']['POST'][option]['max_length'] }}")
-{% endif %}
 {% if option == name_option %}
     new_{{ name_option }} = module.params.get("new_{{ name_option }}")
 {% endif %}

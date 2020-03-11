@@ -45,7 +45,7 @@ options:
       type: str
     is_superuser:
       description:
-        - User is a system wide administrator.
+        - Designates that this user has all permissions without explicitly assigning them.
       required: False
       type: bool
       default: False
@@ -59,10 +59,9 @@ options:
       aliases: ['auditor']
     password:
       description:
-        - Password of the user; write-only field.
+        - Write-only field used to change the password.
       required: False
       type: str
-      default: ''
     state:
       description:
         - Desired state of the resource.
@@ -128,7 +127,7 @@ def main():
         email=dict(required=False, type='str'),
         is_superuser=dict(required=False, type='bool', default=False, aliases=['superuser']),
         is_system_auditor=dict(required=False, type='bool', default=False, aliases=['auditor']),
-        password=dict(required=False, type='str', default=''),
+        password=dict(required=False, type='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
