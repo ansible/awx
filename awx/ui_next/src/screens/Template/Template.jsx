@@ -15,7 +15,8 @@ import { ResourceAccessList } from '@components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
-import SurveyList from './shared/SurveyList';
+import TemplateSurvey from './TemplateSurvey';
+// import SurveyList from './shared/SurveyList';
 
 class Template extends Component {
   constructor(props) {
@@ -246,10 +247,9 @@ class Template extends Component {
               </Route>
             )}
             {template && (
-              <Route
-                path="/templates/:templateType/:id/survey"
-                render={() => <SurveyList template={template} />}
-              />
+              <Route path="/templates/:templateType/:id/survey">
+                <TemplateSurvey template={template} />
+              </Route>
             )}
             <Route
               key="not-found"

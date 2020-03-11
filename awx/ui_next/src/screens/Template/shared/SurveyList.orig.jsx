@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import useRequest from '@util/useRequest';
+import useRequest, { useDeleteItems } from '@util/useRequest';
 import { Button } from '@patternfly/react-core';
 
 import ContentError from '@components/ContentError';
@@ -14,24 +14,68 @@ import AlertModal from '@components/AlertModal';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 
-// survey.name
-// survey.description
-// survey.spec
-function SurveyList({
-  survey,
-  surveyEnabled,
-  toggleSurvey,
-  updateSurvey,
-  deleteSurvey,
-  i18n,
-}) {
-  const questions = survey?.spec || [];
+function SurveyList({ template, i18n }) {
   const [selected, setSelected] = useState([]);
-  // const [showError, setShowError] = useState(false);
+  // const [updated, setUpdated] = useState(null);
+  const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
+  const [showError, setShowError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [questions, setQuestions] = useState(null);
+
+  const {
+    result: { fetchedQuestions, name, description },
+    error: contentError,
+    isLoading,
+    request: fetchSurvey,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: { spec = [], description: surveyDescription, name: surveyName },
+      } = await JobTemplatesAPI.readSurvey(template.id);
+
+      return {
+        fetchedQuestions: spec?.map((s, index) => ({ ...s, id: index })),
+        description: surveyDescription,
+        name: surveyName,
+      };
+    }, [template.id]),
+    { questions: [], name: '', description: '' }
+  );
+
+  useEffect(() => {
+    setQuestions(fetchedQuestions);
+  }, [fetchedQuestions]);
+
+  useEffect(() => {
+    fetchSurvey();
+  }, [fetchSurvey]);
 
   const isAllSelected =
     selected.length === questions?.length && selected.length > 0;
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteSurvey,
+    deletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      await JobTemplatesAPI.destroySurvey(template.id);
+      fetchSurvey();
+    }, [template.id, fetchSurvey])
+  );
+
+  const {
+    isToggleLoading,
+    error: toggleError,
+    request: toggleSurvey,
+  } = useRequest(
+    useCallback(async () => {
+      await JobTemplatesAPI.update(template.id, {
+        survey_enabled: !surveyEnabled,
+      });
+      return setSurveyEnabled(!surveyEnabled);
+    }, [template, surveyEnabled]),
+    template.survey_enabled
+  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...questions] : []);
@@ -48,12 +92,27 @@ function SurveyList({
   const handleDelete = async () => {
     if (isAllSelected) {
       await deleteSurvey();
+      setIsDeleteModalOpen(false);
     } else {
-      await updateSurvey(questions.filter(q => !selected.includes(q)));
+      setQuestions(questions.filter(q => !selected.includes(q)));
+      setIsDeleteModalOpen(false);
     }
-    setIsDeleteModalOpen(false);
     setSelected([]);
   };
+
+  const {
+    isLoading: isUpdateLoading,
+    error: updateError,
+    // request: updateSurvey,
+  } = useRequest(
+    useCallback(async () => {
+      return JobTemplatesAPI.updateSurvey(template.id, {
+        name,
+        description,
+        spec: questions,
+      });
+    }, [template.id, name, description, questions])
+  );
 
   const moveUp = question => {
     const index = questions.indexOf(question);
@@ -63,7 +122,7 @@ function SurveyList({
     const beginning = questions.slice(0, index - 1);
     const swapWith = questions[index - 1];
     const end = questions.slice(index + 1);
-    updateSurvey([...beginning, question, swapWith, ...end]);
+    setQuestions([...beginning, question, swapWith, ...end]);
   };
   const moveDown = question => {
     const index = questions.indexOf(question);
@@ -73,13 +132,17 @@ function SurveyList({
     const beginning = questions.slice(0, index);
     const swapWith = questions[index + 1];
     const end = questions.slice(index + 2);
-    updateSurvey([...beginning, swapWith, question, ...end]);
+    setQuestions([...beginning, swapWith, question, ...end]);
   };
 
   let content;
-  // TODO
-  if (false) {
+  if (
+    (isLoading || isToggleLoading || isDeleteLoading || isUpdateLoading) &&
+    questions?.length <= 0
+  ) {
     content = <ContentLoading />;
+  } else if (contentError) {
+    content = <ContentError error={contentError} />;
   } else if (!questions || questions?.length <= 0) {
     content = (
       <ContentEmpty
@@ -90,7 +153,7 @@ function SurveyList({
   } else {
     content = questions?.map((question, index) => (
       <SurveyListItem
-        key={question.variable}
+        key={question.id}
         isLast={index === questions.length - 1}
         isFirst={index === 0}
         question={question}
@@ -102,22 +165,22 @@ function SurveyList({
     ));
   }
 
-  // const error = deletionError || toggleError || updateError;
-  // let errorMessage = '';
-  // if (updateError) {
-  //   errorMessage = i18n._(t`Failed to update survey`);
-  // }
-  // if (toggleError) {
-  //   errorMessage = i18n._(t`Failed to toggle survey`);
-  // }
-  // if (deletionError) {
-  //   errorMessage = i18n._(t`Failed to delete survey`);
-  // }
-  // useEffect(() => {
-  //   if (error) {
-  //     setShowError(true);
-  //   }
-  // }, [error]);
+  const error = deletionError || toggleError || updateError;
+  let errorMessage = '';
+  if (updateError) {
+    errorMessage = i18n._(t`Failed to update survey`);
+  }
+  if (toggleError) {
+    errorMessage = i18n._(t`Failed to toggle survey`);
+  }
+  if (deletionError) {
+    errorMessage = i18n._(t`Failed to delete survey`);
+  }
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+    }
+  }, [error]);
 
   return (
     <>
@@ -174,7 +237,7 @@ function SurveyList({
           ))}
         </AlertModal>
       )}
-      {/* {showError && (
+      {showError && (
         <AlertModal
           isOpen={showError}
           variant="error"
@@ -184,7 +247,7 @@ function SurveyList({
           {errorMessage}
           <ErrorDetail error={error} />
         </AlertModal>
-      )} */}
+      )}
     </>
   );
 }
