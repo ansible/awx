@@ -212,6 +212,8 @@
     - 'configmap'
     - 'secret'
     - 'deployment'
+    - 'supervisor'
+    - 'launch_awx'
   no_log: true
 
 - name: Apply Deployment
@@ -221,6 +223,8 @@
     - "{{ configmap }}"
     - "{{ secret }}"
     - "{{ deployment }}"
+    - "{{ supervisor }}"
+    - "{{ launch_awx }}"
   no_log: true
 
 - name: Delete any existing management pod
