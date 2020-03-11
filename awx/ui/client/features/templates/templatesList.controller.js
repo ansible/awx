@@ -24,7 +24,6 @@ function ListTemplatesController(
     qs,
     GetBasePath,
     ngToast,
-    $timeout
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -32,10 +31,6 @@ function ListTemplatesController(
     const choices = workflowTemplate.options('actions.GET.type.choices')
         .concat(jobTemplate.options('actions.GET.type.choices'));
 
-    let launchModalOpen = false;
-    let refreshAfterLaunchClose = false;
-    let pendingRefresh = false;
-    let refreshTimerRunning = false;
     let paginateQuerySet = {};
 
     vm.strings = strings;
@@ -120,25 +115,39 @@ function ListTemplatesController(
         setToolbarSort();
     }, true);
 
-    $scope.$on(`ws-jobs`, () => {
-        if (!launchModalOpen) {
-            if (!refreshTimerRunning) {
-                refreshTemplates();
-            } else {
-                pendingRefresh = true;
-            }
-        } else {
-            refreshAfterLaunchClose = true;
-        }
-    });
+    $scope.$on(`ws-jobs`, (e, msg) => {
+        if (msg.unified_job_template_id && vm.templates) {
+            const template = vm.templates.find((t) => t.id === msg.unified_job_template_id);
+            if (template) {
+                if (msg.status === 'pending') {
+                    // This is a new job - add it to the front of the
+                    // recent_jobs array
+                    if (template.summary_fields.recent_jobs.length === 10) {
+                        template.summary_fields.recent_jobs.pop();
+                    }
 
-    $scope.$on('launchModalOpen', (evt, isOpen) => {
-        evt.stopPropagation();
-        if (!isOpen && refreshAfterLaunchClose) {
-            refreshAfterLaunchClose = false;
-            refreshTemplates();
+                    template.summary_fields.recent_jobs.unshift({
+                        id: msg.unified_job_id,
+                        status: msg.status,
+                        type: msg.type
+                    });
+                } else {
+                    // This is an update to an existing job.  Check to see
+                    // if we have it in our array of recent_jobs
+                    for (let i=0; i<template.summary_fields.recent_jobs.length; i++) {
+                        const recentJob = template.summary_fields.recent_jobs[i];
+                        if (recentJob.id === msg.unified_job_id) {
+                            recentJob.status = msg.status;
+                            if (msg.finished) {
+                                recentJob.finished = msg.finished;
+                                template.last_job_run = msg.finished;
+                            }
+                            break;
+                        }
+                    };
+                }
+            }
         }
-        launchModalOpen = isOpen;
     });
 
     vm.isInvalid = (template) => {
@@ -265,15 +274,6 @@ function ListTemplatesController(
             vm.templates = vm.dataset.results;
         })
         .finally(() => Wait('stop'));
-        pendingRefresh = false;
-        refreshTimerRunning = true;
-        $timeout(() => {
-            if (pendingRefresh) {
-                refreshTemplates();
-            } else {
-                refreshTimerRunning = false;
-            }
-        }, 5000);
     }
 
     function createErrorHandler(path, action) {
@@ -483,8 +483,7 @@ ListTemplatesController.$inject = [
     'Wait',
     'QuerySet',
     'GetBasePath',
-    'ngToast',
-    '$timeout'
+    'ngToast'
 ];
 
 export default ListTemplatesController;

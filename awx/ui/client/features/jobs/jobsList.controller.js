@@ -25,15 +25,15 @@ function ListJobsController (
 
     vm.strings = strings;
 
+    let newJobs = [];
+
     // smart-search
     const name = 'jobs';
     const iterator = 'job';
     let paginateQuerySet = {};
 
     let launchModalOpen = false;
-    let refreshAfterLaunchClose = false;
-    let pendingRefresh = false;
-    let refreshTimerRunning = false;
+    let newJobsTimerRunning = false;
 
     vm.searchBasePath = SearchBasePath;
 
@@ -104,23 +104,53 @@ function ListJobsController (
         $scope.$emit('updateCount', vm.job_dataset.count, 'jobs');
     });
 
-    $scope.$on('ws-jobs', () => {
-        if (!launchModalOpen) {
-            if (!refreshTimerRunning) {
-                refreshJobs();
-            } else {
-                pendingRefresh = true;
+    const canAddRowsDynamically = () => {
+        const orderByValue = _.get($state.params, 'job_search.order_by');
+        const pageValue = _.get($state.params, 'job_search.page');
+        const idInValue = _.get($state.params, 'job_search.id__in');
+
+        return (!idInValue && (!pageValue || pageValue === '1')
+            && (orderByValue === '-finished' || orderByValue === '-started'));
+    };
+
+    const updateJobRow = (msg) => {
+        // Loop across the jobs currently shown and update the row
+        // if it exists
+        for (let i = 0; i < vm.jobs.length; i++) {
+            if (vm.jobs[i].id === msg.unified_job_id) {
+                // Update the job status.
+                vm.jobs[i].status = msg.status;
+                if (msg.finished) {
+                    vm.jobs[i].finished = msg.finished;
+                    const orderByValue = _.get($state.params, 'job_search.order_by');
+                    if (orderByValue === '-finished') {
+                        // Attempt to sort the rows in the list by their finish
+                        // timestamp in descending order
+                        vm.jobs.sort((a, b) =>
+                            (!b.finished) - (!a.finished)
+                            || new Date(b.finished) - new Date(a.finished));
+                    }
+                }
+                break;
             }
-        } else {
-            refreshAfterLaunchClose = true;
+        }
+    };
+
+    $scope.$on('ws-jobs', (e, msg) => {
+        if (msg.status === 'pending' && canAddRowsDynamically()) {
+            newJobs.push(msg.unified_job_id);
+            if (!launchModalOpen && !newJobsTimerRunning) {
+                fetchNewJobs();
+            }
+        } else if (!newJobs.includes(msg.unified_job_id)) {
+            updateJobRow(msg);
         }
     });
 
     $scope.$on('launchModalOpen', (evt, isOpen) => {
         evt.stopPropagation();
-        if (!isOpen && refreshAfterLaunchClose) {
-            refreshAfterLaunchClose = false;
-            refreshJobs();
+        if (!isOpen && newJobs.length > 0) {
+            fetchNewJobs();
         }
         launchModalOpen = isOpen;
     });
@@ -289,22 +319,49 @@ function ListJobsController (
         });
     };
 
-    function refreshJobs () {
-        qs.search(SearchBasePath, $state.params.job_search, { 'X-WS-Session-Quiet': true })
+    const fetchNewJobs = () => {
+        newJobsTimerRunning = true;
+        const newJobIdsFilter = newJobs.join(',');
+        newJobs = [];
+        const newJobsSearchParams = Object.assign({}, $state.params.job_search);
+        newJobsSearchParams.count_disabled = 1;
+        newJobsSearchParams.id__in = newJobIdsFilter;
+        delete newJobsSearchParams.page_size;
+        const stringifiedSearchParams = qs.encodeQueryset(newJobsSearchParams, false);
+        Rest.setUrl(`${vm.searchBasePath}${stringifiedSearchParams}`);
+        Rest.get()
             .then(({ data }) => {
-                vm.jobs = data.results;
-                vm.job_dataset = data;
+                vm.job_dataset.count += data.results.length;
+                const pageSize = parseInt($state.params.job_search.page_size, 10) || 20;
+                const joinedJobs = data.results.concat(vm.jobs);
+                vm.jobs = joinedJobs.length > pageSize
+                    ? joinedJobs.slice(0, pageSize)
+                    : joinedJobs;
+                $timeout(() => {
+                    if (canAddRowsDynamically()) {
+                        if (newJobs.length > 0 && !launchModalOpen) {
+                            fetchNewJobs();
+                        } else {
+                            newJobsTimerRunning = false;
+                        }
+                    } else {
+                        // Bail out - one of [order_by, page, id__in] params has changed since we
+                        // received these new job messages
+                        newJobs = [];
+                        newJobsTimerRunning = false;
+                    }
+                }, 5000);
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', {
+                        path: `${vm.searchBasePath}${stringifiedSearchParams}`,
+                        status
+                    })
+                });
             });
-        pendingRefresh = false;
-        refreshTimerRunning = true;
-        $timeout(() => {
-            if (pendingRefresh) {
-                refreshJobs();
-            } else {
-                refreshTimerRunning = false;
-            }
-        }, 5000);
-    }
+    };
 
     vm.isCollapsed = true;
 

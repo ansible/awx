@@ -4,25 +4,45 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope',
-    '$stateParams', 'Rest', 'ProcessErrors',
-    'GetBasePath', 'Wait',
-    '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
-    function($scope, $rootScope,
-        $stateParams, Rest, ProcessErrors,
-        GetBasePath, Wait,
-        $state, OrgJobTemplateList, Dataset, qs) {
+export default ['$scope', '$stateParams', 'Rest', 'GetBasePath', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset',
+    function($scope, $stateParams, Rest, GetBasePath, $state, OrgJobTemplateList, Dataset) {
 
         var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');
 
-        $scope.$on(`ws-jobs`, function () {
-            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-            qs.search(path, $state.params[`${list.iterator}_search`])
-            .then(function(searchResponse) {
-                $scope[`${list.iterator}_dataset`] = searchResponse.data;
-                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-            });
+        $scope.$on(`ws-jobs`, function (e, msg) {
+            if (msg.unified_job_template_id && $scope[list.name]) {
+                const template = $scope[list.name].find((t) => t.id === msg.unified_job_template_id);
+                if (template) {
+                    if (msg.status === 'pending') {
+                        // This is a new job - add it to the front of the
+                        // recent_jobs array
+                        if (template.summary_fields.recent_jobs.length === 10) {
+                            template.summary_fields.recent_jobs.pop();
+                        }
+    
+                        template.summary_fields.recent_jobs.unshift({
+                            id: msg.unified_job_id,
+                            status: msg.status,
+                            type: msg.type
+                        });
+                    } else {
+                        // This is an update to an existing job.  Check to see
+                        // if we have it in our array of recent_jobs
+                        for (let i=0; i<template.summary_fields.recent_jobs.length; i++) {
+                            const recentJob = template.summary_fields.recent_jobs[i];
+                            if (recentJob.id === msg.unified_job_id) {
+                                recentJob.status = msg.status;
+                                if (msg.finished) {
+                                    recentJob.finished = msg.finished;
+                                    template.last_job_run = msg.finished;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         init();
