@@ -109,10 +109,10 @@ hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 def handle_auth(**kwargs):
     result = None
 
-    if bool(kwargs.get('token')):
+    if kwargs.get('token'):
       result = kwargs['token']
     else:
-      if bool(kwargs.get('role_id')) and bool(kwargs.get('secret_id')):
+      if kwargs.get('role_id') and kwargs.get('secret_id'):
         result = approle_auth(**kwargs)
       else:
         raise Exception('Either Vault token or Auth parameters must be set')
@@ -124,7 +124,7 @@ def approle_auth(**kwargs):
     secret_id = kwargs['secret_id']
     auth_path = "approle"
 
-    if bool(kwargs.get('auth_path')):
+    if kwargs.get('auth_path'):
       auth_path = kwargs.get('auth_path', "approle")
 
     url = urljoin(kwargs['url'], 'v1')
