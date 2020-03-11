@@ -159,14 +159,17 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
     jt_qs = jt_qs.only('id', 'admin_role_id', 'execute_role_id', 'inventory_id')
     for jt in jt_qs.iterator():
         org = jt.inventory.organization
-        for role_name in ('admin_role', 'execute_role'):
-            role_id = getattr(jt, '{}_id'.format(role_name))
+        for jt_role, org_roles in (
+                ('admin_role', ('admin_role', 'job_template_admin_role',)),
+                ('execute_role', ('execute_role',))
+            ):
+            role_id = getattr(jt, '{}_id'.format(jt_role))
 
             user_qs = User.objects
             if not backward:
                 # In this specific case, the name for the org role and JT roles were the same
-                org_role_id = getattr(org, '{}_id'.format(role_name))
-                user_qs = user_qs.filter(roles=org_role_id)
+                org_role_ids = [getattr(org, '{}_id'.format(role_name)) for role_name in org_roles]
+                user_qs = user_qs.filter(roles__in=org_role_ids)
                 # bizarre migration behavior - ancestors / descendents of
                 # migration version of Role model is reversed, using current model briefly
                 ancestor_ids = list(
@@ -185,10 +188,10 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
             if not user_ids:
                 continue
 
-            role = getattr(jt, role_name)
+            role = getattr(jt, jt_role)
             logger.debug('{} {} on jt {} for users {} via inventory.organization {}'.format(
                 'Removing' if backward else 'Setting',
-                role_name, jt.pk, user_ids, org.pk
+                jt_role, jt.pk, user_ids, org.pk
             ))
             if not backward:
                 # in reverse, explit role becomes redundant
