@@ -1,56 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { JobTemplatesAPI } from '@api';
+import ContentError from '@components/ContentError';
+import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
+import useRequest, { useDismissableError } from '@util/useRequest';
 import SurveyList from './shared/SurveyList';
 
-export default function TemplateSurvey({ template }) {
-  const [survey, setSurvey] = useState(null);
+function TemplateSurvey({ template, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
 
-  useEffect(() => {
-    (async () => {
+  const {
+    result: survey,
+    request: fetchSurvey,
+    isLoading,
+    error: loadingError,
+    setValue: setSurvey,
+  } = useRequest(
+    useCallback(async () => {
       const { data } = await JobTemplatesAPI.readSurvey(template.id);
-      setSurvey(data);
-    })();
-  }, [template.id]);
+      return data;
+    }, [template.id])
+  );
+  useEffect(() => {
+    fetchSurvey();
+  }, [fetchSurvey]);
 
-  const updateSurvey = async newQuestions => {
-    await JobTemplatesAPI.updateSurvey(template.id, {
-      ...survey,
-      spec: newQuestions,
-    });
-    setSurvey({
-      ...survey,
-      spec: newQuestions,
-    });
-  };
+  const {
+    request: updateSurvey,
+    isLoading: isUpdateLoading,
+    error: updateError,
+  } = useRequest(
+    useCallback(
+      async updatedSurvey => {
+        await JobTemplatesAPI.updateSurvey(template.id, updatedSurvey);
+        setSurvey(updatedSurvey);
+      },
+      [template.id, setSurvey]
+    )
+  );
 
-  const deleteSurvey = async () => {
-    await JobTemplatesAPI.destroySurvey(template.id);
-    setSurvey(null);
-  };
+  const {
+    request: deleteSurvey,
+    isLoading: isDeleteLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
+      await JobTemplatesAPI.destroySurvey(template.id);
+      setSurvey(null);
+    }, [template.id, setSurvey])
+  );
 
-  const toggleSurvey = async () => {
-    await JobTemplatesAPI.update(template.id, {
-      survey_enabled: !surveyEnabled,
-    });
-    setSurveyEnabled(!surveyEnabled);
-  };
+  const {
+    request: toggleSurvey,
+    isLoading: isToggleLoading,
+    error: toggleError,
+  } = useRequest(
+    useCallback(async () => {
+      await JobTemplatesAPI.update(template.id, {
+        survey_enabled: !surveyEnabled,
+      });
+      setSurveyEnabled(!surveyEnabled);
+    }, [template.id, surveyEnabled])
+  );
 
-  // TODO
-  // if (contentError) {
-  // return <ContentError error={contentError} />;
+  const { error, dismissError } = useDismissableError(
+    updateError || deleteError || toggleError
+  );
+
+  if (loadingError) {
+    return <ContentError error={loadingError} />;
+  }
   return (
-    <Switch>
-      <Route path="/templates/:templateType/:id/survey">
-        <SurveyList
-          survey={survey}
-          surveyEnabled={surveyEnabled}
-          toggleSurvey={toggleSurvey}
-          updateSurvey={updateSurvey}
-          deleteSurvey={deleteSurvey}
-        />
-      </Route>
-    </Switch>
+    <>
+      <Switch>
+        <Route path="/templates/:templateType/:id/survey">
+          <SurveyList
+            survey={survey}
+            surveyEnabled={surveyEnabled}
+            toggleSurvey={toggleSurvey}
+            updateSurvey={spec => updateSurvey({ ...survey, spec })}
+            deleteSurvey={deleteSurvey}
+          />
+        </Route>
+      </Switch>
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {i18n._(t`Failed to update survey.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+    </>
   );
 }
+
+export default withI18n()(TemplateSurvey);

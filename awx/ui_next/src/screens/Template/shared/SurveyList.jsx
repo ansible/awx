@@ -1,22 +1,17 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import useRequest from '@util/useRequest';
 import { Button } from '@patternfly/react-core';
 
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import ErrorDetail from '@components/ErrorDetail';
-import { JobTemplatesAPI } from '@api';
 import ContentEmpty from '@components/ContentEmpty';
 import AlertModal from '@components/AlertModal';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 
-// survey.name
-// survey.description
-// survey.spec
 function SurveyList({
   survey,
   surveyEnabled,
@@ -27,7 +22,6 @@ function SurveyList({
 }) {
   const questions = survey?.spec || [];
   const [selected, setSelected] = useState([]);
-  // const [showError, setShowError] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const isAllSelected =

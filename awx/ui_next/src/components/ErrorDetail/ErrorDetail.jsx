@@ -54,7 +54,7 @@ class ErrorDetail extends Component {
     const { response } = error;
 
     let message = '';
-    if (response.data) {
+    if (response?.data) {
       message =
         typeof response.data === 'string'
           ? response.data
@@ -64,8 +64,8 @@ class ErrorDetail extends Component {
     return (
       <Fragment>
         <CardBody>
-          {response.config.method.toUpperCase()} {response.config.url}{' '}
-          <strong>{response.status}</strong>
+          {response?.config?.method.toUpperCase()} {response?.config?.url}{' '}
+          <strong>{response?.status}</strong>
         </CardBody>
         <CardBody>{message}</CardBody>
       </Fragment>
