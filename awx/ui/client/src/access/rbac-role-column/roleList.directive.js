@@ -1,7 +1,7 @@
 /* jshint unused: vars */
 export default
-    [   'templateUrl', 'Wait', 'GetBasePath', 'Rest', '$state', 'ProcessErrors', 'Prompt', '$filter', '$rootScope', 'i18n',
-        function(templateUrl, Wait, GetBasePath, Rest, $state, ProcessErrors, Prompt, $filter, $rootScope, i18n) {
+    [   'templateUrl', 'Wait', 'GetBasePath', 'Rest', '$state', 'ProcessErrors', 'Prompt', '$filter', '$rootScope', 'i18n', 'AppStrings',
+        function(templateUrl, Wait, GetBasePath, Rest, $state, ProcessErrors, Prompt, $filter, $rootScope, i18n, strings) {
             return {
                 restrict: 'E',
                 scope: {
@@ -96,17 +96,17 @@ export default
 
                         if (accessListEntry.team_id) {
                             Prompt({
-                                hdr: i18n._(`Team access removal`),
-                                body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
+                                hdr: strings.get('removeTeamAccess.HEADER'),
+                                body: `<div class="Prompt-bodyQuery">${strings.get('removeTeamAccess.CONFIRM', entry.name, $filter('sanitize')(entry.team_name))}</div>`,
                                 action: action,
-                                actionText: i18n._('REMOVE TEAM ACCESS')
+                                actionText: strings.get('removeTeamAccess.ACTION_TEXT'),
                             });
                         } else {
                             Prompt({
-                                hdr: i18n._(`User access removal`),
-                                body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${$filter('sanitize')(user.username)}</span>.</div>`,
+                                hdr: strings.get('removeUserAccess.HEADER'),
+                                body: `<div class="Prompt-bodyQuery">${strings.get('removeUserAccess.CONFIRM', entry.name, $filter('sanitize')(user.username))}</div>`,
                                 action: action,
-                                actionText: i18n._('REMOVE')
+                                actionText: strings.get('removeUserAccess.ACTION_TEXT'),
                             });
                         }
                     };

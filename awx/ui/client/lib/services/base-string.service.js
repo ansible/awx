@@ -85,6 +85,18 @@ function BaseStringService (namespace) {
         CONFIRM: resourceType => t.s('Are you sure you want to delete this {{ resourceType }}?', { resourceType })
     };
 
+    this.removeTeamAccess = {
+        HEADER: t.s('Team access removal'),
+        ACTION_TEXT: t.s('REMOVE TEAM ACCESS'),
+        CONFIRM: (role, name) => t.s('Please confirm that you would like to remove {{ role }} access from the team {{ name }}. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.', { role, name }),
+    };
+
+    this.removeUserAccess = {
+        HEADER: t.s('Role access removal'),
+        ACTION_TEXT: t.s('REMOVE ACCESS'),
+        CONFIRM: (role, name) => t.s('Please confirm that you would like to remove {{ role }} access from {{ name }}.', { role, name }),
+    };
+
     this.cancelJob = {
         HEADER: t.s('Cancel'),
         SUBMIT_REQUEST: t.s('Are you sure you want to submit the request to cancel this job?'),
