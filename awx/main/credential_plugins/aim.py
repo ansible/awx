@@ -43,7 +43,7 @@ aim_inputs = {
         'id': 'object_query',
         'label': _('Object Query'),
         'type': 'string',
-        'help_text': _('Lookup query for the object. Ex: "Safe=TestSafe;Object=testAccountName123"'),
+        'help_text': _('Lookup query for the object. Ex: Safe=TestSafe;Object=testAccountName123'),
     }, {
         'id': 'object_query_format',
         'label': _('Object Query Format'),
