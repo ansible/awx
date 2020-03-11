@@ -152,3 +152,10 @@ def test_uri_scm_cleartext_redact_and_replace(test_data):
     # Ensure the host didn't get redacted
     assert redacted_str.count(uri.host) == test_data['host_occurrences']
 
+
+@pytest.mark.timeout(1)
+def test_large_string_performance():
+    length = 100000
+    redacted = UriCleaner.remove_sensitive('x' * length)
+    assert len(redacted) == length
+
