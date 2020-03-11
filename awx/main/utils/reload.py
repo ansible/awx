@@ -6,8 +6,6 @@ import subprocess
 import logging
 import os
 
-# Django
-from django.conf import settings
 
 logger = logging.getLogger('awx.main.utils.reload')
 

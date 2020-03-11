@@ -72,7 +72,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.common import get_ansible_version, _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
