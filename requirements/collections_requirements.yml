@@ -1,0 +1,5 @@
+---
+collections:
+  - name: awx.awx
+    version: 9.2.0
+    source: https://galaxy.ansible.com

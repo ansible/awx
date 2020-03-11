@@ -90,9 +90,12 @@ ADD requirements/requirements.txt \
   requirements/requirements_dev.txt \
   requirements/requirements_ansible_uninstall.txt \
   requirements/requirements_tower_uninstall.txt \
+  requirements/collections_requirements.yml \
   /tmp/requirements/
 RUN mkdir -p /venv && chmod g+w /venv
 RUN cd /tmp && VENV_BASE="/venv" make requirements_dev
+RUN mkdir -p /vendor/inventory_collections && chmod g+w /vendor/inventory_collections
+RUN cd /tmp && COLLECTION_BASE="/vendor/inventory_collections" make requirements_collections
 
 # Use the distro provided npm to bootstrap our required version of node
 RUN npm install -g n
