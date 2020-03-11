@@ -107,17 +107,17 @@ hashi_ssh_inputs['metadata'] = [{
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 def handle_auth(**kwargs):
-    result = None
+    token = None
 
     if kwargs.get('token'):
-      result = kwargs['token']
+        token = kwargs['token']
     else:
       if kwargs.get('role_id') and kwargs.get('secret_id'):
-        result = approle_auth(**kwargs)
+        token = approle_auth(**kwargs)
       else:
         raise Exception('Either Vault token or Auth parameters must be set')
 
-    return result
+    return token
 
 def approle_auth(**kwargs):
     role_id = kwargs['role_id']
