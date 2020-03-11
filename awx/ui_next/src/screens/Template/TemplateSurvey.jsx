@@ -28,11 +28,7 @@ function TemplateSurvey({ template, i18n }) {
     fetchSurvey();
   }, [fetchSurvey]);
 
-  const {
-    request: updateSurvey,
-    isLoading: isUpdateLoading,
-    error: updateError,
-  } = useRequest(
+  const { request: updateSurvey, error: updateError } = useRequest(
     useCallback(
       async updatedSurvey => {
         await JobTemplatesAPI.updateSurvey(template.id, updatedSurvey);
@@ -42,22 +38,14 @@ function TemplateSurvey({ template, i18n }) {
     )
   );
 
-  const {
-    request: deleteSurvey,
-    isLoading: isDeleteLoading,
-    error: deleteError,
-  } = useRequest(
+  const { request: deleteSurvey, error: deleteError } = useRequest(
     useCallback(async () => {
       await JobTemplatesAPI.destroySurvey(template.id);
       setSurvey(null);
     }, [template.id, setSurvey])
   );
 
-  const {
-    request: toggleSurvey,
-    isLoading: isToggleLoading,
-    error: toggleError,
-  } = useRequest(
+  const { request: toggleSurvey, error: toggleError } = useRequest(
     useCallback(async () => {
       await JobTemplatesAPI.update(template.id, {
         survey_enabled: !surveyEnabled,
@@ -78,6 +66,7 @@ function TemplateSurvey({ template, i18n }) {
       <Switch>
         <Route path="/templates/:templateType/:id/survey">
           <SurveyList
+            isLoading={isLoading}
             survey={survey}
             surveyEnabled={surveyEnabled}
             toggleSurvey={toggleSurvey}

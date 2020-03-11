@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
-import { Button } from '@patternfly/react-core';
-
-import ContentError from '@components/ContentError';
+import { DataList, Button } from '@patternfly/react-core';
 import ContentLoading from '@components/ContentLoading';
-import ErrorDetail from '@components/ErrorDetail';
 import ContentEmpty from '@components/ContentEmpty';
 import AlertModal from '@components/AlertModal';
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
 
 function SurveyList({
+  isLoading,
   survey,
   surveyEnabled,
   toggleSurvey,
@@ -32,8 +29,8 @@ function SurveyList({
   };
 
   const handleSelect = item => {
-    if (selected.some(s => s.id === item.id)) {
-      setSelected(selected.filter(s => s.id !== item.id));
+    if (selected.some(q => q.variable === item.variable)) {
+      setSelected(selected.filter(q => q.variable !== item.variable));
     } else {
       setSelected(selected.concat(item));
     }
@@ -71,8 +68,7 @@ function SurveyList({
   };
 
   let content;
-  // TODO
-  if (false) {
+  if (isLoading) {
     content = <ContentLoading />;
   } else if (!questions || questions?.length <= 0) {
     content = (
@@ -82,36 +78,23 @@ function SurveyList({
       />
     );
   } else {
-    content = questions?.map((question, index) => (
-      <SurveyListItem
-        key={question.variable}
-        isLast={index === questions.length - 1}
-        isFirst={index === 0}
-        question={question}
-        isChecked={selected.some(s => s.id === question.id)}
-        onSelect={() => handleSelect(question)}
-        onMoveUp={moveUp}
-        onMoveDown={moveDown}
-      />
-    ));
+    content = (
+      <DataList aria-label={i18n._(t`Survey List`)}>
+        {questions?.map((question, index) => (
+          <SurveyListItem
+            key={question.variable}
+            isLast={index === questions.length - 1}
+            isFirst={index === 0}
+            question={question}
+            isChecked={selected.some(q => q.variable === question.variable)}
+            onSelect={() => handleSelect(question)}
+            onMoveUp={moveUp}
+            onMoveDown={moveDown}
+          />
+        ))}
+      </DataList>
+    );
   }
-
-  // const error = deletionError || toggleError || updateError;
-  // let errorMessage = '';
-  // if (updateError) {
-  //   errorMessage = i18n._(t`Failed to update survey`);
-  // }
-  // if (toggleError) {
-  //   errorMessage = i18n._(t`Failed to toggle survey`);
-  // }
-  // if (deletionError) {
-  //   errorMessage = i18n._(t`Failed to delete survey`);
-  // }
-  // useEffect(() => {
-  //   if (error) {
-  //     setShowError(true);
-  //   }
-  // }, [error]);
 
   return (
     <>
@@ -135,7 +118,6 @@ function SurveyList({
           isOpen={isDeleteModalOpen}
           onClose={() => {
             setIsDeleteModalOpen(false);
-            setSelected([]);
           }}
           actions={[
             <Button
@@ -152,7 +134,6 @@ function SurveyList({
               aria-label={i18n._(t`cancel delete`)}
               onClick={() => {
                 setIsDeleteModalOpen(false);
-                setSelected([]);
               }}
             >
               {i18n._(t`Cancel`)}
@@ -160,25 +141,15 @@ function SurveyList({
           ]}
         >
           <div>{i18n._(t`This action will delete the following:`)}</div>
-          {selected.map(question => (
-            <span key={question.id}>
-              <strong>{question.question_name}</strong>
-              <br />
-            </span>
-          ))}
+          <ul>
+            {selected.map(question => (
+              <li key={question.variable}>
+                <strong>{question.question_name}</strong>
+              </li>
+            ))}
+          </ul>
         </AlertModal>
       )}
-      {/* {showError && (
-        <AlertModal
-          isOpen={showError}
-          variant="error"
-          title={i18n._(t`Error!`)}
-          onClose={() => setShowError(false)}
-        >
-          {errorMessage}
-          <ErrorDetail error={error} />
-        </AlertModal>
-      )} */}
     </>
   );
 }

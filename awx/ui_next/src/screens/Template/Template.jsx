@@ -16,7 +16,6 @@ import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import TemplateSurvey from './TemplateSurvey';
-// import SurveyList from './shared/SurveyList';
 
 class Template extends Component {
   constructor(props) {
