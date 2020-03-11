@@ -1,15 +1,15 @@
 ---
 generate_for:
-#  - credential_types
-#  - groups
-#  - hosts
-#  - inventorues
-#  - inventory_sources
-#  - organizations
-#  - projects
-#  - teams
-  - users
-#  - job_templates
-#  - credentials
-#  - notification_templates
-#  - labels
+  # - credential_types
+  # - groups
+  # - hosts
+  # - inventorues
+  # - inventory_sources
+  # - organizations
+  # - projects
+  # - teams
+  # - users
+  # - job_templates
+  # - credentials
+  # - notification_templates
+  # - labels

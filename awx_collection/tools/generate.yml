@@ -2,7 +2,7 @@
 - name: Generate the awx.awx collection
   hosts: localhost
   connection: local
-  gather_facts: False
+  gather_facts: false
   vars:
     api_url: "{{ lookup('env', 'TOWER_HOST') }}"
   vars_files:
@@ -11,8 +11,8 @@
     - vars/examples.yml
   module_defaults:
     uri:
-      validate_certs: False
-      force_basic_auth: True
+      validate_certs: false
+      force_basic_auth: true
       url_username: "{{ lookup('env', 'TOWER_USERNAME') }}"
       url_password: "{{ lookup('env', 'TOWER_PASSWORD') }}"
 
