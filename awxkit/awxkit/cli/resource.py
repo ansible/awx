@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 import sys
@@ -5,6 +6,7 @@ import sys
 from awxkit import api, config
 import awxkit.exceptions as exc
 from awxkit.utils import to_str
+from awxkit.api.mixins import has_create
 from awxkit.api.pages import Page
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
@@ -49,13 +51,13 @@ EXPORTABLE_RESOURCES = [
     'users',
     'organizations',
     'teams',
-    # 'credential_types',
-    # 'credentials',
-    # 'notification_templates',
-    # 'projects',
-    # 'inventory',
-    # 'job_templates',
-    # 'workflow_job_templates',
+    'credential_types',
+    'credentials',
+    'notification_templates',
+    'projects',
+    'inventory',
+    'job_templates',
+    'workflow_job_templates',
 ]
 
 NATURAL_KEYS = {
@@ -188,6 +190,8 @@ class Import(CustomCommand):
         super(Import, self).__init__(*args, **kwargs)
         self._natural_key = {}
         self._options = {}
+        self._resource_page = {}
+        self._page_resource = {}
 
     def get_by_natural_key(self, key, fetch=True):
         frozen_key = freeze(key)
@@ -222,6 +226,9 @@ class Import(CustomCommand):
 
     def register_existing_assets(self, resource):
         endpoint = getattr(self.v2, resource)
+        self._resource_page[resource] = endpoint._create().__item_class__
+        self._page_resource[self._resource_page[resource]] = resource
+
         options = endpoint.options().json['actions']['POST']
         self._options[resource] = options
 
@@ -268,13 +275,15 @@ class Import(CustomCommand):
         for resource in data:
             self.register_existing_assets(resource)
 
-        for resource, assets in data.items():  # FIXME: do a topological sort by dependencies
-            self.create_assets(resource, assets)
+        for page_cls in itertools.chain(*has_create.page_creation_order(*self._page_resource.keys())):
+            resource = self._page_resource[page_cls]
+            cprint("importing {}".format(resource), 'red', file=client.stderr)
+            self.create_assets(resource, data.get(resource, []))
 
         # FIXME: should we delete existing unpatched assets?
 
-        for resource, assets in data.items():
-            self.assign_related_assets(resource, assets)
+        # for resource, assets in data.items():
+        #     self.assign_related_assets(resource, assets)
 
         return {}
 
