@@ -94,9 +94,11 @@ spec:
           ports:
             - containerPort: 8052
           volumeMounts:
-            - name: sockets
-              mountPath: "/var/run/tower/sockets/"
-            - name: rsyslog
+            - name: supervisor-socket
+              mountPath: "/var/run/supervisor"
+            - name: rsyslog-socket
+              mountPath: "/var/run/rsyslog"
+            - name: rsyslog-config
               mountPath: "/var/lib/awx/rsyslog/"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
@@ -178,9 +180,11 @@ spec:
             - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
           volumeMounts:
-            - name: sockets
-              mountPath: "/var/run/tower/sockets/"
-            - name: rsyslog
+            - name: supervisor-socket
+              mountPath: "/var/run/supervisor"
+            - name: rsyslog-socket
+              mountPath: "/var/run/rsyslog"
+            - name: rsyslog-config
               mountPath: "/var/lib/awx/rsyslog/"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
@@ -323,9 +327,11 @@ spec:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=8, indentfirst=True) }}
 {% endif %}
       volumes:
-        - name: sockets
+        - name: supervisor-socket
           emptyDir: {}
-        - name: rsyslog
+        - name: rsyslog-socket
+          emptyDir: {}
+        - name: rsyslog-config
           emptyDir: {}
 {% if ca_trust_dir is defined %}
         - name: {{ kubernetes_deployment_name }}-ca-trust-dir

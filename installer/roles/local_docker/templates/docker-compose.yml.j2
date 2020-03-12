@@ -20,8 +20,8 @@ services:
     user: root
     restart: unless-stopped
     volumes:
-      - sockets:/var/run/tower/sockets/
-      - rsyslog:/var/lib/awx/rsyslog/
+      - rsyslog-socket:/var/run/rsyslog/
+      - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
@@ -77,8 +77,8 @@ services:
     user: root
     restart: unless-stopped
     volumes:
-      - sockets:/var/run/tower/sockets/
-      - rsyslog:/var/lib/awx/rsyslog/
+      - rsyslog-socket:/var/run/rsyslog/
+      - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
@@ -163,5 +163,6 @@ services:
       no_proxy: {{ no_proxy | default('') }}
   {% endif %}
 volumes:
-  sockets:
-  rsyslog:
+  supervisor-socket:
+  rsyslog-socket:
+  rsyslog-config:

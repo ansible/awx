@@ -955,7 +955,7 @@ CHANNEL_LAYERS = {
 }
 
 # Logging configuration.
-LOGGING_SOCK = '/var/run/tower/sockets/rsyslog.sock'
+LOGGING_SOCK = '/var/run/rsyslog/rsyslog.sock'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

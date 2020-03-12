@@ -28,7 +28,7 @@ def reconfigure_rsyslog():
                 port = settings.LOG_AGGREGATOR_PORT
 
         parts.extend([
-            'input(type="imuxsock" Socket="/var/run/tower/sockets/rsyslog.sock" unlink="on")',
+            'input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
         if protocol.startswith('http'):
