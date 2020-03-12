@@ -5,14 +5,14 @@ from django.conf import settings
 from awx.main.utils.reload import supervisor_service_command
 
 
-def reconfigure_rsyslog():
+def construct_rsyslog_conf_template(settings=settings):
     tmpl = ''
     parts = ['$IncludeConfig /etc/rsyslog.conf']
     if settings.LOG_AGGREGATOR_ENABLED:
         host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
         port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
-
+        import pdb; pdb.set_trace()
         if protocol.startswith('http'):
             scheme = 'https'
             # urlparse requires '//' to be provided if scheme is not specified
@@ -23,12 +23,13 @@ def reconfigure_rsyslog():
 
             host = parsed.hostname
             try:
-                port = parsed.port
+                if parsed.port:
+                    port = parsed.port
             except ValueError:
                 port = settings.LOG_AGGREGATOR_PORT
 
         parts.extend([
-            'input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")',
+            'input(type="imuxsock" Socket="' + settings.LOGGING_SOCK + '" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
         if protocol.startswith('http'):
@@ -63,8 +64,11 @@ def reconfigure_rsyslog():
             parts.append(
                 f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
             )
-
     tmpl = '\n'.join(parts)
+    return tmpl
+    
+def reconfigure_rsyslog():
+    tmpl = get_rsyslog_conf_template()
     with open('/var/lib/awx/rsyslog/rsyslog.conf', 'w') as f:
         f.write(tmpl + '\n')
     supervisor_service_command(command='restart', service='awx-rsyslogd')

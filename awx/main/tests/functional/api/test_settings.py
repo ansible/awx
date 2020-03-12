@@ -292,6 +292,11 @@ def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch,
         create_settings = kwargs['custom_settings']
         assert getattr(create_settings, 'LOG_AGGREGATOR_PASSWORD') == 'password123'
 
+    # Update these tests ^^
+    # Test the `/api/v2/settings/logging/test` functionality
+    def test_logging_test():
+        pass
+
 
 @pytest.mark.django_db
 def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):

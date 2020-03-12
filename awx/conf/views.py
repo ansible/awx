@@ -8,6 +8,7 @@ import sys
 import socket
 import os
 from urllib.parse import urlparse
+from socket import SHUT_RDWR
 
 # Django
 from django.conf import settings
@@ -194,7 +195,7 @@ class SettingLoggingTest(GenericAPIView):
         try:
             s.settimeout(.5)
             s.connect((hostname, int(port)))
-            s.shutdown(2)
+            s.shutdown(SHUT_RDWR)
             s.close()
             return Response(status=status.HTTP_202_ACCEPTED)
         except Exception as e:
