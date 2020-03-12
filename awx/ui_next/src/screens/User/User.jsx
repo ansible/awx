@@ -9,7 +9,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import UserDetail from './UserDetail';
 import UserEdit from './UserEdit';
-import UserOrganizationList from './UserOrganizationList';
+import UserOrganizations from './UserOrganizations';
 import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
 import { UsersAPI } from '@api';
@@ -131,7 +131,7 @@ class User extends Component {
               />
             )}
             <Route path="/users/:id/organizations">
-              <UserOrganizationList id={Number(match.params.id)} />
+              <UserOrganizations id={Number(match.params.id)} />
             </Route>
             <Route
               path="/users/:id/teams"

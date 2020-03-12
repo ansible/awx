@@ -7,7 +7,7 @@ import PaginatedDataList from '@components/PaginatedDataList';
 import useRequest from '@util/useRequest';
 import { UsersAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import UserOrganizationListItem from '../UserOrganizationListItem';
+import UserOrganizationListItem from './UserOrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organizations', {
   page: 1,
@@ -16,7 +16,7 @@ const QS_CONFIG = getQSConfig('organizations', {
   type: 'organization',
 });
 
-function UserOrganizationList({ i18n }) {
+function UserOrganizationsList({ i18n }) {
   const location = useLocation();
   const { id: userId } = useParams();
 
@@ -68,4 +68,4 @@ function UserOrganizationList({ i18n }) {
   );
 }
 
-export default withI18n()(UserOrganizationList);
+export default withI18n()(UserOrganizationsList);
