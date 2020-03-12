@@ -28,123 +28,104 @@ options:
         - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
       required: False
       type: str
-      default: ''
     ask_tags_on_launch:
       required: False
       type: bool
-      default: 'False'
     job_type:
       required: False
+      default: "run"
+      choices: 'run', 'check', 'scan'
       type: str
-      default: 'run'
-      choices:
-        - 'run'
-        - 'check'
-        - 'scan'
     skip_tags:
       required: False
       type: str
-      default: ''
     ask_verbosity_on_launch:
       required: False
       type: bool
-      default: 'False'
     playbook:
       required: False
       type: str
-      default: ''
     survey_enabled:
       required: False
       type: bool
-      default: 'False'
     description:
       description:
         - Optional description of this job template.
       required: False
       type: str
-      default: ''
     ask_diff_mode_on_launch:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['ask_diff_mode']
     job_tags:
       required: False
       type: str
-      default: ''
     allow_simultaneous:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['concurrent_jobs_enabled']
     diff_mode:
       description:
-        - If enabled, textual changes made to any templated files on the host are shown in the standard output
+        - If enabled, textual changes made to any templated files on the host are shown in the standard output.
       required: False
       type: bool
-      default: 'False'
     ask_inventory_on_launch:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['ask_inventory']
     inventory:
       required: False
       type: str
     limit:
       required: False
       type: str
-      default: ''
     forks:
       required: False
       type: int
-      default: '0'
+      default: 0
     become_enabled:
       required: False
       type: bool
-      default: 'False'
     force_handlers:
       required: False
       type: bool
-      default: 'False'
     ask_variables_on_launch:
       required: False
       type: bool
-      default: 'False'
     ask_job_type_on_launch:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['ask_job_type']
     start_at_task:
       required: False
       type: str
-      default: ''
     ask_limit_on_launch:
+      description:
+        - Indicates whether the job template is configured to prompt for limit upon launch.
       required: False
       type: bool
-      default: 'False'
     webhook_credential:
       description:
-        - Personal Access Token for posting back the status to the service API
+        - Personal Access Token for posting back the status to the service API.
       required: False
       type: str
     custom_virtualenv:
       description:
-        - Local absolute file path containing a custom Python virtualenv to use
+        - Local absolute file path containing a custom Python virtualenv to use.
       required: False
       type: str
-      default: ''
     host_config_key:
       required: False
       type: str
-      default: ''
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
       required: False
       type: int
-      default: '1'
     ask_skip_tags_on_launch:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['ask_skip_tags']
     name:
       description:
         - Name of this job template.
@@ -152,34 +133,27 @@ options:
       type: str
     new_name:
       description:
-        - To use when changing a team's name.
-      required: True
+        - To use when changing a job template's name.
+      required: False
       type: str
     use_fact_cache:
       description:
-        - If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible.
+        - If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting
+          facts at the end of a playbook run to the database and caching facts for use by Ansible.
       required: False
       type: bool
-      default: 'False'
     extra_vars:
       required: False
       type: dict
-      default: ''
+      aliases: ['ask_extra_vars']
     verbosity:
       required: False
+      choices: [ 0, 1, 2, 3, 4, 5 ]
       type: str
-      default: '0'
-      choices:
-        - '0'
-        - '1'
-        - '2'
-        - '3'
-        - '4'
-        - '5'
     ask_credential_on_launch:
       required: False
       type: bool
-      default: 'False'
+      aliases: ['ask_credential']
     project:
       required: False
       type: str
@@ -187,77 +161,101 @@ options:
       description:
         - Service that webhook requests will be accepted from
       required: False
+      choices:[ "github", "gitlab" ]
       type: str
-      choices:
-        - 'github'
-        - 'gitlab'
     timeout:
       description:
         - The amount of time (in seconds) to run before the task is canceled.
       required: False
       type: int
-      default: '0'
+      default: 0
     ask_scm_branch_on_launch:
+      description:
+        - Indicates whether the job template is configured to prompt for an scm branch upon launch.
       required: False
       type: bool
-      default: 'False'
+    credentials:
+      description:
+        - The credentials associated with this job template
+      required: False
+      type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
       default: "present"
+      choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
+- name: Create tower Ping job template
+  tower_job_template:
+    name: "Ping"
+    job_type: "run"
+    inventory: "Local"
+    project: "Demo"
+    playbook: "ping.yml"
+    credential: "Local"
+    state: "present"
+    tower_config_file: "~/tower_cli.cfg"
+    survey_enabled: yes
+    survey_spec: "{{ lookup('file', 'my_survey.json') }}"
+    custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
 '''
 
 from ..module_utils.tower_api import TowerModule
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        scm_branch=dict( required=False, type='str', default='',),
-        ask_tags_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_tags']),
-        job_type=dict( required=False, type='str', choices=[ 'run', 'check', 'scan', ], default='run',),
-        skip_tags=dict( required=False, type='str', default='',),
-        ask_verbosity_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_verbosity']),
-        playbook=dict( required=False, type='str', default='',),
-        survey_enabled=dict( required=False, type='bool', default='False',),
-        description=dict( required=False, type='str', default='',),
-        ask_diff_mode_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_diff_mode']),
-        job_tags=dict( required=False, type='str', default='',),
-        allow_simultaneous=dict( required=False, type='bool', default='False', aliases=['concurrent_jobs_enabled']),
-        diff_mode=dict( required=False, type='bool', default='False', aliases=['diff_mode_enabled']),
-        ask_inventory_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_inventory']),
-        inventory=dict( required=False, type='str',),
-        limit=dict( required=False, type='str', default='', aliases=['ask_limit']),
-        forks=dict( required=False, type='int', default='0',),
-        become_enabled=dict( required=False, type='bool', default='False',),
-        force_handlers=dict( required=False, type='bool', default='False', aliases=['force_handlers_enabled']),
-        ask_variables_on_launch=dict( required=False, type='bool', default='False',),
-        ask_job_type_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_job_type']),
-        start_at_task=dict( required=False, type='str', default='',),
-        ask_limit_on_launch=dict( required=False, type='bool', default='False',),
-        webhook_credential=dict( required=False, type='str',),
-        custom_virtualenv=dict( required=False, type='str', default='',),
-        host_config_key=dict( required=False, type='str', default='',),
-        job_slice_count=dict( required=False, type='int', default='1',),
-        ask_skip_tags_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_skip_tags']),
-        name=dict( required=True, type='str',),
-        new_name=dict(required=False, type='str'),
-        use_fact_cache=dict( required=False, type='bool', default='False', aliases=['fact_caching_enabled']),
-        extra_vars=dict( required=False, type='dict', default={}, aliases=['ask_extra_vars']),
-        verbosity=dict( required=False, type='str', choices=[ '0', '1', '2', '3', '4', '5', ], default='0',),
-        ask_credential_on_launch=dict( required=False, type='bool', default='False', aliases=['ask_credential']),
-        project=dict( required=False, type='str',),
-        webhook_service=dict( required=False, type='str', choices=[ 'github', 'gitlab', ],),
-        timeout=dict( required=False, type='int', default='0',),
-        ask_scm_branch_on_launch=dict( required=False, type='bool', default='False',),
+        scm_branch=dict(required=False, type='str'),
+        ask_tags_on_launch=dict(required=False, type='bool', aliases=['ask_tags']),
+        job_type=dict(required=False, type='str', choices=['run', 'check', 'scan']),
+        skip_tags=dict(required=False, type='str'),
+        ask_verbosity_on_launch=dict(required=False, type='bool', aliases=['ask_verbosity']),
+        playbook=dict(required=False, type='str'),
+        survey_enabled=dict(required=False, type='bool'),
+        description=dict(required=False, type='str'),
+        ask_diff_mode_on_launch=dict(required=False, type='bool', aliases=['ask_diff_mode']),
+        job_tags=dict(required=False, type='str'),
+        allow_simultaneous=dict(required=False, type='bool', aliases=['concurrent_jobs_enabled']),
+        diff_mode=dict(required=False, type='bool', aliases=['diff_mode_enabled']),
+        ask_inventory_on_launch=dict(required=False, type='bool', aliases=['ask_inventory']),
+        inventory=dict(required=False, type='str'),
+        limit=dict(required=False, type='str', aliases=['ask_limit']),
+        forks=dict(required=False, type='int'),
+        become_enabled=dict(required=False, type='bool'),
+        force_handlers=dict(required=False, type='bool', aliases=['force_handlers_enabled']),
+        ask_variables_on_launch=dict(required=False, type='bool'),
+        ask_job_type_on_launch=dict(required=False, type='bool', aliases=['ask_job_type']),
+        start_at_task=dict(required=False, type='str'),
+        ask_limit_on_launch=dict(required=False, type='bool'),
+        webhook_credential=dict(required=False, type='str'),
+        custom_virtualenv=dict(required=False, type='str'),
+        host_config_key=dict(required=False, type='str'),
+        job_slice_count=dict(required=False, type='int'),
+        ask_skip_tags_on_launch=dict(required=False, type='bool', aliases=['ask_skip_tags']),
+        name=dict(required=True, type='str'),
+        new_name=dict(required=False),
+        use_fact_cache=dict(required=False, type='bool', aliases=['fact_caching_enabled']),
+        extra_vars=dict(required=False, type='dict', aliases=['ask_extra_vars']),
+        verbosity=dict(required=False, type='str', choices=['0', '1', '2', '3', '4', '5']),
+        ask_credential_on_launch=dict(required=False, type='bool', aliases=['ask_credential']),
+        project=dict(required=False, type='str'),
+        webhook_service=dict(required=False, type='str', choices=['github', 'gitlab']),
+        timeout=dict(required=False, type='int'),
+        ask_scm_branch_on_launch=dict(required=False, type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
-        credentials=dict(required=False, type='list', default=[])
-#SURVEY_SPEC
+        credentials=dict(required=False, type='list', elements='str'),
     )
 
     # Create a module for ourselves
@@ -265,23 +263,15 @@ def main():
 
     # Extract our parameters
     scm_branch = module.params.get('scm_branch')
-    if len(scm_branch) > 1024:
-        module.fail_msg(msg="The value for scm_branch can not be longer than 1024")
     ask_tags_on_launch = module.params.get('ask_tags_on_launch')
     job_type = module.params.get('job_type')
     skip_tags = module.params.get('skip_tags')
-    if len(skip_tags) > 1024:
-        module.fail_msg(msg="The value for skip_tags can not be longer than 1024")
     ask_verbosity_on_launch = module.params.get('ask_verbosity_on_launch')
     playbook = module.params.get('playbook')
-    if len(playbook) > 1024:
-        module.fail_msg(msg="The value for playbook can not be longer than 1024")
     survey_enabled = module.params.get('survey_enabled')
     description = module.params.get('description')
     ask_diff_mode_on_launch = module.params.get('ask_diff_mode_on_launch')
     job_tags = module.params.get('job_tags')
-    if len(job_tags) > 1024:
-        module.fail_msg(msg="The value for job_tags can not be longer than 1024")
     allow_simultaneous = module.params.get('allow_simultaneous')
     diff_mode = module.params.get('diff_mode')
     ask_inventory_on_launch = module.params.get('ask_inventory_on_launch')
@@ -297,16 +287,10 @@ def main():
     ask_variables_on_launch = module.params.get('ask_variables_on_launch')
     ask_job_type_on_launch = module.params.get('ask_job_type_on_launch')
     start_at_task = module.params.get('start_at_task')
-    if len(start_at_task) > 1024:
-        module.fail_msg(msg="The value for start_at_task can not be longer than 1024")
     ask_limit_on_launch = module.params.get('ask_limit_on_launch')
     webhook_credential = module.params.get('webhook_credential')
     custom_virtualenv = module.params.get('custom_virtualenv')
-    if len(custom_virtualenv) > 100:
-        module.fail_msg(msg="The value for custom_virtualenv can not be longer than 100")
     host_config_key = module.params.get('host_config_key')
-    if len(host_config_key) > 1024:
-        module.fail_msg(msg="The value for host_config_key can not be longer than 1024")
     job_slice_count = module.params.get('job_slice_count')
     if job_slice_count < 0:
         module.fail_msg(msg="The value for job_slice_count can not be less than 0")
@@ -314,8 +298,6 @@ def main():
         module.fail_msg(msg="The value for job_slice_count can not be larger than 2147483647")
     ask_skip_tags_on_launch = module.params.get('ask_skip_tags_on_launch')
     name = module.params.get('name')
-    if len(name) > 512:
-        module.fail_msg(msg="The value for name can not be longer than 512")
     new_name = module.params.get("new_name")
     use_fact_cache = module.params.get('use_fact_cache')
     extra_vars = module.params.get('extra_vars')
@@ -346,7 +328,7 @@ def main():
     if credentials:
         credential_ids = []
         for credential in credentials:
-            credential_ids.append( module.resolve_name_to_id('credentials', credential) )
+            credential_ids.append(module.resolve_name_to_id('credentials', credential))
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', **{
@@ -434,9 +416,13 @@ def main():
         module.delete_if_needed(existing_item)
     elif state == 'present':
         # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(existing_item, new_fields, endpoint='job_templates', item_type='job_template', associations={ 'credentials': credential_ids })
+        module.create_or_update_if_needed(existing_item,
+                                          new_fields,
+                                          endpoint='job_templates',
+                                          item_type='job_template',
+                                          associations={'credentials': credential_ids}
+                                          )
 
 
 if __name__ == '__main__':
     main()
-
