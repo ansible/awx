@@ -7,13 +7,21 @@ class Users extends Base {
   }
 
   associateRole(userId, roleId) {
-    return this.http.post(`${this.baseUrl}${userId}/roles/`, { id: roleId });
+    return this.http.post(`${this.baseUrl}${userId}/roles/`, {
+      id: roleId,
+    });
   }
 
   disassociateRole(userId, roleId) {
     return this.http.post(`${this.baseUrl}${userId}/roles/`, {
       id: roleId,
       disassociate: true,
+    });
+  }
+
+  readOrganizations(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/organizations/`, {
+      params,
     });
   }
 }
