@@ -51,7 +51,7 @@
 - name: Create a workflow job template
   tower_workflow_template:
     name: my-workflow
-    schema: '[{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]'
+    schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
   register: result
 
 - assert:
@@ -72,7 +72,7 @@
   tower_workflow_template:
     name: my-workflow
     organization: Non Existing Organization
-    schema: '[{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]'
+    schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
   register: result
   ignore_errors: true
 

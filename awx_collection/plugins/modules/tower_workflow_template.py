@@ -44,7 +44,7 @@ options:
     extra_vars:
       description:
         - Extra variables used by Ansible in YAML or key=value format.
-      type: str
+      type: dict
     inventory:
       description:
         - Name of the inventory to use for the job template.
@@ -65,7 +65,8 @@ options:
           The schema is a JSON- or YAML-formatted string defining the
           hierarchy structure that connects the nodes. Refer to Tower
           documentation for more information.
-      type: str
+      type: list
+      elements: dict
     survey_enabled:
       description:
         - Setting that variable will prompt the user for job type on the
@@ -111,6 +112,8 @@ from ..module_utils.ansible_tower import (
     tower_check_mode
 )
 
+import json
+
 try:
     import tower_cli
     import tower_cli.exceptions as exc
@@ -123,10 +126,10 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(required=False),
-        extra_vars=dict(required=False),
+        extra_vars=dict(type='dict', required=False),
         organization=dict(required=False),
         allow_simultaneous=dict(type='bool', required=False),
-        schema=dict(required=False),
+        schema=dict(type='list', elements='dict', required=False),
         survey=dict(required=False),
         survey_enabled=dict(type='bool', required=False),
         inventory=dict(required=False),
@@ -187,10 +190,15 @@ def main():
         if module.params.get('ask_inventory'):
             params['ask_inventory_on_launch'] = module.params.get('ask_inventory')
 
-        for key in ('allow_simultaneous', 'extra_vars', 'inventory',
+        for key in ('allow_simultaneous', 'inventory',
                     'survey_enabled', 'description'):
             if module.params.get(key):
                 params[key] = module.params.get(key)
+
+        # Special treatment for tower-cli extra_vars
+        extra_vars = module.params.get('extra_vars')
+        if extra_vars:
+            params['extra_vars'] = [json.dumps(extra_vars)]
 
         try:
             if state == 'present':
@@ -198,7 +206,7 @@ def main():
                 result = wfjt_res.modify(**params)
                 json_output['id'] = result['id']
                 if schema:
-                    wfjt_res.schema(result['id'], schema)
+                    wfjt_res.schema(result['id'], json.dumps(schema))
             elif state == 'absent':
                 params['fail_on_missing'] = False
                 result = wfjt_res.delete(**params)
