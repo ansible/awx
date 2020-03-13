@@ -190,8 +190,6 @@ class Import(CustomCommand):
         super(Import, self).__init__(*args, **kwargs)
         self._natural_key = {}
         self._options = {}
-        self._resource_page = {}
-        self._page_resource = {}
 
     def get_by_natural_key(self, key, fetch=True):
         frozen_key = freeze(key)
@@ -200,9 +198,14 @@ class Import(CustomCommand):
 
         return self._natural_key.get(frozen_key)
 
-    def create_assets(self, resource, assets):
+    def create_assets(self, data, resource):
+        if resource not in data:
+            return
+        cprint("importing {}".format(resource), 'red', file=client.stderr)
+
         endpoint = getattr(self.v2, resource)
         options = self._options[resource]
+        assets = data[resource]
         for asset in assets:
             post_data = {}
             for field, value in asset.items():
@@ -226,9 +229,6 @@ class Import(CustomCommand):
 
     def register_existing_assets(self, resource):
         endpoint = getattr(self.v2, resource)
-        self._resource_page[resource] = endpoint._create().__item_class__
-        self._page_resource[self._resource_page[resource]] = resource
-
         options = endpoint.options().json['actions']['POST']
         self._options[resource] = options
 
@@ -263,6 +263,16 @@ class Import(CustomCommand):
                 else:
                     self.assign_related(page, name, S)
 
+    def dependent_resources(self, data):
+        page_resource = {}
+        for resource in data:
+            endpoint = getattr(self.v2, resource)
+            page_cls = endpoint._create().__item_class__
+            page_resource[page_cls] = resource
+
+        for page_cls in itertools.chain(*has_create.page_creation_order(*page_resource.keys())):
+            yield page_resource[page_cls]
+
     def handle(self, client, parser):
         if client.help:
             parser.print_help()
@@ -272,15 +282,10 @@ class Import(CustomCommand):
         client.authenticate()
         self.v2 = client.v2
 
-        for resource in data:
+        for resource in self.dependent_resources(data):
             self.register_existing_assets(resource)
-
-        for page_cls in itertools.chain(*has_create.page_creation_order(*self._page_resource.keys())):
-            resource = self._page_resource[page_cls]
-            cprint("importing {}".format(resource), 'red', file=client.stderr)
-            self.create_assets(resource, data.get(resource, []))
-
-        # FIXME: should we delete existing unpatched assets?
+            self.create_assets(data, resource)
+            # FIXME: should we delete existing unpatched assets?
 
         # for resource, assets in data.items():
         #     self.assign_related_assets(resource, assets)
