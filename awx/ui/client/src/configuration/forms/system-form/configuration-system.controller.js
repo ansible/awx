@@ -205,18 +205,25 @@ export default [
 
         $scope.$parent.vm.testLogging = function () {
             if (!$scope.$parent.vm.disableTestButton) {
+                $scope.$parent.vm.disableTestButton = true;
                 Rest.setUrl("/api/v2/settings/logging/test/");
                 Rest.post({})
                     .then(() => {
+                        $scope.$parent.vm.disableTestButton = false;
                         ngToast.success({
+                            dismissButton: false,
+                            dismissOnTimeout: true,
                             content: `<i class="fa fa-check-circle
                                 Toast-successIcon"></i>` +
                                 i18n._('Log aggregator test sent successfully.')
                         });
                     })
                     .catch(({ data, status }) => {
+                        $scope.$parent.vm.disableTestButton = false;
                         if (status === 400 || status == 500) {
                             ngToast.danger({
+                                dismissButton: false,
+                                dismissOnTimeout: true,
                                 content: '<i class="fa fa-exclamation-triangle Toast-successIcon"></i>' +
                                     i18n._('Log aggregator test failed. <br> Detail: ') + $filter('sanitize')(data.error),
                                 additionalClasses: "LogAggregator-failedNotification"
