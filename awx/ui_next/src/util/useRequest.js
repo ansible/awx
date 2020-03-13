@@ -14,7 +14,6 @@ import {
  *   isLoading: boolean state indicating whether the request is in active/in flight
  *   error: any caught error resulting from the request
  *   setValue: setter to explicitly set the result value
- *   isInitialized: set to true once the result is initially fetched
  *
  * The hook also accepts an optional second parameter which is a default
  * value to set as result before the first time the request is made.
