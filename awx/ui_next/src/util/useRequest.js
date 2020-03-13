@@ -70,8 +70,10 @@ export function useDismissableError(error) {
   }, [error]);
 
   return {
-    error: showError && error,
-    dismissError: () => setShowError(false),
+    error: showError ? error : null,
+    dismissError: () => {
+      setShowError(false);
+    },
   };
 }
 
@@ -81,7 +83,10 @@ export function useDeleteItems(
 ) {
   const location = useLocation();
   const history = useHistory();
-  const { requestError, isLoading, request } = useRequest(makeRequest, null);
+  const { error: requestError, isLoading, request } = useRequest(
+    makeRequest,
+    null
+  );
   const { error, dismissError } = useDismissableError(requestError);
 
   const deleteItems = async () => {

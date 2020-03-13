@@ -34,7 +34,7 @@ export function getQSConfig(
  */
 export function parseQueryString(config, queryString) {
   if (!queryString) {
-    return config.defaultParams;
+    return config.defaultParams || {};
   }
   const params = stringToObject(config, queryString);
   return addDefaultsToObject(config, params);
