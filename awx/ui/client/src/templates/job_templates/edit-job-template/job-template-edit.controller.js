@@ -217,6 +217,7 @@ export default
                 });
 
                 $scope.$watch('verbosity', sync_verbosity_select2);
+                $scope.$watch('job_type', sync_job_type_select2);
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -337,10 +338,31 @@ export default
                 }));
             }
 
-            function sync_verbosity_select2() {
+            function sync_verbosity_select2(newValue) {
+                if (newValue === 0 || (newValue && typeof newValue !== 'object')) {
+                    $scope.verbosity = { value: newValue };
+                    return;
+                }
                 select2LoadDefer.push(CreateSelect2({
                     element:'#job_template_verbosity',
-                    multiple: false
+                    multiple: false,
+                    scope: $scope,
+                    model: 'verbosity',
+                    options: 'verbosity_options',
+                }));
+            }
+
+            function sync_job_type_select2(newValue) {
+                if (newValue === 0 || (newValue && typeof newValue !== 'object')) {
+                    $scope.job_type = { value: newValue };
+                    return;
+                }
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#job_template_job_type',
+                    multiple: false,
+                    scope: $scope,
+                    model: 'job_type',
+                    options: 'job_type_options',
                 }));
             }
 
@@ -657,7 +679,6 @@ export default
                 variable: 'verbosity_options',
                 callback: 'choicesReady'
             });
-            sync_verbosity_select2();
 
             // setup job type options lookup
             GetChoices({
