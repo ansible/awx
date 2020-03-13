@@ -1,10 +1,8 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-
 import {
   Button as _Button,
-  DataList,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItemCells,
@@ -28,6 +26,7 @@ const Button = styled(_Button)`
   padding-bottom: 0;
   padding-left: 0;
 `;
+
 function SurveyListItem({
   question,
   i18n,
@@ -35,56 +34,58 @@ function SurveyListItem({
   isFirst,
   isChecked,
   onSelect,
+  onMoveUp,
+  onMoveDown,
 }) {
   return (
-    <DataList aria-label={i18n._(t`Survey List`)}>
-      <DataListItem aria-labelledby={i18n._(t`Survey questions`)}>
-        <DataListItemRow css="padding-left:16px">
-          <DataListAction
-            id="sortQuestions"
-            aria-labelledby={i18n._(t`Sort question order`)}
-            aria-label={i18n._(t`Sort question order`)}
-          >
-            <Stack>
-              <StackItem>
-                <Button
-                  variant="plain"
-                  aria-label={i18n._(t`move up`)}
-                  isDisabled={isFirst}
-                >
-                  <CaretUpIcon />
-                </Button>
-              </StackItem>
-              <StackItem>
-                <Button
-                  variant="plain"
-                  aria-label={i18n._(t`move down`)}
-                  isDisabled={isLast}
-                >
-                  <CaretDownIcon />
-                </Button>
-              </StackItem>
-            </Stack>
-          </DataListAction>
-          <DataListCheck
-            checked={isChecked}
-            onChange={onSelect}
-            aria-labelledby="survey check"
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key={question.question_name}>
-                {question.question_name}
-              </DataListCell>,
-              <DataListCell key={question.type}>{question.type}</DataListCell>,
-              <DataListCell key={question.default}>
-                {question.default}
-              </DataListCell>,
-            ]}
-          />
-        </DataListItemRow>
-      </DataListItem>
-    </DataList>
+    <DataListItem aria-labelledby={i18n._(t`Survey questions`)}>
+      <DataListItemRow css="padding-left:16px">
+        <DataListAction
+          id="sortQuestions"
+          aria-labelledby={i18n._(t`Sort question order`)}
+          aria-label={i18n._(t`Sort question order`)}
+        >
+          <Stack>
+            <StackItem>
+              <Button
+                variant="plain"
+                aria-label={i18n._(t`move up`)}
+                isDisabled={isFirst}
+                onClick={() => onMoveUp(question)}
+              >
+                <CaretUpIcon />
+              </Button>
+            </StackItem>
+            <StackItem>
+              <Button
+                variant="plain"
+                aria-label={i18n._(t`move down`)}
+                isDisabled={isLast}
+                onClick={() => onMoveDown(question)}
+              >
+                <CaretDownIcon />
+              </Button>
+            </StackItem>
+          </Stack>
+        </DataListAction>
+        <DataListCheck
+          checked={isChecked}
+          onChange={onSelect}
+          aria-labelledby="survey check"
+        />
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key={question.question_name}>
+              {question.question_name}
+            </DataListCell>,
+            <DataListCell key={question.type}>{question.type}</DataListCell>,
+            <DataListCell key={question.default}>
+              {question.default}
+            </DataListCell>,
+          ]}
+        />
+      </DataListItemRow>
+    </DataListItem>
   );
 }
 
