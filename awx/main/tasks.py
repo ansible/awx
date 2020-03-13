@@ -489,7 +489,7 @@ def awx_isolated_heartbeat():
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
         logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
-        isolated_manager.IsolatedManager().health_check(isolated_instance_qs)
+        isolated_manager.IsolatedManager(CallbackQueueDispatcher.dispatch).health_check(isolated_instance_qs)
 
 
 @task()
@@ -1162,7 +1162,6 @@ class BaseTask(object):
             except json.JSONDecodeError:
                 pass
 
-        should_write_event = False
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
         self.event_ct += 1
@@ -1174,7 +1173,7 @@ class BaseTask(object):
             self.instance.artifacts = event_data['event_data']['artifact_data']
             self.instance.save(update_fields=['artifacts'])
 
-        return should_write_event
+        return False
 
     def cancel_callback(self):
         '''
@@ -1374,6 +1373,7 @@ class BaseTask(object):
                 if not params[v]:
                     del params[v]
 
+            self.dispatcher = CallbackQueueDispatcher()
             if self.instance.is_isolated() or containerized:
                 module_args = None
                 if 'module_args' in params:
@@ -1388,6 +1388,7 @@ class BaseTask(object):
 
                 ansible_runner.utils.dump_artifacts(params)
                 isolated_manager_instance = isolated_manager.IsolatedManager(
+                    self.event_handler,
                     canceled_callback=lambda: self.update_model(self.instance.pk).cancel_flag,
                     check_callback=self.check_handler,
                     pod_manager=pod_manager
@@ -1397,11 +1398,9 @@ class BaseTask(object):
                                                            params.get('playbook'),
                                                            params.get('module'),
                                                            module_args,
-                                                           event_data_key=self.event_data_key,
                                                            ident=str(self.instance.pk))
                 self.event_ct = len(isolated_manager_instance.handled_events)
             else:
-                self.dispatcher = CallbackQueueDispatcher()
                 res = ansible_runner.interface.run(**params)
                 status = res.status
                 rc = res.rc
