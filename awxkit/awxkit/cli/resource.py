@@ -51,13 +51,13 @@ EXPORTABLE_RESOURCES = [
     'users',
     'organizations',
     'teams',
-    'credential_types',
-    'credentials',
-    'notification_templates',
-    'projects',
-    'inventory',
-    'job_templates',
-    'workflow_job_templates',
+    # 'credential_types',
+    # 'credentials',
+    # 'notification_templates',
+    # 'projects',
+    # 'inventory',
+    # 'job_templates',
+    # 'workflow_job_templates',
 ]
 
 NATURAL_KEYS = {
