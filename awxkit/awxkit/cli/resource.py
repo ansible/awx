@@ -52,7 +52,7 @@ EXPORTABLE_RESOURCES = [
     'organizations',
     'teams',
     'credential_types',
-    # 'credentials',
+    'credentials',
     # 'notification_templates',
     # 'projects',
     # 'inventory',
