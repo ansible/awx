@@ -68,14 +68,14 @@
     </div>
     <div class="InsightsRow" ng-repeat="report in reports">
         <div class="InsightsRow-title">
-            <img class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
-                aw-tool-tip="Critical Risk" data-placement="right" data-original-title="" title="">
-            <img class="InsightsIcon" src="/static/assets/i_severity_high.svg" ng-show="report.rule.severity === 'ERROR'"
-                aw-tool-tip="High Risk" data-placement="top" data-original-title="" title="">
-            <img class="InsightsIcon" src="/static/assets/i_severity_med.svg" ng-show="report.rule.severity === 'WARN'"
-                aw-tool-tip="Medium Risk" data-placement="top">
-            <img class="InsightsIcon" src="/static/assets/i_severity_low.svg" ng-show="report.rule.severity === 'INFO'"
-                aw-tool-tip="Low Risk" data-placement="top">
+            <img ng-attr-aria-label="{{ strings.get('risks.CRITICAL_RISK') }}" class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
+                aw-tool-tip="{{ strings.get('risks.CRITICAL_RISK') }}" data-placement="right" data-original-title="" title="">
+            <img ng-attr-aria-label="{{ strings.get('risks.HIGH_RISK') }}" class="InsightsIcon" src="/static/assets/i_severity_high.svg" ng-show="report.rule.severity === 'ERROR'"
+                aw-tool-tip="{{ strings.get('risks.HIGH_RISK') }}" data-placement="top" data-original-title="" title="">
+            <img ng-attr-aria-label="{{ strings.get('risks.MEDIUM_RISK') }}" class="InsightsIcon" src="/static/assets/i_severity_med.svg" ng-show="report.rule.severity === 'WARN'"
+                aw-tool-tip="{{ strings.get('risks.MEDIUM_RISK') }}" data-placement="top">
+            <img ng-attr-aria-label="{{ strings.get('risks.LOW_RISK') }}" class="InsightsIcon" src="/static/assets/i_severity_low.svg" ng-show="report.rule.severity === 'INFO'"
+                aw-tool-tip="{{ strings.get('risks.LOW_RISK') }}" data-placement="top">
             <div class="InsightsRow-description"><translate>ISSUE: {{report.rule.description}}</translate></div>
             <span class="Form-title--is_superuser">{{report.rule.category}}</span>
         </div>

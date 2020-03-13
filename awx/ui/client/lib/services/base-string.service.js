@@ -78,6 +78,12 @@ function BaseStringService (namespace) {
     this.TEST = t.s('TEST');
     this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource: $filter('sanitize')(resource) });
 
+    this.logos = {
+        AWX_LOGO: t.s('Ansible AWX Logo'),
+        TOWER_LOGO: t.s('Ansible Tower Logo'),
+        CUSTOM_LOGO: t.s('Custom Logo')
+    };
+
     this.deleteResource = {
         HEADER: t.s('Delete'),
         USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),
