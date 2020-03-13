@@ -51,7 +51,7 @@ EXPORTABLE_RESOURCES = [
     'users',
     'organizations',
     'teams',
-    # 'credential_types',
+    'credential_types',
     # 'credentials',
     # 'notification_templates',
     # 'projects',
@@ -316,9 +316,14 @@ class Export(CustomCommand):
             results = endpoint.get(all_pages=True).results
 
         options = self.get_options(endpoint)
-        return [self.serialize_asset(asset, options) for asset in results]
+        assets = (self.serialize_asset(asset, options) for asset in results)
+        return [asset for asset in assets if asset is not None]
 
     def serialize_asset(self, asset, options):
+        # Drop any (credential_type) assets that are being managed by the Tower instance.
+        if asset.json.get('managed_by_tower'):
+            return None
+
         fields = {
             key: asset[key] for key in options
             if key in asset.json and key not in asset.related
