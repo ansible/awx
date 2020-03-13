@@ -23,7 +23,9 @@
   <body>
     <div class="at-Upgrade--panel">
       <img
-        ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? 'Ansible Tower Logo' : 'Ansible AWX Logo' }}"
+        {% verbatim %}
+        ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? appStrings.get('logos.TOWER_LOGO') : appStrings.get('logos.AWX_LOGO') }}"
+        {% endverbatim %}
         src="{% static 'assets/logo-header.svg' %}"
         width="200"
       />

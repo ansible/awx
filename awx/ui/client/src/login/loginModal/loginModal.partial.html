@@ -11,12 +11,12 @@
                     ng-if="!customLogoPresent"
                     ng-class="{'LoginModal-logoImage--notCustom': !customLogoPresent}"
                     ng-src="/static/assets/{{ customLogo }}"
-                    ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? 'Ansible Tower Logo' : 'Ansible AWX Logo' }}"
+                    ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? appStrings.get('logos.TOWER_LOGO') : appStrings.get('logos.AWX_LOGO') }}"
                 />
                 <img id="login_modal_image" class="LoginModal-logoImage"
                     ng-if="customLogoPresent"
                     ng-src="{{ customLogo }}"
-                    aria-label="Custom Logo"
+                    ng-attr-aria-label="{{ appStrings.get('logos.CUSTOM_LOGO') }}"
                 />
             </div>
             <div class="LoginModal-body">

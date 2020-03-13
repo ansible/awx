@@ -2,7 +2,7 @@
     <div class="at-Layout-topNav">
         <at-top-nav-item is-shown="missingLicense" class="at-Layout-topNavItem--logo">
             <a href="/#/">
-                <img ng-attr-aria-label="{{ BRAND_NAME === 'Tower' ? 'Ansible Tower Logo' : 'Ansible AWX Logo' }}" ng-src="/static/assets/logo-header.svg" />
+                <img ng-attr-aria-label="{{ $root.BRAND_NAME === 'Tower' ? $root.appStrings.get('logos.TOWER_LOGO') : $root.appStrings.get('logos.AWX_LOGO') }}" ng-src="/static/assets/logo-header.svg" />
             </a>
         </at-top-nav-item>
         <div class="at-Layout-topNavRightAligner"></div>
