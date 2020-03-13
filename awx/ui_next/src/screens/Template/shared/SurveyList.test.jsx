@@ -16,13 +16,6 @@ const surveyData = {
 };
 
 describe('<SurveyList />', () => {
-  // beforeEach(() => {
-  //   JobTemplatesAPI.readSurvey.mockResolvedValue({
-  //     data: {
-  //     },
-  //   });
-  // });
-
   test('expect component to mount successfully', async () => {
     let wrapper;
     await act(async () => {

@@ -8,7 +8,7 @@ import {
 
 /*
  * The useRequest hook accepts a request function and returns an object with
- * six values:
+ * five values:
  *   request: a function to call to invoke the request
  *   result: the value returned from the request function (once invoked)
  *   isLoading: boolean state indicating whether the request is in active/in flight
@@ -59,6 +59,15 @@ export default function useRequest(makeRequest, initialValue) {
   };
 }
 
+/*
+ * Provides controls for "dismissing" an error message
+ *
+ * Params: an error object
+ * Returns: { error, dismissError }
+ *   The returned error object is the same object passed in via the paremeter,
+ *   until the dismissError function is called, at which point the returned
+ *   error will be set to null on the subsequent render.
+ */
 export function useDismissableError(error) {
   const [showError, setShowError] = useState(false);
 
@@ -76,6 +85,16 @@ export function useDismissableError(error) {
   };
 }
 
+/*
+ * Hook to assist with deletion of items from a paginated item list. The page
+ * url will be navigated back one page on a paginated list if needed to prevent
+ * the UI from re-loading an empty set and displaying a "No items found"
+ * message.
+ *
+ * Params: a callback function that will be invoked in order to delete items,
+ *   and an object with structure { qsConfig, allItemsSelected, fetchItems }
+ * Returns: { isLoading, deleteItems, deletionError, clearDeletionError }
+ */
 export function useDeleteItems(
   makeRequest,
   { qsConfig = null, allItemsSelected = false, fetchItems = null } = {}
