@@ -147,7 +147,7 @@ export default ['$compile', 'Attr', 'Icon',
                         html += "</div>";
                         if (options.cancelButton === true) {
                             html += "<div class=\"Form-exitHolder\">";
-                            html += "<button class=\"Form-exit\" ng-click=\"formCancel()\">";
+                            html += "<button aria-label=\"{{'Close'|translate}}\" class=\"Form-exit\" ng-click=\"formCancel()\">";
                             html += "<i class=\"fa fa-times-circle\"></i>";
                             html += "</button></div>\n";
                         }
@@ -157,7 +157,7 @@ export default ['$compile', 'Attr', 'Icon',
 
                 if (options.mode === 'edit' && list.editInstructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
-                    html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"fa fa-times-circle\"></i></button>\n";
+                    html += "<button aria-label=\"{{'Close'|translate}}\" type=\"button\" class=\"close\" data-dismiss=\"alert\"><i class=\"fa fa-times-circle\"></i></button>\n";
                     html += "<strong>Hint: </strong>" + list.editInstructions + "\n";
                     html += "</div>\n";
                 }
@@ -491,7 +491,7 @@ export default ['$compile', 'Attr', 'Icon',
 
                 if (options.mode === 'select' && (options.selectButton === undefined || options.selectButton)) {
                     html += "<div class=\"navigation-buttons\">\n";
-                    html += " <button class=\"btn btn-sm btn-primary pull-right\" id=\"select_btn\" aw-tool-tip=\"Complete your selection\" " +
+                    html += " <button aria-label=\"{{'Complete your selection'|translate}}\" class=\"btn btn-sm btn-primary pull-right\" id=\"select_btn\" aw-tool-tip=\"Complete your selection\" " +
                         "ng-click=\"finishSelection()\" ng-disabled=\"disableSelectBtn\"><i class=\"fa fa-check\"></i> Select</button>\n";
                     html += "</div>\n";
                 }

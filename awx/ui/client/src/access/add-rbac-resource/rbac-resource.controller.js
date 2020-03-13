@@ -27,6 +27,8 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         // array for all possible roles for the object
         scope.roles = angular.copy(scope.object.summary_fields.object_roles);
 
+        scope.appStrings = rootScope.appStrings;
+
         const objectType = _.get(scope, ['object', 'type']);
         const teamRoles = _.get(scope, ['object', 'summary_fields', 'object_roles'], {});
 

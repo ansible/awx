@@ -137,7 +137,7 @@
 								<div class="input-group Form-mixedInputGroup" ng-if="showPlaceholderPassword">
 									<input class="form-control Form-textInput" type="text" value="ENCRYPTED" disabled />
 									<span class="input-group-btn input-group-append">
-										<button class="btn at-ButtonHollow--default at-Input-button" ng-disabled="!user_is_superuser || newLicense.file" ng-click="replacePassword()" aw-tool-tip="Replace" data-placement="top" data-original-title="Replace">
+										<button aria-label="{{:: strings.get('REPLACE_PASSWORD') }}" class="btn at-ButtonHollow--default at-Input-button" ng-disabled="!user_is_superuser || newLicense.file" ng-click="replacePassword()" aw-tool-tip="Replace" data-placement="top" data-original-title="Replace">
 											<i class="fa fa-undo"></i>
 										</button>
 									</span>
@@ -215,7 +215,7 @@
 										Select a license
 								</div>
 								<div class="Modal-exitHolder">
-										<button class="close Modal-exit" ng-click="cancelLicenseLookup()">
+										<button aria-label="{{:: strings.get('CANCEL_LOOKUP')}}" class="close Modal-exit" ng-click="cancelLicenseLookup()">
 												<i class="fa fa-times-circle"></i>
 										</button>
 								</div>

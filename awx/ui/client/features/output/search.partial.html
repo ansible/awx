@@ -14,6 +14,7 @@
             <button class="btn at-ButtonHollow--default at-Input-button"
                 ng-click="vm.submitSearch()"
                 ng-disabled="vm.disabled || !vm.value || vm.value === ''"
+                aria-label="{{:: vm.strings.get('search.SUBMIT') }}"
                 type="button">
                 <i class="fa fa-search"></i>
             </button>

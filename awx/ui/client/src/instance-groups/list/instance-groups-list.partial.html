@@ -18,8 +18,17 @@
                 search-tags="searchTags">
             </smart-search>
             <div class="at-List-toolbarAction">
-                <button type="button" class="at-Button--add" id="button-add" ng-show="vm.isSuperuser"
-                    data-toggle="dropdown" data-placement="top" aria-haspopup="true" aria-expanded="false">
+                <button
+                    aria-label="{{:: vm.strings.get('list.ADD') }}"
+                    type="button"
+                    class="at-Button--add"
+                    id="button-add"
+                    ng-show="vm.isSuperuser"
+                    data-toggle="dropdown"
+                    data-placement="top"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="button-add">
                     <a class="dropdown-item" ui-sref="instanceGroups.add">

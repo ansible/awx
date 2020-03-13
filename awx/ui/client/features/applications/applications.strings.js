@@ -16,10 +16,6 @@ function ApplicationsStrings (BaseString) {
         USERS: t.s('Tokens')
     };
 
-    ns.tooltips = {
-        ADD: t.s('Create a new Application')
-    };
-
     ns.add = {
         PANEL_TITLE: t.s('NEW APPLICATION'),
         CLIENT_ID_LABEL: t.s('CLIENT ID'),
@@ -32,7 +28,8 @@ function ApplicationsStrings (BaseString) {
         PANEL_TITLE: t.s('APPLICATIONS'),
         ROW_ITEM_LABEL_EXPIRED: t.s('EXPIRATION'),
         ROW_ITEM_LABEL_ORGANIZATION: t.s('ORG'),
-        ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED')
+        ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED'),
+        ADD: t.s('Create a new Application')
     };
 
     ns.inputs = {

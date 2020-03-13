@@ -21,7 +21,8 @@ function InstanceGroupsStrings(BaseString) {
         ROW_ITEM_LABEL_ISOLATED: t.s('ISOLATED'),
         ROW_ITEM_LABEL_RUNNING_JOBS: t.s('Running Jobs'),
         ROW_ITEM_LABEL_TOTAL_JOBS: t.s('Total Jobs'),
-        ROW_ITEM_LABEL_USED_CAPACITY: t.s('Used Capacity')
+        ROW_ITEM_LABEL_USED_CAPACITY: t.s('Used Capacity'),
+        ADD: t.s('Add a new instance group')
     };
 
     ns.tab = {
@@ -39,7 +40,8 @@ function InstanceGroupsStrings(BaseString) {
 
     ns.instance = {
         PANEL_TITLE: t.s('SELECT INSTANCE'),
-        BADGE_TEXT: t.s('Instance Group')
+        BADGE_TEXT: t.s('Instance Group'),
+        ADD: t.s('Add a new instance')
     };
 
     ns.capacityBar = {

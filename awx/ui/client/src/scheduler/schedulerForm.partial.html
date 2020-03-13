@@ -4,7 +4,7 @@
         <div class="Form-title" ng-show="isEdit">{{ schedulerName || strings.get('state.EDIT_SCHEDULE') }}</div>
         <div class="Form-header--fields"></div>
         <div class="Form-exitHolder">
-            <button class="Form-exit" ng-click="formCancel()">
+            <button aria-label="{{'Close'|translate}}" class="Form-exit" ng-click="formCancel()">
                 <i class="fa fa-times-circle"></i>
             </button>
         </div>

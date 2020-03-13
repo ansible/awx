@@ -4,7 +4,9 @@
             <div class="Modal-header">
                 <div class="Modal-title" id="detail-header" ng-bind-html="header"></div>
                 <div class="Modal-exitHolder">
-                    <button class="close Modal-exit" data-target="#stream-detail-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
+                    <button aria-label="{{:: appStrings.get('CLOSE') }}" class="close Modal-exit" data-target="#stream-detail-modal" data-dismiss="modal" aria-hidden="true">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
                 </div>
             </div>
             <div class="Modal-body" id="detail-body">

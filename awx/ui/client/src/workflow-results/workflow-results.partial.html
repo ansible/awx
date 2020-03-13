@@ -23,6 +23,7 @@
 
                         <!-- RELAUNCH ACTION -->
                         <button class="List-actionButton"
+                            aria-label="{{'Relaunch job'|translate}}"
                             data-placement="top"
                             mode="all"
                             ng-click="relaunchJob()"
@@ -35,6 +36,7 @@
                         <!-- CANCEL ACTION -->
                         <button class="List-actionButton
                                 List-actionButton--delete"
+                            aria-label="{{'Cancel job'|translate}}"
                             data-placement="top"
                             ng-click="cancelJob()"
                             ng-show="workflow.status == 'running' ||
@@ -47,6 +49,7 @@
                         <!-- DELETE ACTION -->
                         <button class="List-actionButton
                                 List-actionButton--delete"
+                            aria-label="{{'Delete job'|translate}}"
                             data-placement="top"
                             ng-click="deleteJob()"
                             ng-hide="workflow.status == 'running' ||
@@ -349,6 +352,7 @@
 
                             <!-- FULL-SCREEN TOGGLE ACTION -->
                             <button class="StandardOut-actionButton"
+                                aria-label="{{ strings.tooltips.TOGGLE_STDOUT_FULLSCREEN }}"
                                 aw-tool-tip="{{ strings.tooltips.TOGGLE_STDOUT_FULLSCREEN }}"
                                 data-tip-watch="strings.tooltips.TOGGLE_STDOUT_FULLSCREEN"
                                 data-placement="top"

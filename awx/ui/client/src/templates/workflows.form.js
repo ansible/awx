@@ -210,6 +210,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                             class="input-group-btn input-group-prepend"
                         >
                             <button
+                                aria-label="${i18n._('Rotate Webhook Key')}"
                                 type="button"
                                 class="btn Form-lookupButton"
                                 ng-click="handleWebhookKeyButtonClick()"

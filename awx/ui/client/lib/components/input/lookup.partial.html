@@ -3,9 +3,12 @@
         <at-input-label></at-input-label>
 
         <div class="at-InputLookup">
-            <button class="at-InputLookup-button"
-                    ng-disabled="state._disabled || form.disabled"
-                    ng-click="vm.lookup()">
+            <button
+                aria-label="{{:: vm.strings.get('lookup.PERFORM_LOOKUP')}}"
+                class="at-InputLookup-button"
+                ng-disabled="state._disabled || form.disabled"
+                ng-click="vm.lookup()"
+            >
                 <i class="fa fa-search"></i>
             </button>
             <input type="text"

@@ -21,7 +21,8 @@
             $scope.canAdd = canAdd;
 
             $scope.strings = {
-                deleteModal: {}
+                deleteModal: {},
+                close: InventoryHostsStrings.get('CLOSE')
             };
 
             // Search init

@@ -76,6 +76,7 @@ function BaseStringService (namespace) {
     this.YES = t.s('YES');
     this.CLOSE = t.s('CLOSE');
     this.TEST = t.s('TEST');
+    this.REMOVE = t.s('REMOVE');
     this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource: $filter('sanitize')(resource) });
 
     this.logos = {

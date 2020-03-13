@@ -9,13 +9,14 @@
 
         <!-- CANCEL ACTION -->
         <button
+            aria-label="{{:: vm.strings.get('details.CANCEL_JOB')}}"
             class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.cancelJob()"
             ng-show="vm.status.unmapped === 'pending' ||
                      vm.status.unmapped === 'waiting' ||
                      vm.status.unmapped === 'running'"
-            aw-tool-tip="{{:: vm.strings.get('tooltips.CANCEL') }}"
+            aw-tool-tip="{{:: vm.strings.get('details.CANCEL_JOB') }}"
             data-original-title=""
             title="">
             <i class="fa fa-minus-circle"></i>
@@ -23,6 +24,7 @@
 
         <!-- DELETE ACTION -->
         <button
+            aria-label="{{:: vm.strings.get('details.DELETE_JOB')}}"
             class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.deleteJob()"
@@ -32,7 +34,7 @@
                    vm.status.unmapped === 'failed' ||
                    vm.status.unmapped === 'error' ||
                    vm.status.unmapped === 'canceled')"
-            aw-tool-tip="{{:: vm.strings.get('tooltips.DELETE') }}"
+            aw-tool-tip="{{:: vm.strings.get('details.DELETE_JOB') }}"
             data-original-title=""
             title="">
             <i class="fa fa-trash-o"></i>

@@ -7,6 +7,7 @@
 export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
     function($scope, qs, InventoryHostsStrings) {
         $scope.hostFilterTags = [];
+        $scope.strings = InventoryHostsStrings;
 
         $scope.$watch('organization', function(){
             if($scope.hasEditPermissions) {

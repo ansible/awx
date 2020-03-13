@@ -22,9 +22,11 @@ export default ['templateUrl', function(templateUrl) {
             };
 
         },
-        controller: ['$scope', 'QuerySet', 'GetBasePath', 'HostsList', '$compile', 'generateList', 'i18n', function($scope, qs, GetBasePath, HostsList, $compile, GenerateList, i18n) {
+        controller: ['$scope', 'QuerySet', 'GetBasePath', 'HostsList', '$compile', 'generateList', 'i18n', '$rootScope', function($scope, qs, GetBasePath, HostsList, $compile, GenerateList, i18n, $rootScope) {
 
             function init() {
+
+                $scope.appStrings = $rootScope.appStrings;
 
                 $scope.host_default_params = {
                     order_by: 'name',

@@ -8,7 +8,7 @@
                         <span class="Modal-titleResourceName" ng-bind="nodeToBeDeleted.unifiedJobTemplate.name"></span>
                     </div>
                     <div class="Modal-exitHolder">
-                        <button class="close Modal-exit" ng-click="cancelDeleteNode()">
+                        <button aria-label="{{'Close'|translate}}" class="close Modal-exit" ng-click="cancelDeleteNode()">
                             <i class="fa fa-times-circle"></i>
                         </button>
                     </div>
@@ -31,7 +31,7 @@
                         <span>{{strings.get('workflow_maker.UNSAVED_CHANGES_HEADER')}}</span>
                     </div>
                     <div class="Modal-exitHolder">
-                        <button class="close Modal-exit" ng-click="cancelUnsavedChanges()">
+                        <button aria-label="{{'Cancel unsaved changes'|translate}}" class="close Modal-exit" ng-click="cancelUnsavedChanges()">
                             <i class="fa fa-times-circle"></i>
                         </button>
                     </div>
@@ -58,7 +58,7 @@
             <div class="WorkflowMaker-titleText">{{strings.get('workflow_maker.TITLE')}} | {{ workflowJobTemplateObj.name }}</div>
         </div>
         <div class="WorkflowMaker-exitHolder">
-            <button class="WorkflowMaker-exit" ng-click="closeDialog()">
+            <button aria-label="{{'Close'|translate}}" class="WorkflowMaker-exit" ng-click="closeDialog()">
                 <i class="fa fa-times-circle"></i>
             </button>
         </div>
