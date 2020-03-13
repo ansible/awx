@@ -29,7 +29,7 @@ def construct_rsyslog_conf_template(settings=settings):
                 port = settings.LOG_AGGREGATOR_PORT
 
         parts.extend([
-            'input(type="imuxsock" Socket="' + settings.LOGGING_SOCK + '" unlink="on")',
+            'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger'] + '" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
         if protocol.startswith('http'):
@@ -68,7 +68,7 @@ def construct_rsyslog_conf_template(settings=settings):
     return tmpl
     
 def reconfigure_rsyslog():
-    tmpl = get_rsyslog_conf_template()
+    tmpl = construct_rsyslog_conf_template()
     with open('/var/lib/awx/rsyslog/rsyslog.conf', 'w') as f:
         f.write(tmpl + '\n')
     supervisor_service_command(command='restart', service='awx-rsyslogd')
