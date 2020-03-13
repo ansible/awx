@@ -238,6 +238,11 @@ export default
                             $scope.playbook_options = [$scope.playbook];
                         }
 
+                        if (!Empty($scope.project)) {
+                            // If a project exists, show its playbooks.
+                            $scope.allow_playbook_selection = true;
+                        }
+
                         if (!Empty($scope.project) && $scope.job_template_obj.summary_fields.user_capabilities.edit) {
                             let promises = [];
                             url = GetBasePath('projects') + $scope.project + '/playbooks/';
@@ -259,7 +264,6 @@ export default
                                         $scope.playbook_options.push($scope.playbook);
                                     }
                                     $scope.playbookNotFound = playbookNotFound;
-                                    $scope.allow_playbook_selection = true;
                                     sync_playbook_select2();
                                     if ($scope.playbook) {
                                         jobTemplateLoadFinished();
