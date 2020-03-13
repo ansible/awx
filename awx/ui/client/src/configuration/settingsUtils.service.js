@@ -12,13 +12,9 @@ export default ['$q',
                 var payload;
 
                 if (input.indexOf('[') !== -1) {
-                    try {
-                        payload = JSON.parse(input);
+                    payload = JSON.parse(input);
 
-                        if (!Array.isArray(payload)) {
-                            payload = [];
-                        }
-                    } catch(err) {
+                    if (!Array.isArray(payload)) {
                         payload = [];
                     }
                 } else if (input.indexOf('\n') !== -1) {
