@@ -1,104 +1,69 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import SurveyList from './SurveyList';
 import { JobTemplatesAPI } from '@api';
 import mockJobTemplateData from './data.job_template.json';
 
 jest.mock('@api/models/JobTemplates');
 
+const surveyData = {
+  name: 'Survey',
+  description: 'description for survey',
+  spec: [
+    { question_name: 'Foo', type: 'text', default: 'Bar', variable: 'foo' },
+  ],
+};
+
 describe('<SurveyList />', () => {
-  beforeEach(() => {
-    JobTemplatesAPI.readSurvey.mockResolvedValue({
-      data: {
-        name: 'Survey',
-        description: 'description for survey',
-        spec: [{ question_name: 'Foo', type: 'text', default: 'Bar' }],
-      },
-    });
-  });
+  // beforeEach(() => {
+  //   JobTemplatesAPI.readSurvey.mockResolvedValue({
+  //     data: {
+  //     },
+  //   });
+  // });
+
   test('expect component to mount successfully', async () => {
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(
-        <SurveyList template={mockJobTemplateData} />
-      );
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
     });
     expect(wrapper.length).toBe(1);
   });
-  test('expect api to be called to get survey', async () => {
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <SurveyList template={mockJobTemplateData} />
-      );
-    });
-    expect(JobTemplatesAPI.readSurvey).toBeCalledWith(7);
 
-    wrapper.update();
-
-    expect(wrapper.find('SurveyListItem').length).toBe(1);
-  });
-  test('error in retrieving the survey throws an error', async () => {
-    JobTemplatesAPI.readSurvey.mockRejectedValue(new Error());
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <SurveyList template={{ ...mockJobTemplateData, id: 'a' }} />
-      );
-    });
-
-    wrapper.update();
-
-    expect(wrapper.find('ContentError').length).toBe(1);
-  });
-  test('can toggle survey on and off', async () => {
+  test('should toggle survey', async () => {
+    const toggleSurvey = jest.fn();
     JobTemplatesAPI.update.mockResolvedValue();
     let wrapper;
     await act(async () => {
-<<<<<<< HEAD
       wrapper = mountWithContexts(
-=======
-      wrapper = await mountWithContexts(
->>>>>>> Adds SurveyList tool bar
         <SurveyList
-          template={{ ...mockJobTemplateData, survey_enabled: false }}
+          survey={surveyData}
+          surveyEnabled
+          toggleSurvey={toggleSurvey}
         />
       );
     });
 
     expect(wrapper.find('Switch').length).toBe(1);
-    expect(wrapper.find('Switch').prop('isChecked')).toBe(false);
+    expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
     await act(async () => {
-<<<<<<< HEAD
       wrapper.find('Switch').invoke('onChange')(true);
-=======
-      await wrapper.find('Switch').invoke('onChange')(true);
->>>>>>> Adds SurveyList tool bar
     });
-
     wrapper.update();
 
-    expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
-    expect(JobTemplatesAPI.update).toBeCalledWith(7, {
-      survey_enabled: true,
-    });
+    expect(toggleSurvey).toHaveBeenCalled();
   });
 
-  test('selectAll enables delete button and calls the api to delete properly', async () => {
+  test('should select all and delete', async () => {
+    const deleteSurvey = jest.fn();
     let wrapper;
     await act(async () => {
-<<<<<<< HEAD
       wrapper = mountWithContexts(
-=======
-      wrapper = await mountWithContexts(
->>>>>>> Adds SurveyList tool bar
-        <SurveyList
-          template={{ ...mockJobTemplateData, survey_enabled: false }}
-        />
+        <SurveyList survey={surveyData} deleteSurvey={deleteSurvey} />
       );
     });
-    await waitForElement(wrapper, 'SurveyListItem');
+    wrapper.update();
     expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
       true
     );
@@ -112,38 +77,32 @@ describe('<SurveyList />', () => {
         true
       );
     });
-
     wrapper.update();
 
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(true);
-
     expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
       false
     );
     act(() => {
       wrapper.find('Button[variant="danger"]').invoke('onClick')();
     });
-
     wrapper.update();
 
     await act(() =>
       wrapper.find('Button[aria-label="confirm delete"]').invoke('onClick')()
     );
-    expect(JobTemplatesAPI.destroySurvey).toBeCalledWith(7);
+    expect(deleteSurvey).toHaveBeenCalled();
   });
 });
+
 describe('Survey with no questions', () => {
   test('Survey with no questions renders empty state', async () => {
     JobTemplatesAPI.readSurvey.mockResolvedValue({});
     let wrapper;
     await act(async () => {
-<<<<<<< HEAD
       wrapper = mountWithContexts(
-=======
-      wrapper = await mountWithContexts(
->>>>>>> Adds SurveyList tool bar
         <SurveyList template={mockJobTemplateData} />
       );
     });
