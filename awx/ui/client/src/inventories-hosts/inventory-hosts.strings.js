@@ -38,13 +38,18 @@ function InventoryHostsStrings (BaseString) {
         hostfilter: {
             MISSING_ORG: t.s('Please select an organization before editing the host filter.'),
             INSTRUCTIONS: t.s('Please click the icon to edit the host filter.'),
-            MISSING_PERMISSIONS: t.s('You do not have sufficient permissions to edit the host filter.')
+            MISSING_PERMISSIONS: t.s('You do not have sufficient permissions to edit the host filter.'),
+            OPEN: t.s('Open host filter')
         }
     };
 
     ns.smartinventorybutton = {
         DISABLED_INSTRUCTIONS: t.s("Please enter at least one search term to create a new Smart Inventory."),
         ENABLED_INSTRUCTIONS: t.s("Create a new Smart Inventory from search results.<br /><br />Note: changing the organization of the Smart Inventory could change the hosts included in the Smart Inventory.")
+    };
+
+    ns.insights = {
+        VIEW: t.s("View Insights")
     };
 }
 

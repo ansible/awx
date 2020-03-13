@@ -79,13 +79,13 @@
                                 </div>
                                 <div class="List-actionsContainer col-md-3 col-sm-4">
                                     <div class="List-actionButtonCell List-tableCell">
-                                        <button id="insights-action" class="List-actionButton " ng-class="{'List-actionButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit.insights')}" data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="{{strings.get('inventory.VIEW_INSIGHTS')}}" data-tip-watch="strings.get('inventory.VIEW_INSIGHTS')" ng-show="host.insights_system_id && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')">
+                                        <button id="insights-action" aria-label="{{strings.get('insights.VIEW')}}" class="List-actionButton " ng-class="{'List-actionButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit.insights')}" data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="{{strings.get('inventory.VIEW_INSIGHTS')}}" data-tip-watch="strings.get('inventory.VIEW_INSIGHTS')" ng-show="host.insights_system_id && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')">
                                             <i class="fa fa-info"></i>
                                         </button>
-                                        <button id="edit-action" class="List-actionButton " ng-class="{'List-editButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit') }" data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="{{strings.get('inventory.EDIT_HOST')}}"   data-tip-watch="strings.get('inventory.VIEW_HOST')" ng-show="host.summary_fields.user_capabilities.edit">
+                                        <button id="edit-action" aria-label="{{strings.get('inventory.EDIT_HOST')}}" class="List-actionButton " ng-class="{'List-editButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit') }" data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="{{strings.get('inventory.EDIT_HOST')}}"   data-tip-watch="strings.get('inventory.VIEW_HOST')" ng-show="host.summary_fields.user_capabilities.edit">
                                             <i class="fa fa-pencil"></i>
                                         </button>
-                                        <button id="view-action" class="List-actionButton " data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="{{strings.get('inventory.VIEW_HOST')}}" data-tip-watch="strings.get('inventory.VIEW_HOST')" ng-show="!host.summary_fields.user_capabilities.edit"><i class="fa fa-search-plus"></i>
+                                        <button id="view-action" aria-label="{{strings.get('inventory.VIEW_HOST')}}" class="List-actionButton " data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="{{strings.get('inventory.VIEW_HOST')}}" data-tip-watch="strings.get('inventory.VIEW_HOST')" ng-show="!host.summary_fields.user_capabilities.edit"><i class="fa fa-search-plus"></i>
                                         </button>
                                     </div>
                                 </div>

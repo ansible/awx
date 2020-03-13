@@ -17,6 +17,7 @@
             <div class="List-actionHolder">
                 <div class="List-actions">
                     <button class="at-Button--add"
+                        aria-label="{{'Add a new organization'|translate}}"
                         id="button-add"
                         aw-tool-tip="{{'Create a new organization'|translate}}"
                         ng-show="canAdd"
@@ -51,6 +52,7 @@
                         <div class="OrgCards-actionItems">
                             <button class="OrgCards-actionItem
                                 List-actionButton"
+                                aria-label="{{'Edit Organization'|translate}}"
                                 ng-show="card.user_capabilities.edit"
                                 ng-class="{'List-editButton--selected': $stateParams.organization_id == card.id}"
                                 ng-click="editOrganization(card.id)">
@@ -59,6 +61,7 @@
                             </button>
                             <button class="OrgCards-actionItem
                                 List-actionButton"
+                                aria-label="{{'View Organization'|translate}}"
                                 ng-show="!card.user_capabilities.edit"
                                 ng-class="{'List-editButton--selected': $stateParams.organization_id == card.id}"
                                 ng-click="editOrganization(card.id)">
@@ -67,6 +70,7 @@
                             </button>
                             <button class="OrgCards-actionItem List-actionButton
                                 List-actionButton--delete"
+                                aria-label="{{'Delete Organization'|translate}}"
                                 ng-show="card.user_capabilities.delete"
                                 ng-click="deleteOrganization(card.id, card.name)">
                                 <i class="OrgCards-actionItemIcon

@@ -43,10 +43,6 @@ function ListApplicationsController (
         paginateQuerySet = queryset;
     });
 
-    vm.tooltips = {
-        add: strings.get('tooltips.ADD')
-    };
-
     const toolbarSortDefault = {
         label: `${strings.get('sort.NAME_ASCENDING')}`,
         value: 'name'

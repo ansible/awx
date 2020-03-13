@@ -19,6 +19,7 @@
 
     <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
         <button class="btn at-Input-button at-u-noBorder"
+            aria-label="Download output"
             aw-tool-tip="{{:: vm.strings.get('tooltips.DOWNLOAD_OUTPUT') }}"
             data-placement="top">
             <i class="fa fa-download"></i>
@@ -26,6 +27,7 @@
     </a>
 
     <button class="btn at-Input-button at-u-noBorder"
+        aria-label="{{:: vm.strings.get('stats.TOGGLE_EXPANDED_OUTPUT') }}"
         aw-tool-tip="{{ vm.tooltips.toggleExpand }}"
         data-tip-watch="vm.tooltips.toggleExpand"
         data-placement="top"

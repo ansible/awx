@@ -46,7 +46,7 @@
                         <div class="at-RowItem-tag at-RowItem-tag--header atCodeMirror-badge" ng-show="disabled === 'true' || disabled === true">
                             {{ vm.strings.get('label.READONLY')}}
                         </div>
-                        <button type="button" class="close" ng-click="close()">
+                        <button aria-label="{{:: vm.strings.get('CLOSE_MODAL')}}" type="button" class="close" ng-click="close()">
                             <i class="fa fa-times-circle"></i>
                         </button>
                     </div>
@@ -63,7 +63,7 @@
             </div>
             <div class="modal-footer">
                 <div class="CodeMirror-modalControls">
-                    <button ng-click="close()" class="btn btn-sm btn-default">Close</button>
+                    <button ng-click="close()" class="btn btn-sm btn-default" translate>Close</button>
                 </div>
             </div>
         </div>

@@ -11,12 +11,14 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$state', 'i18n', 'CreateSelect2', 'Rest', '$q', 'Wait', 'ProcessErrors',
-function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
+export default ['$scope', '$state', 'i18n', 'CreateSelect2', 'Rest', '$q', 'Wait', 'ProcessErrors', '$rootScope',
+function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors, rootScope) {
 
     init();
 
     function init(){
+
+        scope.appStrings = rootScope.appStrings;
 
         let resources = ['job_templates', 'workflow_templates', 'projects', 'inventories', 'credentials', 'organizations'];
 

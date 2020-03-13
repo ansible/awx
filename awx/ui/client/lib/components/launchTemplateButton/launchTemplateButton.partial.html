@@ -1,12 +1,15 @@
 <div class="at-LaunchTemplate">
-    <button type="button"
-            ng-class="{'at-LaunchTemplate--button': !vm.showTextButton, 'btn btn-sm Form-primaryButton': vm.showTextButton, 'Form-button--disabled': vm.disabled}"
-            ng-click="vm.startLaunchTemplate()"
-            aw-tool-tip="{{ vm.launchTooltip }}"
-            data-tip-watch="vm.launchTooltip"
-            data-placement="top">
-            <i class="icon-launch" ng-show="!vm.showTextButton"></i>
-            <span ng-show="vm.showTextButton">{{:: vm.strings.get('launchTemplate.BUTTON_LABEL') }}</span>
+    <button
+        type="button"
+        aria-label="{{:: vm.strings.get('launchTemplate.BUTTON_LABEL') }}"
+        ng-class="{'at-LaunchTemplate--button': !vm.showTextButton, 'btn btn-sm Form-primaryButton': vm.showTextButton, 'Form-button--disabled': vm.disabled}"
+        ng-click="vm.startLaunchTemplate()"
+        aw-tool-tip="{{ vm.launchTooltip }}"
+        data-tip-watch="vm.launchTooltip"
+        data-placement="top"
+    >
+        <i class="icon-launch" ng-show="!vm.showTextButton"></i>
+        <span ng-show="vm.showTextButton">{{:: vm.strings.get('launchTemplate.BUTTON_LABEL') }}</span>
     </button>
     <prompt prompt-data="vm.promptData" on-finish="vm.launchTemplateWithPrompts()"></prompt>
 </div>

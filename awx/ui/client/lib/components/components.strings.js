@@ -17,7 +17,8 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.file = {
-        PLACEHOLDER: t.s('CHOOSE A FILE')
+        PLACEHOLDER: t.s('CHOOSE A FILE'),
+        SELECT_FILE: t.s('Select file')
     };
 
     ns.form = {
@@ -44,7 +45,8 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.lookup = {
-        NOT_FOUND: t.s('That value was not found. Please enter or select a valid value.')
+        NOT_FOUND: t.s('That value was not found. Please enter or select a valid value.'),
+        PERFORM_LOOKUP: t.s('Perform lookup')
     };
 
     ns.truncate = {
@@ -129,7 +131,12 @@ function ComponentsStrings (BaseString) {
         NOTIFICATIONS: t.s('NOTIFICATIONS'),
         WORKFLOW_TEMPLATE: t.s('Workflow Template'),
         EXPIRES: t.s('Expires:'),
-        EXPIRES_NEVER: t.s('Expires: Never')
+        EXPIRES_NEVER: t.s('Expires: Never'),
+        CLOSE_APPROVALS: t.s('Close Approvals')
+    };
+
+    ns.secret = {
+        REPLACE: t.s('Replace secret')
     };
 }
 

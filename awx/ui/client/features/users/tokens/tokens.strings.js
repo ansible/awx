@@ -40,6 +40,7 @@ function TokensStrings (BaseString) {
         ROW_ITEM_LABEL_APPLICATION: t.s('APPLICATION'),
         PERSONAL_ACCESS_TOKEN: t.s('Personal Access Token'),
         HEADER: appName => t.s('{{ appName }} Token', { appName }),
+        ADD: t.s('Add a new token')
     };
 }
 

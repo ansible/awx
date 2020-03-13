@@ -20,6 +20,7 @@ function TemplatesStrings (BaseString) {
         ROW_ITEM_LABEL_CREDENTIALS: t.s('Credentials'),
         ROW_ITEM_LABEL_MODIFIED: t.s('Last Modified'),
         ROW_ITEM_LABEL_RAN: t.s('Last Ran'),
+        ADD: t.s('Add a new template')
     };
 
     ns.prompt = {

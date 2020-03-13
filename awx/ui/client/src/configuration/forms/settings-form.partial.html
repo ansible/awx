@@ -1,7 +1,7 @@
 <div class="Section-messageBar" ng-if="show_auditor_bar">
     <i class="fa fa-warning"></i>
     <span translate>System auditors have read-only permissions in this section.</span>
-    <button class="Section-messageBar--close" ng-click="vm.closeMessageBar()"><i class="fa fa-times-circle"></i></button>
+    <button aria-label="{{:: appStrings.get('CLOSE') }}" class="Section-messageBar--close" ng-click="vm.closeMessageBar()"><i class="fa fa-times-circle"></i></button>
 </div>
 
 <div class="tab-pane" id="configuration-panel">

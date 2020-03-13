@@ -195,6 +195,7 @@ angular
             $rootScope.breadcrumb = {};
             $rootScope.BRAND_NAME = AppStrings.get('BRAND_NAME');
             $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME}`;
+            $rootScope.appStrings = AppStrings;
             $rootScope.$watch('$state.current.ncyBreadcrumbLabel', function(title) {
                 title = (title) ? "| " + title : "";
                 document.title = `Ansible ${$rootScope.BRAND_NAME} ${title}`;

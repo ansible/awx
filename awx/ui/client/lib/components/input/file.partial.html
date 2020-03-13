@@ -4,9 +4,12 @@
         <input class="at-InputFile--hidden" type="file"/>
         <div class="input-group">
             <span class="input-group-btn input-group-prepend">
-                <button class="btn at-ButtonHollow--default at-Input-button"
-                        ng-disabled="state._disabled || form.disabled"
-                        ng-click="vm.onButtonClick()">
+                <button
+                    class="btn at-ButtonHollow--default at-Input-button"
+                    aria-label="{{:: vm.strings.get('file.SELECT_FILE')}}"
+                    ng-disabled="state._disabled || form.disabled"
+                    ng-click="vm.onButtonClick()"
+                >
                   <i class="fa fa-folder-open" ng-if="!state._value"></i>
                   <i class="fa fa-trash" ng-if="state._value"></i>
                 </button>

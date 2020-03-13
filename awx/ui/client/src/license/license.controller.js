@@ -7,10 +7,12 @@
 import {N_} from "../i18n";
 
 export default
-    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', '$timeout', 'Rest',
+    ['Wait', '$state', '$scope', '$rootScope', 'ProcessErrors', 'CheckLicense', 'moment', '$timeout', 'Rest', 'LicenseStrings',
     '$window', 'ConfigService', 'pendoService', 'insightsEnablementService', 'i18n', 'config', 'rhCreds', 'GetBasePath',
-    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, $timeout, Rest,
+    function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment, $timeout, Rest, LicenseStrings,
     $window, ConfigService, pendoService, insightsEnablementService, i18n, config, rhCreds, GetBasePath) {
+
+        $scope.strings = LicenseStrings;
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license

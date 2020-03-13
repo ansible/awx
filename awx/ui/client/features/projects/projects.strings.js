@@ -11,6 +11,7 @@ function ProjectsStrings (BaseString) {
         ROW_ITEM_LABEL_ORGANIZATION: t.s('ORGANIZATION'),
         ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED'),
         ROW_ITEM_LABEL_USED: t.s('LAST USED'),
+        ADD: t.s('Add a new project')
     };
 
     ns.update = {

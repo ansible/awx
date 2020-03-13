@@ -4,7 +4,7 @@
                 <div class="Modal-header">
                     <div class="Modal-title" ng-bind="deleteMode === 'survey' ? 'Delete Survey' : (deleteMode === 'question' ? 'Delete Question' : '')"></div>
                     <div class="Modal-exitHolder">
-                        <button class="close Modal-exit" ng-click="hideDeleteOverlay()">
+                        <button aria-label="{{'Close'|translate}}" class="close Modal-exit" ng-click="hideDeleteOverlay()">
                             <i class="fa fa-times-circle"></i>
                         </button>
                     </div>
@@ -25,7 +25,7 @@
             <at-switch on-toggle="toggleSurveyEnabled()" switch-on="survey_enabled" switch-disabled="(!job_template_obj.summary_fields.user_capabilities.edit && !workflow_job_template_obj.summary_fields.user_capabilities.edit && !canAdd)" tooltip="surveyEnabledTooltip" tooltip-placement="right" tooltip-watch="surveyEnabledTooltip"></at-switch>
         </div>
         <div class="SurveyMaker-close">
-            <button class="SurveyMaker-exit" ng-click="closeSurvey('survey-modal-dialog')"><i class="fa fa-times-circle"></i></button>
+            <button aria-label="{{'Close'|translate}}" class="SurveyMaker-exit" ng-click="closeSurvey('survey-modal-dialog')"><i class="fa fa-times-circle"></i></button>
         </div>
     </div>
     <div class="SurveyMaker-content">
@@ -61,10 +61,10 @@
                                     </span>
                                     <survey-question class="SurveyMaker-previewInput" preview="true" question="question" ng-required="question.required" ng-disabled=true></survey-question>
                                     <div class="SurveyMaker-previewActions" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">
-                                        <button class="List-actionButton" data-placement="top" ng-class="{'SurveyMaker-previewActions--selected' : editQuestionIndex == $index}" ng-click="editQuestion($index)" aw-tool-tip="{{editQuestionTooltip}}" data-tip-watch="editQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
+                                        <button aria-label="{{'Edit question'|translate}}" class="List-actionButton" data-placement="top" ng-class="{'SurveyMaker-previewActions--selected' : editQuestionIndex == $index}" ng-click="editQuestion($index)" aw-tool-tip="{{editQuestionTooltip}}" data-tip-watch="editQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
                                             <i class="fa fa-pencil"></i>
                                         </button>
-                                        <button class="List-actionButton List-actionButton--delete" data-placement="top" ng-click="showDeleteQuestion($index)" aw-tool-tip="deleteQuestionTooltip" data-tip-watch="deleteQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
+                                        <button aria-label="{{'Delete question'|translate}}" class="List-actionButton List-actionButton--delete" data-placement="top" ng-click="showDeleteQuestion($index)" aw-tool-tip="deleteQuestionTooltip" data-tip-watch="deleteQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
                                             <i class="fa fa-trash-o"></i>
                                         </button>
                                     </div>

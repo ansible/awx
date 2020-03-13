@@ -51,6 +51,8 @@ function OutputStrings (BaseString) {
         SHOW_MORE: t.s('Show More'),
         UNKNOWN: t.s('Finished'),
         WEBHOOK: t.s('Webhook'),
+        CANCEL_JOB: t.s('Cancel Job'),
+        DELETE_JOB: t.s('Delete Job'),
     };
 
     ns.labels = {
@@ -107,13 +109,15 @@ function OutputStrings (BaseString) {
         PLACEHOLDER_RUNNING: t.s('JOB IS STILL RUNNING'),
         REJECT_DEFAULT: t.s('Failed to update search results.'),
         REJECT_INVALID: t.s('Invalid search filter provided.'),
+        SUBMIT: t.s('Submit search')
     };
 
     ns.stats = {
         ELAPSED: t.s('Elapsed'),
         PLAYS: t.s('Plays'),
         TASKS: t.s('Tasks'),
-        HOSTS: t.s('Hosts')
+        HOSTS: t.s('Hosts'),
+        TOGGLE_EXPANDED_OUTPUT: t.s('Toggle expanded output')
     };
 
     ns.stdout = {
@@ -128,7 +132,8 @@ function OutputStrings (BaseString) {
         MODULE: t.s('MODULE'),
         NO_RESULT_FOUND: t.s('No result found'),
         STANDARD_OUT: t.s('Standard Out'),
-        STANDARD_ERROR: t.s('Standard Error')
+        STANDARD_ERROR: t.s('Standard Error'),
+        CLOSE_HOST_EVENT_MODAL: t.s('Close host event modal')
     };
 
     ns.workflow_status = {

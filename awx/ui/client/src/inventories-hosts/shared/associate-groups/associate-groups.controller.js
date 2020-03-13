@@ -13,6 +13,7 @@
          init();
 
          function init(){
+             $scope.appStrings = $rootScope.appStrings;
              $scope.associate_group_default_params = {
                  order_by: 'name',
                  page_size: 5

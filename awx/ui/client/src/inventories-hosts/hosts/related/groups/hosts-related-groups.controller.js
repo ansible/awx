@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'HostsRelatedGroupsList', 'InventoryUpdate',
+    ['$scope', '$rootScope', '$state', '$stateParams', 'HostsRelatedGroupsList', 'InventoryHostsStrings',
     'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'host', 'GroupsService',
-    function($scope, $rootScope, $state, $stateParams, HostsRelatedGroupsList, InventoryUpdate,
+    function($scope, $rootScope, $state, $stateParams, HostsRelatedGroupsList, InventoryHostsStrings,
         CancelSourceUpdate, rbacUiControlService, GetBasePath, Dataset, Find, qs, inventoryData, host, GroupsService){
 
         let list = HostsRelatedGroupsList;
@@ -16,6 +16,7 @@
         function init(){
             $scope.inventory_id = inventoryData.id;
             $scope.canAdd = false;
+            $scope.strings = InventoryHostsStrings;
 
             rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
                 .then(function(canAdd) {

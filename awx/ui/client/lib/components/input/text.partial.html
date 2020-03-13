@@ -4,6 +4,7 @@
         <div ng-if="state.tagMode" class="input-group">
           <span class="input-group-btn input-group-prepend">
               <button
+                aria-label="{{:: vm.strings.get('lookup.PERFORM_LOOKUP')}}"
                 class="btn at-ButtonHollow--default at-Input-button"
                 ng-disabled="state._disabled || form.disabled"
                 ng-click="vm.onLookupClick()">

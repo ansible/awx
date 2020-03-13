@@ -20,6 +20,7 @@ function atRelaunchCtrl (
     $state, $q, $scope
 ) {
     const vm = this;
+    vm.strings = strings;
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 

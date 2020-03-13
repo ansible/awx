@@ -20,6 +20,7 @@
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
             $scope.canAdd = canAdd;
+            console.log($scope.appStrings);
 
             // Search init
             $scope.list = list;

@@ -4,6 +4,8 @@ function CodeMirrorStrings (BaseString) {
     const { t } = this;
     const ns = this.code_mirror;
 
+    ns.CLOSE_MODAL = t.s('Close variables modal');
+
     ns.label = {
         EXTRA_VARIABLES: t.s('EXTRA VARIABLES'),
         VARIABLES: t.s('VARIABLES'),
