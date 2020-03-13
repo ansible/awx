@@ -884,6 +884,9 @@ class UserSerializer(BaseSerializer):
         fields = ('*', '-name', '-description', '-modified',
                   'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'last_login', 'external_account')
+        extra_kwargs = {
+            'last_login': {'read_only': True}
+        }
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
