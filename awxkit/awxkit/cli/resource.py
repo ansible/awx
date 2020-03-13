@@ -179,6 +179,8 @@ class Config(CustomCommand):
 
 
 def freeze(key):
+    if key is None:
+        return None
     return frozenset((k, freeze(v) if isinstance(v, dict) else v) for k, v in key.items())
 
 
@@ -199,9 +201,9 @@ class Import(CustomCommand):
         return self._natural_key.get(frozen_key)
 
     def create_assets(self, data, resource):
-        if resource not in data:
+        if resource not in data or resource not in EXPORTABLE_RESOURCES:
             return
-        cprint("importing {}".format(resource), 'red', file=client.stderr)
+        cprint("importing {}".format(resource), 'red', file=self.client.stderr)
 
         endpoint = getattr(self.v2, resource)
         options = self._options[resource]
@@ -212,7 +214,8 @@ class Import(CustomCommand):
                 if field in ('related', 'natural_key'):
                     continue
                 if options[field]['type'] == 'id':
-                    post_data[field] = self.get_by_natural_key(value)['id']
+                    page = self.get_by_natural_key(value)
+                    post_data[field] = page['id'] if page is not None else None
                 else:
                     post_data[field] = value
 
@@ -264,13 +267,11 @@ class Import(CustomCommand):
                     self.assign_related(page, name, S)
 
     def dependent_resources(self, data):
-        page_resource = {}
-        for resource in data:
-            endpoint = getattr(self.v2, resource)
-            page_cls = endpoint._create().__item_class__
-            page_resource[page_cls] = resource
+        page_resource = {getattr(self.v2, resource)._create().__item_class__: resource
+                         for resource in self.v2.json}
+        data_pages = [getattr(self.v2, resource)._create().__item_class__ for resource in data]
 
-        for page_cls in itertools.chain(*has_create.page_creation_order(*page_resource.keys())):
+        for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
             yield page_resource[page_cls]
 
     def handle(self, client, parser):
@@ -280,6 +281,7 @@ class Import(CustomCommand):
 
         data = json.load(sys.stdin)
         client.authenticate()
+        self.client = client
         self.v2 = client.v2
 
         for resource in self.dependent_resources(data):
