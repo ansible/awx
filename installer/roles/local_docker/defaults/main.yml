@@ -1,7 +1,7 @@
 ---
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
-rabbitmq_version: "3.7.4"
+rabbitmq_version: "3.7.21"
 rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"
 rabbitmq_default_vhost: "awx"
 rabbitmq_erlang_cookie: "cookiemonster"
