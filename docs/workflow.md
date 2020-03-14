@@ -2,7 +2,7 @@
 
 Workflows are structured compositions of Tower job resources. The only job of a workflow is to trigger other jobs in specific orders to achieve certain goals, such as tracking the full set of jobs that were part of a release process as a single unit.
 
-A workflow has an associated tree-graph that is composed of multiple nodes. Each node in the tree has one associated job template (job template, inventory update, project update, or workflow job template) along with related resources that, if defined, will override the associated job template resources (*i.e.*, credential, inventory, etc.) if the job template associated with the node is selected to run.
+A workflow has an associated tree-graph that is composed of multiple nodes. Each node in the tree has one associated template (job template, inventory update, project update, approval template, or workflow job template) along with related resources that, if defined, will override the associated job template resources (*i.e.*, credential, inventory, etc.) if the job template associated with the node is selected to run.
 
 
 ## Usage Manual
@@ -21,6 +21,12 @@ By default, organization administrators have full control over all workflow job 
 Workflow Nodes are containers of workflow-spawned job resources and function as nodes of workflow decision trees. Like that of the workflow itself, the two types of workflow nodes are workflow job template nodes and workflow job nodes.
 
 Workflow job template nodes are listed and created under the `/workflow_job_templates/\d+/workflow_nodes/` endpoint to be associated with the underlying workflow job template, or directly under endpoint `/workflow_job_template_nodes/`. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The first three are lists of workflow job template nodes that, in union, forms the set of all of its child nodes; specifically, `success_nodes` are triggered when the parent node job succeeds, `failure_nodes` are triggered the when parent node job fails, and `always_nodes` are triggered regardless of whether the parent job succeeds or fails. The latter two fields reference the job template resource it contains and workflow job template it belongs to.
+
+Workflow nodes also have an `identifier` field, which enables clients to do idempotent CRUD actions.
+This can function the same as the `name` field for other resources, in that the client can set its value as needed.
+Unlike `name`, if the client does not provide the `identifier` field, the server will assign a random UUID4 value.
+Any workflow job nodes spawned from that node will share the `identifier` value, so that clients
+can track which job nodes correspond to which template nodes.
 
 
 #### Workflow Launch Configuration

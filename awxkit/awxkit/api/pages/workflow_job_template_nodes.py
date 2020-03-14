@@ -115,6 +115,10 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
         self.related.create_approval_template.post(kwargs)
         return self.get()
 
+    def get_job_node(self, workflow_job):
+        candidates = workflow_job.get_related('workflow_nodes', identifier=self.identifier)
+        return candidates.results.pop()
+
 
 page.register_page([resources.workflow_job_template_node,
                     (resources.workflow_job_template_nodes,
