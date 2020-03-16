@@ -88,6 +88,7 @@
     <label class="JobResults-resultRowLabel">
         {{ vm.hostLimitError.label }}
         <a id="awp-hostLimitError"
+            aria-label="{{ vm.hostLimitError.tooltip }}"
             href=""
             aw-pop-over="{{ vm.hostLimitError.tooltip }}"
             data-placement="top"
@@ -160,6 +161,7 @@
         </a>
 
         <a href="{{ vm.sourceWorkflowJob.link }}"
+            aria-label="{{'Navigate to workflow job' | translate}}"
             ng-if="vm.sourceWorkflowJob"
             aw-tool-tip="{{ vm.sourceWorkflowJob.tooltip }}" data-placement="top">
             <i class="WorkflowBadge"> W</i>
@@ -207,6 +209,7 @@
     <label class="JobResults-resultRowLabel">{{ vm.project.label }}</label>
     <div class="JobResults-resultRowText">
         <a href="{{ vm.projectUpdate.link }}"
+            aria-label="{{'Navigate to project sync job' | translate}}"
             ng-if="vm.projectUpdate"
             aw-tool-tip="{{ vm.projectUpdate.tooltip }}"
             data-placement="top">
@@ -238,6 +241,7 @@
     <div class="JobResults-resultRowText">
         <span>
             <a href="{{ vm.inventoryScm.jobLink }}"
+                aria-label="{{'Navigate to inventory sync job' | translate}}"
                 aw-tool-tip="{{ vm.inventoryScm.jobTooltip }}"
                 data-placement="top">
                 <i class="JobResults-statusResultIcon {{ vm.inventoryScm.icon }}"></i>

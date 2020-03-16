@@ -4,9 +4,7 @@
 		<!-- modal body -->
 		<div class="modal-body">
 			<div class="HostEvent-header">
-				<a class="HostEvents-status">
-					<i class="fa fa-circle"  ng-class="processEventStatus(event).class"></i>
-				</a>
+				<i class="fa fa-circle"  ng-class="processEventStatus(event).class"></i>
 				<span class="HostEvent-title">{{event.host_name}}</span>
 				<!-- close -->
 				<button aria-label="{{:: strings.get('host_event_modal.CLOSE_HOST_EVENT_MODAL')}}" ng-click="closeHostEvent()" type="button" class="close">

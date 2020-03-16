@@ -3,7 +3,7 @@
         <label for="job_type" class="Form-inputLabelContainer">
             <span class="Form-requiredAsterisk">*</span>
             <span class="Form-inputLabel" translate>{{:: vm.strings.get('prompt.JOB_TYPE') }}</span>
-            <a id="awp-job-type" href="" aw-pop-over="{{:: vm.strings.get('prompt.JOB_TYPE_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.JOB_TYPE') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-job-type" href="" aw-pop-over="{{:: vm.strings.get('prompt.JOB_TYPE_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.JOB_TYPE') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -25,7 +25,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_scm_branch_on_launch">
         <label for="scm_branch">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.SCM_BRANCH') }}</span>
-            <a id="awp-scm-branch" href="" aw-pop-over="{{:: vm.strings.get('prompt.SCM_BRANCH_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SCM_BRANCH') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-scm-branch" href="" aw-pop-over="{{:: vm.strings.get('prompt.SCM_BRANCH_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SCM_BRANCH') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -41,7 +41,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_limit_on_launch">
         <label for="limit">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.LIMIT') }}</span>
-            <a id="awp-limit" href="" aw-pop-over="{{:: vm.strings.get('prompt.LIMIT_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.LIMIT') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-limit" href="" aw-pop-over="{{:: vm.strings.get('prompt.LIMIT_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.LIMIT') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -58,7 +58,7 @@
         <label for="verbosity" class="Form-inputLabelContainer">
             <span class="Form-requiredAsterisk">*</span>
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.VERBOSITY') }}</span>
-            <a id="awp-verbosity" href="" aw-pop-over="{{:: vm.strings.get('prompt.VERBOSITY_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.VERBOSITY') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-verbosity" href="" aw-pop-over="{{:: vm.strings.get('prompt.VERBOSITY_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.VERBOSITY') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -80,7 +80,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_tags_on_launch">
         <label for="tags">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.JOB_TAGS') }}</span>
-            <a id="awp-job-tags" href="" aw-pop-over="{{:: vm.strings.get('prompt.JOB_TAGS_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.JOB_TAGS') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-job-tags" href="" aw-pop-over="{{:: vm.strings.get('prompt.JOB_TAGS_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.JOB_TAGS') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -101,7 +101,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_skip_tags_on_launch">
         <label for="skip_tags">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.SKIP_TAGS') }}</span>
-            <a id="awp-skip-tags" href="" aw-pop-over="{{:: vm.strings.get('prompt.SKIP_TAGS_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SKIP_TAGS') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-skip-tags" href="" aw-pop-over="{{:: vm.strings.get('prompt.SKIP_TAGS_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SKIP_TAGS') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -122,7 +122,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_diff_mode_on_launch">
         <label for="diff_mode">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.SHOW_CHANGES') }}</span>
-            <a id="awp-show-changes" href="" aw-pop-over="{{:: vm.strings.get('prompt.SHOW_CHANGES_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SHOW_CHANGES') }}" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-show-changes" href="" aw-pop-over="{{:: vm.strings.get('prompt.SHOW_CHANGES_HELP') }}" data-placement="right" data-container="body" over-title="{{:: vm.strings.get('prompt.SHOW_CHANGES') }}" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
         </label>
@@ -133,7 +133,7 @@
     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_variables_on_launch && !promptData.prompts.variables.ignore">
         <label for="variables">
             <span class="Form-inputLabel">{{:: vm.strings.get('prompt.EXTRA_VARIABLES') }}</span>
-            <a id="awp-extra-variables" href="" aw-pop-over="{{:: vm.strings.get('prompt.EXTRA_VARIABLES_HELP')}}" data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+            <a aria-label="{{'Show help text' | translate}}" id="awp-extra-variables" href="" aw-pop-over="{{:: vm.strings.get('prompt.EXTRA_VARIABLES_HELP')}}" data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
                 <i class="fa fa-question-circle"></i>
             </a>
             <div class="parse-selection" id="job_launch_variables_parse_type">

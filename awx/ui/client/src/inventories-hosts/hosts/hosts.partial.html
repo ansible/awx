@@ -56,7 +56,7 @@
                             </div>
                             <div class="List-tableCell active_failures-column status-column List-staticColumn--smallStatus">
                                 <div class="host-name">
-                                    <a href="" ng-click="noop()" aw-tool-tip="{{ host.badgeToolTip }}" aw-pop-over="{{ host.job_status_html }}" data-placement="top" over-title="{{ host.job_status_title }}">
+                                    <a aria-label="{{ host.badgeToolTip }}" href="" ng-click="noop()" aw-tool-tip="{{ host.badgeToolTip }}" aw-pop-over="{{ host.job_status_html }}" data-placement="top" over-title="{{ host.job_status_title }}">
                                         <i class="fa {{ 'fa icon-job-' + host.active_failures }}"></i>
                                     </a>
                                 </div>

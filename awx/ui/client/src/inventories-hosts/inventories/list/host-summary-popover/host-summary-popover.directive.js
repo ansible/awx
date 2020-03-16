@@ -80,7 +80,7 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n', '$log',
                                 html += `
                                     <tr>
                                         <td>
-                                            <a href="${href}">
+                                            <a href="${href}" aria-label="{{'View job' | translate}}">
                                                 <i class="fa SmartStatus-tooltip--${row.status} icon-job-${row.status}"></i>
                                             </a>
                                         </td>

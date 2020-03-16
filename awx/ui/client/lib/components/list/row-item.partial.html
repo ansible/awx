@@ -1,15 +1,26 @@
 <div class="at-RowItem" ng-class="{'at-RowItem--isHeader': headerValue, 'at-RowItem--inline': inline}"
     ng-show="status || headerValue || value || valueBindHtml || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
         <div class="at-RowItem-status" ng-if="status">
-            <a ng-if="statusClick" ng-click="statusClick()"
-            aw-tool-tip="{{ statusTip }}" data-tip-watch="statusTip"
-            data-placement="top">
+            <a
+                ng-if="statusClick"
+                ng-click="statusClick()"
+                aria-label="{{ statusTip }}"
+                aw-tool-tip="{{ statusTip }}"
+                data-tip-watch="statusTip"
+                data-placement="top"
+            >
                 <i class="fa icon-job-{{ status }}"></i>
             </a>
-            <a ng-if="(headerLink || headerState) && !statusClick" ng-href="{{ headerLink }}" ui-sref="{{ headerState }}"
-                aw-tool-tip="{{ statusTip }}" data-tip-watch="statusTip"
-                data-placement="top">
-                    <i class="fa icon-job-{{ status }}"></i>
+            <a
+                ng-if="(headerLink || headerState) && !statusClick"
+                ng-href="{{ headerLink }}"
+                ui-sref="{{ headerState }}"
+                aria-label="{{ statusTip }}"
+                aw-tool-tip="{{ statusTip }}"
+                data-tip-watch="statusTip"
+                data-placement="top"
+            >
+                <i class="fa icon-job-{{ status }}"></i>
             </a>
             <div ng-if="!headerLink && !headerState && !statusClick"
                 aw-tool-tip="{{ statusTip }}" data-tip-watch="statusTip"

@@ -22,13 +22,13 @@
            <div class="List-tableRow" ng-repeat="job in jobs">
                <div class="d-flex">
                     <div class="List-tableCell col-6">
-                        <a href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
+                        <a aria-label="{{'Navigate to job titled ' + job.name | translate}}" href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
                             <i class="fa DashboardList-status DashboardList-status--success icon-job-successful"></i>
                         </a>
-                        <a href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
+                        <a aria-label="{{'Navigate to job titled ' + job.name | translate}}" href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="{{strings.get('list.STATUS_TOOLTIP', job.status)}}" aw-tip-placement="right" data-tip-watch="strings.get('list.STATUS_TOOLTIP', job.status)">
                             <i class="fa DashboardList-status DashboardList-status--failed icon-job-failed"></i>
                         </a>
-                        <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
+                        <a aria-label="{{'Navigate to job titled ' + job.name | translate}}" href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
                             {{ job.name }}
                         </a>
                   </div>
