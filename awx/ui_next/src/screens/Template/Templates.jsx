@@ -53,6 +53,12 @@ class Templates extends Component {
         t`Completed Jobs`
       ),
       [`/templates/${template.type}/${template.id}/survey`]: i18n._(t`Survey`),
+      [`/templates/${template.type}/${template.id}/survey/add`]: i18n._(
+        t`Add Question`
+      ),
+      [`/templates/${template.type}/${template.id}/survey/edit`]: i18n._(
+        t`Edit Question`
+      ),
       [`/templates/${template.type}/${template.id}/schedules`]: i18n._(
         t`Schedules`
       ),

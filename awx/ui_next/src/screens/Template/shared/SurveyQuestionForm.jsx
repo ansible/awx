@@ -76,8 +76,8 @@ function SurveyQuestionForm({
         variable: question?.variable || '',
         min: question?.min || 0,
         max: question?.max || 1024,
-        default: question?.default,
-        choices: question?.choices,
+        default: question?.default || '',
+        choices: question?.choices || '',
         new_question: !question,
       }}
       onSubmit={handleSubmit}
