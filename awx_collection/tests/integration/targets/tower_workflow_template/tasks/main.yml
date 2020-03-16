@@ -52,6 +52,7 @@
   tower_workflow_template:
     name: my-workflow
     schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
+    extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
 
 - assert:
