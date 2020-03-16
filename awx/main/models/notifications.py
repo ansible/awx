@@ -371,8 +371,7 @@ class JobNotificationMixin(object):
                                     'friendly_name': 'Job',
                                     'finished': False,
                                     'credential': 'Stub credential',
-                                    'created_by': 'admin',
-                                    'stdout': 'Job output'}}
+                                    'created_by': 'admin'}}
 
         return context
 
