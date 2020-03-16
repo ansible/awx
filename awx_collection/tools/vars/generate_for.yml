@@ -1,0 +1,16 @@
+---
+generate_for:
+  # - credentials
+  # - credential_types
+  # - groups
+  # - hosts
+  # - inventorues
+  # - inventory_sources
+  # - job_templates
+  # - labels
+  # - notification_templates
+  # - organizations
+  # - projects
+  - schedules
+  # - teams
+  # - users

@@ -1,0 +1,29 @@
+---
+aliases:
+  job_templates:
+    ask_tags_on_launch:
+      - ask_tags
+    ask_verbosity_on_launch:
+      - ask_verbosity
+    ask_diff_mode_on_launch:
+      - ask_diff_mode
+    allow_simultaneous:
+      - concurrent_jobs_enabled
+    diff_mode:
+      - diff_mode_enabled
+    ask_inventory_on_launch:
+      - ask_inventory
+    limit:
+      - ask_limit
+    force_handlers:
+      - force_handlers_enabled
+    ask_job_type_on_launch:
+      - ask_job_type
+    ask_skip_tags_on_launch:
+      - ask_skip_tags
+    use_fact_cache:
+      - fact_caching_enabled
+    extra_vars:
+      - ask_extra_vars
+    ask_credential_on_launch:
+      - ask_credential
