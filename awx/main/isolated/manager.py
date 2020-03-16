@@ -301,7 +301,7 @@ class IsolatedManager(object):
                         # practice
                         # in this scenario, just ignore this event and try it
                         # again on the next sync
-                        pass
+                        continue
                     self.event_handler(event_data)
                     self.handled_events.add(event)
 
