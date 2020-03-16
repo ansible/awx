@@ -36,7 +36,6 @@ from awx.api.views import (
 
 from awx.api.views.metrics import (
     MetricsView,
-    BroadcastWebsocketMetricsView,
 )
 
 from .organization import urls as organization_urls
@@ -96,7 +95,6 @@ v2_urls = [
     url(r'^tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
     url(r'^', include(oauth2_urls)),
     url(r'^metrics/$', MetricsView.as_view(), name='metrics_view'),
-    url(r'^broadcast_websocket_metrics/$', BroadcastWebsocketMetricsView.as_view(), name='broadcast_websocket_metrics_view'),
     url(r'^ping/$', ApiV2PingView.as_view(), name='api_v2_ping_view'),
     url(r'^config/$', ApiV2ConfigView.as_view(), name='api_v2_config_view'),
     url(r'^config/subscriptions/$', ApiV2SubscriptionView.as_view(), name='api_v2_subscription_view'),
