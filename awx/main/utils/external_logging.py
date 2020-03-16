@@ -12,7 +12,6 @@ def construct_rsyslog_conf_template(settings=settings):
         host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
         port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
-        import pdb; pdb.set_trace()
         if protocol.startswith('http'):
             scheme = 'https'
             # urlparse requires '//' to be provided if scheme is not specified
@@ -29,7 +28,7 @@ def construct_rsyslog_conf_template(settings=settings):
                 port = settings.LOG_AGGREGATOR_PORT
 
         parts.extend([
-            'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger'] + '" unlink="on")',
+            'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
         if protocol.startswith('http'):
@@ -66,7 +65,8 @@ def construct_rsyslog_conf_template(settings=settings):
             )
     tmpl = '\n'.join(parts)
     return tmpl
-    
+
+
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     with open('/var/lib/awx/rsyslog/rsyslog.conf', 'w') as f:

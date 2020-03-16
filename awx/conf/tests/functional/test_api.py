@@ -325,17 +325,3 @@ def test_setting_singleton_delete_no_read_only_fields(api_request, dummy_setting
         )
         assert response.data['FOO_BAR'] == 23
 
-
-@pytest.mark.django_db
-def test_setting_logging_test(api_request):
-    with mock.patch('awx.conf.views.AWXProxyHandler.perform_test') as mock_func:
-        api_request(
-            'post',
-            reverse('api:setting_logging_test'),
-            data={'LOG_AGGREGATOR_HOST': 'http://foobar', 'LOG_AGGREGATOR_TYPE': 'logstash'}
-        )
-        call = mock_func.call_args_list[0]
-        args, kwargs = call
-        given_settings = kwargs['custom_settings']
-        assert given_settings.LOG_AGGREGATOR_HOST == 'http://foobar'
-        assert given_settings.LOG_AGGREGATOR_TYPE == 'logstash'

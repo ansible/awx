@@ -4,7 +4,7 @@ The `requirements.txt` and `requirements_ansible.txt` files are generated from `
 
 ## How To Use
 
-Commands should from inside `./requirements` directory of the awx repository.
+Commands should be run from inside the `./requirements` directory of the awx repository.
 
 Make sure you have `patch, awk, python3, python2, python3-venv, python2-virtualenv, pip2, pip3` installed. The development container image should have all these.
 

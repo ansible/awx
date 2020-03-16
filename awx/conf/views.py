@@ -6,8 +6,6 @@ import collections
 import logging
 import sys
 import socket
-import os
-from urllib.parse import urlparse
 from socket import SHUT_RDWR
 
 # Django
@@ -165,17 +163,16 @@ class SettingLoggingTest(GenericAPIView):
     filter_backends = []
 
     def post(self, request, *args, **kwargs):
+        # Error if logging is not enabled
+        enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED', False)
+        if not enabled:
+            return Response({'error': 'Logging not enabled'}, status=status.HTTP_400_BAD_REQUEST)
+        
         # Send test message to configured logger based on db settings
         logging.getLogger('awx').error('AWX Connection Test Message')
         
         hostname = getattr(settings, 'LOG_AGGREGATOR_HOST', None)
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', None)
-        
-        # Check if host is reacheable
-        host = urlparse(hostname).netloc
-        response = os.system("ping -c 1 " + host)
-        if response != 0:
-            return Response({'error': 'The host is not available'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check to ensure port is open at host
         if protocol in ['udp', 'tcp']:
@@ -184,14 +181,9 @@ class SettingLoggingTest(GenericAPIView):
             if not port:
                 return Response({'error': 'Port required for ' + protocol}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            # if http/https by this point, domain is reacheable
             return Response(status=status.HTTP_202_ACCEPTED)
-        
-        # Error if logging is not enabled
-        enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED', False)
-        if not enabled:
-            return Response({'error': 'Logging not enabled'}, status=status.HTTP_400_BAD_REQUEST)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         try:
             s.settimeout(.5)
             s.connect((hostname, int(port)))

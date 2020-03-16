@@ -199,7 +199,7 @@ export default [
                 $scope.$parent.vm.testTooltip = i18n._('Save and enable log aggregation before testing the log aggregator.');
             } else {
                 $scope.$parent.vm.disableTestButton = false;
-                $scope.$parent.vm.testTooltip = i18n._('Send a test response to the configured log aggregator.');
+                $scope.$parent.vm.testTooltip = i18n._('Send a test log message to the configured log aggregator.');
             }
         });
 
@@ -220,7 +220,7 @@ export default [
                     })
                     .catch(({ data, status }) => {
                         $scope.$parent.vm.disableTestButton = false;
-                        if (status === 400 || status == 500) {
+                        if (status === 400 || status === 500) {
                             ngToast.danger({
                                 dismissButton: false,
                                 dismissOnTimeout: true,
