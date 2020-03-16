@@ -28,12 +28,6 @@ options:
         - The name to use for the group.
       required: True
       type: str
-    new_name:
-      description:
-        - A new name for this group (for renaming)
-      required: False
-      type: str
-      version_added: "3.7"
     description:
       description:
         - The description to use for the group.
@@ -53,6 +47,12 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
+    new_name:
+      description:
+        - A new name for this group (for renaming)
+      required: False
+      type: str
+      version_added: "3.7"
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
