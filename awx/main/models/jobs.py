@@ -711,13 +711,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                                           rescued=h.rescued,
                                           ignored=h.ignored)
            
-        # get joboutput for data
-        joboutput = ""
-        try:
-            # check if information is available
-            joboutput = self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)
-        except:
-            pass
         
         data.update(dict(inventory=self.inventory.name if self.inventory else None,
                          project=self.project.name if self.project else None,
@@ -725,8 +718,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                          credential=getattr(self.machine_credential, 'name', None),
                          limit=self.limit,
                          extra_vars=self.display_extra_vars(),
-                         hosts=all_hosts,
-                         stdout=joboutput))
+                         hosts=all_hosts))
         return data
 
     def _resources_sufficient_for_launch(self):
