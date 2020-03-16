@@ -134,13 +134,17 @@ def gather(dest=None, module=None, collection_type='scheduled'):
         settings.SYSTEM_UUID,
         run_now.strftime('%Y-%m-%d-%H%M%S%z')
     ])
-    tgz = shutil.make_archive(
-        os.path.join(os.path.dirname(dest), tarname),
-        'gztar',
-        dest
-    )
-    shutil.rmtree(dest)
-    return tgz
+    try:
+        tgz = shutil.make_archive(
+            os.path.join(os.path.dirname(dest), tarname),
+            'gztar',
+            dest
+        )
+        return tgz
+    except Exception:
+        logger.exception("Failed to write analytics archive file")
+    finally: 
+        shutil.rmtree(dest)
 
 
 def ship(path):
