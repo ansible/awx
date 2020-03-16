@@ -8,7 +8,7 @@ There are two named-URL-related Tower configuration settings available under `/a
 `NAMED_URL_FORMATS` is a *read only* key-value pair list of all available named URL identifier formats. A typical `NAMED_URL_FORMATS` looks like this:
 ```
 "NAMED_URL_FORMATS": {
-    "job_templates": "<name>",
+    "job_templates": "<name>++<organization.name>",
     "workflow_job_templates": "<name>",
     "inventories": "<name>++<organization.name>",
     "users": "<username>",
@@ -78,6 +78,15 @@ Module `awx.main.utils.named_url_graph` stands at the core of named URL implemen
 
 `generate_graph` will run only once for each Tower WSGI process. This is guaranteed by putting the function call inside `__init__` of `URLModificationMiddleware`. When an incoming request enters `URLModificationMiddleware`, the part of its URL path that could contain a valid named URL identifier is extracted and processed to find (possible) corresponding resource objects. The internal process is basically crawling against part of the named URL graph. If the object is found, the identifier part of the URL path is converted to the object's primary key. Going forward, Tower can treat the request with the old-styled URL.
 
+## Job Template Organization Changes
+
+The `organization` field was added as a read-only field to job templates, derived from its project organization.
+This changed the named URL of job templates, to be compatible with multiple job templates with the same
+name, but in different organizations.
+
+To avoid making a backward-incompatible change, using the old named URL is still supported.
+That means that you can still reference job templates by the `"job_templates": "<name>"` scheme.
+If multiple job templates with the same name exist, the oldest one will be returned.
 
 ## Acceptance Criteria
 
