@@ -1,6 +1,7 @@
 <div class="SmartStatus-container">
     <div ng-repeat="job in sparkArray track by $index" class='SmartStatus-iconContainer'>
         <a ng-href="{{job.detailsUrl}}"
+            aria-label="{{'Navigate to job titled ' + job.name | translate}}"
              aw-tool-tip="{{job.status_tip}}"
              data-tip-watch="job.status_tip"
              aw-tip-placement="left"

@@ -53,7 +53,7 @@ export default
                             // SmartStatus-tooltips are named --success whereas icon-job uses successful
                             var iconStatus = (job.status === 'successful') ? 'success' : 'failed';
 
-                            html += "<td><a href=\"#/jobs/" + job.id + "\"><i class=\"fa DashboardList-status SmartStatus-tooltip--" + iconStatus + " icon-job-" +
+                            html += "<td><a aria-label=\"{{'View job' | translate}}\" href=\"#/jobs/" + job.id + "\"><i class=\"fa DashboardList-status SmartStatus-tooltip--" + iconStatus + " icon-job-" +
                                 job.status + "\"></i></a></td>\n";
 
                             html += "<td>" + ($filter('longDate')(job.finished)).replace(/ /,'<br />') + "</td>\n";

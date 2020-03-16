@@ -17,7 +17,7 @@
         {{ (vm.elapsed * 1000 || 0) | duration: "hh:mm:ss"}}
     </span>
 
-    <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
+    <a aria-label="{{:: vm.strings.get('tooltips.DOWNLOAD_OUTPUT') }}" ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
         <button class="btn at-Input-button at-u-noBorder"
             aria-label="Download output"
             aw-tool-tip="{{:: vm.strings.get('tooltips.DOWNLOAD_OUTPUT') }}"

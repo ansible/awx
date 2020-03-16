@@ -61,14 +61,14 @@ export default ['templateUrl', '$compile', 'Wait', '$filter', 'i18n',
                     data.results.forEach( function(row) {
                         if (row.related.last_update) {
                             html += "<tr>";
-                            html += `<td><a href="" ng-click="viewJob('${row.related.last_update}')" aw-tool-tip="${row.status.charAt(0).toUpperCase() + row.status.slice(1)}. ` + i18n._("Click for details") + `"  data-tooltip-outer-class=\"Tooltip-secondary\" aw-tip-placement="top"><i class="SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></a></td>`;
+                            html += `<td><a aria-label="{{'Click for details' | translate}}" href="" ng-click="viewJob('${row.related.last_update}')" aw-tool-tip="${row.status.charAt(0).toUpperCase() + row.status.slice(1)}. ` + i18n._("Click for details") + `"  data-tooltip-outer-class=\"Tooltip-secondary\" aw-tip-placement="top"><i class="SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></a></td>`;
                             html += "<td>" + ($filter('longDate')(row.last_updated)) + "</td>";
                             html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                             html += "</tr>\n";
                         }
                         else {
                             html += "<tr>";
-                            html += `<td><a href=\"\" aw-tool-tip="` + i18n._('No sync data') + `" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa icon-job-none\"></i></a></td>`;
+                            html += `<td><a aria-label="{{'No sync data' | translate}}" href=\"\" aw-tool-tip="` + i18n._('No sync data') + `" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa icon-job-none\"></i></a></td>`;
                             html += "<td>NA</td>";
                             html += "<td><span>" + $filter('sanitize')(ellipsis(row.name)) + "</span></td>";
                             html += "</tr>\n";

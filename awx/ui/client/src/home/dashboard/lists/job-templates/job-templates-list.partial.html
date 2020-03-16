@@ -25,7 +25,7 @@
            <div class="List-tableRow" ng-repeat="template in templates">
                <div class="d-flex">
                   <div class="List-tableCell col-sm-4">
-                      <a ng-href="#/templates/{{template.type}}/{{template.id}}" class="DashboardList-nameContainer">
+                      <a aria-label="{{'Navigate to template titled ' + template.name | translate}}" ng-href="#/templates/{{template.type}}/{{template.id}}" class="DashboardList-nameContainer">
                           {{ template.name }}
                       </a>
                   </div>

@@ -1,7 +1,7 @@
 <div class="at-Layout">
     <div class="at-Layout-topNav">
         <at-top-nav-item is-shown="missingLicense" class="at-Layout-topNavItem--logo">
-            <a href="/#/">
+            <a aria-label="{{'Navigate to dashboard' | translate}}" href="/#/">
                 <img ng-attr-aria-label="{{ $root.BRAND_NAME === 'Tower' ? $root.appStrings.get('logos.TOWER_LOGO') : $root.appStrings.get('logos.AWX_LOGO') }}" ng-src="/static/assets/logo-header.svg" />
             </a>
         </at-top-nav-item>
@@ -21,12 +21,12 @@
             </div>
         </at-top-nav-item>
         <at-top-nav-item>
-            <a ui-sref="about">
+            <a aria-label="{{'About'|translate}}" ui-sref="about">
                 <i class="fa fa-info-circle" alt="{{ vm.getString('ABOUT') }}"></i>
             </a>
         </at-top-nav-item>
         <at-top-nav-item>
-            <a href="http://docs.ansible.com/ansible-tower/" target="_blank">
+            <a aria-label="{{'View documentation'|translate}}" href="http://docs.ansible.com/ansible-tower/" target="_blank">
                 <i class="fa fa-book" alt="{{ $parent.layoutVm.getString('VIEW_DOCS') }}"></i>
             </a>
         </at-top-nav-item>
@@ -36,7 +36,7 @@
                     <div><i class="fa" ng-class="$parent.layoutVm.socketIconClass"></i></div>
         </at-top-nav-item>
         <at-top-nav-item is-shown="missingLicense">
-            <a href="/#/logout" is-always-shown="license">
+            <a aria-label="{{'Logout'|translate}}" href="/#/logout" is-always-shown="license">
                 <i class="fa fa-power-off" alt="{{ $parent.layoutVm.getString('LOGOUT') }}"></i>
             </a>
         </at-top-nav-item>
