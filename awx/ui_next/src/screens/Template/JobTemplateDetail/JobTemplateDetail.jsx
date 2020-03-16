@@ -168,6 +168,20 @@ function JobTemplateDetail({ i18n, template }) {
         <Detail label={i18n._(t`Name`)} value={name} dataCy="jt-detail-name" />
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail label={i18n._(t`Job Type`)} value={job_type} />
+        {summary_fields.organization ? (
+          <Detail
+            label={i18n._(t`Organization`)}
+            value={
+              <Link
+                to={`/organizations/${summary_fields.organization.id}/details`}
+              >
+                {summary_fields.organization.name}
+              </Link>
+            }
+          />
+        ) : (
+          renderMissingDataDetail(i18n._(t`Project`))
+        )}
         {summary_fields.inventory ? (
           <Detail
             label={i18n._(t`Inventory`)}

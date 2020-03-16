@@ -180,8 +180,8 @@ def project_factory(organization):
 
 
 @pytest.fixture
-def job_factory(job_template, admin):
-    def factory(job_template=job_template, initial_state='new', created_by=admin):
+def job_factory(jt_linked, admin):
+    def factory(job_template=jt_linked, initial_state='new', created_by=admin):
         return job_template.create_unified_job(_eager_fields={
             'status': initial_state, 'created_by': created_by})
     return factory
@@ -701,11 +701,8 @@ def ad_hoc_command_factory(inventory, machine_credential, admin):
 
 
 @pytest.fixture
-def job_template(organization):
-    jt = JobTemplate(name='test-job_template')
-    jt.save()
-
-    return jt
+def job_template():
+    return JobTemplate.objects.create(name='test-job_template')
 
 
 @pytest.fixture
@@ -717,20 +714,16 @@ def job_template_labels(organization, job_template):
 
 
 @pytest.fixture
-def jt_linked(job_template_factory, credential, net_credential, vault_credential):
+def jt_linked(organization, project, inventory, machine_credential, credential, net_credential, vault_credential):
     '''
     A job template with a reasonably complete set of related objects to
     test RBAC and other functionality affected by related objects
     '''
-    objects = job_template_factory(
-        'testJT', organization='org1', project='proj1', inventory='inventory1',
-        credential='cred1')
-    jt = objects.job_template
-    jt.credentials.add(vault_credential)
-    jt.save()
-    # Add AWS cloud credential and network credential
-    jt.credentials.add(credential)
-    jt.credentials.add(net_credential)
+    jt = JobTemplate.objects.create(
+        project=project, inventory=inventory, playbook='helloworld.yml',
+        organization=organization
+    )
+    jt.credentials.add(machine_credential, vault_credential, credential, net_credential)
     return jt
 
 

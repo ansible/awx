@@ -39,6 +39,26 @@ def test_extra_credentials(get, organization_factory, job_template_factory, cred
 @pytest.mark.django_db
 def test_job_relaunch_permission_denied_response(
         post, get, inventory, project, credential, net_credential, machine_credential):
+    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
+    jt.credentials.add(machine_credential)
+    jt_user = User.objects.create(username='jobtemplateuser')
+    jt.execute_role.members.add(jt_user)
+    with impersonate(jt_user):
+        job = jt.create_unified_job()
+
+    # User capability is shown for this
+    r = get(job.get_absolute_url(), jt_user, expect=200)
+    assert r.data['summary_fields']['user_capabilities']['start']
+
+    # Job has prompted extra_credential, launch denied w/ message
+    job.launch_config.credentials.add(net_credential)
+    r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
+    assert 'launched with prompted fields you do not have access to' in r.data['detail']
+
+
+@pytest.mark.django_db
+def test_job_relaunch_prompts_not_accepted_response(
+        post, get, inventory, project, credential, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
     jt.credentials.add(machine_credential)
     jt_user = User.objects.create(username='jobtemplateuser')
@@ -53,8 +73,6 @@ def test_job_relaunch_permission_denied_response(
     # Job has prompted extra_credential, launch denied w/ message
     job.launch_config.credentials.add(net_credential)
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
-    assert 'launched with prompted fields' in r.data['detail']
-    assert 'do not have permission' in r.data['detail']
 
 
 @pytest.mark.django_db
@@ -209,7 +227,8 @@ def test_block_related_unprocessed_events(mocker, organization, project, delete,
         status='finished',
         finished=time_of_finish,
         job_template=job_template,
-        project=project
+        project=project,
+        organization=project.organization
     )
     view = RelatedJobsPreventDeleteMixin()
     time_of_request = time_of_finish + relativedelta(seconds=2)

@@ -2,10 +2,17 @@
 import pytest
 
 from django.core.exceptions import ValidationError
+from django.apps import apps
+from django.db.models.fields.related import ForeignKey
+from django.db.models.fields.related_descriptors import (
+    ReverseManyToOneDescriptor,
+    ForwardManyToOneDescriptor
+)
+
 from rest_framework.serializers import ValidationError as DRFValidationError
 
 from awx.main.models import Credential, CredentialType, BaseModel
-from awx.main.fields import JSONSchemaField
+from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDescriptor
 
 
 @pytest.mark.parametrize('schema, given, message', [
@@ -194,3 +201,57 @@ def test_credential_creation_validation_failure(inputs):
     with pytest.raises(Exception) as e:
         field.validate(inputs, cred)
     assert e.type in (ValidationError, DRFValidationError)
+
+
+def test_implicit_role_field_parents():
+    """This assures that every ImplicitRoleField only references parents
+    which are relationships that actually exist
+    """
+    app_models = apps.get_app_config('main').get_models()
+    for cls in app_models:
+        for field in cls._meta.get_fields():
+            if not isinstance(field, ImplicitRoleField):
+                continue
+
+            if not field.parent_role:
+                continue
+
+            field_names = field.parent_role
+            if type(field_names) is not list:
+                field_names = [field_names]
+
+            for field_name in field_names:
+                # this type of specification appears to have been considered
+                # at some point, but does not exist in the app and would
+                # need support and tests built out for it
+                assert not isinstance(field_name, tuple)
+                # also used to be a thing before py3 upgrade
+                assert not isinstance(field_name, bytes)
+                # this is always coherent
+                if field_name.startswith('singleton:'):
+                    continue
+                # separate out parent role syntax
+                field_name, sep, field_attr = field_name.partition('.')
+                # now make primary assertion, that specified paths exist
+                assert hasattr(cls, field_name)
+
+                # inspect in greater depth
+                second_field = cls._meta.get_field(field_name)
+                second_field_descriptor = getattr(cls, field_name)
+                # all supported linkage types
+                assert isinstance(second_field_descriptor, (
+                    ReverseManyToOneDescriptor,  # not currently used
+                    ImplicitRoleDescriptor,
+                    ForwardManyToOneDescriptor
+                ))
+                # only these links are supported
+                if field_attr:
+                    if isinstance(second_field_descriptor, ReverseManyToOneDescriptor):
+                        assert type(second_field) is ForeignKey
+                        rel_model = cls._meta.get_field(field_name).related_model
+                        third_field = getattr(rel_model, field_attr)
+                        # expecting for related_model.foo_role, test role field type
+                        assert isinstance(third_field, ImplicitRoleDescriptor)
+                else:
+                    # expecting simple format of foo_role
+                    assert type(second_field) is ImplicitRoleField

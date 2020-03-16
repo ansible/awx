@@ -6,6 +6,7 @@ from awx.main.models import (
     UnifiedJobTemplate,
     WorkflowJob,
     WorkflowJobNode,
+    WorkflowApprovalTemplate,
     Job,
     User,
     Project,
@@ -63,6 +64,16 @@ def test_cancel_job_explanation(unified_job):
 
     assert unified_job.job_explanation == job_explanation
     unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'status', 'job_explanation'])
+
+
+def test_organization_copy_to_jobs():
+    '''
+    All unified job types should infer their organization from their template organization
+    '''
+    for cls in UnifiedJobTemplate.__subclasses__():
+        if cls is WorkflowApprovalTemplate:
+            continue  # these do not track organization
+        assert 'organization' in cls._get_unified_job_field_names(), cls
 
 
 def test_log_representation():

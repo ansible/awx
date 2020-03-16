@@ -8,8 +8,7 @@ from awx.main.access import (
     ScheduleAccess
 )
 from awx.main.models.jobs import JobTemplate
-from awx.main.models.organization import Organization
-from awx.main.models.schedules import Schedule
+from awx.main.models import Project, Organization, Inventory, Schedule, User
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
@@ -22,6 +21,29 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
     # THEN all access checks should pass
     assert access.can_read(deploy_jobtemplate)
     assert access.can_add({})
+
+
+@pytest.mark.django_db
+class TestImplicitAccess:
+    def test_org_execute(self, jt_linked, rando):
+        assert rando not in jt_linked.execute_role
+        jt_linked.organization.execute_role.members.add(rando)
+        assert rando in jt_linked.execute_role
+
+    def test_org_admin(self, jt_linked, rando):
+        assert rando not in jt_linked.execute_role
+        jt_linked.organization.job_template_admin_role.members.add(rando)
+        assert rando in jt_linked.execute_role
+
+    def test_org_auditor(self, jt_linked, rando):
+        assert rando not in jt_linked.read_role
+        jt_linked.organization.auditor_role.members.add(rando)
+        assert rando in jt_linked.read_role
+
+    def test_deprecated_inventory_read(self, jt_linked, rando):
+        assert rando not in jt_linked.read_role
+        jt_linked.inventory.organization.execute_role.members.add(rando)
+        assert rando in jt_linked.read_role
 
 
 @pytest.mark.django_db
@@ -45,22 +67,21 @@ def test_job_template_access_read_level(jt_linked, rando):
 
 @pytest.mark.django_db
 def test_job_template_access_use_level(jt_linked, rando):
-    ssh_cred = jt_linked.machine_credential
-    vault_cred = jt_linked.vault_credentials[0]
-
     access = JobTemplateAccess(rando)
     jt_linked.project.use_role.members.add(rando)
     jt_linked.inventory.use_role.members.add(rando)
-    ssh_cred.use_role.members.add(rando)
-    vault_cred.use_role.members.add(rando)
-
+    jt_linked.organization.job_template_admin_role.members.add(rando)
     proj_pk = jt_linked.project.pk
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
-    assert access.can_add(dict(vault_credential=vault_cred.pk, project=proj_pk))
+    org_pk = jt_linked.organization_id
+
+    assert access.can_change(jt_linked, {'job_type': 'check', 'project': proj_pk})
+    assert access.can_change(jt_linked, {'job_type': 'check', 'inventory': None})
 
     for cred in jt_linked.credentials.all():
-        assert not access.can_unattach(jt_linked, cred, 'credentials', {})
+        assert access.can_unattach(jt_linked, cred, 'credentials', {})
+
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(project=proj_pk, organization=org_pk))
 
 
 @pytest.mark.django_db
@@ -69,22 +90,21 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
     ssh_cred = jt_linked.machine_credential
 
     access = JobTemplateAccess(rando)
-    # Appoint this user as admin of the organization
-    #jt_linked.inventory.organization.admin_role.members.add(rando)
+
     assert not access.can_read(jt_linked)
     assert not access.can_delete(jt_linked)
 
-    for role_name in role_names:
-        role = getattr(jt_linked.inventory.organization, role_name)
-        role.members.add(rando)
+    # Appoint this user as admin of the organization
+    jt_linked.organization.admin_role.members.add(rando)
+    org_pk = jt_linked.organization.id
 
     # Assign organization permission in the same way the create view does
     organization = jt_linked.inventory.organization
     ssh_cred.admin_role.parents.add(organization.admin_role)
 
     proj_pk = jt_linked.project.pk
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk))
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk, organization=org_pk))
 
     for cred in jt_linked.credentials.all():
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -105,11 +125,11 @@ def test_job_template_extra_credentials_prompts_access(
     )
     jt.credentials.add(machine_credential)
     jt.execute_role.members.add(rando)
-    r = post(
+    post(
         reverse('api:job_template_launch', kwargs={'pk': jt.id}),
-        {'credentials': [machine_credential.pk, vault_credential.pk]}, rando
+        {'credentials': [machine_credential.pk, vault_credential.pk]}, rando,
+        expect=403
     )
-    assert r.status_code == 403
 
 
 @pytest.mark.django_db
@@ -148,26 +168,41 @@ class TestOrphanJobTemplate:
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
-def test_job_template_creator_access(project, rando, post):
+def test_job_template_creator_access(project, organization, rando, post):
+    project.use_role.members.add(rando)
+    organization.job_template_admin_role.members.add(rando)
+    response = post(url=reverse('api:job_template_list'), data=dict(
+        name='newly-created-jt',
+        ask_inventory_on_launch=True,
+        project=project.pk,
+        organization=organization.id,
+        playbook='helloworld.yml'
+    ), user=rando, expect=201)
 
-    project.admin_role.members.add(rando)
-    with mock.patch(
-            'awx.main.models.projects.ProjectOptions.playbooks',
-            new_callable=mock.PropertyMock(return_value=['helloworld.yml'])):
-        response = post(reverse('api:job_template_list'), dict(
-            name='newly-created-jt',
-            job_type='run',
-            ask_inventory_on_launch=True,
-            ask_credential_on_launch=True,
-            project=project.pk,
-            playbook='helloworld.yml'
-        ), rando)
-
-    assert response.status_code == 201
     jt_pk = response.data['id']
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
-    assert rando in jt_obj.admin_role
+    assert rando in jt_obj.admin_role.members.all()
+
+
+@pytest.mark.django_db
+@pytest.mark.job_permissions
+@pytest.mark.parametrize('lacking', ['project', 'inventory'])
+def test_job_template_insufficient_creator_permissions(lacking, project, inventory, organization, rando, post):
+    if lacking != 'project':
+        project.use_role.members.add(rando)
+    else:
+        project.read_role.members.add(rando)
+    if lacking != 'inventory':
+        inventory.use_role.members.add(rando)
+    else:
+        inventory.read_role.members.add(rando)
+    post(url=reverse('api:job_template_list'), data=dict(
+        name='newly-created-jt',
+        inventory=inventory.id,
+        project=project.pk,
+        playbook='helloworld.yml'
+    ), user=rando, expect=403)
 
 
 @pytest.mark.django_db
@@ -237,27 +272,104 @@ class TestJobTemplateSchedules:
 
 
 @pytest.mark.django_db
-def test_jt_org_ownership_change(user, jt_linked):
-    admin1 = user('admin1')
-    org1 = jt_linked.project.organization
-    org1.admin_role.members.add(admin1)
-    a1_access = JobTemplateAccess(admin1)
+class TestProjectOrganization:
+    """Tests stories related to management of JT organization via its project
+    which have some bearing on RBAC integrity
+    """
 
-    assert a1_access.can_read(jt_linked)
+    def test_new_project_org_change(self, project, patch, admin_user):
+        org2 = Organization.objects.create(name='bar')
+        patch(
+            url=project.get_absolute_url(),
+            data={'organization': org2.id},
+            user=admin_user,
+            expect=200
+        )
+        assert Project.objects.get(pk=project.id).organization_id == org2.id
 
+    def test_jt_org_cannot_change(self, project, post, patch, admin_user):
+        post(
+            url=reverse('api:job_template_list'),
+            data={
+                'name': 'foo_template',
+                'project': project.id,
+                'playbook': 'helloworld.yml',
+                'ask_inventory_on_launch': True
+            },
+            user=admin_user,
+            expect=201
+        )
+        org2 = Organization.objects.create(name='bar')
+        r = patch(
+            url=project.get_absolute_url(),
+            data={'organization': org2.id},
+            user=admin_user,
+            expect=400
+        )
+        assert 'Organization cannot be changed' in str(r.data)
 
-    admin2 = user('admin2')
-    org2 = Organization.objects.create(name='mrroboto', description='domo')
-    org2.admin_role.members.add(admin2)
-    a2_access = JobTemplateAccess(admin2)
+    def test_orphan_JT_adoption(self, project, patch, admin_user, org_admin):
+        jt = JobTemplate.objects.create(
+            name='bar',
+            ask_inventory_on_launch=True,
+            playbook='helloworld.yml'
+        )
+        assert org_admin not in jt.admin_role
+        patch(
+            url=jt.get_absolute_url(),
+            data={'project': project.id},
+            user=admin_user,
+            expect=200
+        )
+        assert org_admin in jt.admin_role
 
-    assert not a2_access.can_read(jt_linked)
+    def test_inventory_read_transfer_direct(self, patch):
+        orgs = []
+        invs = []
+        admins = []
+        for i in range(2):
+            org = Organization.objects.create(name='org{}'.format(i))
+            org_admin = User.objects.create(username='user{}'.format(i))
+            inv = Inventory.objects.create(
+                organization=org,
+                name='inv{}'.format(i)
+            )
+            org.auditor_role.members.add(org_admin)
 
+            orgs.append(org)
+            admins.append(org_admin)
+            invs.append(inv)
 
-    jt_linked.project.organization = org2
-    jt_linked.project.save()
-    jt_linked.inventory.organization = org2
-    jt_linked.inventory.save()
+        jt = JobTemplate.objects.create(name='foo', inventory=invs[0])
+        assert admins[0] in jt.read_role
+        assert admins[1] not in jt.read_role
 
-    assert a2_access.can_read(jt_linked)
-    assert not a1_access.can_read(jt_linked)
+        jt.inventory = invs[1]
+        jt.save(update_fields=['inventory'])
+        assert admins[0] not in jt.read_role
+        assert admins[1] in jt.read_role
+
+    def test_inventory_read_transfer_indirect(self, patch):
+        orgs = []
+        admins = []
+        for i in range(2):
+            org = Organization.objects.create(name='org{}'.format(i))
+            org_admin = User.objects.create(username='user{}'.format(i))
+            org.auditor_role.members.add(org_admin)
+
+            orgs.append(org)
+            admins.append(org_admin)
+
+        inv = Inventory.objects.create(
+            organization=orgs[0],
+            name='inv{}'.format(i)
+        )
+
+        jt = JobTemplate.objects.create(name='foo', inventory=inv)
+        assert admins[0] in jt.read_role
+        assert admins[1] not in jt.read_role
+
+        inv.organization = orgs[1]
+        inv.save(update_fields=['organization'])
+        assert admins[0] not in jt.read_role
+        assert admins[1] in jt.read_role

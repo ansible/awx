@@ -1411,7 +1411,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
 
     model = JobTemplate
-    select_related = ('created_by', 'modified_by', 'inventory', 'project',
+    select_related = ('created_by', 'modified_by', 'inventory', 'project', 'organization',
                       'next_schedule',)
     prefetch_related = (
         'instance_groups',
@@ -1435,9 +1435,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return (
-                Project.accessible_objects(self.user, 'use_role').exists() or
-                Inventory.accessible_objects(self.user, 'use_role').exists())
+            return Organization.accessible_objects(self.user, 'job_template_admin_role').exists()
 
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
@@ -1504,22 +1502,31 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         return self.user in obj.execute_role
 
     def can_change(self, obj, data):
-        data_for_change = data
         if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
-        if data is not None:
-            data = dict(data)
+        if data is None:
+            return True
 
-            if self.changes_are_non_sensitive(obj, data):
-                if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
-                    self.check_license(feature='surveys')
-                return True
+        # standard type of check for organization - cannot change the value
+        # unless posessing the respective job_template_admin_role, otherwise non-blocking
+        if not self.check_related('organization', Organization, data, obj=obj, role_field='job_template_admin_role'):
+            return False
 
-            for required_field in ('inventory', 'project'):
-                required_obj = getattr(obj, required_field, None)
-                if required_field not in data_for_change and required_obj is not None:
-                    data_for_change[required_field] = required_obj.pk
-        return self.can_read(obj) and (self.can_add(data_for_change) if data is not None else True)
+        data = dict(data)
+
+        if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+            self.check_license(feature='surveys')
+
+        if self.changes_are_non_sensitive(obj, data):
+            return True
+
+        for required_field, cls in (('inventory', Inventory), ('project', Project)):
+            is_mandatory = True
+            if not getattr(obj, '{}_id'.format(required_field)):
+                is_mandatory = False
+            if not self.check_related(required_field, cls, data, obj=obj, role_field='use_role', mandatory=is_mandatory):
+                return False
+        return True
 
     def changes_are_non_sensitive(self, obj, data):
         '''
@@ -1554,9 +1561,9 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
     @check_superuser
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship == "instance_groups":
-            if not obj.project.organization:
+            if not obj.organization:
                 return False
-            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role
+            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role
         if relationship == 'credentials' and isinstance(sub_obj, Credential):
             return self.user in obj.admin_role and self.user in sub_obj.use_role
         return super(JobTemplateAccess, self).can_attach(
@@ -1587,6 +1594,7 @@ class JobAccess(BaseAccess):
     select_related = ('created_by', 'modified_by', 'job_template', 'inventory',
                       'project', 'project_update',)
     prefetch_related = (
+        'organization',
         'unified_job_template',
         'instance_group',
         'credentials__credential_type',
@@ -1607,42 +1615,19 @@ class JobAccess(BaseAccess):
 
         return qs.filter(
             Q(job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')) |
-            Q(inventory__organization__in=org_access_qs) |
-            Q(project__organization__in=org_access_qs)).distinct()
-
-    def related_orgs(self, obj):
-        orgs = []
-        if obj.inventory and obj.inventory.organization:
-            orgs.append(obj.inventory.organization)
-        if obj.project and obj.project.organization and obj.project.organization not in orgs:
-            orgs.append(obj.project.organization)
-        return orgs
-
-    def org_access(self, obj, role_types=['admin_role']):
-        orgs = self.related_orgs(obj)
-        for org in orgs:
-            for role_type in role_types:
-                role = getattr(org, role_type)
-                if self.user in role:
-                    return True
-        return False
+            Q(organization__in=org_access_qs)).distinct()
 
     def can_add(self, data, validate_license=True):
-        if validate_license:
-            self.check_license()
-
-        if not data:  # So the browseable API will work
-            return True
-        return self.user.is_superuser
+        raise NotImplementedError('Direct job creation not possible in v2 API')
 
     def can_change(self, obj, data):
-        return (obj.status == 'new' and
-                self.can_read(obj) and
-                self.can_add(data, validate_license=False))
+        raise NotImplementedError('Direct job editing not supported in v2 API')
 
     @check_superuser
     def can_delete(self, obj):
-        return self.org_access(obj)
+        if not obj.organization:
+            return False
+        return self.user in obj.organization.admin_role
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
@@ -1662,6 +1647,7 @@ class JobAccess(BaseAccess):
         except JobLaunchConfig.DoesNotExist:
             config = None
 
+        # Standard permissions model
         if obj.job_template and (self.user not in obj.job_template.execute_role):
             return False
 
@@ -1676,24 +1662,17 @@ class JobAccess(BaseAccess):
                 if JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
                     return True
 
-        org_access = bool(obj.inventory) and self.user in obj.inventory.organization.inventory_admin_role
-        project_access = obj.project is None or self.user in obj.project.admin_role
-        credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
+        # Standard permissions model without job template involved
+        if obj.organization and self.user in obj.organization.execute_role:
+            return True
+        elif not (obj.job_template or obj.organization):
+            raise PermissionDenied(_('Job has been orphaned from its job template and organization.'))
+        elif obj.job_template and config is not None:
+            raise PermissionDenied(_('Job was launched with prompted fields you do not have access to.'))
+        elif obj.job_template and config is None:
+            raise PermissionDenied(_('Job was launched with unknown prompted fields. Organization admin permissions required.'))
 
-        # job can be relaunched if user could make an equivalent JT
-        ret = org_access and credential_access and project_access
-        if not ret and self.save_messages and not self.messages:
-            if not obj.job_template:
-                pretext = _('Job has been orphaned from its job template.')
-            elif config is None:
-                pretext = _('Job was launched with unknown prompted fields.')
-            else:
-                pretext = _('Job was launched with prompted fields.')
-            if credential_access:
-                self.messages['detail'] = '{} {}'.format(pretext, _(' Organization level permissions required.'))
-            else:
-                self.messages['detail'] = '{} {}'.format(pretext, _(' You do not have permission to related resources.'))
-        return ret
+        return False
 
     def get_method_capability(self, method, obj, parent_obj):
         if method == 'start':
@@ -1706,10 +1685,16 @@ class JobAccess(BaseAccess):
     def can_cancel(self, obj):
         if not obj.can_cancel:
             return False
-        # Delete access allows org admins to stop running jobs
-        if self.user == obj.created_by or self.can_delete(obj):
+        # Users may always cancel their own jobs
+        if self.user == obj.created_by:
             return True
-        return obj.job_template is not None and self.user in obj.job_template.admin_role
+        # Users with direct admin to JT may cancel jobs started by anyone
+        if obj.job_template and self.user in obj.job_template.admin_role:
+            return True
+        # If orphaned, allow org JT admins to stop running jobs
+        if not obj.job_template and obj.organization and self.user in obj.organization.job_template_admin_role:
+            return True
+        return False
 
 
 class SystemJobTemplateAccess(BaseAccess):
@@ -1944,11 +1929,11 @@ class WorkflowJobNodeAccess(BaseAccess):
 # TODO: notification attachments?
 class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
     '''
-    I can only see/manage Workflow Job Templates if I'm a super user
+    I can see/manage Workflow Job Templates based on object roles
     '''
 
     model = WorkflowJobTemplate
-    select_related = ('created_by', 'modified_by', 'next_schedule',
+    select_related = ('created_by', 'modified_by', 'organization', 'next_schedule',
                       'admin_role', 'execute_role', 'read_role',)
 
     def filtered_queryset(self):
@@ -2038,7 +2023,7 @@ class WorkflowJobAccess(BaseAccess):
        I can also cancel it if I started it
     '''
     model = WorkflowJob
-    select_related = ('created_by', 'modified_by',)
+    select_related = ('created_by', 'modified_by', 'organization',)
 
     def filtered_queryset(self):
         return WorkflowJob.objects.filter(
@@ -2332,6 +2317,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
     prefetch_related = (
         'last_job',
         'current_job',
+        'organization',
         'credentials__credential_type',
         Prefetch('labels', queryset=Label.objects.all().order_by('name')),
     )
@@ -2371,6 +2357,7 @@ class UnifiedJobAccess(BaseAccess):
     prefetch_related = (
         'created_by',
         'modified_by',
+        'organization',
         'unified_job_node__workflow_job',
         'unified_job_template',
         'instance_group',
@@ -2401,8 +2388,7 @@ class UnifiedJobAccess(BaseAccess):
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
             Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs) |
             Q(adhoccommand__inventory__id__in=inv_pk_qs) |
-            Q(job__inventory__organization__in=org_auditor_qs) |
-            Q(job__project__organization__in=org_auditor_qs)
+            Q(organization__in=org_auditor_qs)
         )
         return qs
 

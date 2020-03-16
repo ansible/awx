@@ -39,3 +39,9 @@ def test_foreign_key_change_changes_modified_by(project, organization):
     assert project._get_fields_snapshot()['organization_id'] == organization.id
     project.organization = Organization(name='foo', pk=41)
     assert project._get_fields_snapshot()['organization_id'] == 41
+
+
+@pytest.mark.django_db
+def test_project_related_jobs(project):
+    update = project.create_unified_job()
+    assert update.id in [u.id for u in project._get_related_jobs()]

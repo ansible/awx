@@ -315,3 +315,8 @@ def generate_graph(models):
     settings.NAMED_URL_GRAPH = largest_graph
     for node in settings.NAMED_URL_GRAPH.values():
         node.add_bindings()
+
+
+def reset_counters():
+    for node in settings.NAMED_URL_GRAPH.values():
+        node.counter = 0

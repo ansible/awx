@@ -199,7 +199,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         'labels', 'instance_groups', 'credentials', 'survey_spec'
     ]
     FIELDS_TO_DISCARD_AT_COPY = ['vault_credential', 'credential']
-    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
 
     class Meta:
         app_label = 'main'
@@ -262,13 +262,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     )
 
     admin_role = ImplicitRoleField(
-        parent_role=['project.organization.job_template_admin_role', 'inventory.organization.job_template_admin_role']
+        parent_role=['organization.job_template_admin_role']
     )
     execute_role = ImplicitRoleField(
-        parent_role=['admin_role', 'project.organization.execute_role', 'inventory.organization.execute_role'],
+        parent_role=['admin_role', 'organization.execute_role'],
     )
     read_role = ImplicitRoleField(
-        parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
+        parent_role=[
+            'organization.auditor_role',
+            'inventory.organization.auditor_role',  # partial support for old inheritance via inventory
+            'execute_role', 'admin_role'
+        ],
     )
 
 
@@ -279,7 +283,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'survey_passwords', 'labels', 'credentials',
+            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'credentials',
              'job_slice_number', 'job_slice_count']
         )
 
@@ -318,6 +322,41 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             return min(self.job_slice_count, actual_inventory.hosts.count())
         else:
             return self.job_slice_count
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields', [])
+        # if project is deleted for some reason, then keep the old organization
+        # to retain ownership for organization admins
+        if self.project and self.project.organization_id != self.organization_id:
+            self.organization_id = self.project.organization_id
+            if 'organization' not in update_fields and 'organization_id' not in update_fields:
+                update_fields.append('organization_id')
+        return super(JobTemplate, self).save(*args, **kwargs)
+
+    def validate_unique(self, exclude=None):
+        """Custom over-ride for JT specifically
+        because organization is inferred from project after full_clean is finished
+        thus the organization field is not yet set when validation happens
+        """
+        errors = []
+        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
+            kwargs = {'name': self.name}
+            if self.project:
+                kwargs['organization'] = self.project.organization_id
+            else:
+                kwargs['organization'] = None
+            qs = JobTemplate.objects.filter(**kwargs)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                errors.append(
+                    '%s with this (%s) combination already exists.' % (
+                        JobTemplate.__name__,
+                        ', '.join(set(ut) - {'polymorphic_ctype'})
+                    )
+                )
+        if errors:
+            raise ValidationError(errors)
 
     def create_unified_job(self, **kwargs):
         prevent_slicing = kwargs.pop('_prevent_slicing', False)
@@ -479,13 +518,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         success_notification_templates = list(base_notification_templates.filter(
             unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
         # Get Organization NotificationTemplates
-        if self.project is not None and self.project.organization is not None:
+        if self.organization is not None:
             error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_errors=self.project.organization)))
+                organization_notification_templates_for_errors=self.organization)))
             started_notification_templates = set(started_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_started=self.project.organization)))
+                organization_notification_templates_for_started=self.organization)))
             success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
-                organization_notification_templates_for_success=self.project.organization)))
+                organization_notification_templates_for_success=self.organization)))
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
                     success=list(success_notification_templates))
@@ -588,7 +627,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         for virtualenv in (
             self.job_template.custom_virtualenv if self.job_template else None,
             self.project.custom_virtualenv,
-            self.project.organization.custom_virtualenv if self.project.organization else None
+            self.organization.custom_virtualenv if self.organization else None
         ):
             if virtualenv:
                 return virtualenv
@@ -741,8 +780,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def preferred_instance_groups(self):
-        if self.project is not None and self.project.organization is not None:
-            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        if self.organization is not None:
+            organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
             organization_groups = []
         if self.inventory is not None:
@@ -1144,7 +1183,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type', 'extra_vars']
+        return ['name', 'description', 'organization', 'job_type', 'extra_vars']
 
     def get_absolute_url(self, request=None):
         return reverse('api:system_job_template_detail', kwargs={'pk': self.pk}, request=request)

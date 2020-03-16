@@ -13,6 +13,7 @@ from awx.main.models import (
     WorkflowApprovalTemplate, Project, WorkflowJob, Schedule,
     Credential
 )
+from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
@@ -24,6 +25,29 @@ def test_subclass_types(rando):
         ContentType.objects.get_for_model(WorkflowApprovalTemplate).id
 
     ])
+
+
+@pytest.mark.django_db
+def test_soft_unique_together(post, project, admin_user):
+    """This tests that SOFT_UNIQUE_TOGETHER restrictions are applied correctly.
+    """
+    jt1 = JobTemplate.objects.create(
+        name='foo_jt',
+        project=project
+    )
+    assert jt1.organization == project.organization
+    r = post(
+        url=reverse('api:job_template_list'),
+        data=dict(
+            name='foo_jt',  # same as first
+            project=project.id,
+            ask_inventory_on_launch=True,
+            playbook='helloworld.yml'
+        ),
+        user=admin_user,
+        expect=400
+    )
+    assert 'combination already exists' in str(r.data)
 
 
 @pytest.mark.django_db

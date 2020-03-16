@@ -254,13 +254,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         app_label = 'main'
         ordering = ('id',)
 
-    organization = models.ForeignKey(
-        'Organization',
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='projects',
-    )
     scm_update_on_launch = models.BooleanField(
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
@@ -329,8 +322,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in ProjectOptions._meta.fields) | set(
-            ['name', 'description']
+            ['name', 'description', 'organization']
         )
+
+    def clean_organization(self):
+        if self.pk:
+            old_org_id = getattr(self, '_prior_values_store', {}).get('organization_id', None)
+            if self.organization_id != old_org_id and self.jobtemplates.exists():
+                raise ValidationError({'organization': _('Organization cannot be changed when in use by job templates.')})
+        return self.organization
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -450,8 +450,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     '''
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            models.Q(Job___project=self) |
-            models.Q(ProjectUpdate___project=self)
+            models.Q(job__project=self) |
+            models.Q(projectupdate__project=self)
         )
 
     def delete(self, *args, **kwargs):
@@ -584,8 +584,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def preferred_instance_groups(self):
-        if self.project is not None and self.project.organization is not None:
-            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        if self.organization is not None:
+            organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
             organization_groups = []
         template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]

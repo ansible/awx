@@ -2,6 +2,8 @@ import pytest
 
 from awx.api.versioning import reverse
 
+from awx.main.models import Project
+
 
 @pytest.fixture
 def organization_resource_creator(organization, user):
@@ -19,21 +21,26 @@ def organization_resource_creator(organization, user):
         for i in range(inventories):
             inventory = organization.inventories.create(name="associated-inv %s" % i)
         for i in range(projects):
-            organization.projects.create(name="test-proj %s" % i,
-                                         description="test-proj-desc")
+            Project.objects.create(
+                name="test-proj %s" % i,
+                description="test-proj-desc",
+                organization=organization
+            )
         # Mix up the inventories and projects used by the job templates
         i_proj = 0
         i_inv = 0
         for i in range(job_templates):
-            project = organization.projects.all()[i_proj]
+            project = Project.objects.filter(organization=organization)[i_proj]
+            # project = organization.projects.all()[i_proj]
             inventory = organization.inventories.all()[i_inv]
             project.jobtemplates.create(name="test-jt %s" % i,
                                         description="test-job-template-desc",
                                         inventory=inventory,
-                                        playbook="test_playbook.yml")
+                                        playbook="test_playbook.yml",
+                                        organization=organization)
             i_proj += 1
             i_inv += 1
-            if i_proj >= organization.projects.count():
+            if i_proj >= Project.objects.filter(organization=organization).count():
                 i_proj = 0
             if i_inv >= organization.inventories.count():
                 i_inv = 0
@@ -179,12 +186,14 @@ def test_scan_JT_counted(resourced_organization, user, get):
 @pytest.mark.django_db
 def test_JT_not_double_counted(resourced_organization, user, get):
     admin_user = user('admin', True)
+    proj = Project.objects.filter(organization=resourced_organization).all()[0]
     # Add a run job template to the org
-    resourced_organization.projects.all()[0].jobtemplates.create(
+    proj.jobtemplates.create(
         job_type='run',
         inventory=resourced_organization.inventories.all()[0],
-        project=resourced_organization.projects.all()[0],
-        name='double-linked-job-template')
+        project=proj,
+        name='double-linked-job-template',
+        organization=resourced_organization)
     counts_dict = COUNTS_PRIMES
     counts_dict['job_templates'] += 1
 
@@ -197,38 +206,3 @@ def test_JT_not_double_counted(resourced_organization, user, get):
     detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
     assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
-
-
-@pytest.mark.django_db
-def test_JT_associated_with_project(organizations, project, user, get):
-    # Check that adding a project to an organization gets the project's JT
-    #  included in the organization's JT count
-    external_admin = user('admin', True)
-    two_orgs = organizations(2)
-    organization = two_orgs[0]
-    other_org = two_orgs[1]
-
-    unrelated_inv = other_org.inventories.create(name='not-in-organization')
-    organization.projects.add(project)
-    project.jobtemplates.create(name="test-jt",
-                                description="test-job-template-desc",
-                                inventory=unrelated_inv,
-                                playbook="test_playbook.yml")
-
-    response = get(reverse('api:organization_list'), external_admin)
-    assert response.status_code == 200
-
-    org_id = organization.id
-    counts = {}
-    for org_json in response.data['results']:
-        working_id = org_json['id']
-        counts[working_id] = org_json['summary_fields']['related_field_counts']
-
-    assert counts[org_id] == {
-        'users': 0,
-        'admins': 0,
-        'job_templates': 1,
-        'projects': 1,
-        'inventories': 0,
-        'teams': 0
-    }

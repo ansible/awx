@@ -102,7 +102,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         ordering = ('name',)
         # unique_together here is intentionally commented out. Please make sure sub-classes of this model
         # contain at least this uniqueness restriction: SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
-        #unique_together = [('polymorphic_ctype', 'name')]
+        #unique_together = [('polymorphic_ctype', 'name', 'organization')]
 
     old_pk = models.PositiveIntegerField(
         null=True,
@@ -156,6 +156,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         choices=ALL_STATUS_CHOICES,
         default='ok',
         editable=False,
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The organization used to determine access to this template.'),
     )
     credentials = models.ManyToManyField(
         'Credential',
@@ -699,6 +707,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         on_delete=polymorphic.SET_NULL,
         help_text=_('The Rampart/Instance group the job was run under'),
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The organization used to determine access to this unified job.'),
     )
     credentials = models.ManyToManyField(
         'Credential',
