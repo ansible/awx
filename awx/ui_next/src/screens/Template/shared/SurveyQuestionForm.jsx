@@ -15,7 +15,7 @@ import FormField, {
 import AnsibleSelect from '@components/AnsibleSelect';
 import { required, noWhiteSpace, combine } from '@util/validators';
 
-function AnswerType({ i18n }) {
+function AnswerTypeField({ i18n }) {
   const [field] = useField({
     name: 'type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
@@ -112,7 +112,7 @@ function SurveyQuestionForm({
                 etc.). Variable names with spaces are not allowed.`
               )}
             />
-            <AnswerType i18n={i18n} />
+            <AnswerTypeField i18n={i18n} />
             <CheckboxField
               id="question-required"
               name="required"
