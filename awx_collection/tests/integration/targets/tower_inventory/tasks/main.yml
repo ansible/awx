@@ -41,6 +41,18 @@
     that:
       - "result is failed"
 
+- name: create a smart inventory
+  tower_inventory:
+    name: smart-inventory
+    organization: Default
+    kind: smart
+    host_filter: name=foo
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete an Inventory
   tower_inventory:
     name: my-inventory
