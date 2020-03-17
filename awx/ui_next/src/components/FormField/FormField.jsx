@@ -84,6 +84,7 @@ function FormField(props) {
             isValid={isValid}
             {...rest}
             {...field}
+            type={type}
             onChange={(value, event) => {
               field.onChange(event);
             }}

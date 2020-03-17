@@ -156,7 +156,7 @@ function SurveyQuestionForm({
               <FormField
                 id="question-default"
                 name="default"
-                type="text"
+                type={formik.values.type === 'text' ? 'text' : 'number'}
                 label={i18n._(t`Default answer`)}
               />
             )}
