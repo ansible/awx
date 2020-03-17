@@ -157,6 +157,7 @@ describe('<JobTemplateForm />', () => {
         name: 'inventory',
       });
     });
+
     wrapper.update();
     await act(async () => {
       wrapper.find('input#template-scm-branch').simulate('change', {
