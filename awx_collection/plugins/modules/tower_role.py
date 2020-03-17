@@ -50,6 +50,10 @@ options:
       description:
         - The job template the role acts on.
       type: str
+    workflow:
+      description:
+        - The job template the role acts on.
+      type: str
     credential:
       description:
         - Credential the role acts on.
@@ -108,6 +112,7 @@ def update_resources(module, p):
         'target_team': 'name',
         'inventory': 'name',
         'job_template': 'name',
+        'workflow': 'name',
         'credential': 'name',
         'organization': 'name',
         'project': 'name',
@@ -133,6 +138,7 @@ def main():
         target_team=dict(),
         inventory=dict(),
         job_template=dict(),
+        workflow=dict(),
         credential=dict(),
         organization=dict(),
         project=dict(),
