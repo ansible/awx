@@ -41,8 +41,13 @@ options:
 {% endif %}
       required: {{ item['json']['actions']['POST'][option]['required'] }}
       type: {{ type_map[ item['json']['actions']['POST'][option]['type'] ] }}
-{% if item['json']['actions']['POST'][option].get('default', '') != '' %}
-      default: {{ item['json']['actions']['POST'][option]['default'] }}
+{% if 'default' in item['json']['actions']['POST'][option] %}
+{# for tower_job_template/extra vars, its type is dict but its default is '', so we want to make that {} #}
+{%   if item['json']['actions']['POST'][option]['default'] == '' and type_map[ item['json']['actions']['POST'][option]['type'] ] == 'dict' %}
+      default: {}
+{%   else %}
+      default: '{{ item['json']['actions']['POST'][option]['default'] }}'
+{%   endif %}
 {% endif %}
 {% if 'choices' in item['json']['actions']['POST'][option] %}
       choices:
@@ -106,7 +111,11 @@ def main():
 {{     option_data.append('choices=[{}]'.format(all_choices | join(', '))) -}}
 {%   endif %}
 {%   if item['json']['actions']['POST'][option].get('default', '') != '' %}
-{{     option_data.append("default='{}'".format(item['json']['actions']['POST'][option]['default'])) -}}
+{%     set default_value = item['json']['actions']['POST'][option]['default'] %}
+{%     if item['json']['actions']['POST'][option]['default'] == '' and type_map[ item['json']['actions']['POST'][option]['type'] ] == 'dict' %}
+{%       set default_value = '{}' %}
+{%     endif %}
+{{     option_data.append("default='{}'".format(default_value)) -}}
 {%   endif %}
 {%   if aliases[item_type][option] | default(False) %}
 {%     set alias_list = [] %}
