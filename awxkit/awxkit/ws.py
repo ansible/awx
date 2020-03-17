@@ -191,7 +191,7 @@ class WSClient(object):
             self._pending_unsubscribe.clear()
             self._send(json.dumps(dict(groups={}, xrftoken=self.csrftoken)))
             if not self._pending_unsubscribe.wait(timeout):
-                raise RuntimeError(f"Failed while waiting on unsubscribe reply because timeout of {timeout} seconds was reached.")
+                raise RuntimeError("Failed while waiting on unsubscribe reply because timeout of {} seconds was reached.".format(timeout))
         else:
             self._send(json.dumps(dict(groups={}, xrftoken=self.csrftoken)))
 
