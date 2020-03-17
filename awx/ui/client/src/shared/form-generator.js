@@ -728,6 +728,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `
                             <div>
                                 <at-switch on-toggle="toggleForm('${field.toggleSource}')" switch-on="${field.toggleSource}" switch-disabled="${"ngDisabled" in field} ? ${field.ngDisabled} : false" hide="!(${"ngShow" in field ? field.ngShow : true})"></at-switch>
+                                <div class="error api-error" id="${this.form.name}-${fld}-api-error" ng-bind="${fld}_api_error"></div>
                             </div>
                         `;
                     }
