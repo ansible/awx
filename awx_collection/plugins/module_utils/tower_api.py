@@ -222,6 +222,8 @@ class TowerModule(AnsibleModule):
 
     def get_all_endpoint(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
+        if 'next' not in response['json']:
+            raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
         next_page = response['json']['next']
 
         if response['json']['count'] > 10000:
@@ -545,47 +547,50 @@ class TowerModule(AnsibleModule):
         #    2. The response from Tower from patching to the endpoint. It's up to you to process the response and exit from the module.
         #    3. An ItemNotDefined exception, if the existing_item does not exist
         # Note: common error codes from the Tower API can cause the module to fail
-        if not existing_item:
-            self.fail_json(msg="The exstiing item is not defined and thus cannot be updated")
+        if existing_item:
 
-        # If we have an item, we can see if it needs an update
-        try:
-            item_url = existing_item['url']
-            item_type = existing_item['type']
-            if item_type == 'user':
-                item_name = existing_item['username']
-            else:
-                item_name = existing_item['name']
-            item_id = existing_item['id']
-        except KeyError as ke:
-            self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
+            # If we have an item, we can see if it needs an update
+            try:
+                item_url = existing_item['url']
+                item_type = existing_item['type']
+                if item_type == 'user':
+                    item_name = existing_item['username']
+                else:
+                    item_name = existing_item['name']
+                item_id = existing_item['id']
+            except KeyError as ke:
+                self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
-        # Check to see if anything within the item requires the item to be updated
-        needs_update = False
-        for field in new_item:
-            existing_field = existing_item.get(field, None)
-            new_field = new_item.get(field, None)
-            # If the two items don't match and we are not comparing '' to None
-            if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
-                # Something doesn't match so let's update it
-                needs_update = True
-                break
+            # Check to see if anything within the item requires the item to be updated
+            needs_update = False
+            for field in new_item:
+                existing_field = existing_item.get(field, None)
+                new_field = new_item.get(field, None)
+                # If the two items don't match and we are not comparing '' to None
+                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
+                    # Something doesn't match so let's update it
+                    needs_update = True
+                    break
 
-        # If we decided the item needs to be updated, update it
-        self.json_output['id'] = item_id
-        if needs_update:
-            response = self.patch_endpoint(item_url, **{'data': new_item})
-            if response['status_code'] == 200:
-                self.json_output['changed'] = True
-            elif 'json' in response and '__all__' in response['json']:
-                self.fail_json(msg=response['json']['__all__'])
-            else:
-                self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
+            # If we decided the item needs to be updated, update it
+            self.json_output['id'] = item_id
+            if needs_update:
+                response = self.patch_endpoint(item_url, **{'data': new_item})
+                if response['status_code'] == 200:
+                    self.json_output['changed'] = True
+                elif 'json' in response and '__all__' in response['json']:
+                    self.fail_json(msg=response['json']['__all__'])
+                else:
+                    self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
+
+        else:
+            raise RuntimeError('update_if_needed called incorrectly without existing_item')
 
         # Process any associations with this item
         if associations is not None:
-            for association_type in associations:
-                self.modify_associations(response['json']['related'][association_type], associations[association_type])
+            for association_type, id_list in associations.items():
+                endpoint = '{0}{1}/'.format(item_url, association_type)
+                self.modify_associations(endpoint, id_list)
 
         # If we change something and have an on_change call it
         if on_update is not None and self.json_output['changed']:
