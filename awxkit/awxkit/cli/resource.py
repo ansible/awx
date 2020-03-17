@@ -69,7 +69,7 @@ NATURAL_KEYS = {
     'notification_template': ('organization', 'name'),
     'project': ('organization', 'name'),
     'inventory': ('organization', 'name'),
-    'job_template': ('name',),
+    'job_template': ('organization', 'name'),
     'workflow_job_template': ('organization', 'name'),
 
     # related resources
@@ -92,9 +92,11 @@ def get_natural_key(page):
                 natural_key[key[1:]] = get_natural_key(related_objs[0].get())
         elif key in page.related:
             natural_key[key] = get_natural_key(page.related[key].get())
-        else:
+        elif key in page:
             natural_key[key] = page[key]
 
+    if not natural_key:
+        return None
     return natural_key
 
 
@@ -195,7 +197,7 @@ class Import(CustomCommand):
 
     def get_by_natural_key(self, key, fetch=True):
         frozen_key = freeze(key)
-        if frozen_key not in self._natural_key and fetch:
+        if frozen_key is not None and frozen_key not in self._natural_key and fetch:
             pass
 
         return self._natural_key.get(frozen_key)
@@ -228,7 +230,12 @@ class Import(CustomCommand):
             else:
                 page = page.put(post_data)
 
-            self._natural_key[freeze(get_natural_key(page))] = page
+            self.register_page(page)
+
+    def register_page(self, page):
+        natural_key = freeze(get_natural_key(page))
+        if natural_key is not None:
+            self._natural_key[natural_key] = page
 
     def register_existing_assets(self, resource):
         endpoint = getattr(self.v2, resource)
@@ -236,8 +243,8 @@ class Import(CustomCommand):
         self._options[resource] = options
 
         results = endpoint.get(all_pages=True).results
-        for asset in results:
-            self._natural_key[freeze(get_natural_key(asset))] = asset
+        for page in results:
+            self.register_page(page)
 
     def assign_roles(self, page, roles):
         role_endpoint = page.json['related']['roles']
@@ -260,6 +267,7 @@ class Import(CustomCommand):
     def assign_related_assets(self, resource, assets):
         for asset in assets:
             page = self.get_by_natural_key(asset['natural_key'])
+            # FIXME: deal with `page is None` case
             for name, S in asset.get('related', {}).items():
                 if name == 'roles':
                     self.assign_roles(page, S)
