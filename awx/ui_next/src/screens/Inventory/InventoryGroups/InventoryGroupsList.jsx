@@ -117,16 +117,18 @@ function InventoryGroupsList({ i18n, location, match }) {
     setIsLoading(true);
 
     try {
-      /* eslint-disable no-await-in-loop, no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
       /* Delete groups sequentially to avoid api integrity errors */
-      for (const group of selected) {
+      /* https://eslint.org/docs/rules/no-await-in-loop#when-not-to-use-it */
+      for (let i = 0; i < selected.length; i++) {
+        const group = selected[i];
         if (option === 'delete') {
           await GroupsAPI.destroy(+group.id);
         } else if (option === 'promote') {
           await InventoriesAPI.promoteGroup(inventoryId, +group.id);
         }
       }
-      /* eslint-enable no-await-in-loop, no-restricted-syntax */
+      /* eslint-enable no-await-in-loop */
     } catch (error) {
       setDeletionError(error);
     }

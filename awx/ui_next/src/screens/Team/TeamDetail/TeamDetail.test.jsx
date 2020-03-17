@@ -46,8 +46,8 @@ describe('<TeamDetail />', () => {
       { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
       { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
     ];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const { label, value } of testParams) {
+    for (let i = 0; i < testParams.length; i++) {
+      const { label, value } = testParams[i];
       // eslint-disable-next-line no-await-in-loop
       const detail = await waitForElement(wrapper, `Detail[label="${label}"]`);
       expect(detail.find('dt').text()).toBe(label);
