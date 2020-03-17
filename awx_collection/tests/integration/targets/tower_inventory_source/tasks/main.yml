@@ -1,8 +1,14 @@
 ---
+- name: Generate names
+  set_fact:
+    openstack_cred: "AWX-Collection-tests-tower_inventory_source-cred-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_inv: "AWX-Collection-tests-tower_inventory_source-inv-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_inv_source: "AWX-Collection-tests-tower_inventory_source-inv-source-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Add a Tower credential
   tower_credential:
     description: Credentials for Openstack Test project
-    name: openstack-test-credential
+    name: "{{ openstack_cred }}"
     kind: openstack
     organization: Default
     project: Test
@@ -15,14 +21,14 @@
   tower_inventory:
     description: Test inventory
     organization: Default
-    name: openstack-test-inventory
+    name: "{{ openstack_inv }}"
 
 - name: Create a source inventory
   tower_inventory_source:
-    name: "source-test-inventory {{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    name: "{{ openstack_inv_source }}"
     description: Source for Test inventory
-    inventory: openstack-test-inventory
-    credential: openstack-test-credential
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ openstack_cred }}"
     overwrite: true
     update_on_launch: true
     source_vars:
@@ -36,14 +42,45 @@
 
 - name: Delete the source inventory
   tower_inventory_source:
-    name: "{{ result.name }}"
+    name: "{{ openstack_inv_source }}"
     description: Source for Test inventory
-    inventory: openstack-test-inventory
-    credential: openstack-test-credential
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ openstack_cred }}"
     overwrite: true
     update_on_launch: true
     source_vars:
       private: false
     source: openstack
     state: absent
-  ignore_errors: true
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the credential
+  tower_credential:
+    description: Credentials for Openstack Test project
+    name: "{{ openstack_cred }}"
+    kind: openstack
+    organization: Default
+    project: Test
+    username: admin
+    host: https://example.org:5000
+    password: passw0rd
+    domain: test
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the inventory
+  tower_inventory:
+    description: Test inventory
+    organization: Default
+    name: "{{ openstack_inv }}"
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"

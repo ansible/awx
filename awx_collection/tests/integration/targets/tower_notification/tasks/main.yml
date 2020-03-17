@@ -1,7 +1,17 @@
 ---
+- name: Generate names
+  set_fact:
+    slack_not: "AWX-Collection-tests-tower_notification-slack-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    email_not: "AWX-Collection-tests-tower_notification-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    twillo_not: "AWX-Collection-tests-tower_notification-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    pd_not: "AWX-Collection-tests-tower_notification-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    hipchat_not: "AWX-Collection-tests-tower_notification-hipchat-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    irc_not: "AWX-Collection-tests-tower_notification-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Create Slack notification
   tower_notification:
-    name: notification1
+    name: "{{ slack_not }}"
     organization: Default
     notification_type: slack
     token: a_token
@@ -16,7 +26,7 @@
 
 - name: Delete Slack notification
   tower_notification:
-    name: notification1
+    name: "{{ slack_not }}"
     organization: Default
     notification_type: slack
     state: absent
@@ -28,7 +38,7 @@
 
 - name: Add webhook notification
   tower_notification:
-    name: notification2
+    name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
     url: http://www.example.com/hook
@@ -43,7 +53,7 @@
 
 - name: Delete webhook notification
   tower_notification:
-    name: notification2
+    name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
     state: absent
@@ -55,7 +65,7 @@
 
 - name: Add email notification
   tower_notification:
-    name: notification3
+    name: "{{ email_not }}"
     organization: Default
     notification_type: email
     username: user
@@ -76,7 +86,7 @@
 
 - name: Delete email notification
   tower_notification:
-    name: notification3
+    name: "{{ email_not }}"
     organization: Default
     notification_type: email
     state: absent
@@ -88,7 +98,7 @@
 
 - name: Add twilio notification
   tower_notification:
-    name: notification4
+    name: "{{ twillo_not }}"
     organization: Default
     notification_type: twilio
     account_token: a_token
@@ -105,7 +115,7 @@
 
 - name: Delete twilio notification
   tower_notification:
-    name: notification4
+    name: "{{ twillo_not }}"
     organization: Default
     notification_type: twilio
     state: absent
@@ -117,7 +127,7 @@
 
 - name: Add PagerDuty notification
   tower_notification:
-    name: notification5
+    name: "{{ pd_not }}"
     organization: Default
     notification_type: pagerduty
     token: a_token
@@ -133,7 +143,7 @@
 
 - name: Delete PagerDuty notification
   tower_notification:
-    name: notification5
+    name: "{{ pd_not }}"
     organization: Default
     notification_type: pagerduty
     state: absent
@@ -145,7 +155,7 @@
 
 - name: Add HipChat notification
   tower_notification:
-    name: notification6
+    name: "{{ hipchat_not }}"
     organization: Default
     notification_type: hipchat
     token: a_token
@@ -164,7 +174,7 @@
 
 - name: Delete HipChat notification
   tower_notification:
-    name: notification6
+    name: "{{ hipchat_not }}"
     organization: Default
     notification_type: hipchat
     state: absent
@@ -176,7 +186,7 @@
 
 - name: Add IRC notification
   tower_notification:
-    name: notification7
+    name: "{{ irc_not }}"
     organization: Default
     notification_type: irc
     nickname: tower
@@ -195,7 +205,7 @@
 
 - name: Delete IRC notification
   tower_notification:
-    name: notification7
+    name: "{{ irc_not }}"
     organization: Default
     notification_type: irc
     state: absent

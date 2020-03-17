@@ -1,4 +1,8 @@
 ---
+- name: Generate names
+  set_fact:
+    team_name: "AWX-Collection-tests-tower_team-team-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Attempt to add a Tower team to a non-existant Organization
   tower_team:
     name: Test Team
@@ -16,7 +20,7 @@
 
 - name: Create a Tower team
   tower_team:
-    name: Test Team
+    name: "{{ team_name }}"
     organization: Default
   register: result
 
@@ -26,7 +30,7 @@
 
 - name: Delete a Tower team
   tower_team:
-    name: Test Team
+    name: "{{ team_name }}"
     organization: Default
     state: absent
   register: result
@@ -37,7 +41,7 @@
 
 - name: Check module fails with correct msg
   tower_team:
-    name: Test Team
+    name: "{{ team_name }}"
     organization: Non Existing Org
     state: present
   register: result

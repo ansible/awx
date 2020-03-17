@@ -1,7 +1,11 @@
 ---
+- name: Generate names
+  set_fact:
+    label_name: "AWX-Collection-tests-tower_label-label-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Create a Label
   tower_label:
-    name: important
+    name: "{{ label_name }}"
     organization: Default
     state: present
 

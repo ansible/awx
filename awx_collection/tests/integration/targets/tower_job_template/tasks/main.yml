@@ -1,12 +1,12 @@
 ---
 - name: generate random string for project
   set_fact:
-    cred1: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred2: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred3: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    proj1: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1: "hello-world {{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt2: "hello-world {{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred1: "AWX-Collection-tests-tower_job_template-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred2: "AWX-Collection-tests-tower_job_template-cred2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred3: "AWX-Collection-tests-tower_job_template-cred3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    proj1: "AWX-Collection-tests-tower_job_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt1: "AWX-Collection-tests-tower_job_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create Credential1
   tower_credential:
