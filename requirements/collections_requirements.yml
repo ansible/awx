@@ -9,5 +9,5 @@ collections:
   - name: theforeman.foreman  # needs inventory plugin published
   - name: google.cloud  # https://github.com/ansible-collections/ansible_collections_google/pull/167
   # - name: openstack.cloud  # needs to be published
-  # - name: community.vmware  # not published
+  - name: community.vmware  # needs patch https://github.com/ansible-collections/vmware/pull/58
   - name: ovirt.ovirt_collection  # new fix published
