@@ -53,7 +53,7 @@ EXPORTABLE_RESOURCES = [
     'teams',
     'credential_types',
     'credentials',
-    # 'notification_templates',
+    'notification_templates',
     # 'projects',
     # 'inventory',
     # 'job_templates',
