@@ -12,6 +12,12 @@ function RoutedTabs(props) {
     if (match) {
       return match.id;
     }
+    const subpathMatch = tabsArray.find(tab =>
+      history.location.pathname.startsWith(tab.link)
+    );
+    if (subpathMatch) {
+      return subpathMatch.id;
+    }
     return 0;
   };
 

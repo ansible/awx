@@ -7,9 +7,7 @@ import ContentError from '@components/ContentError';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import useRequest, { useDismissableError } from '@util/useRequest';
-import SurveyList from './shared/SurveyList';
-import SurveyQuestionAdd from './shared/SurveyQuestionAdd';
-import SurveyQuestionEdit from './shared/SurveyQuestionEdit';
+import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
 function TemplateSurvey({ template, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
