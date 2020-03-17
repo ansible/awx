@@ -39,6 +39,7 @@ class TestJobNotificationMixin(object):
                                  'modified': datetime.datetime,
                                  'name': str,
                                  'playbook': str,
+                                 'scm_branch': str,
                                  'scm_revision': str,
                                  'skip_tags': str,
                                  'start_at_task': str,

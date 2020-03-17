@@ -269,7 +269,7 @@ class JobNotificationMixin(object):
                             'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
                             'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
                             'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
-                            'approval_status', 'approval_node_name', 'workflow_url',
+                            'approval_status', 'approval_node_name', 'workflow_url', 'scm_branch',
                             {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark'
                                                     'processed', 'rescued', 'ignored']},
                             {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
@@ -313,6 +313,7 @@ class JobNotificationMixin(object):
                            'modified': datetime.datetime(2018, 12, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
                            'name': 'Stub JobTemplate',
                            'playbook': 'ping.yml',
+                           'scm_branch': '',
                            'scm_revision': '',
                            'skip_tags': '',
                            'start_at_task': '',
