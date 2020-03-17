@@ -1,0 +1,6 @@
+---
+name_to_id_endpoint_resolution:
+  webhook_credential: credentials
+  project: projects
+  inventory: inventories
+  organization: organizations
