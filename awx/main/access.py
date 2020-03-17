@@ -789,7 +789,6 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        self.check_license(check_expiration=False)
         is_change_possible = self.can_change(obj, None)
         if not is_change_possible:
             return False
@@ -1440,9 +1439,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
 
-        if 'survey_enabled' in data and data['survey_enabled']:
-            self.check_license(feature='surveys')
-
         if self.user.is_superuser:
             return True
 
@@ -1513,9 +1509,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
             return False
 
         data = dict(data)
-
-        if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
-            self.check_license(feature='surveys')
 
         if self.changes_are_non_sensitive(obj, data):
             return True
@@ -1950,10 +1943,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         '''
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'workflow_admin_role').exists()
-
-        # will check this if surveys are added to WFJT
-        if 'survey_enabled' in data and data['survey_enabled']:
-            self.check_license(feature='surveys')
 
         return (
             self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True) and
