@@ -446,7 +446,7 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
-                            actionId: 'button-add',
+                            actionId: 'button-add--permission',
                             ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },

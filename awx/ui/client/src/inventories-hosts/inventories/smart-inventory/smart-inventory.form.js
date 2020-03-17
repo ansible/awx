@@ -114,7 +114,7 @@ export default ['i18n', function(i18n) {
                             ngClick: "$state.go('.add')",
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
-                            actionId: 'button-add',
+                            actionId: 'button-add--permission',
                             ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
 
                         }

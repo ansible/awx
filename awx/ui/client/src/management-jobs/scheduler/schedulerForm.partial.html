@@ -617,19 +617,19 @@
         <div class="buttons Form-buttons">
             <button type="button"
                 class="btn btn-sm Form-cancelButton"
-                id="project_cancel_btn"
+                id="schedule_close_btn"
                 ng-show="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                 ng-click="formCancel()"
                 translate>Close</button>
             <button type="button"
                 class="btn btn-sm Form-cancelButton"
-                id="project_cancel_btn"
+                id="schedule_cancel_btn"
                 ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                 ng-click="formCancel()"
                 translate>Cancel</button>
             <button type="button"
                 class="btn btn-sm Form-saveButton"
-                id="project_save_btn"
+                id="schedule_save_btn"
                 ng-click="saveSchedule()"
                 ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                 ng-disabled="scheduler_form.$invalid || !schedulerIsValid"

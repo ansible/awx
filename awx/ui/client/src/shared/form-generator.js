@@ -1943,7 +1943,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     for (act in collection.fieldActions) {
                         if (act !== 'columnClass') {
                             fAction = collection.fieldActions[act];
-                            html += "<button aria-label=\"{{act}}\" id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                            html += "<button aria-label=\"{{act}}\" id=\"" + ((fAction.id) ? fAction.id : collection.iterator + "-" + `{{${collection.iterator}.id}}` + "-" + act + "-action") + "\" ";
                             html += (fAction.awToolTip) ? 'aw-tool-tip="' + fAction.awToolTip + '"' : '';
                             html += (fAction.dataPlacement) ? 'data-placement="' + fAction.dataPlacement + '"' : '';
                             html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";

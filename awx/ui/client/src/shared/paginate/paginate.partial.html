@@ -25,14 +25,14 @@
             </li>
             <!-- last -->
             <li class="page-item Paginate-controls--item Paginate-controls--last" ng-hide="(pageRange.length < maxVisiblePages || pageRange[pageRange.length-1] === last)">
-                <a aria-label="{{'Go to last page of list' | translate}}" href class="page-link" id="last-page-set" ng-click="toPage(last)">
+                <a aria-label="{{'Go to last page of list' | translate}}"href class="page-link" id="{{iterator}}-last-page-set" ng-click="toPage(last)">
                     <i class="fa fa-angle-double-right"></i>
                 </a>
             </li>
         </ul>
         <span class="Paginate-pager--pageof">{{ 'Page' | translate }}
-                <span id="current-page">{{current}}</span> {{ 'of' | translate }}
-        <span id="total-pages">{{last}}</span>
+                <span id="{{iterator}}-current-page">{{current}}</span> {{ 'of' | translate }}
+        <span id="{{iterator}}-total-pages">{{last}}</span>
         </span>
     </div>
     <div class="Paginate-total page-label" ng-hide="dataset.count === 0">
