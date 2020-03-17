@@ -8,6 +8,8 @@
   vars_files:
     - vars/generate_for.yml
     - vars/aliases.yml
+    - vars/associations.yml
+    - vars/resolution.yml
     - vars/examples.yml
   module_defaults:
     uri:
