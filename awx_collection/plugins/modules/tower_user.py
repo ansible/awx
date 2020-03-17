@@ -127,7 +127,7 @@ def main():
         email=dict(required=False, type='str'),
         is_superuser=dict(required=False, type='bool', default=False, aliases=['superuser']),
         is_system_auditor=dict(required=False, type='bool', default=False, aliases=['auditor']),
-        password=dict(required=False, type='str'),
+        password=dict(required=False, type='str', no_log=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
