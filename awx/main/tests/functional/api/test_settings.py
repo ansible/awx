@@ -386,14 +386,3 @@ def test_saml_x509cert_validation(patch, get, admin, headers):
         }
     })
     assert resp.status_code == 200
-
-
-@pytest.mark.django_db
-def test_broker_url_with_special_characters():
-    settings.BROKER_URL = 'redis://unused:a@ns:ibl3#@redis-fancy:5672/?db=mydb'
-    cli = redis.from_url(settings.BROKER_URL)
-    assert cli.host == 'redis-fancy'
-    assert cli.port == 5672
-    # Note: There are no usernames in redis
-    assert cli.password == 'a@ns:ibl3#'
-    assert cli.db == 'mydb'
