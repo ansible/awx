@@ -1,20 +1,26 @@
 ---
-- name: Delete old git project from any previous test runs
-  tower_project:
-    name: "git project"
-    organization: Default
-    state: absent
-  ignore_errors: true
+- name: Generate names
+  set_fact:
+    project_name1: "AWX-Collection-tests-tower_project-project1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name2: "AWX-Collection-tests-tower_project-project2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    scm_cred_name: "AWX-Collection-tests-tower_project-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    org_name: "AWX-Collection-tests-tower_project-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred_name: "AWX-Collection-tests-tower_project-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an SCM Credential
   tower_credential:
-    name: SCM Credential for Project
+    name: "{{ scm_cred_name }}"
     organization: Default
     kind: scm
+  register: result
+
+- assert:
+    that:
+      - result is changed
 
 - name: Create a git project without credentials without waiting
   tower_project:
-    name: "git project"
+    name: "{{ project_name1 }}"
     organization: Default
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
@@ -27,7 +33,7 @@
 
 - name: Recreate the project to validate not changed
   tower_project:
-    name: "git project"
+    name: "{{ project_name1 }}"
     organization: Default
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
@@ -40,36 +46,40 @@
 
 - name: Create organizations
   tower_organization:
-    name: TestOrg
+    name: "{{ org_name }}"
+  register: result
+
+- assert:
+    that:
+      - result is changed
 
 - name: Create credential
   tower_credential:
     kind: scm
-    name: TestCred
-    organization: TestOrg
+    name: "{{ cred_name }}"
+    organization: "{{ org_name }}"
+  register: result
 
-  register: new_credentials
-
-- name: Generate random project name appender
-  set_fact:
-    project_name_rand: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+- assert:
+    that:
+      - result is changed
 
 - name: Create a new test project in check_mode
   tower_project:
-    name: "TestProject {{ project_name_rand }}"
-    organization: TestOrg
+    name: "{{ project_name2 }}"
+    organization: "{{ org_name }}"
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
-    scm_credential: TestCred
+    scm_credential: "{{ cred_name }}"
   check_mode: true
 
 - name: Create a new test project
   tower_project:
-    name: "TestProject {{ project_name_rand }}"
-    organization: TestOrg
+    name: "{{ project_name2 }}"
+    organization: "{{ org_name }}"
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
-    scm_credential: TestCred
+    scm_credential: "{{ cred_name }}"
   register: result
 
 # If this fails it may be because the check_mode task actually already created
@@ -80,11 +90,11 @@
 
 - name: Check module fails with correct msg when given non-existing org as param
   tower_project:
-    name: "TestProject {{ project_name_rand }}"
+    name: "{{ project_name2 }}"
     organization: Non Existing Org
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
-    scm_credential: TestCred
+    scm_credential: "{{ cred_name }}"
   register: result
   ignore_errors: true
 
@@ -95,8 +105,8 @@
 
 - name: Check module fails with correct msg when given non-existing credential as param
   tower_project:
-    name: "TestProject {{ project_name_rand }}"
-    organization: TestOrg
+    name: "{{ project_name2 }}"
+    organization: "{{ org_name }}"
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
     scm_credential: Non Existing Credential
@@ -110,6 +120,51 @@
 
 - name: Delete the test project
   tower_project:
-    name: "TestProject {{ project_name_rand }}"
-    organization: TestOrg
+    name: "{{ project_name2 }}"
+    organization: "{{ org_name }}"
     state: absent
+
+- name: Delete the SCM Credential
+  tower_credential:
+    name: "{{ scm_cred_name }}"
+    organization: Default
+    kind: scm
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete the other test project
+  tower_project:
+    name: "{{ project_name1 }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete credential
+  tower_credential:
+    kind: scm
+    name: "{{ cred_name }}"
+    organization: "{{ org_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete the organization
+  tower_organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed

@@ -1,44 +1,71 @@
 ---
+- name: Generate names
+  set_fact:
+    scm_cred_name: "AWX-Collection-tests-tower_workflow_template-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    demo_project_name: "AWX-Collection-tests-tower_workflow_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt1_name: "AWX-Collection-tests-tower_workflow_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt2_name: "AWX-Collection-tests-tower_workflow_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    wfjt_name: "AWX-Collection-tests-tower_workflow_template-wfjt-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Create an SCM Credential
   tower_credential:
-    name: SCM Credential for JT
+    name: "{{ scm_cred_name }}"
     organization: Default
     kind: scm
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Create a Demo Project
   tower_project:
-    name: Job Template Test Project
+    name: "{{ demo_project_name }}"
     organization: Default
     state: present
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
-    scm_credential: SCM Credential for JT
+    scm_credential: "{{ scm_cred_name }}"
   register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Create a Job Template
   tower_job_template:
-    name: my-job-1
-    project: Job Template Test Project
+    name: "{{ jt1_name }}"
+    project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
     credential: Demo Credential
     job_type: run
     state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Create a second Job Template
   tower_job_template:
-    name: my-job-2
-    project: Job Template Test Project
+    name: "{{ jt2_name }}"
+    project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
     credential: Demo Credential
     job_type: run
     state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Add a Survey to second Job Template
   tower_job_template:
-    name: my-job-2
-    project: Job Template Test Project
+    name: "{{ jt2_name }}"
+    project: "{{ demo_project_name }}"
     inventory: Demo Inventory
     playbook: hello_world.yml
     credential: Demo Credential
@@ -46,11 +73,15 @@
     state: present
     survey_enabled: true
     survey_spec: '{"spec": [{"index": 0, "question_name": "my question?", "default": "mydef", "variable": "myvar", "type": "text", "required": false}], "description": "test", "name": "test"}'
+  register: result
 
+- assert:
+    that:
+      - "result is changed"
 
 - name: Create a workflow job template
   tower_workflow_template:
-    name: my-workflow
+    name: "{{ wfjt_name }}"
     schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
@@ -61,7 +92,7 @@
 
 - name: Delete a workflow job template
   tower_workflow_template:
-    name: my-workflow
+    name: "{{ wfjt_name }}"
     state: absent
   register: result
 
@@ -71,7 +102,7 @@
 
 - name: Check module fails with correct msg
   tower_workflow_template:
-    name: my-workflow
+    name: "{{ wfjt_name }}"
     organization: Non Existing Organization
     schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
   register: result
@@ -80,3 +111,59 @@
 - assert:
     that:
       - "result.msg =='Failed to update organization source,organization not found: The requested object could not be found.'"
+
+- name: Delete the Job Template
+  tower_job_template:
+    name: "{{ jt1_name }}"
+    project: "{{ demo_project_name }}"
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    credential: Demo Credential
+    job_type: run
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the second Job Template
+  tower_job_template:
+    name: "{{ jt2_name }}"
+    project: "{{ demo_project_name }}"
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    credential: Demo Credential
+    job_type: run
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the Demo Project
+  tower_project:
+    name: "{{ demo_project_name }}"
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+    scm_credential: "{{ scm_cred_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the SCM Credential
+  tower_credential:
+    name: "{{ scm_cred_name }}"
+    organization: Default
+    kind: scm
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

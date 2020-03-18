@@ -1,9 +1,13 @@
 ---
+- name: Generate names
+  set_fact:
+    username: "AWX-Collection-tests-tower_role-user-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Create a User
   tower_user:
     first_name: Joe
     last_name: User
-    username: joe
+    username: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
     email: joe@example.org
     state: present
@@ -15,7 +19,7 @@
 
 - name: Add Joe to the update role of the default Project
   tower_role:
-    user: joe
+    user: "{{ username }}"
     role: update
     project: Demo Project
     state: "{{ item }}"
@@ -48,7 +52,7 @@
 
 - name: Delete a User
   tower_user:
-    username: joe
+    username: "{{ username }}"
     email: joe@example.org
     state: absent
   register: result

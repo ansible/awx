@@ -1,4 +1,10 @@
 ---
+- name: Generate names
+  set_fact:
+    jt_name1: "AWX-Collection-tests-tower_job_launch-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt_name2: "AWX-Collection-tests-tower_job_launch-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    proj_name: "AWX-Collection-tests-tower_job_launch-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Launch a Job Template
   tower_job_launch:
     job_template: "Demo Job Template"
@@ -36,7 +42,7 @@
 
 - name: Create a Job Template for testing prompt on launch
   tower_job_template:
-    name: "Demo Job Template - ask inventory and credential"
+    name: "{{ jt_name1 }}"
     project: Demo Project
     playbook: hello_world.yml
     job_type: run
@@ -47,7 +53,7 @@
 
 - name: Launch job template with inventory and credential for prompt on launch
   tower_job_launch:
-    job_template: "Demo Job Template - ask inventory and credential"
+    job_template: "{{ jt_name1 }}"
     inventory: "Demo Inventory"
     credential: "Demo Credential"
   register: result
@@ -59,15 +65,15 @@
 
 - name: Create a project for testing extra_vars
   tower_project:
-    name: test-playbooks
+    name: "{{ proj_name }}"
     organization: Default
     scm_type: git
     scm_url: https://github.com/ansible/test-playbooks
 
 - name: Create a Job Template for testing extra_vars
   tower_job_template:
-    name: "Demo Job Template - extra_vars"
-    project: test-playbooks
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
     playbook: debug.yml
     job_type: run
     state: present
@@ -78,7 +84,7 @@
 
 - name: Launch job template with inventory and credential for prompt on launch
   tower_job_launch:
-    job_template: "Demo Job Template - extra_vars"
+    job_template: "{{ jt_name2 }}"
   register: result
 
 - assert:
@@ -94,9 +100,37 @@
     that:
       - '{"foo": "bar"} | to_json in result.results[0].extra_vars'
 
-- name: Delete the job
+- name: Delete the first jt
+  tower_job_template:
+    name: "{{ jt_name1 }}"
+    project: Demo Project
+    playbook: hello_world.yml
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the second jt
+  tower_job_template:
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
+    playbook: debug.yml
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the extra_vars project
   tower_project:
-    name: "Demo Job Template - extra_vars"
+    name: "{{ proj_name }}"
     organization: Default
     state: absent
-  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

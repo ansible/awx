@@ -1,15 +1,12 @@
 ---
-- name: Clean up any pre-existing test Inventory
-  tower_inventory:
-    name: my-inventory
-    organization: Default
-    state: absent
-  ignore_errors: true
-
+- name: Generate names
+  set_fact:
+    inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an Inventory
   tower_inventory:
-    name: my-inventory
+    name: "{{ inv_name1 }}"
     organization: Default
     state: present
   register: result
@@ -20,7 +17,7 @@
 
 - name: Test Inventory module idempotency
   tower_inventory:
-    name: my-inventory
+    name: "{{ inv_name1 }}"
     organization: Default
     state: present
   register: result
@@ -31,7 +28,7 @@
 
 - name: Fail Change Regular to Smart
   tower_inventory:
-    name: my-inventory
+    name: "{{ inv_name1 }}"
     organization: Default
     kind: smart
   register: result
@@ -41,9 +38,9 @@
     that:
       - "result is failed"
 
-- name: create a smart inventory
+- name: Create a smart inventory
   tower_inventory:
-    name: smart-inventory
+    name: "{{ inv_name2 }}"
     organization: Default
     kind: smart
     host_filter: name=foo
@@ -53,9 +50,22 @@
     that:
       - "result is changed"
 
+- name: Delete a smart inventory
+  tower_inventory:
+    name: "{{ inv_name2 }}"
+    organization: Default
+    kind: smart
+    host_filter: name=foo
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete an Inventory
   tower_inventory:
-    name: my-inventory
+    name: "{{ inv_name1 }}"
     organization: Default
     state: absent
   register: result
@@ -66,7 +76,7 @@
 
 - name: Delete a Non-Existent Inventory
   tower_inventory:
-    name: my-inventory
+    name: "{{ inv_name1 }}"
     organization: Default
     state: absent
   register: result

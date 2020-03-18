@@ -1,4 +1,25 @@
 ---
+- name: Generate names
+  set_fact:
+    ssh_cred_name1: "AWX-Collection-tests-tower_credential-ssh-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    ssh_cred_name2: "AWX-Collection-tests-tower_credential-ssh-cred2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    ssh_cred_name3: "AWX-Collection-tests-tower_credential-ssh-cred-lookup-source-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    ssh_cred_name4: "AWX-Collection-tests-tower_credential-ssh-cred-file-source-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    vault_cred_name1: "AWX-Collection-tests-tower_credential-vault-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    vault_cred_name2: "AWX-Collection-tests-tower_credential-vault-ssh-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    net_cred_name1: "AWX-Collection-tests-tower_credential-net-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    scm_cred_name1: "AWX-Collection-tests-tower_credential-scm-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    aws_cred_name1: "AWX-Collection-tests-tower_credential-aws-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    vmware_cred_name1: "AWX-Collection-tests-tower_credential-vmware-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    sat6_cred_name1: "AWX-Collection-tests-tower_credential-sat6-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cf_cred_name1: "AWX-Collection-tests-tower_credential-cf-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    gce_cred_name1: "AWX-Collection-tests-tower_credential-gce-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    azurerm_cred_name1: "AWX-Collection-tests-tower_credential-azurerm-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_cred_name1: "AWX-Collection-tests-tower_credential-openstack-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    rhv_cred_name1: "AWX-Collection-tests-tower_credential-rhv-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    insights_cred_name1: "AWX-Collection-tests-tower_credential-insights-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    tower_cred_name1: "AWX-Collection-tests-tower_credential-tower-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: create a tempdir for an SSH key
   local_action: shell mktemp -d
   register: tempdir
@@ -12,7 +33,7 @@
 
 - name: Create a User-specific credential
   tower_credential:
-    name: SSH Credential
+    name: "{{ ssh_cred_name1 }}"
     organization: Default
     user: admin
     state: present
@@ -25,7 +46,7 @@
 
 - name: Delete a User-specific credential
   tower_credential:
-    name: SSH Credential
+    name: "{{ ssh_cred_name1 }}"
     organization: Default
     user: admin
     state: absent
@@ -38,7 +59,7 @@
 
 - name: Create a valid SSH credential
   tower_credential:
-    name: SSH Credential
+    name: "{{ ssh_cred_name2 }}"
     organization: Default
     state: present
     kind: ssh
@@ -58,7 +79,7 @@
 
 - name: Create a valid SSH credential from lookup source
   tower_credential:
-    name: SSH Credential from lookup source
+    name: "{{ ssh_cred_name3 }}"
     organization: Default
     state: present
     kind: ssh
@@ -78,7 +99,7 @@
 
 - name: Create a valid SSH credential from file source
   tower_credential:
-    name: SSH Credential from file source
+    name: "{{ ssh_cred_name4 }}"
     organization: Default
     state: present
     kind: ssh
@@ -131,7 +152,31 @@
 
 - name: Delete an SSH credential
   tower_credential:
-    name: SSH Credential
+    name: "{{ ssh_cred_name2 }}"
+    organization: Default
+    state: absent
+    kind: ssh
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete an SSH credential
+  tower_credential:
+    name: "{{ ssh_cred_name3 }}"
+    organization: Default
+    state: absent
+    kind: ssh
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete an SSH credential
+  tower_credential:
+    name: "{{ ssh_cred_name4 }}"
     organization: Default
     state: absent
     kind: ssh
@@ -143,7 +188,7 @@
 
 - name: Create a valid Vault credential
   tower_credential:
-    name: Vault Credential
+    name: "{{ vault_cred_name1 }}"
     organization: Default
     state: present
     kind: vault
@@ -155,9 +200,10 @@
     that:
       - "result is changed"
 
+# We should decide when to delete this test
 - name: Create a valid Vault credential w/ kind=ssh (deprecated)
   tower_credential:
-    name: Vault Credential
+    name: "{{ vault_cred_name2 }}"
     organization: Default
     state: present
     kind: ssh
@@ -171,7 +217,19 @@
 
 - name: Delete a Vault credential
   tower_credential:
-    name: Vault Credential
+    name: "{{ vault_cred_name1 }}"
+    organization: Default
+    state: absent
+    kind: vault
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a Vault credential
+  tower_credential:
+    name: "{{ vault_cred_name2 }}"
     organization: Default
     state: absent
     kind: vault
@@ -183,7 +241,7 @@
 
 - name: Create a valid Network credential
   tower_credential:
-    name: Network Credential
+    name: "{{ net_cred_name1 }}"
     organization: Default
     state: present
     kind: net
@@ -199,7 +257,7 @@
 
 - name: Delete a Network credential
   tower_credential:
-    name: Network Credential
+    name: "{{ net_cred_name1 }}"
     organization: Default
     state: absent
     kind: net
@@ -211,7 +269,7 @@
 
 - name: Create a valid SCM credential
   tower_credential:
-    name: SCM Credential
+    name: "{{ scm_cred_name1 }}"
     organization: Default
     state: present
     kind: scm
@@ -227,7 +285,7 @@
 
 - name: Delete an SCM credential
   tower_credential:
-    name: SCM Credential
+    name: "{{ scm_cred_name1 }}"
     organization: Default
     state: absent
     kind: scm
@@ -239,7 +297,7 @@
 
 - name: Create a valid AWS credential
   tower_credential:
-    name: AWS Credential
+    name: "{{ aws_cred_name1 }}"
     organization: Default
     state: present
     kind: aws
@@ -254,7 +312,7 @@
 
 - name: Delete an AWS credential
   tower_credential:
-    name: AWS Credential
+    name: "{{ aws_cred_name1 }}"
     organization: Default
     state: absent
     kind: aws
@@ -266,7 +324,7 @@
 
 - name: Create a valid VMWare credential
   tower_credential:
-    name: VMWare Credential
+    name: "{{ vmware_cred_name1 }}"
     organization: Default
     state: present
     kind: vmware
@@ -281,7 +339,7 @@
 
 - name: Delete an VMWare credential
   tower_credential:
-    name: VMWare Credential
+    name: "{{ vmware_cred_name1 }}"
     organization: Default
     state: absent
     kind: vmware
@@ -293,7 +351,7 @@
 
 - name: Create a valid Satellite6 credential
   tower_credential:
-    name: Satellite6 Credential
+    name: "{{ sat6_cred_name1 }}"
     organization: Default
     state: present
     kind: satellite6
@@ -308,7 +366,7 @@
 
 - name: Delete a Satellite6 credential
   tower_credential:
-    name: Satellite6 Credential
+    name: "{{ sat6_cred_name1 }}"
     organization: Default
     state: absent
     kind: satellite6
@@ -320,7 +378,7 @@
 
 - name: Create a valid CloudForms credential
   tower_credential:
-    name: CloudForms Credential
+    name: "{{ cf_cred_name1 }}"
     organization: Default
     state: present
     kind: cloudforms
@@ -335,7 +393,7 @@
 
 - name: Delete a CloudForms credential
   tower_credential:
-    name: CloudForms Credential
+    name: "{{ cf_cred_name1 }}"
     organization: Default
     state: absent
     kind: cloudforms
@@ -347,7 +405,7 @@
 
 - name: Create a valid GCE credential
   tower_credential:
-    name: GCE Credential
+    name: "{{ gce_cred_name1 }}"
     organization: Default
     state: present
     kind: gce
@@ -362,7 +420,7 @@
 
 - name: Delete a GCE credential
   tower_credential:
-    name: GCE Credential
+    name: "{{ gce_cred_name1 }}"
     organization: Default
     state: absent
     kind: gce
@@ -374,7 +432,7 @@
 
 - name: Create a valid AzureRM credential
   tower_credential:
-    name: AzureRM Credential
+    name: "{{ azurerm_cred_name1 }}"
     organization: Default
     state: present
     kind: azure_rm
@@ -389,7 +447,7 @@
 
 - name: Create a valid AzureRM credential with a tenant
   tower_credential:
-    name: AzureRM Credential
+    name: "{{ azurerm_cred_name1 }}"
     organization: Default
     state: present
     kind: azure_rm
@@ -405,7 +463,7 @@
 
 - name: Delete an AzureRM credential
   tower_credential:
-    name: AzureRM Credential
+    name: "{{ azurerm_cred_name1 }}"
     organization: Default
     state: absent
     kind: azure_rm
@@ -417,7 +475,7 @@
 
 - name: Create a valid OpenStack credential
   tower_credential:
-    name: OpenStack Credential
+    name: "{{ openstack_cred_name1 }}"
     organization: Default
     state: present
     kind: openstack
@@ -434,7 +492,7 @@
 
 - name: Delete a OpenStack credential
   tower_credential:
-    name: OpenStack Credential
+    name: "{{ openstack_cred_name1 }}"
     organization: Default
     state: absent
     kind: openstack
@@ -446,7 +504,7 @@
 
 - name: Create a valid RHV credential
   tower_credential:
-    name: RHV Credential
+    name: "{{ rhv_cred_name1 }}"
     organization: Default
     state: present
     kind: rhv
@@ -461,7 +519,7 @@
 
 - name: Delete an RHV credential
   tower_credential:
-    name: RHV Credential
+    name: "{{ rhv_cred_name1 }}"
     organization: Default
     state: absent
     kind: rhv
@@ -473,7 +531,7 @@
 
 - name: Create a valid Insights credential
   tower_credential:
-    name: Insights Credential
+    name: "{{ insights_cred_name1 }}"
     organization: Default
     state: present
     kind: insights
@@ -487,7 +545,7 @@
 
 - name: Delete an Insights credential
   tower_credential:
-    name: Insights Credential
+    name: "{{ insights_cred_name1 }}"
     organization: Default
     state: absent
     kind: insights
@@ -499,7 +557,7 @@
 
 - name: Create a valid Tower-to-Tower credential
   tower_credential:
-    name: Tower Credential
+    name: "{{ tower_cred_name1 }}"
     organization: Default
     state: present
     kind: tower
@@ -514,7 +572,7 @@
 
 - name: Delete a Tower-to-Tower credential
   tower_credential:
-    name: Tower Credential
+    name: "{{ tower_cred_name1 }}"
     organization: Default
     state: absent
     kind: tower
