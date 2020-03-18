@@ -81,7 +81,7 @@ function AssociateModal({
         onClose={handleClose}
         actions={[
           <Button
-            aria-label="Save"
+            aria-label={i18n._(t`Save`)}
             key="select"
             variant="primary"
             onClick={handleSave}
@@ -90,7 +90,7 @@ function AssociateModal({
             {i18n._(t`Save`)}
           </Button>,
           <Button
-            aria-label="Cancel"
+            aria-label={i18n._(t`Cancel`)}
             key="cancel"
             variant="secondary"
             onClick={handleClose}
