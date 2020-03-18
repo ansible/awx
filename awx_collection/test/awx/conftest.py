@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import io
+import os
 import json
 import datetime
 import importlib
@@ -46,10 +47,22 @@ def sanitize_dict(din):
         return str(din)  # translation proxies often not string but stringlike
 
 
+@pytest.fixture(autouse=True)
+def collection_path_set(monkeypatch):
+    """Monkey patch sys.path, insert the root of the collection folder
+    so that content can be imported without being fully packaged
+    """
+    base_folder = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+    )
+    monkeypatch.syspath_prepend(base_folder)
+
+
 @pytest.fixture
 def collection_import():
     """These tests run assuming that the awx_collection folder is inserted
-    into the PATH before-hand. But all imports internally to the collection
+    into the PATH before-hand by collection_path_set.
+    But all imports internally to the collection
     go through this fixture so that can be changed if needed.
     For instance, we could switch to fully-qualified import paths.
     """

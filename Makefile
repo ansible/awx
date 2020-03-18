@@ -408,7 +408,7 @@ test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(COLLECTION_VENV):/awx_devel/awx_collection:$PYTHONPATH:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
+	PYTHONPATH=$(COLLECTION_VENV):$PYTHONPATH:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
 
 flake8_collection:
 	flake8 awx_collection/  # Different settings, in main exclude list
