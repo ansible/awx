@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0108_v370_unifiedjob_dependencies_processed'),
+        ('main', '0109_v370_job_template_organization_field'),
     ]
 
     operations = [
