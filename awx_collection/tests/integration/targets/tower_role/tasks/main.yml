@@ -28,6 +28,24 @@
     that:
       - "result is changed"
 
+- name: Create a workflow
+  tower_workflow_template:
+    name: test-role-workflow
+    organization: Default
+    state: present
+
+- name: Add Joe to workflow execute role
+  tower_role:
+    user: joe
+    role: execute
+    workflow: test-role-workflow
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete a User
   tower_user:
     username: joe
