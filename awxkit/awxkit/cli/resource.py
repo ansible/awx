@@ -1,7 +1,5 @@
 import os
 
-from six import PY3, with_metaclass
-
 from awxkit import api, config
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
@@ -45,7 +43,7 @@ DEPRECATED_RESOURCES_REVERSE = dict(
 )
 
 
-class CustomCommand(with_metaclass(CustomRegistryMeta)):
+class CustomCommand(metaclass=CustomRegistryMeta):
     """Base class for implementing custom commands.
 
     Custom commands represent static code which should run - they are
@@ -153,18 +151,7 @@ def parse_resource(client, skip_deprecated=False):
                 k, help='', **kwargs
             )
 
-    try:
-        resource = client.parser.parse_known_args()[0].resource
-    except SystemExit:
-        if PY3:
-            raise
-        else:
-            # Unfortunately, argparse behavior between py2 and py3
-            # changed in a notable way when required subparsers
-            # have invalid (or missing) arguments specified
-            # see: https://github.com/python/cpython/commit/f97c59aaba2d93e48cbc6d25f7ff9f9c87f8d0b2
-            # In py2, this raises a SystemExit; which we want to _ignore_
-            resource = None
+    resource = client.parser.parse_known_args()[0].resource
     if resource in DEPRECATED_RESOURCES.values():
         client.argv[
             client.argv.index(resource)

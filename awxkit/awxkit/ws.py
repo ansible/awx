@@ -4,8 +4,8 @@ import atexit
 import json
 import ssl
 
-from six.moves.queue import Queue, Empty
-from six.moves.urllib.parse import urlparse
+from queue import Queue, Empty
+from urllib.parse import urlparse
 
 from awxkit.config import config
 

@@ -1,6 +1,6 @@
 import logging
 
-from six.moves import http_client as http
+import http.client as http
 
 import awxkit.exceptions as exc
 from awxkit.api.mixins import DSAdapter, HasCopy, HasCreate
@@ -19,10 +19,7 @@ from awxkit.utils import (
 from . import base, page
 from .page import exception_from_status_code
 
-try:
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
+from urllib.parse import urljoin
 
 
 log = logging.getLogger(__name__)
