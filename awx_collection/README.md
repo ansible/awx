@@ -38,15 +38,15 @@ The following notes are changes that may require changes to playbooks:
 
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
  - Creating a "scan" type job template is no longer supported.
+ - Specifying a custom certificate via the `TOWER_CERTIFICATE` environment variable no longer works.
  - Type changes of variable fields
-   - `extra_vars` in the `tower_job_launch` module worked with a list previously, but is now configured to work solely in a `dict` format.
-   - `extra_vars` in the `tower_workflow_job_template` module worked with a string previously but now expects a dict.
-   - When the `extra_vars` parameter is used with the `tower_job_launch` module, the Job Template launch will fail unless `add_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
-   - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules are now in `dict` format and no longer supports the use of the `C(@)` syntax (for an external `vars` file).
+   - `extra_vars` in the `tower_job_launch` module worked with a `list` previously, but now only works with a `dict` type.
+   - `extra_vars` in the `tower_workflow_job_template` module worked with a `string` previously but now expects a `dict`.
+   - When the `extra_vars` parameter is used with the `tower_job_launch` module, the launch will fail unless `ask_extra_vars` or `survey_enabled` is explicitly set to `True` on the Job Template.
+   - The `variables` parameter in the `tower_group`, `tower_host` and `tower_inventory` modules now expects a `dict` type and no longer supports the use of `@` syntax for a file.
  - Type changes of other types of fields
-   - Specifying `inputs` or `injectors` as strings in the
-     `tower_credential_type` module is no longer supported. Provide them as dictionaries instead.
-   - Specifying `schema` as in the `tower_workflow_job_template` module is no longer supported. Use a list of dicts instead.
+   - `inputs` or `injectors` in the `tower_credential_type` module worked with a string previously but now expects a `dict`.
+   - `schema` in the `tower_workflow_job_template` module worked with a `string` previously but not expects a `list` of `dict`s.
  - `tower_group` used to also service inventory sources, but this functionality has been removed from this module; use `tower_inventory_source` instead.
  - Specified `tower_config` file used to handle `k=v` pairs on a single line; this is no longer supported. Please use a file formatted as `yaml`, `json` or `ini` only.
  - Some return values (e.g., `credential_type`) have been removed. Use of `id` is recommended.
