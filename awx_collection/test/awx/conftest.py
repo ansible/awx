@@ -140,15 +140,22 @@ def run_module(request, collection_import):
                 else:
                     tower_cli_mgr = suppress()
                 with tower_cli_mgr:
-                    # Ansible modules return data to the mothership over stdout
-                    with redirect_stdout(stdout_buffer):
-                        try:
+                    try:
+                        # Ansible modules return data to the mothership over stdout
+                        with redirect_stdout(stdout_buffer):
                             resource_module.main()
-                        except SystemExit:
-                            pass  # A system exit indicates successful execution
+                    except SystemExit:
+                        pass  # A system exit indicates successful execution
+                    except Exception:
+                        # dump the stdout back to console for debugging
+                        print(stdout_buffer.getvalue())
+                        raise
 
         module_stdout = stdout_buffer.getvalue().strip()
-        result = json.loads(module_stdout)
+        try:
+            result = json.loads(module_stdout)
+        except Exception as e:
+            raise Exception('Module did not write valid JSON, error: {}, stdout:\n{}'.format(str(e), module_stdout))
         # A module exception should never be a test expectation
         if 'exception' in result:
             raise Exception('Module encountered error:\n{0}'.format(result['exception']))
