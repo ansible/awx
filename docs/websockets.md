@@ -6,7 +6,7 @@ Our channels/websocket implementation handles the communication between Tower AP
 
 Tower enlists the help of the `django-channels` library to create our communications layer. `django-channels` provides us with per-client messaging integration in our application by implementing the Asynchronous Server Gateway Interface (ASGI).
 
-To communicate between our different services we use RabbitMQ to exchange messages. Traditionally, `django-channels` uses Redis, but Tower uses a custom `asgi_amqp` library that allows access to RabbitMQ for the same purpose.
+To communicate between our different services we use websockets. Every AWX node is fully connected via a special websocket endpoint that forwards any local websocket data to all other nodes. Local websockets are backed by Redis, the channels2 default service.
 
 Inside Tower we use the `emit_channel_notification` function which places messages onto the queue. The messages are given an explicit event group and event type which we later use in our wire protocol to control message delivery to the client.
 
@@ -50,7 +50,7 @@ When a request comes in to `nginx` and has the `Upgrade` header and is for the p
 
 `daphne` handles websocket connections proxied by nginx.
 
-`wsbroadcast` fully connects all cluster nodes to every other cluster nodes. Sends a copy of all group websocket messages to all other cluster nodes (i.e. job event type messages).
+`wsbroadcast` fully connects all cluster nodes via the `/websocket/broadcast/` endpoint to every other cluster nodes. Sends a copy of all group websocket messages to all other cluster nodes (i.e. job event type messages).
 
 ### Development
  - `nginx` listens on 8013/8043 instead of 80/443
