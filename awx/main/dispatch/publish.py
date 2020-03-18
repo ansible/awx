@@ -1,12 +1,12 @@
 import inspect
 import logging
 import sys
+import json
 from uuid import uuid4
 
 from django.conf import settings
-from kombu import Exchange, Producer
 
-from awx.main.dispatch.kombu import Connection
+from . import pg_bus_conn
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -39,24 +39,22 @@ class task:
     add.apply_async([1, 1])
     Adder.apply_async([1, 1])
 
-    # Tasks can also define a specific target queue or exchange type:
+    # Tasks can also define a specific target queue or use the special fan-out queue tower_broadcast:
 
     @task(queue='slow-tasks')
     def snooze():
         time.sleep(10)
 
-    @task(queue='tower_broadcast', exchange_type='fanout')
+    @task(queue='tower_broadcast')
     def announce():
         print("Run this everywhere!")
     """
 
-    def __init__(self, queue=None, exchange_type=None):
+    def __init__(self, queue=None):
         self.queue = queue
-        self.exchange_type = exchange_type
 
     def __call__(self, fn=None):
         queue = self.queue
-        exchange_type = self.exchange_type
 
         class PublisherMixin(object):
 
@@ -73,9 +71,12 @@ class task:
                 kwargs = kwargs or {}
                 queue = (
                     queue or
-                    getattr(cls.queue, 'im_func', cls.queue) or
-                    settings.CELERY_DEFAULT_QUEUE
+                    getattr(cls.queue, 'im_func', cls.queue)
                 )
+                if not queue:
+                    msg = f'{cls.name}: Queue value required and may not me None'
+                    logger.error(msg)
+                    raise ValueError(msg)
                 obj = {
                     'uuid': task_id,
                     'args': args,
@@ -86,21 +87,8 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with Connection(settings.BROKER_URL) as conn:
-                        exchange = Exchange(queue, type=exchange_type or 'direct')
-                        producer = Producer(conn)
-                        logger.debug('publish {}({}, queue={})'.format(
-                            cls.name,
-                            task_id,
-                            queue
-                        ))
-                        producer.publish(obj,
-                                         serializer='json',
-                                         compression='bzip2',
-                                         exchange=exchange,
-                                         declare=[exchange],
-                                         delivery_mode="persistent",
-                                         routing_key=queue)
+                    with pg_bus_conn() as conn:
+                        conn.notify(queue, json.dumps(obj))
                 return (obj, queue)
 
         # If the object we're wrapping *is* a class (e.g., RunJob), return

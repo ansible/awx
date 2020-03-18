@@ -36,6 +36,7 @@ from awx.main.models.base import (
     NotificationFieldsModel,
     prevent_search
 )
+from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
@@ -1360,7 +1361,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             timeout = 5
             try:
                 running = self.celery_task_id in ControlDispatcher(
-                    'dispatcher', self.execution_node
+                    'dispatcher', self.controller_node or self.execution_node
                 ).running(timeout=timeout)
             except socket.timeout:
                 logger.error('could not reach dispatcher on {} within {}s'.format(
@@ -1466,7 +1467,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return r
 
     def get_queue_name(self):
-        return self.controller_node or self.execution_node or settings.CELERY_DEFAULT_QUEUE
+        return self.controller_node or self.execution_node or get_local_queuename()
 
     def is_isolated(self):
         return bool(self.controller_node)

@@ -38,7 +38,7 @@ dockerhub_base=ansible
 # kubernetes_ingress_tls_secret=awx-cert
 
 # Kubernetes and Openshift Install Resource Requests
-# These are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
+# These are the request and limit values for a pod's container for task/web/redis/memcached/management.
 # The total amount of requested resources for a pod is the sum of all
 # resources requested by all containers in the pod
 # A cpu_request of 1500 is 1.5 cores for the container to start out with.
@@ -52,8 +52,8 @@ dockerhub_base=ansible
 # task_mem_limit=4
 # web_cpu_limit=1000
 # web_mem_limit=2
-# rabbitmq_cpu_limit=1000
-# rabbitmq_mem_limit=3
+# redis_cpu_limit=1000
+# redis_mem_limit=3
 # memcached_cpu_limit=1000
 # memcached_mem_limit=2
 # management_cpu_limit=2000
@@ -92,10 +92,6 @@ pg_port=5432
 # The following variable is only required when using the provided
 # containerized postgres deployment on OpenShift
 # pg_admin_password=postgrespass
-
-# RabbitMQ Configuration
-rabbitmq_password=awxpass
-rabbitmq_erlang_cookie=cookiemonster
 
 # Use a local distribution build container image for building the AWX package
 # This is helpful if you don't want to bother installing the build-time dependencies as

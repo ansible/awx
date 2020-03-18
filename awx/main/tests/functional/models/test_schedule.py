@@ -103,7 +103,8 @@ class TestComputedFields:
             Schedule.objects.filter(pk=s.pk).update(next_run=old_next_run)
             s.next_run = old_next_run
             prior_modified = s.modified
-            s.update_computed_fields()
+            with mock.patch('awx.main.models.schedules.emit_channel_notification'):
+                s.update_computed_fields()
             assert s.next_run != old_next_run
             assert s.modified == prior_modified
 
@@ -133,7 +134,8 @@ class TestComputedFields:
             assert s.next_run is None
             assert job_template.next_schedule is None
             s.rrule = self.distant_rrule
-            s.update_computed_fields()
+            with mock.patch('awx.main.models.schedules.emit_channel_notification'):
+                s.update_computed_fields()
             assert s.next_run is not None
             assert job_template.next_schedule == s
 

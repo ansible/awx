@@ -3,10 +3,8 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from kombu import Exchange, Queue
 
-from awx.main.dispatch.kombu import Connection
-from awx.main.dispatch.worker import AWXConsumer, CallbackBrokerWorker
+from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 
 
 class Command(BaseCommand):
@@ -18,23 +16,15 @@ class Command(BaseCommand):
     help = 'Launch the job callback receiver'
 
     def handle(self, *arg, **options):
-        with Connection(settings.BROKER_URL) as conn:
-            consumer = None
-            try:
-                consumer = AWXConsumer(
-                    'callback_receiver',
-                    conn,
-                    CallbackBrokerWorker(),
-                    [
-                        Queue(
-                            settings.CALLBACK_QUEUE,
-                            Exchange(settings.CALLBACK_QUEUE, type='direct'),
-                            routing_key=settings.CALLBACK_QUEUE
-                        )
-                    ]
-                )
-                consumer.run()
-            except KeyboardInterrupt:
-                print('Terminating Callback Receiver')
-                if consumer:
-                    consumer.stop()
+        consumer = None
+        try:
+            consumer = AWXConsumerRedis(
+                'callback_receiver',
+                CallbackBrokerWorker(),
+                queues=[getattr(settings, 'CALLBACK_QUEUE', '')],
+            )
+            consumer.run()
+        except KeyboardInterrupt:
+            print('Terminating Callback Receiver')
+            if consumer:
+                consumer.stop()

@@ -265,28 +265,6 @@ migrate:
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
 
-server_noattach:
-	tmux new-session -d -s awx 'exec make uwsgi'
-	tmux rename-window 'AWX'
-	tmux select-window -t awx:0
-	tmux split-window -v 'exec make dispatcher'
-	tmux new-window 'exec make daphne'
-	tmux select-window -t awx:1
-	tmux rename-window 'WebSockets'
-	tmux split-window -h 'exec make runworker'
-	tmux split-window -v 'exec make nginx'
-	tmux new-window 'exec make receiver'
-	tmux select-window -t awx:2
-	tmux rename-window 'Extra Services'
-	tmux select-window -t awx:0
-
-server: server_noattach
-	tmux -2 attach-session -t awx
-
-# Use with iterm2's native tmux protocol support
-servercc: server_noattach
-	tmux -2 -CC attach-session -t awx
-
 supervisor:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -311,18 +289,11 @@ daphne:
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
-runworker:
+wsbroadcast:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py runworker --only-channels websocket.*
-
-# Run the built-in development webserver (by default on http://localhost:8013).
-runserver:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py runserver
+	$(PYTHON) manage.py run_wsbroadcast
 
 # Run to start the background task dispatcher for development.
 dispatcher:

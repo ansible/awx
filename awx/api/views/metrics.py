@@ -39,3 +39,4 @@ class MetricsView(APIView):
         if (request.user.is_superuser or request.user.is_system_auditor):
             return Response(metrics().decode('UTF-8'))
         raise PermissionDenied()
+

@@ -1,18 +1,10 @@
 ---
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
-rabbitmq_version: "3.7.4"
-rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"
-rabbitmq_default_vhost: "awx"
-rabbitmq_erlang_cookie: "cookiemonster"
-rabbitmq_hostname: "rabbitmq"
-rabbitmq_port: "5672"
-rabbitmq_user: "guest"
-rabbitmq_password: "guest"
+redis_image: "redis"
 
 postgresql_version: "10"
 postgresql_image: "postgres:{{postgresql_version}}"
-
 
 memcached_image: "memcached"
 memcached_version: "alpine"

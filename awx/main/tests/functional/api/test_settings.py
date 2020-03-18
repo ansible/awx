@@ -8,7 +8,6 @@ import os
 import time
 
 from django.conf import settings
-from kombu.utils.url import parse_url
 
 # Mock
 from unittest import mock
@@ -386,15 +385,3 @@ def test_saml_x509cert_validation(patch, get, admin, headers):
         }
     })
     assert resp.status_code == 200
-
-
-@pytest.mark.django_db
-def test_broker_url_with_special_characters():
-    settings.BROKER_URL = 'amqp://guest:a@ns:ibl3#@rabbitmq:5672//'
-    url = parse_url(settings.BROKER_URL)
-    assert url['transport'] == 'amqp'
-    assert url['hostname'] == 'rabbitmq'
-    assert url['port'] == 5672
-    assert url['userid'] == 'guest'
-    assert url['password'] == 'a@ns:ibl3#'
-    assert url['virtual_host'] == '/'

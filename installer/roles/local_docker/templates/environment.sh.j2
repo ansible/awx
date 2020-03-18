@@ -8,7 +8,5 @@ DATABASE_ADMIN_PASSWORD={{ pg_admin_password|quote }}
 {% endif %}
 MEMCACHED_HOST={{ memcached_hostname|default('memcached') }}
 MEMCACHED_PORT={{ memcached_port|default('11211')|quote }}
-RABBITMQ_HOST={{ rabbitmq_hostname|default('rabbitmq')|quote }}
-RABBITMQ_PORT={{ rabbitmq_port|default('5672')|quote }}
 AWX_ADMIN_USER={{ admin_user|quote }}
 AWX_ADMIN_PASSWORD={{ admin_password|quote }}

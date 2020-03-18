@@ -421,8 +421,8 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 BROKER_DURABILITY = True
 BROKER_POOL_LIMIT = None
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-CELERY_DEFAULT_QUEUE = 'awx_private_queue'
+BROKER_URL = 'unix:///var/run/redis/redis.sock'
+BROKER_TRANSPORT_OPTIONS = {}
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
@@ -449,19 +449,6 @@ CELERYBEAT_SCHEDULE = {
         'options': {'expires': 50,}
     },
     # 'isolated_heartbeat': set up at the end of production.py and development.py
-}
-
-AWX_CELERY_QUEUES_STATIC = [
-    CELERY_DEFAULT_QUEUE,
-]
-
-AWX_CELERY_BCAST_QUEUES_STATIC = [
-    'tower_broadcast_all',
-]
-
-ASGI_AMQP = {
-    'INIT_FUNC': 'awx.prepare_env',
-    'MODEL': 'awx.main.models.channels.ChannelGroup',
 }
 
 # Django Caching Configuration
@@ -929,8 +916,6 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
-PERSISTENT_CALLBACK_MESSAGES = True
-USE_CALLBACK_QUEUE = True
 CALLBACK_QUEUE = "callback_tasks"
 
 SCHEDULER_QUEUE = "scheduler"
@@ -964,6 +949,18 @@ LOG_AGGREGATOR_LEVEL = 'INFO'
 # If you're encountering issues establishing websockets in clustered Tower,
 # raising this value can help
 CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
+
+ASGI_APPLICATION = "awx.main.routing.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [BROKER_URL],
+            "capacity": 10000,
+        },
+    },
+}
 
 # Logging configuration.
 LOGGING = {
@@ -1111,10 +1108,6 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },
-        'kombu': {
-            'handlers': ['console', 'file', 'tower_warnings'],
-            'level': 'WARNING',
-        },
         'rest_framework.request': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
@@ -1239,3 +1232,29 @@ MIDDLEWARE = [
     'awx.main.middleware.URLModificationMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
 ]
+
+# Secret header value to exchange for websockets responsible for distributing websocket messages.
+# This needs to be kept secret and randomly generated
+BROADCAST_WEBSOCKET_SECRET = ''
+
+# Port for broadcast websockets to connect to
+# Note: that the clients will follow redirect responses
+BROADCAST_WEBSOCKET_PORT = 443
+
+# Whether or not broadcast websockets should check nginx certs when interconnecting
+BROADCAST_WEBSOCKET_VERIFY_CERT = False
+
+# Connect to other AWX nodes using http or https
+BROADCAST_WEBSOCKET_PROTOCOL = 'https'
+
+# All websockets that connect to the broadcast websocket endpoint will be put into this group
+BROADCAST_WEBSOCKET_GROUP_NAME = 'broadcast-group_send'
+
+# Time wait before retrying connecting to a websocket broadcast tower node
+BROADCAST_WEBSOCKET_RECONNECT_RETRY_RATE_SECONDS = 5
+
+# How often websocket process will look for changes in the Instance table
+BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
+
+# How often websocket process will generate stats
+BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5

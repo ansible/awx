@@ -6,7 +6,7 @@ services:
     image: {{ awx_web_docker_actual_image }}
     container_name: awx_web
     depends_on:
-      - rabbitmq
+      - redis
       - memcached
       {% if pg_hostname is not defined %}
       - postgres
@@ -24,6 +24,7 @@ services:
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
       - "{{ docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -63,7 +64,7 @@ services:
     image: {{ awx_task_docker_actual_image }}
     container_name: awx_task
     depends_on:
-      - rabbitmq
+      - redis
       - memcached
       - web
       {% if pg_hostname is not defined %}
@@ -76,6 +77,7 @@ services:
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
+      - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -111,18 +113,18 @@ services:
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
 
-  rabbitmq:
-    image: {{ rabbitmq_image }}
-    container_name: awx_rabbitmq
+  redis:
+    image: {{ redis_image }}
+    container_name: awx_redis
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_VHOST: "{{ rabbitmq_default_vhost }}"
-      RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
-      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password | quote }}"
-      RABBITMQ_ERLANG_COOKIE: {{ rabbitmq_erlang_cookie }}
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
+    command: ["/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - "{{ docker_compose_dir }}/redis.conf:/usr/local/etc/redis/redis.conf:ro"
+      - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
 
   memcached:
     image: "{{ memcached_image }}:{{ memcached_version }}"

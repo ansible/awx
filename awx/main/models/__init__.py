@@ -58,7 +58,6 @@ from awx.main.models.workflow import (  # noqa
     WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,
     WorkflowJobTemplateNode, WorkflowApproval, WorkflowApprovalTemplate,
 )
-from awx.main.models.channels import ChannelGroup # noqa
 from awx.api.versioning import reverse
 from awx.main.models.oauth import ( # noqa
     OAuth2AccessToken, OAuth2Application

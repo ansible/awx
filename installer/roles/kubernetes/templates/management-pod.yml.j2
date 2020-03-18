@@ -12,6 +12,7 @@ spec:
   containers:
     - name: ansible-tower-management
       image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+      imagePullPolicy: Always
       command: ["sleep", "infinity"]
       volumeMounts:
         - name: {{ kubernetes_deployment_name }}-application-config

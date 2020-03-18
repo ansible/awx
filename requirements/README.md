@@ -144,8 +144,3 @@ in the top-level Makefile.
 
 This can be removed when a solution for the external log queuing is ready.
 https://github.com/ansible/awx/pull/5092
-
-### asgi-amqp
-
-This library is not compatible with channels 2 and is not expected
-to become so. This drives other pins in the requirements file.

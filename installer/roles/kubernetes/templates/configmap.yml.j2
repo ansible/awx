@@ -205,3 +205,11 @@ data:
     USE_X_FORWARDED_PORT = True
 
     AWX_CONTAINER_GROUP_DEFAULT_IMAGE = "{{ container_groups_image }}"
+    BROADCAST_WEBSOCKET_PORT = 8052
+    BROADCAST_WEBSOCKET_PROTOCOL = 'http'
+
+  {{ kubernetes_deployment_name }}_redis_conf: |
+    unixsocket /var/run/redis/redis.sock
+    unixsocketperm 777
+    port 0
+    bind 127.0.0.1

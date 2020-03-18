@@ -12,7 +12,6 @@
 # MISC PROJECT SETTINGS
 ###############################################################################
 import os
-import urllib.parse
 import sys
 
 # Enable the following lines and install the browser extension to use Django debug toolbar
@@ -48,18 +47,6 @@ if "pytest" in sys.modules:
             },
         }
     }
-
-# AMQP configuration.
-BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
-                                  os.environ.get("RABBITMQ_PASS"),
-                                  os.environ.get("RABBITMQ_HOST"),
-                                  urllib.parse.quote(os.environ.get("RABBITMQ_VHOST", "/"), safe=''))
-
-CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
-                'ROUTING': 'awx.main.routing.channel_routing',
-                'CONFIG': {'url': BROKER_URL}}
-}
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.
@@ -238,3 +225,8 @@ TEST_OPENSTACK_PROJECT = ''
 # Azure credentials.
 TEST_AZURE_USERNAME = ''
 TEST_AZURE_KEY_DATA = ''
+
+BROADCAST_WEBSOCKET_SECRET = '🤖starscream🤖'
+BROADCAST_WEBSOCKET_PORT = 8013
+BROADCAST_WEBSOCKET_VERIFY_CERT = False
+BROADCAST_WEBSOCKET_PROTOCOL = 'http'

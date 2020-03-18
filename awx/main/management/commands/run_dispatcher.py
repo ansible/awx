@@ -6,14 +6,12 @@ from django.conf import settings
 from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
-from kombu import Exchange, Queue
 
 from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
-from awx.main.dispatch.kombu import Connection
 from awx.main.dispatch.pool import AutoscalePool
-from awx.main.dispatch.worker import AWXConsumer, TaskWorker
+from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
 from awx.main.dispatch import periodic
 
 logger = logging.getLogger('awx.main.dispatch')
@@ -63,30 +61,16 @@ class Command(BaseCommand):
         # in cpython itself:
         # https://bugs.python.org/issue37429
         AWXProxyHandler.disable()
-        with Connection(settings.BROKER_URL) as conn:
-            try:
-                bcast = 'tower_broadcast_all'
-                queues = [
-                    Queue(q, Exchange(q), routing_key=q)
-                    for q in (settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()])
-                ]
-                queues.append(
-                    Queue(
-                        construct_bcast_queue_name(bcast),
-                        exchange=Exchange(bcast, type='fanout'),
-                        routing_key=bcast,
-                        reply=True
-                    )
-                )
-                consumer = AWXConsumer(
-                    'dispatcher',
-                    conn,
-                    TaskWorker(),
-                    queues,
-                    AutoscalePool(min_workers=4)
-                )
-                consumer.run()
-            except KeyboardInterrupt:
-                logger.debug('Terminating Task Dispatcher')
-                if consumer:
-                    consumer.stop()
+        try:
+            queues = ['tower_broadcast_all', get_local_queuename()]
+            consumer = AWXConsumerPG(
+                'dispatcher',
+                TaskWorker(),
+                queues,
+                AutoscalePool(min_workers=4)
+            )
+            consumer.run()
+        except KeyboardInterrupt:
+            logger.debug('Terminating Task Dispatcher')
+            if consumer:
+                consumer.stop()

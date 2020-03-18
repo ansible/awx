@@ -1,10 +1,11 @@
+aiohttp
 ansible-runner
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
-asgi-amqp>=1.1.4  # see library notes, related to channels 2
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 boto  # replacement candidate https://github.com/ansible/awx/issues/2115
-channels==1.1.8  # UPGRADE BLOCKER: Last before backwards-incompatible channels 2 upgrade
-daphne==1.4.2  # UPGRADE BLOCKER: last before channels 2 but not pinned by other deps
+channels
+channels-redis
+daphne
 django==2.2.10  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
@@ -37,6 +38,7 @@ python3-saml
 schedule==0.6.0
 social-auth-core==3.2.0  # see UPGRADE BLOCKERs
 social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
+redis
 requests
 requests-futures  # see library notes
 slackclient==1.1.2  # see UPGRADE BLOCKERs

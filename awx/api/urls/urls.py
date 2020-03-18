@@ -34,7 +34,9 @@ from awx.api.views import (
     OAuth2ApplicationDetail,
 )
 
-from awx.api.views.metrics import MetricsView
+from awx.api.views.metrics import (
+    MetricsView,
+)
 
 from .organization import urls as organization_urls
 from .user import urls as user_urls

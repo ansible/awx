@@ -151,7 +151,7 @@ def inform_cluster_of_shutdown():
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
-@task()
+@task(queue=get_local_queuename)
 def apply_cluster_membership_policies():
     started_waiting = time.time()
     with advisory_lock('cluster_policy_lock', wait=True):
@@ -264,7 +264,7 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def handle_setting_changes(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -275,7 +275,7 @@ def handle_setting_changes(setting_keys):
     cache.delete_many(cache_keys)
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def delete_project_files(project_path):
     # TODO: possibly implement some retry logic
     lock_file = project_path + '.lock'
@@ -293,7 +293,7 @@ def delete_project_files(project_path):
             logger.exception('Could not remove lock file {}'.format(lock_file))
 
 
-@task(queue='tower_broadcast_all', exchange_type='fanout')
+@task(queue='tower_broadcast_all')
 def profile_sql(threshold=1, minutes=1):
     if threshold == 0:
         cache.delete('awx-profile-sql-threshold')
@@ -307,7 +307,7 @@ def profile_sql(threshold=1, minutes=1):
         logger.error('SQL QUERIES >={}s ENABLED FOR {} MINUTE(S)'.format(threshold, minutes))
 
 
-@task()
+@task(queue=get_local_queuename)
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -336,7 +336,7 @@ def send_notifications(notification_list, job_id=None):
                 logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
-@task()
+@task(queue=get_local_queuename)
 def gather_analytics():
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
@@ -492,7 +492,7 @@ def awx_isolated_heartbeat():
         isolated_manager.IsolatedManager(CallbackQueueDispatcher.dispatch).health_check(isolated_instance_qs)
 
 
-@task()
+@task(queue=get_local_queuename)
 def awx_periodic_scheduler():
     with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
         if acquired is False:
@@ -549,7 +549,7 @@ def awx_periodic_scheduler():
         state.save()
 
 
-@task()
+@task(queue=get_local_queuename)
 def handle_work_success(task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -562,7 +562,7 @@ def handle_work_success(task_actual):
     schedule_task_manager()
 
 
-@task()
+@task(queue=get_local_queuename)
 def handle_work_error(task_id, *args, **kwargs):
     subtasks = kwargs.get('subtasks', None)
     logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
@@ -602,7 +602,7 @@ def handle_work_error(task_id, *args, **kwargs):
         pass
 
 
-@task()
+@task(queue=get_local_queuename)
 def update_inventory_computed_fields(inventory_id):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -644,7 +644,7 @@ def update_smart_memberships_for_inventory(smart_inventory):
     return False
 
 
-@task()
+@task(queue=get_local_queuename)
 def update_host_smart_inventory_memberships():
     smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
     changed_inventories = set([])
@@ -660,7 +660,7 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields()
 
 
-@task()
+@task(queue=get_local_queuename)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
@@ -1478,7 +1478,7 @@ class BaseTask(object):
 
 
 
-@task()
+@task(queue=get_local_queuename)
 class RunJob(BaseTask):
     '''
     Run a job using ansible-playbook.
@@ -1911,7 +1911,7 @@ class RunJob(BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
 
-@task()
+@task(queue=get_local_queuename)
 class RunProjectUpdate(BaseTask):
 
     model = ProjectUpdate
@@ -2321,7 +2321,7 @@ class RunProjectUpdate(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
 
-@task()
+@task(queue=get_local_queuename)
 class RunInventoryUpdate(BaseTask):
 
     model = InventoryUpdate
@@ -2589,7 +2589,7 @@ class RunInventoryUpdate(BaseTask):
             )
 
 
-@task()
+@task(queue=get_local_queuename)
 class RunAdHocCommand(BaseTask):
     '''
     Run an ad hoc command using ansible.
@@ -2779,7 +2779,7 @@ class RunAdHocCommand(BaseTask):
             isolated_manager_instance.cleanup()
 
 
-@task()
+@task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
 
     model = SystemJob
@@ -2853,11 +2853,16 @@ def _reconstruct_relationships(copy_mapping):
         new_obj.save()
 
 
-@task()
+@task(queue=get_local_queuename)
 def deep_copy_model_obj(
     model_module, model_name, obj_pk, new_obj_pk,
-    user_pk, sub_obj_list, permission_check_func=None
+    user_pk, uuid, permission_check_func=None
 ):
+    sub_obj_list = cache.get(uuid)
+    if sub_obj_list is None:
+        logger.error('Deep copy {} from {} to {} failed unexpectedly.'.format(model_name, obj_pk, new_obj_pk))
+        return
+
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
     from awx.main.signals import disable_activity_stream
