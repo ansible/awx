@@ -183,6 +183,9 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     """Assure that can_add is called with all ForeignKeys."""
 
     class RoleReturnsTrue(Role):
+        class Meta:
+            proxy = True
+            
         def __contains__(self, accessor):
             return True
 
