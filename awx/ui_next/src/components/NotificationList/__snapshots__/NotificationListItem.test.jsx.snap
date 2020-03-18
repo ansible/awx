@@ -43,7 +43,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
             dataListCells={
               Array [
                 <DataListCell>
-                  <ForwardRef
+                  <Link
                     to={
                       Object {
                         "pathname": "/foo",
@@ -55,7 +55,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                     >
                       Foo
                     </b>
-                  </ForwardRef>
+                  </Link>
                 </DataListCell>,
                 <DataListCell>
                   Slack

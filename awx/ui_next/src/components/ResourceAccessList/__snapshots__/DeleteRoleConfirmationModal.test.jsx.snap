@@ -159,8 +159,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       ariaDescribedById=""
       className=""
       header={
-        <ForwardRef>
-          <ForwardRef
+        <AlertModal__Header>
+          <Styled(ExclamationCircleIcon)
             size="lg"
           />
           <Title
@@ -168,7 +168,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           >
             Remove {0} Access
           </Title>
-        </ForwardRef>
+        </AlertModal__Header>
       }
       hideTitle={false}
       isFooterLeftAligned={true}
@@ -296,8 +296,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           ariaDescribedById=""
           className=""
           header={
-            <ForwardRef>
-              <ForwardRef
+            <AlertModal__Header>
+              <Styled(ExclamationCircleIcon)
                 size="lg"
               />
               <Title
@@ -305,7 +305,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               >
                 Remove {0} Access
               </Title>
-            </ForwardRef>
+            </AlertModal__Header>
           }
           hideTitle={false}
           id="pf-modal-0"
