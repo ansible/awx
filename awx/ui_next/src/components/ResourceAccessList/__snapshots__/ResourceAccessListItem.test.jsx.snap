@@ -57,7 +57,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Text
                       component="h6"
                     >
-                      <ForwardRef
+                      <Styled(Link)
                         to={
                           Object {
                             "pathname": "/users/2/details",
@@ -65,10 +65,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         }
                       >
                         jane
-                      </ForwardRef>
+                      </Styled(Link)>
                     </Text>
                   </TextContent>
-                  <ForwardRef
+                  <DetailList
                     stacked={true}
                   >
                     <Detail
@@ -77,10 +77,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       label="Name"
                       value="jane brown"
                     />
-                  </ForwardRef>
+                  </DetailList>
                 </DataListCell>,
                 <DataListCell>
-                  <ForwardRef
+                  <DetailList
                     stacked={true}
                   >
                     <Detail
@@ -105,7 +105,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         </ChipGroup>
                       }
                     />
-                  </ForwardRef>
+                  </DetailList>
                 </DataListCell>,
               ]
             }
@@ -120,7 +120,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Text
                         component="h6"
                       >
-                        <ForwardRef
+                        <Styled(Link)
                           to={
                             Object {
                               "pathname": "/users/2/details",
@@ -128,10 +128,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           }
                         >
                           jane
-                        </ForwardRef>
+                        </Styled(Link)>
                       </Text>
                     </TextContent>
-                    <ForwardRef
+                    <DetailList
                       stacked={true}
                     >
                       <Detail
@@ -140,10 +140,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         label="Name"
                         value="jane brown"
                       />
-                    </ForwardRef>
+                    </DetailList>
                   </DataListCell>,
                   <DataListCell>
-                    <ForwardRef
+                    <DetailList
                       stacked={true}
                     >
                       <Detail
@@ -168,7 +168,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           </ChipGroup>
                         }
                       />
-                    </ForwardRef>
+                    </DetailList>
                   </DataListCell>,
                 ]
               }
@@ -206,7 +206,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Text
                           component="h6"
                         >
-                          <ForwardRef
+                          <Styled(Link)
                             to={
                               Object {
                                 "pathname": "/users/2/details",
@@ -214,10 +214,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             }
                           >
                             jane
-                          </ForwardRef>
+                          </Styled(Link)>
                         </Text>
                       </TextContent>
-                      <ForwardRef
+                      <DetailList
                         stacked={true}
                       >
                         <Detail
@@ -226,10 +226,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           label="Name"
                           value="jane brown"
                         />
-                      </ForwardRef>
+                      </DetailList>
                     </DataListCell>,
                     <DataListCell>
-                      <ForwardRef
+                      <DetailList
                         stacked={true}
                       >
                         <Detail
@@ -254,7 +254,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             </ChipGroup>
                           }
                         />
-                      </ForwardRef>
+                      </DetailList>
                     </DataListCell>,
                   ]
                 }
