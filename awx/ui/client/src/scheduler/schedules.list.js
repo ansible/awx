@@ -81,7 +81,7 @@ export default ['i18n', function(i18n) {
                 awToolTip: i18n._('Add a new schedule'),
                 dataTipWatch: 'addTooltip',
                 actionClass: 'at-Button--add',
-                actionId: 'button-add',
+                actionId: 'button-add--schedule',
                 ngShow: 'canAdd',
                 ngClass: "{ 'Form-tab--disabled': credentialRequiresPassword }"
             }

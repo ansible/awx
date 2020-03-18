@@ -540,7 +540,7 @@ function(NotificationsList, i18n) {
                             label: 'Add',
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
-                            actionId: 'button-add',
+                            actionId: 'button-add--permission',
                             ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                         }
                     },

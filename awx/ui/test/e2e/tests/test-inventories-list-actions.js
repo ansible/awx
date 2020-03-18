@@ -98,8 +98,8 @@ module.exports = {
         inventories.waitForElementNotVisible('div.spinny');
 
         inventories.expect.element(`#inventories_table .List-tableRow[id="${data.inventory.id}"]`).visible;
-        inventories.expect.element('#copy-action').visible;
-        inventories.expect.element('#copy-action[class*="btn-disabled"]').present;
+        inventories.expect.element(`#inventory-${data.inventory.id}-copy-action`).visible;
+        inventories.expect.element(`#inventory-${data.inventory.id}-copy-action[class*="btn-disabled"]`).present;
 
         client.end();
     }

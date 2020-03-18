@@ -85,7 +85,7 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add User'),
                             actionClass: 'at-Button--add',
-                            actionId: 'button-add',
+                            actionId: 'button-add--user',
                             ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
@@ -169,7 +169,7 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Add'),
                             awToolTip: i18n._('Grant Permission'),
                             actionClass: 'at-Button--add',
-                            actionId: 'button-add',
+                            actionId: 'button-add--permission',
                             ngShow: '(team_obj.summary_fields.user_capabilities.edit || canEditOrg)'
                         }
                     }

@@ -424,7 +424,7 @@ export default ['$compile', 'Attr', 'Icon',
                                 } else {
                                     fAction = list.fieldActions[field_action];
                                     innerTable += "<button id=\"";
-                                    innerTable += (fAction.id) ? fAction.id : field_action + "-action";
+                                    innerTable += (fAction.id) ? fAction.id : `${list.iterator}-{{${list.iterator}.id}}-${field_action}-action`;
                                     innerTable += "\" ";
                                     innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                                     innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";

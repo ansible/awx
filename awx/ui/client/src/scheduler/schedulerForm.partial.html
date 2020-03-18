@@ -667,7 +667,7 @@
             ng-click="prompt()">{{ strings.get('form.PROMPT') }}</button>
         <button type="button"
             class="btn btn-sm Form-cancelButton"
-            id="schedule_cancel_btn"
+            id="schedule_close_btn"
             ng-show="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
             ng-click="formCancel()">{{ strings.get('form.CLOSE') }}</button>
         <button type="button"

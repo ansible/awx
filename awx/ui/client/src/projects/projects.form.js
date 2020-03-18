@@ -285,7 +285,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                         label: i18n._('Add'),
                         awToolTip: i18n._('Add a permission'),
                         actionClass: 'at-Button--add',
-                        actionId: 'button-add',
+                        actionId: 'button-add--permission',
                         ngShow: '(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },

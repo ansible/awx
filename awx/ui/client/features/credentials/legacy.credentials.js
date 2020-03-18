@@ -70,7 +70,7 @@ function LegacyCredentialsService () {
                         label: N_('Add'),
                         awToolTip: N_('Add a permission'),
                         actionClass: 'at-Button--add',
-                        actionId: 'button-add',
+                        actionId: 'button-add--permission',
                         ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },
