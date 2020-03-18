@@ -1,7 +1,49 @@
-docker build --no-cache=true --rm=true -t ansible/awx_devel:latest .
-docker run --name awx_test -it --memory="4g" --cpuset="0,1" -v /Users/meyers/ansible/:/awx_devel -p 8013:8013 -p 8080:8080 -p 27017:27017 -p 2222:22 ansible/awx_devel
+# Docker Compose for Dev container
+
+## How to start the Dev container
+
+In the root directory of your awx clone, run the following to build your docker image:
+
+```
+make docker-compose-build
+```
+
+Copy over your local settings 
+
+```
+cp awx/settings/local_settings.py.docker_compose awx/settings/local_settings.py
+```
+
+Build the UI
+
+```
+make ui-devel
+```
+
+Run the container 
+
+```
+make docker-compose
+```
+
+The app should now be accessible in your browser at `https://localhost:8043/#/home`
+
 
 ## How to use the logstash container
+
+#### Modify the docker-compose.yml
+
+Uncomment the following lines in the `docker-compose.yml`
+
+```
+#- logstash
+...
+
+#logstash:
+#  build:
+#    context: ./docker-compose
+#    dockerfile: Dockerfile-logstash
+```
 
 POST the following content to `/api/v2/settings/logging/` (this uses
 authentication set up inside of the logstash configuration file).
