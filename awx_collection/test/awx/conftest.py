@@ -209,3 +209,19 @@ def vault_credential(organization):
         credential_type=ct, name='vault-cred',
         inputs={'vault_id': 'foo', 'vault_password': 'pas4word'}
     )
+
+
+@pytest.fixture
+def silence_deprecation():
+    """The deprecation warnings are stored in a global variable
+    they will create cross-test interference. Use this to turn them off.
+    """
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.deprecate'):
+        yield
+
+
+@pytest.fixture
+def silence_warning():
+    """Warnings use global variable, same as deprecations."""
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.warn'):
+        yield
