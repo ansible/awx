@@ -1,63 +1,58 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import { act } from 'react-dom/test-utils';
+import { sleep } from '@testUtils/testUtils';
+
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import Template, { _Template } from './Template';
+import Template from './Template';
 import mockJobTemplateData from './shared/data.job_template.json';
 
-jest.mock('@api');
-
-JobTemplatesAPI.readDetail.mockResolvedValue({
-  data: mockJobTemplateData,
-});
-
-OrganizationsAPI.read.mockResolvedValue({
-  data: {
-    count: 1,
-    next: null,
-    previous: null,
-    results: [
-      {
-        id: 1,
-      },
-    ],
-  },
-});
+jest.mock('@api/models/JobTemplates');
+jest.mock('@api/models/Organizations');
 
 const mockMe = {
   is_super_user: true,
   is_system_auditor: false,
 };
-
 describe('<Template />', () => {
-  test('initially renders succesfully', () => {
-    mountWithContexts(<Template setBreadcrumb={() => {}} me={mockMe} />);
+  beforeEach(() => {
+    JobTemplatesAPI.readDetail.mockResolvedValue({
+      data: mockJobTemplateData,
+    });
+
+    OrganizationsAPI.read.mockResolvedValue({
+      data: {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    });
   });
-  test('When component mounts API is called and the response is put in state', async done => {
-    const loadTemplateAndRoles = jest.spyOn(
-      _Template.prototype,
-      'loadTemplateAndRoles'
-    );
-    const wrapper = mountWithContexts(
-      <Template setBreadcrumb={() => {}} me={mockMe} />
-    );
-    await waitForElement(
-      wrapper,
-      'Template',
-      el => el.state('hasContentLoading') === true
-    );
-    expect(loadTemplateAndRoles).toHaveBeenCalled();
-    await waitForElement(
-      wrapper,
-      'Template',
-      el => el.state('hasContentLoading') === true
-    );
-    done();
+  test('initially renders succesfully', async () => {
+    await act(async () => {
+      mountWithContexts(<Template setBreadcrumb={() => {}} me={mockMe} />);
+    });
+  });
+  test('When component mounts API is called and the response is put in state', async () => {
+    await act(async () => {
+      mountWithContexts(<Template setBreadcrumb={() => {}} me={mockMe} />);
+    });
+    expect(JobTemplatesAPI.readDetail).toBeCalled();
+    expect(OrganizationsAPI.read).toBeCalled();
   });
   test('notifications tab shown for admins', async done => {
-    const wrapper = mountWithContexts(
-      <Template setBreadcrumb={() => {}} me={mockMe} />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Template setBreadcrumb={() => {}} me={mockMe} />
+      );
+    });
 
     const tabs = await waitForElement(
       wrapper,
@@ -77,9 +72,12 @@ describe('<Template />', () => {
       },
     });
 
-    const wrapper = mountWithContexts(
-      <Template setBreadcrumb={() => {}} me={mockMe} />
-    );
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Template setBreadcrumb={() => {}} me={mockMe} />
+      );
+    });
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
@@ -93,24 +91,28 @@ describe('<Template />', () => {
     const history = createMemoryHistory({
       initialEntries: ['/templates/job_template/1/foobar'],
     });
-    const wrapper = mountWithContexts(
-      <Template setBreadcrumb={() => {}} me={mockMe} />,
-      {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/templates/job_template/1/foobar',
-                path: '/templates/job_template/1/foobar',
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Template setBreadcrumb={() => {}} me={mockMe} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/templates/job_template/1/foobar',
+                  path: '/templates/job_template/1/foobar',
+                },
               },
             },
           },
-        },
-      }
-    );
+        }
+      );
+    });
+
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 });
