@@ -2,17 +2,22 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import { getQSConfig, mergeParams, parseQueryString } from '@util/qs';
 import { GroupsAPI, InventoriesAPI } from '@api';
 
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from '@util/useRequest';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
+import AssociateModal from './AssociateModal';
 import AddHostDropdown from './AddHostDropdown';
 import DisassociateButton from './DisassociateButton';
+import useSelect from '../shared/useSelect';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -21,7 +26,6 @@ const QS_CONFIG = getQSConfig('host', {
 });
 
 function InventoryGroupHostList({ i18n }) {
-  const [selected, setSelected] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id: inventoryId, groupId } = useParams();
   const location = useLocation();
@@ -52,29 +56,18 @@ function InventoryGroupHostList({ i18n }) {
     }
   );
 
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelect(
+    hosts
+  );
+
   useEffect(() => {
     fetchHosts();
   }, [fetchHosts]);
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...hosts] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
-
-  const isAllSelected = selected.length > 0 && selected.length === hosts.length;
 
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateHosts,
     deletionError: disassociateError,
-    clearDeletionError: clearDisassociateError,
   } = useDeleteItems(
     useCallback(async () => {
       return Promise.all(
@@ -92,6 +85,34 @@ function InventoryGroupHostList({ i18n }) {
     await disassociateHosts();
     setSelected([]);
   };
+
+  const fetchHostsToAssociate = useCallback(
+    params => {
+      return InventoriesAPI.readHosts(
+        inventoryId,
+        mergeParams(params, { not__groups: groupId })
+      );
+    },
+    [groupId, inventoryId]
+  );
+
+  const { request: handleAssociate, error: associateError } = useRequest(
+    useCallback(
+      async hostsToAssociate => {
+        await Promise.all(
+          hostsToAssociate.map(host =>
+            GroupsAPI.associateHost(groupId, host.id)
+          )
+        );
+        fetchHosts();
+      },
+      [groupId, fetchHosts]
+    )
+  );
+
+  const { error, dismissError } = useDismissableError(
+    associateError || disassociateError
+  );
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -133,7 +154,9 @@ function InventoryGroupHostList({ i18n }) {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={isSelected =>
+              setSelected(isSelected ? [...hosts] : [])
+            }
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -179,25 +202,26 @@ function InventoryGroupHostList({ i18n }) {
         }
       />
       {isModalOpen && (
-        <AlertModal
-          isOpen={isModalOpen}
-          variant="info"
-          title={i18n._(t`Select Hosts`)}
+        <AssociateModal
+          header={i18n._(t`Hosts`)}
+          fetchRequest={fetchHostsToAssociate}
+          isModalOpen={isModalOpen}
+          onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
-        >
-          {/* ADD/ASSOCIATE HOST MODAL PLACEHOLDER */}
-          {i18n._(t`Host Select Modal`)}
-        </AlertModal>
+          title={i18n._(t`Select Hosts`)}
+        />
       )}
-      {disassociateError && (
+      {(associateError || disassociateError) && (
         <AlertModal
-          isOpen={disassociateError}
-          variant="error"
+          isOpen={error}
+          onClose={dismissError}
           title={i18n._(t`Error!`)}
-          onClose={clearDisassociateError}
+          variant="error"
         >
-          {i18n._(t`Failed to disassociate one or more hosts.`)}
-          <ErrorDetail error={disassociateError} />
+          {associateError
+            ? i18n._(t`Failed to associate.`)
+            : i18n._(t`Failed to disassociate one or more hosts.`)}
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </>

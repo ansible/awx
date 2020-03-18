@@ -25,6 +25,7 @@ const ModalList = styled.div`
 
 function OptionsList({
   value,
+  contentError,
   options,
   optionCount,
   searchColumns,
@@ -53,6 +54,7 @@ function OptionsList({
         />
       )}
       <PaginatedDataList
+        contentError={contentError}
         items={options}
         itemCount={optionCount}
         pluralizedItemName={header}
