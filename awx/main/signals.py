@@ -6,7 +6,6 @@ import contextlib
 import logging
 import threading
 import json
-import pkg_resources
 import sys
 
 # Django

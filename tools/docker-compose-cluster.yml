@@ -21,7 +21,6 @@ services:
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx-1
-    #entrypoint: ["bash"]
     environment:
       CURRENT_UID:
       SDB_HOST: 0.0.0.0

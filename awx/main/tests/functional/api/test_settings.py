@@ -8,7 +8,6 @@ import os
 import time
 
 from django.conf import settings
-import redis
 
 # Mock
 from unittest import mock
