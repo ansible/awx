@@ -24,12 +24,14 @@ class Projects extends Component {
     };
   }
 
-  setBreadcrumbConfig = project => {
+  setBreadcrumbConfig = (project, nested) => {
     const { i18n } = this.props;
 
     if (!project) {
       return;
     }
+
+    const projectSchedulesPath = `/projects/${project.id}/schedules`;
 
     const breadcrumbConfig = {
       '/projects': i18n._(t`Projects`),
@@ -40,7 +42,12 @@ class Projects extends Component {
       [`/projects/${project.id}/access`]: i18n._(t`Access`),
       [`/projects/${project.id}/notifications`]: i18n._(t`Notifications`),
       [`/projects/${project.id}/job_templates`]: i18n._(t`Job Templates`),
-      [`/projects/${project.id}/schedules`]: i18n._(t`Schedules`),
+
+      [`${projectSchedulesPath}`]: i18n._(t`Schedules`),
+      [`${projectSchedulesPath}/${nested?.id}`]: `${nested?.name}`,
+      [`${projectSchedulesPath}/${nested?.id}/details`]: i18n._(
+        t`Edit Details`
+      ),
     };
 
     this.setState({ breadcrumbConfig });
