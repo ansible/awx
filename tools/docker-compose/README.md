@@ -2,11 +2,15 @@
 
 ## How to start the Dev container
 
-In the root directory of your awx clone, run the following to build your docker image:
+In the root directory of your awx clone, run the following to build your docker image.  
+This step takes a while, but once your image is built, you don't need to do this again 
+unless you make changes to the Dockerfile or any of the files used by the Dockerfile.  
 
 ```
 make docker-compose-build
 ```
+
+> Note: By default, this image will be tagged with your branch name.  
 
 Copy over your local settings 
 
@@ -25,6 +29,8 @@ Run the container
 ```
 make docker-compose
 ```
+
+> Note: You may need to add `COMPOSE_TAG=<yourbranch>` at the end of this to use the correct image for your branch.  
 
 The app should now be accessible in your browser at `https://localhost:8043/#/home`
 
@@ -74,3 +80,7 @@ An example of how to view the most recent logs from the container:
 ```
 docker exec -i -t $(docker ps -aqf "name=tools_logstash_1") tail -n 50 /logstash.log
 ```
+
+#### How to add logstash plugins
+
+Add any plugins you need in `tools/elastic/logstash/Dockerfile` before running the container.  
