@@ -15,7 +15,9 @@ from django.db.utils import InterfaceError, InternalError, IntegrityError
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
-                             InventoryUpdateEvent, SystemJobEvent, UnifiedJob)
+                             InventoryUpdateEvent, SystemJobEvent, UnifiedJob,
+                             Job)
+from awx.main.tasks import handle_success_and_failure_notifications
 from awx.main.models.events import emit_event_detail
 
 from .base import BaseWorker
@@ -137,19 +139,14 @@ class CallbackBrokerWorker(BaseWorker):
                         # have all the data we need to send out success/failure
                         # notification templates
                         uj = UnifiedJob.objects.get(pk=job_identifier)
-                        if hasattr(uj, 'send_notification_templates'):
-                            retries = 0
-                            while retries < 5:
-                                if uj.finished:
-                                    uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
-                                    break
-                                else:
-                                    # wait a few seconds to avoid a race where the
-                                    # events are persisted _before_ the UJ.status
-                                    # changes from running -> successful
-                                    retries += 1
-                                    time.sleep(1)
-                                    uj = UnifiedJob.objects.get(pk=job_identifier)
+
+                        if isinstance(uj, Job):
+                            # *actual playbooks* send their success/failure
+                            # notifications in response to the playbook_on_stats
+                            # event handling code in main.models.events
+                            pass
+                        elif hasattr(uj, 'send_notification_templates'):
+                            handle_success_and_failure_notifications.apply_async([uj.id])
                     except Exception:
                         logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     return
