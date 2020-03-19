@@ -561,9 +561,10 @@ function JobTemplateForm({
                   <CheckboxField
                     id="option-fact-cache"
                     name="use_fact_cache"
-                    label={i18n._(t`Fact Cache`)}
-                    tooltip={i18n._(t`If enabled, use cached facts if available
-                        and store discovered facts in the cache.`)}
+                    label={i18n._(t`Enable Fact Storage`)}
+                    tooltip={i18n._(
+                      t`If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime.`
+                    )}
                   />
                 </FormCheckboxLayout>
               </FormGroup>

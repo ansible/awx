@@ -5,6 +5,10 @@ class Hosts extends Base {
     super(http);
     this.baseUrl = '/api/v2/hosts/';
   }
+
+  readFacts(id) {
+    return this.http.get(`${this.baseUrl}${id}/ansible_facts/`);
+  }
 }
 
 export default Hosts;

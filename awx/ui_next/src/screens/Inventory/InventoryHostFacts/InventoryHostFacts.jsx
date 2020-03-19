@@ -10,7 +10,7 @@ import ContentLoading from '@components/ContentLoading';
 import useRequest from '@util/useRequest';
 import { HostsAPI } from '@api';
 
-function HostFacts({ i18n, host }) {
+function InventoryHostFacts({ i18n, host }) {
   const { result: facts, isLoading, error, request: fetchFacts } = useRequest(
     useCallback(async () => {
       const [{ data: factsObj }] = await Promise.all([
@@ -42,8 +42,8 @@ function HostFacts({ i18n, host }) {
   );
 }
 
-HostFacts.propTypes = {
+InventoryHostFacts.propTypes = {
   host: Host.isRequired,
 };
 
-export default withI18n()(HostFacts);
+export default withI18n()(InventoryHostFacts);
