@@ -1,11 +1,9 @@
 # Python
 import contextlib
 import logging
-import re
 import sys
 import threading
 import time
-import urllib.parse
 
 # Django
 from django.conf import LazySettings
@@ -55,15 +53,6 @@ SETTING_CACHE_TIMEOUT = 60
 SETTING_CACHE_DEFAULTS = True
 
 __all__ = ['SettingsWrapper', 'get_settings_to_cache', 'SETTING_CACHE_NOTSET']
-
-
-def normalize_broker_url(value):
-    parts = value.rsplit('@', 1)
-    match = re.search('(amqp://[^:]+:)(.*)', parts[0])
-    if match:
-        prefix, password = match.group(1), match.group(2)
-        parts[0] = prefix + urllib.parse.quote(password)
-    return '@'.join(parts)
 
 
 @contextlib.contextmanager
@@ -415,16 +404,7 @@ class SettingsWrapper(UserSettingsHolder):
                 value = self._get_local(name)
         if value is not empty:
             return value
-        value = self._get_default(name)
-        # sometimes users specify RabbitMQ passwords that contain
-        # unescaped : and @ characters that confused urlparse, e.g.,
-        # amqp://guest:a@ns:ibl3#@localhost:5672//
-        #
-        # detect these scenarios, and automatically escape the user's
-        # password so it just works
-        if name == 'BROKER_URL':
-            value = normalize_broker_url(value)
-        return value
+        return self._get_default(name)
 
     def _set_local(self, name, value):
         field = self.registry.get_setting_field(name)
