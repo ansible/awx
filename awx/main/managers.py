@@ -126,7 +126,7 @@ class InstanceManager(models.Manager):
                 instance = instance.get()
                 if instance.ip_address != ip_address:
                     instance.ip_address = ip_address
-                    instance.save()
+                    instance.save(update_fields=['ip_address'])
                     return (True, instance)
                 else:
                     return (False, instance)
