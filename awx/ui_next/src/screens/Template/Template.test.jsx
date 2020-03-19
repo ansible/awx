@@ -2,7 +2,6 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import { act } from 'react-dom/test-utils';
-import { sleep } from '@testUtils/testUtils';
 
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import Template from './Template';

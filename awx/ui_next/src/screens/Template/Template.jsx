@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
@@ -36,7 +36,7 @@ function Template({ i18n, me, setBreadcrumb }) {
     result: { isNotifAdmin, template },
     isLoading: hasRolesandTemplateLoading,
     error: rolesAndTemplateError,
-    request: loadTempplateAndRoles,
+    request: loadTemplateAndRoles,
   } = useRequest(
     useCallback(async () => {
       const [{ data }, notifAdminRes] = await Promise.all([
@@ -56,8 +56,8 @@ function Template({ i18n, me, setBreadcrumb }) {
     { isNotifAdmin: false, template: null }
   );
   useEffect(() => {
-    loadTempplateAndRoles();
-  }, [loadTempplateAndRoles]);
+    loadTemplateAndRoles();
+  }, [loadTemplateAndRoles]);
 
   const loadScheduleOptions = () => {
     return JobTemplatesAPI.readScheduleOptions(templateId);
