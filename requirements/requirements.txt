@@ -74,7 +74,7 @@ multidict==4.7.5          # via aiohttp, yarl
 netaddr==0.7.19           # via pyrad
 oauthlib==3.1.0           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
 openshift==0.10.3
-pexpect==4.8.0            # via ansible-runner
+pexpect==4.7.0            # via ansible-runner
 pkgconfig==1.5.1          # via xmlsec
 prometheus-client==0.7.1
 psutil==5.7.0             # via ansible-runner
