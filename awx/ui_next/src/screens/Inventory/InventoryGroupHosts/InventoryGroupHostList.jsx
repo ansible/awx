@@ -9,6 +9,7 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from '@util/useRequest';
+import useSelect from '@util/useSelect';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -17,7 +18,6 @@ import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import AssociateModal from './AssociateModal';
 import AddHostDropdown from './AddHostDropdown';
 import DisassociateButton from './DisassociateButton';
-import useSelect from '../shared/useSelect';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,

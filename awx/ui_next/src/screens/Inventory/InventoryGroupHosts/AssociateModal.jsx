@@ -6,7 +6,7 @@ import { Button, Modal } from '@patternfly/react-core';
 import OptionsList from '@components/Lookup/shared/OptionsList';
 import useRequest from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import useSelect from '../shared/useSelect';
+import useSelect from '@util/useSelect';
 
 const QS_CONFIG = getQSConfig('associate', {
   page: 1,
