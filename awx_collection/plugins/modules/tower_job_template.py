@@ -288,6 +288,11 @@ options:
         - The credentials used by this job template
       required: False
       type: list
+    labels:
+      description:
+        - The labels applied to this job template
+      required: False
+      type: list
     survey_spec:
       description:
         - JSON/YAML dict formatted survey definition.
@@ -358,6 +363,7 @@ def main():
         webhook_service=dict(required=False, type='str', choices=['github', 'gitlab']),
         webhook_credential=dict(required=False, type='str'),
         credentials=dict(required=False, type="list", default=[]),
+        labels=dict(required=False, type="list", default=[]),
         survey_spec=dict(required=False, type="dict"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -405,6 +411,7 @@ def main():
     webhook_credential = module.params.get('webhook_credential')
     survey_spec = module.params.get('survey_spec')
     credentials = module.params.get('credentials')
+    labels = module.params.get('labels')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -422,6 +429,11 @@ def main():
         credentials_ids = []
         for item in credentials:
             credentials_ids.append( module.resolve_name_to_id('credentials', item) )
+    label_ids = None
+    if labels is not None:
+        labels_ids = []
+        for item in labels:
+            labels_ids.append( module.resolve_name_to_id('labels', item) )
 
     # Pull in additional posts
     additional_posts = []
@@ -522,6 +534,7 @@ def main():
             endpoint='job_templates', item_type='job_template',
             associations={
                 'credentials': credentials_ids,
+                'labels': labels_ids,
             },
             additional_posts=additional_posts,
         )
