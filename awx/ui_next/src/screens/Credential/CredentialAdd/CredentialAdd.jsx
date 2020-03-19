@@ -12,6 +12,7 @@ function CredentialAdd({ me }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [credentialTypes, setCredentialTypes] = useState(null);
+  const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function CredentialAdd({ me }) {
 
   const handleSubmit = async values => {
     const { organization, ...remainingValues } = values;
+    setFormSubmitError(null);
     try {
       const {
         data: { id: credentialId },
@@ -47,7 +49,7 @@ function CredentialAdd({ me }) {
       const url = `/credentials/${credentialId}/details`;
       history.push(`${url}`);
     } catch (err) {
-      setError(err);
+      setFormSubmitError(err);
     }
   };
 
@@ -73,6 +75,7 @@ function CredentialAdd({ me }) {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             credentialTypes={credentialTypes}
+            submitError={formSubmitError}
           />
         </CardBody>
       </Card>
