@@ -155,7 +155,7 @@ def run_module(request, collection_import):
         try:
             result = json.loads(module_stdout)
         except Exception as e:
-            raise Exception('Module did not write valid JSON, error: {}, stdout:\n{}'.format(str(e), module_stdout))
+            raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
         # A module exception should never be a test expectation
         if 'exception' in result:
             raise Exception('Module encountered error:\n{0}'.format(result['exception']))
