@@ -21,6 +21,8 @@ from awx.main.signals import (
     disable_computed_fields
 )
 
+from awx.main.management.commands.deletion import AWXCollector, pre_delete
+
 
 class Command(BaseCommand):
     '''
@@ -57,27 +59,37 @@ class Command(BaseCommand):
                             action='store_true', dest='only_workflow_jobs',
                             help='Remove workflow jobs')
 
-    def cleanup_jobs(self):
-        #jobs_qs = Job.objects.exclude(status__in=('pending', 'running'))
-        #jobs_qs = jobs_qs.filter(created__lte=self.cutoff)
-        skipped, deleted = 0, 0
-        jobs = Job.objects.filter(created__lt=self.cutoff)
-        for job in jobs.iterator():
-            job_display = '"%s" (%d host summaries, %d events)' % \
-                          (str(job),
-                           job.job_host_summaries.count(), job.job_events.count())
-            if job.status in ('pending', 'waiting', 'running'):
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s job %s', action_text, job.status, job_display)
-                skipped += 1
-            else:
-                action_text = 'would delete' if self.dry_run else 'deleting'
-                self.logger.info('%s %s', action_text, job_display)
-                if not self.dry_run:
-                    job.delete()
-                deleted += 1
 
-        skipped += Job.objects.filter(created__gte=self.cutoff).count()
+    def cleanup_jobs(self):
+        skipped, deleted = 0, 0
+
+        batch_size = 1000000
+
+        while True:
+            # get queryset for available jobs to remove
+            qs = Job.objects.filter(created__lt=self.cutoff).exclude(status__in=['pending', 'waiting', 'running'])
+            # get pk list for the first N (batch_size) objects
+            pk_list = qs[0:batch_size].values_list('pk')
+            # You cannot delete queries with sql LIMIT set, so we must
+            # create a new query from this pk_list
+            qs_batch = Job.objects.filter(pk__in=pk_list)
+            just_deleted = 0
+            if not self.dry_run:
+                del_query = pre_delete(qs_batch)
+                collector = AWXCollector(del_query.db)
+                collector.collect(del_query)
+                _, models_deleted = collector.delete()
+                if models_deleted:
+                    just_deleted = models_deleted['main.Job']
+                deleted += just_deleted
+            else:
+                just_deleted = 0 # break from loop, this is dry run
+                deleted = qs.count()
+
+            if just_deleted == 0:
+                break
+
+        skipped += (Job.objects.filter(created__gte=self.cutoff) | Job.objects.filter(status__in=['pending', 'waiting', 'running'])).count()
         return skipped, deleted
 
     def cleanup_ad_hoc_commands(self):
