@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom';
 import {
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { DetailList, Detail } from '@components/DetailList';
 import { ScheduleToggle } from '@components/Schedule';

@@ -5,13 +5,14 @@ import { t } from '@lingui/macro';
 import {
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
+
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 

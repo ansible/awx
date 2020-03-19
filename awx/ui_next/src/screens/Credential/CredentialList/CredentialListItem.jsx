@@ -6,13 +6,14 @@ import { Link } from 'react-router-dom';
 import {
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
+
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { Credential } from '@types';
 import styled from 'styled-components';

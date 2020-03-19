@@ -1,4 +1,1 @@
-export {
-  default
-}
-from './DataListCell'
+export { default } from './DataListCell';

@@ -71,42 +71,102 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
               <DataListCell
                 key="name"
               >
-                <div
-                  className="pf-c-data-list__cell"
-                >
-                  <Link
-                    to={
-                      Object {
-                        "pathname": "/foo",
-                      }
+                <StyledComponent
+                  forwardedComponent={
+                    Object {
+                      "$$typeof": Symbol(react.forward_ref),
+                      "attrs": Array [],
+                      "componentStyle": ComponentStyle {
+                        "componentId": "DataListCell-sc-18ntxrx-0",
+                        "isStatic": true,
+                        "lastClassName": "flJMIO",
+                        "rules": Array [
+                          "word-break:break-word;",
+                        ],
+                      },
+                      "displayName": "DataListCell",
+                      "foldedComponentIds": Array [],
+                      "render": [Function],
+                      "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                      "target": [Function],
+                      "toString": [Function],
+                      "warnTooManyClasses": [Function],
+                      "withComponent": [Function],
                     }
+                  }
+                  forwardedRef={null}
+                >
+                  <PFDataListCell
+                    className="DataListCell-sc-18ntxrx-0 flJMIO"
                   >
-                    <LinkAnchor
-                      href="/foo"
-                      navigate={[Function]}
+                    <div
+                      className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
                     >
-                      <a
-                        href="/foo"
-                        onClick={[Function]}
+                      <Link
+                        to={
+                          Object {
+                            "pathname": "/foo",
+                          }
+                        }
                       >
-                        <b
-                          id="items-list-item-9000"
+                        <LinkAnchor
+                          href="/foo"
+                          navigate={[Function]}
                         >
-                          Foo
-                        </b>
-                      </a>
-                    </LinkAnchor>
-                  </Link>
-                </div>
+                          <a
+                            href="/foo"
+                            onClick={[Function]}
+                          >
+                            <b
+                              id="items-list-item-9000"
+                            >
+                              Foo
+                            </b>
+                          </a>
+                        </LinkAnchor>
+                      </Link>
+                    </div>
+                  </PFDataListCell>
+                </StyledComponent>
               </DataListCell>
               <DataListCell
                 key="type"
               >
-                <div
-                  className="pf-c-data-list__cell"
+                <StyledComponent
+                  forwardedComponent={
+                    Object {
+                      "$$typeof": Symbol(react.forward_ref),
+                      "attrs": Array [],
+                      "componentStyle": ComponentStyle {
+                        "componentId": "DataListCell-sc-18ntxrx-0",
+                        "isStatic": true,
+                        "lastClassName": "flJMIO",
+                        "rules": Array [
+                          "word-break:break-word;",
+                        ],
+                      },
+                      "displayName": "DataListCell",
+                      "foldedComponentIds": Array [],
+                      "render": [Function],
+                      "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                      "target": [Function],
+                      "toString": [Function],
+                      "warnTooManyClasses": [Function],
+                      "withComponent": [Function],
+                    }
+                  }
+                  forwardedRef={null}
                 >
-                  Slack
-                </div>
+                  <PFDataListCell
+                    className="DataListCell-sc-18ntxrx-0 flJMIO"
+                  >
+                    <div
+                      className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                    >
+                      Slack
+                    </div>
+                  </PFDataListCell>
+                </StyledComponent>
               </DataListCell>
             </div>
           </DataListItemCells>

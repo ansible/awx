@@ -4,9 +4,9 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCell,
   TextContent,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 import styled from 'styled-components';
 
 const DetailWrapper = styled(TextContent)`

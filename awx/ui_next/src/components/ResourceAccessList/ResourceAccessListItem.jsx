@@ -8,11 +8,11 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells as PFDataListItemCells,
-  DataListCell,
   Text,
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 

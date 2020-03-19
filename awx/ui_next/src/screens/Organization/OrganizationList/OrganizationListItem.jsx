@@ -6,13 +6,14 @@ import {
   Badge as PFBadge,
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemCells,
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
+
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
