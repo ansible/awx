@@ -94,6 +94,17 @@ class TowerModule(AnsibleModule):
 
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
+    def extract_errors_from_response(self, response):
+        if 'json' in response:
+            if '__all__' in response['json']:
+                return response['json']['__all__'][0]
+            elif 'error' in response['json']:
+                return response['json']['error']
+            else:
+                return response['json']
+        else:
+            return response['status_code']
+
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
         config_files = ['/etc/tower/tower_cli.cfg', join(expanduser("~"), ".{0}".format(self.config_name))]
@@ -208,6 +219,7 @@ class TowerModule(AnsibleModule):
     def patch_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
+            self.json_output['patch_check_changed'] = True
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
 
@@ -216,6 +228,7 @@ class TowerModule(AnsibleModule):
     def post_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
+            self.json_output['post_check_changed'] = True
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
 
@@ -224,6 +237,7 @@ class TowerModule(AnsibleModule):
     def delete_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
+            self.json_output['delete_check_changed'] = True
             self.json_output['changed'] = True
             self.exit_json(**self.json_output)
 
@@ -457,20 +471,12 @@ class TowerModule(AnsibleModule):
             if response['status_code'] in [202, 204]:
                 if on_delete:
                     on_delete(self, response['json'])
-                self.json_output['changed'] = True
                 self.json_output['id'] = item_id
+                self.json_output['deleted_item'] = True
+                self.json_output['changed'] = True
                 self.exit_json(**self.json_output)
             else:
-                if 'json' in response and '__all__' in response['json']:
-                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
-                elif 'json' in response:
-                    # This is from a project delete (if there is an active job against it)
-                    if 'error' in response['json']:
-                        self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']['error']))
-                    else:
-                        self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['json']))
-                else:
-                    self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
+                self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, self.extract_errors_from_response(response)), **{'response': response})
         else:
             self.exit_json(**self.json_output)
 
@@ -488,17 +494,69 @@ class TowerModule(AnsibleModule):
         for an_id in ids_to_remove:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
             if response['status_code'] == 204:
+                self.json_output['removed_an_association'] = True
                 self.json_output['changed'] = True
             else:
-                self.fail_json(msg="Failed to disassociate item {0}".format(response['json']['detail']))
+                self.fail_json(msg="Failed to disassociate item {0}".format(self.extract_errors_from_response(response)))
 
         # Associate anything that is in new_association_list but not in `association`
         for an_id in list(set(new_association_list) - set(existing_associated_ids)):
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
             if response['status_code'] == 204:
+                self.json_output['added_an_association'] = True
                 self.json_output['changed'] = True
             else:
-                self.fail_json(msg="Failed to associate item {0}".format(response['json']['detail']))
+                self.fail_json(msg="Failed to associate item {0}".format(self.extract_errors_from_response(response)))
+
+    def process_additional_posts(self, item, item_type, additional_posts):
+        # Process any additional posts with this item
+        for post in additional_posts:
+            endpoint = item.get('related', {}).get(post['endpoint_reference'], None)
+            if endpoint:
+                # First get the existing data from the endpoint
+                existing_data = self.get_endpoint(endpoint)
+
+                # If the endpont data is identical, just continue on to the next item
+                if existing_data['json'] == post['data']:
+                    continue
+
+                with open('/tmp/john', 'w') as f:
+                    import json
+                    f.write(json.dumps(post['data']))
+
+                # If this item no longer has data, lets remove it
+                if post['data'] in ('', [], {}):
+                    response = self.delete_endpoint(endpoint)
+                    # Tower job template requires a 200
+                    # Left as an array as for future additional delete returns
+                    if response['status_code'] in [200]:
+                        self.json_output['deleted_additional_post'] = True
+                        self.json_output['changed'] = True
+                    else:
+                        self.fail_json(msg="Unable to delete to {0} for {1}: {2}".format(endpoint, item_type, self.extract_errors_from_response(response)), **{'response': response})
+                else:
+                    response = self.post_endpoint(endpoint, **{'data': post['data']})
+                    # Tower job template requires a 200
+                    # Left as an array as for future additional posts returns
+                    if response['status_code'] in [200]:
+                        self.json_output['added_additional_post'] = True
+                        self.json_output['changed'] = True
+                    else:
+                        self.fail_json(msg="Unable to post to {0} for {1}: {2}".format(endpoint, item_type, self.extract_errors_from_response(response)), **{'response': response})
+            else:
+                self.fail_json(msg="Addition post type of {0} is not valid for {1}".format(association_type, item_type))
+
+    def process_associations(self, item, item_type, associations):
+        # Process any associations with this item
+        if associations is not None:
+            for association_type in associations:
+                if item.get('related', {}).get(association_type, None):
+                    self.modify_associations(item['related'][association_type], associations[association_type])
+                else:
+                    self.fail_json(msg="Association type of {0} is not valid for {1}".format(association_type, item_type))
+
+
+    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None, additional_posts=[]):
 
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None):
 
@@ -538,6 +596,7 @@ class TowerModule(AnsibleModule):
                     if key in response['json']:
                         self.json_output['name'] = response['json'][key]
                 self.json_output['id'] = response['json']['id']
+                self.json_output['created'] = True
                 self.json_output['changed'] = True
                 item_url = response['json']['url']
             else:
@@ -555,12 +614,12 @@ class TowerModule(AnsibleModule):
                 self.modify_associations(sub_endpoint, associations[association_type])
 
         # If we have an on_create method and we actually changed something we can call on_create
-        if on_create is not None and self.json_output['changed']:
+        if on_create is not None and self.json_output['created']:
             on_create(self, response['json'])
         else:
             self.exit_json(**self.json_output)
 
-    def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
+    def update_if_needed(self, existing_item, new_item, on_update=None, associations=None, additional_posts=[]):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
@@ -588,36 +647,35 @@ class TowerModule(AnsibleModule):
 
             # Check to see if anything within the item requires the item to be updated
             needs_update = False
+            self.json_output['field_changes'] = {}
             for field in new_item:
                 existing_field = existing_item.get(field, None)
                 new_field = new_item.get(field, None)
                 # If the two items don't match and we are not comparing '' to None
-                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
+                # In the case of extra_vars in a job template, we have to pass in {} for nothing ('' is not valid)
+                # But when its returned from the API, instead of {} we get back ''.
+                if existing_field != new_field and not (existing_field in (None, '') and new_field in ('', {})):
                     # Something doesn't match so let's update it
                     needs_update = True
-                    break
+                    self.json_output['field_changes'][field] = { 'old': existing_field, 'new': new_field }
 
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
             if needs_update:
                 response = self.patch_endpoint(item_url, **{'data': new_item})
                 if response['status_code'] == 200:
+                    self.json_output['needed_update'] = True
                     self.json_output['changed'] = True
-                elif 'json' in response and '__all__' in response['json']:
-                    self.fail_json(msg=response['json']['__all__'])
                 else:
-                    self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
+                    self.json_output['msg'] = "Unable to update {0} {1}: {2}".format(item_type, item_name, self.extract_errors_from_response(response))
+                    self.json_output['response'] = response
+                    self.fail_json(**self.json_output)
 
         else:
             raise RuntimeError('update_if_needed called incorrectly without existing_item')
 
-        # Process any associations with this item
-        if associations is not None:
-            for association_type in associations:
-                if existing_item['related'][association_type]:
-                    self.modify_associations(existing_item['related'][association_type], associations[association_type])
-                else:
-                    self.fail_json(msg="Association type of {0} is not valid for {1}".format(association_type, item_type))
+        self.process_associations(existing_item, item_type, associations)
+        self.process_additional_posts(existing_item, item_type, additional_posts)
 
         # If we change something and have an on_change call it
         if on_update is not None and self.json_output['changed']:
@@ -629,11 +687,11 @@ class TowerModule(AnsibleModule):
         else:
             self.exit_json(**self.json_output)
 
-    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, associations=None):
+    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, associations=None, additional_posts=[]):
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, on_update=on_update, associations=associations)
+            return self.update_if_needed(existing_item, new_item, on_update=on_update, associations=associations, additional_posts=additional_posts)
         else:
-            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
+            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations, additional_posts=additional_posts)
 
     def logout(self):
         if self.oauth_token_id is not None and self.username and self.password:
