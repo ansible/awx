@@ -77,7 +77,7 @@ def pg_bus_conn():
                             user=conf['USER'],
                             password=conf['PASSWORD'],
                             port=conf['PORT'],
-                            **conf["OPTIONS"])
+                            **conf.get("OPTIONS", {}))
     # Django connection.cursor().connection doesn't have autocommit=True on
     conn.set_session(autocommit=True)
     pubsub = PubSub(conn)
