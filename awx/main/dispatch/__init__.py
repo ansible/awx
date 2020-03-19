@@ -75,7 +75,9 @@ def pg_bus_conn():
     conn = psycopg2.connect(dbname=conf['NAME'],
                             host=conf['HOST'],
                             user=conf['USER'],
-                            password=conf['PASSWORD'])
+                            password=conf['PASSWORD'],
+                            port=conf['PORT'],
+                            **conf["OPTIONS"])
     # Django connection.cursor().connection doesn't have autocommit=True on
     conn.set_session(autocommit=True)
     pubsub = PubSub(conn)
