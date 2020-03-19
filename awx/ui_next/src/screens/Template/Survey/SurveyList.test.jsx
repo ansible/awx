@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import SurveyList from './SurveyList';
 import { JobTemplatesAPI } from '@api';
-import mockJobTemplateData from './data.job_template.json';
+import mockJobTemplateData from '../shared/data.job_template.json';
 
 jest.mock('@api/models/JobTemplates');
 

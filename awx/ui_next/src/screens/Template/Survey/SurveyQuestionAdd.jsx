@@ -11,8 +11,9 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
   const handleSubmit = async question => {
     if (survey.spec.find(q => q.variable === question.variable)) {
       setFormError(
-        new Error(`Survey already contains a question with variable named
-          “${question.variable}”`)
+        new Error(
+          `Survey already contains a question with variable named “${question.variable}”`
+        )
       );
       return;
     }

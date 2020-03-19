@@ -27,8 +27,9 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
     ) {
       debugger;
       setFormError(
-        new Error(`Survey already contains a question with variable named
-          “${formData.variable}”`)
+        new Error(
+          `Survey already contains a question with variable named “${formData.variable}”`
+        )
       );
       return;
     }

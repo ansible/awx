@@ -131,7 +131,7 @@ function SurveyList({
       >
         <div>{i18n._(t`This action will delete the following:`)}</div>
         {selected.map(question => (
-          <span key={question.id}>
+          <span key={question.variable}>
             <strong>{question.question_name}</strong>
             <br />
           </span>
