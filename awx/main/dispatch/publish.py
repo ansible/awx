@@ -74,7 +74,7 @@ class task:
                     getattr(cls.queue, 'im_func', cls.queue)
                 )
                 if not queue:
-                    msg = f'{cls.name}: Queue value required and may not me None'
+                    msg = f'{cls.name}: Queue value required and may not be None'
                     logger.error(msg)
                     raise ValueError(msg)
                 obj = {
