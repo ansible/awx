@@ -1,5 +1,5 @@
 import logging
-import string
+import uuid
 import random
 import json
 
@@ -29,8 +29,7 @@ class Control(object):
 
     @classmethod
     def generate_reply_queue_name(cls):
-        letters = string.ascii_lowercase
-        return 'reply_to_{}'.format(''.join(random.choice(letters) for i in range(8)))
+        return f"reply_to_{str(uuid.uuid4()).replace('-','_')}"
 
     def control_with_reply(self, command, timeout=5):
         logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
