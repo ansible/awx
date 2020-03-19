@@ -2,12 +2,8 @@
 from datetime import datetime
 import sys
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 import pytest
-import six
 
 from awxkit import utils
 from awxkit import exceptions as exc
@@ -83,7 +79,7 @@ def test_load_invalid_json_or_yaml(inp):
     reason='this is only intended to be used in py3, not the CLI'
 )
 def test_random_titles_are_unicode(non_ascii):
-    assert isinstance(utils.random_title(non_ascii=non_ascii), six.text_type)
+    assert isinstance(utils.random_title(non_ascii=non_ascii), str)
 
 
 @pytest.mark.parametrize('non_ascii', [True, False])

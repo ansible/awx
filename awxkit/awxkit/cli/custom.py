@@ -1,8 +1,6 @@
 import functools
 import json
 
-from six import with_metaclass, PY3
-
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
 from awxkit import api
@@ -24,7 +22,7 @@ class CustomActionRegistryMeta(CustomRegistryMeta):
         return ' '.join([self.resource, self.action])
 
 
-class CustomAction(with_metaclass(CustomActionRegistryMeta)):
+class CustomAction(metaclass=CustomActionRegistryMeta):
     """Base class for defining a custom action for a resource."""
 
     def __init__(self, page):
@@ -549,11 +547,8 @@ class SettingsModify(CustomAction):
         return resp.from_json({'key': key, 'value': resp[key]})
 
     def is_json(self, data):
-        err = ValueError
-        if PY3:
-            err = json.decoder.JSONDecodeError
         try:
             json.loads(data)
-        except err:
+        except json.decoder.JSONDecodeError:
             return False
         return True

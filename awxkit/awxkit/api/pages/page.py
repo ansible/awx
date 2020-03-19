@@ -4,8 +4,7 @@ import json
 import re
 
 from requests import Response
-import six
-from six.moves import http_client as http
+import http.client as http
 
 from awxkit.utils import (
     PseudoNamespace,
@@ -170,10 +169,7 @@ class Page(object):
     def from_json(cls, raw):
         resp = Response()
         data = json.dumps(raw)
-        if six.PY3:
-            resp._content = bytes(data, 'utf-8')
-        else:
-            resp._content = data
+        resp._content = bytes(data, 'utf-8')
         resp.encoding = 'utf-8'
         resp.status_code = 200
         return cls(r=resp)

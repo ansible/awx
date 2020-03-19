@@ -7,7 +7,6 @@ import sys
 import yaml
 
 from distutils.util import strtobool
-import six
 
 from .custom import CustomAction
 from .format import add_output_formatting_arguments
@@ -182,7 +181,7 @@ class ResourceOptionsParser(object):
                 for k, v in parsed.items():
                     # add support for file reading at top-level JSON keys
                     # (to make things like SSH key data easier to work with)
-                    if isinstance(v, six.text_type) and v.startswith('@'):
+                    if isinstance(v, str) and v.startswith('@'):
                         path = os.path.expanduser(v[1:])
                         parsed[k] = open(path).read()
 

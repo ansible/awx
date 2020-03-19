@@ -10,7 +10,6 @@ import sys
 import re
 import os
 
-import six
 import yaml
 
 from awxkit.words import words
@@ -132,7 +131,7 @@ class PseudoNamespace(dict):
 
 
 def is_relative_endpoint(candidate):
-    return isinstance(candidate, (six.text_type,)) and candidate.startswith('/api/')
+    return isinstance(candidate, (str,)) and candidate.startswith('/api/')
 
 
 def is_class_or_instance(obj, cls):
@@ -321,19 +320,9 @@ def update_payload(payload, fields, kwargs):
 
 
 def to_str(obj):
-    if six.PY3:
-        if isinstance(obj, bytes):
-            return obj.decode('utf-8')
-        return obj
-    if not isinstance(obj, six.text_type):
-        try:
-            return str(obj)
-        except UnicodeDecodeError:
-            try:
-                obj = six.text_type(obj, 'utf8')
-            except UnicodeDecodeError:
-                obj = obj.decode('latin1')
-    return obj.encode('utf8')
+    if isinstance(obj, bytes):
+        return obj.decode('utf-8')
+    return obj
 
 
 def to_bool(obj):

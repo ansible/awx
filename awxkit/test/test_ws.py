@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from unittest.mock import patch
 import pytest
 
 from awxkit.ws import WSClient

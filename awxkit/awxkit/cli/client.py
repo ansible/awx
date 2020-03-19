@@ -6,7 +6,6 @@ import pkg_resources
 import sys
 
 from requests.exceptions import RequestException
-import six
 
 from .custom import handle_custom_actions
 from .format import (add_authentication_arguments,
@@ -203,15 +202,7 @@ class CLI(object):
             if hasattr(response, 'rc'):
                 raise SystemExit(response.rc)
         else:
-            if six.PY3:
-                self.parser.print_help()
-            elif six.PY2 and not self.help:
-                # Unfortunately, argparse behavior between py2 and py3
-                # changed in a notable way when required subparsers
-                # have invalid (or missing) arguments specified
-                # see: https://github.com/python/cpython/commit/f97c59aaba2d93e48cbc6d25f7ff9f9c87f8d0b2
-                print('\nargument resource: invalid choice')
-                raise SystemExit(2)
+            self.parser.print_help()
 
     def parse_action(self, page, from_sphinx=False):
         """Perform an HTTP OPTIONS request
