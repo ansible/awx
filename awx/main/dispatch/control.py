@@ -21,10 +21,6 @@ class Control(object):
         self.service = service
         self.queuename = host or get_local_queuename()
 
-    def publish(self, msg, conn, **kwargs):
-        # TODO: delete this method??
-        raise RuntimeError("Publish called?!")
-
     def status(self, *args, **kwargs):
         return self.control_with_reply('status', *args, **kwargs)
 

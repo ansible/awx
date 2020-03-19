@@ -9,10 +9,6 @@ from django.conf import settings
 
 
 NOT_READY = ([], [], [])
-if 'run_callback_receiver' in sys.argv:
-    logger = logging.getLogger('awx.main.commands.run_callback_receiver')
-else:
-    logger = logging.getLogger('awx.main.dispatch')
 
 
 def get_local_queuename():
@@ -35,25 +31,6 @@ class PubSub(object):
     def notify(self, channel, payload):
         with self.conn.cursor() as cur:
             cur.execute('SELECT pg_notify(%s, %s);', (channel, payload))
-
-    def get_event(self, select_timeout=0):
-        # poll the connection, then return one event, if we have one.  Else
-        # return None.
-        select.select([self.conn], [], [], select_timeout)
-        self.conn.poll()
-        if self.conn.notifies:
-            return self.conn.notifies.pop(0)
-
-    def get_events(self, select_timeout=0):
-        # Poll the connection and return all events, if there are any.  Else
-        # return None.
-        select.select([self.conn], [], [], select_timeout) # redundant?
-        self.conn.poll()
-        events = []
-        while self.conn.notifies:
-            events.append(self.conn.notifies.pop(0))
-        if events:
-            return events
 
     def events(self, select_timeout=5, yield_timeouts=False):
         while True:
