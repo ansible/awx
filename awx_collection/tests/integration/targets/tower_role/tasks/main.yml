@@ -40,7 +40,7 @@
 
 - name: Add Joe to workflow execute role
   tower_role:
-    user: joe
+    user: "{{ username }}"
     role: execute
     workflow: test-role-workflow
     state: present

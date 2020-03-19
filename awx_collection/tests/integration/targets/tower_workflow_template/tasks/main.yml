@@ -82,7 +82,7 @@
 - name: Create a workflow job template
   tower_workflow_template:
     name: "{{ wfjt_name }}"
-    schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
+    schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
 
@@ -104,7 +104,7 @@
   tower_workflow_template:
     name: "{{ wfjt_name }}"
     organization: Non Existing Organization
-    schema: [{"success": [{"job_template": "my-job-1"}], "job_template": "my-job-2"}]
+    schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
   register: result
   ignore_errors: true
 
