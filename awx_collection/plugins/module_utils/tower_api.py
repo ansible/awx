@@ -222,6 +222,8 @@ class TowerModule(AnsibleModule):
 
     def get_all_endpoint(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
+        if 'next' not in response['json']:
+            raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
         next_page = response['json']['next']
 
         if response['json']['count'] > 10000:
@@ -414,14 +416,14 @@ class TowerModule(AnsibleModule):
             except(Exception) as excinfo:
                 self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
-    def delete_if_needed(self, existing_item, handle_response=True, on_delete=None):
-        # This will exit from the module on its own unless handle_response is False.
-        # If handle_response is True and the method successfully deletes an item and on_delete param is defined,
+    def delete_if_needed(self, existing_item, on_delete=None):
+        # This will exit from the module on its own.
+        # If the method successfully deletes an item and on_delete param is defined,
         #   the on_delete parameter will be called as a method pasing in this object and the json from the response
-        # If you pass handle_response=False, it will return one of two things:
+        # This will return one of two things:
         #   1. None if the existing_item is not defined (so no delete needs to happen)
         #   2. The response from Tower from calling the delete on the endpont. It's up to you to process the response and exit from the module
-        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
+        # Note: common error codes from the Tower API can cause the module to fail
         if existing_item:
             # If we have an item, we can try to delete it
             try:
@@ -440,9 +442,7 @@ class TowerModule(AnsibleModule):
 
             response = self.delete_endpoint(item_url)
 
-            if not handle_response:
-                return response
-            elif response['status_code'] in [202, 204]:
+            if response['status_code'] in [202, 204]:
                 if on_delete:
                     on_delete(self, response['json'])
                 self.json_output['changed'] = True
@@ -460,21 +460,40 @@ class TowerModule(AnsibleModule):
                 else:
                     self.fail_json(msg="Unable to delete {0} {1}: {2}".format(item_type, item_name, response['status_code']))
         else:
-            if not handle_response:
-                return None
-            else:
-                self.exit_json(**self.json_output)
+            self.exit_json(**self.json_output)
 
-    def create_if_needed(self, existing_item, new_item, endpoint, handle_response=True, on_create=None, item_type='unknown'):
-        #
-        # This will exit from the module on its own unless handle_response is False.
-        # If handle_response is True and the method successfully creates an item and on_create param is defined,
+    def modify_associations(self, association_endpoint, new_association_list):
+        # First get the existing associations
+        response = self.get_all_endpoint(association_endpoint)
+        existing_associated_ids = [association['id'] for association in response['json']['results']]
+
+        # Disassociate anything that is in existing_associated_ids but not in new_association_list
+        ids_to_remove = list(set(existing_associated_ids) - set(new_association_list))
+        for an_id in ids_to_remove:
+            response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
+            if response['status_code'] == 204:
+                self.json_output['changed'] = True
+            else:
+                self.fail_json(msg="Failed to disassociate item {0}".format(response['json']['detail']))
+
+        # Associate anything that is in new_association_list but not in `association`
+        for an_id in list(set(new_association_list) - set(existing_associated_ids)):
+            response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
+            if response['status_code'] == 204:
+                self.json_output['changed'] = True
+            else:
+                self.fail_json(msg="Failed to associate item {0}".format(response['json']['detail']))
+
+    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None):
+
+        # This will exit from the module on its own
+        # If the method successfully creates an item and on_create param is defined,
         #    the on_create parameter will be called as a method pasing in this object and the json from the response
-        # If you pass handle_response=False it will return one of two things:
+        # This will return one of two things:
         #    1. None if the existing_item is already defined (so no create needs to happen)
         #    2. The response from Tower from calling the patch on the endpont. It's up to you to process the response and exit from the module
-        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
-        #
+        # Note: common error codes from the Tower API can cause the module to fail
+
         if not endpoint:
             self.fail_json(msg="Unable to create new {0} due to missing endpoint".format(item_type))
 
@@ -482,11 +501,7 @@ class TowerModule(AnsibleModule):
             try:
                 existing_item['url']
             except KeyError as ke:
-                self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
-            if not handle_response:
-                return None
-            else:
-                self.exit_json(**self.json_output)
+                self.fail_json(msg="Unable to process create of item due to missing data {0}".format(ke))
         else:
             # If we don't have an exisitng_item, we can try to create it
 
@@ -495,9 +510,7 @@ class TowerModule(AnsibleModule):
             item_name = new_item.get('name', 'unknown')
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
-            if not handle_response:
-                return response
-            elif response['status_code'] == 201:
+            if response['status_code'] == 201:
                 self.json_output['name'] = 'unknown'
                 if 'name' in response['json']:
                     self.json_output['name'] = response['json']['name']
@@ -506,10 +519,6 @@ class TowerModule(AnsibleModule):
                     self.json_output['name'] = response['json']['username']
                 self.json_output['id'] = response['json']['id']
                 self.json_output['changed'] = True
-                if on_create is None:
-                    self.exit_json(**self.json_output)
-                else:
-                    on_create(self, response['json'])
             else:
                 if 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
@@ -518,16 +527,28 @@ class TowerModule(AnsibleModule):
                 else:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']))
 
-    def update_if_needed(self, existing_item, new_item, handle_response=True, on_update=None):
-        # This will exit from the module on its own unless handle_response is False.
-        # If handle_response is True and the method successfully updates an item and on_update param is defined,
+        # Process any associations with this item
+        if associations is not None:
+            for association_type in associations:
+                self.modify_associations(response, associations[association_type])
+
+        # If we have an on_create method and we actually changed something we can call on_create
+        if on_create is not None and self.json_output['changed']:
+            on_create(self, response['json'])
+        else:
+            self.exit_json(**self.json_output)
+
+    def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
+        # This will exit from the module on its own
+        # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
-        # If you pass handle_response=False it will return one of three things:
+        # This will return one of three things:
         #    1. None if the existing_item does not need to be updated
         #    2. The response from Tower from patching to the endpoint. It's up to you to process the response and exit from the module.
         #    3. An ItemNotDefined exception, if the existing_item does not exist
-        # Note: common error codes from the Tower API can cause the module to fail even if handle_response is set to False
+        # Note: common error codes from the Tower API can cause the module to fail
         if existing_item:
+
             # If we have an item, we can see if it needs an update
             try:
                 item_url = existing_item['url']
@@ -540,6 +561,7 @@ class TowerModule(AnsibleModule):
             except KeyError as ke:
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
+            # Check to see if anything within the item requires the item to be updated
             needs_update = False
             for field in new_item:
                 existing_field = existing_item.get(field, None)
@@ -550,40 +572,37 @@ class TowerModule(AnsibleModule):
                     needs_update = True
                     break
 
+            # If we decided the item needs to be updated, update it
+            self.json_output['id'] = item_id
             if needs_update:
                 response = self.patch_endpoint(item_url, **{'data': new_item})
-                if not handle_response:
-                    return response
-                elif response['status_code'] == 200:
+                if response['status_code'] == 200:
                     self.json_output['changed'] = True
-                    self.json_output['id'] = item_id
-                    if on_update is None:
-                        self.exit_json(**self.json_output)
-                    else:
-                        on_update(self, response['json'])
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
                     self.fail_json(**{'msg': "Unable to update {0} {1}, see response".format(item_type, item_name), 'response': response})
-            else:
-                if not handle_response:
-                    return None
 
-                # Since we made it here, we don't need to update, status ok
-                self.json_output['changed'] = False
-                self.json_output['id'] = item_id
-                self.exit_json(**self.json_output)
         else:
-            if handle_response:
-                self.fail_json(msg="The exstiing item is not defined and thus cannot be updated")
-            else:
-                raise ItemNotDefined("Not given an existing item to update")
+            raise RuntimeError('update_if_needed called incorrectly without existing_item')
 
-    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, handle_response=True, item_type='unknown', on_create=None, on_update=None):
+        # Process any associations with this item
+        if associations is not None:
+            for association_type, id_list in associations.items():
+                endpoint = '{0}{1}/'.format(item_url, association_type)
+                self.modify_associations(endpoint, id_list)
+
+        # If we change something and have an on_change call it
+        if on_update is not None and self.json_output['changed']:
+            on_update(self, response['json'])
+        else:
+            self.exit_json(**self.json_output)
+
+    def create_or_update_if_needed(self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, associations=None):
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, handle_response=handle_response, on_update=on_update)
+            return self.update_if_needed(existing_item, new_item, on_update=on_update, associations=associations)
         else:
-            return self.create_if_needed(existing_item, new_item, endpoint, handle_response=handle_response, on_create=on_create, item_type=item_type)
+            return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
 
     def logout(self):
         if self.oauth_token_id is not None and self.username and self.password:
