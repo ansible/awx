@@ -1,6 +1,5 @@
 import logging
 import uuid
-import random
 import json
 
 from awx.main.dispatch import get_local_queuename

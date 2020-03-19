@@ -1,7 +1,5 @@
 import psycopg2
 import select
-import sys
-import logging
 
 from contextlib import contextmanager
 
