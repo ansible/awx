@@ -1,14 +1,11 @@
-import itertools
 import json
 import os
 import sys
 
 from awxkit import api, config
-import awxkit.exceptions as exc
 from awxkit.utils import to_str
-from awxkit.api.mixins import has_create
 from awxkit.api.pages import Page
-from awxkit.api.pages.api import EXPORTABLE_RESOURCES, get_natural_key
+from awxkit.api.pages.api import EXPORTABLE_RESOURCES
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
@@ -129,107 +126,9 @@ class Config(CustomCommand):
         }
 
 
-def freeze(key):
-    if key is None:
-        return None
-    return frozenset((k, freeze(v) if isinstance(v, dict) else v) for k, v in key.items())
-
-
 class Import(CustomCommand):
     name = 'import'
     help_text = 'import resources into Tower'
-
-    def __init__(self, *args, **kwargs):
-        super(Import, self).__init__(*args, **kwargs)
-        self._natural_key = {}
-        self._options = {}
-
-    def get_by_natural_key(self, key, fetch=True):
-        frozen_key = freeze(key)
-        if frozen_key is not None and frozen_key not in self._natural_key and fetch:
-            pass
-
-        return self._natural_key.get(frozen_key)
-
-    def create_assets(self, data, resource):
-        if resource not in data or resource not in EXPORTABLE_RESOURCES:
-            return
-        cprint("importing {}".format(resource), 'red', file=self.client.stderr)
-
-        endpoint = getattr(self.v2, resource)
-        options = self._options[resource]
-        assets = data[resource]
-        for asset in assets:
-            post_data = {}
-            for field, value in asset.items():
-                if field in ('related', 'natural_key'):
-                    continue
-                if options[field]['type'] == 'id':
-                    page = self.get_by_natural_key(value)
-                    post_data[field] = page['id'] if page is not None else None
-                else:
-                    post_data[field] = value
-
-            page = self.get_by_natural_key(asset['natural_key'], fetch=False)
-            if page is None:
-                if resource == 'users':
-                    # We should only impose a default password if the resource doesn't exist.
-                    post_data.setdefault('password', 'password')
-                page = endpoint.post(post_data)
-            else:
-                page = page.put(post_data)
-
-            self.register_page(page)
-
-    def register_page(self, page):
-        natural_key = freeze(get_natural_key(page))
-        if natural_key is not None:
-            self._natural_key[natural_key] = page
-
-    def register_existing_assets(self, resource):
-        endpoint = getattr(self.v2, resource)
-        options = endpoint.options().json['actions']['POST']
-        self._options[resource] = options
-
-        results = endpoint.get(all_pages=True).results
-        for page in results:
-            self.register_page(page)
-
-    def assign_roles(self, page, roles):
-        role_endpoint = page.json['related']['roles']
-        for role in roles:
-            if 'content_object' not in role:
-                continue  # admin role
-            obj_page = self.get_by_natural_key(role['content_object'])
-            if obj_page is not None:
-                role_page = obj_page.get_object_role(role['name'], by_name=True)
-                try:
-                    role_endpoint.post({'id': role_page['id']})
-                except exc.NoContent:  # desired exception on successful (dis)association
-                    pass
-            else:
-                pass  # admin role
-
-    def assign_related(self, page, name, related_set):
-        pass
-
-    def assign_related_assets(self, resource, assets):
-        for asset in assets:
-            page = self.get_by_natural_key(asset['natural_key'])
-            # FIXME: deal with `page is None` case
-            for name, S in asset.get('related', {}).items():
-                if name == 'roles':
-                    self.assign_roles(page, S)
-                else:
-                    self.assign_related(page, name, S)
-
-    def dependent_resources(self, data):
-        page_resource = {getattr(self.v2, resource)._create().__item_class__: resource
-                         for resource in self.v2.json}
-        data_pages = [getattr(self.v2, resource)._create().__item_class__ for resource in data]
-
-        for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
-            yield page_resource[page_cls]
 
     def handle(self, client, parser):
         if client.help:
@@ -237,17 +136,9 @@ class Import(CustomCommand):
             raise SystemExit()
 
         data = json.load(sys.stdin)
+
         client.authenticate()
-        self.client = client
-        self.v2 = client.v2
-
-        for resource in self.dependent_resources(data):
-            self.register_existing_assets(resource)
-            self.create_assets(data, resource)
-            # FIXME: should we delete existing unpatched assets?
-
-        # for resource, assets in data.items():
-        #     self.assign_related_assets(resource, assets)
+        client.v2.import_assets(data)
 
         return {}
 
