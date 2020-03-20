@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 
+
 # (c) 2017, Wayne Witzel III <wayne@riotousliving.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -12,97 +13,92 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
                     'supported_by': 'community'}
 
-
 DOCUMENTATION = '''
 ---
 module: tower_label
 author: "Wayne Witzel III (@wwitzel3)"
 version_added: "2.3"
-short_description: create, update, or destroy Ansible Tower label.
+short_description: create, update, or destroy Ansible Tower labels.
 description:
     - Create, update, or destroy Ansible Tower labels. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
       description:
-        - Name to use for the label.
+        - Name of this label.
+      required: True
+      type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field).
       required: True
       type: str
     organization:
       description:
-        - Organization the label should be applied to.
+        - Organization this label belongs to.
       required: True
       type: str
-    state:
+    tower_oauthtoken:
       description:
-        - Desired state of the resource.
-      default: "present"
-      choices: ["present", "absent"]
+        - The Tower OAuth token to use.
+      required: False
       type: str
-
-requirements:
-- ansible-tower-cli >= 3.0.2
-
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
+note: Labels can only be created via the Tower API, they can not be deleted. Once they are fully disassociated the API will clean them up on its own.
 '''
-
 
 EXAMPLES = '''
 - name: Add label to tower organization
   tower_label:
     name: Custom Label
     organization: My Organization
-    state: present
-    tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True),
-        organization=dict(required=True),
-        state=dict(choices=['present', 'absent'], default='present'),
+        name=dict(required=True, type='str'),
+        new_name=dict(required=False, type='str'),
+        organization=dict(required=True, type='str'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     organization = module.params.get('organization')
-    state = module.params.get('state')
 
-    json_output = {'label': name, 'state': state}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = None
+    if organization:
+        organization_id = module.resolve_name_to_id('organizations', organization)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        label = tower_cli.get_resource('label')
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('labels', **{
+        'data': {
+            'name': name,
+            'organization': organization_id,
+        }
+    })
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Create the data that gets sent for create and update
+    new_fields = {}
+    new_fields['name'] = new_name if new_name else name
+    if organization != None:
+        new_fields['organization'] = organization_id
 
-            if state == 'present':
-                result = label.modify(name=name, organization=org['id'], create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = label.delete(name=name, organization=org['id'])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update label, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update label: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='labels', item_type='label',
+        associations={
+        }
+    )
 
 
 if __name__ == '__main__':
