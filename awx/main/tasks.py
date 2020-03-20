@@ -609,7 +609,7 @@ def handle_success_and_failure_notifications(job_id):
     while retries < 5:
         if uj.finished:
             uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
-            break
+            return
         else:
             # wait a few seconds to avoid a race where the
             # events are persisted _before_ the UJ.status
@@ -617,6 +617,8 @@ def handle_success_and_failure_notifications(job_id):
             retries += 1
             time.sleep(1)
             uj = UnifiedJob.objects.get(pk=job_id)
+
+    logger.warn(f"Failed to even try to send notifications for job '{uj}' due to job not being in finished state.")
 
 
 @task(queue=get_local_queuename)
