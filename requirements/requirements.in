@@ -28,6 +28,7 @@ jinja2
 jsonschema
 Markdown  # used for formatting API help
 openshift
+pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
 pygerduty

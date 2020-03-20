@@ -140,6 +140,11 @@ in the top-level Makefile.
 
 ## Library Notes
 
+### pexpect
+
+Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
+Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
+
 ### requests-futures
 
 This can be removed when a solution for the external log queuing is ready.
