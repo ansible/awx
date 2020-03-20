@@ -4991,7 +4991,7 @@ msgstr "カンマ区切りのフィルター式の一覧を提供します。ホ
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:48
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:50
 msgid "Provide a host name, ip address, or ip address:port. Examples include:"
-msgstr "host name、ip address、または ip address:port を指定してください。例:reo"
+msgstr "host name、ip address、または ip address:port を指定してください。例:"
 
 #: client/features/templates/templates.strings.js:55
 #: client/src/templates/job_templates/job-template.form.js:178
