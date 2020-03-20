@@ -26,7 +26,10 @@ describe('<HostAdd />', () => {
   let history;
 
   beforeEach(async () => {
-    history = createMemoryHistory();
+    history = createMemoryHistory({
+      initialEntries: ['/templates/job_templates/1/survey/edit/foo'],
+      state: { some: 'state' },
+    });
     await act(async () => {
       wrapper = mountWithContexts(<HostAdd />, {
         context: { router: { history } },

@@ -47,3 +47,24 @@ export function requiredEmail(i18n) {
     return undefined;
   };
 }
+
+export function noWhiteSpace(i18n) {
+  return value => {
+    if (/\s/.test(value)) {
+      return i18n._(t`This field must not contain spaces`);
+    }
+    return undefined;
+  };
+}
+
+export function combine(validators) {
+  return value => {
+    for (let i = 0; i < validators.length; i++) {
+      const error = validators[i](value);
+      if (error) {
+        return error;
+      }
+    }
+    return undefined;
+  };
+}

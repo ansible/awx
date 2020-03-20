@@ -1,6 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
+import { Link } from 'react-router-dom';
 import {
   Button as _Button,
   DataListAction as _DataListAction,
@@ -75,13 +76,13 @@ function SurveyListItem({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell key={question.question_name}>
-              {question.question_name}
+            <DataListCell key="name">
+              <Link to={`survey/edit/${question.variable}`}>
+                {question.question_name}
+              </Link>
             </DataListCell>,
-            <DataListCell key={question.type}>{question.type}</DataListCell>,
-            <DataListCell key={question.default}>
-              {question.default}
-            </DataListCell>,
+            <DataListCell key="type">{question.type}</DataListCell>,
+            <DataListCell key="default">{question.default}</DataListCell>,
           ]}
         />
       </DataListItemRow>

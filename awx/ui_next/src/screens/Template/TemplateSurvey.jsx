@@ -7,7 +7,7 @@ import ContentError from '@components/ContentError';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
 import useRequest, { useDismissableError } from '@util/useRequest';
-import SurveyList from './shared/SurveyList';
+import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
 function TemplateSurvey({ template, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
@@ -37,6 +37,13 @@ function TemplateSurvey({ template, i18n }) {
       [template.id, setSurvey]
     )
   );
+  const updateSurveySpec = spec => {
+    updateSurvey({
+      name: survey.name || '',
+      description: survey.description || '',
+      spec,
+    });
+  };
 
   const { request: deleteSurvey, error: deleteError } = useRequest(
     useCallback(async () => {
@@ -64,13 +71,19 @@ function TemplateSurvey({ template, i18n }) {
   return (
     <>
       <Switch>
-        <Route path="/templates/:templateType/:id/survey">
+        <Route path="/templates/:templateType/:id/survey/add">
+          <SurveyQuestionAdd survey={survey} updateSurvey={updateSurveySpec} />
+        </Route>
+        <Route path="/templates/:templateType/:id/survey/edit/:variable">
+          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurveySpec} />
+        </Route>
+        <Route path="/templates/:templateType/:id/survey" exact>
           <SurveyList
             isLoading={isLoading}
             survey={survey}
             surveyEnabled={surveyEnabled}
             toggleSurvey={toggleSurvey}
-            updateSurvey={spec => updateSurvey({ ...survey, spec })}
+            updateSurvey={updateSurveySpec}
             deleteSurvey={deleteSurvey}
           />
         </Route>

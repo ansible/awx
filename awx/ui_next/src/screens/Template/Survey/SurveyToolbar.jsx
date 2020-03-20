@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 
@@ -20,6 +21,7 @@ function SurveyToolbar({
   isDeleteDisabled,
   onToggleDeleteModal,
 }) {
+  const match = useRouteMatch();
   return (
     <DataToolbar id="survey-toolbar">
       <DataToolbarContent>
@@ -45,7 +47,7 @@ function SurveyToolbar({
         </DataToolbarItem>
         <DataToolbarGroup>
           <DataToolbarItem>
-            <ToolbarAddButton linkTo="/" />
+            <ToolbarAddButton linkTo={`${match.url}/add`} />
           </DataToolbarItem>
           <DataToolbarItem>
             <Button
