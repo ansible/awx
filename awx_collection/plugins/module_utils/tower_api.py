@@ -523,10 +523,6 @@ class TowerModule(AnsibleModule):
                 if existing_data['json'] == post['data']:
                     continue
 
-                with open('/tmp/john', 'w') as f:
-                    import json
-                    f.write(json.dumps(post['data']))
-
                 # If this item no longer has data, lets remove it
                 if post['data'] in ('', [], {}):
                     response = self.delete_endpoint(endpoint)
