@@ -349,7 +349,7 @@ class TestTaskPublisher:
     def test_apply_async_queue_required(self):
         with pytest.raises(ValueError) as e:
             message, queue = add.apply_async([2, 2])
-        assert "awx.main.tests.functional.test_dispatch.add: Queue value required and may not me None" == e.value.args[0]
+        assert "awx.main.tests.functional.test_dispatch.add: Queue value required and may not be None" == e.value.args[0]
 
     def test_queue_defined_in_task_decorator(self):
         message, queue = multiply.apply_async([2, 2])

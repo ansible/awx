@@ -1,6 +1,5 @@
 import logging
-import string
-import random
+import uuid
 import json
 
 from awx.main.dispatch import get_local_queuename
@@ -21,10 +20,6 @@ class Control(object):
         self.service = service
         self.queuename = host or get_local_queuename()
 
-    def publish(self, msg, conn, **kwargs):
-        # TODO: delete this method??
-        raise RuntimeError("Publish called?!")
-
     def status(self, *args, **kwargs):
         return self.control_with_reply('status', *args, **kwargs)
 
@@ -33,8 +28,7 @@ class Control(object):
 
     @classmethod
     def generate_reply_queue_name(cls):
-        letters = string.ascii_lowercase
-        return 'reply_to_{}'.format(''.join(random.choice(letters) for i in range(8)))
+        return f"reply_to_{str(uuid.uuid4()).replace('-','_')}"
 
     def control_with_reply(self, command, timeout=5):
         logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
