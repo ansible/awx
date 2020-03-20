@@ -21,7 +21,7 @@ function getValueAsMode(value, mode) {
   return mode === YAML_MODE ? jsonToYaml(value) : yamlToJson(value);
 }
 
-function VariablesDetail({ value, label, rows }) {
+function VariablesDetail({ value, label, rows, fullHeight }) {
   const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
   const [currentValue, setCurrentValue] = useState(value || '---');
   const [error, setError] = useState(null);
@@ -75,6 +75,7 @@ function VariablesDetail({ value, label, rows }) {
           value={currentValue}
           readOnly
           rows={rows}
+          fullHeight={fullHeight}
           css="margin-top: 10px"
         />
         {error && (

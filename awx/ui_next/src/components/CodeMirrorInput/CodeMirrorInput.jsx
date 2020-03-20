@@ -17,7 +17,8 @@ const CodeMirror = styled(ReactCodeMirror)`
   }
 
   & > .CodeMirror {
-    height: ${props => props.rows * LINE_HEIGHT + PADDING}px;
+    height: ${props =>
+      props.fullHeight ? 'auto' : `${props.rows * LINE_HEIGHT + PADDING}px`};
     font-family: var(--pf-global--FontFamily--monospace);
   }
 
@@ -63,6 +64,7 @@ function CodeMirrorInput({
   readOnly,
   hasErrors,
   rows,
+  fullHeight,
   className,
 }) {
   return (
@@ -75,8 +77,10 @@ function CodeMirrorInput({
       options={{
         smartIndent: false,
         lineNumbers: true,
+        lineWrapping: true,
         readOnly,
       }}
+      fullHeight={fullHeight}
       rows={rows}
     />
   );
@@ -87,12 +91,14 @@ CodeMirrorInput.propTypes = {
   mode: oneOf(['javascript', 'yaml', 'jinja2']).isRequired,
   readOnly: bool,
   hasErrors: bool,
+  fullHeight: bool,
   rows: number,
 };
 CodeMirrorInput.defaultProps = {
   readOnly: false,
   onChange: () => {},
   rows: 6,
+  fullHeight: false,
   hasErrors: false,
 };
 

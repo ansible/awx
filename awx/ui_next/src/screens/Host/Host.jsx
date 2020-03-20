@@ -116,7 +116,7 @@ function Host({ i18n, setBreadcrumb }) {
             <Route path="/hosts/:id/edit" key="edit">
               <HostEdit host={host} />
             </Route>,
-            <Route path="/hosts/:id/facts" key="facts">
+            <Route key="facts" path="/hosts/:id/facts">
               <HostFacts host={host} />
             </Route>,
             <Route path="/hosts/:id/groups" key="groups">

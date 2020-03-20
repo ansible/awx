@@ -22,6 +22,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import JobList from '@components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
+import InventoryHostFacts from '../InventoryHostFacts';
 
 function InventoryHost({ i18n, setBreadcrumb, inventory }) {
   const location = useLocation();
@@ -139,6 +140,12 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
             path="/inventories/inventory/:id/hosts/:hostId/edit"
           >
             <InventoryHostEdit host={host} inventory={inventory} />
+          </Route>
+          <Route
+            key="facts"
+            path="/inventories/inventory/:id/hosts/:hostId/facts"
+          >
+            <InventoryHostFacts host={host} />
           </Route>
           <Route
             key="completed-jobs"

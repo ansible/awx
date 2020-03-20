@@ -127,7 +127,7 @@ function JobTemplateDetail({ i18n, template }) {
       )}
       {use_fact_cache && (
         <TextListItem component={TextListItemVariants.li}>
-          {i18n._(t`Use Fact Cache`)}
+          {i18n._(t`Use Fact Storage`)}
         </TextListItem>
       )}
     </TextList>
