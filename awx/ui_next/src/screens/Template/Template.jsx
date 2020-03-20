@@ -1,8 +1,18 @@
-import React, { Component } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
+import {
+  Switch,
+  Route,
+  Redirect,
+  withRouter,
+  Link,
+  useLocation,
+  useParams,
+  useRouteMatch,
+} from 'react-router-dom';
+import useRequest from '@util/useRequest';
 
 import { TabbedCardHeader } from '@components/Card';
 import CardCloseButton from '@components/CardCloseButton';
@@ -17,261 +27,195 @@ import JobTemplateEdit from './JobTemplateEdit';
 import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import TemplateSurvey from './TemplateSurvey';
 
-class Template extends Component {
-  constructor(props) {
-    super(props);
+function Template({ i18n, me, setBreadcrumb }) {
+  const location = useLocation();
+  const { id: templateId } = useParams();
+  const match = useRouteMatch();
 
-    this.state = {
-      contentError: null,
-      hasContentLoading: true,
-      template: null,
-      isNotifAdmin: false,
-    };
-    this.loadTemplate = this.loadTemplate.bind(this);
-    this.loadTemplateAndRoles = this.loadTemplateAndRoles.bind(this);
-    this.loadSchedules = this.loadSchedules.bind(this);
-    this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
-  }
-
-  async componentDidMount() {
-    await this.loadTemplateAndRoles();
-  }
-
-  async componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
-      await this.loadTemplate();
-    }
-  }
-
-  async loadTemplateAndRoles() {
-    const { match, setBreadcrumb } = this.props;
-    const id = parseInt(match.params.id, 10);
-
-    this.setState({ contentError: null, hasContentLoading: true });
-    try {
+  const {
+    result: { isNotifAdmin, template },
+    isLoading: hasRolesandTemplateLoading,
+    error: rolesAndTemplateError,
+    request: loadTemplateAndRoles,
+  } = useRequest(
+    useCallback(async () => {
       const [{ data }, notifAdminRes] = await Promise.all([
-        JobTemplatesAPI.readDetail(id),
+        JobTemplatesAPI.readDetail(templateId),
         OrganizationsAPI.read({
           page_size: 1,
           role_level: 'notification_admin_role',
         }),
       ]);
       setBreadcrumb(data);
-      this.setState({
+
+      return {
         template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
-      });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
-    }
-  }
+      };
+    }, [setBreadcrumb, templateId]),
+    { isNotifAdmin: false, template: null }
+  );
+  useEffect(() => {
+    loadTemplateAndRoles();
+  }, [loadTemplateAndRoles]);
 
-  async loadTemplate() {
-    const { setBreadcrumb, match } = this.props;
-    const { id } = match.params;
+  const loadScheduleOptions = () => {
+    return JobTemplatesAPI.readScheduleOptions(templateId);
+  };
 
-    this.setState({ contentError: null, hasContentLoading: true });
-    try {
-      const { data } = await JobTemplatesAPI.readDetail(id);
-      setBreadcrumb(data);
-      this.setState({ template: data });
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
-    }
-  }
+  const loadSchedules = params => {
+    return JobTemplatesAPI.readSchedules(templateId, params);
+  };
 
-  loadScheduleOptions() {
-    const { template } = this.state;
-    return JobTemplatesAPI.readScheduleOptions(template.id);
-  }
+  const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
 
-  loadSchedules(params) {
-    const { template } = this.state;
-    return JobTemplatesAPI.readSchedules(template.id, params);
-  }
+  const tabsArray = [
+    { name: i18n._(t`Details`), link: `${match.url}/details` },
+    { name: i18n._(t`Access`), link: `${match.url}/access` },
+  ];
 
-  render() {
-    const { i18n, location, match, me, setBreadcrumb } = this.props;
-    const {
-      contentError,
-      hasContentLoading,
-      isNotifAdmin,
-      template,
-    } = this.state;
-
-    const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
-
-    const tabsArray = [
-      { name: i18n._(t`Details`), link: `${match.url}/details` },
-      { name: i18n._(t`Access`), link: `${match.url}/access` },
-    ];
-
-    if (canSeeNotificationsTab) {
-      tabsArray.push({
-        name: i18n._(t`Notifications`),
-        link: `${match.url}/notifications`,
-      });
-    }
-
-    if (template) {
-      tabsArray.push({
-        name: i18n._(t`Schedules`),
-        link: `${match.url}/schedules`,
-      });
-    }
-
-    tabsArray.push(
-      {
-        name: i18n._(t`Completed Jobs`),
-        link: `${match.url}/completed_jobs`,
-      },
-      {
-        name: i18n._(t`Survey`),
-        link: `${match.url}/survey`,
-      }
-    );
-
-    tabsArray.forEach((tab, n) => {
-      tab.id = n;
+  if (canSeeNotificationsTab) {
+    tabsArray.push({
+      name: i18n._(t`Notifications`),
+      link: `${match.url}/notifications`,
     });
+  }
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/templates" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+  if (template) {
+    tabsArray.push({
+      name: i18n._(t`Schedules`),
+      link: `${match.url}/schedules`,
+    });
+  }
 
-    if (
-      location.pathname.endsWith('edit') ||
-      location.pathname.includes('schedules/')
-    ) {
-      cardHeader = null;
+  tabsArray.push(
+    {
+      name: i18n._(t`Completed Jobs`),
+      link: `${match.url}/completed_jobs`,
+    },
+    {
+      name: i18n._(t`Survey`),
+      link: `${match.url}/survey`,
     }
+  );
 
-    if (!hasContentLoading && contentError) {
-      return (
-        <PageSection>
-          <Card>
-            <ContentError error={contentError}>
-              {contentError.response.status === 404 && (
-                <span>
-                  {i18n._(`Template not found.`)}{' '}
-                  <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
-                </span>
-              )}
-            </ContentError>
-          </Card>
-        </PageSection>
-      );
-    }
+  tabsArray.forEach((tab, n) => {
+    tab.id = n;
+  });
 
+  let cardHeader = (
+    <TabbedCardHeader>
+      <RoutedTabs tabsArray={tabsArray} />
+      <CardActions>
+        <CardCloseButton linkTo="/templates" />
+      </CardActions>
+    </TabbedCardHeader>
+  );
+  if (
+    location.pathname.endsWith('edit') ||
+    location.pathname.includes('schedules/')
+  ) {
+    cardHeader = null;
+  }
+
+  const contentError = rolesAndTemplateError;
+  if (!hasRolesandTemplateLoading && contentError) {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
-          <Switch>
-            <Redirect
-              from="/templates/:templateType/:id"
-              to="/templates/:templateType/:id/details"
-              exact
-            />
-            {template && (
-              <Route
-                key="details"
-                path="/templates/:templateType/:id/details"
-                render={() => (
-                  <JobTemplateDetail
-                    hasTemplateLoading={hasContentLoading}
-                    template={template}
-                  />
-                )}
-              />
+          <ContentError error={contentError}>
+            {contentError.response.status === 404 && (
+              <span>
+                {i18n._(`Template not found.`)}{' '}
+                <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+              </span>
             )}
-            {template && (
-              <Route
-                key="edit"
-                path="/templates/:templateType/:id/edit"
-                render={() => <JobTemplateEdit template={template} />}
-              />
-            )}
-            {template && (
-              <Route
-                key="access"
-                path="/templates/:templateType/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={template}
-                    apiModel={JobTemplatesAPI}
-                  />
-                )}
-              />
-            )}
-            {template && (
-              <Route
-                key="schedules"
-                path="/templates/:templateType/:id/schedules"
-                render={() => (
-                  <Schedules
-                    setBreadcrumb={setBreadcrumb}
-                    unifiedJobTemplate={template}
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
-            )}
-            {canSeeNotificationsTab && (
-              <Route
-                path="/templates/:templateType/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={isNotifAdmin}
-                    apiModel={JobTemplatesAPI}
-                  />
-                )}
-              />
-            )}
-            {template?.id && (
-              <Route path="/templates/:templateType/:id/completed_jobs">
-                <JobList defaultParams={{ job__job_template: template.id }} />
-              </Route>
-            )}
-            {template && (
-              <Route path="/templates/:templateType/:id/survey">
-                <TemplateSurvey template={template} />
-              </Route>
-            )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link
-                        to={`/templates/${match.params.templateType}/${match.params.id}/details`}
-                      >
-                        {i18n._(`View Template Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
-          </Switch>
+          </ContentError>
         </Card>
       </PageSection>
     );
   }
+
+  return (
+    <PageSection>
+      <Card>
+        {cardHeader}
+        <Switch>
+          <Redirect
+            from="/templates/:templateType/:id"
+            to="/templates/:templateType/:id/details"
+            exact
+          />
+          {template && (
+            <Route key="details" path="/templates/:templateType/:id/details">
+              <JobTemplateDetail
+                hasTemplateLoading={hasRolesandTemplateLoading}
+                template={template}
+              />
+            </Route>
+          )}
+          {template && (
+            <Route key="edit" path="/templates/:templateType/:id/edit">
+              <JobTemplateEdit template={template} />
+            </Route>
+          )}
+          {template && (
+            <Route key="access" path="/templates/:templateType/:id/access">
+              <ResourceAccessList
+                resource={template}
+                apiModel={JobTemplatesAPI}
+              />
+            </Route>
+          )}
+          {template && (
+            <Route
+              key="schedules"
+              path="/templates/:templateType/:id/schedules"
+            >
+              <Schedules
+                setBreadcrumb={setBreadcrumb}
+                unifiedJobTemplate={template}
+                loadSchedules={loadSchedules}
+                loadScheduleOptions={loadScheduleOptions}
+              />
+            </Route>
+          )}
+          {canSeeNotificationsTab && (
+            <Route path="/templates/:templateType/:id/notifications">
+              <NotificationList
+                id={Number(templateId)}
+                canToggleNotifications={isNotifAdmin}
+                apiModel={JobTemplatesAPI}
+              />
+            </Route>
+          )}
+          {template?.id && (
+            <Route path="/templates/:templateType/:id/completed_jobs">
+              <JobList defaultParams={{ job__job_template: template.id }} />
+            </Route>
+          )}
+          {template && (
+            <Route path="/templates/:templateType/:id/survey">
+              <TemplateSurvey template={template} />
+            </Route>
+          )}
+          {!hasRolesandTemplateLoading && (
+            <Route key="not-found" path="*">
+              <ContentError isNotFound>
+                {match.params.id && (
+                  <Link
+                    to={`/templates/${match.params.templateType}/${match.params.id}/details`}
+                  >
+                    {i18n._(`View Template Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            </Route>
+          )}
+        </Switch>
+      </Card>
+    </PageSection>
+  );
 }
 
 export { Template as _Template };
