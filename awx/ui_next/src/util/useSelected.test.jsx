@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import useSelect from './useSelect';
+import useSelected from './useSelected';
 
 const array = [{ id: '1' }, { id: '2' }, { id: '3' }];
 
@@ -14,7 +14,7 @@ const testHook = callback => {
   mount(<TestHook callback={callback} />);
 };
 
-describe('useSelect hook', () => {
+describe('useSelected hook', () => {
   let selected;
   let isAllSelected;
   let handleSelect;
@@ -22,7 +22,7 @@ describe('useSelect hook', () => {
 
   test('should return expected initial values', () => {
     testHook(() => {
-      ({ selected, isAllSelected, handleSelect, setSelected } = useSelect());
+      ({ selected, isAllSelected, handleSelect, setSelected } = useSelected());
     });
     expect(selected).toEqual([]);
     expect(isAllSelected).toEqual(false);
@@ -32,7 +32,7 @@ describe('useSelect hook', () => {
 
   test('handleSelect should update and filter selected items', () => {
     testHook(() => {
-      ({ selected, isAllSelected, handleSelect, setSelected } = useSelect());
+      ({ selected, isAllSelected, handleSelect, setSelected } = useSelected());
     });
 
     act(() => {
@@ -48,7 +48,7 @@ describe('useSelect hook', () => {
 
   test('should return expected isAllSelected value', () => {
     testHook(() => {
-      ({ selected, isAllSelected, handleSelect, setSelected } = useSelect(
+      ({ selected, isAllSelected, handleSelect, setSelected } = useSelected(
         array
       ));
     });

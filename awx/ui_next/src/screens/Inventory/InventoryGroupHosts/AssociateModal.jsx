@@ -6,7 +6,7 @@ import { Button, Modal } from '@patternfly/react-core';
 import OptionsList from '@components/Lookup/shared/OptionsList';
 import useRequest from '@util/useRequest';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import useSelect from '@util/useSelect';
+import useSelected from '@util/useSelected';
 
 const QS_CONFIG = getQSConfig('associate', {
   page: 1,
@@ -24,7 +24,7 @@ function AssociateModal({
   isModalOpen = false,
 }) {
   const history = useHistory();
-  const { selected, handleSelect } = useSelect([]);
+  const { selected, handleSelect } = useSelected([]);
 
   const {
     request: fetchItems,
@@ -101,7 +101,7 @@ function AssociateModal({
       >
         <OptionsList
           contentError={contentError}
-          deselectItem={item => handleSelect(item)}
+          deselectItem={handleSelect}
           header={header}
           isLoading={isLoading}
           multiple
@@ -109,7 +109,7 @@ function AssociateModal({
           options={items}
           qsConfig={QS_CONFIG}
           readOnly={false}
-          selectItem={item => handleSelect(item)}
+          selectItem={handleSelect}
           value={selected}
           searchColumns={[
             {

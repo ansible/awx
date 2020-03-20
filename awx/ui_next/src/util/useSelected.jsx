@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 /**
- * useSelect hook provides a way to read and update a selected list
+ * useSelected hook provides a way to read and update a selected list
  * Param: array of list items
  * Returns: {
  *  selected: array of selected list items
@@ -11,7 +11,7 @@ import { useState } from 'react';
  * }
  */
 
-export default function useSelect(list = []) {
+export default function useSelected(list = []) {
   const [selected, setSelected] = useState([]);
   const isAllSelected = selected.length > 0 && selected.length === list.length;
 

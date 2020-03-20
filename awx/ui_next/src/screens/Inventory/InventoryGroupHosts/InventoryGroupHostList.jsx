@@ -9,7 +9,7 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from '@util/useRequest';
-import useSelect from '@util/useSelect';
+import useSelected from '@util/useSelected';
 import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
@@ -56,7 +56,7 @@ function InventoryGroupHostList({ i18n }) {
     }
   );
 
-  const { selected, isAllSelected, handleSelect, setSelected } = useSelect(
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
     hosts
   );
 
@@ -211,7 +211,7 @@ function InventoryGroupHostList({ i18n }) {
           title={i18n._(t`Select Hosts`)}
         />
       )}
-      {(associateError || disassociateError) && (
+      {error && (
         <AlertModal
           isOpen={error}
           onClose={dismissError}
