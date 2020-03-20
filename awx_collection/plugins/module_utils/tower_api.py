@@ -94,6 +94,15 @@ class TowerModule(AnsibleModule):
 
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
+    def append_json_output(self, entry, value):
+        if entry in self.json_output:
+            if type(self.json_output[entry]) is str:
+                self.json_output[entry] = [ self.json_output[entry], value ]
+            else:
+                self.json_output[entry].append(value)
+        else:
+            self.json_output[entry] = value
+
     def extract_errors_from_response(self, response):
         if 'json' in response:
             for key in ('__all__', 'error'):
@@ -497,7 +506,7 @@ class TowerModule(AnsibleModule):
         for an_id in ids_to_remove:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
             if response['status_code'] == 204:
-                self.json_output['removed_an_association'] = True
+                self.append_json_output('removed_an_association', "{}[{}]".format(association_endpoint, an_id))
                 self.json_output['changed'] = True
             else:
                 self.fail_json(msg="Failed to disassociate item {0}".format(self.extract_errors_from_response(response)))
@@ -506,7 +515,7 @@ class TowerModule(AnsibleModule):
         for an_id in list(set(new_association_list) - set(existing_associated_ids)):
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
             if response['status_code'] == 204:
-                self.json_output['added_an_association'] = True
+                self.append_json_output('added_an_association', "{}[{}]".format(association_endpoint, an_id))
                 self.json_output['changed'] = True
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(self.extract_errors_from_response(response)))
@@ -529,7 +538,7 @@ class TowerModule(AnsibleModule):
                     # Tower job template requires a 200
                     # Left as an array as for future additional delete returns
                     if response['status_code'] in [200]:
-                        self.json_output['deleted_additional_post'] = True
+                        self.append_json_output('deleted_additional_post', endpoint)
                         self.json_output['changed'] = True
                     else:
                         self.fail_json(msg="Unable to delete to {0} for {1}: {2}".format(endpoint, item_type, self.extract_errors_from_response(response)), **{'response': response})
@@ -538,7 +547,7 @@ class TowerModule(AnsibleModule):
                     # Tower job template requires a 200
                     # Left as an array as for future additional posts returns
                     if response['status_code'] in [200]:
-                        self.json_output['added_additional_post'] = True
+                        self.append_json_output('added_additional_post', endpoint)
                         self.json_output['changed'] = True
                     else:
                         self.fail_json(msg="Unable to post to {0} for {1}: {2}".format(endpoint, item_type, self.extract_errors_from_response(response)), **{'response': response})
@@ -556,8 +565,6 @@ class TowerModule(AnsibleModule):
 
 
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None, additional_posts=[]):
-
-    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, item_type='unknown', associations=None):
 
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
