@@ -38,6 +38,12 @@ options:
         - Organization this label belongs to.
       required: True
       type: str
+    state:
+      description:
+        - Desired state of the resource.
+      default: "present"
+      choices: ["present"]	
+      type: str
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
@@ -64,6 +70,7 @@ def main():
         name=dict(required=True, type='str'),
         new_name=dict(required=False, type='str'),
         organization=dict(required=True, type='str'),
+        state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
