@@ -9,15 +9,15 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
   const match = useRouteMatch();
 
   const handleSubmit = async question => {
-    if (survey.spec?.some(q => q.variable === question.variable)) {
-      setFormError(
-        new Error(
-          `Survey already contains a question with variable named “${question.variable}”`
-        )
-      );
-      return;
-    }
     try {
+      if (survey.spec?.some(q => q.variable === question.variable)) {
+        setFormError(
+          new Error(
+            `Survey already contains a question with variable named “${question.variable}”`
+          )
+        );
+        return;
+      }
       const newSpec = survey.spec ? survey.spec.concat(question) : [question];
       await updateSurvey(newSpec);
       history.push(match.url.replace('/add', ''));

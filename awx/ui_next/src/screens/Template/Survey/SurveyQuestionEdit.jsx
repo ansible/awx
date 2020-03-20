@@ -21,19 +21,18 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
   };
 
   const handleSubmit = async formData => {
-    if (
-      formData.variable !== question.variable &&
-      survey.spec.find(q => q.variable === formData.variable)
-    ) {
-      debugger;
-      setFormError(
-        new Error(
-          `Survey already contains a question with variable named “${formData.variable}”`
-        )
-      );
-      return;
-    }
     try {
+      if (
+        formData.variable !== question.variable &&
+        survey.spec.find(q => q.variable === formData.variable)
+      ) {
+        setFormError(
+          new Error(
+            `Survey already contains a question with variable named “${formData.variable}”`
+          )
+        );
+        return;
+      }
       const questionIndex = survey.spec.findIndex(
         q => q.variable === match.params.variable
       );
