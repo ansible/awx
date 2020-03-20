@@ -96,12 +96,15 @@ class TowerModule(AnsibleModule):
 
     def extract_errors_from_response(self, response):
         if 'json' in response:
-            if '__all__' in response['json']:
-                return response['json']['__all__'][0]
-            elif 'error' in response['json']:
-                return response['json']['error']
-            else:
-                return response['json']
+            for key in ('__all__', 'error'):
+                if key in response['json']:
+                    if type(response['json'][key]) is str:
+                        return response['json'][key]
+                    else:
+                        return ', '.join(response['json'][key])
+
+            # If we made it here we have a JSON payload but didn't find one of our error keys
+            return response['json']
         else:
             return response['status_code']
 
