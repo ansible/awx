@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import FormField from '@components/FormField';
+import FormField, { FormSubmitError } from '@components/FormField';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { required } from '@util/validators';
@@ -118,6 +118,7 @@ function CredentialForm({
   credentialTypes,
   onSubmit,
   onCancel,
+  submitError,
   ...rest
 }) {
   const initialValues = {
@@ -193,6 +194,7 @@ function CredentialForm({
               sshCredentialTypeId={sshCredentialTypeId}
               {...rest}
             />
+            <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={onCancel}
               onSubmit={formik.handleSubmit}
