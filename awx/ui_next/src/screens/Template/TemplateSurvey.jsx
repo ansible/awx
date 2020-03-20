@@ -39,7 +39,8 @@ function TemplateSurvey({ template, i18n }) {
   );
   const updateSurveySpec = spec => {
     updateSurvey({
-      ...survey,
+      name: survey.name || '',
+      description: survey.description || '',
       spec,
     });
   };
