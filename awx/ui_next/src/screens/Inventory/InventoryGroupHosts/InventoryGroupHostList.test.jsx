@@ -155,9 +155,41 @@ describe('<InventoryGroupHostList />', () => {
     wrapper
       .find('DropdownItem[aria-label="add existing host"]')
       .simulate('click');
-    expect(wrapper.find('AlertModal').length).toBe(1);
+    expect(wrapper.find('AssociateModal').length).toBe(1);
     wrapper.find('ModalBoxCloseButton').simulate('click');
-    expect(wrapper.find('AlertModal').length).toBe(0);
+    expect(wrapper.find('AssociateModal').length).toBe(0);
+  });
+
+  test('should make expected api request when associating hosts', async () => {
+    GroupsAPI.associateHost.mockResolvedValue();
+    InventoriesAPI.readHosts.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
+      },
+    });
+    wrapper
+      .find('DropdownToggle button[aria-label="add host"]')
+      .simulate('click');
+    await act(async () => {
+      wrapper
+        .find('DropdownItem[aria-label="add existing host"]')
+        .simulate('click');
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await act(async () => {
+      wrapper
+        .find('CheckboxListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
+    await waitForElement(wrapper, 'AssociateModal', el => el.length === 0);
+    expect(InventoriesAPI.readHosts).toHaveBeenCalledTimes(1);
+    expect(GroupsAPI.associateHost).toHaveBeenCalledTimes(1);
   });
 
   test('should navigate to host add form when adding a new host', async () => {
