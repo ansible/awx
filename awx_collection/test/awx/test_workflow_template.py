@@ -10,7 +10,7 @@ from awx.main.models import (
 
 
 @pytest.mark.django_db
-def test_create_workflow_job_template(run_module, admin_user, organization):
+def test_create_workflow_job_template(run_module, admin_user, organization, silence_deprecation):
 
     module_args = {
         'name': 'foo-workflow',
@@ -39,7 +39,7 @@ def test_create_workflow_job_template(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_with_nested_workflow(run_module, admin_user, organization):
+def test_with_nested_workflow(run_module, admin_user, organization, silence_deprecation):
     wfjt1 = WorkflowJobTemplate.objects.create(name='first', organization=organization)
 
     result = run_module('tower_workflow_template', {
@@ -59,7 +59,7 @@ def test_with_nested_workflow(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_schema_with_branches(run_module, admin_user, organization):
+def test_schema_with_branches(run_module, admin_user, organization, silence_deprecation):
 
     proj = Project.objects.create(organization=organization, name='Ansible Examples')
     inv = Inventory.objects.create(organization=organization, name='test-inv')
@@ -119,7 +119,7 @@ def test_schema_with_branches(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_with_missing_ujt(run_module, admin_user, organization):
+def test_with_missing_ujt(run_module, admin_user, organization, silence_deprecation):
     result = run_module('tower_workflow_template', {
         'name': 'foo-workflow',
         'organization': organization.name,

@@ -7,7 +7,7 @@ from awx.main.models import WorkflowJobTemplate, User
 
 
 @pytest.mark.django_db
-def test_grant_organization_permission(run_module, admin_user, organization):
+def test_grant_organization_permission(run_module, admin_user, organization, silence_deprecation):
     rando = User.objects.create(username='rando')
 
     result = run_module('tower_role', {
@@ -22,7 +22,7 @@ def test_grant_organization_permission(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_grant_workflow_permission(run_module, admin_user, organization):
+def test_grant_workflow_permission(run_module, admin_user, organization, silence_deprecation):
     wfjt = WorkflowJobTemplate.objects.create(organization=organization, name='foo-workflow')
     rando = User.objects.create(username='rando')
 
