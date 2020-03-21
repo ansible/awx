@@ -19,6 +19,6 @@
 
 - assert:
     that:
-      - "result.msg == 'Failed to update label, organization not found: The requested object could not be found.'"
+      - "'Non existing org was not found on the Tower server' in result.msg"
 
 # TODO: Deleting labels doesn't seem to work currently
