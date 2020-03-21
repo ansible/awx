@@ -18,10 +18,10 @@ DOCUMENTATION = '''
 module: tower_role
 version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Ansible Tower role.
+short_description: grant or revoke an Ansible Tower role.
 description:
-    - Create, update, or destroy Ansible Tower roles. See
-      U(https://www.ansible.com/tower) for an overview.
+    - Roles are used for access control, this module is for managing user access to server resources.
+    - Grant or revoke Ansible Tower roles to users. See U(https://www.ansible.com/tower) for an overview.
 options:
     user:
       description:
@@ -41,6 +41,8 @@ options:
     target_team:
       description:
         - Team that the role acts on.
+        - For example, make someone a member or an admin of a team.
+        - Members of a team implicitly receive the permissions that the team has.
       type: str
     inventory:
       description:
@@ -52,7 +54,7 @@ options:
       type: str
     workflow:
       description:
-        - The job template the role acts on.
+        - The workflow job template the role acts on.
       type: str
     credential:
       description:
@@ -68,10 +70,18 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
+        - Desired state.
+        - State of present indicates the user should have the role.
+        - State of absent indicates the user should have the role taken away, if they have it.
       default: "present"
       choices: ["present", "absent"]
       type: str
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 
 requirements:
 - ansible-tower-cli >= 3.0.2
@@ -87,45 +97,9 @@ EXAMPLES = '''
     target_team: "My Team"
     role: member
     state: present
-    tower_config_file: "~/tower_cli.cfg"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
-
-def update_resources(module, p):
-    '''update_resources attempts to fetch any of the resources given
-    by name using their unique field (identity)
-    '''
-    params = p.copy()
-    identity_map = {
-        'user': 'username',
-        'team': 'name',
-        'target_team': 'name',
-        'inventory': 'name',
-        'job_template': 'name',
-        'workflow': 'name',
-        'credential': 'name',
-        'organization': 'name',
-        'project': 'name',
-    }
-    for k, v in identity_map.items():
-        try:
-            if params[k]:
-                key = 'team' if k == 'target_team' else k
-                result = tower_cli.get_resource(key).get(**{v: params[k]})
-                params[k] = result['id']
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update role, {0} not found: {1}'.format(k, excinfo), changed=False)
-    return params
+from ..module_utils.tower_api import TowerModule
 
 
 def main():
@@ -147,32 +121,75 @@ def main():
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
-
     role_type = module.params.pop('role')
+    role_field = role_type + '_role'
     state = module.params.pop('state')
 
-    json_output = {'role': role_type, 'state': state}
+    module.json_output['role'] = role_type
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        role = tower_cli.get_resource('role')
+    # Lookup data for all the objects specified in params
+    params = module.params.copy()
+    resource_param_keys = (
+        'user', 'team',
+        'target_team', 'inventory', 'job_template', 'workflow', 'credential', 'organization', 'project'
+    )
+    resource_data = {}
+    for param in resource_param_keys:
+        endpoint = module.param_to_endpoint(param)
+        name_field = 'username' if param == 'user' else 'name'
 
-        params = update_resources(module, module.params)
-        params['type'] = role_type
+        resource_name = params.get(param)
+        if resource_name:
+            resource = module.get_one(endpoint, **{'data': {name_field: resource_name}})
+            if not resource:
+                module.fail_json(
+                    msg='Failed to update role, {0} not found in {1}'.format(param, endpoint),
+                    changed=False
+                )
+            resource_data[param] = resource
 
-        try:
-            if state == 'present':
-                result = role.grant(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = role.revoke(**params)
-        except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update role: {0}'.format(excinfo), changed=False)
+    # separate actors from resources
+    actor_data = {}
+    for key in ('user', 'team'):
+        if key in resource_data:
+            actor_data[key] = resource_data.pop(key)
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    # build association agenda
+    associations = {}
+    for actor_type, actor in actor_data.items():
+        for resource_type, resource in resource_data.items():
+            resource_roles = resource['summary_fields']['object_roles']
+            if role_field not in resource_roles:
+                available_roles = ', '.join(list(resource_roles.keys()))
+                module.fail_json(msg='Resource {0} has no role {1}, available roles: {2}'.format(
+                    resource['url'], role_field, available_roles
+                ), changed=False)
+            role_data = resource_roles[role_field]
+            endpoint = '/roles/{0}/{1}/'.format(role_data['id'], module.param_to_endpoint(actor_type))
+            associations.setdefault(endpoint, [])
+            associations[endpoint].append(actor['id'])
+
+    # perform associations
+    for association_endpoint, new_association_list in associations.items():
+        response = module.get_all_endpoint(association_endpoint)
+        existing_associated_ids = [association['id'] for association in response['json']['results']]
+
+        if state == 'present':
+            for an_id in list(set(new_association_list) - set(existing_associated_ids)):
+                response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
+                if response['status_code'] == 204:
+                    module.json_output['changed'] = True
+                else:
+                    module.fail_json(msg="Failed to grant role {0}".format(response['json']['detail']))
+        else:
+            for an_id in list(set(existing_associated_ids) & set(new_association_list)):
+                response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
+                if response['status_code'] == 204:
+                    module.json_output['changed'] = True
+                else:
+                    module.fail_json(msg="Failed to revoke role {0}".format(response['json']['detail']))
+
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':

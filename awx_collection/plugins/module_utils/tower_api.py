@@ -190,6 +190,15 @@ class TowerModule(AnsibleModule):
                 else:
                     setattr(self, honorred_setting, config_data[honorred_setting])
 
+    @staticmethod
+    def param_to_endpoint(name):
+        exceptions = {
+            'inventory': 'inventories',
+            'target_team': 'teams',
+            'workflow': 'workflow_job_templates'
+        }
+        return exceptions.get(name, '{0}s'.format(name))
+
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
 
