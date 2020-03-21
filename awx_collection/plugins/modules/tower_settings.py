@@ -31,6 +31,8 @@ options:
     value:
       description:
         - Value to be modified for given setting.
+        - If given a non-string type, will make best effort to cast it to type API expects.
+        - For better control over types, use the C(settings) param instead.
       required: False
       type: str
     settings:
@@ -45,6 +47,8 @@ options:
       required: False
       type: str
       version_added: "3.7"
+requirements:
+  - pyyaml
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -78,8 +82,31 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.tower_api import TowerModule
-from json import loads
-import re
+
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
+
+def coerce_type(module, value):
+    yaml_ish = bool((
+        value.startswith('{') and value.endswith('}')
+    ) or (
+        value.startswith('[') and value.endswith(']'))
+    )
+    if yaml_ish:
+        if not HAS_YAML:
+            module.fail_json(msg="yaml is not installed, try 'pip install pyyaml'")
+        return yaml.safe_load(value)
+    elif value.lower in ('true', 'false', 't', 'f'):
+        return {'t': True, 'f': False}[value[0].lower()]
+    try:
+        return int(value)
+    except ValueError:
+        pass
+    return value
 
 
 def main():
@@ -106,14 +133,7 @@ def main():
 
     # If we were given a name/value pair we will just make settings out of that and proceed normally
     if new_settings is None:
-        new_value = value
-        try:
-            new_value = loads(value)
-        except ValueError:
-            # JSONDecodeError only available on Python 3.5+
-            # Attempt to deal with old tower_cli array types
-            if ',' in value:
-                new_value = re.split(r",\s+", new_value)
+        new_value = coerce_type(module, value)
 
         new_settings = {name: new_value}
 
