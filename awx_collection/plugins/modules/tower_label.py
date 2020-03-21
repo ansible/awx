@@ -22,6 +22,8 @@ short_description: create, update, or destroy Ansible Tower labels.
 description:
     - Create, update, or destroy Ansible Tower labels. See
       U(https://www.ansible.com/tower) for an overview.
+    - Note, labels can only be created via the Tower API, they can not be deleted.
+      Once they are fully disassociated the API will clean them up on its own.
 options:
     name:
       description:
@@ -31,7 +33,6 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name (looked up via the name field).
-      required: True
       type: str
     organization:
       description:
@@ -42,7 +43,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present"]	
+      choices: ["present"]
       type: str
     tower_oauthtoken:
       description:
@@ -51,7 +52,6 @@ options:
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
-note: Labels can only be created via the Tower API, they can not be deleted. Once they are fully disassociated the API will clean them up on its own.
 '''
 
 EXAMPLES = '''
@@ -70,7 +70,7 @@ def main():
         name=dict(required=True, type='str'),
         new_name=dict(required=False, type='str'),
         organization=dict(required=True, type='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present'], default='present'),
     )
 
     # Create a module for ourselves
@@ -97,7 +97,7 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     new_fields['name'] = new_name if new_name else name
-    if organization != None:
+    if organization:
         new_fields['organization'] = organization_id
 
     module.create_or_update_if_needed(
