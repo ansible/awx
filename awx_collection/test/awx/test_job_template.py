@@ -23,8 +23,8 @@ def test_create_job_template(run_module, admin_user, project, inventory):
     assert jt.extra_vars == '{"foo": "bar"}'
 
     assert result == {
-        "job_template": "foo",
-        "state": "present",
+        "name": "foo",
+        "created": True,
         "id": jt.id,
         "changed": True,
         "invocation": {
@@ -81,10 +81,11 @@ def test_create_job_template_with_old_credentials(
 
     jt = JobTemplate.objects.get(name='foo')
 
+    result.pop("added_an_association")
     assert result == {
-        "job_template": "foo",
-        "state": "present",
+        "name": "foo",
         "id": jt.id,
+        "created": True,
         "changed": True,
         "invocation": {
             "module_args": module_args
@@ -114,9 +115,11 @@ def test_create_job_template_with_new_credentials(
     assert result.pop('changed', None), result
 
     result.pop('invocation')
+    result.pop('added_an_association')
+    result.pop('field_changes')
     assert result == {
-        "job_template": "foo",
-        "state": "present",
+        "updated": False,
+        "needed_update": True,
         "id": jt.id
     }
 

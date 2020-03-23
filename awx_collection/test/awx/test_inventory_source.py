@@ -42,6 +42,7 @@ def test_inventory_source_create(run_module, admin_user, base_inventory, project
     assert result == {
         'id': inv_src.id,
         'name': 'foo',
+        'created': True,
     }
 
 
@@ -66,6 +67,7 @@ def test_create_inventory_source_implied_org(run_module, admin_user):
     assert result == {
         "name": "Test Inventory Source",
         "id": inv_src.id,
+        "created": True,
     }
 
 
@@ -93,6 +95,7 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     assert result == {
         "name": "Test Inventory Source",
         "id": inv_src.id,
+        "created": True,
     }
 
 

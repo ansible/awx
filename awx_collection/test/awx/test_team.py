@@ -24,6 +24,7 @@ def test_create_team(run_module, admin_user):
         "changed": True,
         "name": "foo_team",
         "id": team.id if team else None,
+        "created": True,
     }
     team = Team.objects.get(name='foo_team')
     assert team.description == 'fooin around'
@@ -47,7 +48,10 @@ def test_modify_team(run_module, admin_user):
     }, admin_user)
     team.refresh_from_db()
     result.pop('invocation')
+    result.pop('field_changes')
     assert result == {
+        "needed_update": True,
+        "updated": False,
         "changed": True,
         "id": team.id,
     }
@@ -60,7 +64,9 @@ def test_modify_team(run_module, admin_user):
         'organization': 'foo'
     }, admin_user)
     result.pop('invocation')
+    result.pop('field_changes')
     assert result == {
         "id": team.id,
-        "changed": False
+        "changed": False,
+        "updated": False,
     }

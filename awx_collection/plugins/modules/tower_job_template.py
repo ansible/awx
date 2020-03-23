@@ -31,7 +31,7 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name (looed up via the name field.
-      required: True
+      required: False
       type: str
     description:
       description:
@@ -140,7 +140,8 @@ options:
       default: '0'
     use_fact_cache:
       description:
-        - If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible.
+        - If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts
+          at the end of a playbook run to the database and caching facts for use by Ansible.
       required: False
       type: bool
       default: 'False'
@@ -288,11 +289,13 @@ options:
         - The credentials used by this job template
       required: False
       type: list
+      elements: str
     labels:
       description:
         - The labels applied to this job template
       required: False
       type: list
+      elements: str
     survey_spec:
       description:
         - JSON/YAML dict formatted survey definition.
@@ -303,6 +306,18 @@ options:
         - Desired state of the resource.
       choices: ["present", "absent"]
       default: "present"
+      type: str
+    credential:
+      description:
+        - Name of the credential to use for the job template.
+        - Deprecated, use 'credentials'.
+      version_added: 2.7
+      type: str
+    vault_credential:
+      description:
+        - Name of the vault credential to use for the job template.
+        - Deprecated, use 'credentials'.
+      version_added: 2.7
       type: str
     tower_oauthtoken:
       description:
@@ -321,6 +336,8 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.tower_api import TowerModule
+import json
+
 
 def main():
     # Any additional arguments that are not fields of the item can be added here
@@ -336,7 +353,7 @@ def main():
         forks=dict(required=False, type='int', default='0'),
         limit=dict(required=False, type='str', default='', aliases=['ask_limit']),
         verbosity=dict(required=False, type='int', choices=[0, 1, 2, 3, 4, 5], default=0),
-        extra_vars=dict(required=False, type='dict', default='{}', aliases=['ask_extra_vars']),
+        extra_vars=dict(required=False, type='dict', default={}, aliases=['ask_extra_vars']),
         job_tags=dict(required=False, type='str', default=''),
         force_handlers=dict(required=False, type='bool', default='False', aliases=['force_handlers_enabled']),
         skip_tags=dict(required=False, type='str', default=''),
@@ -362,8 +379,10 @@ def main():
         job_slice_count=dict(required=False, type='int', default='1'),
         webhook_service=dict(required=False, type='str', choices=['github', 'gitlab']),
         webhook_credential=dict(required=False, type='str'),
-        credentials=dict(required=False, type="list", default=[]),
-        labels=dict(required=False, type="list", default=[]),
+        credentials=dict(required=False, type="list", default=[], elements='str'),
+        labels=dict(required=False, type="list", default=[], elements='str'),
+        credential=dict(default=''),
+        vault_credential=dict(default=''),
         survey_spec=dict(required=False, type="dict"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -412,7 +431,19 @@ def main():
     survey_spec = module.params.get('survey_spec')
     credentials = module.params.get('credentials')
     labels = module.params.get('labels')
+    credential = module.params.get('credential')
+    vault_credential = module.params.get('vault_credential')
     state = module.params.get('state')
+
+    # Deal with legacy credential and vault_credential
+    if vault_credential:
+        if credentials is None:
+            credentials = []
+        credentials.append(vault_credential)
+    if credential:
+        if credentials is None:
+            credentials = []
+        credentials.append(credential)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = None
@@ -428,12 +459,12 @@ def main():
     if credentials is not None:
         credentials_ids = []
         for item in credentials:
-            credentials_ids.append( module.resolve_name_to_id('credentials', item) )
-    label_ids = None
+            credentials_ids.append(module.resolve_name_to_id('credentials', item))
+    labels_ids = None
     if labels is not None:
         labels_ids = []
         for item in labels:
-            labels_ids.append( module.resolve_name_to_id('labels', item) )
+            labels_ids.append(module.resolve_name_to_id('labels', item))
 
     # Pull in additional posts
     additional_posts = []
@@ -472,7 +503,7 @@ def main():
     if verbosity is not None:
         new_fields['verbosity'] = verbosity
     if extra_vars is not None:
-        new_fields['extra_vars'] = extra_vars
+        new_fields['extra_vars'] = json.dumps(extra_vars)
     if job_tags is not None:
         new_fields['job_tags'] = job_tags
     if force_handlers is not None:
@@ -538,7 +569,6 @@ def main():
             },
             additional_posts=additional_posts,
         )
-
 
 
 if __name__ == '__main__':

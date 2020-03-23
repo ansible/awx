@@ -29,6 +29,7 @@ def test_create_group(run_module, admin_user):
         'id': group.id,
         'name': 'Test Group',
         'changed': True,
+        'created': True,
     }
 
 
@@ -113,5 +114,7 @@ def test_tower_group_idempotent(run_module, admin_user):
     result.pop('invocation')
     assert result == {
         'id': group.id,
+        'field_changes': {},
+        'updated': False,
         'changed': False,  # idempotency assertion
     }

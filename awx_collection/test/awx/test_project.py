@@ -29,5 +29,6 @@ def test_create_project(run_module, admin_user, organization):
     result.pop('invocation')
     assert result == {
         'name': 'foo',
-        'id': proj.id
+        'id': proj.id,
+        'created': True,
     }

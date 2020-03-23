@@ -82,6 +82,7 @@ def test_create_custom_credential_type(run_module, admin_user):
         "name": "Nexus",
         "id": ct.pk,
         "changed": True,
+        "created": True,
     }
     assert ct.inputs == {"fields": [{"id": "server", "type": "string", "default": "", "label": ""}], "required": []}
     assert ct.injectors == {'extra_vars': {'nexus_credential': 'test'}}

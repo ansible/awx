@@ -31,6 +31,7 @@ def test_create_organization(run_module, admin_user):
         "name": "foo",
         "changed": True,
         "id": org.id,
+        "created": True,
         "invocation": {
             "module_args": module_args
         }
@@ -54,7 +55,8 @@ def test_create_organization_with_venv(run_module, admin_user, mocker):
     result.pop('invocation')
     assert result == {
         "name": "foo",
-        "id": org.id
+        "id": org.id,
+        "created": True,
     }
 
     assert org.custom_virtualenv == path

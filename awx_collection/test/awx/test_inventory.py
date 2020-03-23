@@ -23,7 +23,8 @@ def test_inventory_create(run_module, admin_user, organization):
     assert result == {
         "name": "foo-inventory",
         "id": inv.id,
-        "changed": True
+        "changed": True,
+        "created": True,
     }
 
     assert inv.organization_id == organization.id

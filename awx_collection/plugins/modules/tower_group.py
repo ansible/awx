@@ -99,8 +99,8 @@ def main():
         description=dict(required=False),
         inventory=dict(required=True),
         variables=dict(type='dict', required=False),
-        hosts=dict(type='list', elements='str', default=None),
-        groups=dict(type='list', elements='str', default=None),
+        hosts=dict(type='list', elements='str'),
+        groups=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -114,21 +114,9 @@ def main():
     description = module.params.get('description')
     state = module.params.pop('state')
     variables = module.params.get('variables')
-    hosts = module.params.get('hosts')
-    groups = module.params.get('groups')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
-    hosts_ids = None
-    if hosts is not None:
-        hosts_ids = []
-        for item in hosts:
-            hosts_ids.append( module.resolve_name_to_id('hosts', item) )
-    groups_ids = None
-    if groups is not None:
-        groups_ids = []
-        for item in groups:
-            groups_ids.append( module.resolve_name_to_id('groups', item) )
 
     # Attempt to look up the object based on the provided name and inventory ID
     group = module.get_one('groups', **{
@@ -169,7 +157,10 @@ def main():
         module.delete_if_needed(group)
     elif state == 'present':
         # If the state was present we can let the module build or update the existing group, this will return on its own
-        module.create_or_update_if_needed(group, group_fields, endpoint='groups', item_type='group', associations={ 'hosts': hosts_ids, 'children': groups_ids,})
+        module.create_or_update_if_needed(
+            group, group_fields, endpoint='groups', item_type='group',
+            associations=association_fields
+        )
 
 
 if __name__ == '__main__':
