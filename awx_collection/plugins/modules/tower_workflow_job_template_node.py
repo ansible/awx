@@ -165,6 +165,15 @@ EXAMPLES = '''
     organization: Default  # organization of workflow job template
     extra_data:
       foo_key: bar_value
+
+- name: Create parent node for prior node
+  tower_workflow_job_template_node:
+    identifier: my-root-node
+    workflow: example-workflow
+    unified_job_template: jt-for-node-use
+    organization: Default
+    success_nodes:
+      - my-first-node
 '''
 
 from ..module_utils.tower_api import TowerModule

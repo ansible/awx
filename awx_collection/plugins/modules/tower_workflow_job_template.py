@@ -215,13 +215,15 @@ def main():
         new_fields['extra_vars'] = json.dumps(new_fields['extra_vars'])
 
     on_change = None
-    existing_spec = None
-    if existing_item:
-        existing_spec = module.get_endpoint('spec_endpoint')
     new_spec = module.params.get('survey')
-    if new_spec and (new_spec != existing_spec):
-        module.json_output['changed'] = True
-        on_change = update_survey
+    if new_spec:
+        existing_spec = None
+        if existing_item:
+            spec_endpoint = existing_item.get('related', {}).get('survey_spec')
+            existing_spec = module.get_endpoint(spec_endpoint)
+        if new_spec != existing_spec:
+            module.json_output['changed'] = True
+            on_change = update_survey
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
