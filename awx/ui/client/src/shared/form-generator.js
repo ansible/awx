@@ -93,7 +93,7 @@
  * | sourceModel | Used in conjunction with sourceField when the data for the field is part of the summary_fields object returned by the API. Set to the name of the summary_fields object that contains the field. For example, the job_templates object returned by the API contains summary_fields.inventory. |
  * | sourceField | String containing the summary_field.object.field name from the API summary_field object. For example, if a fields should be associated to the summary_fields.inventory.name, set the sourceModel to 'inventory' and the sourceField to 'name'. |
  * | spinner | true or false. If true, adds aw-spinner directive. Optionally add min and max attributes to control the range of allowed values. |
- * | type | String containing one of the following types defined in buildField: alertblock, hidden, text, password, email, textarea, select, number, checkbox, checkbox_group, radio, radio_group, lookup, custom. |
+ * | type | String containing one of the following types defined in buildField: alertblock, hidden, text, password, email, textarea, select, number, checkbox, checkbox_group, radio, lookup, custom. |
  * | trueValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is selected. |
  * | hasShowInputButton (sensitive type only) | This creates a button next to the input that toggles the input as text and password types. |
  * The form object contains a buttons object for defining any buttons to be included in the generated HTML. Generally all forms will have a Reset and a Submit button. If no buttons should be generated define buttons as an empty object, or set the showButtons option to false.
@@ -1196,51 +1196,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (horizontal) {
                             html += "</div>\n";
                         }
-                    }
-
-                    //radio group
-                    if (field.type === 'radio_group') {
-
-                        html += label();
-
-                        html += "<div ";
-                        html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
-                        html += (horizontal) ? "class=\"radio-group " + getFieldWidth() + "\"" : "class=\"radio-group\"";
-                        html += ">\n";
-
-                        for (i = 0; i < field.options.length; i++) {
-                            html += "<label class=\"";
-                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\"";
-                            html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
-                            html += ">";
-                            html += "<input type=\"radio\" ";
-                            html += "name=\"" + fld + "\" ";
-                            html += "value=\"" + field.options[i].value + "\" ";
-                            html += "ng-model=\"" + fld + "\" ";
-                            html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
-                            html += (field.ngClick) ? this.attr(field, 'ngClick') : "";
-                            html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}"` : "";
-                            html += (field.readonly) ? "disabled " : "";
-                            html += (field.required) ? "required " : "";
-                            html += (field.ngshow) ? "ng-show=\"" + field.ngShow + "\" " : "";
-                            if(field.awRequiredWhen) {
-                                html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
-                                html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
-                                html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
-                            }
-                            html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "";
-                            html += " > " + field.options[i].label + "\n";
-                            html += "</label>\n";
-                        }
-                        if (field.required || field.awRequiredWhen) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
-                                this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + i18n._("Please select a value.") + "</div>\n";
-                        }
-                        html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
-                            fld + "_api_error\"></div>\n";
-
-                        html += "</div>\n";
                     }
 
                     // radio button

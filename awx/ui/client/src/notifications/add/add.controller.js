@@ -93,6 +93,15 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 multiple: false
             });
 
+            $scope.emailOptions = [
+                {'id': 'use_tls', 'name': i18n._('Use TLS')},
+                {'id': 'use_ssl', 'name': i18n._('Use SSL')},
+            ];
+            CreateSelect2({
+                element: '#notification_template_email_options',
+                multiple: false
+            });
+
             $scope.httpMethodChoices = [
                 {'id': 'POST', 'name': i18n._('POST')},
                 {'id': 'PUT', 'name': i18n._('PUT')},
@@ -181,27 +190,38 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             }
         });
 
-        $scope.emailOptionsChange = function () {
-            if ($scope.email_options === 'use_ssl') {
-                if ($scope.use_ssl) {
-                    $scope.email_options = null;
-                    $scope.use_ssl = false;
-                    return;
+        $scope.typeChange = function() {
+            for (var fld in form.fields) {
+                if (form.fields[fld] && form.fields[fld].subForm) {
+                    if (form.fields[fld].type === 'checkbox_group' && form.fields[fld].fields) {
+                        // Need to loop across the groups fields to null them out
+                        for (var i = 0; i < form.fields[fld].fields.length; i++) {
+                            // Pull the name out of the object (array of objects)
+                            var subFldName = form.fields[fld].fields[i].name;
+                            $scope[subFldName] = null;
+                            $scope.notification_template_form[subFldName].$setPristine();
+                        }
+                    } else {
+                        $scope.notification_template_form[fld].$setPristine();
+                    }
                 }
-
-                $scope.use_ssl = true;
-                $scope.use_tls = false;
             }
-            else if ($scope.email_options === 'use_tls') {
-                if ($scope.use_tls) {
-                    $scope.email_options = null;
-                    $scope.use_tls = false;
-                    return;
-                }
 
-                $scope.use_ssl = false;
-                $scope.use_tls = true;
+            NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
+                $scope[field[0]] = field[1];
+            });
+
+
+            $scope.parse_type = 'json';
+            if (!$scope.headers) {
+                $scope.headers = "{\n}";
             }
+            ParseTypeChange({
+                scope: $scope,
+                parse_variable: 'parse_type',
+                variable: 'headers',
+                field_id: 'notification_template_headers'
+            });
         };
 
         // Save
@@ -254,13 +274,10 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 .filter(i => (form.fields[i].ngShow && form.fields[i].ngShow.indexOf(v) > -1))
                 .map(i => [i, processValue($scope[i], i, form.fields[i])]));
 
-                delete params.notification_configuration.email_options;
+            delete params.notification_configuration.email_options;
 
-                for(var j = 0; j < form.fields.email_options.options.length; j++) {
-                    if(form.fields.email_options.options[j].ngShow && form.fields.email_options.options[j].ngShow.indexOf(v) > -1) {
-                        params.notification_configuration[form.fields.email_options.options[j].value] = Boolean($scope[form.fields.email_options.options[j].value]);
-                    }
-                }
+            params.notification_configuration.use_ssl = $scope.email_options === 'use_ssl';
+            params.notification_configuration.use_tls = $scope.email_options === 'use_tls';
 
             Wait('start');
             Rest.setUrl(url);
