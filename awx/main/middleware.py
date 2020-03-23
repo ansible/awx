@@ -103,8 +103,7 @@ class ActivityStreamMiddleware(threading.local, MiddlewareMixin):
         for instance in ActivityStream.objects.filter(id__in=self.instance_ids):
             if drf_user and drf_user.id:       
                 from awx.api.serializers import ActivityStreamSerializer
-                ActStr = ActivityStreamSerializer(instance).to_representation(instance)
-                summary_fields = ActStr.get('summary_fields', {})
+                summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
                 instance.actor = drf_user
                 try:
                     instance.save(update_fields=['actor'])
