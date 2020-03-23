@@ -31,7 +31,6 @@ class Command(BaseCommand):
 
 
     def get_create_update_instance_group(self, queuename, instance_percent, instance_min):
-        ig = InstanceGroup.objects.filter(name=queuename)
         created = False
         changed = False
 
@@ -98,7 +97,7 @@ class Command(BaseCommand):
         if options.get('hostnames'):
             hostname_list = options.get('hostnames').split(",")
 
-        with advisory_lock('instance_group_registration_{}'.format(queuename)):
+        with advisory_lock('instance_group_registration'):
             changed2 = False
             changed3 = False
             (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
