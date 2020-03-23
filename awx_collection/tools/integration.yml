@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  collections:
+    - awx.awx
+  vars:
+    loc_tests: "{{ playbook_dir | dirname }}/tests/integration/targets/"
+    test: everything
+  tasks:
+    - name: Include all targets
+      include: "{{ loc_tests }}{{ tasks_file.path }}"
+      when:
+        - tasks_file.state == 'file'
+        - test == 'everything' or test in tasks_file.path
+      with_filetree: "{{ loc_tests }}"
+      loop_control:
+        label: "{{ tasks_file.path }}"
+        loop_var: tasks_file

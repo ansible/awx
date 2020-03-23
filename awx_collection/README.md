@@ -74,7 +74,6 @@ If you do not install tower-cli, it will skip tests for modules that require it.
 ## Running Integration Tests
 
 The integration tests require a virtualenv with `ansible` >= 2.9 and `tower_cli`.
-The collection must first be installed, which can be done using `make install_collection`.
 You also need a configuration file at `~/.tower_cli.cfg` or
 `/etc/tower/tower_cli.cfg` with the credentials for accessing tower. This can
 be populated using `tower-cli`:
@@ -87,6 +86,9 @@ tower-cli config password $PASSWORD
 tower-cli config verify_ssl false
 ```
 
+### Official Way
+
+Build and install the collection, which can be done using `make install_collection`.
 Finally you can run the tests:
 
 ```
@@ -94,6 +96,20 @@ Finally you can run the tests:
 cd ~/.ansible/collections/ansible_collections/awx/awx/
 ansible-test integration
 ```
+
+### Development, In-Place Runs
+
+A shortcut is available to avoid the need to switch directories
+and have the environment stripped in `ansible-test`. Example:
+
+```
+make symlink_collection  # to run against current source
+ansible-playbook awx_collection/tools/integration.yml -e test=tower_role
+```
+
+This will run only the integration test target `tower_role`.
+Note: installing by other methods will overwrite the symlink faux-install,
+and vice versa.
 
 ## Licensing
 
