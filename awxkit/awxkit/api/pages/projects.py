@@ -202,6 +202,14 @@ class ProjectUpdateCancel(base.Base):
 page.register_page(resources.project_update_cancel, ProjectUpdateCancel)
 
 
+class ProjectCopy(base.Base):
+
+    pass
+
+
+page.register_page(resources.project_copy, ProjectCopy)
+
+
 class Playbooks(base.Base):
 
     pass

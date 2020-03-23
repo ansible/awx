@@ -230,6 +230,14 @@ page.register_page([resources.notification_templates,
                    NotificationTemplates)
 
 
+class NotificationTemplateCopy(base.Base):
+
+    pass
+
+
+page.register_page(resources.notification_template_copy, NotificationTemplateCopy)
+
+
 class NotificationTemplateTest(base.Base):
 
     pass

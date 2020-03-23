@@ -682,3 +682,11 @@ class InventoryUpdateCancel(base.Base):
 
 
 page.register_page(resources.inventory_update_cancel, InventoryUpdateCancel)
+
+
+class InventoryCopy(base.Base):
+
+    pass
+
+
+page.register_page(resources.inventory_copy, InventoryCopy)

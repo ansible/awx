@@ -366,3 +366,11 @@ page.register_page([resources.credentials,
                     resources.job_extra_credentials,
                     resources.job_template_extra_credentials],
                    Credentials)
+
+
+class CredentialCopy(base.Base):
+
+    pass
+
+
+page.register_page(resources.credential_copy, CredentialCopy)
