@@ -57,7 +57,7 @@ function Template({ i18n, me, setBreadcrumb }) {
   );
   useEffect(() => {
     loadTemplateAndRoles();
-  }, [loadTemplateAndRoles]);
+  }, [loadTemplateAndRoles, location.pathname]);
 
   const loadScheduleOptions = () => {
     return JobTemplatesAPI.readScheduleOptions(templateId);

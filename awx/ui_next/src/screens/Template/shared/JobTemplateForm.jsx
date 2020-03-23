@@ -109,12 +109,15 @@ function JobTemplateForm({
     return undefined;
   };
 
-  const handleProjectUpdate = newProject => {
-    setProject(newProject);
-    setFieldValue('project', newProject.id);
-    setFieldValue('playbook', 0);
-    setFieldValue('scm_branch', '');
-  };
+  const handleProjectUpdate = useCallback(
+    newProject => {
+      setProject(newProject);
+      setFieldValue('project', newProject.id);
+      setFieldValue('playbook', 0);
+      setFieldValue('scm_branch', '');
+    },
+    [setFieldValue, setProject]
+  );
 
   const jobTypeOptions = [
     {
@@ -245,7 +248,7 @@ function JobTemplateForm({
             )}
           </Field>
         </FieldWithPrompt>
-        <Field name="project" validate={() => handleProjectValidation()}>
+        <Field name="project" validate={handleProjectValidation}>
           {({ form }) => (
             <ProjectLookup
               value={project}
@@ -632,9 +635,11 @@ const FormikApp = withFormik({
         inventory: { organization: null },
       },
     } = template;
+
     const hasInventory = summary_fields.inventory
       ? summary_fields.inventory.organization_id
       : null;
+
     return {
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
@@ -649,7 +654,7 @@ const FormikApp = withFormik({
       name: template.name || '',
       description: template.description || '',
       job_type: template.job_type || 'run',
-      inventory: template.inventory || '',
+      inventory: template.inventory || null,
       project: template.project || '',
       scm_branch: template.scm_branch || '',
       playbook: template.playbook || '',
