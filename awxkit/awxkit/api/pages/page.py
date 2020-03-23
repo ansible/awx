@@ -273,7 +273,7 @@ class Page(object):
     def get(self, all_pages=False, **query_parameters):
         r = self.connection.get(self.endpoint, query_parameters)
         page = self.page_identity(r)
-        if all_pages and page.next:
+        if all_pages and getattr(page, 'next', None):
             paged_results = [r.json()['results']]
             while page.next:
                 r = self.connection.get(self.next, query_parameters)

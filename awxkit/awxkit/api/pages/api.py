@@ -21,6 +21,15 @@ EXPORTABLE_RESOURCES = [
 ]
 
 
+EXPORTABLE_RELATIONS = [
+    'Roles',
+    'NotificationTemplates',
+    'Labels',
+    'SurveySpec',
+    'WorkflowJobTemplateNodes',
+]
+
+
 NATURAL_KEYS = {
     'user': ('username',),
     'organization': ('name',),
@@ -35,6 +44,9 @@ NATURAL_KEYS = {
 
     # related resources
     'role': ('name', ':content_object'),
+    'notification_template': ('organization', 'name'),
+    'label': ('organization', 'name'),  # FIXME: label will need to be fully constructed from this
+    'workflow_job_template_node': ('workflow_job_template', 'identifier'),
 }
 
 
@@ -98,11 +110,18 @@ class ApiV2(base.Base):
 
         related = {}
         for k, related_endpoint in asset.related.items():
-            if k != 'roles':
+            if not related_endpoint:
+                continue
+            if k == 'object_roles':
+                continue
+            rel = related_endpoint._create()
+            if rel.__class__.__name__ not in EXPORTABLE_RELATIONS:
                 continue
             data = related_endpoint.get(all_pages=True)
             if 'results' in data:
                 related[k] = [get_natural_key(x) for x in data.results]
+            else:
+                related[k] = data.json
 
         related_fields = {'related': related} if related else {}
 
@@ -115,7 +134,7 @@ class ApiV2(base.Base):
         if value:
             from awxkit.cli.options import pk_or_name
 
-            pk = pk_or_name(self, resource, value)
+            pk = pk_or_name(self, resource, value)  # TODO: decide whether to support multiple
             results = endpoint.get(id=pk).results
         else:
             results = endpoint.get(all_pages=True).results
@@ -205,7 +224,7 @@ class ApiV2(base.Base):
             else:
                 pass  # admin role
 
-    def assign_related_assets(self, resource, assets):
+    def _assign_related_assets(self, resource, assets):
         for asset in assets:
             page = self._get_by_natural_key(asset['natural_key'])
             # FIXME: deal with `page is None` case
@@ -234,7 +253,7 @@ class ApiV2(base.Base):
             # FIXME: should we delete existing unpatched assets?
 
         # for resource, assets in data.items():
-        #     self.assign_related_assets(resource, assets)
+        #     self._assign_related_assets(resource, assets)
 
 
 page.register_page(resources.v2, ApiV2)
