@@ -2291,7 +2291,7 @@ class RunProjectUpdate(BaseTask):
             # force option is necessary because remote refs are not counted, although no information is lost
             git_repo.delete_head(tmp_branch_name, force=True)
         else:
-            copy_tree(project_path, destination_folder)
+            copy_tree(project_path, destination_folder, preserve_symlinks=1)
 
     def post_run_hook(self, instance, status):
         # To avoid hangs, very important to release lock even if errors happen here
