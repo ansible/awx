@@ -104,7 +104,12 @@ export default
                     $rootScope.$broadcast('ws-approval');
                 }
 
-                if(!window.liveUpdates && data.group_name !== "control" && $state.current.name !== "output"){
+                if (
+                    !window.liveUpdates &&
+                    data.group_name !== "control" &&
+                    $state.current.name !== "output" &&
+                    !$state.current.name.includes('settings')
+                ) {
                     $log.debug('Message from server dropped: ' + e.data);
                     needsRefreshAfterBlur = true;
                     return;
