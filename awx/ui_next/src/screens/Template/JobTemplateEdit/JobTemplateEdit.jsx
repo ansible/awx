@@ -4,7 +4,7 @@ import { withRouter, Redirect } from 'react-router-dom';
 import { CardBody } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
-import { JobTemplatesAPI, ProjectsAPI } from '@api';
+import { JobTemplatesAPI, OrganizationsAPI, ProjectsAPI } from '@api';
 import { JobTemplate } from '@types';
 import { getAddedAndRemoved } from '@util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
@@ -118,17 +118,27 @@ class JobTemplateEdit extends Component {
     }
   }
 
-  async submitLabels(labels = [], organizationId) {
+  async submitLabels(labels = [], formOrgId) {
     const { template } = this.props;
+    let orgId = formOrgId;
+
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.labels.results,
       labels
     );
+
+    if (!orgId && added.length > 0) {
+      const {
+        data: { results },
+      } = await OrganizationsAPI.read();
+      orgId = results[0].id;
+    }
+
     const disassociationPromises = removed.map(label =>
       JobTemplatesAPI.disassociateLabel(template.id, label)
     );
     const associationPromises = added.map(label => {
-      return JobTemplatesAPI.associateLabel(template.id, label, organizationId);
+      return JobTemplatesAPI.associateLabel(template.id, label, orgId);
     });
 
     const results = await Promise.all([

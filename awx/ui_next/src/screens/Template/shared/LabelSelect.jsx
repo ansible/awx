@@ -36,8 +36,8 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
   );
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
+  const toggleExpanded = toggleValue => {
+    setIsExpanded(toggleValue);
   };
 
   useEffect(() => {
