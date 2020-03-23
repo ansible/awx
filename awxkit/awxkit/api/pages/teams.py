@@ -45,4 +45,5 @@ class Teams(page.PageList, Team):
 
 
 page.register_page([resources.teams,
+                    resources.credential_owner_teams,
                     resources.related_teams], Teams)
