@@ -26,7 +26,7 @@ services:
       SDB_HOST: 0.0.0.0
       SDB_PORT: 5899
       AWX_GROUP_QUEUES: alpha,tower
-    command: /start_development.sh
+    command: launch_awx.sh
     working_dir: "/awx_devel"
     volumes:
       - "../:/awx_devel"
@@ -39,7 +39,7 @@ services:
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx-2
-    command: /start_development.sh
+    command: launch_awx.sh
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
@@ -58,7 +58,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx-3
     entrypoint: ["bash"]
-    command: /start_development.sh
+    command: launch_awx.sh
     working_dir: "/awx_devel"
     environment:
       CURRENT_UID:
