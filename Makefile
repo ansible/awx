@@ -371,6 +371,7 @@ prepare_collection_venv:
 	$(VENV_BASE)/awx/bin/pip install --target=$(COLLECTION_VENV) git+https://github.com/ansible/tower-cli.git
 
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
+COLLECTION_TEST_TARGET ?=
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
 COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
@@ -405,7 +406,7 @@ test_collection_sanity: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity
 
 test_collection_integration: install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test integration
+	cd $(COLLECTION_INSTALL) && ansible-test integration $(COLLECTION_TEST_TARGET)
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \

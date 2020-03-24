@@ -165,6 +165,24 @@ def run_module(request, collection_import):
 
 
 @pytest.fixture
+def survey_spec():
+    return {
+        "spec": [
+            {
+                "index": 0,
+                "question_name": "my question?",
+                "default": "mydef",
+                "variable": "myvar",
+                "type": "text",
+                "required": False
+            }
+        ],
+        "description": "test",
+        "name": "test"
+    }
+
+
+@pytest.fixture
 def organization():
     return Organization.objects.create(name='Default')
 

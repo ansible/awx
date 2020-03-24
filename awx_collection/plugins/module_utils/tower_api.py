@@ -248,7 +248,10 @@ class TowerModule(AnsibleModule):
     def get_one(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
         if response['status_code'] != 200:
-            self.fail_json(msg="Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint))
+            fail_msg = "Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint)
+            if 'detail' in response.get('json', {}):
+                fail_msg += ', detail: {0}'.format(response['json']['detail'])
+            self.fail_json(msg=fail_msg)
 
         if 'count' not in response['json'] or 'results' not in response['json']:
             self.fail_json(msg="The endpoint did not provide count and results")
@@ -516,16 +519,19 @@ class TowerModule(AnsibleModule):
 
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
-            item_name = new_item.get('name', 'unknown')
+            for key in ('name', 'username', 'identifier', 'hostname'):
+                if key in new_item:
+                    item_name = new_item[key]
+                    break
+            else:
+                item_name = 'unknown'
 
             response = self.post_endpoint(endpoint, **{'data': new_item})
             if response['status_code'] == 201:
                 self.json_output['name'] = 'unknown'
-                if 'name' in response['json']:
-                    self.json_output['name'] = response['json']['name']
-                elif 'username' in response['json']:
-                    # User objects return username instead of name
-                    self.json_output['name'] = response['json']['username']
+                for key in ('name', 'username', 'identifier', 'hostname'):
+                    if key in response['json']:
+                        self.json_output['name'] = response['json'][key]
                 self.json_output['id'] = response['json']['id']
                 self.json_output['changed'] = True
             else:
@@ -556,6 +562,7 @@ class TowerModule(AnsibleModule):
         #    2. The response from Tower from patching to the endpoint. It's up to you to process the response and exit from the module.
         #    3. An ItemNotDefined exception, if the existing_item does not exist
         # Note: common error codes from the Tower API can cause the module to fail
+        response = None
         if existing_item:
 
             # If we have an item, we can see if it needs an update
@@ -564,6 +571,8 @@ class TowerModule(AnsibleModule):
                 item_type = existing_item['type']
                 if item_type == 'user':
                     item_name = existing_item['username']
+                elif item_type == 'workflow_job_template_node':
+                    item_name = existing_item['identifier']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']
@@ -603,7 +612,11 @@ class TowerModule(AnsibleModule):
 
         # If we change something and have an on_change call it
         if on_update is not None and self.json_output['changed']:
-            on_update(self, response['json'])
+            if response is None:
+                last_data = existing_item
+            else:
+                last_data = response['json']
+            on_update(self, last_data)
         else:
             self.exit_json(**self.json_output)
 

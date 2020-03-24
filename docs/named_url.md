@@ -9,24 +9,25 @@ There are two named-URL-related Tower configuration settings available under `/a
 ```
 "NAMED_URL_FORMATS": {
     "job_templates": "<name>++<organization.name>",
-    "workflow_job_templates": "<name>",
+    "workflow_job_templates": "<name>++<organization.name>",
+    "workflow_job_template_nodes": "<identifier>++<workflow_job_template.name>++<organization.name>",
     "inventories": "<name>++<organization.name>",
     "users": "<username>",
-    "custom_inventory_scripts": "<name>++<organization.name>",
+    "applications": "<name>++<organization.name>",
+    "inventory_scripts": "<name>++<organization.name>",
     "labels": "<name>++<organization.name>",
     "credential_types": "<name>+<kind>",
     "notification_templates": "<name>++<organization.name>",
     "instances": "<hostname>",
     "instance_groups": "<name>",
     "hosts": "<name>++<inventory.name>++<organization.name>",
-    "system_job_templates": "<name>",
     "groups": "<name>++<inventory.name>++<organization.name>",
     "organizations": "<name>",
     "credentials": "<name>++<credential_type.name>+<credential_type.kind>++<organization.name>",
     "teams": "<name>++<organization.name>",
-    "inventory_sources": "<name>",
-    "projects": "<name>"
-}
+    "inventory_sources": "<name>++<inventory.name>++<organization.name>",
+    "projects": "<name>++<organization.name>"
+},
 ```
 For each item in `NAMED_URL_FORMATS`, the key is the API name of the resource to have named URL, the value is a string indicating how to form a human-readable unique identifiers for that resource. A typical procedure of composing named URL for a specific resource object using `NAMED_URL_FORMATS` is given below:
 

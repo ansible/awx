@@ -77,6 +77,8 @@ class GraphNode(object):
         Performance assured: http://stackoverflow.com/a/27086669
         '''
         for c in URL_PATH_RESERVED_CHARSET:
+            if not isinstance(text, str):
+                text = str(text)  # needed for WFJT node creation, identifier temporarily UUID4 type
             if c in text:
                 text = text.replace(c, URL_PATH_RESERVED_CHARSET[c])
         text = text.replace(NAMED_URL_RES_INNER_DILIMITER,
@@ -200,14 +202,14 @@ def _get_all_unique_togethers(model):
 
 
 def _check_unique_together_fields(model, ut):
-    has_name = False
+    name_field = None
     fk_names = []
     fields = []
     is_valid = True
     for field_name in ut:
         field = model._meta.get_field(field_name)
-        if field_name == 'name':
-            has_name = True
+        if field_name in ('name', 'identifier'):
+            name_field = field_name
         elif type(field) == models.ForeignKey and field.related_model != model:
             fk_names.append(field_name)
         elif issubclass(type(field), models.CharField) and field.choices:
@@ -219,8 +221,8 @@ def _check_unique_together_fields(model, ut):
         return (), (), is_valid
     fk_names.sort()
     fields.sort(reverse=True)
-    if has_name:
-        fields.append('name')
+    if name_field:
+        fields.append(name_field)
     fields.reverse()
     return tuple(fk_names), tuple(fields), is_valid
 
