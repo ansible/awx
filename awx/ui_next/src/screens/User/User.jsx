@@ -130,10 +130,9 @@ class User extends Component {
                 render={() => <UserDetail user={user} />}
               />
             )}
-            <Route
-              path="/users/:id/organizations"
-              render={() => <UserOrganizations id={Number(match.params.id)} />}
-            />
+            <Route path="/users/:id/organizations">
+              <UserOrganizations id={Number(match.params.id)} />
+            </Route>
             <Route
               path="/users/:id/teams"
               render={() => <UserTeams id={Number(match.params.id)} />}
