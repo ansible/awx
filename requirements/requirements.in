@@ -6,7 +6,7 @@ boto  # replacement candidate https://github.com/ansible/awx/issues/2115
 channels
 channels-redis
 daphne
-django==2.2.10  # see UPGRADE BLOCKERs
+django==2.2.11  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
 django-crum
