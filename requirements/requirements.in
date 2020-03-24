@@ -27,7 +27,7 @@ irc
 jinja2
 jsonschema
 Markdown  # used for formatting API help
-openshift
+openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
@@ -36,6 +36,7 @@ pyparsing
 python-memcached
 python-radius
 python3-saml
+pyyaml>=5.3.1  # minimum version to pull in new pyyaml for CVE-2017-18342
 schedule==0.6.0
 social-auth-core==3.2.0  # see UPGRADE BLOCKERs
 social-auth-app-django==3.1.0  # see UPGRADE BLOCKERs
