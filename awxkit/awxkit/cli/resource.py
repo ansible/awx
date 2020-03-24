@@ -177,7 +177,7 @@ def parse_resource(client, skip_deprecated=False):
                 }
                 _filter = 'key, value'
             formatted = format_response(
-                Page.from_json(response),
+                Page.from_json(response, connection=client.root.connection),
                 fmt=client.get_config('format'),
                 filter=_filter
             )
