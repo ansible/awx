@@ -25,8 +25,8 @@ function TagMultiSelect({ onChange, value }) {
     onChange(arrayToString(newValue));
   };
 
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
+  const toggleExpanded = toggleValue => {
+    setIsExpanded(toggleValue);
   };
 
   const renderOptions = opts => {
