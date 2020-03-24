@@ -20,8 +20,9 @@ author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower workflow job templates.
 description:
-    - Create, update, or destroy Ansible Tower workflow job templates. See
-      U(https://www.ansible.com/tower) for an overview.
+    - Create, update, or destroy Ansible Tower workflow job templates.
+    - Replaces the deprecated tower_workflow_template module.
+    - Use the tower_workflow_job_template_node after this to build the workflow's graph.
 options:
     name:
       description:
@@ -30,7 +31,7 @@ options:
       type: str
     new_name:
       description:
-        - Setting this option will change the existing name (looked up via the name field.
+        - Setting this option will change the existing name.
       required: False
       type: str
     description:
@@ -40,7 +41,7 @@ options:
       type: str
     extra_vars:
       description:
-        - NO DESCRIPTION GIVEN IN THE TOWER API
+        - Variables which will be made available to jobs ran inside the workflow.
       required: False
       type: dict
     organization:
@@ -57,7 +58,7 @@ options:
       type: bool
     ask_variables_on_launch:
       description:
-        - Prompt user for (extra_vars) on launch.
+        - Prompt user for C(extra_vars) on launch.
       required: False
       type: bool
     inventory:

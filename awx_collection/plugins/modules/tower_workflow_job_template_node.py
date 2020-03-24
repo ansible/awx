@@ -20,8 +20,12 @@ author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower workflow job template nodes.
 description:
-    - Create, update, or destroy Ansible Tower workflow job template nodes. See
-      U(https://www.ansible.com/tower) for an overview.
+    - Create, update, or destroy Ansible Tower workflow job template nodes.
+    - Use this to build a graph for a workflow, which dictates what the workflow runs.
+    - Replaces the deprecated tower_workflow_template module schema command.
+    - You can create nodes first, and link them afterwards, and not worry about ordering.
+      For failsafe referencing of a node, specify identifier, WFJT, and organization.
+      With those specified, you can choose to modify or not modify any other parameter.
 options:
     extra_data:
       description:
@@ -182,20 +186,20 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        extra_data=dict(required=False, type='dict'),
-        inventory=dict(required=False, type='str'),
-        scm_branch=dict(required=False, type='str'),
-        job_type=dict(required=False, type='str', choices=['run', 'check']),
-        job_tags=dict(required=False, type='str'),
-        skip_tags=dict(required=False, type='str'),
-        limit=dict(required=False, type='str'),
-        diff_mode=dict(required=False, type='bool'),
-        verbosity=dict(required=False, type='str', choices=['0', '1', '2', '3', '4', '5']),
-        workflow_job_template=dict(required=True, type='str', aliases=['workflow']),
-        organization=dict(required=False, type='str'),
-        unified_job_template=dict(required=False, type='str'),
-        all_parents_must_converge=dict(required=False, type='bool'),
         identifier=dict(required=True, type='str'),
+        workflow_job_template=dict(required=True, type='str', aliases=['workflow']),
+        organization=dict(type='str'),
+        extra_data=dict(type='dict'),
+        inventory=dict(type='str'),
+        scm_branch=dict(type='str'),
+        job_type=dict(type='str', choices=['run', 'check']),
+        job_tags=dict(type='str'),
+        skip_tags=dict(type='str'),
+        limit=dict(type='str'),
+        diff_mode=dict(type='bool'),
+        verbosity=dict(type='str', choices=['0', '1', '2', '3', '4', '5']),
+        unified_job_template=dict(type='str'),
+        all_parents_must_converge=dict(type='bool'),
         success_nodes=dict(type='list', elements='str'),
         always_nodes=dict(type='list', elements='str'),
         failure_nodes=dict(type='list', elements='str'),
