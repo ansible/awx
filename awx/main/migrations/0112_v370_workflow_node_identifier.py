@@ -56,10 +56,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='workflowjobtemplatenode',
-            index=models.Index(fields=['identifier', 'workflow_job_template'], name='main_workfl_identif_6fda75_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='workflowjobtemplatenode',
             index=models.Index(fields=['identifier'], name='main_workfl_identif_0cc025_idx'),
         ),
     ]

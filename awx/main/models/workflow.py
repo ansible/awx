@@ -159,7 +159,6 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         app_label = 'main'
         unique_together = (("identifier", "workflow_job_template"),)
         indexes = [
-            models.Index(fields=["identifier", "workflow_job_template"]),
             models.Index(fields=['identifier']),
         ]
 
