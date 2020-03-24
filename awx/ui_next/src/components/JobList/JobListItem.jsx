@@ -5,13 +5,13 @@ import { t } from '@lingui/macro';
 import {
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemRow,
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 import { RocketIcon } from '@patternfly/react-icons';
 import LaunchButton from '@components/LaunchButton';
 import StatusIcon from '@components/StatusIcon';

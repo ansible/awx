@@ -9,10 +9,10 @@ import {
   DataListItemCells,
   DataListItemRow,
   DataListItem,
-  DataListCell,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 import { CaretDownIcon, CaretUpIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 

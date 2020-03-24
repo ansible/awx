@@ -7,13 +7,14 @@ import { t } from '@lingui/macro';
 import {
   Button,
   DataListAction as _DataListAction,
-  DataListCell,
   DataListCheck,
   DataListItem,
   DataListItemCells,
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
+
 import { PencilAltIcon } from '@patternfly/react-icons';
 import HostToggle from '@components/HostToggle';
 import Sparkline from '@components/Sparkline';

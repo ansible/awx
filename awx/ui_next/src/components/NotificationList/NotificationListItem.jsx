@@ -5,12 +5,13 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import {
   DataListAction as _DataListAction,
-  DataListCell,
   DataListItem,
   DataListItemCells,
   DataListItemRow,
   Switch,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
+
 import styled from 'styled-components';
 
 const DataListAction = styled(_DataListAction)`

@@ -266,634 +266,694 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                   <DataListCell
                     key="name"
                   >
-                    <div
-                      className="pf-c-data-list__cell"
+                    <StyledComponent
+                      forwardedComponent={
+                        Object {
+                          "$$typeof": Symbol(react.forward_ref),
+                          "attrs": Array [],
+                          "componentStyle": ComponentStyle {
+                            "componentId": "DataListCell-sc-18ntxrx-0",
+                            "isStatic": true,
+                            "lastClassName": "flJMIO",
+                            "rules": Array [
+                              "word-break:break-word;",
+                            ],
+                          },
+                          "displayName": "DataListCell",
+                          "foldedComponentIds": Array [],
+                          "render": [Function],
+                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "target": [Function],
+                          "toString": [Function],
+                          "warnTooManyClasses": [Function],
+                          "withComponent": [Function],
+                        }
+                      }
+                      forwardedRef={null}
                     >
-                      <TextContent>
+                      <PFDataListCell
+                        className="DataListCell-sc-18ntxrx-0 flJMIO"
+                      >
                         <div
-                          className="pf-c-content"
+                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
                         >
-                          <Text
-                            component="h6"
-                          >
-                            <h6
-                              className=""
-                              data-pf-content={true}
+                          <TextContent>
+                            <div
+                              className="pf-c-content"
                             >
-                              <Styled(Link)
-                                to={
-                                  Object {
-                                    "pathname": "/users/2/details",
-                                  }
-                                }
+                              <Text
+                                component="h6"
                               >
-                                <StyledComponent
-                                  forwardedComponent={
-                                    Object {
-                                      "$$typeof": Symbol(react.forward_ref),
-                                      "attrs": Array [],
-                                      "componentStyle": ComponentStyle {
-                                        "componentId": "sc-bdVaJa",
-                                        "isStatic": true,
-                                        "lastClassName": "fqQVUT",
-                                        "rules": Array [
-                                          "font-weight: bold",
-                                        ],
-                                      },
-                                      "displayName": "Styled(Link)",
-                                      "foldedComponentIds": Array [],
-                                      "propTypes": Object {
-                                        "innerRef": [Function],
-                                        "onClick": [Function],
-                                        "replace": [Function],
-                                        "target": [Function],
-                                        "to": [Function],
-                                      },
-                                      "render": [Function],
-                                      "styledComponentId": "sc-bdVaJa",
-                                      "target": Object {
-                                        "$$typeof": Symbol(react.forward_ref),
-                                        "displayName": "Link",
-                                        "propTypes": Object {
-                                          "innerRef": [Function],
-                                          "onClick": [Function],
-                                          "replace": [Function],
-                                          "target": [Function],
-                                          "to": [Function],
-                                        },
-                                        "render": [Function],
-                                      },
-                                      "toString": [Function],
-                                      "warnTooManyClasses": [Function],
-                                      "withComponent": [Function],
-                                    }
-                                  }
-                                  forwardedRef={null}
-                                  to={
-                                    Object {
-                                      "pathname": "/users/2/details",
-                                    }
-                                  }
+                                <h6
+                                  className=""
+                                  data-pf-content={true}
                                 >
-                                  <Link
-                                    className="sc-bdVaJa fqQVUT"
+                                  <Styled(Link)
                                     to={
                                       Object {
                                         "pathname": "/users/2/details",
                                       }
                                     }
                                   >
-                                    <LinkAnchor
-                                      className="sc-bdVaJa fqQVUT"
-                                      href="/users/2/details"
-                                      navigate={[Function]}
-                                    >
-                                      <a
-                                        className="sc-bdVaJa fqQVUT"
-                                        href="/users/2/details"
-                                        onClick={[Function]}
-                                      >
-                                        jane
-                                      </a>
-                                    </LinkAnchor>
-                                  </Link>
-                                </StyledComponent>
-                              </Styled(Link)>
-                            </h6>
-                          </Text>
-                        </div>
-                      </TextContent>
-                      <DetailList
-                        stacked={true}
-                      >
-                        <StyledComponent
-                          forwardedComponent={
-                            Object {
-                              "$$typeof": Symbol(react.forward_ref),
-                              "attrs": Array [],
-                              "componentStyle": ComponentStyle {
-                                "componentId": "DetailList-sc-12g7m4-0",
-                                "isStatic": false,
-                                "lastClassName": "iAtits",
-                                "rules": Array [
-                                  "display:grid;grid-gap:20px;align-items:center;",
-                                  [Function],
-                                ],
-                              },
-                              "displayName": "DetailList",
-                              "foldedComponentIds": Array [],
-                              "render": [Function],
-                              "styledComponentId": "DetailList-sc-12g7m4-0",
-                              "target": [Function],
-                              "toString": [Function],
-                              "warnTooManyClasses": [Function],
-                              "withComponent": [Function],
-                            }
-                          }
-                          forwardedRef={null}
-                          stacked={true}
-                        >
-                          <DetailList
-                            className="DetailList-sc-12g7m4-0 iAtits"
-                            stacked={true}
-                          >
-                            <TextList
-                              className="DetailList-sc-12g7m4-0 iAtits"
-                              component="dl"
-                            >
-                              <dl
-                                className="DetailList-sc-12g7m4-0 iAtits"
-                                data-pf-content={true}
-                              >
-                                <Detail
-                                  alwaysVisible={false}
-                                  fullWidth={false}
-                                  label="Name"
-                                  value="jane brown"
-                                >
-                                  <Detail__DetailName
-                                    component="dt"
-                                    data-cy={null}
-                                    fullWidth={false}
-                                  >
                                     <StyledComponent
-                                      component="dt"
-                                      data-cy={null}
                                       forwardedComponent={
                                         Object {
                                           "$$typeof": Symbol(react.forward_ref),
                                           "attrs": Array [],
                                           "componentStyle": ComponentStyle {
-                                            "componentId": "Detail__DetailName-sc-16ypsyv-0",
-                                            "isStatic": false,
-                                            "lastClassName": "erdIBg",
+                                            "componentId": "sc-bdVaJa",
+                                            "isStatic": true,
+                                            "lastClassName": "fqQVUT",
                                             "rules": Array [
-                                              "font-weight:var(--pf-global--FontWeight--bold);",
-                                              [Function],
+                                              "font-weight: bold",
                                             ],
                                           },
-                                          "displayName": "Detail__DetailName",
+                                          "displayName": "Styled(Link)",
                                           "foldedComponentIds": Array [],
+                                          "propTypes": Object {
+                                            "innerRef": [Function],
+                                            "onClick": [Function],
+                                            "replace": [Function],
+                                            "target": [Function],
+                                            "to": [Function],
+                                          },
                                           "render": [Function],
-                                          "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
-                                          "target": [Function],
+                                          "styledComponentId": "sc-bdVaJa",
+                                          "target": Object {
+                                            "$$typeof": Symbol(react.forward_ref),
+                                            "displayName": "Link",
+                                            "propTypes": Object {
+                                              "innerRef": [Function],
+                                              "onClick": [Function],
+                                              "replace": [Function],
+                                              "target": [Function],
+                                              "to": [Function],
+                                            },
+                                            "render": [Function],
+                                          },
                                           "toString": [Function],
                                           "warnTooManyClasses": [Function],
                                           "withComponent": [Function],
                                         }
                                       }
                                       forwardedRef={null}
-                                      fullWidth={false}
+                                      to={
+                                        Object {
+                                          "pathname": "/users/2/details",
+                                        }
+                                      }
                                     >
-                                      <Component
-                                        className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                      <Link
+                                        className="sc-bdVaJa fqQVUT"
+                                        to={
+                                          Object {
+                                            "pathname": "/users/2/details",
+                                          }
+                                        }
+                                      >
+                                        <LinkAnchor
+                                          className="sc-bdVaJa fqQVUT"
+                                          href="/users/2/details"
+                                          navigate={[Function]}
+                                        >
+                                          <a
+                                            className="sc-bdVaJa fqQVUT"
+                                            href="/users/2/details"
+                                            onClick={[Function]}
+                                          >
+                                            jane
+                                          </a>
+                                        </LinkAnchor>
+                                      </Link>
+                                    </StyledComponent>
+                                  </Styled(Link)>
+                                </h6>
+                              </Text>
+                            </div>
+                          </TextContent>
+                          <DetailList
+                            stacked={true}
+                          >
+                            <StyledComponent
+                              forwardedComponent={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "isStatic": false,
+                                    "lastClassName": "iAtits",
+                                    "rules": Array [
+                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      [Function],
+                                    ],
+                                  },
+                                  "displayName": "DetailList",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "target": [Function],
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              forwardedRef={null}
+                              stacked={true}
+                            >
+                              <DetailList
+                                className="DetailList-sc-12g7m4-0 iAtits"
+                                stacked={true}
+                              >
+                                <TextList
+                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  component="dl"
+                                >
+                                  <dl
+                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    data-pf-content={true}
+                                  >
+                                    <Detail
+                                      alwaysVisible={false}
+                                      fullWidth={false}
+                                      label="Name"
+                                      value="jane brown"
+                                    >
+                                      <Detail__DetailName
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
-                                        <TextListItem
-                                          className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                        <StyledComponent
                                           component="dt"
                                           data-cy={null}
+                                          forwardedComponent={
+                                            Object {
+                                              "$$typeof": Symbol(react.forward_ref),
+                                              "attrs": Array [],
+                                              "componentStyle": ComponentStyle {
+                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "isStatic": false,
+                                                "lastClassName": "erdIBg",
+                                                "rules": Array [
+                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  [Function],
+                                                ],
+                                              },
+                                              "displayName": "Detail__DetailName",
+                                              "foldedComponentIds": Array [],
+                                              "render": [Function],
+                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "target": [Function],
+                                              "toString": [Function],
+                                              "warnTooManyClasses": [Function],
+                                              "withComponent": [Function],
+                                            }
+                                          }
+                                          forwardedRef={null}
+                                          fullWidth={false}
                                         >
-                                          <dt
+                                          <Component
                                             className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            component="dt"
                                             data-cy={null}
-                                            data-pf-content={true}
+                                            fullWidth={false}
                                           >
-                                            Name
-                                          </dt>
-                                        </TextListItem>
-                                      </Component>
-                                    </StyledComponent>
-                                  </Detail__DetailName>
-                                  <Detail__DetailValue
-                                    component="dd"
-                                    data-cy={null}
-                                    fullWidth={false}
-                                  >
-                                    <StyledComponent
-                                      component="dd"
-                                      data-cy={null}
-                                      forwardedComponent={
-                                        Object {
-                                          "$$typeof": Symbol(react.forward_ref),
-                                          "attrs": Array [],
-                                          "componentStyle": ComponentStyle {
-                                            "componentId": "Detail__DetailValue-sc-16ypsyv-1",
-                                            "isStatic": false,
-                                            "lastClassName": "kCDjmZ",
-                                            "rules": Array [
-                                              "word-break:break-all;",
-                                              [Function],
-                                              " ",
-                                              [Function],
-                                            ],
-                                          },
-                                          "displayName": "Detail__DetailValue",
-                                          "foldedComponentIds": Array [],
-                                          "render": [Function],
-                                          "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
-                                          "target": [Function],
-                                          "toString": [Function],
-                                          "warnTooManyClasses": [Function],
-                                          "withComponent": [Function],
-                                        }
-                                      }
-                                      forwardedRef={null}
-                                      fullWidth={false}
-                                    >
-                                      <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            <TextListItem
+                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              component="dt"
+                                              data-cy={null}
+                                            >
+                                              <dt
+                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                data-cy={null}
+                                                data-pf-content={true}
+                                              >
+                                                Name
+                                              </dt>
+                                            </TextListItem>
+                                          </Component>
+                                        </StyledComponent>
+                                      </Detail__DetailName>
+                                      <Detail__DetailValue
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
-                                        <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                        <StyledComponent
                                           component="dd"
                                           data-cy={null}
+                                          forwardedComponent={
+                                            Object {
+                                              "$$typeof": Symbol(react.forward_ref),
+                                              "attrs": Array [],
+                                              "componentStyle": ComponentStyle {
+                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "isStatic": false,
+                                                "lastClassName": "kCDjmZ",
+                                                "rules": Array [
+                                                  "word-break:break-all;",
+                                                  [Function],
+                                                  " ",
+                                                  [Function],
+                                                ],
+                                              },
+                                              "displayName": "Detail__DetailValue",
+                                              "foldedComponentIds": Array [],
+                                              "render": [Function],
+                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "target": [Function],
+                                              "toString": [Function],
+                                              "warnTooManyClasses": [Function],
+                                              "withComponent": [Function],
+                                            }
+                                          }
+                                          forwardedRef={null}
+                                          fullWidth={false}
                                         >
-                                          <dd
+                                          <Component
                                             className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            component="dd"
                                             data-cy={null}
-                                            data-pf-content={true}
+                                            fullWidth={false}
                                           >
-                                            jane brown
-                                          </dd>
-                                        </TextListItem>
-                                      </Component>
-                                    </StyledComponent>
-                                  </Detail__DetailValue>
-                                </Detail>
-                              </dl>
-                            </TextList>
+                                            <TextListItem
+                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              component="dd"
+                                              data-cy={null}
+                                            >
+                                              <dd
+                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                data-cy={null}
+                                                data-pf-content={true}
+                                              >
+                                                jane brown
+                                              </dd>
+                                            </TextListItem>
+                                          </Component>
+                                        </StyledComponent>
+                                      </Detail__DetailValue>
+                                    </Detail>
+                                  </dl>
+                                </TextList>
+                              </DetailList>
+                            </StyledComponent>
                           </DetailList>
-                        </StyledComponent>
-                      </DetailList>
-                    </div>
+                        </div>
+                      </PFDataListCell>
+                    </StyledComponent>
                   </DataListCell>
                   <DataListCell
                     key="roles"
                   >
-                    <div
-                      className="pf-c-data-list__cell"
+                    <StyledComponent
+                      forwardedComponent={
+                        Object {
+                          "$$typeof": Symbol(react.forward_ref),
+                          "attrs": Array [],
+                          "componentStyle": ComponentStyle {
+                            "componentId": "DataListCell-sc-18ntxrx-0",
+                            "isStatic": true,
+                            "lastClassName": "flJMIO",
+                            "rules": Array [
+                              "word-break:break-word;",
+                            ],
+                          },
+                          "displayName": "DataListCell",
+                          "foldedComponentIds": Array [],
+                          "render": [Function],
+                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "target": [Function],
+                          "toString": [Function],
+                          "warnTooManyClasses": [Function],
+                          "withComponent": [Function],
+                        }
+                      }
+                      forwardedRef={null}
                     >
-                      <DetailList
-                        stacked={true}
+                      <PFDataListCell
+                        className="DataListCell-sc-18ntxrx-0 flJMIO"
                       >
-                        <StyledComponent
-                          forwardedComponent={
-                            Object {
-                              "$$typeof": Symbol(react.forward_ref),
-                              "attrs": Array [],
-                              "componentStyle": ComponentStyle {
-                                "componentId": "DetailList-sc-12g7m4-0",
-                                "isStatic": false,
-                                "lastClassName": "iAtits",
-                                "rules": Array [
-                                  "display:grid;grid-gap:20px;align-items:center;",
-                                  [Function],
-                                ],
-                              },
-                              "displayName": "DetailList",
-                              "foldedComponentIds": Array [],
-                              "render": [Function],
-                              "styledComponentId": "DetailList-sc-12g7m4-0",
-                              "target": [Function],
-                              "toString": [Function],
-                              "warnTooManyClasses": [Function],
-                              "withComponent": [Function],
-                            }
-                          }
-                          forwardedRef={null}
-                          stacked={true}
+                        <div
+                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
                         >
                           <DetailList
-                            className="DetailList-sc-12g7m4-0 iAtits"
                             stacked={true}
                           >
-                            <TextList
-                              className="DetailList-sc-12g7m4-0 iAtits"
-                              component="dl"
+                            <StyledComponent
+                              forwardedComponent={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "isStatic": false,
+                                    "lastClassName": "iAtits",
+                                    "rules": Array [
+                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      [Function],
+                                    ],
+                                  },
+                                  "displayName": "DetailList",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "target": [Function],
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              forwardedRef={null}
+                              stacked={true}
                             >
-                              <dl
+                              <DetailList
                                 className="DetailList-sc-12g7m4-0 iAtits"
-                                data-pf-content={true}
+                                stacked={true}
                               >
-                                <Detail
-                                  alwaysVisible={false}
-                                  fullWidth={false}
-                                  label="Team Roles"
-                                  value={
-                                    <ChipGroup
-                                      className=""
-                                      collapsedText="\${remaining} more"
-                                      defaultIsOpen={false}
-                                      expandedText="Show Less"
-                                      numChips={5}
-                                      withToolbar={false}
-                                    >
-                                      <Unknown
-                                        isReadOnly={false}
-                                        onClick={[Function]}
-                                      >
-                                        Member
-                                      </Unknown>
-                                    </ChipGroup>
-                                  }
+                                <TextList
+                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  component="dl"
                                 >
-                                  <Detail__DetailName
-                                    component="dt"
-                                    data-cy={null}
-                                    fullWidth={false}
+                                  <dl
+                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    data-pf-content={true}
                                   >
-                                    <StyledComponent
-                                      component="dt"
-                                      data-cy={null}
-                                      forwardedComponent={
-                                        Object {
-                                          "$$typeof": Symbol(react.forward_ref),
-                                          "attrs": Array [],
-                                          "componentStyle": ComponentStyle {
-                                            "componentId": "Detail__DetailName-sc-16ypsyv-0",
-                                            "isStatic": false,
-                                            "lastClassName": "erdIBg",
-                                            "rules": Array [
-                                              "font-weight:var(--pf-global--FontWeight--bold);",
-                                              [Function],
-                                            ],
-                                          },
-                                          "displayName": "Detail__DetailName",
-                                          "foldedComponentIds": Array [],
-                                          "render": [Function],
-                                          "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
-                                          "target": [Function],
-                                          "toString": [Function],
-                                          "warnTooManyClasses": [Function],
-                                          "withComponent": [Function],
-                                        }
-                                      }
-                                      forwardedRef={null}
+                                    <Detail
+                                      alwaysVisible={false}
                                       fullWidth={false}
+                                      label="Team Roles"
+                                      value={
+                                        <ChipGroup
+                                          className=""
+                                          collapsedText="\${remaining} more"
+                                          defaultIsOpen={false}
+                                          expandedText="Show Less"
+                                          numChips={5}
+                                          withToolbar={false}
+                                        >
+                                          <Unknown
+                                            isReadOnly={false}
+                                            onClick={[Function]}
+                                          >
+                                            Member
+                                          </Unknown>
+                                        </ChipGroup>
+                                      }
                                     >
-                                      <Component
-                                        className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                      <Detail__DetailName
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
-                                        <TextListItem
-                                          className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                        <StyledComponent
                                           component="dt"
                                           data-cy={null}
+                                          forwardedComponent={
+                                            Object {
+                                              "$$typeof": Symbol(react.forward_ref),
+                                              "attrs": Array [],
+                                              "componentStyle": ComponentStyle {
+                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "isStatic": false,
+                                                "lastClassName": "erdIBg",
+                                                "rules": Array [
+                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  [Function],
+                                                ],
+                                              },
+                                              "displayName": "Detail__DetailName",
+                                              "foldedComponentIds": Array [],
+                                              "render": [Function],
+                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "target": [Function],
+                                              "toString": [Function],
+                                              "warnTooManyClasses": [Function],
+                                              "withComponent": [Function],
+                                            }
+                                          }
+                                          forwardedRef={null}
+                                          fullWidth={false}
                                         >
-                                          <dt
+                                          <Component
                                             className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            component="dt"
                                             data-cy={null}
-                                            data-pf-content={true}
+                                            fullWidth={false}
                                           >
-                                            Team Roles
-                                          </dt>
-                                        </TextListItem>
-                                      </Component>
-                                    </StyledComponent>
-                                  </Detail__DetailName>
-                                  <Detail__DetailValue
-                                    component="dd"
-                                    data-cy={null}
-                                    fullWidth={false}
-                                  >
-                                    <StyledComponent
-                                      component="dd"
-                                      data-cy={null}
-                                      forwardedComponent={
-                                        Object {
-                                          "$$typeof": Symbol(react.forward_ref),
-                                          "attrs": Array [],
-                                          "componentStyle": ComponentStyle {
-                                            "componentId": "Detail__DetailValue-sc-16ypsyv-1",
-                                            "isStatic": false,
-                                            "lastClassName": "kCDjmZ",
-                                            "rules": Array [
-                                              "word-break:break-all;",
-                                              [Function],
-                                              " ",
-                                              [Function],
-                                            ],
-                                          },
-                                          "displayName": "Detail__DetailValue",
-                                          "foldedComponentIds": Array [],
-                                          "render": [Function],
-                                          "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
-                                          "target": [Function],
-                                          "toString": [Function],
-                                          "warnTooManyClasses": [Function],
-                                          "withComponent": [Function],
-                                        }
-                                      }
-                                      forwardedRef={null}
-                                      fullWidth={false}
-                                    >
-                                      <Component
-                                        className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            <TextListItem
+                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              component="dt"
+                                              data-cy={null}
+                                            >
+                                              <dt
+                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                data-cy={null}
+                                                data-pf-content={true}
+                                              >
+                                                Team Roles
+                                              </dt>
+                                            </TextListItem>
+                                          </Component>
+                                        </StyledComponent>
+                                      </Detail__DetailName>
+                                      <Detail__DetailValue
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
                                       >
-                                        <TextListItem
-                                          className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                        <StyledComponent
                                           component="dd"
                                           data-cy={null}
+                                          forwardedComponent={
+                                            Object {
+                                              "$$typeof": Symbol(react.forward_ref),
+                                              "attrs": Array [],
+                                              "componentStyle": ComponentStyle {
+                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "isStatic": false,
+                                                "lastClassName": "kCDjmZ",
+                                                "rules": Array [
+                                                  "word-break:break-all;",
+                                                  [Function],
+                                                  " ",
+                                                  [Function],
+                                                ],
+                                              },
+                                              "displayName": "Detail__DetailValue",
+                                              "foldedComponentIds": Array [],
+                                              "render": [Function],
+                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "target": [Function],
+                                              "toString": [Function],
+                                              "warnTooManyClasses": [Function],
+                                              "withComponent": [Function],
+                                            }
+                                          }
+                                          forwardedRef={null}
+                                          fullWidth={false}
                                         >
-                                          <dd
+                                          <Component
                                             className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            component="dd"
                                             data-cy={null}
-                                            data-pf-content={true}
+                                            fullWidth={false}
                                           >
-                                            <ChipGroup
-                                              className=""
-                                              collapsedText="\${remaining} more"
-                                              defaultIsOpen={false}
-                                              expandedText="Show Less"
-                                              numChips={5}
-                                              withToolbar={false}
+                                            <TextListItem
+                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              component="dd"
+                                              data-cy={null}
                                             >
-                                              <ul
-                                                className="pf-c-chip-group"
+                                              <dd
+                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                data-cy={null}
+                                                data-pf-content={true}
                                               >
-                                                <InnerChipGroup
+                                                <ChipGroup
                                                   className=""
                                                   collapsedText="\${remaining} more"
                                                   defaultIsOpen={false}
                                                   expandedText="Show Less"
-                                                  isOpen={false}
                                                   numChips={5}
-                                                  onToggleCollapse={[Function]}
                                                   withToolbar={false}
                                                 >
-                                                  <Component
-                                                    component="li"
-                                                    isReadOnly={false}
-                                                    key=".$3"
-                                                    onClick={[Function]}
+                                                  <ul
+                                                    className="pf-c-chip-group"
                                                   >
-                                                    <ComponentWithOuia
-                                                      component={[Function]}
-                                                      componentProps={
-                                                        Object {
-                                                          "children": "Member",
-                                                          "component": "li",
-                                                          "isReadOnly": false,
-                                                          "onClick": [Function],
-                                                        }
-                                                      }
-                                                      consumerContext={null}
+                                                    <InnerChipGroup
+                                                      className=""
+                                                      collapsedText="\${remaining} more"
+                                                      defaultIsOpen={false}
+                                                      expandedText="Show Less"
+                                                      isOpen={false}
+                                                      numChips={5}
+                                                      onToggleCollapse={[Function]}
+                                                      withToolbar={false}
                                                     >
-                                                      <Chip
-                                                        className=""
-                                                        closeBtnAriaLabel="close"
+                                                      <Component
                                                         component="li"
-                                                        isOverflowChip={false}
                                                         isReadOnly={false}
+                                                        key=".$3"
                                                         onClick={[Function]}
-                                                        ouiaContext={
-                                                          Object {
-                                                            "isOuia": false,
-                                                            "ouiaId": null,
-                                                          }
-                                                        }
-                                                        tooltipPosition="top"
                                                       >
-                                                        <GenerateId
-                                                          prefix="pf-random-id-"
+                                                        <ComponentWithOuia
+                                                          component={[Function]}
+                                                          componentProps={
+                                                            Object {
+                                                              "children": "Member",
+                                                              "component": "li",
+                                                              "isReadOnly": false,
+                                                              "onClick": [Function],
+                                                            }
+                                                          }
+                                                          consumerContext={null}
                                                         >
-                                                          <li
-                                                            className="pf-c-chip"
+                                                          <Chip
+                                                            className=""
+                                                            closeBtnAriaLabel="close"
+                                                            component="li"
+                                                            isOverflowChip={false}
+                                                            isReadOnly={false}
+                                                            onClick={[Function]}
+                                                            ouiaContext={
+                                                              Object {
+                                                                "isOuia": false,
+                                                                "ouiaId": null,
+                                                              }
+                                                            }
+                                                            tooltipPosition="top"
                                                           >
-                                                            <span
-                                                              className="pf-c-chip__text"
-                                                              id="pf-random-id-0"
+                                                            <GenerateId
+                                                              prefix="pf-random-id-"
                                                             >
-                                                              Member
-                                                            </span>
-                                                            <ChipButton
-                                                              aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                              ariaLabel="close"
-                                                              id="remove_pf-random-id-0"
-                                                              onClick={[Function]}
-                                                            >
-                                                              <Component
-                                                                aria-label="close"
-                                                                aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                className=""
-                                                                id="remove_pf-random-id-0"
-                                                                onClick={[Function]}
-                                                                variant="plain"
+                                                              <li
+                                                                className="pf-c-chip"
                                                               >
-                                                                <ComponentWithOuia
-                                                                  component={[Function]}
-                                                                  componentProps={
-                                                                    Object {
-                                                                      "aria-label": "close",
-                                                                      "aria-labelledby": "remove_pf-random-id-0 pf-random-id-0",
-                                                                      "children": <TimesCircleIcon
-                                                                        aria-hidden="true"
-                                                                        color="currentColor"
-                                                                        noVerticalAlign={false}
-                                                                        size="sm"
-                                                                        title={null}
-                                                                      />,
-                                                                      "className": "",
-                                                                      "id": "remove_pf-random-id-0",
-                                                                      "onClick": [Function],
-                                                                      "variant": "plain",
-                                                                    }
-                                                                  }
-                                                                  consumerContext={
-                                                                    Object {
-                                                                      "isOuia": false,
-                                                                      "ouiaId": null,
-                                                                    }
-                                                                  }
+                                                                <span
+                                                                  className="pf-c-chip__text"
+                                                                  id="pf-random-id-0"
                                                                 >
-                                                                  <Button
+                                                                  Member
+                                                                </span>
+                                                                <ChipButton
+                                                                  aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                                                  ariaLabel="close"
+                                                                  id="remove_pf-random-id-0"
+                                                                  onClick={[Function]}
+                                                                >
+                                                                  <Component
                                                                     aria-label="close"
                                                                     aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
                                                                     className=""
                                                                     id="remove_pf-random-id-0"
                                                                     onClick={[Function]}
-                                                                    ouiaContext={
-                                                                      Object {
-                                                                        "isOuia": false,
-                                                                        "ouiaId": null,
-                                                                      }
-                                                                    }
                                                                     variant="plain"
                                                                   >
-                                                                    <button
-                                                                      aria-disabled={null}
-                                                                      aria-label="close"
-                                                                      aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                      className="pf-c-button pf-m-plain"
-                                                                      disabled={false}
-                                                                      id="remove_pf-random-id-0"
-                                                                      onClick={[Function]}
-                                                                      tabIndex={null}
-                                                                      type="button"
+                                                                    <ComponentWithOuia
+                                                                      component={[Function]}
+                                                                      componentProps={
+                                                                        Object {
+                                                                          "aria-label": "close",
+                                                                          "aria-labelledby": "remove_pf-random-id-0 pf-random-id-0",
+                                                                          "children": <TimesCircleIcon
+                                                                            aria-hidden="true"
+                                                                            color="currentColor"
+                                                                            noVerticalAlign={false}
+                                                                            size="sm"
+                                                                            title={null}
+                                                                          />,
+                                                                          "className": "",
+                                                                          "id": "remove_pf-random-id-0",
+                                                                          "onClick": [Function],
+                                                                          "variant": "plain",
+                                                                        }
+                                                                      }
+                                                                      consumerContext={
+                                                                        Object {
+                                                                          "isOuia": false,
+                                                                          "ouiaId": null,
+                                                                        }
+                                                                      }
                                                                     >
-                                                                      <TimesCircleIcon
-                                                                        aria-hidden="true"
-                                                                        color="currentColor"
-                                                                        noVerticalAlign={false}
-                                                                        size="sm"
-                                                                        title={null}
-                                                                      >
-                                                                        <svg
-                                                                          aria-hidden="true"
-                                                                          aria-labelledby={null}
-                                                                          fill="currentColor"
-                                                                          height="1em"
-                                                                          role="img"
-                                                                          style={
-                                                                            Object {
-                                                                              "verticalAlign": "-0.125em",
-                                                                            }
+                                                                      <Button
+                                                                        aria-label="close"
+                                                                        aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                                                        className=""
+                                                                        id="remove_pf-random-id-0"
+                                                                        onClick={[Function]}
+                                                                        ouiaContext={
+                                                                          Object {
+                                                                            "isOuia": false,
+                                                                            "ouiaId": null,
                                                                           }
-                                                                          viewBox="0 0 512 512"
-                                                                          width="1em"
+                                                                        }
+                                                                        variant="plain"
+                                                                      >
+                                                                        <button
+                                                                          aria-disabled={null}
+                                                                          aria-label="close"
+                                                                          aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                                                          className="pf-c-button pf-m-plain"
+                                                                          disabled={false}
+                                                                          id="remove_pf-random-id-0"
+                                                                          onClick={[Function]}
+                                                                          tabIndex={null}
+                                                                          type="button"
                                                                         >
-                                                                          <path
-                                                                            d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
-                                                                            transform=""
-                                                                          />
-                                                                        </svg>
-                                                                      </TimesCircleIcon>
-                                                                    </button>
-                                                                  </Button>
-                                                                </ComponentWithOuia>
-                                                              </Component>
-                                                            </ChipButton>
-                                                          </li>
-                                                        </GenerateId>
-                                                      </Chip>
-                                                    </ComponentWithOuia>
-                                                  </Component>
-                                                </InnerChipGroup>
-                                              </ul>
-                                            </ChipGroup>
-                                          </dd>
-                                        </TextListItem>
-                                      </Component>
-                                    </StyledComponent>
-                                  </Detail__DetailValue>
-                                </Detail>
-                              </dl>
-                            </TextList>
+                                                                          <TimesCircleIcon
+                                                                            aria-hidden="true"
+                                                                            color="currentColor"
+                                                                            noVerticalAlign={false}
+                                                                            size="sm"
+                                                                            title={null}
+                                                                          >
+                                                                            <svg
+                                                                              aria-hidden="true"
+                                                                              aria-labelledby={null}
+                                                                              fill="currentColor"
+                                                                              height="1em"
+                                                                              role="img"
+                                                                              style={
+                                                                                Object {
+                                                                                  "verticalAlign": "-0.125em",
+                                                                                }
+                                                                              }
+                                                                              viewBox="0 0 512 512"
+                                                                              width="1em"
+                                                                            >
+                                                                              <path
+                                                                                d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
+                                                                                transform=""
+                                                                              />
+                                                                            </svg>
+                                                                          </TimesCircleIcon>
+                                                                        </button>
+                                                                      </Button>
+                                                                    </ComponentWithOuia>
+                                                                  </Component>
+                                                                </ChipButton>
+                                                              </li>
+                                                            </GenerateId>
+                                                          </Chip>
+                                                        </ComponentWithOuia>
+                                                      </Component>
+                                                    </InnerChipGroup>
+                                                  </ul>
+                                                </ChipGroup>
+                                              </dd>
+                                            </TextListItem>
+                                          </Component>
+                                        </StyledComponent>
+                                      </Detail__DetailValue>
+                                    </Detail>
+                                  </dl>
+                                </TextList>
+                              </DetailList>
+                            </StyledComponent>
                           </DetailList>
-                        </StyledComponent>
-                      </DetailList>
-                    </div>
+                        </div>
+                      </PFDataListCell>
+                    </StyledComponent>
                   </DataListCell>
                 </div>
               </DataListItemCells>

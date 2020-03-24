@@ -4,10 +4,10 @@ import {
   DataListItem,
   DataListItemRow,
   DataListItemCells,
-  DataListCell,
   DataListCheck,
   Radio,
 } from '@patternfly/react-core';
+import DataListCell from '@components/DataListCell';
 
 const CheckboxListItem = ({
   isDisabled = false,
