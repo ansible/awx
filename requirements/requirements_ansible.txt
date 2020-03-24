@@ -1,46 +1,46 @@
 adal==1.2.2               # via msrestazure
-apache-libcloud==2.5.0
+apache-libcloud==2.5.0    # via -r /awx_devel/requirements/requirements_ansible.in
 appdirs==1.4.3            # via openstacksdk
 applicationinsights==0.11.9  # via azure-cli-core
 argcomplete==1.10.3       # via azure-cli-core, knack
-azure-cli-core==2.0.35
-azure-cli-nspkg==3.0.2
-azure-common==1.1.11
-azure-graphrbac==0.40.0
-azure-keyvault==1.0.0a1
-azure-mgmt-authorization==0.51.1
-azure-mgmt-automation==0.1.1
-azure-mgmt-batch==5.0.1
-azure-mgmt-cdn==3.0.0
-azure-mgmt-compute==4.4.0
-azure-mgmt-containerinstance==1.4.0
-azure-mgmt-containerregistry==2.0.0
-azure-mgmt-containerservice==4.4.0
-azure-mgmt-cosmosdb==0.5.2
-azure-mgmt-devtestlabs==3.0.0
-azure-mgmt-dns==2.1.0
-azure-mgmt-hdinsight==0.1.0
-azure-mgmt-iothub==0.7.0
-azure-mgmt-keyvault==1.1.0
-azure-mgmt-loganalytics==0.2.0
-azure-mgmt-marketplaceordering==0.1.0
-azure-mgmt-monitor==0.5.2
-azure-mgmt-network==2.3.0
-azure-mgmt-nspkg==2.0.0
-azure-mgmt-rdbms==1.4.1
-azure-mgmt-redis==5.0.0
-azure-mgmt-resource==2.1.0
-azure-mgmt-servicebus==0.5.3
-azure-mgmt-sql==0.10.0
-azure-mgmt-storage==3.1.0
-azure-mgmt-trafficmanager==0.50.0
-azure-mgmt-web==0.41.0
-azure-nspkg==2.0.0
-azure-storage==0.35.1
-backports.ssl-match-hostname==3.5.0.1
+azure-cli-core==2.0.35    # via -r /awx_devel/requirements/requirements_ansible.in
+azure-cli-nspkg==3.0.2    # via -r /awx_devel/requirements/requirements_ansible.in, azure-cli-core
+azure-common==1.1.11      # via -r /awx_devel/requirements/requirements_ansible.in, azure-graphrbac, azure-mgmt-authorization, azure-mgmt-automation, azure-mgmt-batch, azure-mgmt-cdn, azure-mgmt-compute, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-hdinsight, azure-mgmt-iothub, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-marketplaceordering, azure-mgmt-monitor, azure-mgmt-network, azure-mgmt-rdbms, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-servicebus, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-trafficmanager, azure-mgmt-web, azure-storage
+azure-graphrbac==0.40.0   # via -r /awx_devel/requirements/requirements_ansible.in
+azure-keyvault==1.0.0a1   # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-authorization==0.51.1  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-automation==0.1.1  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-batch==5.0.1   # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-cdn==3.0.0     # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-compute==4.4.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-containerinstance==1.4.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-containerregistry==2.0.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-containerservice==4.4.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-cosmosdb==0.5.2  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-devtestlabs==3.0.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-dns==2.1.0     # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-hdinsight==0.1.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-iothub==0.7.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-keyvault==1.1.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-loganalytics==0.2.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-marketplaceordering==0.1.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-monitor==0.5.2  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-network==2.3.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-nspkg==2.0.0; python_version < "3" # via -r /awx_devel/requirements/requirements_ansible.in, azure-mgmt-authorization, azure-mgmt-automation, azure-mgmt-batch, azure-mgmt-cdn, azure-mgmt-compute, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-hdinsight, azure-mgmt-iothub, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-marketplaceordering, azure-mgmt-monitor, azure-mgmt-network, azure-mgmt-rdbms, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-servicebus, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-trafficmanager, azure-mgmt-web
+azure-mgmt-rdbms==1.4.1   # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-redis==5.0.0   # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-resource==2.1.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-servicebus==0.5.3  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-sql==0.10.0    # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-storage==3.1.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-trafficmanager==0.50.0  # via -r /awx_devel/requirements/requirements_ansible.in
+azure-mgmt-web==0.41.0    # via -r /awx_devel/requirements/requirements_ansible.in
+azure-nspkg==2.0.0        # via -r /awx_devel/requirements/requirements_ansible.in, azure-cli-nspkg, azure-common, azure-graphrbac, azure-keyvault, azure-mgmt-nspkg, azure-storage
+azure-storage==0.35.1     # via -r /awx_devel/requirements/requirements_ansible.in
+backports.ssl-match-hostname==3.5.0.1  # via -r /awx_devel/requirements/requirements_ansible.in
 bcrypt==3.1.7             # via paramiko
-boto3==1.9.223
-boto==2.47.0
+boto3==1.9.223            # via -r /awx_devel/requirements/requirements_ansible.in
+boto==2.47.0              # via -r /awx_devel/requirements/requirements_ansible.in
 botocore==1.12.253        # via boto3, s3transfer
 cachetools==3.1.1         # via google-auth
 certifi==2019.11.28       # via msrest, requests
@@ -53,13 +53,13 @@ docutils==0.15.2          # via botocore
 dogpile.cache==0.9.0      # via openstacksdk
 enum34==1.1.6; python_version < "3" # via cryptography, knack, msrest, ovirt-engine-sdk-python
 futures==3.3.0; python_version < "3" # via openstacksdk, s3transfer
-google-auth==1.6.2
+google-auth==1.6.2        # via -r /awx_devel/requirements/requirements_ansible.in
 humanfriendly==4.18       # via azure-cli-core
 idna==2.8                 # via requests
 ipaddress==1.0.23; python_version < "3" # via cryptography, openstacksdk
 iso8601==0.1.12           # via keystoneauth1, openstacksdk
 isodate==0.6.0            # via msrest
-jinja2==2.10.1
+jinja2==2.10.1            # via -r /awx_devel/requirements/requirements_ansible.in
 jmespath==0.9.4           # via azure-cli-core, boto3, botocore, knack, openstacksdk
 jsonpatch==1.24           # via openstacksdk
 jsonpointer==2.0          # via jsonpatch
@@ -68,25 +68,25 @@ knack==0.3.3              # via azure-cli-core
 lxml==4.4.2               # via ncclient
 markupsafe==1.1.1         # via jinja2
 monotonic==1.5; python_version < "3" # via humanfriendly
-msrest==0.6.1
-msrestazure==0.5.0
+msrest==0.6.1             # via -r /awx_devel/requirements/requirements_ansible.in, azure-cli-core, azure-keyvault, azure-mgmt-authorization, azure-mgmt-automation, azure-mgmt-compute, azure-mgmt-containerinstance, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-hdinsight, azure-mgmt-iothub, azure-mgmt-keyvault, azure-mgmt-network, azure-mgmt-rdbms, azure-mgmt-resource, azure-mgmt-servicebus, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-web, msrestazure
+msrestazure==0.5.0        # via -r /awx_devel/requirements/requirements_ansible.in, azure-cli-core, azure-graphrbac, azure-keyvault, azure-mgmt-authorization, azure-mgmt-automation, azure-mgmt-batch, azure-mgmt-cdn, azure-mgmt-compute, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-hdinsight, azure-mgmt-iothub, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-marketplaceordering, azure-mgmt-monitor, azure-mgmt-network, azure-mgmt-rdbms, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-servicebus, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-trafficmanager, azure-mgmt-web
 munch==2.5.0              # via openstacksdk
-ncclient==0.6.3
-netaddr==0.7.19
+ncclient==0.6.3           # via -r /awx_devel/requirements/requirements_ansible.in
+netaddr==0.7.19           # via -r /awx_devel/requirements/requirements_ansible.in
 netifaces==0.10.9         # via openstacksdk
 ntlm-auth==1.4.0          # via requests-credssp, requests-ntlm
 oauthlib==3.1.0           # via requests-oauthlib
-openstacksdk==0.37.0
+openstacksdk==0.37.0      # via -r /awx_devel/requirements/requirements_ansible.in
 os-service-types==1.7.0   # via keystoneauth1, openstacksdk
-ovirt-engine-sdk-python==4.3.0
-packaging==19.2
+ovirt-engine-sdk-python==4.3.0  # via -r /awx_devel/requirements/requirements_ansible.in
+packaging==19.2           # via -r /awx_devel/requirements/requirements_ansible.in
 paramiko==2.7.1           # via azure-cli-core, ncclient
 pbr==5.4.4                # via keystoneauth1, openstacksdk, os-service-types, stevedore
-psutil==5.4.3
+psutil==5.4.3             # via -r /awx_devel/requirements/requirements_ansible.in
 pyasn1-modules==0.2.7     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, requests-credssp, rsa
 pycparser==2.19           # via cffi
-pycurl==7.43.0.1
+pycurl==7.43.0.1          # via -r /awx_devel/requirements/requirements_ansible.in, ovirt-engine-sdk-python
 pygments==2.5.2           # via azure-cli-core, knack
 pyjwt==1.7.1              # via adal, azure-cli-core
 pykerberos==1.2.1         # via requests-kerberos
@@ -94,14 +94,14 @@ pynacl==1.3.0             # via paramiko
 pyopenssl==19.1.0         # via azure-cli-core, requests-credssp
 pyparsing==2.4.5          # via packaging
 python-dateutil==2.8.1    # via adal, azure-storage, botocore
-pyvmomi==6.7.3
-pywinrm[kerberos]==0.3.0
+pyvmomi==6.7.3            # via -r /awx_devel/requirements/requirements_ansible.in
+pywinrm[kerberos]==0.3.0  # via -r /awx_devel/requirements/requirements_ansible.in
 pyyaml==5.2               # via azure-cli-core, knack, openstacksdk
-requests-credssp==1.0.2
+requests-credssp==1.0.2   # via -r /awx_devel/requirements/requirements_ansible.in
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
 requests-oauthlib==1.3.0  # via msrest
-requests==2.22.0
+requests==2.22.0          # via -r /awx_devel/requirements/requirements_ansible.in, adal, apache-libcloud, azure-cli-core, azure-keyvault, azure-storage, keystoneauth1, msrest, pyvmomi, pywinrm, requests-credssp, requests-kerberos, requests-ntlm, requests-oauthlib
 requestsexceptions==1.4.0  # via openstacksdk
 rsa==4.0                  # via google-auth
 s3transfer==0.2.1         # via boto3
@@ -115,5 +115,5 @@ wheel==0.33.6  # via azure-cli-core (overriden, see upgrade blockers)
 xmltodict==0.12.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==19.3.1
-setuptools==41.6.0
+pip==19.3.1               # via -r /awx_devel/requirements/requirements_ansible.in, azure-cli-core
+setuptools==41.6.0        # via -r /awx_devel/requirements/requirements_ansible.in, ncclient
