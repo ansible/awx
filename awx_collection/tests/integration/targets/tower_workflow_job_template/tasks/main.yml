@@ -1,11 +1,11 @@
 ---
 - name: Generate names
   set_fact:
-    scm_cred_name: "AWX-Collection-tests-tower_workflow_template-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    demo_project_name: "AWX-Collection-tests-tower_workflow_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1_name: "AWX-Collection-tests-tower_workflow_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt2_name: "AWX-Collection-tests-tower_workflow_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    wfjt_name: "AWX-Collection-tests-tower_workflow_template-wfjt-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create an SCM Credential
   tower_credential:
@@ -80,9 +80,8 @@
       - "result is changed"
 
 - name: Create a workflow job template
-  tower_workflow_template:
+  tower_workflow_job_template:
     name: "{{ wfjt_name }}"
-    schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
 
@@ -90,8 +89,22 @@
     that:
       - "result is changed"
 
+# Node actions do what this schema command used to do
+# schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
+- name: Create leaf node
+  tower_workflow_job_template_node:
+    identifier: leaf
+    unified_job_template: "{{ jt2_name }}"
+    workflow: "{{ wfjt_name }}"
+
+- name: Create root node
+  tower_workflow_job_template_node:
+    identifier: root
+    unified_job_template: "{{ jt1_name }}"
+    workflow: "{{ wfjt_name }}"
+
 - name: Delete a workflow job template
-  tower_workflow_template:
+  tower_workflow_job_template:
     name: "{{ wfjt_name }}"
     state: absent
   register: result
@@ -101,16 +114,15 @@
       - "result is changed"
 
 - name: Check module fails with correct msg
-  tower_workflow_template:
+  tower_workflow_job_template:
     name: "{{ wfjt_name }}"
     organization: Non Existing Organization
-    schema: [{"success": [{"job_template": "{{ jt1_name }}"}], "job_template": "{{ jt2_name }}"}]
   register: result
   ignore_errors: true
 
 - assert:
     that:
-      - "result.msg =='Failed to update organization source,organization not found: The requested object could not be found.'"
+      - "'The organizations Non Existing Organization was not found' in result.msg"
 
 - name: Delete the Job Template
   tower_job_template:
