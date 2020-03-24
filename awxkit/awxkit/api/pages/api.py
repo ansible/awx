@@ -92,7 +92,7 @@ class ApiV2(base.Base):
     # Common import/export methods
 
     def _get_options(self, endpoint):
-        return endpoint.options().json['actions']['POST']
+        return endpoint.options().json['actions'].get('POST', {})
 
     # Export methods
 
@@ -101,31 +101,34 @@ class ApiV2(base.Base):
         if asset.json.get('managed_by_tower'):
             return None
 
-        fields = {
-            key: asset[key] for key in options
-            if key in asset.json and key not in asset.related
-        }
-        fields['natural_key'] = get_natural_key(asset)
+        try:
+            fields = {
+                key: asset[key] for key in options
+                if key in asset.json and key not in asset.related
+            }
+            fields['natural_key'] = get_natural_key(asset)
 
-        fk_fields = {
-            key: get_natural_key(asset.related[key].get()) for key in options
-            if key in asset.related
-        }
+            fk_fields = {
+                key: get_natural_key(asset.related[key].get()) for key in options
+                if key in asset.related
+            }
 
-        related = {}
-        for k, related_endpoint in asset.related.items():
-            if not related_endpoint:
-                continue
-            if k == 'object_roles':
-                continue
-            rel = related_endpoint._create()
-            if rel.__class__.__name__ not in EXPORTABLE_RELATIONS:
-                continue
-            data = related_endpoint.get(all_pages=True)
-            if 'results' in data:
-                related[k] = [get_natural_key(x) for x in data.results]
-            else:
-                related[k] = data.json
+            related = {}
+            for k, related_endpoint in asset.related.items():
+                if not related_endpoint:
+                    continue
+                if k == 'object_roles':
+                    continue
+                rel = related_endpoint._create()
+                if rel.__class__.__name__ not in EXPORTABLE_RELATIONS:
+                    continue
+                data = related_endpoint.get(all_pages=True)
+                if 'results' in data:
+                    related[k] = [get_natural_key(x) for x in data.results]
+                else:
+                    related[k] = data.json
+        except exc.Forbidden:
+            return None
 
         related_fields = {'related': related} if related else {}
 
