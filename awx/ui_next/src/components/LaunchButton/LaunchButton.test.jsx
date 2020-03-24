@@ -13,6 +13,12 @@ describe('LaunchButton', () => {
   JobTemplatesAPI.readLaunch.mockResolvedValue({
     data: {
       can_start_without_user_input: true,
+      ask_inventory_on_launch: false,
+      ask_variables_on_launch: false,
+      ask_limit_on_launch: false,
+      ask_scm_branch_on_launch: false,
+      survey_enabled: false,
+      variables_needed_to_start: [],
     },
   });
 

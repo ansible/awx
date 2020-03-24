@@ -431,6 +431,7 @@ function Visualizer({ template, i18n }) {
           <VisualizerToolbar
             onClose={handleVisualizerClose}
             onSave={handleVisualizerSave}
+            hasUnsavedChanges={unsavedChanges}
             template={template}
           />
           {links.length > 0 ? (

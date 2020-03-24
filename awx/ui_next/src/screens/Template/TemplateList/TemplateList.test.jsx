@@ -1,7 +1,5 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { createMemoryHistory } from 'history';
-import { Route } from 'react-router-dom';
 import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
@@ -307,37 +305,5 @@ describe('<TemplateList />', () => {
       'Modal',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
-  });
-  test('Calls API with jobtemplate__project id', async () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/projects/6/job_templates'],
-    });
-    const wrapper = mountWithContexts(
-      <Route
-        path="/projects/:id/job_templates"
-        component={() => <TemplateList />}
-      />,
-      {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: { params: { id: 6 } },
-            },
-          },
-        },
-      }
-    );
-    await act(async () => {
-      await waitForElement(wrapper, 'ContentLoading', el => el.length === 1);
-    });
-    expect(UnifiedJobTemplatesAPI.read).toBeCalledWith({
-      jobtemplate__project: '6',
-      order_by: 'name',
-      page: 1,
-      page_size: 20,
-      type: 'job_template,workflow_job_template',
-    });
   });
 });

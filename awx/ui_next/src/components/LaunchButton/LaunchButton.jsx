@@ -16,6 +16,18 @@ import {
   WorkflowJobTemplatesAPI,
 } from '@api';
 
+function canLaunchWithoutPrompt(launchData) {
+  return (
+    launchData.can_start_without_user_input &&
+    !launchData.ask_inventory_on_launch &&
+    !launchData.ask_variables_on_launch &&
+    !launchData.ask_limit_on_launch &&
+    !launchData.ask_scm_branch_on_launch &&
+    !launchData.survey_enabled &&
+    launchData.variables_needed_to_start.length === 0
+  );
+}
+
 class LaunchButton extends React.Component {
   static propTypes = {
     resource: shape({
@@ -47,19 +59,23 @@ class LaunchButton extends React.Component {
 
   async handleLaunch() {
     const { history, resource } = this.props;
+
     const readLaunch =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
         : JobTemplatesAPI.readLaunch(resource.id);
+
     const launchJob =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.launch(resource.id)
         : JobTemplatesAPI.launch(resource.id);
+
     try {
       const { data: launchConfig } = await readLaunch;
 
-      if (launchConfig.can_start_without_user_input) {
+      if (canLaunchWithoutPrompt(launchConfig)) {
         const { data: job } = await launchJob;
+
         history.push(
           `/${
             resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
@@ -107,7 +123,7 @@ class LaunchButton extends React.Component {
         relaunchConfig.passwords_needed_to_start.length === 0
       ) {
         const { data: job } = await relaunch;
-        history.push(`/jobs/${job.id}`);
+        history.push(`/jobs/${job.id}/output`);
       } else {
         this.setState({ promptError: true });
       }

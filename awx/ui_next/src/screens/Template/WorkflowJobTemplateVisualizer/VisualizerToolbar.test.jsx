@@ -13,6 +13,11 @@ const save = jest.fn();
 const template = {
   id: 1,
   name: 'Test JT',
+  summary_fields: {
+    user_capabilities: {
+      start: true,
+    },
+  },
 };
 const workflowContext = {
   nodes: [],
@@ -41,6 +46,7 @@ describe('VisualizerToolbar', () => {
             onClose={close}
             onSave={save}
             template={template}
+            hasUnsavedChanges={false}
           />
         </WorkflowStateContext.Provider>
       </WorkflowDispatchContext.Provider>
@@ -80,6 +86,30 @@ describe('VisualizerToolbar', () => {
       type: 'SET_SHOW_DELETE_ALL_NODES_MODAL',
       value: true,
     });
+  });
+
+  test('Launch button should be disabled when there are unsaved changes', () => {
+    expect(wrapper.find('LaunchButton button').prop('disabled')).toEqual(false);
+    const nodes = [
+      {
+        id: 1,
+      },
+    ];
+    const disabledToolbar = mountWithContexts(
+      <WorkflowDispatchContext.Provider value={dispatch}>
+        <WorkflowStateContext.Provider value={{ ...workflowContext, nodes }}>
+          <VisualizerToolbar
+            onClose={close}
+            onSave={save}
+            template={template}
+            hasUnsavedChanges
+          />
+        </WorkflowStateContext.Provider>
+      </WorkflowDispatchContext.Provider>
+    );
+    expect(
+      disabledToolbar.find('LaunchButton button').prop('disabled')
+    ).toEqual(true);
   });
 
   test('Save button calls expected function', () => {

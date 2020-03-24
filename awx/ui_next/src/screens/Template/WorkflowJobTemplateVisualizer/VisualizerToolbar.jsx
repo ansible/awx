@@ -5,7 +5,7 @@ import {
 } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape } from 'prop-types';
+import { bool, func, shape } from 'prop-types';
 import {
   Badge as PFBadge,
   Button,
@@ -20,6 +20,7 @@ import {
   TrashAltIcon,
   WrenchIcon,
 } from '@patternfly/react-icons';
+import LaunchButton from '@components/LaunchButton';
 import styled from 'styled-components';
 
 const Badge = styled(PFBadge)`
@@ -45,12 +46,20 @@ const ActionButton = styled(Button)`
 `;
 ActionButton.displayName = 'ActionButton';
 
-function VisualizerToolbar({ i18n, onClose, onSave, template }) {
+function VisualizerToolbar({
+  i18n,
+  onClose,
+  onSave,
+  template,
+  hasUnsavedChanges,
+}) {
   const dispatch = useContext(WorkflowDispatchContext);
 
   const { nodes, showLegend, showTools } = useContext(WorkflowStateContext);
 
   const totalNodes = nodes.reduce((n, node) => n + !node.isDeleted, 0) - 1;
+  const canLaunch =
+    template.summary_fields?.user_capabilities?.start && !hasUnsavedChanges;
 
   return (
     <div id="visualizer-toolbar">
@@ -92,9 +101,18 @@ function VisualizerToolbar({ i18n, onClose, onSave, template }) {
           >
             <BookIcon />
           </ActionButton>
-          <ActionButton id="visualizer-launch" variant="plain" isDisabled>
-            <RocketIcon />
-          </ActionButton>
+          <LaunchButton resource={template} aria-label={i18n._(t`Launch`)}>
+            {({ handleLaunch }) => (
+              <ActionButton
+                id="visualizer-launch"
+                variant="plain"
+                isDisabled={!canLaunch}
+                onClick={handleLaunch}
+              >
+                <RocketIcon />
+              </ActionButton>
+            )}
+          </LaunchButton>
           <Tooltip content={i18n._(t`Delete All Nodes`)} position="bottom">
             <ActionButton
               id="visualizer-delete-all"
@@ -138,6 +156,7 @@ VisualizerToolbar.propTypes = {
   onClose: func.isRequired,
   onSave: func.isRequired,
   template: shape().isRequired,
+  hasUnsavedChanges: bool.isRequired,
 };
 
 export default withI18n()(VisualizerToolbar);
