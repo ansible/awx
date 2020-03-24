@@ -128,7 +128,6 @@ For convenience, you can create a file called `vars.yml`:
 ```
 admin_password: 'adminpass'
 pg_password: 'pgpass'
-rabbitmq_password: 'rabbitpass'
 secret_key: 'mysupersecret'
 ```
 
@@ -555,16 +554,7 @@ $ ansible-playbook -i inventory -e docker_registry_password=password install.yml
 
 ### Post-install
 
-After the playbook run completes, Docker will report up to 5 running containers. If you chose to use an existing PostgresSQL database, then it will report 4. You can view the running containers using the `docker ps` command, as follows:
-
-```bash
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                NAMES
-e240ed8209cd        awx_task:1.0.0.8    "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   8052/tcp                             awx_task
-1cfd02601690        awx_web:1.0.0.8     "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   0.0.0.0:443->8052/tcp                 awx_web
-55a552142bcd        memcached:alpine    "docker-entrypoint..."   2 minutes ago       Up 2 minutes        11211/tcp                            memcached
-84011c072aad        rabbitmq:3          "docker-entrypoint..."   2 minutes ago       Up 2 minutes        4369/tcp, 5671-5672/tcp, 25672/tcp   rabbitmq
-97e196120ab3        postgres:9.6        "docker-entrypoint..."   2 minutes ago       Up 2 minutes        5432/tcp                             postgres
-```
+After the playbook run completes, Docker starts a series of containers that provide the services that make up AWX.  You can view the running containers using the `docker ps` command.
 
 If you're deploying using Docker Compose, container names will be prefixed by the name of the folder where the docker-compose.yml file is created (by default, `awx`).
 

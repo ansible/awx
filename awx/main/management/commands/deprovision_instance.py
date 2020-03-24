@@ -1,8 +1,6 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved
 
-import subprocess
-
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
@@ -33,18 +31,9 @@ class Command(BaseCommand):
         with advisory_lock('instance_registration_%s' % hostname):
             instance = Instance.objects.filter(hostname=hostname)
             if instance.exists():
-                isolated = instance.first().is_isolated()
                 instance.delete()
                 print("Instance Removed")
-                if isolated:
-                    print('Successfully deprovisioned {}'.format(hostname))
-                else:
-                    result = subprocess.Popen("rabbitmqctl forget_cluster_node rabbitmq@{}".format(hostname), shell=True).wait()
-                    if result != 0:
-                        print("Node deprovisioning may have failed when attempting to "
-                              "remove the RabbitMQ instance {} from the cluster".format(hostname))
-                    else:
-                        print('Successfully deprovisioned {}'.format(hostname))
+                print('Successfully deprovisioned {}'.format(hostname))
                 print('(changed: True)')
             else:
                 print('No instance found matching name {}'.format(hostname))
