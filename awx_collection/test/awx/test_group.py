@@ -33,7 +33,7 @@ def test_create_group(run_module, admin_user):
 
 
 @pytest.mark.django_db
-def test_associate_hosts_and_groups(run_module, admin_user, organization):
+def test_associate_hosts_and_children(run_module, admin_user, organization):
     inv = Inventory.objects.create(name='test-inv', organization=organization)
     group = Group.objects.create(name='Test Group', inventory=inv)
 
@@ -46,7 +46,7 @@ def test_associate_hosts_and_groups(run_module, admin_user, organization):
         name='Test Group',
         inventory='test-inv',
         hosts=[inv_hosts[1].name, inv_hosts[2].name],
-        groups=[child.name],
+        children=[child.name],
         state='present'
     ), admin_user)
     assert not result.get('failed', False), result.get('msg', result)
