@@ -555,23 +555,14 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             email_options: {
-                label: i18n._('Options'),
-                type: 'radio_group',
-                subForm: 'typeSubForm',
+                label: i18n._('Email Options'),
+                dataTitle: i18n._('Email Options'),
+                defaultText: i18n._('Choose an email option'),
+                type: 'select',
+                ngOptions: 'type.id as type.name for type in emailOptions',
                 ngShow: "notification_type.value == 'email'",
-                ngClick: "emailOptionsChange()",
-                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
-                options: [{
-                    value: 'use_tls',
-                    label: i18n._('Use TLS'),
-                    ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'Form-inputLabel'
-                }, {
-                    value: 'use_ssl',
-                    label: i18n._('Use SSL'),
-                    ngShow: "notification_type.value == 'email'",
-                    labelClass: 'Form-inputLabel'
-                }]
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             hex_color: {
                 label: i18n._('Notification Color'),
