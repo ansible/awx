@@ -42,10 +42,12 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish.
       type: int
-
-requirements:
-- ansible-tower-cli >= 3.0.2
-
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -90,22 +92,26 @@ status:
 '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-from ansible.module_utils.six import PY2
-from ansible.module_utils.six.moves import cStringIO as StringIO
-from codecs import getwriter
+from ..module_utils.tower_api import TowerModule
+import time
+import itertools
 
 
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
+def check_job(module, job_url):
+    response = module.get_endpoint(job_url)
+    if response['status_code'] != 200:
+        module.fail_json(msg="Unable to read job from Tower {0}: {1}".format(response['status_code'], module.extract_errors_from_response(response)))
 
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+    # Since we were successful, extract the fields we want to return
+    for k in ('id', 'status', 'elapsed', 'started', 'finished'):
+        module.json_output[k] = response['json'].get(k)
+
+    # And finally return the payload
+    return response['json']
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         job_id=dict(type='int', required=True),
         timeout=dict(type='int'),
@@ -113,55 +119,82 @@ def main():
         max_interval=dict(type='float', default=30),
     )
 
-    module = TowerModule(
-        argument_spec,
-        supports_check_mode=True
-    )
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    json_output = {}
-    fail_json = None
+    # Extract our parameters
+    job_id = module.params.get('job_id')
+    timeout = module.params.get('timeout')
+    min_interval = module.params.get('min_interval')
+    max_interval = module.params.get('max_interval')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        job = tower_cli.get_resource('job')
-        params = module.params.copy()
+    # Attempt to look up job based on the provided id
+    job = module.get_one('jobs', **{
+        'data': {
+            'id': job_id,
+        }
+    })
 
-        # tower-cli gets very noisy when monitoring.
-        # We pass in our our outfile to suppress the out during our monitor call.
-        if PY2:
-            outfile = getwriter('utf-8')(StringIO())
-        else:
-            outfile = StringIO()
-        params['outfile'] = outfile
+    if job is None:
+        module.fail_json(msg='Unable to wait, on job {0} that ID does not exist in Tower.'.format(job_id))
 
-        job_id = params.get('job_id')
-        try:
-            result = job.monitor(job_id, **params)
-        except exc.Timeout:
-            result = job.status(job_id)
-            result['id'] = job_id
-            json_output['msg'] = 'Timeout waiting for job to finish.'
-            json_output['timeout'] = True
-        except exc.NotFound as excinfo:
-            fail_json = dict(msg='Unable to wait, no job_id {0} found: {1}'.format(job_id, excinfo), changed=False)
-        except exc.JobFailure as excinfo:
-            fail_json = dict(msg='Job with id={0} failed, error: {1}'.format(job_id, excinfo))
-            fail_json['success'] = False
-            result = job.get(job_id)
-            for k in ('id', 'status', 'elapsed', 'started', 'finished'):
-                fail_json[k] = result.get(k)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            fail_json = dict(msg='Unable to wait for job: {0}'.format(excinfo), changed=False)
+    job_url = job['url']
 
-    if fail_json is not None:
-        module.fail_json(**fail_json)
+    # This comes from tower_cli/models/base.py from the old tower-cli
+    dots = itertools.cycle([0, 1, 2, 3])
+    interval = min_interval
+    start = time.time()
 
-    json_output['success'] = True
-    for k in ('id', 'status', 'elapsed', 'started', 'finished'):
-        json_output[k] = result.get(k)
+    # Poll the Ansible Tower instance for status, and print the status to the outfile (usually standard out).
+    #
+    # Note that this is one of the few places where we use `secho` even though we're in a function that might
+    # theoretically be imported and run in Python.  This seems fine; outfile can be set to /dev/null and very
+    # much the normal use for this method should be CLI monitoring.
+    result = check_job(module, job_url)
 
-    module.exit_json(**json_output)
+    last_poll = time.time()
+    timeout_check = 0
+    while not result['finished']:
+        # Sanity check: Have we officially timed out?
+        # The timeout check is incremented below, so this is checking to see if we were timed out as of
+        # the previous iteration. If we are timed out, abort.
+        if timeout and timeout_check - start > timeout:
+            module.json_output['msg'] = "Monitoring aborted due to timeout"
+            module.fail_json(**module.json_output)
+
+        # If the outfile is a TTY, print the current status.
+        output = '\rCurrent status: %s%s' % (result['status'], '.' * next(dots))
+
+        # Put the process to sleep briefly.
+        time.sleep(0.2)
+
+        # Sanity check: Have we reached our timeout?
+        # If we're about to time out, then we need to ensure that we do one last check.
+        #
+        # Note that the actual timeout will be performed at the start of the **next** iteration,
+        # so there's a chance for the job's completion to be noted first.
+        timeout_check = time.time()
+        if timeout and timeout_check - start > timeout:
+            last_poll -= interval
+
+        # If enough time has elapsed, ask the server for a new status.
+        #
+        # Note that this doesn't actually do a status check every single time; we want the "spinner" to
+        # spin even if we're not actively doing a check.
+        #
+        # So, what happens is that we are "counting down" (actually up) to the next time that we intend
+        # to do a check, and once that time hits, we do the status check as part of the normal cycle.
+        if time.time() - last_poll > interval:
+            result = check_job(module, job_url)
+            last_poll = time.time()
+            interval = min(interval * 1.5, max_interval)
+
+    # If the job has failed, we want to raise an Exception for that so we get a non-zero response.
+    if result['failed']:
+        module.json_output['msg'] = 'Job with id {0} failed'.format(job_id)
+        module.fail_json(**module.json_output)
+
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
