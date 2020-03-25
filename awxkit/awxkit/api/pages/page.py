@@ -166,13 +166,13 @@ class Page(object):
         return self.__class__
 
     @classmethod
-    def from_json(cls, raw):
+    def from_json(cls, raw, connection=None):
         resp = Response()
         data = json.dumps(raw)
         resp._content = bytes(data, 'utf-8')
         resp.encoding = 'utf-8'
         resp.status_code = 200
-        return cls(r=resp)
+        return cls(r=resp, connection=connection)
 
     def page_identity(self, response, request_json=None):
         """Takes a `requests.Response` and
@@ -283,7 +283,7 @@ class Page(object):
             json['results'] = []
             for page in paged_results:
                 json['results'].extend(page)
-            page = self.__class__.from_json(json)
+            page = self.__class__.from_json(json, connection=self.connection)
         return page
 
     def head(self):
