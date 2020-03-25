@@ -1,4 +1,10 @@
 ---
+- name: Generate broadcast websocket secret
+  set_fact:
+    broadcast_websocket_secret: "{{ lookup('password', '/dev/null', length=128) }}"
+  run_once: true
+  no_log: true
+
 - fail:
     msg: "Only set one of kubernetes_context or openshift_host"
   when: openshift_host is defined and kubernetes_context is defined
