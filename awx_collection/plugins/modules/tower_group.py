@@ -47,12 +47,14 @@ options:
       required: False
       type: list
       elements: str
-    groups:
+    children:
       description:
         - List of groups that should be nested inside in this group.
       required: False
       type: list
       elements: str
+      aliases:
+        - groups
     state:
       description:
         - Desired state of the resource.
@@ -98,7 +100,7 @@ def main():
         inventory=dict(required=True),
         variables=dict(type='dict', required=False),
         hosts=dict(type='list', elements='str'),
-        groups=dict(type='list', elements='str'),
+        children=dict(type='list', elements='str', aliases=['groups']),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -136,7 +138,7 @@ def main():
 
     association_fields = {}
     for resource, relationship in (('hosts', 'hosts'), ('groups', 'children')):
-        name_list = module.params.get(resource)
+        name_list = module.params.get(relationship)
         if name_list is None:
             continue
         id_list = []
