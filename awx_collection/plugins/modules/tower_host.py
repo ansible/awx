@@ -43,6 +43,11 @@ options:
         - Inventory the host should be made a member of.
       required: True
       type: str
+    organization:
+      description:
+        - Organization that the inventory is in.
+      required: False
+      type: str
     enabled:
       description:
         - If the host should be enabled.
@@ -92,6 +97,7 @@ def main():
         new_name=dict(required=False),
         description=dict(required=False),
         inventory=dict(required=True),
+        organization=dict(),
         enabled=dict(type='bool', default=True),
         variables=dict(type='dict', required=False),
         state=dict(choices=['present', 'absent'], default='present'),
@@ -104,26 +110,18 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get('new_name')
     description = module.params.get('description')
-    inventory = module.params.get('inventory')
     enabled = module.params.get('enabled')
     state = module.params.get('state')
     variables = module.params.get('variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
-
     # Attempt to look up host based on the provided name and inventory ID
-    host = module.get_one('hosts', **{
-        'data': {
-            'name': name,
-            'inventory': inventory_id
-        }
-    })
+    host, related_data = module.lookup_resource_data('hosts', module.params)
 
     # Create the data that gets sent for create and update
     host_fields = {
         'name': new_name if new_name else name,
-        'inventory': inventory_id,
+        'inventory': related_data['inventory']['id'],
         'enabled': enabled,
     }
     if description is not None:

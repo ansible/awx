@@ -37,14 +37,20 @@ def test_associate_hosts_and_children(run_module, admin_user, organization):
     inv = Inventory.objects.create(name='test-inv', organization=organization)
     group = Group.objects.create(name='Test Group', inventory=inv)
 
-    inv_hosts = [Host.objects.create(inventory=inv, name='foo{0}'.format(i)) for i in range(3)]
-    group.hosts.add(inv_hosts[0], inv_hosts[1])
+    # assure groups and hosts are looked up in right inventory via a decoy inventory
+    decoy_inv = Inventory.objects.create(
+        name='test-inv', organization=Organization.objects.create(name='decoy')
+    )
+    for this_inv in (decoy_inv, inv):
+        inv_hosts = [Host.objects.create(inventory=this_inv, name='foo{0}'.format(i)) for i in range(3)]
+        child = Group.objects.create(inventory=this_inv, name='child_group')
 
-    child = Group.objects.create(inventory=inv, name='child_group')
+    group.hosts.add(inv_hosts[0], inv_hosts[1])
 
     result = run_module('tower_group', dict(
         name='Test Group',
         inventory='test-inv',
+        organization=organization.name,
         hosts=[inv_hosts[1].name, inv_hosts[2].name],
         children=[child.name],
         state='present'

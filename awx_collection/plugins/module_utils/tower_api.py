@@ -44,6 +44,27 @@ class TowerModule(AnsibleModule):
     cookie_jar = CookieJar()
     authenticated = False
     config_name = 'tower_cli.cfg'
+    named_url_formats = {  # coppied from /api/v2/settings/named-url/
+        "organizations": "<name>",
+        "teams": "<name>++<organization.name>",
+        "credential_types": "<name>+<kind>",
+        "credentials": "<name>++<credential_type.name>+<credential_type.kind>++<organization.name>",
+        "notification_templates": "<name>++<organization.name>",
+        "job_templates": "<name>++<organization.name>",
+        "projects": "<name>++<organization.name>",
+        "inventories": "<name>++<organization.name>",
+        "hosts": "<name>++<inventory.name>++<organization.name>",
+        "groups": "<name>++<inventory.name>++<organization.name>",
+        "inventory_sources": "<name>++<inventory.name>++<organization.name>",
+        "inventory_scripts": "<name>++<organization.name>",
+        "instance_groups": "<name>",
+        "labels": "<name>++<organization.name>",
+        "workflow_job_templates": "<name>++<organization.name>",
+        "workflow_job_template_nodes": "<identifier>++<workflow_job_template.name>++<organization.name>",
+        "applications": "<name>++<organization.name>",
+        "users": "<username>",
+        "instances": "<hostname>"
+    }
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -195,9 +216,51 @@ class TowerModule(AnsibleModule):
         exceptions = {
             'inventory': 'inventories',
             'target_team': 'teams',
-            'workflow': 'workflow_job_templates'
+            'workflow': 'workflow_job_templates',
+            'children': 'groups'
         }
         return exceptions.get(name, '{0}s'.format(name))
+
+    def find_lookup_fields(self, endpoint):
+        """We are interested in a maximum of 2 lookup fields, an identity field
+        and a parent object. For example, (name, organization)
+        """
+        blob = self.named_url_formats[endpoint]
+        blob = blob.replace('<', '').replace('>', '')
+        # deconstruct the entry text, get primary lookup field
+        resource_parts = blob.split('++')
+        self_lookup = resource_parts[0]
+        # rare case of model having more than one lookup fields is cred type
+        identity_field = self_lookup.split('+')[0]
+        fk_lookup = None
+        if len(resource_parts) > 1:
+            fk_lookup = resource_parts[1]  # trash all but next related obj
+            fk_lookup = fk_lookup.split('.')[0]  # trash all fields, using pk
+        return (identity_field, fk_lookup)
+
+    def lookup_resource_data(self, endpoint, params):
+        """High-level method, given params to a module, returns a tuple
+        first entry is data for the primary object, second object is a dict
+        with lookup data for all related ForeignKey fields
+        """
+        data = {}
+        for dep_ct in range(1, 3):  # max number of resource dependencies
+            for key, value in params.items():
+                related_endpoint = self.param_to_endpoint(key)
+                if related_endpoint not in self.named_url_formats or related_endpoint == endpoint:
+                    continue
+                if len(self.named_url_formats[related_endpoint].split('++')) != dep_ct:
+                    continue
+                lookup_data = {}
+                identity_field, fk_lookup = self.find_lookup_fields(related_endpoint)
+                lookup_data[identity_field] = value
+                if fk_lookup and fk_lookup in data:
+                    lookup_data[fk_lookup] = data[fk_lookup]['id']
+                data[key] = self.resolve_obj_from_lookup(related_endpoint, lookup_data)
+
+        identity_field, fk_lookup = self.find_lookup_fields(related_endpoint)
+        response = self.resolve_obj_from_lookup(related_endpoint, lookup_data)
+        return (response, data)
 
     def head_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('HEAD', endpoint, **kwargs)
@@ -263,25 +326,39 @@ class TowerModule(AnsibleModule):
 
         return response['json']['results'][0]
 
-    def resolve_name_to_id(self, endpoint, name_or_id):
-        # Try to resolve the object by name
-        response = self.get_endpoint(endpoint, **{'data': {'name': name_or_id}})
+    def resolve_obj_from_lookup(self, endpoint, lookup_data):
+        identity_field, fk_lookup = self.find_lookup_fields(endpoint)
+        response = self.get_endpoint(endpoint, data=lookup_data)
+
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
             try:
-                int(name_or_id)
+                value = lookup_data[identity_field]
+                int(value)
                 # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
-                response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
+                response = self.get_endpoint("{0}/{1}".format(endpoint, value), return_none_on_404=True)
                 if response is not None:
-                    return name_or_id
+                    return response
             except ValueError:
-                # If we got a value error than we didn't have an integer so we can just pass and fall down to the fail
-                pass
-
-            self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
+                # Query was too specific, try without the contextual data
+                value = lookup_data[identity_field]
+                response = self.get_endpoint(endpoint, data={identity_field: value})
+                if response['json']['count'] == 1:
+                    return response['json']['results'][0]['id']
+                else:
+                    self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, value))
         else:
-            self.fail_json(msg="Found too many names {0} at endpoint {1} try using an ID instead of a name".format(name_or_id, endpoint))
+            if fk_lookup and len(lookup_data) == 1:
+                self.fail_json(msg="Too many {0} at endpoint {1}, try ID or context data {2}".format(
+                    identity_field, endpoint, fk_lookup
+                ))
+            raise Exception('Uniqueness rules did not work as expected GET {0} at {0}'.format(
+                lookup_data, endpoint
+            ))
+
+    def resolve_name_to_id(self, endpoint, name_or_id):
+        return self.resolve_obj_from_lookup(endpoint, {'name': name_or_id})['id']
 
     def make_request(self, method, endpoint, *args, **kwargs):
         # In case someone is calling us directly; make sure we were given a method, let's not just assume a GET

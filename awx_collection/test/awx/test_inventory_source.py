@@ -80,7 +80,8 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
 
     result = run_module('tower_inventory_source', dict(
         name='Test Inventory Source',
-        inventory=inv2.id,
+        inventory=inv2.name,
+        organization='test-org',
         source='ec2',
         state='present'
     ), admin_user)

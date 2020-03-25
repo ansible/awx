@@ -37,6 +37,11 @@ options:
         - Inventory the group should be made a member of.
       required: True
       type: str
+    organization:
+      description:
+        - Organization that the inventory is in.
+      required: False
+      type: str
     variables:
       description:
         - Variables to use for the group.
@@ -95,10 +100,11 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(required=False),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
-        variables=dict(type='dict', required=False),
+        organization=dict(),
+        variables=dict(type='dict'),
         hosts=dict(type='list', elements='str'),
         children=dict(type='list', elements='str', aliases=['groups']),
         state=dict(choices=['present', 'absent'], default='present'),
@@ -137,17 +143,18 @@ def main():
         group_fields['variables'] = json.dumps(variables)
 
     association_fields = {}
-    for resource, relationship in (('hosts', 'hosts'), ('groups', 'children')):
+    for relationship in ('hosts', 'children'):
+        endpoint = module.param_to_endpoint(relationship[:-1])
         name_list = module.params.get(relationship)
         if name_list is None:
             continue
         id_list = []
         for sub_name in name_list:
-            sub_obj = module.get_one(resource, **{
+            sub_obj = module.get_one(endpoint, **{
                 'data': {'inventory': inventory_id, 'name': sub_name}
             })
             if sub_obj is None:
-                module.fail_json(msg='Could not find {0} with name {1}'.format(resource, sub_name))
+                module.fail_json(msg='Could not find {0} with name {1}'.format(endpoint, sub_name))
             id_list.append(sub_obj['id'])
         if id_list:
             association_fields[relationship] = id_list
