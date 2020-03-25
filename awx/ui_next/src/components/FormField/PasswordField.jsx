@@ -14,7 +14,7 @@ import {
 import { EyeIcon, EyeSlashIcon } from '@patternfly/react-icons';
 
 function PasswordField(props) {
-  const { id, name, label, validate, isRequired, i18n } = props;
+  const { id, name, label, validate, isRequired, isDisabled, i18n } = props;
   const [inputType, setInputType] = useState('password');
   const [field, meta] = useField({ name, validate });
 
@@ -40,6 +40,7 @@ function PasswordField(props) {
             variant={ButtonVariant.control}
             aria-label={i18n._(t`Toggle Password`)}
             onClick={handlePasswordToggle}
+            isDisabled={isDisabled}
           >
             {inputType === 'password' && <EyeSlashIcon />}
             {inputType === 'text' && <EyeIcon />}
@@ -50,6 +51,7 @@ function PasswordField(props) {
           placeholder={field.value === '$encrypted$' ? 'ENCRYPTED' : undefined}
           {...field}
           value={field.value === '$encrypted$' ? '' : field.value}
+          isDisabled={isDisabled}
           isRequired={isRequired}
           isValid={isValid}
           type={inputType}
@@ -68,11 +70,13 @@ PasswordField.propTypes = {
   label: PropTypes.string.isRequired,
   validate: PropTypes.func,
   isRequired: PropTypes.bool,
+  isDisabled: PropTypes.bool,
 };
 
 PasswordField.defaultProps = {
   validate: () => {},
   isRequired: false,
+  isDisabled: false,
 };
 
 export default withI18n()(PasswordField);
