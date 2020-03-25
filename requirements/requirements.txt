@@ -19,7 +19,7 @@ channels-redis==2.4.2     # via -r /awx_devel/requirements/requirements.in
 channels==2.4.0           # via -r /awx_devel/requirements/requirements.in, channels-redis
 chardet==3.0.4            # via aiohttp, requests
 constantly==15.1.0        # via twisted
-cryptography==2.8         # via adal, autobahn, azure-keyvault, pyopenssl, service-identity
+cryptography==2.8         # via adal, autobahn, azure-keyvault, pyopenssl, service-identity, social-auth-core
 daphne==2.4.1             # via -r /awx_devel/requirements/requirements.in, channels
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dictdiffer==0.8.1         # via openshift
@@ -113,7 +113,7 @@ six==1.14.0               # via ansible-runner, automat, cryptography, django-ex
 slackclient==1.1.2        # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1              # via gitdb
 social-auth-app-django==3.1.0  # via -r /awx_devel/requirements/requirements.in
-social-auth-core==3.2.0   # via -r /awx_devel/requirements/requirements.in, social-auth-app-django
+social-auth-core==3.3.1   # via -r /awx_devel/requirements/requirements.in, social-auth-app-django
 sqlparse==0.3.1           # via django
 tacacs_plus==1.0          # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0            # via irc, jaraco.logging
