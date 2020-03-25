@@ -46,6 +46,9 @@ const ActionButton = styled(Button)`
 `;
 ActionButton.displayName = 'ActionButton';
 
+const DOCLINK =
+  'https://docs.ansible.com/ansible-tower/latest/html/userguide/workflow_templates.html#ug-wf-editor';
+
 function VisualizerToolbar({
   i18n,
   onClose,
@@ -95,9 +98,12 @@ function VisualizerToolbar({
             </ActionButton>
           </Tooltip>
           <ActionButton
+            aria-label={i18n._(t`Workflow Documentation`)}
             id="visualizer-documentation"
             variant="plain"
-            isDisabled
+            component="a"
+            target="_blank"
+            href={DOCLINK}
           >
             <BookIcon />
           </ActionButton>
