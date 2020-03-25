@@ -115,6 +115,5 @@ def test_tower_group_idempotent(run_module, admin_user):
     assert result == {
         'id': group.id,
         'field_changes': {},
-        'updated': False,
         'changed': False,  # idempotency assertion
     }

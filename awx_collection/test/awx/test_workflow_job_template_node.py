@@ -44,7 +44,8 @@ def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_tem
     assert result == {
         "name": this_identifier,  # FIXME: should this be identifier instead
         "id": node.id,
-        "changed": True
+        "changed": True,
+        "created": True,
     }
 
     assert node.workflow_job_template_id == wfjt.id
