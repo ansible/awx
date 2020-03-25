@@ -30,6 +30,7 @@ RUN dnf -y update && \
   make \
   mercurial \
   nginx \
+  nmap-ncat \
   nodejs \
   nss \
   openldap-devel \
@@ -45,11 +46,13 @@ RUN dnf -y update && \
   python3-pycurl \
   rsync \
   subversion \
+  strace \
   sudo \
   swig \
+  tcpdump \
   tmux \
   unzip \
-  vim-minimal \
+  vim \
   which \
   xmlsec1 \
   xmlsec1-devel \
