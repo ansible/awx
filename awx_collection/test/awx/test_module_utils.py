@@ -3,6 +3,8 @@ __metaclass__ = type
 
 import sys
 
+import pytest
+
 from unittest import mock
 
 import json
@@ -33,3 +35,15 @@ def test_duplicate_config(collection_import):
         'tower_config_file. Precedence may be unstable, '
         'we suggest either using config file or params.'
     )
+
+
+@pytest.mark.parametrize('endpoint, expect', [
+    ('users', ('username', None,)),
+    ('hosts', ('name', 'inventory',)),
+    ('workflow_job_templates', ('name', 'organization')),
+    ('workflow_job_template_nodes', ('identifier', 'workflow_job_template'))
+])
+def test_find_lookup_fields(collection_import, endpoint, expect):
+    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+    # abuse the self argument here, because initializing a module is hard
+    assert TowerModule.find_lookup_fields(TowerModule, endpoint) == expect
