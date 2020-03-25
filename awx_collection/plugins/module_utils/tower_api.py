@@ -247,6 +247,8 @@ class TowerModule(AnsibleModule):
         for dep_ct in range(1, 3):  # max number of resource dependencies
             for key, value in params.items():
                 related_endpoint = self.param_to_endpoint(key)
+                if value is None:
+                    continue
                 if related_endpoint not in self.named_url_formats or related_endpoint == endpoint:
                     continue
                 if len(self.named_url_formats[related_endpoint].split('++')) != dep_ct:
@@ -258,8 +260,12 @@ class TowerModule(AnsibleModule):
                     lookup_data[fk_lookup] = data[fk_lookup]['id']
                 data[key] = self.resolve_obj_from_lookup(related_endpoint, lookup_data)
 
-        identity_field, fk_lookup = self.find_lookup_fields(related_endpoint)
-        response = self.resolve_obj_from_lookup(related_endpoint, lookup_data)
+        lookup_data = {}
+        identity_field, fk_lookup = self.find_lookup_fields(endpoint)
+        lookup_data[identity_field] = params[identity_field]
+        if fk_lookup and fk_lookup in data:
+            lookup_data[fk_lookup] = data[fk_lookup]['id']
+        response = self.resolve_obj_from_lookup(endpoint, lookup_data, allow_none=True, allow_id=False)
         return (response, data)
 
     def head_endpoint(self, endpoint, *args, **kwargs):
@@ -326,32 +332,43 @@ class TowerModule(AnsibleModule):
 
         return response['json']['results'][0]
 
-    def resolve_obj_from_lookup(self, endpoint, lookup_data):
+    def resolve_obj_from_lookup(self, endpoint, lookup_data, allow_none=False, allow_id=True):
         identity_field, fk_lookup = self.find_lookup_fields(endpoint)
         response = self.get_endpoint(endpoint, data=lookup_data)
 
         if response['json']['count'] == 1:
-            return response['json']['results'][0]['id']
+            return response['json']['results'][0]
         elif response['json']['count'] == 0:
-            try:
-                value = lookup_data[identity_field]
-                int(value)
-                # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
-                response = self.get_endpoint("{0}/{1}".format(endpoint, value), return_none_on_404=True)
-                if response is not None:
-                    return response
-            except ValueError:
-                # Query was too specific, try without the contextual data
-                value = lookup_data[identity_field]
-                response = self.get_endpoint(endpoint, data={identity_field: value})
-                if response['json']['count'] == 1:
-                    return response['json']['results'][0]['id']
-                else:
-                    self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, value))
+            id_value = lookup_data[identity_field]
+            if not (id_value.isdigit() and allow_id):
+                if allow_none:
+                    return None
+                # raise Exception(1)
+                self.fail_json(msg="No objects found at /api/v2/{0}/ with data {1}".format(endpoint, lookup_data))
+            # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
+            response = self.get_endpoint(endpoint, data={'id': id_value}, return_none_on_404=True)
+            if response is not None or allow_none:
+                return response
+            self.fail_json(msg="No objects found at {0} with data {1} or data {2}".format(
+                endpoint, lookup_data, {'id': id_value}))
+            # except ValueError:
+            #     # if len(lookup_data) > 1:
+            #     #     # Query was too specific, try without the contextual data
+            #     #     value = lookup_data[identity_field]
+            #     #     response = self.get_endpoint(endpoint, data={identity_field: value})
+            #     #     if response['json']['count'] == 1:
+            #     #         return response['json']['results'][0]
+            #     #     else:
+            #     #         # raise Exception('alan1')
+            #     #         self.fail_json(msg="No objects found at {0} with data {1} or {2}".format(
+            #     #             endpoint, lookup_data, {identity_field: value}))
+            #     # else:
+            #     self.fail_json(msg="No objects found at {0} with data {1}".format(
+            #         endpoint, lookup_data))
         else:
             if fk_lookup and len(lookup_data) == 1:
-                self.fail_json(msg="Too many {0} at endpoint {1}, try ID or context data {2}".format(
-                    identity_field, endpoint, fk_lookup
+                self.fail_json(msg="Obtained {0} objects at endpoint {1} with data {2}, try ID or context param {3}".format(
+                    response['json']['count'], endpoint, lookup_data, fk_lookup
                 ))
             raise Exception('Uniqueness rules did not work as expected GET {0} at {0}'.format(
                 lookup_data, endpoint
