@@ -43,6 +43,11 @@ options:
         - Inventory the group should be made a member of.
       required: True
       type: str
+    organization:
+      description:
+        - Organization that the inventory is in.
+      required: False
+      type: str
     source:
       description:
         - The source to use for this group.
@@ -154,16 +159,17 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(type='str'),
-        description=dict(required=False),
+        description=dict(),
         inventory=dict(required=True),
+        organization=dict(),
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
                              "azure_rm", "vmware", "satellite6", "cloudforms",
-                             "openstack", "rhv", "tower", "custom"], required=False),
+                             "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
-        source_script=dict(required=False),
+        source_script=dict(),
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
@@ -187,20 +193,14 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
-    inventory = module.params.get('inventory')
     source_script = module.params.get('source_script')
     credential = module.params.get('credential')
     source_project = module.params.get('source_project')
     state = module.params.get('state')
 
     # Attempt to look up inventory source based on the provided name and inventory ID
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
-    inventory_source = module.get_one('inventory_sources', **{
-        'data': {
-            'name': name,
-            'inventory': inventory_id,
-        }
-    })
+    inventory_source, related_data = module.lookup_resource_data('inventory_sources', module.params)
+    inventory_id = related_data['inventory']['id']
 
     # Create the data that gets sent for create and update
     inventory_source_fields = {

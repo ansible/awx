@@ -213,6 +213,8 @@ class TowerModule(AnsibleModule):
 
     @staticmethod
     def param_to_endpoint(name):
+        if name.endswith('s'):
+            return name  # already in plural endpoint format
         exceptions = {
             'inventory': 'inventories',
             'target_team': 'teams',
@@ -253,6 +255,8 @@ class TowerModule(AnsibleModule):
                     continue
                 if len(self.named_url_formats[related_endpoint].split('++')) != dep_ct:
                     continue
+                if isinstance(value, list):
+                    continue  # TODO: implement lookups of many related params
                 lookup_data = {}
                 identity_field, fk_lookup = self.find_lookup_fields(related_endpoint)
                 lookup_data[identity_field] = value

@@ -81,7 +81,7 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     result = run_module('tower_inventory_source', dict(
         name='Test Inventory Source',
         inventory=inv2.name,
-        organization='test-org',
+        organization=org2.name,
         source='ec2',
         state='present'
     ), admin_user)
@@ -90,11 +90,8 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     inv_src = InventorySource.objects.get(name='Test Inventory Source')
     assert inv_src.inventory == inv2
 
-    result.pop('invocation')
-    assert result == {
-        "name": "Test Inventory Source",
-        "id": inv_src.id,
-    }
+    assert result['name'] == 'Test Inventory Source'
+    assert result['id'] == inv_src.id
 
 
 @pytest.mark.django_db

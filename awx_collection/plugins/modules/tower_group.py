@@ -116,21 +116,14 @@ def main():
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get('new_name')
-    inventory = module.params.get('inventory')
     description = module.params.get('description')
     state = module.params.pop('state')
     variables = module.params.get('variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
-
     # Attempt to look up the object based on the provided name and inventory ID
-    group = module.get_one('groups', **{
-        'data': {
-            'name': name,
-            'inventory': inventory_id
-        }
-    })
+    group, related_data = module.lookup_resource_data('groups', module.params)
+    inventory_id = related_data['inventory']['id']
 
     # Create the data that gets sent for create and update
     group_fields = {
@@ -144,7 +137,7 @@ def main():
 
     association_fields = {}
     for relationship in ('hosts', 'children'):
-        endpoint = module.param_to_endpoint(relationship[:-1])
+        endpoint = module.param_to_endpoint(relationship)
         name_list = module.params.get(relationship)
         if name_list is None:
             continue

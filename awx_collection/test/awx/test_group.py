@@ -7,14 +7,35 @@ from awx.main.models import Organization, Inventory, Group, Host
 
 
 @pytest.mark.django_db
+def test_duplicate_inventories(run_module, admin_user):
+    org = Organization.objects.create(name='test-org')
+    decoy_org = Organization.objects.create(name='decoy')
+    for this_org in (decoy_org, org):
+        inv = Inventory.objects.create(name='test-inv', organization=this_org)
+
+    result = run_module('tower_host', dict(
+        name='Test Group',
+        inventory=inv.name,
+        state='present'
+    ), admin_user)
+    assert result.get('failed', True)
+    msg = result.get('msg', '')
+    assert 'Obtained 2 objects at endpoint inventories with data' in msg
+    assert 'try ID or context param organization' in msg
+
+
+@pytest.mark.django_db
 def test_create_group(run_module, admin_user):
     org = Organization.objects.create(name='test-org')
-    inv = Inventory.objects.create(name='test-inv', organization=org)
+    decoy_org = Organization.objects.create(name='decoy')
+    for this_org in (decoy_org, org):
+        inv = Inventory.objects.create(name='test-inv', organization=this_org)
     variables = {"ansible_network_os": "iosxr"}
 
     result = run_module('tower_group', dict(
         name='Test Group',
         inventory='test-inv',
+        organization=org.name,
         variables=variables,
         state='present'
     ), admin_user)
