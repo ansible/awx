@@ -343,7 +343,6 @@ class TowerModule(AnsibleModule):
             if not (id_value.isdigit() and allow_id):
                 if allow_none:
                     return None
-                # raise Exception(1)
                 self.fail_json(msg="No objects found at /api/v2/{0}/ with data {1}".format(endpoint, lookup_data))
             # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
             response = self.get_endpoint(endpoint, data={'id': id_value}, return_none_on_404=True)
@@ -351,27 +350,13 @@ class TowerModule(AnsibleModule):
                 return response
             self.fail_json(msg="No objects found at {0} with data {1} or data {2}".format(
                 endpoint, lookup_data, {'id': id_value}))
-            # except ValueError:
-            #     # if len(lookup_data) > 1:
-            #     #     # Query was too specific, try without the contextual data
-            #     #     value = lookup_data[identity_field]
-            #     #     response = self.get_endpoint(endpoint, data={identity_field: value})
-            #     #     if response['json']['count'] == 1:
-            #     #         return response['json']['results'][0]
-            #     #     else:
-            #     #         # raise Exception('alan1')
-            #     #         self.fail_json(msg="No objects found at {0} with data {1} or {2}".format(
-            #     #             endpoint, lookup_data, {identity_field: value}))
-            #     # else:
-            #     self.fail_json(msg="No objects found at {0} with data {1}".format(
-            #         endpoint, lookup_data))
         else:
             if fk_lookup and len(lookup_data) == 1:
                 self.fail_json(msg="Obtained {0} objects at endpoint {1} with data {2}, try ID or context param {3}".format(
                     response['json']['count'], endpoint, lookup_data, fk_lookup
                 ))
-            raise Exception('Uniqueness rules did not work as expected GET {0} at {0}'.format(
-                lookup_data, endpoint
+            raise RuntimeError('Uniqueness rules did not work as expected GET /api/v2/{0}/ with data {0}'.format(
+                endpoint, lookup_data
             ))
 
     def resolve_name_to_id(self, endpoint, name_or_id):
