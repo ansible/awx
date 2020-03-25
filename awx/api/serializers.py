@@ -1251,6 +1251,7 @@ class OrganizationSerializer(BaseSerializer):
         res.update(dict(
             projects    = self.reverse('api:organization_projects_list',       kwargs={'pk': obj.pk}),
             inventories = self.reverse('api:organization_inventories_list',    kwargs={'pk': obj.pk}),
+            job_templates = self.reverse('api:organization_job_templates_list', kwargs={'pk': obj.pk}),
             workflow_job_templates = self.reverse('api:organization_workflow_job_templates_list', kwargs={'pk': obj.pk}),
             users       = self.reverse('api:organization_users_list',          kwargs={'pk': obj.pk}),
             admins      = self.reverse('api:organization_admins_list',         kwargs={'pk': obj.pk}),

@@ -99,7 +99,8 @@ class WorkflowJobTemplates(page.PageList, WorkflowJobTemplate):
     pass
 
 
-page.register_page([resources.workflow_job_templates], WorkflowJobTemplates)
+page.register_page([resources.workflow_job_templates,
+                    resources.related_workflow_job_templates], WorkflowJobTemplates)
 
 
 class WorkflowJobTemplateLaunch(base.Base):

@@ -244,3 +244,11 @@ class JobTemplateLaunch(base.Base):
 
 
 page.register_page(resources.job_template_launch, JobTemplateLaunch)
+
+
+class JobTemplateCopy(base.Base):
+
+    pass
+
+
+page.register_page([resources.job_template_copy], JobTemplateCopy)

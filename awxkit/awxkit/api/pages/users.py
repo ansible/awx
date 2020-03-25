@@ -64,6 +64,7 @@ class Users(page.PageList, User):
 page.register_page([resources.users,
                     resources.organization_admins,
                     resources.related_users,
+                    resources.credential_owner_users,
                     resources.user_admin_organizations], Users)
 
 
