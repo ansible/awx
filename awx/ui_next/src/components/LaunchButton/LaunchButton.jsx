@@ -15,6 +15,7 @@ import {
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
 } from '@api';
+import LaunchPrompt from '@components/LaunchPrompt';
 
 function canLaunchWithoutPrompt(launchData) {
   return (
@@ -39,8 +40,9 @@ class LaunchButton extends React.Component {
     super(props);
 
     this.state = {
-      launchError: null,
-      promptError: false,
+      showLaunchPrompt: false,
+      launchConfig: null,
+      launchError: false,
     };
 
     this.handleLaunch = this.handleLaunch.bind(this);
@@ -54,7 +56,7 @@ class LaunchButton extends React.Component {
   }
 
   handlePromptErrorClose() {
-    this.setState({ promptError: false });
+    this.setState({ showLaunchPrompt: false });
   }
 
   async handleLaunch() {
@@ -82,7 +84,11 @@ class LaunchButton extends React.Component {
           }/${job.id}/output`
         );
       } else {
-        this.setState({ promptError: true });
+        // TODO: restructure (async?) to send launch command after prompts
+        this.setState({
+          showLaunchPrompt: true,
+          launchConfig,
+        });
       }
     } catch (err) {
       this.setState({ launchError: err });
@@ -125,7 +131,12 @@ class LaunchButton extends React.Component {
         const { data: job } = await relaunch;
         history.push(`/jobs/${job.id}/output`);
       } else {
-        this.setState({ promptError: true });
+        // TODO: restructure (async?) to send launch command after prompts
+        // TODO: does relaunch need different prompt treatment than launch?
+        this.setState({
+          showLaunchPrompt: true,
+          launchConfig: relaunchConfig,
+        });
       }
     } catch (err) {
       this.setState({ launchError: err });
@@ -133,7 +144,7 @@ class LaunchButton extends React.Component {
   }
 
   render() {
-    const { launchError, promptError } = this.state;
+    const { launchError, showLaunchPrompt, launchConfig } = this.state;
     const { i18n, children } = this.props;
     return (
       <Fragment>
@@ -152,18 +163,7 @@ class LaunchButton extends React.Component {
             <ErrorDetail error={launchError} />
           </AlertModal>
         )}
-        {promptError && (
-          <AlertModal
-            isOpen={promptError}
-            variant="info"
-            title={i18n._(t`Attention!`)}
-            onClose={this.handlePromptErrorClose}
-          >
-            {i18n._(
-              t`Launching jobs with promptable fields is not supported at this time.`
-            )}
-          </AlertModal>
-        )}
+        {showLaunchPrompt && <LaunchPrompt config={launchConfig} />}
       </Fragment>
     );
   }
