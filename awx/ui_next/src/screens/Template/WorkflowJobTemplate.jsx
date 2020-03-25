@@ -34,6 +34,7 @@ class WorkflowJobTemplate extends Component {
       webhook_key: null,
       isNotifAdmin: false,
     };
+    this.createSchedule = this.createSchedule.bind(this);
     this.loadTemplate = this.loadTemplate.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
     this.loadScheduleOptions = this.loadScheduleOptions.bind(this);
@@ -89,6 +90,11 @@ class WorkflowJobTemplate extends Component {
     } finally {
       this.setState({ hasContentLoading: false });
     }
+  }
+
+  createSchedule(data) {
+    const { template } = this.state;
+    return WorkflowJobTemplatesAPI.createSchedule(template.id, data);
   }
 
   loadScheduleOptions() {
@@ -271,6 +277,7 @@ class WorkflowJobTemplate extends Component {
                   <Schedules
                     setBreadcrumb={setBreadcrumb}
                     unifiedJobTemplate={template}
+                    createSchedule={this.createSchedule}
                     loadSchedules={this.loadSchedules}
                     loadScheduleOptions={this.loadScheduleOptions}
                   />

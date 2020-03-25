@@ -62,6 +62,9 @@ class Templates extends Component {
       [`/templates/${template.type}/${template.id}/schedules`]: i18n._(
         t`Schedules`
       ),
+      [`/templates/${template.type}/${template.id}/schedules/add`]: i18n._(
+        t`Create New Schedule`
+      ),
       [`/templates/${template.type}/${template.id}/schedules/${schedule &&
         schedule.id}`]: `${schedule && schedule.name}`,
       [`/templates/${template.type}/${template.id}/schedules/${schedule &&

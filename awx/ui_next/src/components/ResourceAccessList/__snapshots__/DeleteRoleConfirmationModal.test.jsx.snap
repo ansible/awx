@@ -37,7 +37,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
     }
     isOpen={true}
     onClose={[Function]}
-    title="Remove {0} Access"
+    title="Remove Team Access"
     variant="danger"
   >
     <Modal
@@ -71,7 +71,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               >
                 <div
                   aria-describedby="pf-modal-0"
-                  aria-label="Remove {0} Access"
+                  aria-label="Remove Team Access"
                   aria-modal="true"
                   class="pf-c-modal-box pf-m-sm"
                   role="dialog"
@@ -120,7 +120,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       <h1
                         class="pf-c-title pf-m-2xl"
                       >
-                        Remove {0} Access
+                        Remove Team Access
                       </h1>
                     </div>
                   </div>
@@ -128,7 +128,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-modal-box__body"
                     id="pf-modal-0"
                   >
-                    Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                    Are you sure you want to remove Member access from The Team?  Doing so affects all members of the team.
                     <br />
                     <br />
                     If you only want to remove access for this particular user, please remove them from the team.
@@ -166,7 +166,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           <Title
             size="2xl"
           >
-            Remove {0} Access
+            Remove Team Access
           </Title>
         </AlertModal__Header>
       }
@@ -177,7 +177,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       isSmall={true}
       onClose={[Function]}
       showClose={true}
-      title="Remove {0} Access"
+      title="Remove Team Access"
     >
       <Portal
         containerInfo={
@@ -190,7 +190,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               >
                 <div
                   aria-describedby="pf-modal-0"
-                  aria-label="Remove {0} Access"
+                  aria-label="Remove Team Access"
                   aria-modal="true"
                   class="pf-c-modal-box pf-m-sm"
                   role="dialog"
@@ -239,7 +239,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       <h1
                         class="pf-c-title pf-m-2xl"
                       >
-                        Remove {0} Access
+                        Remove Team Access
                       </h1>
                     </div>
                   </div>
@@ -247,7 +247,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-modal-box__body"
                     id="pf-modal-0"
                   >
-                    Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                    Are you sure you want to remove Member access from The Team?  Doing so affects all members of the team.
                     <br />
                     <br />
                     If you only want to remove access for this particular user, please remove them from the team.
@@ -303,7 +303,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               <Title
                 size="2xl"
               >
-                Remove {0} Access
+                Remove Team Access
               </Title>
             </AlertModal__Header>
           }
@@ -315,7 +315,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           isSmall={true}
           onClose={[Function]}
           showClose={true}
-          title="Remove {0} Access"
+          title="Remove Team Access"
         >
           <Backdrop>
             <div
@@ -342,11 +342,11 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     isLarge={false}
                     isSmall={true}
                     style={Object {}}
-                    title="Remove {0} Access"
+                    title="Remove Team Access"
                   >
                     <div
                       aria-describedby="pf-modal-0"
-                      aria-label="Remove {0} Access"
+                      aria-label="Remove Team Access"
                       aria-modal="true"
                       className="pf-c-modal-box pf-m-sm"
                       role="dialog"
@@ -528,7 +528,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 <h1
                                   className="pf-c-title pf-m-2xl"
                                 >
-                                  Remove {0} Access
+                                  Remove Team Access
                                 </h1>
                               </Title>
                             </div>
@@ -542,7 +542,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           className="pf-c-modal-box__body"
                           id="pf-modal-0"
                         >
-                          Are you sure you want to remove {0} access from {1}?  Doing so affects all members of the team.
+                          Are you sure you want to remove Member access from The Team?  Doing so affects all members of the team.
                           <br />
                           <br />
                           If you only want to remove access for this particular user, please remove them from the team.
