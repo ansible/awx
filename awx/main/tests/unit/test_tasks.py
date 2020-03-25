@@ -126,10 +126,8 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
 @pytest.mark.parametrize("key,value", [
     ('REST_API_TOKEN', 'SECRET'),
     ('SECRET_KEY', 'SECRET'),
-    ('RABBITMQ_PASS', 'SECRET'),
     ('VMWARE_PASSWORD', 'SECRET'),
     ('API_SECRET', 'SECRET'),
-    ('CALLBACK_CONNECTION', 'amqp://tower:password@localhost:5672/tower'),
     ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_PASSWORD', 'SECRET'),
     ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
 ])

@@ -14,7 +14,6 @@ services:
       - "8013:8013"
       - "8043:8043"
       - "1936:1936"
-      - "15672:15672"
   awx-1:
     user: ${CURRENT_UID}
     container_name: tools_awx_1_1

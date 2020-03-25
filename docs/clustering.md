@@ -19,7 +19,6 @@ It's important to point out a few existing things:
 
 * PostgreSQL is still a standalone instance and is not clustered. Replica configuration will not be managed. If the user configures standby replicas, database failover will also not be managed.
 * All instances should be reachable from all other instances and they should be able to reach the database. It's also important for the hosts to have a stable address and/or hostname (depending on how you configure the Tower host).
-* RabbitMQ is the cornerstone of Tower's Clustering system. A lot of AWX's configuration requirements and behavior are dictated by its needs. For this reason, it is generally inflexible to customize beyond what the setup playbook allows. Each AWX/Tower instance has a deployment of RabbitMQ which will cluster with the other instances' RabbitMQ instances.
 * Existing old-style HA deployments will be transitioned automatically to the new HA system during the upgrade process to 3.1.
 * Manual projects will need to be synced to all instances by the customer.
 
@@ -29,7 +28,6 @@ Ansible Tower 3.3 adds support for container-based clusters using Openshift or K
 ## Important Changes
 
 * There is no concept of primary/secondary in the new Tower system. *All* systems are primary.
-* Set up playbook changes to configure RabbitMQ and give hints to the type of network the hosts are on.
 * The `inventory` file for Tower deployments should be saved/persisted. If new instances are to be provisioned, the passwords and configuration options as well as host names will need to be available to the installer.
 
 
@@ -67,38 +65,6 @@ hostC
 hostDB
 ```
 
-* It's common for customers to provision Tower instances externally but prefer to reference them by internal addressing. This is most significant for RabbitMQ clustering, where the service isn't available at all on an external interface. Because of this, it is necessary to assign the internal address for RabbitMQ links as such:
-
-```
-[tower]
-hostA rabbitmq_host=10.1.0.2
-hostB rabbitmq_host=10.1.0.3
-hostC rabbitmq_host=10.1.0.3
-```
-
-* The `redis_password` field is removed from `[all:vars]`.
-* There are various new fields for RabbitMQ:
-  - `rabbitmq_port=5672` - RabbitMQ is installed on each instance and is not optional, it's also not possible to externalize. It is possible to configure what port it listens on and this setting controls that.
-  - `rabbitmq_vhost=tower` - Tower configures a rabbitmq virtualhost to isolate itself. This controls that setting.
-  - `rabbitmq_username=tower` and `rabbitmq_password=tower` - Each instance will be configured with these values and each instance's Tower instance will be configured with it also. This is similar to our other uses of usernames/passwords.
-  - `rabbitmq_cookie=<somevalue>` - This value is unused in a standalone deployment but is critical for clustered deployments. This acts as the secret key that allows RabbitMQ cluster members to identify each other.
-  - `rabbitmq_use_long_names` - RabbitMQ is pretty sensitive to what each instance is named. We are flexible enough to allow FQDNs (_host01.example.com_), short names (`host01`), or IP addresses (192.168.5.73). Depending on what is used to identify each host in the `inventory` file, this value may need to be changed. For FQDNs and IP addresses, this value needs to be `true`. For short names it should be `false`
-  - `rabbitmq_enable_manager` - Setting this to `true` will expose the RabbitMQ management web console on each instance.
-
-The most important field to point out for variability is `rabbitmq_use_long_name`. This cannot be detected and no reasonable default is provided for it, so it's important to point out when it needs to be changed. If instances are provisioned to where they reference other instances internally and not on external addresses, then `rabbitmq_use_long_name` semantics should follow the internal addressing (*i.e.*, `rabbitmq_host`).
-
-Other than `rabbitmq_use_long_name`, the defaults are pretty reasonable:
-```
-rabbitmq_port=5672
-rabbitmq_vhost=tower
-rabbitmq_username=tower
-rabbitmq_password=''
-rabbitmq_cookie=cookiemonster
-
-# Needs to be true for fqdns and ip addresses
-rabbitmq_use_long_name=false
-rabbitmq_enable_manager=false
-```
 
 Recommendations and constraints:
  - Do not create a group named `instance_group_tower`.
@@ -238,7 +204,6 @@ Tower itself reports as much status as it can via the API at `/api/v2/ping` in o
 
 * The instance servicing the HTTP request.
 * The last heartbeat time of all other instances in the cluster.
-* The RabbitMQ cluster status.
 * Instance Groups and Instance membership in those groups.
 
 A more detailed view of Instances and Instance Groups, including running jobs and membership
@@ -252,7 +217,7 @@ Each Tower instance is made up of several different services working collaborati
 * **HTTP Services** - This includes the Tower application itself as well as external web services.
 * **Callback Receiver** - Receives job events that result from running Ansible jobs.
 * **Celery** - The worker queue that processes and runs all jobs.
-* **RabbitMQ** - A Message Broker, this is used as a signaling mechanism for Celery as well as any event data propagated to the application.
+* **Redis** - this is used as a queue for AWX to process ansible playbook callback events.
 * **Memcached** - A local caching service for the instance it lives on.
 
 Tower is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
@@ -262,7 +227,7 @@ Tower is configured in such a way that if any of these services or their compone
 
 Ideally a regular user of Tower should not notice any semantic difference to the way jobs are run and reported. Behind the scenes it is worth pointing out the differences in how the system behaves.
 
-When a job is submitted from the API interface, it gets pushed into the Dispatcher queue on RabbitMQ. A single RabbitMQ instance is the responsible master for individual queues, but each Tower instance will connect to and receive jobs from that queue using a fair-share scheduling algorithm. Any instance on the cluster is just as likely to receive the work and execute the task. If an instance fails while executing jobs, then the work is marked as permanently failed.
+When a job is submitted from the API interface, it gets pushed into the dispatcher queue via postgres notify/listen (https://www.postgresql.org/docs/10/sql-notify.html), and the task is handled by the dispatcher process running on that specific Tower node.  If an instance fails while executing jobs, then the work is marked as permanently failed.
 
 If a cluster is divided into separate Instance Groups, then the behavior is similar to the cluster as a whole. If two instances are assigned to a group then either one is just as likely to receive a job as any other in the same group.
 
