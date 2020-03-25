@@ -14,9 +14,9 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
     'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2',
-    '$state', 'i18n', 'resolvedModels', 'resourceData',
+    '$state', 'i18n', 'resolvedModels', 'resourceData', 'Prompt',
     function($scope, $rootScope, $stateParams, UserForm, Rest, ProcessErrors,
-    GetBasePath, Wait, CreateSelect2, $state, i18n, models, resourceData) {
+    GetBasePath, Wait, CreateSelect2, $state, i18n, models, resourceData, Prompt) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
@@ -159,19 +159,48 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         };
 
         $scope.formSave = function() {
-            $rootScope.flashMessage = null;
-            if ($scope[form.name + '_form'].$valid) {
-                Rest.setUrl(defaultUrl + '/');
-                var data = processNewData(form.fields);
-                Rest.put(data).then(() => {
-                        $state.go($state.current, null, { reload: true });
-                    })
-                    .catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, null, {
-                            hdr: i18n._('Error!'),
-                            msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
-                        });
-                    });
+                alert(user_obj.is_superuser);
+                console.log(user_obj.is_superuser);
+                alert($scope.is_superuser);
+                console.log($scope.is_superuser);
+                if (user_obj.is_superuser === true && $scope.is_superuser === false ) {
+                var action = function() {
+                $('#prompt-modal').modal('hide');
+                $rootScope.flashMessage = null;
+                    if ($scope[form.name + '_form'].$valid) {
+                        Rest.setUrl(defaultUrl + '/');
+                        var data = processNewData(form.fields);
+                        Rest.put(data).then(() => {
+                            $state.go($state.current, null, { reload: true });
+                            })
+                            .catch(({data, status}) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: i18n._('Error!'),
+                                    msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
+                                });
+                            });
+                    }
+                };
+                Prompt({
+                    hdr: i18n._('Save'),
+                    body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to change the permissions of admin user?') + '</div>',
+                    action: action,
+                    actionText: i18n._('SAVE')
+                });
+            } else {
+                    if ($scope[form.name + '_form'].$valid) {
+                        Rest.setUrl(defaultUrl + '/');
+                        var data = processNewData(form.fields);
+                        Rest.put(data).then(() => {
+                            $state.go($state.current, null, { reload: true });
+                            })
+                            .catch(({data, status}) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: i18n._('Error!'),
+                                    msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
+                                });
+                            });
+                    }
             }
         };
 
