@@ -145,8 +145,8 @@ function UserForm({ user, handleCancel, handleSubmit, submitError, i18n }) {
       if (!values.password || values.password === '') {
         delete values.password;
       }
-      delete values.confirm_password;
-      handleSubmit(values);
+      const { confirm_password, ...submitValues } = values;
+      handleSubmit(submitValues);
     }
   };
 
