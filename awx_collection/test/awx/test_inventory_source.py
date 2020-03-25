@@ -39,11 +39,7 @@ def test_inventory_source_create(run_module, admin_user, base_inventory, project
     inv_src = InventorySource.objects.get(name='foo')
     assert inv_src.inventory == base_inventory
     result.pop('invocation')
-    assert result == {
-        'id': inv_src.id,
-        'name': 'foo',
-        'created': True,
-    }
+    assert result['id'] == inv_src.id
 
 
 @pytest.mark.django_db

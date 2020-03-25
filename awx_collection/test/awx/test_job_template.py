@@ -118,8 +118,7 @@ def test_create_job_template_with_new_credentials(
     result.pop('added_an_association')
     result.pop('field_changes')
     assert result == {
-        "needed_update": True,
-        "id": jt.id
+        "id": jt.id,
     }
 
     assert set([machine_credential.id, vault_credential.id]) == set([

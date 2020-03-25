@@ -333,6 +333,14 @@ notes:
 '''
 
 EXAMPLES = '''
+- name: Create a Job Template
+  tower_job_template:
+    name: Example Job Template
+    project: Example Project
+    inventory: Example Inventory
+    playbook: hello_world.yml
+    job_type: run
+    state: present
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -343,47 +351,47 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True, type='str'),
-        new_name=dict(required=False, type='str'),
-        description=dict(required=False, type='str', default=''),
-        job_type=dict(required=False, type='str', choices=['run', 'check', 'scan'], default='run'),
-        inventory=dict(required=False, type='str'),
-        project=dict(required=False, type='str'),
-        playbook=dict(required=False, type='str', default=''),
-        scm_branch=dict(required=False, type='str', default=''),
-        forks=dict(required=False, type='int', default='0'),
-        limit=dict(required=False, type='str', default='', aliases=['ask_limit']),
-        verbosity=dict(required=False, type='int', choices=[0, 1, 2, 3, 4, 5], default=0),
-        extra_vars=dict(required=False, type='dict', default={}, aliases=['ask_extra_vars']),
-        job_tags=dict(required=False, type='str', default=''),
-        force_handlers=dict(required=False, type='bool', default='False', aliases=['force_handlers_enabled']),
-        skip_tags=dict(required=False, type='str', default=''),
-        start_at_task=dict(required=False, type='str', default=''),
-        timeout=dict(required=False, type='int', default='0'),
-        use_fact_cache=dict(required=False, type='bool', default='False', aliases=['fact_caching_enabled']),
-        host_config_key=dict(required=False, type='str', default=''),
-        ask_scm_branch_on_launch=dict(required=False, type='bool', default='False'),
-        ask_diff_mode_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_diff_mode']),
-        ask_variables_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_extra_vars']),
-        ask_limit_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_limit']),
-        ask_tags_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_tags']),
-        ask_skip_tags_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_skip_tags']),
-        ask_job_type_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_job_type']),
-        ask_verbosity_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_verbosity']),
-        ask_inventory_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_inventory']),
-        ask_credential_on_launch=dict(required=False, type='bool', default='False', aliases=['ask_credential']),
-        survey_enabled=dict(required=False, type='bool', default='False'),
-        become_enabled=dict(required=False, type='bool', default='False'),
-        diff_mode=dict(required=False, type='bool', default='False', aliases=['diff_mode_enabled']),
-        allow_simultaneous=dict(required=False, type='bool', default='False', aliases=['concurrent_jobs_enabled']),
-        custom_virtualenv=dict(required=False, type='str', default=''),
-        job_slice_count=dict(required=False, type='int', default='1'),
-        webhook_service=dict(required=False, type='str', choices=['github', 'gitlab']),
-        webhook_credential=dict(required=False, type='str'),
-        credentials=dict(required=False, type="list", default=[], elements='str'),
-        labels=dict(required=False, type="list", default=[], elements='str'),
-        credential=dict(default=''),
-        vault_credential=dict(default=''),
-        survey_spec=dict(required=False, type="dict"),
+        new_name=dict(type='str'),
+        description=dict(type='str'),
+        job_type=dict(type='str', choices=['run', 'check', 'scan'], default='run'),
+        inventory=dict(type='str'),
+        project=dict(type='str'),
+        playbook=dict(type='str'),
+        scm_branch=dict(type='str'),
+        forks=dict(type='int', default='0'),
+        limit=dict(type='str', aliases=['ask_limit']),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
+        extra_vars=dict(type='dict', aliases=['ask_extra_vars']),
+        job_tags=dict(type='str'),
+        force_handlers=dict(type='bool', aliases=['force_handlers_enabled']),
+        skip_tags=dict(type='str'),
+        start_at_task=dict(type='str'),
+        timeout=dict(type='int', default='0'),
+        use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
+        host_config_key=dict(type='str'),
+        ask_scm_branch_on_launch=dict(type='bool'),
+        ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode']),
+        ask_variables_on_launch=dict(type='bool', aliases=['ask_extra_vars']),
+        ask_limit_on_launch=dict(type='bool', aliases=['ask_limit']),
+        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
+        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
+        ask_job_type_on_launch=dict(type='bool', aliases=['ask_job_type']),
+        ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
+        ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
+        ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
+        survey_enabled=dict(type='bool'),
+        become_enabled=dict(type='bool'),
+        diff_mode=dict(type='bool', aliases=['diff_mode_enabled']),
+        allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled']),
+        custom_virtualenv=dict(type='str'),
+        job_slice_count=dict(type='int', default='1'),
+        webhook_service=dict(type='str', choices=['github', 'gitlab']),
+        webhook_credential=dict(type='str'),
+        credentials=dict(type="list", elements='str'),
+        labels=dict(type="list", elements='str'),
+        credential=dict(),
+        vault_credential=dict(),
+        survey_spec=dict(type="dict"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

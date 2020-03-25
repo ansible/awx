@@ -218,7 +218,10 @@ class TowerModule(AnsibleModule):
         exceptions = {
             'inventory': 'inventories',
             'target_team': 'teams',
-            'workflow': 'workflow_job_templates'
+            'workflow': 'workflow_job_templates',
+            'project': 'projects',
+            'organization': 'organizations',
+            'webhook_credential': 'credentials',
         }
         return exceptions.get(name, '{0}s'.format(name))
 
@@ -635,7 +638,7 @@ class TowerModule(AnsibleModule):
                 self.modify_associations(sub_endpoint, associations[association_type])
 
         # If we have an on_create method and we actually changed something we can call on_create
-        if on_create is not None and self.json_output['created']:
+        if on_create is not None and self.json_output['changed']:
             on_create(self, response['json'])
         else:
             self.exit_json(**self.json_output)
