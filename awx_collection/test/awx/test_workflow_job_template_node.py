@@ -53,9 +53,6 @@ def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_tem
 
 @pytest.mark.django_db
 def test_make_use_of_prompts(run_module, admin_user, wfjt, job_template, machine_credential, vault_credential):
-    # Create to temporarily woraround other issue https://github.com/ansible/awx/issues/5177
-    WorkflowJobTemplateNode.objects.create(
-        identifier='42', workflow_job_template=wfjt, unified_job_template=job_template)
     result = run_module('tower_workflow_job_template_node', {
         'identifier': '42',
         'workflow_job_template': 'foo-workflow',
@@ -85,9 +82,6 @@ def test_create_with_edges(run_module, admin_user, wfjt, job_template):
             unified_job_template=job_template
         ) for i in range(3)
     ]
-    # Create to temporarily woraround other issue https://github.com/ansible/awx/issues/5177
-    WorkflowJobTemplateNode.objects.create(
-        identifier='42', workflow_job_template=wfjt, unified_job_template=job_template)
 
     result = run_module('tower_workflow_job_template_node', {
         'identifier': '42',

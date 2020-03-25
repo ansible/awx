@@ -509,9 +509,10 @@ class TowerModule(AnsibleModule):
         if not endpoint:
             self.fail_json(msg="Unable to create new {0} due to missing endpoint".format(item_type))
 
+        item_url = None
         if existing_item:
             try:
-                existing_item['url']
+                item_url = existing_item['url']
             except KeyError as ke:
                 self.fail_json(msg="Unable to process create of item due to missing data {0}".format(ke))
         else:
@@ -534,6 +535,7 @@ class TowerModule(AnsibleModule):
                         self.json_output['name'] = response['json'][key]
                 self.json_output['id'] = response['json']['id']
                 self.json_output['changed'] = True
+                item_url = response['json']['url']
             else:
                 if 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']['__all__'][0]))
@@ -545,7 +547,8 @@ class TowerModule(AnsibleModule):
         # Process any associations with this item
         if associations is not None:
             for association_type in associations:
-                self.modify_associations(response, associations[association_type])
+                sub_endpoint = '{0}{1}/'.format(item_url, association_type)
+                self.modify_associations(sub_endpoint, associations[association_type])
 
         # If we have an on_create method and we actually changed something we can call on_create
         if on_create is not None and self.json_output['changed']:
