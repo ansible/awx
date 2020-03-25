@@ -13,11 +13,10 @@ import AlertModal from '@components/AlertModal';
 import DatalistToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList, {
+  ToolbarAddButton,
   ToolbarDeleteButton,
 } from '@components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '@util/qs';
-
-import AddDropDownButton from '@components/AddDropDownButton';
 import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
@@ -139,26 +138,14 @@ function ProjectJobTemplatesList({ i18n }) {
 
   const canAddJT =
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
-  const canAddWFJT =
-    wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
-  const addButtonOptions = [];
-  if (canAddJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Template`),
-      url: `/templates/job_template/add/`,
-    });
-  }
-  if (canAddWFJT) {
-    addButtonOptions.push({
-      label: i18n._(t`Workflow Template`),
-      url: `/templates/workflow_job_template/add/`,
-    });
-  }
+
+  const addButton = (
+    <ToolbarAddButton key="add" linkTo="/templates/job_template/add/" />
+  );
+
   const isAllSelected =
     selected.length === templates.length && selected.length > 0;
-  const addButton = (
-    <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
-  );
+
   return (
     <>
       <Card>
@@ -232,13 +219,13 @@ function ProjectJobTemplatesList({ i18n }) {
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}
               additionalControls={[
+                ...(canAddJT ? [addButton] : []),
                 <ToolbarDeleteButton
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
                   pluralizedItemName="Templates"
                 />,
-                ...(canAddJT || canAddWFJT ? [addButton] : []),
               ]}
             />
           )}
@@ -252,7 +239,7 @@ function ProjectJobTemplatesList({ i18n }) {
               isSelected={selected.some(row => row.id === template.id)}
             />
           )}
-          emptyStateControls={(canAddJT || canAddWFJT) && addButton}
+          emptyStateControls={canAddJT && addButton}
         />
       </Card>
       <AlertModal
