@@ -94,7 +94,6 @@ status:
 
 from ..module_utils.tower_api import TowerModule
 import time
-import itertools
 
 
 def check_job(module, job_url):
@@ -141,15 +140,16 @@ def main():
     job_url = job['url']
 
     # This comes from tower_cli/models/base.py from the old tower-cli
-    dots = itertools.cycle([0, 1, 2, 3])
     interval = min_interval
     start = time.time()
 
-    # Poll the Ansible Tower instance for status, and print the status to the outfile (usually standard out).
+    # Get the initial job status from Tower, this will exit if there are any issues
     result = check_job(module, job_url)
 
     last_poll = time.time()
     timeout_check = 0
+
+    # Loop while the job is not yet completed
     while not result['finished']:
         # Sanity check: Have we officially timed out?
         # The timeout check is incremented below, so this is checking to see if we were timed out as of
@@ -157,9 +157,6 @@ def main():
         if timeout and timeout_check - start > timeout:
             module.json_output['msg'] = "Monitoring aborted due to timeout"
             module.fail_json(**module.json_output)
-
-        # If the outfile is a TTY, print the current status.
-        output = '\rCurrent status: %s%s' % (result['status'], '.' * next(dots))
 
         # Put the process to sleep briefly.
         time.sleep(0.2)
