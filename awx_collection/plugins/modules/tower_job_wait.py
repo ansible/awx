@@ -146,10 +146,6 @@ def main():
     start = time.time()
 
     # Poll the Ansible Tower instance for status, and print the status to the outfile (usually standard out).
-    #
-    # Note that this is one of the few places where we use `secho` even though we're in a function that might
-    # theoretically be imported and run in Python.  This seems fine; outfile can be set to /dev/null and very
-    # much the normal use for this method should be CLI monitoring.
     result = check_job(module, job_url)
 
     last_poll = time.time()

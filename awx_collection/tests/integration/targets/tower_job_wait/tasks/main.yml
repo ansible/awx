@@ -33,7 +33,7 @@
 
 - name: Launch Demo Job Template (take happy path)
   tower_job_launch:
-    job_template: "Jenkins Export Vars"
+    job_template: "Demo Job Template"
   register: job
 
 - assert:
