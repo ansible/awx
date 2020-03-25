@@ -3205,7 +3205,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
             field_kwargs['choices'] = module_name_choices
             field_kwargs['required'] = bool(not module_name_default)
             field_kwargs['default'] = module_name_default or serializers.empty
-            field_kwargs['allow_blank'] = bool(module_name_default)
+            field_kwargs['allow_blank'] = False
             field_kwargs.pop('max_length', None)
         return field_class, field_kwargs
 
