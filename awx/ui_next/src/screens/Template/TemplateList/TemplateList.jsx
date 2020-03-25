@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -31,7 +31,6 @@ const QS_CONFIG = getQSConfig('template', {
 });
 
 function TemplateList({ i18n }) {
-  const { id: projectId } = useParams();
   const location = useLocation();
 
   const [selected, setSelected] = useState([]);
@@ -44,9 +43,6 @@ function TemplateList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      if (location.pathname.startsWith('/projects') && projectId) {
-        params.jobtemplate__project = projectId;
-      }
       const results = await Promise.all([
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
@@ -58,7 +54,7 @@ function TemplateList({ i18n }) {
         jtActions: results[1].data.actions,
         wfjtActions: results[2].data.actions,
       };
-    }, [location, projectId]),
+    }, [location]),
     {
       templates: [],
       count: 0,
@@ -228,7 +224,7 @@ function TemplateList({ i18n }) {
               key={template.id}
               value={template.name}
               template={template}
-              detailUrl={`${location.pathname}/${template.type}/${template.id}`}
+              detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
             />
