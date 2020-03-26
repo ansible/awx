@@ -60,7 +60,8 @@ class Metadata(metadata.SimpleMetadata):
                 'type': _('Data type for this {}.'),
                 'url': _('URL for this {}.'),
                 'related': _('Data structure with URLs of related resources.'),
-                'summary_fields': _('Data structure with name/description for related resources.'),
+                'summary_fields': _('Data structure with name/description for related resources.  '
+                                    'The output for some objects may be limited for performance reasons.'),
                 'created': _('Timestamp when this {} was created.'),
                 'modified': _('Timestamp when this {} was last modified.'),
             }
