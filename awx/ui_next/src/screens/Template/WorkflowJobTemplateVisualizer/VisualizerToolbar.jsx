@@ -112,7 +112,7 @@ function VisualizerToolbar({
               <ActionButton
                 id="visualizer-launch"
                 variant="plain"
-                isDisabled={!canLaunch}
+                isDisabled={!canLaunch || totalNodes === 0}
                 onClick={handleLaunch}
               >
                 <RocketIcon />
