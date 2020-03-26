@@ -40,6 +40,7 @@ NOTEBOOK_ARGUMENTS = [
 ]
 
 # print SQL queries in shell_plus
+SHELL_PLUS = 'ipython'
 SHELL_PLUS_PRINT_SQL = False
 
 # show colored logs in the dev environment
