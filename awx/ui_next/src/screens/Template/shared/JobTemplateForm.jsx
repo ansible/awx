@@ -50,7 +50,6 @@ function JobTemplateForm({
   setFieldValue,
   submitError,
   i18n,
-  touched,
 }) {
   const [contentError, setContentError] = useState(false);
   const [project, setProject] = useState(null);
@@ -61,23 +60,20 @@ function JobTemplateForm({
     Boolean(template?.host_config_key)
   );
 
-  const formikBag = useFormikContext();
-  const formikValues = formikBag.values;
-  const setFormikFieldValue = formikBag.setFieldValue;
+  const { values: formikValues } = useFormikContext();
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
     name: 'job_type',
     validate: required(null, i18n),
   });
   const [, inventoryMeta, inventoryHelpers] = useField('inventory');
-
-  const [, projectMeta, projectHelpers] = useField({
+  const [projectField, projectMeta, projectHelpers] = useField({
     name: 'project',
     validate: () => handleProjectValidation(),
   });
 
-  const [scmField] = useField('scm_branch');
+  const [scmField, , scmHelpers] = useField('scm_branch');
 
-  const [playbookField, , playbookMeta] = useField({
+  const [playbookField, playbookMeta, playbookHelpers] = useField({
     name: 'playbook',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
@@ -131,7 +127,7 @@ function JobTemplateForm({
   }, [loadRelatedInstanceGroups]);
 
   const handleProjectValidation = () => {
-    if (!project && touched.project) {
+    if (!project && projectMeta.touched) {
       return i18n._(t`Select a value for this field`);
     }
     if (project && project.status === 'never updated') {
@@ -143,11 +139,11 @@ function JobTemplateForm({
   const handleProjectUpdate = useCallback(
     newProject => {
       setProject(newProject);
-      setFieldValue('project', newProject.id);
-      setFieldValue('playbook', 0);
-      setFieldValue('scm_branch', '');
+      projectHelpers.setValue(newProject);
+      playbookHelpers.setValue(0);
+      scmHelpers.setValue('');
     },
-    [setFieldValue, setProject]
+    [setProject, projectHelpers, playbookHelpers, scmHelpers]
   );
 
   const jobTypeOptions = [
@@ -239,7 +235,6 @@ function JobTemplateForm({
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value.id);
-              setFormikFieldValue('organizationId', value.organization);
               setInventory(value);
             }}
             required
@@ -293,11 +288,10 @@ function JobTemplateForm({
             content={i18n._(t`Select the playbook to be executed by this job.`)}
           />
           <PlaybookSelect
-            projectId={formikValues.project}
+            projectId={project?.id || projectField.value?.id}
             isValid={!(playbookMeta.touched || playbookMeta.error)}
-            form={formikBag}
             field={playbookField}
-            onBlur={() => playbookMeta.setTouched()}
+            onBlur={() => playbookHelpers.setTouched()}
             onError={setContentError}
           />
         </FormGroup>
@@ -581,10 +575,6 @@ const FormikApp = withFormik({
       },
     } = template;
 
-    const hasInventory = summary_fields.inventory
-      ? summary_fields.inventory.organization_id
-      : null;
-
     return {
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
@@ -600,7 +590,7 @@ const FormikApp = withFormik({
       description: template.description || '',
       job_type: template.job_type || 'run',
       inventory: template.inventory || null,
-      project: template.project || '',
+      project: template.project || null,
       scm_branch: template.scm_branch || '',
       playbook: template.playbook || '',
       labels: summary_fields.labels.results || [],
@@ -617,7 +607,6 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       use_fact_cache: template.use_fact_cache || false,
       host_config_key: template.host_config_key || '',
-      organizationId: hasInventory,
       initialInstanceGroups: [],
       instanceGroups: [],
       credentials: summary_fields.credentials || [],

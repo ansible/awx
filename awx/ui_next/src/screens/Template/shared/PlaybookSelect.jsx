@@ -5,15 +5,7 @@ import { t } from '@lingui/macro';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { ProjectsAPI } from '@api';
 
-function PlaybookSelect({
-  projectId,
-  isValid,
-  form,
-  field,
-  onBlur,
-  onError,
-  i18n,
-}) {
+function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
   const [options, setOptions] = useState([]);
 
   useEffect(() => {
@@ -47,7 +39,6 @@ function PlaybookSelect({
       id="template-playbook"
       data={options}
       isValid={isValid}
-      form={form}
       {...field}
       onBlur={onBlur}
     />

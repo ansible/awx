@@ -33,7 +33,7 @@ const jobTemplateData = {
   limit: '',
   name: '',
   playbook: '',
-  project: 1,
+  project: { id: 1, summary_fields: { organization: { id: 1 } } },
   scm_branch: '',
   skip_tags: '',
   timeout: 0,
@@ -123,6 +123,7 @@ describe('<JobTemplateAdd />', () => {
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 2,
         name: 'project',
+        summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
       wrapper.update();
       wrapper
@@ -161,6 +162,7 @@ describe('<JobTemplateAdd />', () => {
         id: 1,
         type: 'job_template',
         ...jobTemplateData,
+        project: jobTemplateData.project.id,
       },
     });
     let wrapper;
@@ -181,6 +183,7 @@ describe('<JobTemplateAdd />', () => {
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 2,
         name: 'project',
+        summary_fields: { organization: { id: 1, name: 'Org Foo' } },
       });
       wrapper.update();
       wrapper
