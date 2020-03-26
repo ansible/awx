@@ -38,12 +38,12 @@ options:
     min_interval:
       description:
         - Minimum interval in seconds, to request an update from Tower.
-        - depreciated, use interval instead
+        - deprecated, use interval instead
       type: float
     max_interval:
       description:
         - Maximum interval in seconds, to request an update from Tower.
-        - depreciated, use interval instead
+        - deprecated, use interval instead
       type: float
     timeout:
       description:
@@ -142,7 +142,7 @@ def main():
         if interval == 1:
             interval = abs((module.params.get('min_interval', 1) + module.params.get('max_interval', 30)) / 2)
         module.deprecate(
-            msg="min and max interval have been depricated, please use interval instead, interval will be set to {0}".format(interval),
+            msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
             version="3.7"
         )
 
