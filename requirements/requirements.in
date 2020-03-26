@@ -1,5 +1,5 @@
 aiohttp
-ansible-runner>=1.4.5
+ansible-runner>=1.4.6
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 boto  # replacement candidate https://github.com/ansible/awx/issues/2115
