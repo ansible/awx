@@ -2,13 +2,15 @@ import React from 'react';
 import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Formik } from 'formik';
 import InventoryStep from './InventoryStep';
 import CredentialsStep from './CredentialsStep';
 import OtherPromptsStep from './OtherPromptsStep';
 import SurveyStep from './SurveyStep';
 import PreviewStep from './PreviewStep';
 
-function LaunchPrompt({ config, i18n }) {
+function LaunchPrompt({ config, onCancel, i18n }) {
+  // CONFIG
   // can_start_without_user_input: false
   // passwords_needed_to_start: []
   // ask_scm_branch_on_launch: false
@@ -26,14 +28,17 @@ function LaunchPrompt({ config, i18n }) {
   // credential_needed_to_start: false
   // inventory_needed_to_start: false
   // job_template_data: {name: "JT with prompts", id: 25, description: ""
+
   const steps = [];
+  const initialValues = {};
   if (config.ask_inventory_on_launch) {
+    initialValues.inventory = null;
     steps.push({
       name: i18n._(t`Inventory`),
       component: <InventoryStep />,
     });
   }
-  // angular code was:
+  // TODO: match old UI Logic:
   // if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
   //     (_.has(vm, 'promptDataClone.prompts.credentials.passwords.vault') &&
   //     vm.promptDataClone.prompts.credentials.passwords.vault.length > 0) ||
@@ -42,6 +47,7 @@ function LaunchPrompt({ config, i18n }) {
   //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_password')
   // ) {
   if (config.ask_credential_on_launch) {
+    initialValues.credentials = [];
     steps.push({
       name: i18n._(t`Credential`),
       component: <CredentialsStep />,
@@ -73,17 +79,23 @@ function LaunchPrompt({ config, i18n }) {
     component: <PreviewStep />,
   });
 
-  const handleClose = x => {
-    console.log(x);
+  const handleSubmit = x => {
+    console.log('SUBMIT', x);
   };
 
   return (
-    <Wizard
-      isOpen
-      onClose={handleClose}
-      title={i18n._(t`Prompts`)}
-      steps={steps}
-    />
+    <Formik
+      initialValues={initialValues}
+      onSubmit={() => console.log('FORMIK SUBMIT ?!')}
+    >
+      <Wizard
+        isOpen
+        onClose={onCancel}
+        onSave={handleSubmit}
+        title={i18n._(t`Prompts`)}
+        steps={steps}
+      />
+    </Formik>
   );
 }
 

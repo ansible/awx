@@ -163,7 +163,12 @@ class LaunchButton extends React.Component {
             <ErrorDetail error={launchError} />
           </AlertModal>
         )}
-        {showLaunchPrompt && <LaunchPrompt config={launchConfig} />}
+        {showLaunchPrompt && (
+          <LaunchPrompt
+            config={launchConfig}
+            onCancel={() => this.setState({ showLaunchPrompt: false })}
+          />
+        )}
       </Fragment>
     );
   }
