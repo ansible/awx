@@ -62,6 +62,14 @@ describe('VisualizerToolbar', () => {
     expect(wrapper.find('Badge').text()).toBe('1');
   });
 
+  test('Should display action buttons', () => {
+    expect(wrapper.find('CompassIcon')).toHaveLength(1);
+    expect(wrapper.find('WrenchIcon')).toHaveLength(1);
+    expect(wrapper.find('BookIcon')).toHaveLength(1);
+    expect(wrapper.find('RocketIcon')).toHaveLength(1);
+    expect(wrapper.find('TrashAltIcon')).toHaveLength(1);
+  });
+
   test('Toggle Legend button dispatches as expected', () => {
     wrapper.find('CompassIcon').simulate('click');
     expect(dispatch).toHaveBeenCalledWith({ type: 'TOGGLE_LEGEND' });
