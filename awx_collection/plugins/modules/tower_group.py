@@ -100,7 +100,7 @@ def main():
         inventory=dict(required=True),
         variables=dict(type='dict', required=False),
         hosts=dict(type='list', elements='str'),
-        groups=dict(type='list', elements='str'),
+        children=dict(type='list', elements='str', aliases=['groups']),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
