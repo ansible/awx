@@ -163,8 +163,6 @@ function ProjectFormFields({
           organizationHelpers.setValue(value);
         }}
         value={organizationField.value}
-        touched={organizationMeta.touched}
-        error={organizationMeta.error}
         required
       />
       <FormGroup
