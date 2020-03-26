@@ -526,9 +526,7 @@ class TowerModule(AnsibleModule):
             else:
                 self.fail_json(msg="Failed to associate item {0}".format(self.extract_errors_from_response(response)))
 
-    def process_additional_posts(self, item, item_type, additional_posts, association_type=None):
-        if association_type is None:
-            return
+    def process_additional_posts(self, item, item_type, additional_posts):
         # Process any additional posts with this item
         for post in additional_posts:
             endpoint = item.get('related', {}).get(post['endpoint_reference'], None)
@@ -566,7 +564,7 @@ class TowerModule(AnsibleModule):
                                                                                        self.extract_errors_from_response(response)
                                                                                        ), **{'response': response})
             else:
-                self.fail_json(msg="Addition post type of {0} is not valid for {1}".format(association_type, item_type))
+                self.fail_json(msg="Addition post type of {0} is not valid for {1}".format(post['endpoint_reference'], item_type))
 
     def process_associations(self, item, item_type, associations):
         # Process any associations with this item
@@ -636,6 +634,7 @@ class TowerModule(AnsibleModule):
             for association_type in associations:
                 sub_endpoint = '{0}{1}/'.format(item_url, association_type)
                 self.modify_associations(sub_endpoint, associations[association_type])
+        self.process_additional_posts(existing_item, item_type, additional_posts)
 
         # If we have an on_create method and we actually changed something we can call on_create
         if on_create is not None and self.json_output['changed']:
