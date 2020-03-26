@@ -52,7 +52,6 @@
 - assert:
     that:
       - job is changed
-      - "job.status == 'pending'"
 
 - name: Wait for the Job to finish
   tower_job_wait:
@@ -74,7 +73,6 @@
 - assert:
     that:
       - job is changed
-      - "job.status == 'pending'"
 
 - name: Timeout waiting for the job to complete
   tower_job_wait:
