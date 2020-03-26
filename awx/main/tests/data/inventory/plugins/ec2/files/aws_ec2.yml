@@ -76,7 +76,7 @@ keyed_groups:
   parent_group: '{{ placement.region }}'
   prefix: ''
   separator: ''
-plugin: ansible.amazon.aws_ec2
+plugin: amazon.aws.aws_ec2
 regions:
 - us-east-2
 - ap-south-1
