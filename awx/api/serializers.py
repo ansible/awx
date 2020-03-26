@@ -1280,6 +1280,14 @@ class OrganizationSerializer(BaseSerializer):
                     'job_templates': 0, 'admins': 0, 'projects': 0}
             else:
                 summary_dict['related_field_counts'] = counts_dict[obj.id]
+
+        # Organization participation roles (admin, member) can't be assigned
+        # to a team. This provides a hint to the ui so it can know to not
+        # display these roles for team role selection.
+        for key in ('admin_role', 'member_role',):
+            if key in summary_dict.get('object_roles', {}):
+                summary_dict['object_roles'][key]['user_only'] = True
+
         return summary_dict
 
     def validate(self, attrs):
