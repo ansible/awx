@@ -63,11 +63,12 @@ class TowerModule(AnsibleModule):
         "workflow_job_template_nodes": "<identifier>++<workflow_job_template.name>++<organization.name>",
         "applications": "<name>++<organization.name>",
         "users": "<username>",
-        "instances": "<hostname>"
+        "instances": "<hostname>",
+        "unified_job_templates": "<name>++<organization.name>"  # special case
     }
 
     def __init__(self, argument_spec, **kwargs):
-        args = dict(
+        self.base_argument_spec = dict(
             tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
             tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
             tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
@@ -75,6 +76,8 @@ class TowerModule(AnsibleModule):
             tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
             tower_config_file=dict(type='path', required=False, default=None),
         )
+        args = {}
+        args.update(self.base_argument_spec)
         args.update(argument_spec)
         kwargs['supports_check_mode'] = True
 
@@ -213,63 +216,103 @@ class TowerModule(AnsibleModule):
 
     @staticmethod
     def param_to_endpoint(name):
+        if name.endswith('_nodes'):
+            return 'workflow_job_template_nodes'
         if name.endswith('s'):
             return name  # already in plural endpoint format
         exceptions = {
             'inventory': 'inventories',
             'target_team': 'teams',
             'workflow': 'workflow_job_templates',
-            'children': 'groups'
+            'children': 'groups',
+            'webhook_credential': 'credentials'
         }
         return exceptions.get(name, '{0}s'.format(name))
 
-    def find_lookup_fields(self, endpoint):
+    @staticmethod
+    def find_lookup_fields(endpoint):
         """We are interested in a maximum of 2 lookup fields, an identity field
         and a parent object. For example, (name, organization)
         """
-        blob = self.named_url_formats[endpoint]
+        blob = TowerModule.named_url_formats[endpoint]
         blob = blob.replace('<', '').replace('>', '')
         # deconstruct the entry text, get primary lookup field
         resource_parts = blob.split('++')
         self_lookup = resource_parts[0]
-        # rare case of model having more than one lookup fields is cred type
+        # rare case of model having more than one lookup fields is credential type
         identity_field = self_lookup.split('+')[0]
         fk_lookup = None
         if len(resource_parts) > 1:
             fk_lookup = resource_parts[1]  # trash all but next related obj
-            fk_lookup = fk_lookup.split('.')[0]  # trash all fields, using pk
+            fk_lookup = fk_lookup.split('+')[0]  # again, credential type
+            fk_lookup = fk_lookup.split('.')[0]  # trash all fields, using related pk
         return (identity_field, fk_lookup)
+
+    def find_lookup_order(self, endpoint):
+        """Find the order in which to look up related fields
+        """
+        # first, include the primary dependency chain
+        entries = []
+        for dep_str in reversed(TowerModule.named_url_formats[endpoint].split('++')[1:]):
+            dep_name = dep_str.replace('<', '').replace('>', '')
+            dep_name = dep_name.split('+')[0]  # take first field sub-entry in entry
+            dep_name = dep_name.split('.')[0]  # take resource name over field name
+            if dep_name in self.argument_spec:
+                entries.append(dep_name)
+        # any other related non-dependency items go after those
+        related_entries = []
+        for key in self.argument_spec:
+            if key in self.base_argument_spec or key in entries:
+                continue
+            related_endpoint = self.param_to_endpoint(key)
+            if related_endpoint not in TowerModule.named_url_formats:
+                continue  # is a flat field, not related object
+            related_entries.append(key)
+        entries += sorted(related_entries)
+        return entries
 
     def lookup_resource_data(self, endpoint, params):
         """High-level method, given params to a module, returns a tuple
-        first entry is data for the primary object, second object is a dict
-        with lookup data for all related ForeignKey fields
+        first item returned is data for the target of the module,
+        for example, for tower_team, returns API data for its team
+        second item returned is a dict
+        with API for all related ForeignKey fields, keyed by param name
         """
-        data = {}
-        for dep_ct in range(1, 3):  # max number of resource dependencies
-            for key, value in params.items():
-                related_endpoint = self.param_to_endpoint(key)
-                if value is None:
-                    continue
-                if related_endpoint not in self.named_url_formats or related_endpoint == endpoint:
-                    continue
-                if len(self.named_url_formats[related_endpoint].split('++')) != dep_ct:
-                    continue
-                if isinstance(value, list):
-                    continue  # TODO: implement lookups of many related params
-                lookup_data = {}
-                identity_field, fk_lookup = self.find_lookup_fields(related_endpoint)
-                lookup_data[identity_field] = value
-                if fk_lookup and fk_lookup in data:
-                    lookup_data[fk_lookup] = data[fk_lookup]['id']
-                data[key] = self.resolve_obj_from_lookup(related_endpoint, lookup_data)
+        data = {}  # related object data
+        # look up related objects first, from top of heirarchy down, then target object
+        lookup_order = self.find_lookup_order(endpoint) + [endpoint]
 
-        lookup_data = {}
-        identity_field, fk_lookup = self.find_lookup_fields(endpoint)
-        lookup_data[identity_field] = params[identity_field]
-        if fk_lookup and fk_lookup in data:
-            lookup_data[fk_lookup] = data[fk_lookup]['id']
-        response = self.resolve_obj_from_lookup(endpoint, lookup_data, allow_none=True, allow_id=False)
+        for key in lookup_order:
+            this_endpoint = self.param_to_endpoint(key)
+            identity_field, fk_lookup = self.find_lookup_fields(this_endpoint)
+
+            if key == endpoint:
+                # lookup target object by name, or other identifier
+                identity_value = params[identity_field]
+            else:
+                # related ForeignKey give name or id as that parameter
+                identity_value = params.get(key)
+                if identity_value is None:
+                    continue
+
+            lookup_data = {}
+            lookup_data[identity_field] = identity_value
+            if fk_lookup and fk_lookup in data:
+                lookup_data[fk_lookup] = data[fk_lookup]['id']
+
+            if key == endpoint:
+                # question: should this allow id? is calling with "name: 42" okay?
+                response = self.resolve_obj_from_lookup(
+                    this_endpoint, lookup_data, allow_none=True, allow_id=False)
+            elif isinstance(identity_value, list):
+                responses = []
+                for nth_value in identity_value:
+                    lookup_data[identity_field] = nth_value
+                    responses.append(self.resolve_obj_from_lookup(this_endpoint, lookup_data))
+                data[key] = responses
+            else:
+                data[key] = self.resolve_obj_from_lookup(this_endpoint, lookup_data)
+
         return (response, data)
 
     def head_endpoint(self, endpoint, *args, **kwargs):
@@ -339,6 +382,10 @@ class TowerModule(AnsibleModule):
     def resolve_obj_from_lookup(self, endpoint, lookup_data, allow_none=False, allow_id=True):
         identity_field, fk_lookup = self.find_lookup_fields(endpoint)
         response = self.get_endpoint(endpoint, data=lookup_data)
+        if 'count' not in response['json']:
+            raise RuntimeError("Unexpected response at /api/v2/{0}/ with data {1}: {2}".format(
+                endpoint, lookup_data, response['json']
+            ))
 
         if response['json']['count'] == 1:
             return response['json']['results'][0]
@@ -350,8 +397,10 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="No objects found at /api/v2/{0}/ with data {1}".format(endpoint, lookup_data))
             # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
             response = self.get_endpoint(endpoint, data={'id': id_value}, return_none_on_404=True)
-            if response is not None or allow_none:
-                return response
+            if response is not None:
+                return response['json']['results'][0]
+            elif allow_none:
+                return None
             self.fail_json(msg="No objects found at {0} with data {1} or data {2}".format(
                 endpoint, lookup_data, {'id': id_value}))
         else:
@@ -364,7 +413,8 @@ class TowerModule(AnsibleModule):
             ))
 
     def resolve_name_to_id(self, endpoint, name_or_id):
-        return self.resolve_obj_from_lookup(endpoint, {'name': name_or_id})['id']
+        response = self.resolve_obj_from_lookup(endpoint, {'name': name_or_id})
+        return response['id']
 
     def make_request(self, method, endpoint, *args, **kwargs):
         # In case someone is calling us directly; make sure we were given a method, let's not just assume a GET

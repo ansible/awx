@@ -137,20 +137,8 @@ def main():
 
     association_fields = {}
     for relationship in ('hosts', 'children'):
-        endpoint = module.param_to_endpoint(relationship)
-        name_list = module.params.get(relationship)
-        if name_list is None:
-            continue
-        id_list = []
-        for sub_name in name_list:
-            sub_obj = module.get_one(endpoint, **{
-                'data': {'inventory': inventory_id, 'name': sub_name}
-            })
-            if sub_obj is None:
-                module.fail_json(msg='Could not find {0} with name {1}'.format(endpoint, sub_name))
-            id_list.append(sub_obj['id'])
-        if id_list:
-            association_fields[relationship] = id_list
+        if relationship in related_data:
+            association_fields[relationship] = [item['id'] for item in related_data[relationship]]
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

@@ -46,4 +46,40 @@ def test_duplicate_config(collection_import):
 def test_find_lookup_fields(collection_import, endpoint, expect):
     TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
     # abuse the self argument here, because initializing a module is hard
-    assert TowerModule.find_lookup_fields(TowerModule, endpoint) == expect
+    assert TowerModule.find_lookup_fields(endpoint) == expect
+
+
+@pytest.mark.parametrize('endpoint, spec, expect', [
+    ('users', dict(
+        username=dict(),
+    ), []),
+    ('hosts', dict(
+        name=dict(),
+        inventory=dict(),
+        organization=dict(),
+    ), ['organization', 'inventory']),
+    ('workflow_job_templates', dict(
+        name=dict(),
+        organization=dict(),
+        inventory=dict(),
+        webhook_credential=dict(),
+    ), ['organization', 'inventory', 'webhook_credential']),
+    ('workflow_job_template_nodes', dict(
+        identifier=dict(),
+        workflow_job_template=dict(),
+        organization=dict(),
+        inventory=dict(),
+        unified_job_template=dict(),
+        success_nodes=dict(type='list', elements='str'),
+        credentials=dict(type='list', elements='str'),
+    ), ['organization', 'workflow_job_template', 'credentials', 'inventory', 'success_nodes', 'unified_job_template'])
+])
+def test_find_lookup_order(collection_import, endpoint, spec, expect):
+    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+
+    def mock_load_params(self):
+        self.params = {}
+
+    with mock.patch.object(TowerModule, '_load_params', new=mock_load_params):
+        module = TowerModule(argument_spec=spec)
+        assert module.find_lookup_order(endpoint) == expect

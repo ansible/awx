@@ -211,39 +211,16 @@ def main():
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
     # Extract our parameters
-    identifier = module.params.get('identifier')
     state = module.params.get('state')
 
     new_fields = {}
-    search_fields = {'identifier': identifier}
-
-    # Attempt to look up the related items the user specified (these will fail the module if not found)
-    workflow_job_template = module.params.get('workflow_job_template')
-    workflow_job_template_id = None
-    if workflow_job_template:
-        wfjt_search_fields = {'name': workflow_job_template}
-        organization = module.params.get('organization')
-        if organization:
-            organization_id = module.resolve_name_to_id('organizations', organization)
-            wfjt_search_fields['organization'] = organization_id
-        wfjt_data = module.get_one('workflow_job_templates', **{'data': wfjt_search_fields})
-        if wfjt_data is None:
-            module.fail_json(msg="The workflow {0} in organization {1} was not found on the Tower server".format(
-                workflow_job_template, organization
-            ))
-        workflow_job_template_id = wfjt_data['id']
-        search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
-
-    unified_job_template = module.params.get('unified_job_template')
-    if unified_job_template:
-        new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
-
-    inventory = module.params.get('inventory')
-    if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+    existing_item, related_data = module.lookup_resource_data('workflow_job_template_nodes', module.params)
+
+    for related in ('inventory', 'unified_job_template', 'workflow_job_template'):
+        if related in related_data:
+            new_fields[related] = related_data[related]['id']
 
     # Create the data that gets sent for create and update
     for field_name in (
@@ -254,26 +231,9 @@ def main():
             new_fields[field_name] = field_val
 
     association_fields = {}
-    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
-        name_list = module.params.get(association)
-        if name_list is None:
-            continue
-        id_list = []
-        for sub_name in name_list:
-            if association == 'credentials':
-                endpoint = 'credentials'
-                lookup_data = {'name': sub_name}
-            else:
-                endpoint = 'workflow_job_template_nodes'
-                lookup_data = {'identifier': sub_name}
-                if workflow_job_template_id:
-                    lookup_data['workflow_job_template'] = workflow_job_template_id
-            sub_obj = module.get_one(endpoint, **{'data': lookup_data})
-            if sub_obj is None:
-                module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
-            id_list.append(sub_obj['id'])
-        if id_list:
-            association_fields[association] = id_list
+    for relationship in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+        if relationship in related_data:
+            association_fields[relationship] = [item['id'] for item in related_data[relationship]]
 
     # In the case of a new object, the utils need to know it is a node
     new_fields['type'] = 'workflow_job_template_node'
