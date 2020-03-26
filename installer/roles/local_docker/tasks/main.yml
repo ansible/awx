@@ -1,4 +1,10 @@
 ---
+- name: Generate broadcast websocket secret
+  set_fact:
+    broadcast_websocket_secret: "{{ lookup('password', '/dev/null', length=128) }}"
+  run_once: true
+  no_log: true
+
 - name: Check for existing Postgres data
   stat:
     path: "{{ postgres_data_dir }}/pgdata/PG_VERSION"
