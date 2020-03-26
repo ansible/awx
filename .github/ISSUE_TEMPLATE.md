@@ -30,8 +30,9 @@ https://www.ansible.com/security
 
 ##### STEPS TO REPRODUCE
 
-<!-- For bugs, please show exactly how to reproduce the problem. For new
-features, show how the feature would be used.  -->
+<!-- For new features, show how the feature would be used. For bugs, please show
+exactly how to reproduce the problem. Ideally, provide all steps and data needed
+to recreate the bug from a new awx install. -->
 
 ##### EXPECTED RESULTS
 
