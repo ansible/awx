@@ -23,13 +23,13 @@ async function checkOutput(wrapper, expectedLines) {
 async function findScrollButtons(wrapper) {
   const pageControls = await waitForElement(wrapper, 'PageControls');
   const scrollFirstButton = pageControls.find(
-    'button[aria-label="scroll first"]'
+    'button[aria-label="Scroll first"]'
   );
   const scrollLastButton = pageControls.find(
-    'button[aria-label="scroll last"]'
+    'button[aria-label="Scroll last"]'
   );
   const scrollPreviousButton = pageControls.find(
-    'button[aria-label="scroll previous"]'
+    'button[aria-label="Scroll previous"]'
   );
   return {
     scrollFirstButton,

@@ -71,6 +71,7 @@ class UserListItem extends React.Component {
             {user.summary_fields.user_capabilities.edit && (
               <Tooltip content={i18n._(t`Edit User`)} position="top">
                 <Button
+                  aria-label={i18n._(t`Edit User`)}
                   variant="plain"
                   component={Link}
                   to={`/users/${user.id}/edit`}

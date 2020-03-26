@@ -89,6 +89,7 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (
                   <Button
+                    aria-label={i18n._(t`Launch template`)}
                     css="grid-column: 1"
                     variant="plain"
                     onClick={handleLaunch}
@@ -102,6 +103,7 @@ function TemplateListItem({ i18n, template, isSelected, onSelect, detailUrl }) {
           {template.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Template`)} position="top">
               <Button
+                aria-label={i18n._(t`Edit Template`)}
                 css="grid-column: 2"
                 variant="plain"
                 component={Link}

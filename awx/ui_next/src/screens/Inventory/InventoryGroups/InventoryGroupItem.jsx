@@ -54,7 +54,12 @@ function InventoryGroupItem({
         >
           {group.summary_fields.user_capabilities.edit && (
             <Tooltip content={i18n._(t`Edit Group`)} position="top">
-              <Button variant="plain" component={Link} to={editUrl}>
+              <Button
+                aria-label={i18n._(t`Edit Group`)}
+                variant="plain"
+                component={Link}
+                to={editUrl}
+              >
                 <PencilAltIcon />
               </Button>
             </Tooltip>

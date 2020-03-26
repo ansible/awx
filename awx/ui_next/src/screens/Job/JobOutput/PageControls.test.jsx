@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import PageControls from './PageControls';
 
 let wrapper;
@@ -19,12 +19,12 @@ const findChildren = () => {
 
 describe('PageControls', () => {
   test('should render successfully', () => {
-    wrapper = mount(<PageControls />);
+    wrapper = mountWithContexts(<PageControls />);
     expect(wrapper).toHaveLength(1);
   });
 
   test('should render menu control icons', () => {
-    wrapper = mount(<PageControls />);
+    wrapper = mountWithContexts(<PageControls />);
     findChildren();
     expect(PlusIcon.length).toBe(1);
     expect(AngleDoubleUpIcon.length).toBe(1);

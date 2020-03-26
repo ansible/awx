@@ -132,6 +132,7 @@ class ProjectListItem extends React.Component {
                 <ProjectSyncButton projectId={project.id}>
                   {handleSync => (
                     <Button
+                      aria-label={i18n._(t`Sync Project`)}
                       css="grid-column: 1"
                       variant="plain"
                       onClick={handleSync}
@@ -147,6 +148,7 @@ class ProjectListItem extends React.Component {
             {project.summary_fields.user_capabilities.edit ? (
               <Tooltip content={i18n._(t`Edit Project`)} position="top">
                 <Button
+                  aria-label={i18n._(t`Edit Project`)}
                   css="grid-column: 2"
                   variant="plain"
                   component={Link}

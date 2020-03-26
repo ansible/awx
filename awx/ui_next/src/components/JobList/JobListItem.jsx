@@ -81,7 +81,11 @@ function JobListItem({
             <Tooltip content={i18n._(t`Relaunch Job`)} position="top">
               <LaunchButton resource={job}>
                 {({ handleRelaunch }) => (
-                  <Button variant="plain" onClick={handleRelaunch}>
+                  <Button
+                    variant="plain"
+                    onClick={handleRelaunch}
+                    aria-label={i18n._(t`Relaunch`)}
+                  >
                     <RocketIcon />
                   </Button>
                 )}
