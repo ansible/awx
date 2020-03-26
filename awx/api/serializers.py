@@ -2734,7 +2734,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook', 'scm_branch',
                   'forks', 'limit', 'verbosity', 'extra_vars', 'job_tags',
                   'force_handlers', 'skip_tags', 'start_at_task', 'timeout',
-                  'use_fact_cache', 'organization',)
+                  'use_fact_cache', 'organization', 'limit',)
         read_only_fields = ('organization',)
 
     def get_related(self, obj):
