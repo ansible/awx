@@ -28,15 +28,23 @@ options:
         - ID of the job to monitor.
       required: True
       type: int
+    interval:
+      description:
+        - The interval in sections, to request an update from Tower.
+        - For backwards compatability this will assume the value of min or max interval.
+        - Or if both are set it will average the two of them.
+      required: False
+      default: 1
+      type: float
     min_interval:
       description:
         - Minimum interval in seconds, to request an update from Tower.
-      default: 1
+        - depreciated, use interval instead
       type: float
     max_interval:
       description:
         - Maximum interval in seconds, to request an update from Tower.
-      default: 30
+        - depreciated, use interval instead
       type: float
     timeout:
       description:
@@ -114,8 +122,9 @@ def main():
     argument_spec = dict(
         job_id=dict(type='int', required=True),
         timeout=dict(type='int'),
-        min_interval=dict(type='float', default=1),
-        max_interval=dict(type='float', default=30),
+        min_interval=dict(type='float'),
+        max_interval=dict(type='float'),
+        interval=dict(type='float', default=1),
     )
 
     # Create a module for ourselves
@@ -126,6 +135,14 @@ def main():
     timeout = module.params.get('timeout')
     min_interval = module.params.get('min_interval')
     max_interval = module.params.get('max_interval')
+    interval = module.params.get('interval')
+
+    if min_interval is not None or max_interval is not None:
+        interval = abs((module.params.get('min_interval', 1) + module.params.get('max_interval', 30)) / 2)
+        module.deprecate(
+            msg="min and max interval have been depricated, please use interval instead, interval will be set to {0}".format(interval),
+            version="3.7"
+        )
 
     # Attempt to look up job based on the provided id
     job = module.get_one('jobs', **{
@@ -139,48 +156,24 @@ def main():
 
     job_url = job['url']
 
-    # This comes from tower_cli/models/base.py from the old tower-cli
-    interval = min_interval
+    # Grab our start time to compare against for the timeout
     start = time.time()
 
-    # Get the initial job status from Tower, this will exit if there are any issues
+    # Get the initial job status from Tower, this will exit if there are any issues with the HTTP call
     result = check_job(module, job_url)
-
-    last_poll = time.time()
-    timeout_check = 0
 
     # Loop while the job is not yet completed
     while not result['finished']:
-        # Sanity check: Have we officially timed out?
-        # The timeout check is incremented below, so this is checking to see if we were timed out as of
-        # the previous iteration. If we are timed out, abort.
-        if timeout and timeout_check - start > timeout:
+        # If we are past our time out fail with a message
+        if timeout and time.time() - start:
             module.json_output['msg'] = "Monitoring aborted due to timeout"
             module.fail_json(**module.json_output)
 
-        # Put the process to sleep briefly.
-        time.sleep(0.2)
+        # Put the process to sleep for our interval
+        time.sleep(interval)
 
-        # Sanity check: Have we reached our timeout?
-        # If we're about to time out, then we need to ensure that we do one last check.
-        #
-        # Note that the actual timeout will be performed at the start of the **next** iteration,
-        # so there's a chance for the job's completion to be noted first.
-        timeout_check = time.time()
-        if timeout and timeout_check - start > timeout:
-            last_poll -= interval
-
-        # If enough time has elapsed, ask the server for a new status.
-        #
-        # Note that this doesn't actually do a status check every single time; we want the "spinner" to
-        # spin even if we're not actively doing a check.
-        #
-        # So, what happens is that we are "counting down" (actually up) to the next time that we intend
-        # to do a check, and once that time hits, we do the status check as part of the normal cycle.
-        if time.time() - last_poll > interval:
-            result = check_job(module, job_url)
-            last_poll = time.time()
-            interval = min(interval * 1.5, max_interval)
+        # Check the job again
+        result = check_job(module, job_url)
 
     # If the job has failed, we want to raise an Exception for that so we get a non-zero response.
     if result['failed']:

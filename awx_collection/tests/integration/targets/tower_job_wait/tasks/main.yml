@@ -20,6 +20,19 @@
     project: "{{ proj_name }}"
     inventory: "Demo Inventory"
 
+- name: Check deprication warnings
+  tower_job_wait:
+    min_interval: 10
+    max_interval: 20
+    job_id: "99999999"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'deprecations' in result"
+      - "'min and max interval have been depricated, please use interval instead, interval will be set to 15' in result['deprecations'][0]['msg']"
+
 - name: Check module fails with correct msg
   tower_job_wait:
     job_id: "99999999"
@@ -98,6 +111,10 @@
 - name: Delete the job template
   tower_job_template:
     name: "{{ jt_name }}"
+    playbook: "sleep.yml"
+    job_type: run
+    project: "{{ proj_name }}"
+    inventory: "Demo Inventory"
     state: absent
 
 - name: Delete the project
