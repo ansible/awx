@@ -18,7 +18,7 @@ def test_job_wait_successful(run_module, admin_user):
     assert result.pop('started', '')[:10] == str(job.started)[:10]
     assert result == {
         "status": "successful",
-        "success": True,
+        "changed": False,
         "elapsed": str(job.elapsed),
         "id": job.id
     }
@@ -36,10 +36,10 @@ def test_job_wait_failed(run_module, admin_user):
     assert result == {
         "status": "failed",
         "failed": True,
-        "success": False,
+        "changed": False,
         "elapsed": str(job.elapsed),
         "id": job.id,
-        "msg": "Job with id=1 failed, error: Job failed."
+        "msg": "Job with id 1 failed"
     }
 
 
@@ -50,7 +50,6 @@ def test_job_wait_not_found(run_module, admin_user):
     ), admin_user)
     result.pop('invocation', None)
     assert result == {
-        "changed": False,
         "failed": True,
-        "msg": "Unable to wait, no job_id 42 found: The requested object could not be found."
+        "msg": "Unable to wait on job 42; that ID does not exist in Tower."
     }

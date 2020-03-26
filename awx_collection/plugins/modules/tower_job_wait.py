@@ -31,8 +31,7 @@ options:
     interval:
       description:
         - The interval in sections, to request an update from Tower.
-        - For backwards compatability this will assume the value of min or max interval.
-        - Or if both are set it will average the two of them.
+        - For backwards compatability if unset this will be set to the average of min and max intervals
       required: False
       default: 1
       type: float
@@ -138,7 +137,10 @@ def main():
     interval = module.params.get('interval')
 
     if min_interval is not None or max_interval is not None:
-        interval = abs((module.params.get('min_interval', 1) + module.params.get('max_interval', 30)) / 2)
+        # We can't tell if we got the default or if someone actually set this to 1.
+        # For now if we find 1 and had a min or max then we will do the average logic.
+        if interval == 1:
+            interval = abs((module.params.get('min_interval', 1) + module.params.get('max_interval', 30)) / 2)
         module.deprecate(
             msg="min and max interval have been depricated, please use interval instead, interval will be set to {0}".format(interval),
             version="3.7"
@@ -152,7 +154,7 @@ def main():
     })
 
     if job is None:
-        module.fail_json(msg='Unable to wait, on job {0} that ID does not exist in Tower.'.format(job_id))
+        module.fail_json(msg='Unable to wait on job {0}; that ID does not exist in Tower.'.format(job_id))
 
     job_url = job['url']
 

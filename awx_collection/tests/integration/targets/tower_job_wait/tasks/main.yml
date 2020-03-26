@@ -33,6 +33,20 @@
       - "'deprecations' in result"
       - "'min and max interval have been depricated, please use interval instead, interval will be set to 15' in result['deprecations'][0]['msg']"
 
+- name: Validate that interval superceeds min/max
+  tower_job_wait:
+    min_interval: 10
+    max_interval: 20
+    interval: 12
+    job_id: "99999999"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'deprecations' in result"
+      - "'min and max interval have been depricated, please use interval instead, interval will be set to 12' in result['deprecations'][0]['msg']"
+
 - name: Check module fails with correct msg
   tower_job_wait:
     job_id: "99999999"
@@ -78,7 +92,7 @@
   tower_job_wait:
     job_id: "{{ job.id }}"
     timeout: 5
-  ignore_errors: True
+  ignore_errors: true
   register: wait_results
 
 # Make sure that we failed and that we have some data in our results
@@ -98,7 +112,7 @@
   tower_job_wait:
     job_id: "{{ job.id }}"
   register: wait_results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
