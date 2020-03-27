@@ -183,6 +183,9 @@ function SurveyQuestionForm({
                   type="textarea"
                   label={i18n._(t`Multiple Choice Options`)}
                   validate={required(null, i18n)}
+                  tooltip={i18n._(
+                    t`Each answer choice must be on a separate line.`
+                  )}
                   isRequired
                 />
                 <FormField

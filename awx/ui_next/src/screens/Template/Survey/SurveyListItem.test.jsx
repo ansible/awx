@@ -25,6 +25,18 @@ describe('<SurveyListItem />', () => {
     const moveDown = wrapper.find('Button[aria-label="move down"]');
     expect(moveUp.length).toBe(1);
     expect(moveDown.length).toBe(1);
+    expect(
+      wrapper
+        .find('b')
+        .at(0)
+        .text()
+    ).toBe('Type:');
+    expect(
+      wrapper
+        .find('b')
+        .at(1)
+        .text()
+    ).toBe('Default:');
     expect(wrapper.find('DataListCheck').length).toBe(1);
     expect(wrapper.find('DataListCell').length).toBe(3);
   });
@@ -43,5 +55,86 @@ describe('<SurveyListItem />', () => {
       .prop('isDisabled');
     expect(moveUp).toBe(true);
     expect(moveDown).toBe(true);
+  });
+  test('required item has required asterisk', () => {
+    const newItem = {
+      question_name: 'Foo',
+      default: 'Bar',
+      type: 'text',
+      id: 1,
+      required: true,
+    };
+
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem question={newItem} isChecked={false} isFirst isLast />
+      );
+    });
+    expect(wrapper.find('span[aria-label="Required"]').length).toBe(1);
+  });
+  test('items that are not required should not have an asterisk', () => {
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem question={item} isChecked={false} isFirst isLast />
+      );
+    });
+    expect(wrapper.find('span[aria-label="Required"]').length).toBe(0);
+  });
+  test('required item has required asterisk', () => {
+    const newItem = {
+      question_name: 'Foo',
+      default: 'a\nd\nb\ne\nf\ng\nh\ni\nk',
+      type: 'multiselect',
+      id: 1,
+    };
+
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem question={newItem} isChecked={false} isFirst isLast />
+      );
+    });
+    expect(wrapper.find('Chip').length).toBe(9);
+    wrapper
+      .find('Chip')
+      .map(chip => expect(chip.prop('isReadOnly')).toBe(true));
+  });
+  test('items that are no required should have no an asterisk', () => {
+    const newItem = {
+      question_name: 'Foo',
+      default: '$encrypted$',
+      type: 'password',
+      id: 1,
+    };
+
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem question={newItem} isChecked={false} isFirst isLast />
+      );
+    });
+    expect(wrapper.find('span').text()).toBe('ENCRYPTED');
+  });
+  test('users without edit/delete permissions are unable to reorder the questions', () => {
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyListItem
+          question={item}
+          canAddAndDelete={false}
+          isChecked={false}
+          isFirst
+          isLast
+        />
+      );
+    });
+    expect(wrapper.find('button[aria-label="move up"]').prop('disabled')).toBe(
+      true
+    );
+    expect(
+      wrapper.find('button[aria-label="move down"]').prop('disabled')
+    ).toBe(true);
   });
 });

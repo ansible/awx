@@ -116,6 +116,9 @@ class WorkflowJobTemplate extends Component {
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
     const canToggleNotifications = isNotifAdmin;
+    const canAddAndEditSurvey =
+      template?.summary_fields?.user_capabilities.edit ||
+      template?.summary_fields?.user_capabilities.delete;
 
     const tabsArray = [
       { name: i18n._(t`Details`), link: `${match.url}/details` },
@@ -145,7 +148,7 @@ class WorkflowJobTemplate extends Component {
       link: `${match.url}/completed_jobs`,
     });
     tabsArray.push({
-      name: i18n._(t`Survey`),
+      name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
       link: `${match.url}/survey`,
     });
 
@@ -269,7 +272,10 @@ class WorkflowJobTemplate extends Component {
             )}
             {template && (
               <Route path="/templates/:templateType/:id/survey">
-                <TemplateSurvey template={template} />
+                <TemplateSurvey
+                  template={template}
+                  canAddAndEditSurvey={canAddAndEditSurvey}
+                />
               </Route>
             )}
             <Route key="not-found" path="*">

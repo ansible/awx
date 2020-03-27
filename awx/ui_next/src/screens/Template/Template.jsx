@@ -71,6 +71,9 @@ function Template({ i18n, me, setBreadcrumb }) {
   };
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+  const canAddAndEditSurvey =
+    template?.summary_fields?.user_capabilities.edit ||
+    template?.summary_fields?.user_capabilities.delete;
 
   const tabsArray = [
     { name: i18n._(t`Details`), link: `${match.url}/details` },
@@ -97,7 +100,7 @@ function Template({ i18n, me, setBreadcrumb }) {
       link: `${match.url}/completed_jobs`,
     },
     {
-      name: i18n._(t`Survey`),
+      name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
       link: `${match.url}/survey`,
     }
   );
@@ -200,7 +203,10 @@ function Template({ i18n, me, setBreadcrumb }) {
           )}
           {template && (
             <Route path="/templates/:templateType/:id/survey">
-              <TemplateSurvey template={template} />
+              <TemplateSurvey
+                template={template}
+                canAddAndEditSurvey={canAddAndEditSurvey}
+              />
             </Route>
           )}
           {!hasRolesandTemplateLoading && (
