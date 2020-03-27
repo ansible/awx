@@ -101,7 +101,6 @@ class AWXConsumerBase(object):
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
-        self.worker.on_start()
 
         # Child should implement other things here
 
@@ -115,6 +114,7 @@ class AWXConsumerBase(object):
 class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
+        self.worker.on_start()
 
         queue = redis.Redis.from_url(settings.BROKER_URL)
         while True:
@@ -130,12 +130,16 @@ class AWXConsumerPG(AWXConsumerBase):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
         logger.warn(f"Running worker {self.name} listening to queues {self.queues}")
+        init = False
 
         while True:
             try:
                 with pg_bus_conn() as conn:
                     for queue in self.queues:
                         conn.listen(queue)
+                    if init is False:
+                        self.worker.on_start()
+                        init = True
                     for e in conn.events():
                         self.process_task(json.loads(e.payload))
                     if self.should_stop:
