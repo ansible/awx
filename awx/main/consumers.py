@@ -170,11 +170,9 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                                 continue
                         new_groups.add(name)
                 else:
-                    if group_name == settings.BROADCAST_WEBSOCKET_GROUP_NAME:
-                        logger.warn("Non-priveleged client asked to join broadcast group!")
-                        return
-
-                    new_groups.add(group_name)
+                    await self.send_json({"error": "access denied to channel"})
+                    logger.error(f"groups must be a list, not {groups}")
+                    return
 
             old_groups = current_groups - new_groups
             for group_name in old_groups:
