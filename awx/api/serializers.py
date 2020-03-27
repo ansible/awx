@@ -2900,6 +2900,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
         if obj.organization_id:
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization_id})
+        if obj.webhook_credential_id:
+            res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
         return res
 
     def validate(self, attrs):
@@ -3390,6 +3392,8 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
         )
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
+        if obj.webhook_credential_id:
+            res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
         return res
 
     def validate_extra_vars(self, value):
