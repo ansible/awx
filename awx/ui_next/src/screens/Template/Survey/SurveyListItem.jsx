@@ -39,7 +39,10 @@ function SurveyListItem({
   onMoveDown,
 }) {
   return (
-    <DataListItem aria-labelledby={i18n._(t`Survey questions`)}>
+    <DataListItem
+      aria-labelledby={i18n._(t`Survey questions`)}
+      id={`survey-list-item-${question.variable}`}
+    >
       <DataListItemRow css="padding-left:16px">
         <DataListAction
           id="sortQuestions"
