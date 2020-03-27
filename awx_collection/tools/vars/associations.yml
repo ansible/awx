@@ -1,0 +1,13 @@
+---
+associations:
+  job_templates:
+    - related_item: credentials
+      endpoint: credentials
+      description: "The credentials used by this job template"
+  groups:
+    - related_item: hosts
+      endpoint: hosts
+      description: "The hosts associated with this group"
+    - related_item: groups
+      endpoint: children
+      description: "The hosts associated with this group"
