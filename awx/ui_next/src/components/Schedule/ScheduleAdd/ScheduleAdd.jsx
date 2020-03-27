@@ -26,112 +26,114 @@ function ScheduleAdd({ i18n, createSchedule }) {
   const { pathname } = location;
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
+  const buildRuleObj = values => {
+    const [startDate, startTime] = values.startDateTime.split('T');
+    // Dates are formatted like "YYYY-MM-DD"
+    const [startYear, startMonth, startDay] = startDate.split('-');
+    // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
+    // have been specified
+    const [startHour = 0, startMinute = 0, startSecond = 0] = startTime.split(
+      ':'
+    );
+
+    const ruleObj = {
+      interval: values.interval,
+      dtstart: new Date(
+        Date.UTC(
+          startYear,
+          parseInt(startMonth, 10) - 1,
+          startDay,
+          startHour,
+          startMinute,
+          startSecond
+        )
+      ),
+      tzid: values.timezone,
+    };
+
+    switch (values.frequency) {
+      case 'none':
+        ruleObj.count = 1;
+        ruleObj.freq = RRule.MINUTELY;
+        break;
+      case 'minute':
+        ruleObj.freq = RRule.MINUTELY;
+        break;
+      case 'hour':
+        ruleObj.freq = RRule.HOURLY;
+        break;
+      case 'day':
+        ruleObj.freq = RRule.DAILY;
+        break;
+      case 'week':
+        ruleObj.freq = RRule.WEEKLY;
+        ruleObj.byweekday = values.daysOfWeek.map(day => RRule[day]);
+        break;
+      case 'month':
+        ruleObj.freq = RRule.MONTHLY;
+        if (values.runOn === 'number') {
+          ruleObj.bymonthday = startDay;
+        } else if (values.runOn === 'day') {
+          ruleObj.byweekday =
+            RRule[days[new Date(values.startDateTime).getDay()]];
+          ruleObj.bysetpos = getWeekNumber(values.startDateTime);
+        } else if (values.runOn === 'lastDay') {
+          ruleObj.byweekday =
+            RRule[days[new Date(values.startDateTime).getDay()]];
+          ruleObj.bysetpos = -1;
+        }
+        break;
+      case 'year':
+        ruleObj.freq = RRule.YEARLY;
+        ruleObj.bymonth = new Date(values.startDateTime).getMonth() + 1;
+        if (values.runOn === 'number') {
+          ruleObj.bymonthday = startDay;
+        } else if (values.runOn === 'day') {
+          ruleObj.byweekday =
+            RRule[days[new Date(values.startDateTime).getDay()]];
+          ruleObj.bysetpos = getWeekNumber(values.startDateTime);
+        } else if (values.runOn === 'lastDay') {
+          ruleObj.byweekday =
+            RRule[days[new Date(values.startDateTime).getDay()]];
+          ruleObj.bysetpos = -1;
+        }
+        break;
+      default:
+        throw new Error(i18n._(t`Frequency did not match an expected value`));
+    }
+
+    switch (values.end) {
+      case 'never':
+        break;
+      case 'after':
+        ruleObj.count = values.occurrences;
+        break;
+      case 'onDate': {
+        const [endDate, endTime] = values.endDateTime.split('T');
+        const [endYear, endMonth, endDay] = endDate.split('-');
+        const [endHour = 0, endMinute = 0, endSecond = 0] = endTime.split(':');
+        ruleObj.until = new Date(
+          Date.UTC(
+            endYear,
+            parseInt(endMonth, 10) - 1,
+            endDay,
+            endHour,
+            endMinute,
+            endSecond
+          )
+        );
+        break;
+      }
+      default:
+        throw new Error(i18n._(t`End did not match an expected value`));
+    }
+
+    return ruleObj;
+  };
+
   const handleSubmit = async values => {
     try {
-      const [startDate, startTime] = values.startDateTime.split('T');
-      // Dates are formatted like "YYYY-MM-DD"
-      const [startYear, startMonth, startDay] = startDate.split('-');
-      // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
-      // have been specified
-      const [startHour = 0, startMinute = 0, startSecond = 0] = startTime.split(
-        ':'
-      );
-
-      const ruleObj = {
-        interval: values.interval,
-        dtstart: new Date(
-          Date.UTC(
-            startYear,
-            parseInt(startMonth, 10) - 1,
-            startDay,
-            startHour,
-            startMinute,
-            startSecond
-          )
-        ),
-        tzid: values.timezone,
-      };
-
-      switch (values.frequency) {
-        case 'none':
-          ruleObj.count = 1;
-          ruleObj.freq = RRule.MINUTELY;
-          break;
-        case 'minute':
-          ruleObj.freq = RRule.MINUTELY;
-          break;
-        case 'hour':
-          ruleObj.freq = RRule.HOURLY;
-          break;
-        case 'day':
-          ruleObj.freq = RRule.DAILY;
-          break;
-        case 'week':
-          ruleObj.freq = RRule.WEEKLY;
-          ruleObj.byweekday = values.daysOfWeek.map(day => RRule[day]);
-          break;
-        case 'month':
-          ruleObj.freq = RRule.MONTHLY;
-          if (values.runOn === 'number') {
-            ruleObj.bymonthday = startDay;
-          } else if (values.runOn === 'day') {
-            ruleObj.byweekday =
-              RRule[days[new Date(values.startDateTime).getDay()]];
-            ruleObj.bysetpos = getWeekNumber(values.startDateTime);
-          } else if (values.runOn === 'lastDay') {
-            ruleObj.byweekday =
-              RRule[days[new Date(values.startDateTime).getDay()]];
-            ruleObj.bysetpos = -1;
-          }
-          break;
-        case 'year':
-          ruleObj.freq = RRule.YEARLY;
-          ruleObj.bymonth = new Date(values.startDateTime).getMonth() + 1;
-          if (values.runOn === 'number') {
-            ruleObj.bymonthday = startDay;
-          } else if (values.runOn === 'day') {
-            ruleObj.byweekday =
-              RRule[days[new Date(values.startDateTime).getDay()]];
-            ruleObj.bysetpos = getWeekNumber(values.startDateTime);
-          } else if (values.runOn === 'lastDay') {
-            ruleObj.byweekday =
-              RRule[days[new Date(values.startDateTime).getDay()]];
-            ruleObj.bysetpos = -1;
-          }
-          break;
-        default:
-          throw new Error(i18n._(t`Frequency did not match an expected value`));
-      }
-
-      switch (values.end) {
-        case 'never':
-          break;
-        case 'after':
-          ruleObj.count = values.occurrences;
-          break;
-        case 'onDate': {
-          const [endDate, endTime] = values.endDateTime.split('T');
-          const [endYear, endMonth, endDay] = endDate.split('-');
-          const [endHour = 0, endMinute = 0, endSecond = 0] = endTime.split(
-            ':'
-          );
-          ruleObj.until = new Date(
-            Date.UTC(
-              endYear,
-              parseInt(endMonth, 10) - 1,
-              endDay,
-              endHour,
-              endMinute,
-              endSecond
-            )
-          );
-          break;
-        }
-        default:
-          throw new Error(i18n._(t`End did not match an expected value`));
-      }
-
-      const rule = new RRule(ruleObj);
+      const rule = new RRule(buildRuleObj(values));
       const {
         data: { id: scheduleId },
       } = await createSchedule({
