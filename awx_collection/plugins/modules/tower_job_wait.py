@@ -171,7 +171,7 @@ def main():
     # Loop while the job is not yet completed
     while not result['finished']:
         # If we are past our time out fail with a message
-        if timeout and time.time() - start:
+        if timeout and timeout < time.time() - start:
             module.json_output['msg'] = "Monitoring aborted due to timeout"
             module.fail_json(**module.json_output)
 
