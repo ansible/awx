@@ -161,14 +161,14 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         $scope.formSave = function() {
             if (user_obj.is_superuser === true && $scope.is_superuser === false ) {
                 var action = function() {
-                $('#prompt-modal').modal('hide');
-                $rootScope.flashMessage = null;
+                    $('#prompt-modal').modal('hide');
+                    $rootScope.flashMessage = null;
                     if ($scope[form.name + '_form'].$valid) {
                         Rest.setUrl(defaultUrl + '/');
                         var data = processNewData(form.fields);
                         Rest.put(data).then(() => {
                             $state.go($state.current, null, { reload: true });
-                            })
+                        })
                             .catch(({data, status}) => {
                                 ProcessErrors($scope, data, status, null, {
                                     hdr: i18n._('Error!'),
@@ -184,19 +184,19 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     actionText: i18n._('SAVE')
                 });
             } else {
-                    if ($scope[form.name + '_form'].$valid) {
-                        Rest.setUrl(defaultUrl + '/');
-                        var data = processNewData(form.fields);
-                        Rest.put(data).then(() => {
-                            $state.go($state.current, null, { reload: true });
-                            })
-                            .catch(({data, status}) => {
-                                ProcessErrors($scope, data, status, null, {
-                                    hdr: i18n._('Error!'),
-                                    msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
-                                });
+                if ($scope[form.name + '_form'].$valid) {
+                    Rest.setUrl(defaultUrl + '/');
+                    var data = processNewData(form.fields);
+                    Rest.put(data).then(() => {
+                        $state.go($state.current, null, { reload: true });
+                    })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: i18n._('Error!'),
+                                msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
                             });
-                    }
+                        });
+                }
             }
         };
 
