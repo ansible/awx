@@ -127,7 +127,11 @@ const OutputToolbar = ({ i18n, job, onDelete }) => {
           <Tooltip content={i18n._(t`Relaunch Job`)}>
             <LaunchButton resource={job} aria-label={i18n._(t`Relaunch`)}>
               {({ handleRelaunch }) => (
-                <Button variant="plain" onClick={handleRelaunch}>
+                <Button
+                  variant="plain"
+                  onClick={handleRelaunch}
+                  aria-label={i18n._(t`Relaunch`)}
+                >
                   <RocketIcon />
                 </Button>
               )}
@@ -138,7 +142,7 @@ const OutputToolbar = ({ i18n, job, onDelete }) => {
       {job.related?.stdout && (
         <Tooltip content={i18n._(t`Download Output`)}>
           <a href={`${job.related.stdout}?format=txt_download`}>
-            <Button variant="plain">
+            <Button variant="plain" aria-label={i18n._(t`Download Output`)}>
               <DownloadIcon />
             </Button>
           </a>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { Button as PFButton } from '@patternfly/react-core';
 import {
   PlusIcon,
@@ -22,32 +24,49 @@ const Button = styled(PFButton)`
 `;
 
 const PageControls = ({
+  i18n,
   onScrollFirst,
   onScrollLast,
   onScrollNext,
   onScrollPrevious,
 }) => (
   <Wrapper>
-    <Button variant="plain" css="margin-right: auto">
+    <Button
+      aria-label={i18n._(t`Toggle expand/collapse event lines`)}
+      variant="plain"
+      css="margin-right: auto"
+    >
       <PlusIcon />
     </Button>
     <Button
-      aria-label="scroll previous"
+      aria-label={i18n._(t`Scroll previous`)}
       onClick={onScrollPrevious}
       variant="plain"
     >
       <AngleUpIcon />
     </Button>
-    <Button aria-label="scroll next" onClick={onScrollNext} variant="plain">
+    <Button
+      aria-label={i18n._(t`Scroll next`)}
+      onClick={onScrollNext}
+      variant="plain"
+    >
       <AngleDownIcon />
     </Button>
-    <Button aria-label="scroll first" onClick={onScrollFirst} variant="plain">
+    <Button
+      aria-label={i18n._(t`Scroll first`)}
+      onClick={onScrollFirst}
+      variant="plain"
+    >
       <AngleDoubleUpIcon />
     </Button>
-    <Button aria-label="scroll last" onClick={onScrollLast} variant="plain">
+    <Button
+      aria-label={i18n._(t`Scroll last`)}
+      onClick={onScrollLast}
+      variant="plain"
+    >
       <AngleDoubleDownIcon />
     </Button>
   </Wrapper>
 );
 
-export default PageControls;
+export default withI18n()(PageControls);

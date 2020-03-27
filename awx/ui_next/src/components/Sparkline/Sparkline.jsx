@@ -38,7 +38,10 @@ const Sparkline = ({ i18n, jobs }) => {
 
   const statusIcons = jobs.map(job => (
     <Tooltip position="top" content={generateTooltip(job)} key={job.id}>
-      <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
+      <Link
+        aria-label={i18n._(t`View job ${job.id}`)}
+        to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}
+      >
         <StatusIcon status={job.status} />
       </Link>
     </Tooltip>

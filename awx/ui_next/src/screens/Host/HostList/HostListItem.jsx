@@ -81,6 +81,7 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
           {host.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Host`)} position="top">
               <Button
+                aria-label={i18n._(t`Edit Host`)}
                 variant="plain"
                 component={Link}
                 to={`/hosts/${host.id}/edit`}

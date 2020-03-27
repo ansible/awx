@@ -107,6 +107,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
               {schedule.summary_fields.user_capabilities.edit ? (
                 <Tooltip content={i18n._(t`Edit Schedule`)} position="top">
                   <Button
+                    aria-label={i18n._(t`Edit Schedule`)}
                     css="grid-column: 2"
                     variant="plain"
                     component={Link}

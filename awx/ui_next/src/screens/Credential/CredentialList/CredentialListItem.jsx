@@ -68,6 +68,7 @@ function CredentialListItem({
           {canEdit ? (
             <Tooltip content={i18n._(t`Edit Credential`)} position="top">
               <Button
+                aria-label={i18n._(t`Edit Credential`)}
                 variant="plain"
                 component={Link}
                 to={`/credentials/${credential.id}/edit`}

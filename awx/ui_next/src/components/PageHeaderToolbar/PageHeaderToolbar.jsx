@@ -72,7 +72,10 @@ class PageHeaderToolbar extends Component {
                 position={DropdownPosition.right}
                 onSelect={this.handleHelpSelect}
                 toggle={
-                  <DropdownToggle onToggle={this.handleHelpToggle}>
+                  <DropdownToggle
+                    onToggle={this.handleHelpToggle}
+                    aria-label={i18n._(t`Info`)}
+                  >
                     <QuestionCircleIcon />
                   </DropdownToggle>
                 }

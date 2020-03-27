@@ -72,6 +72,7 @@ class InventoryListItem extends React.Component {
             {inventory.summary_fields.user_capabilities.edit ? (
               <Tooltip content={i18n._(t`Edit Inventory`)} position="top">
                 <Button
+                  aria-label={i18n._(t`Edit Inventory`)}
                   variant="plain"
                   component={Link}
                   to={`/inventories/${
