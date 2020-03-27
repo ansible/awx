@@ -142,6 +142,17 @@ class AddResourceRole extends React.Component {
     } = this.state;
     const { onClose, roles, i18n } = this.props;
 
+    // Object roles can be user only, so we remove them when
+    // showing role choices for team access
+    const selectableRoles = { ...roles };
+    if (selectedResource === 'teams') {
+      Object.keys(roles).forEach(key => {
+        if (selectableRoles[key].user_only) {
+          delete selectableRoles[key];
+        }
+      });
+    }
+
     const userSearchColumns = [
       {
         name: i18n._(t`Username`),
@@ -274,7 +285,7 @@ class AddResourceRole extends React.Component {
         component: (
           <SelectRoleStep
             onRolesClick={this.handleRoleCheckboxClick}
-            roles={roles}
+            roles={selectableRoles}
             selectedListKey={selectedResource === 'users' ? 'username' : 'name'}
             selectedListLabel={i18n._(t`Selected`)}
             selectedResourceRows={selectedResourceRows}
