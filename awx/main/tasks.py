@@ -692,7 +692,7 @@ def migrate_legacy_event_data(tblname):
     with advisory_lock(f'bigint_migration_{tblname}', wait=False) as acquired:
         if acquired is False:
             return
-        chunk = 1000000
+        chunk = settings.JOB_EVENT_MIGRATION_CHUNK_SIZE
 
         def _remaining():
             try:

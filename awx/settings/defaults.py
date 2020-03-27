@@ -197,6 +197,9 @@ JOB_EVENT_WORKERS = 4
 # The maximum size of the job event worker queue before requests are blocked
 JOB_EVENT_MAX_QUEUE_SIZE = 10000
 
+# The number of job events to migrate per-transaction when moving from int -> bigint
+JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
