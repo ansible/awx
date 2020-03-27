@@ -6,6 +6,7 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.models import Instance, InstanceGroup
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 
 class InstanceNotFound(Exception):
@@ -97,26 +98,27 @@ class Command(BaseCommand):
         if options.get('hostnames'):
             hostname_list = options.get('hostnames').split(",")
 
-        with advisory_lock('instance_group_registration'):
-            changed2 = False
-            changed3 = False
-            (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
-            if created:
-                print("Creating instance group {}".format(ig.name))
-            elif not created:
-                print("Instance Group already registered {}".format(ig.name))
+        with advisory_lock('cluster_policy_lock'):
+            with transaction.atomic():
+                changed2 = False
+                changed3 = False
+                (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
+                if created:
+                    print("Creating instance group {}".format(ig.name))
+                elif not created:
+                    print("Instance Group already registered {}".format(ig.name))
 
-            if ctrl:
-                (ig_ctrl, changed2) = self.update_instance_group_controller(ig, ctrl)
-                if changed2:
-                    print("Set controller group {} on {}.".format(ctrl, queuename))
+                if ctrl:
+                    (ig_ctrl, changed2) = self.update_instance_group_controller(ig, ctrl)
+                    if changed2:
+                        print("Set controller group {} on {}.".format(ctrl, queuename))
 
-            try:
-                (instances, changed3) = self.add_instances_to_group(ig, hostname_list)
-                for i in instances:
-                    print("Added instance {} to {}".format(i.hostname, ig.name))
-            except InstanceNotFound as e:
-                instance_not_found_err = e
+                try:
+                    (instances, changed3) = self.add_instances_to_group(ig, hostname_list)
+                    for i in instances:
+                        print("Added instance {} to {}".format(i.hostname, ig.name))
+                except InstanceNotFound as e:
+                    instance_not_found_err = e
 
         if any([changed1, changed2, changed3]):
             print('(changed: True)')
