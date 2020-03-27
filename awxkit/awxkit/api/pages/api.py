@@ -31,6 +31,7 @@ EXPORTABLE_DEPENDENT_OBJECTS = [
     'Labels',
     'SurveySpec',
     'WorkflowJobTemplateNodes',
+    'Schedules',
 ]
 
 
@@ -51,6 +52,7 @@ NATURAL_KEYS = {
     'notification_template': ('organization', 'name'),
     'label': ('organization', 'name'),  # FIXME: label will need to be fully constructed from this
     'workflow_job_template_node': ('workflow_job_template', 'identifier'),
+    'schedule': ('unified_job_template', 'name'),
 }
 
 
