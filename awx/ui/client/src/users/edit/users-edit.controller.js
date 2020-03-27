@@ -159,11 +159,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         };
 
         $scope.formSave = function() {
-                alert(user_obj.is_superuser);
-                console.log(user_obj.is_superuser);
-                alert($scope.is_superuser);
-                console.log($scope.is_superuser);
-                if (user_obj.is_superuser === true && $scope.is_superuser === false ) {
+            if (user_obj.is_superuser === true && $scope.is_superuser === false ) {
                 var action = function() {
                 $('#prompt-modal').modal('hide');
                 $rootScope.flashMessage = null;
