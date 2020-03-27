@@ -145,7 +145,7 @@ class LaunchButton extends React.Component {
 
   render() {
     const { launchError, showLaunchPrompt, launchConfig } = this.state;
-    const { i18n, children } = this.props;
+    const { resource, i18n, children } = this.props;
     return (
       <Fragment>
         {children({
@@ -166,6 +166,7 @@ class LaunchButton extends React.Component {
         {showLaunchPrompt && (
           <LaunchPrompt
             config={launchConfig}
+            resource={resource}
             onCancel={() => this.setState({ showLaunchPrompt: false })}
           />
         )}

@@ -18,7 +18,7 @@ const QS_CONFIG = getQSConfig('inventory', {
 
 function InventoryStep({ i18n }) {
   const history = useHistory();
-  const [field, meta, helpers] = useField('inventory');
+  const [field, , helpers] = useField('inventory');
 
   const {
     isLoading,
@@ -29,9 +29,6 @@ function InventoryStep({ i18n }) {
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const { data } = await InventoriesAPI.read(params);
-      if (!field.value && data.results.length) {
-        helpers.setValue(data.results[0]);
-      }
       return {
         inventories: data.results,
         count: data.count,

@@ -1,7 +1,7 @@
 import React from 'react';
 
-function InventoryStep() {
+function CredentialsStep() {
   return <div />;
 }
 
-export default InventoryStep;
+export default CredentialsStep;

@@ -1,7 +1,7 @@
 import React from 'react';
 
-function InventoryStep() {
-  return <div />;
+function PreviewStep() {
+  return <div>Preview of selected values will appear here</div>;
 }
 
-export default InventoryStep;
+export default PreviewStep;

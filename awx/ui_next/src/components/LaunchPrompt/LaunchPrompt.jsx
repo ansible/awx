@@ -9,7 +9,7 @@ import OtherPromptsStep from './OtherPromptsStep';
 import SurveyStep from './SurveyStep';
 import PreviewStep from './PreviewStep';
 
-function LaunchPrompt({ config, onCancel, i18n }) {
+function LaunchPrompt({ config, resource, onCancel, i18n }) {
   // CONFIG
   // can_start_without_user_input: false
   // passwords_needed_to_start: []
@@ -28,11 +28,12 @@ function LaunchPrompt({ config, onCancel, i18n }) {
   // credential_needed_to_start: false
   // inventory_needed_to_start: false
   // job_template_data: {name: "JT with prompts", id: 25, description: ""
+  // defaults: {} ??
 
   const steps = [];
   const initialValues = {};
   if (config.ask_inventory_on_launch) {
-    initialValues.inventory = null;
+    initialValues.inventory = resource?.summary_fields?.inventory || null;
     steps.push({
       name: i18n._(t`Inventory`),
       component: <InventoryStep />,
@@ -47,7 +48,7 @@ function LaunchPrompt({ config, onCancel, i18n }) {
   //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_password')
   // ) {
   if (config.ask_credential_on_launch) {
-    initialValues.credentials = [];
+    initialValues.credentials = resource?.summary_fields?.credentials || [];
     steps.push({
       name: i18n._(t`Credential`),
       component: <CredentialsStep />,
