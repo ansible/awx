@@ -99,7 +99,7 @@ export default ['i18n', function(i18n) {
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
-                    ngDisabled: 'user_obj.id == 1 || !(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
             },
 
