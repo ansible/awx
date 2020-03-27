@@ -140,7 +140,11 @@ def main():
         # We can't tell if we got the default or if someone actually set this to 1.
         # For now if we find 1 and had a min or max then we will do the average logic.
         if interval == 1:
-            interval = abs((module.params.get('min_interval', 1) + module.params.get('max_interval', 30)) / 2)
+            if not min_interval:
+                min_interval = 1
+            if not max_interval:
+                max_interval = 30
+            interval = abs((min_interval + max_interval) / 2)
         module.deprecate(
             msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
             version="3.7"
