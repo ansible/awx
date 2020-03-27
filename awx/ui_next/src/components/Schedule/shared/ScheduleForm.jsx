@@ -121,6 +121,13 @@ function ScheduleForm({
   submitError,
   ...rest
 }) {
+  const now = new Date();
+  const closestQuarterHour = new Date(
+    Math.ceil(now.getTime() / 900000) * 900000
+  );
+  const tomorrow = new Date(closestQuarterHour);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
   const {
     request: loadZoneInfo,
     error: contentError,
@@ -154,12 +161,6 @@ function ScheduleForm({
   return (
     <Config>
       {() => {
-        const now = new Date();
-        const closestQuarterHour = new Date(
-          Math.ceil(now.getTime() / 900000) * 900000
-        );
-        const tomorrow = new Date(closestQuarterHour);
-        tomorrow.setDate(tomorrow.getDate() + 1);
         return (
           <Formik
             initialValues={{
