@@ -102,8 +102,9 @@ class ApiV2(base.Base):
             return None
 
         try:
+            # Note: doing asset[key] automatically parses json blob strings, which can be a problem.
             fields = {
-                key: asset[key] for key in options
+                key: asset.json[key] for key in options
                 if key in asset.json and key not in asset.related
             }
             fields['natural_key'] = get_natural_key(asset)
