@@ -24,6 +24,10 @@ EXPORTABLE_RESOURCES = [
 EXPORTABLE_RELATIONS = [
     'Roles',
     'NotificationTemplates',
+]
+
+
+EXPORTABLE_DEPENDENT_OBJECTS = [
     'Labels',
     'SurveySpec',
     'WorkflowJobTemplateNodes',
@@ -105,7 +109,7 @@ class ApiV2(base.Base):
             # Note: doing asset[key] automatically parses json blob strings, which can be a problem.
             fields = {
                 key: asset.json[key] for key in options
-                if key in asset.json and key not in asset.related
+                if key in asset.json and key not in asset.related and key != 'id'
             }
             fields['natural_key'] = get_natural_key(asset)
 
@@ -115,19 +119,29 @@ class ApiV2(base.Base):
             }
 
             related = {}
-            for k, related_endpoint in asset.related.items():
-                if not related_endpoint:
+            for key, related_endpoint in asset.related.items():
+                if key in asset.json or not related_endpoint:
                     continue
-                if k == 'object_roles':
+                if key == 'object_roles':
                     continue
                 rel = related_endpoint._create()
-                if rel.__class__.__name__ not in EXPORTABLE_RELATIONS:
+
+                if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
+                    by_natural_key = True
+                elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
+                    by_natural_key = False
+                else:
                     continue
+
                 data = related_endpoint.get(all_pages=True)
                 if 'results' in data:
-                    related[k] = [get_natural_key(x) for x in data.results]
+                    related_options = self._get_options(related_endpoint)
+                    related[key] = [
+                        get_natural_key(x) if by_natural_key else self._serialize_asset(x, related_options)
+                        for x in data.results
+                    ]
                 else:
-                    related[k] = data.json
+                    related[key] = data.json
         except exc.Forbidden:
             return None
 
