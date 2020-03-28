@@ -55,14 +55,14 @@
   set_fact:
     kube_cluster: |
       {{ (kube_config.contexts |
-          selectattr("name", "equalto", current_kube_context) |
+          selectattr("name", "match", current_kube_context) |
           list)[0].context.cluster }}
 
 - name: Find server for current context
   set_fact:
     kube_server: |
       {{ (kube_config.clusters |
-          selectattr("name", "equalto", kube_cluster|trim) |
+          selectattr("name", "match", kube_cluster|trim) |
           list)[0].cluster.server }}
 
 - name: Get kube version from api server
