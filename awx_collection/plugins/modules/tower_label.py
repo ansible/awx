@@ -48,7 +48,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -67,14 +66,14 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True, type='str'),
-        new_name=dict(required=False, type='str'),
-        organization=dict(required=True, type='str'),
+        name=dict(required=True),
+        new_name=dict(),
+        organization=dict(required=True),
         state=dict(choices=['present'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

@@ -31,7 +31,6 @@ options:
     new_name:
       description:
         - To use when changing a hosts's name.
-      required: False
       type: str
       version_added: "3.7"
     description:
@@ -61,7 +60,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -89,16 +87,16 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(required=False),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
-        variables=dict(type='dict', required=False),
+        variables=dict(type='dict'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

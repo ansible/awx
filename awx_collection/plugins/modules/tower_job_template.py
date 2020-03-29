@@ -39,7 +39,6 @@ options:
     job_type:
       description:
         - The job type to use for the job template.
-      required: False
       choices: ["run", "check"]
       type: str
     inventory:
@@ -332,12 +331,12 @@ def main():
         playbook=dict(),
         credential=dict(default=''),
         vault_credential=dict(default=''),
-        custom_virtualenv=dict(required=False),
+        custom_virtualenv=dict(),
         credentials=dict(type='list', default=[], elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
-        extra_vars=dict(type='dict', required=False),
+        extra_vars=dict(type='dict'),
         job_tags=dict(default=''),
         force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
         skip_tags=dict(default=''),
@@ -369,7 +368,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

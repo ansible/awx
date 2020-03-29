@@ -28,12 +28,10 @@ options:
     extra_vars:
       description:
         - Any extra vars required to launch the job.
-      required: False
       type: str
     wait:
       description:
         - Wait for the workflow to complete.
-      required: False
       default: True
       type: bool
     timeout:
@@ -94,9 +92,9 @@ except ImportError:
 def main():
     argument_spec = dict(
         workflow_template=dict(required=True),
-        extra_vars=dict(required=False),
-        wait=dict(required=False, default=True, type='bool'),
-        timeout=dict(required=False, default=None, type='int'),
+        extra_vars=dict(),
+        wait=dict(default=True, type='bool'),
+        timeout=dict(default=None, type='int'),
     )
 
     module = TowerModule(

@@ -40,13 +40,11 @@ options:
     organization:
       description:
         - Organization that should own the credential.
-      required: False
       type: str
     credential_type:
       description:
         - Name of credential type.
         - Will be preferred over kind
-      required: False
       version_added: "2.10"
       type: str
     inputs:
@@ -55,7 +53,6 @@ options:
           Credential inputs where the keys are var names used in templating.
           Refer to the Ansible Tower documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
-      required: False
       version_added: "2.9"
       type: dict
     user:
@@ -100,7 +97,6 @@ options:
       description:
         - SSH private key content. To extract the content from a file path, use the lookup function (see examples).
         - Deprecated, please use inputs
-      required: False
       type: str
     ssh_key_unlock:
       description:

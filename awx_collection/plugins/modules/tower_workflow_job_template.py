@@ -32,69 +32,56 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name.
-      required: False
       type: str
     description:
       description:
         - Optional description of this workflow job template.
-      required: False
       type: str
     extra_vars:
       description:
         - Variables which will be made available to jobs ran inside the workflow.
-      required: False
       type: dict
     organization:
       description:
         - Organization the workflow job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
-      required: False
       type: str
     allow_simultaneous:
       description:
         - Allow simultaneous runs of the workflow job template.
-      required: False
       type: bool
     ask_variables_on_launch:
       description:
         - Prompt user for C(extra_vars) on launch.
-      required: False
       type: bool
     inventory:
       description:
         - Inventory applied as a prompt, assuming job template prompts for inventory
-      required: False
       type: str
     limit:
       description:
         - Limit applied as a prompt, assuming job template prompts for limit
-      required: False
       type: str
     scm_branch:
       description:
         - SCM branch applied as a prompt, assuming job template prompts for SCM branch
-      required: False
       type: str
     ask_inventory_on_launch:
       description:
         - Prompt user for inventory on launch of this workflow job template
-      required: False
       type: bool
     ask_scm_branch_on_launch:
       description:
         - Prompt user for SCM branch on launch of this workflow job template
-      required: False
       type: bool
     ask_limit_on_launch:
       description:
         - Prompt user for limit on launch of this workflow job template
-      required: False
       type: bool
     webhook_service:
       description:
         - Service that webhook requests will be accepted from
-      required: False
       type: str
       choices:
         - github
@@ -102,7 +89,6 @@ options:
     webhook_credential:
       description:
         - Personal Access Token for posting back the status to the service API
-      required: False
       type: str
     survey_enabled:
       description:
@@ -113,7 +99,6 @@ options:
       description:
         - The definition of the survey associated to the workflow.
       type: dict
-      required: false
     state:
       description:
         - Desired state of the resource.
@@ -125,7 +110,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -153,28 +137,28 @@ def update_survey(module, last_request):
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True, type='str'),
-        new_name=dict(type='str'),
-        description=dict(type='str'),
+        name=dict(required=True),
+        new_name=dict(),
+        description=dict(),
         extra_vars=dict(type='dict'),
-        organization=dict(type='str'),
+        organization=dict(),
         survey=dict(type='dict'),  # special handling
         survey_enabled=dict(type='bool'),
         allow_simultaneous=dict(type='bool'),
         ask_variables_on_launch=dict(type='bool'),
-        inventory=dict(type='str'),
-        limit=dict(type='str'),
-        scm_branch=dict(type='str'),
+        inventory=dict(),
+        limit=dict(),
+        scm_branch=dict(),
         ask_inventory_on_launch=dict(type='bool'),
         ask_scm_branch_on_launch=dict(type='bool'),
         ask_limit_on_launch=dict(type='bool'),
-        webhook_service=dict(type='str', choices=['github', 'gitlab']),
-        webhook_credential=dict(type='str'),
+        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

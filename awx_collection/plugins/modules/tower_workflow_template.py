@@ -78,7 +78,6 @@ options:
       description:
         - The definition of the survey associated to the workflow.
       type: dict
-      required: false
     state:
       description:
         - Desired state of the resource.
@@ -128,16 +127,16 @@ except ImportError:
 def main():
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        extra_vars=dict(type='dict', required=False),
-        organization=dict(required=False),
-        allow_simultaneous=dict(type='bool', required=False),
-        schema=dict(type='list', elements='dict', required=False),
+        description=dict(),
+        extra_vars=dict(type='dict'),
+        organization=dict(),
+        allow_simultaneous=dict(type='bool'),
+        schema=dict(type='list', elements='dict'),
         survey=dict(type='dict'),
-        survey_enabled=dict(type='bool', required=False),
-        inventory=dict(required=False),
-        ask_inventory=dict(type='bool', required=False),
-        ask_extra_vars=dict(type='bool', required=False),
+        survey_enabled=dict(type='bool'),
+        inventory=dict(),
+        ask_inventory=dict(type='bool'),
+        ask_extra_vars=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

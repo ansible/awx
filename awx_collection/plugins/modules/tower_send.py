@@ -27,19 +27,16 @@ options:
       description:
         - The assets to import.
         - This can be the output of tower_receive or loaded from a file
-      required: False
       type: str
     files:
       description:
         - List of files to import.
-      required: False
       default: []
       type: list
       elements: str
     prevent:
       description:
         - A list of asset types to prevent import for
-      required: false
       default: []
       type: list
       elements: str
@@ -47,7 +44,6 @@ options:
       description:
         - The password management option to use.
         - The prompt option is not supported.
-      required: false
       default: 'default'
       choices: ["default", "random"]
       type: str
@@ -98,10 +94,10 @@ except ImportError:
 
 def main():
     argument_spec = dict(
-        assets=dict(required=False),
-        files=dict(required=False, default=[], type='list', elements='str'),
-        prevent=dict(required=False, default=[], type='list', elements='str'),
-        password_management=dict(required=False, default='default', choices=['default', 'random']),
+        assets=dict(),
+        files=dict(default=[], type='list', elements='str'),
+        prevent=dict(default=[], type='list', elements='str'),
+        password_management=dict(default='default', choices=['default', 'random']),
     )
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)

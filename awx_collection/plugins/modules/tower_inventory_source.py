@@ -31,7 +31,6 @@ options:
     new_name:
       description:
         - A new name for this assets (will rename the asset)
-      required: False
       type: str
       version_added: "3.7"
     description:
@@ -48,7 +47,6 @@ options:
         - The source to use for this group.
       choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
       type: str
-      required: False
     source_path:
       description:
         - For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
@@ -57,7 +55,6 @@ options:
       description:
         - Inventory script to be used when group type is C(custom).
       type: str
-      required: False
     source_vars:
       description:
         - The variables or environment fields to apply to this source type.
@@ -92,7 +89,6 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      required: False
       default: ''
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
@@ -126,7 +122,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -153,17 +148,17 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(type='str'),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
                              "azure_rm", "vmware", "satellite6", "cloudforms",
-                             "openstack", "rhv", "tower", "custom"], required=False),
+                             "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
-        source_script=dict(required=False),
+        source_script=dict(),
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
@@ -171,12 +166,12 @@ def main():
         group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(type='str', default=''),
+        custom_virtualenv=dict(default=''),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
-        source_project=dict(type='str'),
+        source_project=dict(),
         update_on_project_update=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )

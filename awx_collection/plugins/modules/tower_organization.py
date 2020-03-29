@@ -37,14 +37,12 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      required: False
       default: ''
     max_hosts:
       description:
         - The max hosts allowed in this organizations
       default: "0"
       type: int
-      required: False
       version_added: "3.7"
     state:
       description:
@@ -55,7 +53,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -85,15 +82,15 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(type='str', required=True),
-        description=dict(type='str', required=False),
-        custom_virtualenv=dict(type='str', required=False),
-        max_hosts=dict(type='int', required=False, default="0"),
-        state=dict(type='str', choices=['present', 'absent'], default='present', required=False),
+        name=dict(required=True),
+        description=dict(),
+        custom_virtualenv=dict(),
+        max_hosts=dict(type='int', default="0"),
+        state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
