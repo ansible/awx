@@ -9,6 +9,63 @@
     hipchat_not: "AWX-Collection-tests-tower_notification-hipchat-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     irc_not: "AWX-Collection-tests-tower_notification-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
+- name: Test deprication warnings
+  tower_notification:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    username: maw
+    sender: maw
+    recipients:
+      - everyone
+    use_tls: True
+    host: all
+    use_ssl: False
+    password: password
+    port: 12
+    channels:
+      - general
+    token: chunkecheese
+    account_token: asdf1234
+    from_number: "1 (888) 733-4281"
+    to_numbers:
+      - 867-5309
+    account_sid: vicious
+    subdomain: 'redhat.com'
+    service_key: skeleton
+    client_name: Bill
+    message_from: me
+    api_url: https://tower.example.com/api/v2
+    color: green
+    rooms:
+      - The Study
+      - Kitchen
+      - Ballroom
+      - Conservatory
+      - Billiard Room
+      - Library
+      - Hall
+      - Lounge
+      - Dining Room
+      - Cellar
+    notify: True
+    url: ansible.com
+    headers:
+      X-Custom-Header: value123
+    server: littimer.somewhere.com
+    nickname: chalk
+    targets:
+      - zombie
+    state: absent
+  register: result
+  ignore_errors: True
+
+- assert:
+    that:
+      - "'deprecations' in result"
+      # The 27 can be count from the size of the OLD_INPUT_NAMES list in the module
+      - result['deprecations'] | length() == 27
+
 - name: Create Slack notification
   tower_notification:
     name: "{{ slack_not }}"
@@ -50,6 +107,22 @@
 - assert:
     that:
       - result is changed
+
+- name: Recreate with notification_configuration
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is not changed
 
 - name: Delete webhook notification
   tower_notification:

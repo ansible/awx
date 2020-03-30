@@ -26,168 +26,188 @@ options:
     name:
       description:
         - The name of the notification.
+      type: str
       required: True
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
       type: str
     description:
       description:
         - The description of the notification.
-      required: False
       type: str
     organization:
       description:
         - The organization the notification belongs to.
-      required: False
       type: str
     notification_type:
       description:
         - The type of notification to be sent.
       required: True
-      choices: ["email", "slack", "twilio", "pagerduty", "hipchat", "webhook", "irc"]
+      choices:
+        - 'email'
+        - 'grafana'
+        - 'hipchat'
+        - 'irc'
+        - 'mattermost'
+        - 'pagerduty'
+        - 'rocketchat'
+        - 'slack'
+        - 'twilio'
+        - 'webhook'
       type: str
     notification_configuration:
       description:
         - The notification configuration file. Note providing this field would disable all notification-configuration-related fields.
-      required: False
-      type: str
+      type: dict
+    messages:
+      description:
+        - Optional custom messages for notification template.
+      type: dict
+      default:
+        started:
+        success:
+        error:
+        workflow_approval:
     username:
       description:
         - The mail server username. Required if I(notification_type=email).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     sender:
       description:
         - The sender email address. Required if I(notification_type=email).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     recipients:
       description:
         - The recipients email addresses. Required if I(notification_type=email).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     use_tls:
       description:
         - The TLS trigger. Required if I(notification_type=email).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     host:
       description:
         - The mail server host. Required if I(notification_type=email).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     use_ssl:
       description:
         - The SSL trigger. Required if I(notification_type=email) or if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     password:
       description:
         - The mail server password. Required if I(notification_type=email) or if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     port:
       description:
         - The mail server port. Required if I(notification_type=email) or if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: int
     channels:
       description:
         - The destination Slack channels. Required if I(notification_type=slack).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     token:
       description:
         - The access token. Required if I(notification_type=slack), if I(notification_type=pagerduty) or if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     account_token:
       description:
         - The Twillio account token. Required if I(notification_type=twillio).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     from_number:
       description:
         - The source phone number. Required if I(notification_type=twillio).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     to_numbers:
       description:
         - The destination phone numbers. Required if I(notification_type=twillio).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     account_sid:
       description:
         - The Twillio account SID. Required if I(notification_type=twillio).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     subdomain:
       description:
         - The PagerDuty subdomain. Required if I(notification_type=pagerduty).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     service_key:
       description:
         - The PagerDuty service/integration API key. Required if I(notification_type=pagerduty).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     client_name:
       description:
         - The PagerDuty client identifier. Required if I(notification_type=pagerduty).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     message_from:
       description:
         - The label to be shown with the notification. Required if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     api_url:
       description:
         - The HipChat API URL. Required if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     color:
       description:
         - The notification color. Required if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       choices: ["yellow", "green", "red", "purple", "gray", "random"]
       type: str
     rooms:
       description:
         - HipChat rooms to send the notification to. Required if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     notify:
       description:
         - The notify channel trigger. Required if I(notification_type=hipchat).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     url:
       description:
         - The target URL. Required if I(notification_type=webhook).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     headers:
       description:
         - The HTTP headers as JSON string. Required if I(notification_type=webhook).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: dict
     server:
       description:
         - The IRC server address. Required if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     nickname:
       description:
         - The IRC nickname. Required if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     targets:
       description:
         - The destination channels or users. Required if I(notification_type=irc).
-      required: False
+        - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     state:
@@ -196,10 +216,11 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-
-requirements:
-- ansible-tower-cli >= 3.0.2
-
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      version_added: "3.7"
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -304,125 +325,121 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
+from ..module_utils.tower_api import TowerModule
 
-try:
-    import tower_cli
-    import tower_cli.utils.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
+OLD_INPUT_NAMES = (
+    'username', 'sender', 'recipients', 'use_tls',
+    'host', 'use_ssl', 'password', 'port',
+    'channels', 'token', 'account_token', 'from_number',
+    'to_numbers', 'account_sid', 'subdomain', 'service_key',
+    'client_name', 'message_from', 'api_url', 'color',
+    'rooms', 'notify', 'url', 'headers', 'server',
+    'nickname', 'targets',
+)
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        organization=dict(required=False),
-        notification_type=dict(required=True, choices=['email', 'slack', 'twilio', 'pagerduty', 'hipchat', 'webhook', 'irc']),
-        notification_configuration=dict(required=False),
-        username=dict(required=False),
-        sender=dict(required=False),
-        recipients=dict(required=False, type='list', elements='str'),
-        use_tls=dict(required=False, type='bool'),
-        host=dict(required=False),
-        use_ssl=dict(required=False, type='bool'),
-        password=dict(required=False, no_log=True),
-        port=dict(required=False, type='int'),
-        channels=dict(required=False, type='list', elements='str'),
-        token=dict(required=False, no_log=True),
-        account_token=dict(required=False, no_log=True),
-        from_number=dict(required=False),
-        to_numbers=dict(required=False, type='list', elements='str'),
-        account_sid=dict(required=False),
-        subdomain=dict(required=False),
-        service_key=dict(required=False, no_log=True),
-        client_name=dict(required=False),
-        message_from=dict(required=False),
-        api_url=dict(required=False),
-        color=dict(required=False, choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
-        rooms=dict(required=False, type='list', elements='str'),
-        notify=dict(required=False, type='bool'),
-        url=dict(required=False),
-        headers=dict(required=False, type='dict', default={}),
-        server=dict(required=False),
-        nickname=dict(required=False),
-        targets=dict(required=False, type='list', elements='str'),
+        new_name=dict(),
+        description=dict(),
+        organization=dict(),
+        notification_type=dict(required=True, choices=[
+            'email', 'grafana', 'hipchat', 'irc', 'mattermost',
+            'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook'
+        ]),
+        notification_configuration=dict(type='dict'),
+        messages=dict(type='dict', default={'started': None, 'success': None, 'error': None, 'workflow_approval': None}),
+        username=dict(),
+        sender=dict(),
+        recipients=dict(type='list', elements='str'),
+        use_tls=dict(type='bool'),
+        host=dict(),
+        use_ssl=dict(type='bool'),
+        password=dict(no_log=True),
+        port=dict(type='int'),
+        channels=dict(type='list', elements='str'),
+        token=dict(no_log=True),
+        account_token=dict(no_log=True),
+        from_number=dict(),
+        to_numbers=dict(type='list', elements='str'),
+        account_sid=dict(),
+        subdomain=dict(),
+        service_key=dict(no_log=True),
+        client_name=dict(),
+        message_from=dict(),
+        api_url=dict(),
+        color=dict(choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
+        rooms=dict(type='list', elements='str'),
+        notify=dict(type='bool'),
+        url=dict(),
+        headers=dict(type='dict', default={}),
+        server=dict(),
+        nickname=dict(),
+        targets=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
+    # Create a module for ourselves
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get("new_name")
     description = module.params.get('description')
     organization = module.params.get('organization')
     notification_type = module.params.get('notification_type')
     notification_configuration = module.params.get('notification_configuration')
-    username = module.params.get('username')
-    sender = module.params.get('sender')
-    recipients = module.params.get('recipients')
-    use_tls = module.params.get('use_tls')
-    host = module.params.get('host')
-    use_ssl = module.params.get('use_ssl')
-    password = module.params.get('password')
-    port = module.params.get('port')
-    channels = module.params.get('channels')
-    token = module.params.get('token')
-    account_token = module.params.get('account_token')
-    from_number = module.params.get('from_number')
-    to_numbers = module.params.get('to_numbers')
-    account_sid = module.params.get('account_sid')
-    subdomain = module.params.get('subdomain')
-    service_key = module.params.get('service_key')
-    client_name = module.params.get('client_name')
-    message_from = module.params.get('message_from')
-    api_url = module.params.get('api_url')
-    color = module.params.get('color')
-    rooms = module.params.get('rooms')
-    notify = module.params.get('notify')
-    url = module.params.get('url')
-    headers = module.params.get('headers')
-    server = module.params.get('server')
-    nickname = module.params.get('nickname')
-    targets = module.params.get('targets')
+    messages = module.params.get('messages')
     state = module.params.get('state')
 
-    json_output = {'notification': name, 'state': state}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = None
+    if organization:
+        organization_id = module.resolve_name_to_id('organizations', organization)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        notification_template = tower_cli.get_resource('notification_template')
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('notification_templates', **{
+        'data': {
+            'name': name,
+            'organization': organization_id,
+        }
+    })
 
-        try:
-            org_res = tower_cli.get_resource('organization')
-            org = org_res.get(name=organization)
+    # Create notification_configuration from legacy inputs
+    final_notification_configuration = {}
+    for legacy_input in OLD_INPUT_NAMES:
+        if module.params.get(legacy_input) is not None:
+            module.deprecate(msg='{0} parameter has been depricated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
+            final_notification_configuration[legacy_input] = module.params.get(legacy_input)
+    # Give anything in notification_configuration prescedence over the individual inputs
+    if notification_configuration is not None:
+        final_notification_configuration.update(notification_configuration)
 
-            if state == 'present':
-                result = notification_template.modify(name=name, description=description, organization=org['id'],
-                                                      notification_type=notification_type,
-                                                      notification_configuration=notification_configuration,
-                                                      username=username, sender=sender, recipients=recipients,
-                                                      use_tls=use_tls, host=host, use_ssl=use_ssl, password=password,
-                                                      port=port, channels=channels, token=token,
-                                                      account_token=account_token, from_number=from_number,
-                                                      to_numbers=to_numbers, account_sid=account_sid,
-                                                      subdomain=subdomain, service_key=service_key,
-                                                      client_name=client_name, message_from=message_from,
-                                                      api_url=api_url, color=color, rooms=rooms, notify=notify,
-                                                      url=url, headers=headers, server=server, nickname=nickname,
-                                                      targets=targets, create_on_missing=True)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = notification_template.delete(name=name)
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update notification template, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update notification template: {0}'.format(excinfo), changed=False)
+    # Create the data that gets sent for create and update
+    new_fields = {'notification_configuration': final_notification_configuration}
+    new_fields['name'] = new_name if new_name else name
+    if description is not None:
+        new_fields['description'] = description
+    if organization is not None:
+        new_fields['organization'] = organization_id
+    if notification_type is not None:
+        new_fields['notification_type'] = notification_type
+    if messages is not None:
+        new_fields['messages'] = messages
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(
+            existing_item, new_fields,
+            endpoint='notification_templates', item_type='notification_template',
+            associations={
+            }
+        )
 
 
 if __name__ == '__main__':
