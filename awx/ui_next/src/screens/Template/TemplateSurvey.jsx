@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import ContentError from '@components/ContentError';
 import AlertModal from '@components/AlertModal';
 import ErrorDetail from '@components/ErrorDetail';
@@ -12,6 +12,7 @@ import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 function TemplateSurvey({ template, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
 
+  const { templateType } = useParams();
   const {
     result: survey,
     request: fetchSurvey,
@@ -20,9 +21,12 @@ function TemplateSurvey({ template, i18n }) {
     setValue: setSurvey,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await JobTemplatesAPI.readSurvey(template.id);
+      const { data } =
+        templateType === 'workflow_job_template'
+          ? await WorkflowJobTemplatesAPI.readSurvey(template.id)
+          : await JobTemplatesAPI.readSurvey(template.id);
       return data;
-    }, [template.id])
+    }, [template.id, templateType])
   );
   useEffect(() => {
     fetchSurvey();
@@ -31,10 +35,17 @@ function TemplateSurvey({ template, i18n }) {
   const { request: updateSurvey, error: updateError } = useRequest(
     useCallback(
       async updatedSurvey => {
-        await JobTemplatesAPI.updateSurvey(template.id, updatedSurvey);
+        if (templateType === 'workflow_job_template') {
+          await WorkflowJobTemplatesAPI.updateSurvey(
+            template.id,
+            updatedSurvey
+          );
+        } else {
+          await JobTemplatesAPI.updateSurvey(template.id, updatedSurvey);
+        }
         setSurvey(updatedSurvey);
       },
-      [template.id, setSurvey]
+      [template.id, setSurvey, templateType]
     )
   );
   const updateSurveySpec = spec => {

@@ -22,6 +22,7 @@ import {
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
+import TemplateSurvey from './TemplateSurvey';
 
 class WorkflowJobTemplate extends Component {
   constructor(props) {
@@ -140,6 +141,10 @@ class WorkflowJobTemplate extends Component {
     tabsArray.push({
       name: i18n._(t`Completed Jobs`),
       link: `${match.url}/completed_jobs`,
+    });
+    tabsArray.push({
+      name: i18n._(t`Survey`),
+      link: `${match.url}/survey`,
     });
 
     tabsArray.forEach((tab, n) => {
@@ -276,6 +281,11 @@ class WorkflowJobTemplate extends Component {
                   />
                 )}
               />
+            )}
+            {template && (
+              <Route path="/templates/:templateType/:id/survey">
+                <TemplateSurvey template={template} />
+              </Route>
             )}
             <Route
               key="not-found"
