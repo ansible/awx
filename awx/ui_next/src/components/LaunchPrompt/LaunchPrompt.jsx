@@ -9,27 +9,7 @@ import OtherPromptsStep from './OtherPromptsStep';
 import SurveyStep from './SurveyStep';
 import PreviewStep from './PreviewStep';
 
-function LaunchPrompt({ config, resource, onCancel, i18n }) {
-  // CONFIG
-  // can_start_without_user_input: false
-  // passwords_needed_to_start: []
-  // ask_scm_branch_on_launch: false
-  // ask_variables_on_launch: true
-  // ask_tags_on_launch: false
-  // ask_diff_mode_on_launch: false
-  // ask_skip_tags_on_launch: false
-  // ask_job_type_on_launch: false
-  // ask_limit_on_launch: false
-  // ask_verbosity_on_launch: false
-  // ask_inventory_on_launch: false
-  // ask_credential_on_launch: true
-  // survey_enabled: false
-  // variables_needed_to_start: []
-  // credential_needed_to_start: false
-  // inventory_needed_to_start: false
-  // job_template_data: {name: "JT with prompts", id: 25, description: ""
-  // defaults: {} ??
-
+function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   const steps = [];
   const initialValues = {};
   if (config.ask_inventory_on_launch) {
@@ -78,24 +58,28 @@ function LaunchPrompt({ config, resource, onCancel, i18n }) {
   steps.push({
     name: i18n._(t`Preview`),
     component: <PreviewStep />,
+    nextButtonText: i18n._(t`Launch`),
   });
 
-  const handleSubmit = x => {
-    console.log('SUBMIT', x);
+  const submit = values => {
+    const postValues = {};
+    if (values.inventory) {
+      postValues.inventory_id = values.inventory.id;
+    }
+    onLaunch(postValues);
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={() => console.log('FORMIK SUBMIT ?!')}
-    >
-      <Wizard
-        isOpen
-        onClose={onCancel}
-        onSave={handleSubmit}
-        title={i18n._(t`Prompts`)}
-        steps={steps}
-      />
+    <Formik initialValues={initialValues} onSubmit={submit}>
+      {({ handleSubmit }) => (
+        <Wizard
+          isOpen
+          onClose={onCancel}
+          onSave={handleSubmit}
+          title={i18n._(t`Prompts`)}
+          steps={steps}
+        />
+      )}
     </Formik>
   );
 }

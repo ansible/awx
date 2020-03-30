@@ -46,6 +46,7 @@ class LaunchButton extends React.Component {
     };
 
     this.handleLaunch = this.handleLaunch.bind(this);
+    this.launchWithParams = this.launchWithParams.bind(this);
     this.handleRelaunch = this.handleRelaunch.bind(this);
     this.handleLaunchErrorClose = this.handleLaunchErrorClose.bind(this);
     this.handlePromptErrorClose = this.handlePromptErrorClose.bind(this);
@@ -60,31 +61,17 @@ class LaunchButton extends React.Component {
   }
 
   async handleLaunch() {
-    const { history, resource } = this.props;
-
+    const { resource } = this.props;
     const readLaunch =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
         : JobTemplatesAPI.readLaunch(resource.id);
-
-    const launchJob =
-      resource.type === 'workflow_job_template'
-        ? WorkflowJobTemplatesAPI.launch(resource.id)
-        : JobTemplatesAPI.launch(resource.id);
-
     try {
       const { data: launchConfig } = await readLaunch;
 
       if (canLaunchWithoutPrompt(launchConfig)) {
-        const { data: job } = await launchJob;
-
-        history.push(
-          `/${
-            resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
-          }/${job.id}/output`
-        );
+        this.launchWithParams(null);
       } else {
-        // TODO: restructure (async?) to send launch command after prompts
         this.setState({
           showLaunchPrompt: true,
           launchConfig,
@@ -93,6 +80,21 @@ class LaunchButton extends React.Component {
     } catch (err) {
       this.setState({ launchError: err });
     }
+  }
+
+  async launchWithParams(params) {
+    const { history, resource } = this.props;
+    const launchJob =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.launch(resource.id, params)
+        : JobTemplatesAPI.launch(resource.id, params);
+
+    const { data: job } = await launchJob;
+    history.push(
+      `/${
+        resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
+      }/${job.id}/output`
+    );
   }
 
   async handleRelaunch() {
@@ -167,6 +169,7 @@ class LaunchButton extends React.Component {
           <LaunchPrompt
             config={launchConfig}
             resource={resource}
+            onLaunch={this.launchWithParams}
             onCancel={() => this.setState({ showLaunchPrompt: false })}
           />
         )}

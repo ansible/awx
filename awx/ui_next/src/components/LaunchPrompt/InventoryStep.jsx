@@ -22,7 +22,7 @@ function InventoryStep({ i18n }) {
 
   const {
     isLoading,
-    error,
+    // error,
     result: { inventories, count },
     request: fetchInventories,
   } = useRequest(
