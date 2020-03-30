@@ -45,7 +45,7 @@ class TowerModule(AnsibleModule):
     authenticated = False
     config_name = 'tower_cli.cfg'
 
-    def __init__(self, argument_spec, **kwargs):
+    def __init__(self, argument_spec, mock_params=None, **kwargs):
         args = dict(
             tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
             tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
@@ -59,7 +59,10 @@ class TowerModule(AnsibleModule):
 
         self.json_output = {'changed': False}
 
-        super(TowerModule, self).__init__(argument_spec=args, **kwargs)
+        if mock_params is not None:
+            self.params = mock_params
+        else:
+            super(TowerModule, self).__init__(argument_spec=args, **kwargs)
 
         self.load_config_files()
 
