@@ -17,6 +17,8 @@ function FormSubmitError({ error }) {
         setErrorMessage(errorMessages.__all__);
       } else if (errorMessages.detail) {
         setErrorMessage(errorMessages.detail);
+      } else if (errorMessages.resources_needed_to_start) {
+        setErrorMessage(errorMessages.resources_needed_to_start);
       } else {
         setErrorMessage(null);
       }
