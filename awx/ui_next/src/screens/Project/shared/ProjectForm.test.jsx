@@ -27,6 +27,10 @@ describe('<ProjectForm />', () => {
         kind: 'scm',
         name: 'Foo',
       },
+      organization: {
+        id: 2,
+        name: 'Default',
+      },
     },
   };
 

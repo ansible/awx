@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { bool, func, number, string, oneOfType } from 'prop-types';
+import { bool, func, node, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -113,7 +113,7 @@ function CredentialLookup({
 
 CredentialLookup.propTypes = {
   credentialTypeId: oneOfType([number, string]).isRequired,
-  helperTextInvalid: string,
+  helperTextInvalid: node,
   isValid: bool,
   label: string.isRequired,
   onBlur: func,

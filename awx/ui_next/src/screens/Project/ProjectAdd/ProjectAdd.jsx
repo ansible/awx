@@ -24,7 +24,10 @@ function ProjectAdd() {
     try {
       const {
         data: { id },
-      } = await ProjectsAPI.create(values);
+      } = await ProjectsAPI.create({
+        ...values,
+        organization: values.organization.id,
+      });
       history.push(`/projects/${id}/details`);
     } catch (error) {
       setFormSubmitError(error);

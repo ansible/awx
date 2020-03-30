@@ -23,7 +23,10 @@ function ProjectEdit({ project }) {
     try {
       const {
         data: { id },
-      } = await ProjectsAPI.update(project.id, values);
+      } = await ProjectsAPI.update(project.id, {
+        ...values,
+        organization: values.organization.id,
+      });
       history.push(`/projects/${id}/details`);
     } catch (error) {
       setFormSubmitError(error);

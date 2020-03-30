@@ -29,6 +29,10 @@ describe('<ProjectEdit />', () => {
         credential_type_id: 5,
         kind: 'insights',
       },
+      organization: {
+        id: 2,
+        name: 'Default',
+      },
     },
   };
 

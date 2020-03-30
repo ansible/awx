@@ -74,8 +74,6 @@ function ProjectFormFields({
   scmTypeOptions,
   setScmSubFormState,
   scmSubFormState,
-  setOrganization,
-  organization,
 }) {
   const scmFormFields = {
     scm_url: '',
@@ -94,12 +92,10 @@ function ProjectFormFields({
     validate: required(i18n._(t`Set a value for this field`), i18n),
   });
   const [venvField] = useField('custom_virtualenv');
-  const orgFieldArr = useField({
+  const [organizationField, organizationMeta, organizationHelpers] = useField({
     name: 'organization',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
-  const organizationMeta = orgFieldArr[1];
-  const organizationHelpers = orgFieldArr[2];
 
   /* Save current scm subform field values to state */
   const saveSubFormState = form => {
@@ -164,10 +160,9 @@ function ProjectFormFields({
         isValid={!organizationMeta.touched || !organizationMeta.error}
         onBlur={() => organizationHelpers.setTouched()}
         onChange={value => {
-          organizationHelpers.setValue(value.id);
-          setOrganization(value);
+          organizationHelpers.setValue(value);
         }}
-        value={organization}
+        value={organizationField.value}
         required
       />
       <FormGroup
@@ -293,7 +288,6 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
   const { summary_fields = {} } = project;
   const [contentError, setContentError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [organization, setOrganization] = useState(null);
   const [scmSubFormState, setScmSubFormState] = useState(null);
   const [scmTypeOptions, setScmTypeOptions] = useState(null);
   const [credentials, setCredentials] = useState({
@@ -347,7 +341,7 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
             description: project.description || '',
             local_path: project.local_path || '',
             name: project.name || '',
-            organization: project.organization || '',
+            organization: project.summary_fields?.organization || null,
             scm_branch: project.scm_branch || '',
             scm_clean: project.scm_clean || false,
             scm_delete_on_update: project.scm_delete_on_update || false,
@@ -377,8 +371,6 @@ function ProjectForm({ i18n, project, submitError, ...props }) {
                   scmTypeOptions={scmTypeOptions}
                   setScmSubFormState={setScmSubFormState}
                   scmSubFormState={scmSubFormState}
-                  setOrganization={setOrganization}
-                  organization={organization}
                 />
                 <FormSubmitError error={submitError} />
                 <FormActionGroup
