@@ -18,7 +18,7 @@ DOCUMENTATION = '''
 module: tower_job_template
 author: "Wayne Witzel III (@wwitzel3)"
 version_added: "2.3"
-short_description: create, update, or destroy Ansible Tower job template.
+short_description: create, update, or destroy Ansible Tower job templates.
 description:
     - Create, update, or destroy Ansible Tower job templates. See
       U(https://www.ansible.com/tower) for an overview.
@@ -27,6 +27,10 @@ options:
       description:
         - Name to use for the job template.
       required: True
+      type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looed up via the name field.
       type: str
     description:
       description:
@@ -45,31 +49,28 @@ options:
     project:
       description:
         - Name of the project to use for the job template.
-      required: True
       type: str
     playbook:
       description:
         - Path to the playbook to use for the job template within the project provided.
-      required: True
       type: str
     credential:
       description:
         - Name of the credential to use for the job template.
-        - Deprecated, mutually exclusive with 'credentials'.
+        - Deprecated, use 'credentials'.
       version_added: 2.7
       type: str
     credentials:
       description:
         - List of credentials to use for the job template.
-        - Will not remove any existing credentials. This may change in the future.
-      version_added: 2.8
       type: list
-      default: []
       elements: str
+      version_added: 2.8
+      default: []
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
-        - Deprecated, mutually exclusive with 'credentials'.
+        - Deprecated, use 'credentials'.
       version_added: 2.7
       type: str
     forks:
@@ -91,21 +92,18 @@ options:
         - Specify C(extra_vars) for the template.
       type: dict
       version_added: 3.7
-    extra_vars_path:
-      description:
-        - This parameter has been deprecated, please use 'extra_vars' instead.
-        - Path to the C(extra_vars) YAML file.
-      type: path
     job_tags:
       description:
         - Comma separated list of the tags to use for the job template.
       type: str
-    force_handlers_enabled:
+    force_handlers:
       description:
         - Enable forcing playbook handlers to run even if a task fails.
       version_added: 2.7
       type: bool
       default: 'no'
+      aliases:
+        - force_handlers_enabled
     skip_tags:
       description:
         - Comma separated list of the tags to skip for the job template.
@@ -115,71 +113,98 @@ options:
         - Start the playbook at the task matching this name.
       version_added: 2.7
       type: str
-    diff_mode_enabled:
+    diff_mode:
       description:
         - Enable diff mode for the job template.
       version_added: 2.7
       type: bool
+      aliases:
+        - diff_mode_enabled
       default: 'no'
-    fact_caching_enabled:
+    use_fact_cache:
       description:
         - Enable use of fact caching for the job template.
       version_added: 2.7
       type: bool
       default: 'no'
+      aliases:
+        - fact_caching_enabled
     host_config_key:
       description:
         - Allow provisioning callbacks using this host config key.
       type: str
-    ask_diff_mode:
+    ask_scm_branch_on_launch:
+      description:
+        - Prompt user for (scm branch) on launch.
+      type: bool
+      default: 'False'
+    ask_diff_mode_on_launch:
       description:
         - Prompt user to enable diff mode (show changes) to files when supported by modules.
       version_added: 2.7
       type: bool
-      default: 'no'
-    ask_extra_vars:
+      default: 'False'
+      aliases:
+        - ask_diff_mode
+    ask_variables_on_launch:
       description:
         - Prompt user for (extra_vars) on launch.
       type: bool
-      default: 'no'
-    ask_limit:
+      default: 'False'
+      aliases:
+        - ask_extra_vars
+    ask_limit_on_launch:
       description:
         - Prompt user for a limit on launch.
       version_added: 2.7
       type: bool
-      default: 'no'
-    ask_tags:
+      default: 'False'
+      aliases:
+        - ask_limit
+    ask_tags_on_launch:
       description:
         - Prompt user for job tags on launch.
       type: bool
-      default: 'no'
-    ask_skip_tags:
+      default: 'False'
+      aliases:
+        - ask_tags
+    ask_skip_tags_on_launch:
       description:
         - Prompt user for job tags to skip on launch.
       version_added: 2.7
       type: bool
-      default: 'no'
-    ask_job_type:
+      default: 'False'
+      aliases:
+        - ask_skip_tags
+    ask_job_type_on_launch:
       description:
         - Prompt user for job type on launch.
       type: bool
-      default: 'no'
-    ask_verbosity:
+      default: 'False'
+      aliases:
+        - ask_job_type
+    ask_verbosity_on_launch:
       description:
         - Prompt user to choose a verbosity level on launch.
       version_added: 2.7
       type: bool
-      default: 'no'
-    ask_inventory:
+      default: 'False'
+      aliases:
+        - ask_verbosity
+    ask_inventory_on_launch:
       description:
         - Prompt user for inventory on launch.
       type: bool
-      default: 'no'
-    ask_credential:
+      default: 'False'
+      aliases:
+        - ask_inventory
+    ask_credential_on_launch:
       description:
         - Prompt user for credential on launch.
       type: bool
-      default: 'no'
+      default: 'False'
+      aliases:
+        - ask_credential
     survey_enabled:
       description:
         - Enable a survey on the job template.
@@ -191,18 +216,19 @@ options:
         - JSON/YAML dict formatted survey definition.
       version_added: 2.8
       type: dict
-      required: False
     become_enabled:
       description:
         - Activate privilege escalation.
       type: bool
       default: 'no'
-    concurrent_jobs_enabled:
+    allow_simultaneous:
       description:
         - Allow simultaneous runs of the job template.
       version_added: 2.7
       type: bool
       default: 'no'
+      aliases:
+        - concurrent_jobs_enabled
     timeout:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
@@ -212,17 +238,43 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      required: False
+    job_slice_count:
+      description:
+        - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
+      type: int
+      default: '1'
+    webhook_service:
+      description:
+        - Service that webhook requests will be accepted from
+      type: str
+      choices:
+        - 'github'
+        - 'gitlab'
+    webhook_credential:
+      description:
+        - Personal Access Token for posting back the status to the service API
+      type: str
+    scm_branch:
+      description:
+        - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
+      type: str
       default: ''
+    labels:
+      description:
+        - The labels applied to this job template
+      type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
       default: "present"
       choices: ["present", "absent"]
       type: str
-
-requirements:
-- ansible-tower-cli >= 3.0.2
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      type: str
+      version_added: "3.7"
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -241,7 +293,8 @@ EXAMPLES = '''
     inventory: "Local"
     project: "Demo"
     playbook: "ping.yml"
-    credential: "Local"
+    credentials:
+      - "Local"
     state: "present"
     tower_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
@@ -249,172 +302,164 @@ EXAMPLES = '''
     custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-import json
+from ..module_utils.tower_api import TowerModule
 
 
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
-
-def update_fields(module, p):
-    '''This updates the module field names
-    to match the field names tower-cli expects to make
-    calling of the modify/delete methods easier.
-    '''
-    params = p.copy()
-    field_map = {
-        'fact_caching_enabled': 'use_fact_cache',
-        'ask_diff_mode': 'ask_diff_mode_on_launch',
-        'ask_extra_vars': 'ask_variables_on_launch',
-        'ask_limit': 'ask_limit_on_launch',
-        'ask_tags': 'ask_tags_on_launch',
-        'ask_skip_tags': 'ask_skip_tags_on_launch',
-        'ask_verbosity': 'ask_verbosity_on_launch',
-        'ask_inventory': 'ask_inventory_on_launch',
-        'ask_credential': 'ask_credential_on_launch',
-        'ask_job_type': 'ask_job_type_on_launch',
-        'diff_mode_enabled': 'diff_mode',
-        'concurrent_jobs_enabled': 'allow_simultaneous',
-        'force_handlers_enabled': 'force_handlers',
-    }
-
-    params_update = {}
-    for old_k, new_k in field_map.items():
-        v = params.pop(old_k)
-        params_update[new_k] = v
-
-    extra_vars = params.get('extra_vars')
-    extra_vars_path = params.get('extra_vars_path')
-
-    if extra_vars:
-        params_update['extra_vars'] = [json.dumps(extra_vars)]
-
-    elif extra_vars_path is not None:
-        params_update['extra_vars'] = ['@' + extra_vars_path]
-        module.deprecate(
-            msg='extra_vars_path should not be used anymore. Use \'extra_vars: "{{ lookup(\'file\', \'/path/to/file\') | from_yaml }}"\' instead',
-            version="3.8"
-        )
-
-    params.update(params_update)
-    return params
-
-
-def update_resources(module, p):
-    params = p.copy()
-    identity_map = {
-        'project': 'name',
-        'inventory': 'name',
-        'credential': 'name',
-        'vault_credential': 'name',
-    }
-    for k, v in identity_map.items():
-        try:
-            if params[k]:
-                key = 'credential' if '_credential' in k else k
-                result = tower_cli.get_resource(key).get(**{v: params[k]})
-                params[k] = result['id']
-            elif k in params:
-                # unset empty parameters to avoid ValueError: invalid literal for int() with base 10: ''
-                del(params[k])
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update job template: {0}'.format(excinfo), changed=False)
-    return params
+def update_survey(module, last_request):
+    spec_endpoint = last_request.get('related', {}).get('survey_spec')
+    if module.params.get('survey_spec') == {}:
+        response = module.delete_endpoint(spec_endpoint)
+        if response['status_code'] != 200:
+            # Not sure how to make this actually return a non 200 to test what to dump in the respinse
+            module.fail_json(msg="Failed to delete survey: {0}".format(response['json']))
+    else:
+        response = module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
+        if response['status_code'] != 200:
+            module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
+    module.exit_json(**module.json_output)
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
+        new_name=dict(),
         description=dict(default=''),
         job_type=dict(choices=['run', 'check']),
-        inventory=dict(default=''),
-        project=dict(required=True),
-        playbook=dict(required=True),
+        inventory=dict(),
+        project=dict(),
+        playbook=dict(),
         credential=dict(default=''),
         vault_credential=dict(default=''),
-        custom_virtualenv=dict(type='str', required=False),
+        custom_virtualenv=dict(required=False),
         credentials=dict(type='list', default=[], elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
         extra_vars=dict(type='dict', required=False),
-        extra_vars_path=dict(type='path', required=False),
         job_tags=dict(default=''),
-        force_handlers_enabled=dict(type='bool', default=False),
+        force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
         skip_tags=dict(default=''),
         start_at_task=dict(default=''),
         timeout=dict(type='int', default=0),
-        fact_caching_enabled=dict(type='bool', default=False),
-        host_config_key=dict(default=''),
-        ask_diff_mode=dict(type='bool', default=False),
-        ask_extra_vars=dict(type='bool', default=False),
-        ask_limit=dict(type='bool', default=False),
-        ask_tags=dict(type='bool', default=False),
-        ask_skip_tags=dict(type='bool', default=False),
-        ask_job_type=dict(type='bool', default=False),
-        ask_verbosity=dict(type='bool', default=False),
-        ask_inventory=dict(type='bool', default=False),
-        ask_credential=dict(type='bool', default=False),
-        survey_enabled=dict(type='bool', default=False),
-        survey_spec=dict(type='dict', required=False),
-        become_enabled=dict(type='bool', default=False),
-        diff_mode_enabled=dict(type='bool', default=False),
-        concurrent_jobs_enabled=dict(type='bool', default=False),
+        use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
+        host_config_key=dict(),
+        ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode']),
+        ask_variables_on_launch=dict(type='bool', aliases=['ask_extra_vars']),
+        ask_limit_on_launch=dict(type='bool', aliases=['ask_limit']),
+        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
+        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
+        ask_job_type_on_launch=dict(type='bool', aliases=['ask_job_type']),
+        ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
+        ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
+        ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
+        survey_enabled=dict(type='bool'),
+        survey_spec=dict(type="dict"),
+        become_enabled=dict(type='bool'),
+        diff_mode=dict(type='bool', aliases=['diff_mode_enabled']),
+        allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled']),
+        scm_branch=dict(),
+        ask_scm_branch_on_launch=dict(type='bool'),
+        job_slice_count=dict(type='int', default='1'),
+        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_credential=dict(),
+        labels=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True,
-        mutually_exclusive=[
-            ('credential', 'credentials'),
-            ('vault_credential', 'credentials'),
-            ('extra_vars_path', 'extra_vars'),
-        ]
-    )
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
+    # Extract our parameters
     name = module.params.get('name')
-    state = module.params.pop('state')
-    json_output = {'job_template': name, 'state': state}
+    new_name = module.params.get("new_name")
+    state = module.params.get('state')
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        jt = tower_cli.get_resource('job_template')
+    # Deal with legacy credential and vault_credential
+    credential = module.params.get('credential')
+    vault_credential = module.params.get('vault_credential')
+    credentials = module.params.get('credentials')
+    if vault_credential:
+        if credentials is None:
+            credentials = []
+        credentials.append(vault_credential)
+    if credential:
+        if credentials is None:
+            credentials = []
+        credentials.append(credential)
 
-        params = update_resources(module, module.params)
-        params = update_fields(module, params)
-        params['create_on_missing'] = True
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('job_templates', **{
+        'data': {
+            'name': name,
+        }
+    })
 
-        try:
-            if state == 'present':
-                result = jt.modify(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = jt.delete(**params)
-        except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update job template: {0}'.format(excinfo), changed=False)
+    # Create the data that gets sent for create and update
+    new_fields = {}
+    new_fields['name'] = new_name if new_name else name
+    for field_name in (
+        'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity', 'extra_vars',
+        'job_tags', 'force_handlers', 'skip_tags', 'start_at_task', 'timeout', 'use_fact_cache',
+        'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
+        'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
+        'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
+        'become_enabled', 'diff_mode', 'allow_simultaneous', 'custom_virtualenv', 'job_slice_count', 'webhook_service',
+    ):
+        field_val = module.params.get(field_name)
+        if field_val:
+            new_fields[field_name] = field_val
 
-        cred_list = module.params.get('credentials')
-        if cred_list:
-            cred = tower_cli.get_resource('credential')
-            for cred_name in cred_list:
-                try:
-                    cred_id = cred.get(name=cred_name)['id']
-                    r = jt.associate_credential(result['id'], cred_id)
-                except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
-                    module.fail_json(msg='Failed to add credential to job template: {0}'.format(excinfo), changed=False)
-                if r.get('changed'):
-                    result['changed'] = True
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    inventory = module.params.get('inventory')
+    project = module.params.get('project')
+    webhook_credential = module.params.get('webhook_credential')
 
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if inventory is not None:
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+    if project is not None:
+        new_fields['project'] = module.resolve_name_to_id('projects', project)
+    if webhook_credential is not None:
+        new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
+
+    credentials_ids = None
+    if credentials is not None:
+        credentials_ids = []
+        for item in credentials:
+            credentials_ids.append(module.resolve_name_to_id('credentials', item))
+
+    labels = module.params.get('labels')
+    labels_ids = None
+    if labels is not None:
+        labels_ids = []
+        for item in labels:
+            labels_ids.append(module.resolve_name_to_id('labels', item))
+
+    on_change = None
+    new_spec = module.params.get('survey_spec')
+    if new_spec is not None:
+        existing_spec = None
+        if existing_item:
+            spec_endpoint = existing_item.get('related', {}).get('survey_spec')
+            existing_spec = module.get_endpoint(spec_endpoint)['json']
+        if new_spec != existing_spec:
+            module.json_output['changed'] = True
+            on_change = update_survey
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+    elif state == 'present':
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(
+            existing_item, new_fields,
+            endpoint='job_templates', item_type='job_template',
+            associations={
+                'credentials': credentials_ids,
+                'labels': labels_ids,
+            },
+            on_create=on_change, on_update=on_change,
+        )
 
 
 if __name__ == '__main__':

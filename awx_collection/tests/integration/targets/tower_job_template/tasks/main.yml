@@ -1,12 +1,27 @@
 ---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: generate random string for project
   set_fact:
-    cred1: "AWX-Collection-tests-tower_job_template-cred1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred2: "AWX-Collection-tests-tower_job_template-cred2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred3: "AWX-Collection-tests-tower_job_template-cred3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    proj1: "AWX-Collection-tests-tower_job_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1: "AWX-Collection-tests-tower_job_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred1: "AWX-Collection-tests-tower_job_template-cred1-{{ test_id }}"
+    cred2: "AWX-Collection-tests-tower_job_template-cred2-{{ test_id }}"
+    cred3: "AWX-Collection-tests-tower_job_template-cred3-{{ test_id }}"
+    proj1: "AWX-Collection-tests-tower_job_template-proj-{{ test_id }}"
+    jt1: "AWX-Collection-tests-tower_job_template-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
+    lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
+
+- name: Create a Demo Project
+  tower_project:
+    name: "{{ proj1 }}"
+    organization: Default
+    state: present
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+    
+  register: result
 
 - name: Create Credential1
   tower_credential:
@@ -26,14 +41,10 @@
     organization: Default
     kind: ssh
 
-- name: Create a Demo Project
-  tower_project:
-    name: "{{ proj1 }}"
+- name: Create Label
+  tower_label:
+    name: "{{ lab1 }}"
     organization: Default
-    state: present
-    scm_type: git
-    scm_url: https://github.com/ansible/ansible-tower-samples.git
-  register: result
 
 - name: Create Job Template 1
   tower_job_template:
@@ -44,6 +55,71 @@
     credentials: ["{{ cred1 }}", "{{ cred2 }}"]
     job_type: run
     state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Add a credential to this JT
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Try to add the same credential to this JT
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add another credential to this JT
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove a credential for this JT
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove all credentials from this JT
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials: []
   register: result
 
 - assert:
@@ -73,7 +149,91 @@
     playbook: hello_world.yml
     credential: "{{ cred3 }}"
     job_type: run
+    labels: 
+      - "{{ lab1 }}"
     state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Add survey to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: True
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: True
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add survey to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: True
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: True
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add question to survey to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: True
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: True
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+          choices: ""
+        - question_name: "Q2"
+          type: "text"
+          variable: "q2"
+          required: False
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove survey from Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: False
+    survey_spec: {}
   register: result
 
 - assert:
@@ -124,3 +284,5 @@
     organization: Default
     kind: ssh
     state: absent
+
+# You can't delete a label directly so no cleanup needed

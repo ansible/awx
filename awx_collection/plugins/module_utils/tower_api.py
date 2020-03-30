@@ -475,6 +475,10 @@ class TowerModule(AnsibleModule):
             self.exit_json(**self.json_output)
 
     def modify_associations(self, association_endpoint, new_association_list):
+        # if we got None instead of [] we are not modifying the association_list
+        if new_association_list is None:
+            return
+
         # First get the existing associations
         response = self.get_all_endpoint(association_endpoint)
         existing_associated_ids = [association['id'] for association in response['json']['results']]
