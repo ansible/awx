@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
@@ -9,15 +9,24 @@ import {
   Radio,
   TextInput,
 } from '@patternfly/react-core';
+import AnsibleSelect from '@components/AnsibleSelect';
 import FormField from '@components/FormField';
-import {
-  getDaysInMonth,
-  getDayString,
-  getMonthString,
-  getWeekString,
-  getWeekNumber,
-} from '@util/dates';
 import { required } from '@util/validators';
+
+const RunOnRadio = styled(Radio)`
+  label {
+    display: block;
+    width: 100%;
+  }
+
+  :not(:last-of-type) {
+    margin-bottom: 10px;
+  }
+
+  select:not(:first-of-type) {
+    margin-left: 10px;
+  }
+`;
 
 const RunEveryLabel = styled.p`
   display: flex;
@@ -48,6 +57,21 @@ export function requiredPositiveInteger(i18n) {
 }
 
 const FrequencyDetailSubform = ({ i18n }) => {
+  const [runOnDayMonth] = useField({
+    name: 'runOnDayMonth',
+  });
+  const [runOnDayNumber] = useField({
+    name: 'runOnDayNumber',
+  });
+  const [runOnTheOccurrence] = useField({
+    name: 'runOnTheOccurrence',
+  });
+  const [runOnTheDay] = useField({
+    name: 'runOnTheDay',
+  });
+  const [runOnTheMonth] = useField({
+    name: 'runOnTheMonth',
+  });
   const [startDateTime] = useField({
     name: 'startDateTime',
   });
@@ -63,7 +87,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
     name: 'interval',
     validate: requiredPositiveInteger(i18n),
   });
-  const [runOn, runOnMeta, runOnHelpers] = useField({
+  const [runOn, runOnMeta] = useField({
     name: 'runOn',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
@@ -79,20 +103,64 @@ const FrequencyDetailSubform = ({ i18n }) => {
     validate: requiredPositiveInteger(i18n),
   });
 
-  useEffect(() => {
-    // The Last day option disappears if the start date isn't in the
-    // last week of the month.  If that value was selected when this
-    // happens then we'll clear out the selection and force the user
-    // to choose between the remaining two.
-    if (
-      (frequency.value === 'month' || frequency.value === 'year') &&
-      runOn.value === 'lastDay' &&
-      getDaysInMonth(startDateTime.value) - 7 >=
-        new Date(startDateTime.value).getDate()
-    ) {
-      runOnHelpers.setValue('');
-    }
-  }, [startDateTime.value, frequency.value, runOn.value, runOnHelpers]);
+  const monthOptions = [
+    {
+      key: 'january',
+      value: 1,
+      label: i18n._(t`January`),
+    },
+    {
+      key: 'february',
+      value: 2,
+      label: i18n._(t`February`),
+    },
+    {
+      key: 'march',
+      value: 3,
+      label: i18n._(t`March`),
+    },
+    {
+      key: 'april',
+      value: 4,
+      label: i18n._(t`April`),
+    },
+    {
+      key: 'may',
+      value: 5,
+      label: i18n._(t`May`),
+    },
+    {
+      key: 'june',
+      value: 6,
+      label: i18n._(t`June`),
+    },
+    {
+      key: 'july',
+      value: 7,
+      label: i18n._(t`July`),
+    },
+    { key: 'august', value: 8, label: i18n._(t`August`) },
+    {
+      key: 'september',
+      value: 9,
+      label: i18n._(t`September`),
+    },
+    {
+      key: 'october',
+      value: 10,
+      label: i18n._(t`October`),
+    },
+    {
+      key: 'november',
+      value: 11,
+      label: i18n._(t`November`),
+    },
+    {
+      key: 'december',
+      value: 12,
+      label: i18n._(t`December`),
+    },
+  ];
 
   const updateDaysOfWeek = (day, checked) => {
     const newDaysOfWeek = [...daysOfWeek.value];
@@ -149,66 +217,6 @@ const FrequencyDetailSubform = ({ i18n }) => {
     }
   };
 
-  const generateRunOnNumberLabel = () => {
-    switch (frequency.value) {
-      case 'month':
-        return i18n._(
-          t`Day ${startDateTime.value.split('T')[0].split('-')[2]}`
-        );
-      case 'year': {
-        const monthString = getMonthString(
-          new Date(startDateTime.value).getMonth(),
-          i18n
-        );
-        return `${monthString} ${new Date(startDateTime.value).getDate()}`;
-      }
-      default:
-        throw new Error(i18n._(t`Frequency did not match an expected value`));
-    }
-  };
-
-  const generateRunOnDayLabel = () => {
-    const dayString = getDayString(
-      new Date(startDateTime.value).getDay(),
-      i18n
-    );
-    const weekNumber = getWeekNumber(startDateTime.value);
-    const weekString = getWeekString(weekNumber, i18n);
-    switch (frequency.value) {
-      case 'month':
-        return i18n._(t`The ${weekString} ${dayString}`);
-      case 'year': {
-        const monthString = getMonthString(
-          new Date(startDateTime.value).getMonth(),
-          i18n
-        );
-        return i18n._(t`The ${weekString} ${dayString} in ${monthString}`);
-      }
-      default:
-        throw new Error(i18n._(t`Frequency did not match an expected value`));
-    }
-  };
-
-  const generateRunOnLastDayLabel = () => {
-    const dayString = getDayString(
-      new Date(startDateTime.value).getDay(),
-      i18n
-    );
-    switch (frequency.value) {
-      case 'month':
-        return i18n._(t`The last ${dayString}`);
-      case 'year': {
-        const monthString = getMonthString(
-          new Date(startDateTime.value).getMonth(),
-          i18n
-        );
-        return i18n._(t`The last ${dayString} in ${monthString}`);
-      }
-      default:
-        throw new Error(i18n._(t`Frequency did not match an expected value`));
-    }
-  };
-
   /* eslint-disable no-restricted-globals */
   return (
     <>
@@ -252,7 +260,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('SU', checked);
               }}
               aria-label={i18n._(t`Sunday`)}
-              id="days-of-week-sun"
+              id="schedule-days-of-week-sun"
               name="daysOfWeek"
             />
             <Checkbox
@@ -262,7 +270,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('MO', checked);
               }}
               aria-label={i18n._(t`Monday`)}
-              id="days-of-week-mon"
+              id="schedule-days-of-week-mon"
               name="daysOfWeek"
             />
             <Checkbox
@@ -272,7 +280,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('TU', checked);
               }}
               aria-label={i18n._(t`Tuesday`)}
-              id="days-of-week-tue"
+              id="schedule-days-of-week-tue"
               name="daysOfWeek"
             />
             <Checkbox
@@ -282,7 +290,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('WE', checked);
               }}
               aria-label={i18n._(t`Wednesday`)}
-              id="days-of-week-wed"
+              id="schedule-days-of-week-wed"
               name="daysOfWeek"
             />
             <Checkbox
@@ -292,7 +300,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('TH', checked);
               }}
               aria-label={i18n._(t`Thursday`)}
-              id="days-of-week-thu"
+              id="schedule-days-of-week-thu"
               name="daysOfWeek"
             />
             <Checkbox
@@ -302,7 +310,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('FR', checked);
               }}
               aria-label={i18n._(t`Friday`)}
-              id="days-of-week-fri"
+              id="schedule-days-of-week-fri"
               name="daysOfWeek"
             />
             <Checkbox
@@ -312,7 +320,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 updateDaysOfWeek('SA', checked);
               }}
               aria-label={i18n._(t`Saturday`)}
-              id="days-of-week-sat"
+              id="schedule-days-of-week-sat"
               name="daysOfWeek"
             />
           </div>
@@ -328,21 +336,39 @@ const FrequencyDetailSubform = ({ i18n }) => {
             isValid={!runOnMeta.touched || !runOnMeta.error}
             label={i18n._(t`Run on`)}
           >
-            <Radio
-              id="run-on-number"
+            <RunOnRadio
+              id="schedule-run-on-day"
               name="runOn"
-              label={generateRunOnNumberLabel()}
-              value="number"
-              isChecked={runOn.value === 'number'}
-              onChange={(value, event) => {
-                event.target.value = 'number';
-                runOn.onChange(event);
-              }}
-            />
-            <Radio
-              id="run-on-day"
-              name="runOn"
-              label={generateRunOnDayLabel()}
+              label={
+                <div css="display: flex;align-items: center;">
+                  {frequency?.value === 'month' && (
+                    <span id="foobar" css="margin-right: 10px;">
+                      Day
+                    </span>
+                  )}
+                  {frequency?.value === 'year' && (
+                    <AnsibleSelect
+                      id="schedule-run-on-day-month"
+                      css="margin-right: 10px"
+                      isDisabled={runOn.value !== 'day'}
+                      data={monthOptions}
+                      {...runOnDayMonth}
+                    />
+                  )}
+                  <TextInput
+                    id="schedule-run-on-day-number"
+                    type="number"
+                    min="1"
+                    max="31"
+                    step="1"
+                    isDisabled={runOn.value !== 'day'}
+                    {...runOnDayNumber}
+                    onChange={(value, event) => {
+                      runOnDayNumber.onChange(event);
+                    }}
+                  />
+                </div>
+              }
               value="day"
               isChecked={runOn.value === 'day'}
               onChange={(value, event) => {
@@ -350,20 +376,105 @@ const FrequencyDetailSubform = ({ i18n }) => {
                 runOn.onChange(event);
               }}
             />
-            {new Date(startDateTime.value).getDate() >
-              getDaysInMonth(startDateTime.value) - 7 && (
-              <Radio
-                id="run-on-last-day"
-                name="runOn"
-                label={generateRunOnLastDayLabel()}
-                value="lastDay"
-                isChecked={runOn.value === 'lastDay'}
-                onChange={(value, event) => {
-                  event.target.value = 'lastDay';
-                  runOn.onChange(event);
-                }}
-              />
-            )}
+            <RunOnRadio
+              id="schedule-run-on-the"
+              name="runOn"
+              label={
+                <div css="display: flex;align-items: center;">
+                  <span id="foobar" css="margin-right: 10px;">
+                    The
+                  </span>
+                  <AnsibleSelect
+                    id="schedule-run-on-the-occurrence"
+                    isDisabled={runOn.value !== 'the'}
+                    data={[
+                      { value: 1, key: 'first', label: i18n._(t`First`) },
+                      {
+                        value: 2,
+                        key: 'second',
+                        label: i18n._(t`Second`),
+                      },
+                      { value: 3, key: 'third', label: i18n._(t`Third`) },
+                      {
+                        value: 4,
+                        key: 'fourth',
+                        label: i18n._(t`Fourth`),
+                      },
+                      { value: 5, key: 'fifth', label: i18n._(t`Fifth`) },
+                      { value: -1, key: 'last', label: i18n._(t`Last`) },
+                    ]}
+                    {...runOnTheOccurrence}
+                  />
+                  <AnsibleSelect
+                    id="schedule-run-on-the-day"
+                    isDisabled={runOn.value !== 'the'}
+                    data={[
+                      {
+                        value: 'sunday',
+                        key: 'sunday',
+                        label: i18n._(t`Sunday`),
+                      },
+                      {
+                        value: 'monday',
+                        key: 'monday',
+                        label: i18n._(t`Monday`),
+                      },
+                      {
+                        value: 'tuesday',
+                        key: 'tuesday',
+                        label: i18n._(t`Tuesday`),
+                      },
+                      {
+                        value: 'wednesday',
+                        key: 'wednesday',
+                        label: i18n._(t`Wednesday`),
+                      },
+                      {
+                        value: 'thursday',
+                        key: 'thursday',
+                        label: i18n._(t`Thursday`),
+                      },
+                      {
+                        value: 'friday',
+                        key: 'friday',
+                        label: i18n._(t`Friday`),
+                      },
+                      {
+                        value: 'saturday',
+                        key: 'saturday',
+                        label: i18n._(t`Saturday`),
+                      },
+                      { value: 'day', key: 'day', label: i18n._(t`Day`) },
+                      {
+                        value: 'weekday',
+                        key: 'weekday',
+                        label: i18n._(t`Weekday`),
+                      },
+                      {
+                        value: 'weekendDay',
+                        key: 'weekendDay',
+                        label: i18n._(t`Weekend day`),
+                      },
+                    ]}
+                    {...runOnTheDay}
+                  />
+                  {frequency?.value === 'year' && (
+                    <AnsibleSelect
+                      id="schedule-run-on-the-month"
+                      isDisabled={runOn.value !== 'the'}
+                      data={monthOptions}
+                      {...runOnTheMonth}
+                    />
+                  )}
+                </div>
+              }
+              value="the"
+              isChecked={runOn.value === 'the'}
+              onChange={(value, event) => {
+                event.target.value = 'the';
+                runOn.onChange(event);
+              }}
+            />
           </FormGroup>
         )}
       <FormGroup

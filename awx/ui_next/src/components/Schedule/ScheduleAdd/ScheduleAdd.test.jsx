@@ -64,7 +64,6 @@ describe('<ScheduleAdd />', () => {
         interval: 10,
         name: 'Run every 10 minutes 10 times',
         occurrences: 10,
-        runOn: 'number',
         startDateTime: '2020-03-25T10:30:00',
         timezone: 'America/New_York',
       });
@@ -85,7 +84,6 @@ describe('<ScheduleAdd />', () => {
         frequency: 'hour',
         interval: 1,
         name: 'Run every hour until date',
-        runOn: 'number',
         startDateTime: '2020-03-25T10:45:00',
         timezone: 'America/New_York',
       });
@@ -105,7 +103,6 @@ describe('<ScheduleAdd />', () => {
         frequency: 'day',
         interval: 1,
         name: 'Run daily',
-        runOn: 'number',
         startDateTime: '2020-03-25T10:45:00',
         timezone: 'America/New_York',
       });
@@ -127,7 +124,6 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run weekly on mon/wed/fri',
         occurrences: 1,
-        runOn: 'number',
         startDateTime: '2020-03-25T10:45:00',
         timezone: 'America/New_York',
       });
@@ -148,7 +144,8 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run on the first day of the month',
         occurrences: 1,
-        runOn: 'number',
+        runOn: 'day',
+        runOnDayNumber: 1,
         startDateTime: '2020-04-01T10:45',
         timezone: 'America/New_York',
       });
@@ -157,7 +154,7 @@ describe('<ScheduleAdd />', () => {
       description: 'test description',
       name: 'Run on the first day of the month',
       rrule:
-        'DTSTART;TZID=America/New_York:20200401T104500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=01',
+        'DTSTART;TZID=America/New_York:20200401T104500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=1',
     });
   });
   test('Successfully creates a schedule with monthly repeat frequency on the last tuesday of the month', async () => {
@@ -170,7 +167,9 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Run monthly on the last Tuesday',
         occurrences: 1,
-        runOn: 'lastDay',
+        runOn: 'the',
+        runOnTheDay: 'tuesday',
+        runOnTheOccurrence: -1,
         startDateTime: '2020-03-31T11:00',
         timezone: 'America/New_York',
       });
@@ -179,7 +178,7 @@ describe('<ScheduleAdd />', () => {
       description: 'test description',
       name: 'Run monthly on the last Tuesday',
       rrule:
-        'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYDAY=TU;BYSETPOS=-1',
+        'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=TU',
     });
   });
   test('Successfully creates a schedule with yearly repeat frequency on the first day of March', async () => {
@@ -191,7 +190,9 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Yearly on the first day of March',
         occurrences: 1,
-        runOn: 'number',
+        runOn: 'day',
+        runOnDayMonth: 3,
+        runOnDayNumber: 1,
         startDateTime: '2020-03-01T00:00',
         timezone: 'America/New_York',
       });
@@ -200,7 +201,7 @@ describe('<ScheduleAdd />', () => {
       description: 'test description',
       name: 'Yearly on the first day of March',
       rrule:
-        'DTSTART;TZID=America/New_York:20200301T000000 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=01',
+        'DTSTART;TZID=America/New_York:20200301T000000 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=1',
     });
   });
   test('Successfully creates a schedule with yearly repeat frequency on the second Friday in April', async () => {
@@ -212,7 +213,10 @@ describe('<ScheduleAdd />', () => {
         interval: 1,
         name: 'Yearly on the second Friday in April',
         occurrences: 1,
-        runOn: 'day',
+        runOn: 'the',
+        runOnTheOccurrence: 2,
+        runOnTheDay: 'friday',
+        runOnTheMonth: 4,
         startDateTime: '2020-04-10T11:15',
         timezone: 'America/New_York',
       });
@@ -221,7 +225,31 @@ describe('<ScheduleAdd />', () => {
       description: 'test description',
       name: 'Yearly on the second Friday in April',
       rrule:
-        'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=4;BYDAY=FR;BYSETPOS=2',
+        'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=2;BYDAY=FR;BYMONTH=4',
+    });
+  });
+  test('Successfully creates a schedule with yearly repeat frequency on the first weekday in October', async () => {
+    await act(async () => {
+      wrapper.find('ScheduleForm').invoke('handleSubmit')({
+        description: 'test description',
+        end: 'never',
+        frequency: 'year',
+        interval: 1,
+        name: 'Yearly on the first weekday in October',
+        occurrences: 1,
+        runOn: 'the',
+        runOnTheOccurrence: 1,
+        runOnTheDay: 'weekday',
+        runOnTheMonth: 10,
+        startDateTime: '2020-04-10T11:15',
+        timezone: 'America/New_York',
+      });
+    });
+    expect(createSchedule).toHaveBeenCalledWith({
+      description: 'test description',
+      name: 'Yearly on the first weekday in October',
+      rrule:
+        'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=1;BYDAY=MO,TU,WE,TH,FR;BYMONTH=10',
     });
   });
 });

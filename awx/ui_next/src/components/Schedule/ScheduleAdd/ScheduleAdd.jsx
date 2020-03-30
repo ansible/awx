@@ -6,18 +6,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
-import { getWeekNumber } from '@util/dates';
+import { getRRuleDayConstants } from '@util/dates';
 import ScheduleForm from '../shared/ScheduleForm';
-
-const days = {
-  0: 'SU',
-  1: 'MO',
-  2: 'TU',
-  3: 'WE',
-  4: 'TH',
-  5: 'FR',
-  6: 'SA',
-};
 
 function ScheduleAdd({ i18n, createSchedule }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
@@ -71,31 +61,22 @@ function ScheduleAdd({ i18n, createSchedule }) {
         break;
       case 'month':
         ruleObj.freq = RRule.MONTHLY;
-        if (values.runOn === 'number') {
-          ruleObj.bymonthday = startDay;
-        } else if (values.runOn === 'day') {
-          ruleObj.byweekday =
-            RRule[days[new Date(values.startDateTime).getDay()]];
-          ruleObj.bysetpos = getWeekNumber(values.startDateTime);
-        } else if (values.runOn === 'lastDay') {
-          ruleObj.byweekday =
-            RRule[days[new Date(values.startDateTime).getDay()]];
-          ruleObj.bysetpos = -1;
+        if (values.runOn === 'day') {
+          ruleObj.bymonthday = values.runOnDayNumber;
+        } else if (values.runOn === 'the') {
+          ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
+          ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay, i18n);
         }
         break;
       case 'year':
         ruleObj.freq = RRule.YEARLY;
-        ruleObj.bymonth = new Date(values.startDateTime).getMonth() + 1;
-        if (values.runOn === 'number') {
-          ruleObj.bymonthday = startDay;
-        } else if (values.runOn === 'day') {
-          ruleObj.byweekday =
-            RRule[days[new Date(values.startDateTime).getDay()]];
-          ruleObj.bysetpos = getWeekNumber(values.startDateTime);
-        } else if (values.runOn === 'lastDay') {
-          ruleObj.byweekday =
-            RRule[days[new Date(values.startDateTime).getDay()]];
-          ruleObj.bysetpos = -1;
+        if (values.runOn === 'day') {
+          ruleObj.bymonth = parseInt(values.runOnDayMonth, 10);
+          ruleObj.bymonthday = values.runOnDayNumber;
+        } else if (values.runOn === 'the') {
+          ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
+          ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay, i18n);
+          ruleObj.bymonth = parseInt(values.runOnTheMonth, 10);
         }
         break;
       default:

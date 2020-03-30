@@ -216,67 +216,17 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
-    });
-    test('month run on options displayed correctly as date changes', async () => {
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-23T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(true);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe('Day 23');
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The fourth Monday'
+      expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
+        true
       );
-      expect(wrapper.find('input#run-on-last-day').length).toBe(0);
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-27T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(true);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe('Day 27');
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The fourth Friday'
+      expect(
+        wrapper.find('input#schedule-run-on-day-number').prop('value')
+      ).toBe(1);
+      expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
+        false
       );
-      expect(wrapper.find('input#run-on-last-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-last-day + label').text()).toBe(
-        'The last Friday'
-      );
-    });
-    test('month run on cleared when last day selected but date changes from one of the last seven days of the month', async () => {
-      await act(async () => {
-        wrapper.find('Radio#run-on-last-day').invoke('onChange')('lastDay', {
-          target: { name: 'runOn' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-last-day').prop('checked')).toBe(true);
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-15T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe('Day 15');
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The third Sunday'
-      );
-      expect(wrapper.find('input#run-on-last-day').length).toBe(0);
-      await act(async () => {
-        wrapper.find('Radio#run-on-number').invoke('onChange')('number', {
-          target: { name: 'runOn' },
-        });
-      });
-      wrapper.update();
+      expect(wrapper.find('select#schedule-run-on-day-month').length).toBe(0);
+      expect(wrapper.find('select#schedule-run-on-the-month').length).toBe(0);
     });
     test('correct frequency details fields and values shown when frequency changed to year', async () => {
       const runFrequencySelect = wrapper.find(
@@ -300,43 +250,19 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('input#end-never').prop('checked')).toBe(true);
       expect(wrapper.find('input#end-after').prop('checked')).toBe(false);
       expect(wrapper.find('input#end-on-date').prop('checked')).toBe(false);
+      expect(wrapper.find('input#schedule-run-on-day').prop('checked')).toBe(
+        true
+      );
+      expect(
+        wrapper.find('input#schedule-run-on-day-number').prop('value')
+      ).toBe(1);
+      expect(wrapper.find('input#schedule-run-on-the').prop('checked')).toBe(
+        false
+      );
+      expect(wrapper.find('select#schedule-run-on-day-month').length).toBe(1);
+      expect(wrapper.find('select#schedule-run-on-the-month').length).toBe(1);
     });
-    test('year run on options displayed correctly as date changes', async () => {
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-23T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(true);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe(
-        'March 23'
-      );
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The fourth Monday in March'
-      );
-      expect(wrapper.find('input#run-on-last-day').length).toBe(0);
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-27T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(true);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe(
-        'March 27'
-      );
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The fourth Friday in March'
-      );
-      expect(wrapper.find('input#run-on-last-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-last-day + label').text()).toBe(
-        'The last Friday in March'
-      );
-    });
-    test('occurrences field properly shown when that run on selection is made', async () => {
+    test('occurrences field properly shown when end after selection is made', async () => {
       await act(async () => {
         wrapper.find('Radio#end-after').invoke('onChange')('after', {
           target: { name: 'end' },
@@ -354,32 +280,6 @@ describe('<ScheduleForm />', () => {
         });
       });
       wrapper.update();
-    });
-    test('year run on cleared when last day selected but date changes from one of the last seven days of the month', async () => {
-      await act(async () => {
-        wrapper.find('Radio#run-on-last-day').invoke('onChange')('lastDay', {
-          target: { name: 'runOn' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-last-day').prop('checked')).toBe(true);
-      await act(async () => {
-        wrapper.find('input#schedule-start-datetime').simulate('change', {
-          target: { value: '2020-03-15T01:45:00', name: 'startDateTime' },
-        });
-      });
-      wrapper.update();
-      expect(wrapper.find('input#run-on-number').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-number + label').text()).toBe(
-        'March 15'
-      );
-      expect(wrapper.find('input#run-on-day').prop('checked')).toBe(false);
-      expect(wrapper.find('input#run-on-day + label').text()).toBe(
-        'The third Sunday in March'
-      );
-      expect(wrapper.find('input#run-on-last-day').length).toBe(0);
     });
     test('error shown when end date/time comes before start date/time', async () => {
       expect(wrapper.find('input#end-never').prop('checked')).toBe(true);

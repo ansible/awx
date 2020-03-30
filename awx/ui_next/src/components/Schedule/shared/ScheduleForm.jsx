@@ -172,14 +172,26 @@ function ScheduleForm({
               interval: 1,
               name: schedule.name || '',
               occurrences: 1,
-              runOn: 'number',
+              runOn: 'day',
+              runOnDayMonth: 1,
+              runOnDayNumber: 1,
+              runOnTheDay: 'sunday',
+              runOnTheMonth: 1,
+              runOnTheOccurrence: 1,
               startDateTime: dateToInputDateTime(closestQuarterHour),
               timezone: schedule.timezone || 'America/New_York',
             }}
             onSubmit={handleSubmit}
             validate={values => {
               const errors = {};
-              const { end, endDateTime, startDateTime } = values;
+              const {
+                end,
+                endDateTime,
+                frequency,
+                runOn,
+                runOnDayNumber,
+                startDateTime,
+              } = values;
 
               if (
                 end === 'onDate' &&
@@ -187,6 +199,16 @@ function ScheduleForm({
               ) {
                 errors.endDateTime = i18n._(
                   t`Please select an end date/time that comes after the start date/time.`
+                );
+              }
+
+              if (
+                (frequency === 'month' || frequency === 'year') &&
+                runOn === 'day' &&
+                (runOnDayNumber < 1 || runOnDayNumber > 31)
+              ) {
+                errors.runOn = i18n._(
+                  t`Please select a day number between 1 and 31`
                 );
               }
 

@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { t } from '@lingui/macro';
+import { RRule } from 'rrule';
 import { getLanguage } from './language';
 
 const prependZeros = value => value.toString().padStart(2, 0);
@@ -28,87 +29,37 @@ export function dateToInputDateTime(dateObj) {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
-export function getDaysInMonth(dateString) {
-  const dateObj = new Date(dateString);
-  return new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
-}
-
-export function getWeekNumber(dateString) {
-  const dateObj = new Date(dateString);
-  const dayOfMonth = dateObj.getDate();
-  const dayOfWeek = dateObj.getDay();
-  if (dayOfMonth < 8) {
-    return 1;
-  }
-  dateObj.setDate(dayOfMonth - dayOfWeek + 1);
-  return Math.ceil(dayOfMonth / 7);
-}
-
-export function getDayString(dayIndex, i18n) {
-  switch (dayIndex) {
-    case 0:
-      return i18n._(t`Sunday`);
-    case 1:
-      return i18n._(t`Monday`);
-    case 2:
-      return i18n._(t`Tuesday`);
-    case 3:
-      return i18n._(t`Wednesday`);
-    case 4:
-      return i18n._(t`Thursday`);
-    case 5:
-      return i18n._(t`Friday`);
-    case 6:
-      return i18n._(t`Saturday`);
+export function getRRuleDayConstants(dayString, i18n) {
+  switch (dayString) {
+    case 'sunday':
+      return RRule.SU;
+    case 'monday':
+      return RRule.MO;
+    case 'tuesday':
+      return RRule.TU;
+    case 'wednesday':
+      return RRule.WE;
+    case 'thursday':
+      return RRule.TH;
+    case 'friday':
+      return RRule.FR;
+    case 'saturday':
+      return RRule.SA;
+    case 'day':
+      return [
+        RRule.MO,
+        RRule.TU,
+        RRule.WE,
+        RRule.TH,
+        RRule.FR,
+        RRule.SA,
+        RRule.SU,
+      ];
+    case 'weekday':
+      return [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR];
+    case 'weekendDay':
+      return [RRule.SA, RRule.SU];
     default:
-      throw new Error(i18n._(t`Unrecognized day index`));
-  }
-}
-
-export function getWeekString(weekNumber, i18n) {
-  switch (weekNumber) {
-    case 1:
-      return i18n._(t`first`);
-    case 2:
-      return i18n._(t`second`);
-    case 3:
-      return i18n._(t`third`);
-    case 4:
-      return i18n._(t`fourth`);
-    case 5:
-      return i18n._(t`fifth`);
-    default:
-      throw new Error(i18n._(t`Unrecognized week number`));
-  }
-}
-
-export function getMonthString(monthIndex, i18n) {
-  switch (monthIndex) {
-    case 0:
-      return i18n._(t`January`);
-    case 1:
-      return i18n._(t`February`);
-    case 2:
-      return i18n._(t`March`);
-    case 3:
-      return i18n._(t`April`);
-    case 4:
-      return i18n._(t`May`);
-    case 5:
-      return i18n._(t`June`);
-    case 6:
-      return i18n._(t`July`);
-    case 7:
-      return i18n._(t`August`);
-    case 8:
-      return i18n._(t`September`);
-    case 9:
-      return i18n._(t`October`);
-    case 10:
-      return i18n._(t`November`);
-    case 11:
-      return i18n._(t`December`);
-    default:
-      throw new Error(i18n._(t`Unrecognized month index`));
+      throw new Error(i18n._(t`Unrecognized day string`));
   }
 }

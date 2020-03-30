@@ -1,12 +1,9 @@
+import { RRule } from 'rrule';
 import {
   dateToInputDateTime,
-  getDaysInMonth,
-  getDayString,
-  getMonthString,
-  getWeekNumber,
-  getWeekString,
   formatDateString,
   formatDateStringUTC,
+  getRRuleDayConstants,
   secondsToHHMMSS,
 } from './dates';
 
@@ -59,63 +56,35 @@ describe('dateToInputDateTime', () => {
   });
 });
 
-describe('getDaysInMonth', () => {
+describe('getRRuleDayConstants', () => {
   test('it returns the expected value', () => {
-    expect(getDaysInMonth('2020-02-15T00:00:00Z')).toEqual(29);
-    expect(getDaysInMonth('2020-03-15T00:00:00Z')).toEqual(31);
-    expect(getDaysInMonth('2020-04-15T00:00:00Z')).toEqual(30);
-  });
-});
-
-describe('getWeekNumber', () => {
-  test('it returns the expected value', () => {
-    expect(getWeekNumber('2020-02-01T00:00:00Z')).toEqual(1);
-    expect(getWeekNumber('2020-02-08T00:00:00Z')).toEqual(2);
-    expect(getWeekNumber('2020-02-15T00:00:00Z')).toEqual(3);
-    expect(getWeekNumber('2020-02-22T00:00:00Z')).toEqual(4);
-    expect(getWeekNumber('2020-02-29T00:00:00Z')).toEqual(5);
-  });
-});
-
-describe('getDayString', () => {
-  test('it returns the expected value', () => {
-    expect(getDayString(0, i18n)).toEqual('Sunday');
-    expect(getDayString(1, i18n)).toEqual('Monday');
-    expect(getDayString(2, i18n)).toEqual('Tuesday');
-    expect(getDayString(3, i18n)).toEqual('Wednesday');
-    expect(getDayString(4, i18n)).toEqual('Thursday');
-    expect(getDayString(5, i18n)).toEqual('Friday');
-    expect(getDayString(6, i18n)).toEqual('Saturday');
-    expect(() => getDayString(7, i18n)).toThrow();
-  });
-});
-
-describe('getWeekString', () => {
-  test('it returns the expected value', () => {
-    expect(() => getWeekString(0, i18n)).toThrow();
-    expect(getWeekString(1, i18n)).toEqual('first');
-    expect(getWeekString(2, i18n)).toEqual('second');
-    expect(getWeekString(3, i18n)).toEqual('third');
-    expect(getWeekString(4, i18n)).toEqual('fourth');
-    expect(getWeekString(5, i18n)).toEqual('fifth');
-    expect(() => getWeekString(6, i18n)).toThrow();
-  });
-});
-
-describe('getMonthString', () => {
-  test('it returns the expected value', () => {
-    expect(getMonthString(0, i18n)).toEqual('January');
-    expect(getMonthString(1, i18n)).toEqual('February');
-    expect(getMonthString(2, i18n)).toEqual('March');
-    expect(getMonthString(3, i18n)).toEqual('April');
-    expect(getMonthString(4, i18n)).toEqual('May');
-    expect(getMonthString(5, i18n)).toEqual('June');
-    expect(getMonthString(6, i18n)).toEqual('July');
-    expect(getMonthString(7, i18n)).toEqual('August');
-    expect(getMonthString(8, i18n)).toEqual('September');
-    expect(getMonthString(9, i18n)).toEqual('October');
-    expect(getMonthString(10, i18n)).toEqual('November');
-    expect(getMonthString(11, i18n)).toEqual('December');
-    expect(() => getMonthString(12, i18n)).toThrow();
+    expect(getRRuleDayConstants('monday', i18n)).toEqual(RRule.MO);
+    expect(getRRuleDayConstants('tuesday', i18n)).toEqual(RRule.TU);
+    expect(getRRuleDayConstants('wednesday', i18n)).toEqual(RRule.WE);
+    expect(getRRuleDayConstants('thursday', i18n)).toEqual(RRule.TH);
+    expect(getRRuleDayConstants('friday', i18n)).toEqual(RRule.FR);
+    expect(getRRuleDayConstants('saturday', i18n)).toEqual(RRule.SA);
+    expect(getRRuleDayConstants('sunday', i18n)).toEqual(RRule.SU);
+    expect(getRRuleDayConstants('day', i18n)).toEqual([
+      RRule.MO,
+      RRule.TU,
+      RRule.WE,
+      RRule.TH,
+      RRule.FR,
+      RRule.SA,
+      RRule.SU,
+    ]);
+    expect(getRRuleDayConstants('weekday', i18n)).toEqual([
+      RRule.MO,
+      RRule.TU,
+      RRule.WE,
+      RRule.TH,
+      RRule.FR,
+    ]);
+    expect(getRRuleDayConstants('weekendDay', i18n)).toEqual([
+      RRule.SA,
+      RRule.SU,
+    ]);
+    expect(() => getRRuleDayConstants('foobar', i18n)).toThrow();
   });
 });
