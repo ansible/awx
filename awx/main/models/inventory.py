@@ -1345,6 +1345,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_source_detail', kwargs={'pk': self.pk}, request=request)
 
+    @property
+    def can_update(self):
+        if self.source == '':
+            return False
+        return super(InventorySource, self).can_update
+
     def _can_update(self):
         if self.source == 'custom':
             return bool(self.source_script)
