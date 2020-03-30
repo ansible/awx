@@ -16,6 +16,7 @@ EXPORTABLE_RESOURCES = [
     'notification_templates',
     'projects',
     'inventory',
+    'inventory_sources',
     'job_templates',
     'workflow_job_templates',
 ]

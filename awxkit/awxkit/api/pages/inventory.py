@@ -474,6 +474,7 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
     optional_schedule_fields = tuple()
     dependencies = [Inventory]
     optional_dependencies = [Credential, InventoryScript, Project]
+    NATURAL_KEY = ('organization', 'name', 'inventory')
 
     def payload(
             self,
