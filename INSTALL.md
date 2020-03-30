@@ -41,6 +41,8 @@ This document provides a guide for installing AWX.
     + [Run the installer](#run-the-installer-2)
     + [Post-install](#post-install-2)
     + [Accessing AWX](#accessing-awx-2)
+- [Installing the AWX CLI](#installing-the-awx-cli)
+  * [Building the CLI Documentation](#building-the-cli-documentation)
 
     
 ## Getting started
@@ -620,3 +622,34 @@ Added instance awx to tower
 The AWX web server is accessible on the deployment host, using the *host_port* value set in the *inventory* file. The default URL is [http://localhost](http://localhost).
 
 You will prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
+
+
+# Installing the AWX CLI
+
+`awx` is the official command-line client for AWX.  It:
+
+* Uses naming and structure consistent with the AWX HTTP API
+* Provides consistent output formats with optional machine-parsable formats
+* To the extent possible, auto-detects API versions, available endpoints, and
+  feature support across multiple versions of AWX.
+
+Potential uses include:
+
+* Configuring and launching jobs/playbooks
+* Checking on the status and output of job runs
+* Managing objects like organizations, users, teams, etc...
+
+The preferred way to install the AWX CLI is through pip directly from GitHub:
+
+    pip install "https://github.com/ansible/awx/archive/$VERSION.tar.gz#egg=awxkit&subdirectory=awxkit"
+    awx --help
+
+...where ``$VERSION`` is the version of AWX you're running.  To see a list of all available releases, visit: https://github.com/ansible/awx/releases
+
+## Building the CLI Documentation
+
+To build the docs, spin up a real AWX server, `pip install sphinx sphinxcontrib-autoprogram`, and run:
+
+    ~ TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
+    ~ cd build/html/ && python -m http.server
+    Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ..
