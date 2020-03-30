@@ -8,7 +8,7 @@ from . import base
 
 class Schedule(UnifiedJob):
 
-    pass
+    NATURAL_KEY = ('unified_job_template', 'name')
 
 
 page.register_page([resources.schedule,

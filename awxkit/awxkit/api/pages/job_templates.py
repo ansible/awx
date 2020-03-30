@@ -24,6 +24,7 @@ class JobTemplate(
         UnifiedJobTemplate):
 
     optional_dependencies = [Inventory, Credential, Project]
+    NATURAL_KEY = ('organization', 'name')
 
     def launch(self, payload={}):
         """Launch the job_template using related->launch endpoint."""

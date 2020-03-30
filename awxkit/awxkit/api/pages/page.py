@@ -317,6 +317,24 @@ class Page(object):
         page_cls = get_registered_page(endpoint)
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
+    def get_natural_key(self):
+        if not getattr(self, 'NATURAL_KEY', None):
+            raise exc.NoNaturalKey(
+                "Page does not have a natural key: {}".format(getattr(self, 'endpoint', repr(self.__class__)))
+            )
+        natural_key = {}
+        for key in self.NATURAL_KEY:
+            if key in self.related:
+                # FIXME: use caching by url
+                natural_key[key] = self.related[key].get().get_natural_key()
+            elif key in self:
+                natural_key[key] = self[key]
+        if not natural_key:
+            return None
+
+        natural_key['type'] = self['type']
+        return natural_key
+
 
 _exception_map = {http.NO_CONTENT: exc.NoContent,
                   http.NOT_FOUND: exc.NotFound,
@@ -375,6 +393,9 @@ class PageList(object):
 
     def create(self, *a, **kw):
         return self.__item_class__(self.connection).create(*a, **kw)
+
+    def get_natural_key(self):
+        raise exc.NoNaturalKey
 
 
 class TentativePage(str):

@@ -8,6 +8,8 @@ from . import page
 
 class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
 
+    NATURAL_KEY = ('name',)
+
     def add_admin(self, user):
         if isinstance(user, page.Page):
             user = user.json

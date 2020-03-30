@@ -35,50 +35,6 @@ EXPORTABLE_DEPENDENT_OBJECTS = [
 ]
 
 
-NATURAL_KEYS = {
-    'user': ('username',),
-    'organization': ('name',),
-    'team': ('organization', 'name'),
-    'credential_type': ('name', 'kind'),
-    'credential': ('organization', 'name', 'credential_type'),
-    'notification_template': ('organization', 'name'),
-    'project': ('organization', 'name'),
-    'inventory': ('organization', 'name'),
-    'job_template': ('organization', 'name'),
-    'workflow_job_template': ('organization', 'name'),
-
-    # related resources
-    'role': ('name', ':content_object'),
-    'notification_template': ('organization', 'name'),
-    'label': ('organization', 'name'),  # FIXME: label will need to be fully constructed from this
-    'workflow_job_template_node': ('workflow_job_template', 'identifier'),
-    'schedule': ('unified_job_template', 'name'),
-}
-
-
-def get_natural_key(pg):
-    natural_key = {'type': pg['type']}
-    lookup = NATURAL_KEYS.get(pg['type'], ())
-
-    for key in lookup or ():
-        if key.startswith(':'):
-            # treat it like a special-case related object
-            related_objs = [
-                related for name, related in pg.related.items()
-                if name not in ('users', 'teams')
-            ]
-            if related_objs:
-                natural_key[key[1:]] = get_natural_key(related_objs[0].get())
-        elif key in pg.related:
-            natural_key[key] = get_natural_key(pg.related[key].get())
-        elif key in pg:
-            natural_key[key] = pg[key]
-
-    if not natural_key:
-        return None
-    return natural_key
-
-
 def freeze(key):
     if key is None:
         return None
@@ -113,10 +69,11 @@ class ApiV2(base.Base):
                 key: asset.json[key] for key in options
                 if key in asset.json and key not in asset.related and key != 'id'
             }
-            fields['natural_key'] = get_natural_key(asset)
+            fields['natural_key'] = asset.get_natural_key()
 
             fk_fields = {
-                key: get_natural_key(asset.related[key].get()) for key in options
+                # FIXME: use caching by url
+                key: asset.related[key].get().get_natural_key() for key in options
                 if key in asset.related
             }
 
@@ -124,7 +81,7 @@ class ApiV2(base.Base):
             for key, related_endpoint in asset.related.items():
                 if key in asset.json or not related_endpoint:
                     continue
-                if key == 'object_roles':
+                if key == 'object_roles':  # FIXME
                     continue
                 rel = related_endpoint._create()
 
@@ -139,7 +96,7 @@ class ApiV2(base.Base):
                 if 'results' in data:
                     related_options = self._get_options(related_endpoint)
                     related[key] = [
-                        get_natural_key(x) if by_natural_key else self._serialize_asset(x, related_options)
+                        x.get_natural_key() if by_natural_key else self._serialize_asset(x, related_options)
                         for x in data.results
                     ]
                 else:
@@ -190,7 +147,7 @@ class ApiV2(base.Base):
             yield page_resource[page_cls]
 
     def _register_page(self, page):
-        natural_key = freeze(get_natural_key(page))
+        natural_key = freeze(page.get_natural_key())
         # FIXME: we need to keep a reference for the case where we
         # don't have a natural key, so we can delete
         if natural_key is not None:

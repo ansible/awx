@@ -11,6 +11,7 @@ from . import page
 class Team(HasCreate, base.Base):
 
     dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def add_user(self, user):
         if isinstance(user, page.Page):

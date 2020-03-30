@@ -9,6 +9,8 @@ from . import page
 
 class User(HasCreate, base.Base):
 
+    NATURAL_KEY = ('username',)
+
     def payload(self, **kwargs):
         payload = PseudoNamespace(
             username=kwargs.get('username') or 'User-{}'.format(

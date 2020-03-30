@@ -32,6 +32,7 @@ log = logging.getLogger(__name__)
 class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
 
     dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def print_ini(self):
         """Print an ini version of the inventory"""

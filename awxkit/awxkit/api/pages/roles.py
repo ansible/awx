@@ -5,7 +5,19 @@ from . import page
 
 class Role(base.Base):
 
-    pass
+    NATURAL_KEY = ('name',)
+
+    def get_natural_key(self):
+        natural_key = super(Role, self).get_natural_key()
+        related_objs = [
+            related for name, related in self.related.items()
+            if name not in ('users', 'teams')
+        ]
+        if related_objs:
+            # FIXME: use caching by url
+            natural_key['content_object'] = related_objs[0].get().get_natural_key()
+
+        return natural_key
 
 
 page.register_page(resources.role, Role)
