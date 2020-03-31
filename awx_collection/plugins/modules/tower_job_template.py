@@ -303,6 +303,7 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.tower_api import TowerModule
+import json
 
 
 def update_survey(module, last_request):
@@ -399,7 +400,7 @@ def main():
     new_fields = {}
     new_fields['name'] = new_name if new_name else name
     for field_name in (
-        'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity', 'extra_vars',
+        'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity',
         'job_tags', 'force_handlers', 'skip_tags', 'start_at_task', 'timeout', 'use_fact_cache',
         'host_config_key', 'ask_scm_branch_on_launch', 'ask_diff_mode_on_launch', 'ask_variables_on_launch',
         'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
@@ -409,6 +410,11 @@ def main():
         field_val = module.params.get(field_name)
         if field_val:
             new_fields[field_name] = field_val
+
+        # Special treatment of extra_vars parameter
+        extra_vars = module.params.get('extra_vars')
+        if extra_vars is not None:
+            new_fields['extra_vars'] = json.dumps(extra_vars)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory = module.params.get('inventory')
