@@ -16,8 +16,8 @@ imagePullSecrets:
 {% endif %}
 
 ---
-apiVersion: {{ kubernetes_statefulset_api_version }}
-kind: StatefulSet
+apiVersion: {{ kubernetes_deployment_api_version }}
+kind: Deployment
 metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
@@ -26,9 +26,8 @@ metadata:
     app: {{ kubernetes_deployment_name }}
 {% endif %}
 spec:
-  serviceName: {{ kubernetes_deployment_name }}
   replicas: 1
-{% if kubernetes_statefulset_api_version == "apps/v1" %}
+{% if kubernetes_deployment_api_version == "apps/v1" %}
   selector:
     matchLabels:
       app: {{ kubernetes_deployment_name }}
