@@ -150,6 +150,9 @@ spec:
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
 
+            - name: {{ kubernetes_deployment_name }}-memcached-socket
+              mountPath: "/var/run/memcached"
+
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -216,6 +219,9 @@ spec:
 
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
+
+            - name: {{ kubernetes_deployment_name }}-memcached-socket
+              mountPath: "/var/run/memcached"
           env:
             - name: AWX_SKIP_MIGRATIONS
               value: "1"
@@ -272,6 +278,15 @@ spec:
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
+          command:
+            - 'memcached'
+            - '-s'
+            - '/var/run/memcached/memcached.sock'
+            - '-a'
+            - '0666'
+          volumeMounts:
+            - name: {{ kubernetes_deployment_name }}-memcached-socket
+              mountPath: "/var/run/memcached"
           resources:
             requests:
               memory: "{{ memcached_mem_request }}Gi"
@@ -383,6 +398,9 @@ spec:
                 path: SECRET_KEY
 
         - name: {{ kubernetes_deployment_name }}-redis-socket
+          emptyDir: {}
+
+        - name: {{ kubernetes_deployment_name }}-memcached-socket
           emptyDir: {}
 
 ---

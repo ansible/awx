@@ -195,7 +195,7 @@ data:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '{}:{}'.format("localhost", "11211")
+            'LOCATION': 'unix:/var/run/memcached/memcached.sock'
         },
         'ephemeral': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
