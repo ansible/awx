@@ -9,6 +9,7 @@ import styled from 'styled-components';
 
 const PromptHeader = styled.h2`
   font-weight: bold;
+  margin: var(--pf-global--spacer--lg) 0;
 `;
 
 function hasPromptData(launchData) {
@@ -49,9 +50,7 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
 
       {hasPromptData(launchConfig) && (
         <>
-          <br />
           <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
-          <br />
           <DetailList>
             {launchConfig.ask_job_type_on_launch && (
               <Detail label={i18n._(t`Job Type`)} value={defaults?.job_type} />
