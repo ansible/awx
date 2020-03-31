@@ -33,7 +33,17 @@ function FormSubmitError({ error }) {
     return null;
   }
 
-  return <Alert variant="danger" isInline title={errorMessage} />;
+  return (
+    <Alert
+      variant="danger"
+      isInline
+      title={
+        Array.isArray(errorMessage)
+          ? errorMessage.map(msg => <div key={msg}>{msg}</div>)
+          : errorMessage
+      }
+    />
+  );
 }
 
 export default FormSubmitError;
