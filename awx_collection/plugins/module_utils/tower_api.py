@@ -575,14 +575,15 @@ class TowerModule(AnsibleModule):
             self.exit_json(**self.json_output)
 
     # We need to be able to recursevly step through fields in the case of inputs for credentials.
-    # They are dicts and we can't just compare them at the top level because the dict returned from tower_cli will have fields like $encrypted$
-    def compare_fields(self, new_item, existing_item):
+    # They are dicts and we can't just compare them at the top level because the dict returned from the tower api will have fields like $encrypted$
+    @staticmethod
+    def compare_fields(new_item, existing_item):
         needs_update = False
         for field in new_item:
             existing_field = existing_item.get(field, None)
             new_field = new_item.get(field, None)
             if type(existing_field) == dict and type(new_field) == dict:
-                needs_update = needs_update or self.compare_fields(new_field, existing_field)
+                needs_update = needs_update or TowerModule.compare_fields(new_field, existing_field)
             # If the two items don't match and we are not comparing '' to None
             # In the case of extra_vars in a job template, we have to pass in {} for nothing ('' is not valid)
             # But when its returned from the API, instead of {} we get back ''.
@@ -618,7 +619,7 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
             # Check to see if anything within the item requires the item to be updated
-            needs_update = self.compare_fields(new_item, existing_item)
+            needs_update = TowerModule.compare_fields(new_item, existing_item)
 
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
