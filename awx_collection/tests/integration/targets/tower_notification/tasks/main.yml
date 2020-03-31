@@ -66,7 +66,7 @@
       # The 27 can be count from the size of the OLD_INPUT_NAMES list in the module
       - result['deprecations'] | length() == 27
 
-- name: Create Slack notification
+- name: Create Slack notification with custom messages
   tower_notification:
     name: "{{ slack_not }}"
     organization: Default
@@ -74,6 +74,13 @@
     token: a_token
     channels:
       - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
     state: present
   register: result
 
