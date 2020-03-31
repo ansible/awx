@@ -84,4 +84,5 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   );
 }
 
+export { LaunchPrompt as _LaunchPrompt };
 export default withI18n()(LaunchPrompt);

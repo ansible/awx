@@ -6,8 +6,8 @@ import { t } from '@lingui/macro';
 import { InventoriesAPI } from '@api';
 import { Inventory } from '@types';
 import Lookup from '@components/Lookup';
+import OptionsList from '@components/OptionsList';
 import { getQSConfig, parseQueryString } from '@util/qs';
-import OptionsList from './shared/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('inventory', {

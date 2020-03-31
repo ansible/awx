@@ -6,8 +6,7 @@ import { useField } from 'formik';
 import { InventoriesAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import useRequest from '@util/useRequest';
-// TODO move OptionsList out of Lookup/shared
-import { OptionsList } from '@components/Lookup';
+import OptionsList from '@components/OptionsList';
 import ContentLoading from '@components/ContentLoading';
 
 const QS_CONFIG = getQSConfig('inventory', {

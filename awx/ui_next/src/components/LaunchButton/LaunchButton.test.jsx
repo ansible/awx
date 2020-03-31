@@ -30,7 +30,9 @@ describe('LaunchButton', () => {
     id: 1,
     type: 'job_template',
   };
+
   afterEach(() => jest.clearAllMocks());
+
   test('renders the expected content', () => {
     const wrapper = mountWithContexts(
       <LaunchButton resource={resource}>{children}</LaunchButton>

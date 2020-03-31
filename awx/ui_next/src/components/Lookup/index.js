@@ -3,4 +3,3 @@ export { default as InstanceGroupsLookup } from './InstanceGroupsLookup';
 export { default as InventoryLookup } from './InventoryLookup';
 export { default as ProjectLookup } from './ProjectLookup';
 export { default as MultiCredentialsLookup } from './MultiCredentialsLookup';
-export { default as OptionsList } from './shared/OptionsList';
