@@ -2662,7 +2662,7 @@ class satellite6(PluginFileInjector):
         # this assumes that this is merged
         # https://github.com/ansible/ansible/pull/52693
         credential = inventory_update.get_cloud_credential()
-        ret = {}
+        ret = super(satellite6, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
         if credential:
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
