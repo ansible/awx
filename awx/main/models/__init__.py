@@ -3,7 +3,7 @@
 
 # Django
 from django.conf import settings # noqa
-from django.db import connection, ProgrammingError
+from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
@@ -91,14 +91,13 @@ def enforce_bigint_pk_migration():
         'main_systemjobevent'
     ):
         with connection.cursor() as cursor:
-            try:
-                cursor.execute(f'SELECT MAX(id) FROM _old_{tblname}')
-                if cursor.fetchone():
-                    from awx.main.tasks import migrate_legacy_event_data
-                    migrate_legacy_event_data.apply_async([tblname])
-            except ProgrammingError:
-                # the table is gone (migration is unnecessary)
-                pass
+            cursor.execute(
+                'SELECT 1 FROM information_schema.tables WHERE table_name=%s',
+                (f'_old_{tblname}',)
+            )
+            if bool(cursor.rowcount):
+                from awx.main.tasks import migrate_legacy_event_data
+                migrate_legacy_event_data.apply_async([tblname])
 
 
 def cleanup_created_modified_by(sender, **kwargs):
