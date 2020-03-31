@@ -25,7 +25,8 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_limit_on_launch &&
     !launchData.ask_scm_branch_on_launch &&
     !launchData.survey_enabled &&
-    launchData.variables_needed_to_start.length === 0
+    (!launchData.variables_needed_to_start ||
+      launchData.variables_needed_to_start.length === 0)
   );
 }
 
@@ -83,18 +84,22 @@ class LaunchButton extends React.Component {
   }
 
   async launchWithParams(params) {
-    const { history, resource } = this.props;
-    const launchJob =
-      resource.type === 'workflow_job_template'
-        ? WorkflowJobTemplatesAPI.launch(resource.id, params)
-        : JobTemplatesAPI.launch(resource.id, params);
+    try {
+      const { history, resource } = this.props;
+      const jobPromise =
+        resource.type === 'workflow_job_template'
+          ? WorkflowJobTemplatesAPI.launch(resource.id, params)
+          : JobTemplatesAPI.launch(resource.id, params);
 
-    const { data: job } = await launchJob;
-    history.push(
-      `/${
-        resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
-      }/${job.id}/output`
-    );
+      const { data: job } = await jobPromise;
+      history.push(
+        `/${
+          resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
+        }/${job.id}/output`
+      );
+    } catch (launchError) {
+      this.setState({ launchError });
+    }
   }
 
   async handleRelaunch() {
