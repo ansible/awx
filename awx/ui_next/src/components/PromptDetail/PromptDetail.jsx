@@ -1,7 +1,7 @@
 import React from 'react';
 import { shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { Chip, ChipGroup } from '@patternfly/react-core';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import { DetailList, Detail } from '@components/DetailList';
@@ -27,6 +27,15 @@ function hasPromptData(launchData) {
   );
 }
 
+function formatTimeout(timeout) {
+  if (typeof timeout === "undefined" || timeout === null) {
+    return null;
+  }
+  const minutes = Math.floor(timeout / 60);
+  const seconds = timeout - Math.floor(timeout / 60) * 60;
+  return <>{minutes} <Trans>min</Trans> {seconds} <Trans>sec</Trans></>;
+}
+
 function PromptDetail({ i18n, resource, launchConfig = {} }) {
   const { defaults = {} } = launchConfig;
   const VERBOSITY = {
@@ -45,6 +54,10 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
         <Detail
           label={i18n._(t`Type`)}
           value={resource.unified_job_type || resource.type}
+        />
+        <Detail
+          label={i18n._(t`Timeout`)}
+          value={formatTimeout(resource?.timeout)}
         />
       </DetailList>
 
