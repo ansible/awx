@@ -26,7 +26,7 @@ dictdiffer==0.8.1         # via openshift
 django-auth-ldap==2.1.0   # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.2.1  # via -r /awx_devel/requirements/requirements.in
 django-crum==0.7.5        # via -r /awx_devel/requirements/requirements.in
-django-extensions==2.2.8  # via -r /awx_devel/requirements/requirements.in
+django-extensions==2.2.9  # via -r /awx_devel/requirements/requirements.in
 django-jsonfield==1.2.0   # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.1.3  # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4     # via -r /awx_devel/requirements/requirements.in
