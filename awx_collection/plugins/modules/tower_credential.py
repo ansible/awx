@@ -45,7 +45,7 @@ options:
     credential_type:
       description:
         - Name of credential type.
-        - Will be prefered over kind
+        - Will be preferred over kind
       required: False
       version_added: "2.10"
       type: str
@@ -340,13 +340,14 @@ def main():
 
     cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
 
-    # Attempt to look up the object based on the provided name and inventory ID
-    credential = module.get_one('credentials', **{
-        'data': {
-            'name': name,
-            'credential_type': cred_type_id,
-        }
-    })
+    # Attempt to look up the object based on the provided name, credential type and optional organization
+    lookup_data = {
+        'name': name,
+        'credential_type': cred_type_id,
+    }
+    if organization:
+        lookup_data['organization'] = org_id
+    credential = module.get_one('credentials', **{'data': lookup_data})
 
     # Create credential input from legacy inputs
     credential_inputs = {}

@@ -42,7 +42,7 @@
     organization: Default
     user: admin
     kind: ssh
-    authorize: False
+    authorize: false
     authorize_password: 'test'
     client: 'test'
     security_token: 'test'
@@ -62,7 +62,7 @@
     vault_id: 'test'
     ssh_key_unlock: 'test'
     state: absent
-  ignore_errors: True
+  ignore_errors: true
   register: result
 
 - assert:
@@ -125,7 +125,6 @@
 - name: Delete a User-specific credential
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
-    organization: Default
     user: admin
     state: absent
     kind: ssh
@@ -253,7 +252,7 @@
     ssh_key_data: "{{ tempdir.stdout }}/id_rsa"
     ssh_key_unlock: "passphrase"
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -353,7 +352,7 @@
     description: An example Vault credential
     vault_password: secret-vault
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
