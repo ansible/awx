@@ -122,7 +122,7 @@ def cred_type_counts(since):
     return counts
     
     
-@register('inventory_counts', '1.0')
+@register('inventory_counts', '1.1')
 def inventory_counts(since):
     counts = {}
     for inv in models.Inventory.objects.filter(kind='').annotate(num_sources=Count('inventory_sources', distinct=True), 
@@ -136,8 +136,8 @@ def inventory_counts(since):
     for smart_inv in models.Inventory.objects.filter(kind='smart'):
         counts[smart_inv.id] = {'name': smart_inv.name,
                                 'kind': smart_inv.kind,
-                                'num_hosts': smart_inv.hosts.count(),
-                                'num_sources': smart_inv.inventory_sources.count()
+                                'hosts': smart_inv.hosts.count(),
+                                'sources': smart_inv.inventory_sources.count()
                                 }
     return counts
 
