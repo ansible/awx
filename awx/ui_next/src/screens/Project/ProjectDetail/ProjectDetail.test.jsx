@@ -66,22 +66,7 @@ describe('<ProjectDetail />', () => {
   });
 
   test('should render Details', () => {
-    const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />, {
-      context: {
-        linguiPublisher: {
-          i18n: {
-            _: key => {
-              if (key.values) {
-                Object.entries(key.values).forEach(([k, v]) => {
-                  key.id = key.id.replace(new RegExp(`\\{${k}\\}`), v);
-                });
-              }
-              return key.id;
-            },
-          },
-        },
-      },
-    });
+    const wrapper = mountWithContexts(<ProjectDetail project={mockProject} />);
     function assertDetail(label, value) {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);

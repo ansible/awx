@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { rrulestr } from 'rrule';
+import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -66,7 +66,7 @@ function ScheduleDetail({ schedule, i18n }) {
 
   const rule = rrulestr(rrule);
   const repeatFrequency =
-    rule.options.freq === 3 && dtstart === dtend
+    rule.options.freq === RRule.MINUTELY && dtstart === dtend
       ? i18n._(t`None (Run Once)`)
       : rule.toText().replace(/^\w/, c => c.toUpperCase());
   const showPromptedFields =

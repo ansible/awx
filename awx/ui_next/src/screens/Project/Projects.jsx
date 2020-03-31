@@ -44,6 +44,7 @@ class Projects extends Component {
       [`/projects/${project.id}/job_templates`]: i18n._(t`Job Templates`),
 
       [`${projectSchedulesPath}`]: i18n._(t`Schedules`),
+      [`${projectSchedulesPath}/add`]: i18n._(t`Create New Schedule`),
       [`${projectSchedulesPath}/${nested?.id}`]: `${nested?.name}`,
       [`${projectSchedulesPath}/${nested?.id}/details`]: i18n._(
         t`Edit Details`

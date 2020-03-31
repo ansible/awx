@@ -26,6 +26,7 @@ class Project extends Component {
       isInitialized: false,
       isNotifAdmin: false,
     };
+    this.createSchedule = this.createSchedule.bind(this);
     this.loadProject = this.loadProject.bind(this);
     this.loadProjectAndRoles = this.loadProjectAndRoles.bind(this);
     this.loadSchedules = this.loadSchedules.bind(this);
@@ -89,6 +90,11 @@ class Project extends Component {
     } finally {
       this.setState({ hasContentLoading: false });
     }
+  }
+
+  createSchedule(data) {
+    const { project } = this.state;
+    return ProjectsAPI.createSchedule(project.id, data);
   }
 
   loadScheduleOptions() {
@@ -233,6 +239,7 @@ class Project extends Component {
                   <Schedules
                     setBreadcrumb={setBreadcrumb}
                     unifiedJobTemplate={project}
+                    createSchedule={this.createSchedule}
                     loadSchedules={this.loadSchedules}
                     loadScheduleOptions={this.loadScheduleOptions}
                   />

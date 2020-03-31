@@ -59,6 +59,10 @@ function Template({ i18n, me, setBreadcrumb }) {
     loadTemplateAndRoles();
   }, [loadTemplateAndRoles, location.pathname]);
 
+  const createSchedule = data => {
+    return JobTemplatesAPI.createSchedule(templateId, data);
+  };
+
   const loadScheduleOptions = () => {
     return JobTemplatesAPI.readScheduleOptions(templateId);
   };
@@ -173,6 +177,7 @@ function Template({ i18n, me, setBreadcrumb }) {
               path="/templates/:templateType/:id/schedules"
             >
               <Schedules
+                createSchedule={createSchedule}
                 setBreadcrumb={setBreadcrumb}
                 unifiedJobTemplate={template}
                 loadSchedules={loadSchedules}

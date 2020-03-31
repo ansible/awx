@@ -13,6 +13,10 @@ class Schedules extends Base {
   readCredentials(resourceId, params) {
     return this.http.get(`${this.baseUrl}${resourceId}/credentials/`, params);
   }
+
+  readZoneInfo() {
+    return this.http.get(`${this.baseUrl}zoneinfo/`);
+  }
 }
 
 export default Schedules;

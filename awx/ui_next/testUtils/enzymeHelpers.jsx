@@ -27,7 +27,14 @@ const defaultContexts = {
   linguiPublisher: {
     i18n: {
       ...originalI18n,
-      _: key => key.id, // provide _ macro, for just passing down the key
+      _: key => {
+        if (key.values) {
+          Object.entries(key.values).forEach(([k, v]) => {
+            key.id = key.id.replace(new RegExp(`\\{${k}\\}`), v);
+          });
+        }
+        return key.id;
+      }, // provide _ macro, for just passing down the key
       toJSON: () => '/i18n/',
     },
   },
