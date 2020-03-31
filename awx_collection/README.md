@@ -50,6 +50,7 @@ The following notes are changes that may require changes to playbooks:
  - `tower_group` used to also service inventory sources, but this functionality has been removed from this module; use `tower_inventory_source` instead.
  - Specified `tower_config` file used to handle `k=v` pairs on a single line; this is no longer supported. Please use a file formatted as `yaml`, `json` or `ini` only.
  - Some return values (e.g., `credential_type`) have been removed. Use of `id` is recommended.
+ - tower_job_template no longer supports the deprecated extra_vars_path parameter, please use extra_vars with the lookup plugin to replace this functionality.
 
 ## Running Unit Tests
 
