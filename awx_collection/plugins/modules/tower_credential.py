@@ -28,37 +28,24 @@ options:
         - The name to use for the credential.
       required: True
       type: str
+    new_name:
+      description:
+        - Setting this option will change the existing name (looked up via the name field.
+      required: True
+      type: str
     description:
       description:
         - The description to use for the credential.
       type: str
-    user:
-      description:
-        - User that should own this credential.
-      type: str
-    team:
-      description:
-        - Team that should own this credential.
-      type: str
-    project:
-      description:
-        - Project that should use this credential.
-      type: str
     organization:
       description:
         - Organization that should own the credential.
-      required: True
-      type: str
-    kind:
-      description:
-        - Type of credential being added.
-        - The ssh choice refers to a Tower Machine credential.
       required: False
       type: str
-      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
     credential_type:
       description:
         - Name of credential type.
+        - Will be prefered over kind
       required: False
       version_added: "2.10"
       type: str
@@ -67,91 +54,132 @@ options:
         - >-
           Credential inputs where the keys are var names used in templating.
           Refer to the Ansible Tower documentation for example syntax.
+        - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
       required: False
       version_added: "2.9"
       type: dict
+    user:
+      description:
+        - User that should own this credential.
+      type: str
+    team:
+      description:
+        - Team that should own this credential.
+      type: str
+
+    kind:
+      description:
+        - Type of credential being added.
+        - The ssh choice refers to a Tower Machine credential.
+        - Deprecated, please use credential_type
+      required: False
+      type: str
+      choices: ["ssh", "vault", "net", "scm", "aws", "vmware", "satellite6", "cloudforms", "gce", "azure_rm", "openstack", "rhv", "insights", "tower"]
     host:
       description:
         - Host for this credential.
+        - Deprecated, will be removed in a future release
       type: str
     username:
       description:
         - Username for this credential. ``access_key`` for AWS.
+        - Deprecated, please use inputs
       type: str
     password:
       description:
         - Password for this credential. ``secret_key`` for AWS. ``api_key`` for RAX.
         - Use "ASK" and launch in Tower to be prompted.
+        - Deprecated, please use inputs
+      type: str
+    project:
+      description:
+        - Project that should use this credential for GCP.
+        - Deprecated, will be removed in a future release
       type: str
     ssh_key_data:
       description:
         - SSH private key content. To extract the content from a file path, use the lookup function (see examples).
+        - Deprecated, please use inputs
       required: False
       type: str
     ssh_key_unlock:
       description:
         - Unlock password for ssh_key.
         - Use "ASK" and launch in Tower to be prompted.
+        - Deprecated, please use inputs
       type: str
     authorize:
       description:
         - Should use authorize for net type.
+        - Deprecated, please use inputs
       type: bool
       default: 'no'
     authorize_password:
       description:
         - Password for net credentials that require authorize.
+        - Deprecated, please use inputs
       type: str
     client:
       description:
         - Client or application ID for azure_rm type.
+        - Deprecated, please use inputs
       type: str
     security_token:
       description:
         - STS token for aws type.
+        - Deprecated, please use inputs
       version_added: "2.6"
       type: str
     secret:
       description:
         - Secret token for azure_rm type.
+        - Deprecated, please use inputs
       type: str
     subscription:
       description:
         - Subscription ID for azure_rm type.
+        - Deprecated, please use inputs
       type: str
     tenant:
       description:
         - Tenant ID for azure_rm type.
+        - Deprecated, please use inputs
       type: str
     domain:
       description:
         - Domain for openstack type.
+        - Deprecated, please use inputs
       type: str
     become_method:
       description:
         - Become method to use for privilege escalation.
         - Some examples are "None", "sudo", "su", "pbrun"
         - Due to become plugins, these can be arbitrary
+        - Deprecated, please use inputs
       type: str
     become_username:
       description:
         - Become username.
         - Use "ASK" and launch in Tower to be prompted.
+        - Deprecated, please use inputs
       type: str
     become_password:
       description:
         - Become password.
         - Use "ASK" and launch in Tower to be prompted.
+        - Deprecated, please use inputs
       type: str
     vault_password:
       description:
         - Vault password.
         - Use "ASK" and launch in Tower to be prompted.
+        - Deprecated, please use inputs
       type: str
     vault_id:
       description:
         - Vault identifier.
         - This parameter is only valid if C(kind) is specified as C(vault).
+        - Deprecated, please use inputs
       type: str
       version_added: "2.8"
     state:
@@ -160,21 +188,23 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
-
-requirements:
-- ansible-tower-cli >= 3.0.2
-
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
 
 EXAMPLES = '''
-- name: Add tower credential
+- name: Add tower machine credential
   tower_credential:
     name: Team Name
     description: Team Description
     organization: test-org
-    kind: ssh
+    credential_type: Machine
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -183,11 +213,12 @@ EXAMPLES = '''
     name: SCM Credential
     organization: Default
     state: present
-    kind: scm
-    username: joe
-    password: secret
-    ssh_key_data: "{{ lookup('file', '/tmp/id_rsa') }}"
-    ssh_key_unlock: "passphrase"
+    credential_type: Source Control
+    inputs:
+      username: joe
+      password: secret
+      ssh_key_data: "{{ lookup('file', '/tmp/id_rsa') }}"
+      ssh_key_unlock: "passphrase"
 
 - name: Fetch private key
   slurp:
@@ -196,12 +227,10 @@ EXAMPLES = '''
 - name: Add Credential Into Tower
   tower_credential:
     name: Workshop Credential
-    ssh_key_data: "{{ aws_ssh_key['content'] | b64decode }}"
-    kind: ssh
+    credential_type: Machine
     organization: Default
-    tower_username: admin
-    tower_password: ansible
-    tower_host: https://localhost
+    inputs:
+      ssh_key_data: "{{ aws_ssh_key['content'] | b64decode }}"
   run_once: true
   delegate_to: localhost
 
@@ -215,23 +244,11 @@ EXAMPLES = '''
     tower_host: https://localhost
 '''
 
-import os
-
-from ansible.module_utils._text import to_text
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, tower_check_mode
-
-try:
-    import tower_cli
-    import tower_cli.exceptions as exc
-
-    from tower_cli.conf import settings
-except ImportError:
-    pass
-
+from ..module_utils.tower_api import TowerModule
 
 KIND_CHOICES = {
     'ssh': 'Machine',
-    'vault': 'Ansible Vault',
+    'vault': 'Vault',
     'net': 'Network',
     'scm': 'Source Control',
     'aws': 'Amazon Web Services',
@@ -257,162 +274,117 @@ OLD_INPUT_NAMES = (
 )
 
 
-def credential_type_for_kind(params):
-    credential_type_res = tower_cli.get_resource('credential_type')
-    kind = params.get('kind')
-    arguments = {'managed_by_tower': True}
-    if kind == 'ssh':
-        if params.get('vault_password'):
-            arguments['kind'] = 'vault'
-        else:
-            arguments['kind'] = 'ssh'
-    elif kind in ('net', 'scm', 'insights', 'vault'):
-        arguments['kind'] = kind
-    elif kind in KIND_CHOICES:
-        arguments.update(dict(
-            kind='cloud',
-            name=KIND_CHOICES[kind]
-        ))
-    return credential_type_res.get(**arguments)
-
-
 def main():
-
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        user=dict(),
-        team=dict(),
-        kind=dict(choices=list(KIND_CHOICES.keys())),
+        new_name=dict(),
+        description=dict(),
+        organization=dict(),
         credential_type=dict(),
         inputs=dict(type='dict'),
+        user=dict(),
+        team=dict(),
+        # These are for backwards compatability
+        kind=dict(choices=list(KIND_CHOICES.keys())),
         host=dict(),
         username=dict(),
         password=dict(no_log=True),
-        ssh_key_data=dict(no_log=True, type='str'),
+        project=dict(),
+        ssh_key_data=dict(no_log=True),
         ssh_key_unlock=dict(no_log=True),
-        authorize=dict(type='bool', default=False),
+        authorize=dict(type='bool'),
         authorize_password=dict(no_log=True),
         client=dict(),
         security_token=dict(),
-        secret=dict(),
-        tenant=dict(),
+        secret=dict(no_log=True),
         subscription=dict(),
+        tenant=dict(),
         domain=dict(),
         become_method=dict(),
         become_username=dict(),
         become_password=dict(no_log=True),
         vault_password=dict(no_log=True),
-        description=dict(),
-        organization=dict(required=True),
-        project=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
         vault_id=dict(),
+        # End backwards compatability
+        state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    mutually_exclusive = [
-        ('kind', 'credential_type')
-    ]
-    for input_name in OLD_INPUT_NAMES:
-        mutually_exclusive.append(('inputs', input_name))
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True, required_one_of=[['kind', 'credential_type']])
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True,
-                         mutually_exclusive=mutually_exclusive)
-
+    # Extract our parameters
     name = module.params.get('name')
+    new_name = module.params.get('new_name')
+    description = module.params.get('description')
     organization = module.params.get('organization')
+    credential_type = module.params.get('credential_type')
+    inputs = module.params.get('inputs')
+    user = module.params.get('user')
+    team = module.params.get('team')
+    # The legacy arguments are put into a hash down below
+    kind = module.params.get('kind')
+    # End backwards compatability
     state = module.params.get('state')
 
-    json_output = {'credential': name, 'state': state}
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if organization:
+        org_id = module.resolve_name_to_id('organizations', organization)
+    if user:
+        user_id = module.resolve_name_to_id('users', user)
+    if team:
+        team_id = module.resolve_name_to_id('teams', team)
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        tower_check_mode(module)
-        credential = tower_cli.get_resource('credential')
-        try:
-            params = {}
-            params['create_on_missing'] = True
-            params['name'] = name
+    if kind:
+        module.deprecate(msg='The kind parameter has been depricated, please use credential_type instead', version="3.6")
 
-            if organization:
-                org_res = tower_cli.get_resource('organization')
-                org = org_res.get(name=organization)
-                params['organization'] = org['id']
+    cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
 
-            try:
-                tower_cli.get_resource('credential_type')
-            except (ImportError, AttributeError):
-                # /api/v1/ backwards compat
-                # older versions of tower-cli don't *have* a credential_type
-                # resource
-                params['kind'] = module.params.get('kind')
-            else:
-                if module.params.get('credential_type'):
-                    credential_type_res = tower_cli.get_resource('credential_type')
-                    try:
-                        credential_type = credential_type_res.get(name=module.params['credential_type'])
-                    except (exc.NotFound) as excinfo:
-                        module.fail_json(msg=(
-                            'Failed to update credential, credential_type not found: {0}'
-                        ).format(excinfo), changed=False)
-                    params['credential_type'] = credential_type['id']
+    # Attempt to look up the object based on the provided name and inventory ID
+    credential = module.get_one('credentials', **{
+        'data': {
+            'name': name,
+            'credential_type': cred_type_id,
+        }
+    })
 
-                    if module.params.get('inputs'):
-                        params['inputs'] = module.params.get('inputs')
+    # Create credential input from legacy inputs
+    credential_inputs = {}
+    for legacy_input in OLD_INPUT_NAMES:
+        if module.params.get(legacy_input) is not None:
+            module.deprecate(msg='{0} parameter has been depricated, please use inputs instead'.format(legacy_input), version="3.6")
+            credential_inputs[legacy_input] = module.params.get(legacy_input)
+    if inputs:
+        credential_inputs.update(inputs)
 
-                elif module.params.get('kind'):
-                    credential_type = credential_type_for_kind(module.params)
-                    params['credential_type'] = credential_type['id']
-                else:
-                    module.fail_json(msg='must either specify credential_type or kind', changed=False)
+    # Create the data that gets sent for create and update
+    credential_fields = {
+        'name': new_name if new_name else name,
+        'credential_type': cred_type_id,
+        'inputs': credential_inputs,
+    }
+    if description:
+        credential_fields['description'] = description
+    if organization:
+        credential_fields['organization'] = org_id
 
-            if module.params.get('description'):
-                params['description'] = module.params.get('description')
+    # If we don't already have a credential (and we are creating one) we can add user/team
+    # The API does not appear to do anything with these after creation anyway
+    # NOTE: We can't just add these on a modification because they are never returned from a GET so it would always cause a changed=True
+    if not credential:
+        if user:
+            credential_fields['user'] = user_id
+        if team:
+            credential_fields['team'] = team_id
 
-            if module.params.get('user'):
-                user_res = tower_cli.get_resource('user')
-                user = user_res.get(username=module.params.get('user'))
-                params['user'] = user['id']
-
-            if module.params.get('team'):
-                team_res = tower_cli.get_resource('team')
-                team = team_res.get(name=module.params.get('team'))
-                params['team'] = team['id']
-
-            if module.params.get('ssh_key_data'):
-                data = module.params.get('ssh_key_data')
-                if os.path.exists(data):
-                    module.deprecate(
-                        msg='ssh_key_data should be a string, not a path to a file.',
-                        version="2.12"
-                    )
-                    if os.path.isdir(data):
-                        module.fail_json(msg='attempted to read contents of directory: %s' % data)
-                    with open(data, 'rb') as f:
-                        module.params['ssh_key_data'] = to_text(f.read())
-                else:
-                    module.params['ssh_key_data'] = data
-
-            if module.params.get('vault_id', None) and module.params.get('kind') != 'vault':
-                module.fail_json(msg="Parameter 'vault_id' is only valid if parameter 'kind' is specified as 'vault'")
-
-            for key in OLD_INPUT_NAMES:
-                if 'kind' in params:
-                    params[key] = module.params.get(key)
-                elif module.params.get(key):
-                    params.setdefault('inputs', {})[key] = module.params.get(key)
-
-            if state == 'present':
-                result = credential.modify(**params)
-                json_output['id'] = result['id']
-            elif state == 'absent':
-                result = credential.delete(**params)
-        except (exc.NotFound) as excinfo:
-            module.fail_json(msg='Failed to update credential, organization not found: {0}'.format(excinfo), changed=False)
-        except (exc.ConnectionError, exc.BadRequest, exc.AuthError) as excinfo:
-            module.fail_json(msg='Failed to update credential: {0}'.format(excinfo), changed=False)
-
-    json_output['changed'] = result['changed']
-    module.exit_json(**json_output)
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(credential)
+    elif state == 'present':
+        # If the state was present we can let the module build or update the existing group, this will return on its own
+        module.create_or_update_if_needed(
+            credential, credential_fields, endpoint='credentials', item_type='credential'
+        )
 
 
 if __name__ == '__main__':

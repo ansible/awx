@@ -265,7 +265,14 @@ class TowerModule(AnsibleModule):
 
     def resolve_name_to_id(self, endpoint, name_or_id):
         # Try to resolve the object by name
-        response = self.get_endpoint(endpoint, **{'data': {'name': name_or_id}})
+        name_field = 'name'
+        if endpoint == 'users':
+            name_field = 'username'
+
+        response = self.get_endpoint(endpoint, **{'data': {name_field: name_or_id}})
+        if response['status_code'] == 400:
+            self.fail_json(msg="Unable to try and resolve {0} for {1} : {2}".format(endpoint, name_or_id, response['json']['detail']))
+
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
@@ -567,6 +574,23 @@ class TowerModule(AnsibleModule):
         else:
             self.exit_json(**self.json_output)
 
+    # We need to be able to recursevly step through fields in the case of inputs for credentials.
+    # They are dicts and we can't just compare them at the top level because the dict returned from tower_cli will have fields like $encrypted$
+    def compare_fields(self, new_item, existing_item):
+        needs_update = False
+        for field in new_item:
+            existing_field = existing_item.get(field, None)
+            new_field = new_item.get(field, None)
+            if type(existing_field) == dict and type(new_field) == dict:
+                needs_update = needs_update or self.compare_fields(new_field, existing_field)
+            # If the two items don't match and we are not comparing '' to None
+            # In the case of extra_vars in a job template, we have to pass in {} for nothing ('' is not valid)
+            # But when its returned from the API, instead of {} we get back ''.
+            elif existing_field != new_field and not (existing_field in (None, '') and new_field in ('', {})):
+                # Something doesn't match so let's update it
+                needs_update = True
+        return needs_update
+
     def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
@@ -594,15 +618,7 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
             # Check to see if anything within the item requires the item to be updated
-            needs_update = False
-            for field in new_item:
-                existing_field = existing_item.get(field, None)
-                new_field = new_item.get(field, None)
-                # If the two items don't match and we are not comparing '' to None
-                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
-                    # Something doesn't match so let's update it
-                    needs_update = True
-                    break
+            needs_update = self.compare_fields(new_item, existing_item)
 
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
