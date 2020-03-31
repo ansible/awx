@@ -101,14 +101,16 @@ class ActivityStreamMiddleware(threading.local, MiddlewareMixin):
             post_save.disconnect(dispatch_uid=self.disp_uid)
 
         for instance in ActivityStream.objects.filter(id__in=self.instance_ids):
-            if drf_user and drf_user.id:
+            if drf_user and drf_user.id:       
+                from awx.api.serializers import ActivityStreamSerializer
+                summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
                 instance.actor = drf_user
                 try:
                     instance.save(update_fields=['actor'])
                     analytics_logger.info('Activity Stream update entry for %s' % str(instance.object1),
                                           extra=dict(changes=instance.changes, relationship=instance.object_relationship_type,
                                           actor=drf_user.username, operation=instance.operation,
-                                          object1=instance.object1, object2=instance.object2))
+                                          object1=instance.object1, object2=instance.object2, summary_fields=summary_fields))
                 except IntegrityError:
                     logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
             # else:
