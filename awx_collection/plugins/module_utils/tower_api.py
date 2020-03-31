@@ -316,13 +316,12 @@ class TowerModule(AnsibleModule):
         elif kwargs.get('data'):
             self.url = self.url._replace(query=urlencode(kwargs.get('data')))
 
-        data = {}
+        data = None  # Important, if content type is not JSON, this should not be dict type
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
 
         try:
             response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
-            self.url = self.url._replace(query=None)
         except(SSLValidationError) as ssl_err:
             self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(self.url.netloc, ssl_err))
         except(ConnectionError) as con_err:
@@ -364,6 +363,8 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(self.url.geturl(), he))
         except(Exception) as e:
             self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, self.url.geturl()))
+        finally:
+            self.url = self.url._replace(query=None)
 
         response_body = ''
         try:
@@ -403,6 +404,12 @@ class TowerModule(AnsibleModule):
                     force_basic_auth=True, url_username=self.username, url_password=self.password,
                     data=dumps(login_data), headers={'Content-Type': 'application/json'}
                 )
+            except HTTPError as he:
+                try:
+                    resp = he.read()
+                except Exception as e:
+                    resp = 'unknown {0}'.format(e)
+                self.fail_json(msg='Failed to get token: {0}'.format(he), response=resp)
             except(Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.fail_json(msg='Failed to get token: {0}'.format(e))
@@ -633,7 +640,12 @@ class TowerModule(AnsibleModule):
         if self.oauth_token_id is not None and self.username and self.password:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
-            api_token_url = (self.url._replace(path='/api/v2/tokens/{0}/'.format(self.oauth_token_id))).geturl()
+            api_token_url = (
+                self.url._replace(
+                    path='/api/v2/tokens/{0}/'.format(self.oauth_token_id),
+                    query=None  # in error cases, fail_json exists before exception handling
+                )
+            ).geturl()
 
             try:
                 self.session.open(
@@ -647,6 +659,12 @@ class TowerModule(AnsibleModule):
                 )
                 self.oauth_token_id = None
                 self.authenticated = False
+            except HTTPError as he:
+                try:
+                    resp = he.read()
+                except Exception as e:
+                    resp = 'unknown {0}'.format(e)
+                self.warn('Failed to release tower token: {0}, response: {1}'.format(he, resp))
             except(Exception) as e:
                 # Sanity check: Did the server send back some kind of internal error?
                 self.warn('Failed to release tower token {0}: {1}'.format(self.oauth_token_id, e))

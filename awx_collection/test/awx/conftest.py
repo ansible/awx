@@ -78,10 +78,15 @@ def run_module(request, collection_import):
         def new_request(self, method, url, **kwargs):
             kwargs_copy = kwargs.copy()
             if 'data' in kwargs:
-                if not isinstance(kwargs['data'], dict):
+                if isinstance(kwargs['data'], dict):
+                    kwargs_copy['data'] = kwargs['data']
+                elif kwargs['data'] is None:
+                    pass
+                elif isinstance(kwargs['data'], str):
                     kwargs_copy['data'] = json.loads(kwargs['data'])
                 else:
-                    kwargs_copy['data'] = kwargs['data']
+                    raise RuntimeError('Expected data to be dict or str, got {0}, data: {1}'.format(
+                        type(kwargs['data']), kwargs['data']))
             if 'params' in kwargs and method == 'GET':
                 # query params for GET are handled a bit differently by
                 # tower-cli and python requests as opposed to REST framework APIRequestFactory
