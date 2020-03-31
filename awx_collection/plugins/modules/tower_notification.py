@@ -226,7 +226,7 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = '''
-- name: Add Slack notification
+- name: Add Slack notification with custom messages
   tower_notification:
     name: slack notification
     organization: Default
@@ -234,14 +234,6 @@ EXAMPLES = '''
     channels:
       - general
     token: cefda9e2be1f21d11cdd9452f5b7f97fda977f42
-    state: present
-    tower_config_file: "~/tower_cli.cfg"
-
-- name: Add custom messages to our notification
-  tower_notification:
-    name: slack notification
-    notification_type: slack
-    organization: Default
     messages:
       started:
         message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
@@ -249,6 +241,7 @@ EXAMPLES = '''
         message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
       error:
         message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: present
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add webhook notification
