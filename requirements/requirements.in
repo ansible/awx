@@ -46,6 +46,7 @@ requests-futures  # see library notes
 slackclient==1.1.2  # see UPGRADE BLOCKERs
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
+twisted[tls]>=20.3.0  # CVE-2020-10108, CVE-2020-10109
 uWSGI
 uwsgitop
 pip==19.3.1  # see UPGRADE BLOCKERs

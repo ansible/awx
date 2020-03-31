@@ -118,7 +118,7 @@ sqlparse==0.3.1           # via django
 tacacs_plus==1.0          # via -r /awx_devel/requirements/requirements.in
 tempora==2.1.0            # via irc, jaraco.logging
 twilio==6.37.0            # via -r /awx_devel/requirements/requirements.in
-twisted[tls]==19.10.0     # via daphne
+twisted[tls]==20.3.0      # via -r /awx_devel/requirements/requirements.in, daphne
 txaio==20.1.1             # via autobahn
 typing-extensions==3.7.4.1  # via aiohttp
 urllib3==1.25.8           # via kubernetes, requests
