@@ -103,6 +103,11 @@ class IsMigrating(Common):
     pass
 
 
-class NoNaturalKey(Common):
+class ImportExportError(Exception):
+
+    pass
+
+
+class NoNaturalKey(ImportExportError):
 
     pass
