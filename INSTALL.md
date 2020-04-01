@@ -477,7 +477,7 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 *ssl_certificate*
 
-> Optionally, provide the path to a file that contains a certificate and its private key.
+> Optionally, provide the path to a file that contains a certificate and its private key. This needs to be a .pem-file
 
 *docker_compose_dir*
 
