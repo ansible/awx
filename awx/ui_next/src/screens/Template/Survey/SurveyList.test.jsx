@@ -88,6 +88,42 @@ describe('<SurveyList />', () => {
     );
     expect(deleteSurvey).toHaveBeenCalled();
   });
+  test('should render Preview button ', async () => {
+    let wrapper;
+
+    await act(async () => {
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+    });
+
+    expect(wrapper.find('Button[aria-label="Preview"]').length).toBe(1);
+  });
+  test('Preview button should render Modal', async () => {
+    let wrapper;
+
+    await act(async () => {
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+    });
+    act(() => wrapper.find('Button[aria-label="Preview"]').prop('onClick')());
+    wrapper.update();
+
+    expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
+  });
+  test('Modal close button should close modal', async () => {
+    let wrapper;
+
+    await act(async () => {
+      wrapper = mountWithContexts(<SurveyList survey={surveyData} />);
+    });
+    act(() => wrapper.find('Button[aria-label="Preview"]').prop('onClick')());
+    wrapper.update();
+
+    expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
+
+    wrapper.find('Modal').prop('onClose')();
+    wrapper.update();
+
+    expect(wrapper.find('SurveyPreviewModal').length).toBe(0);
+  });
 });
 
 describe('Survey with no questions', () => {

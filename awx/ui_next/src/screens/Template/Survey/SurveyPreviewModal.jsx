@@ -1,12 +1,10 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
-import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { PasswordField } from '@components/FormField';
 import { Formik } from 'formik';
 
 import {
-  Chip,
   Form,
   FormGroup,
   Modal,
@@ -16,9 +14,6 @@ import {
   SelectVariant,
 } from '@patternfly/react-core';
 
-// const Chip = styled(_Chip)`
-//   margin-right: 5px;
-// `;
 function SurveyPreviewModal({
   questions,
   isPreviewModalOpen,
