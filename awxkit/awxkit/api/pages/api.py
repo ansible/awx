@@ -54,14 +54,34 @@ class ApiV2(base.Base):
 
     # Common import/export methods
 
-    def _get_options(self, endpoint):
-        return endpoint.options().json['actions'].get('POST', {})
+    def _get_options(self, _page):
+        if getattr(self, '_options', None) is None:
+            self._options = {}
+
+        if isinstance(_page, page.TentativePage):
+            url = str(_page)
+        else:
+            url = _page.url
+
+        if url in self._options:
+            return self._options[url]
+
+        options = _page.options()
+        warning = options.r.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            return self._options.setdefault(url, None)
+        if 'POST' not in options.r.headers.get('Allow', ''):
+            return self._options.setdefault(url, None)
+
+        return self._options.setdefault(url, options.json['actions'].get('POST', {}))
 
     # Export methods
 
     def _serialize_asset(self, asset, options):
         # Drop any (credential_type) assets that are being managed by the Tower instance.
         if asset.json.get('managed_by_tower'):
+            return None
+        if options is None:  # Deprecated endpoint or insufficient permissions
             return None
 
         try:
@@ -88,14 +108,16 @@ class ApiV2(base.Base):
 
                 if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
                     by_natural_key = True
+                    related_options = self._get_options(related_endpoint)
+                    if related_options is None:
+                        continue
                 elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
-                    by_natural_key = False
+                    by_natural_key, related_options = False, None
                 else:
                     continue
 
                 data = related_endpoint.get(all_pages=True)
                 if 'results' in data:
-                    related_options = self._get_options(related_endpoint)
                     related[key] = [
                         x.get_natural_key() if by_natural_key else self._serialize_asset(x, related_options)
                         for x in data.results
@@ -113,6 +135,10 @@ class ApiV2(base.Base):
 
     def _get_assets(self, resource, value):
         endpoint = getattr(self, resource)
+        options = self._get_options(endpoint)
+        if options is None:
+            return None
+
         if value:
             from awxkit.cli.options import pk_or_name
 
@@ -121,7 +147,6 @@ class ApiV2(base.Base):
         else:
             results = endpoint.get(all_pages=True).results
 
-        options = self._get_options(endpoint)
         assets = (self._serialize_asset(asset, options) for asset in results)
         return [asset for asset in assets if asset is not None]
 
@@ -160,9 +185,8 @@ class ApiV2(base.Base):
     def _register_existing_assets(self, resource):
         endpoint = getattr(self, resource)
         options = self._get_options(endpoint)
-        if getattr(self, '_options', None) is None:
-            self._options = {}
-        self._options[resource] = options
+        if options is None:
+            return
 
         results = endpoint.get(all_pages=True).results
         for pg in results:
