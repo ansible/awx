@@ -92,7 +92,6 @@
   tower_notification:
     name: "{{ slack_not }}"
     organization: Default
-    notification_type: slack
     state: absent
   register: result
 
@@ -135,7 +134,6 @@
   tower_notification:
     name: "{{ webhook_not }}"
     organization: Default
-    notification_type: webhook
     state: absent
   register: result
 
@@ -168,7 +166,6 @@
   tower_notification:
     name: "{{ email_not }}"
     organization: Default
-    notification_type: email
     state: absent
   register: result
 
@@ -197,7 +194,6 @@
   tower_notification:
     name: "{{ twillo_not }}"
     organization: Default
-    notification_type: twilio
     state: absent
   register: result
 
@@ -225,7 +221,6 @@
   tower_notification:
     name: "{{ pd_not }}"
     organization: Default
-    notification_type: pagerduty
     state: absent
   register: result
 
@@ -256,7 +251,6 @@
   tower_notification:
     name: "{{ hipchat_not }}"
     organization: Default
-    notification_type: hipchat
     state: absent
   register: result
 
@@ -287,7 +281,6 @@
   tower_notification:
     name: "{{ irc_not }}"
     organization: Default
-    notification_type: irc
     state: absent
   register: result
 

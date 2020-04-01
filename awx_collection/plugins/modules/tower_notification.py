@@ -43,7 +43,6 @@ options:
     notification_type:
       description:
         - The type of notification to be sent.
-      required: True
       choices:
         - 'email'
         - 'grafana'
@@ -64,149 +63,144 @@ options:
       description:
         - Optional custom messages for notification template.
       type: dict
-      default:
-        started:
-        success:
-        error:
-        workflow_approval:
     username:
       description:
-        - The mail server username. Required if I(notification_type=email).
+        - The mail server username.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     sender:
       description:
-        - The sender email address. Required if I(notification_type=email).
+        - The sender email address.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     recipients:
       description:
-        - The recipients email addresses. Required if I(notification_type=email).
+        - The recipients email addresses.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     use_tls:
       description:
-        - The TLS trigger. Required if I(notification_type=email).
+        - The TLS trigger.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     host:
       description:
-        - The mail server host. Required if I(notification_type=email).
+        - The mail server host.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     use_ssl:
       description:
-        - The SSL trigger. Required if I(notification_type=email) or if I(notification_type=irc).
+        - The SSL trigger.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     password:
       description:
-        - The mail server password. Required if I(notification_type=email) or if I(notification_type=irc).
+        - The mail server password.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     port:
       description:
-        - The mail server port. Required if I(notification_type=email) or if I(notification_type=irc).
+        - The mail server port.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: int
     channels:
       description:
-        - The destination Slack channels. Required if I(notification_type=slack).
+        - The destination Slack channels.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     token:
       description:
-        - The access token. Required if I(notification_type=slack), if I(notification_type=pagerduty) or if I(notification_type=hipchat).
+        - The access token.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     account_token:
       description:
-        - The Twillio account token. Required if I(notification_type=twillio).
+        - The Twillio account token.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     from_number:
       description:
-        - The source phone number. Required if I(notification_type=twillio).
+        - The source phone number.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     to_numbers:
       description:
-        - The destination phone numbers. Required if I(notification_type=twillio).
+        - The destination phone numbers.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     account_sid:
       description:
-        - The Twillio account SID. Required if I(notification_type=twillio).
+        - The Twillio account SID.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     subdomain:
       description:
-        - The PagerDuty subdomain. Required if I(notification_type=pagerduty).
+        - The PagerDuty subdomain.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     service_key:
       description:
-        - The PagerDuty service/integration API key. Required if I(notification_type=pagerduty).
+        - The PagerDuty service/integration API key.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     client_name:
       description:
-        - The PagerDuty client identifier. Required if I(notification_type=pagerduty).
+        - The PagerDuty client identifier.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     message_from:
       description:
-        - The label to be shown with the notification. Required if I(notification_type=hipchat).
+        - The label to be shown with the notification.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     api_url:
       description:
-        - The HipChat API URL. Required if I(notification_type=hipchat).
+        - The HipChat API URL.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     color:
       description:
-        - The notification color. Required if I(notification_type=hipchat).
+        - The notification color.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       choices: ["yellow", "green", "red", "purple", "gray", "random"]
       type: str
     rooms:
       description:
-        - HipChat rooms to send the notification to. Required if I(notification_type=hipchat).
+        - HipChat rooms to send the notification to.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
     notify:
       description:
-        - The notify channel trigger. Required if I(notification_type=hipchat).
+        - The notify channel trigger.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: bool
     url:
       description:
-        - The target URL. Required if I(notification_type=webhook).
+        - The target URL.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     headers:
       description:
-        - The HTTP headers as JSON string. Required if I(notification_type=webhook).
+        - The HTTP headers as JSON string.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: dict
     server:
       description:
-        - The IRC server address. Required if I(notification_type=irc).
+        - The IRC server address.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     nickname:
       description:
-        - The IRC nickname. Required if I(notification_type=irc).
+        - The IRC nickname.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
     targets:
       description:
-        - The destination channels or users. Required if I(notification_type=irc).
+        - The destination channels or users.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: list
       elements: str
@@ -231,16 +225,17 @@ EXAMPLES = '''
     name: slack notification
     organization: Default
     notification_type: slack
-    channels:
-      - general
-    token: cefda9e2be1f21d11cdd9452f5b7f97fda977f42
+    notification_configuration:
+      channels:
+        - general
+      token: cefda9e2be1f21d11cdd9452f5b7f97fda977f42
     messages:
-      started:
-        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
-      success:
-        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
-      error:
-        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+       started:
+         message: "{{ '{{ job_friendly_name }}{{ job.id }} started' }}"
+       success:
+         message: "{{ '{{ job_friendly_name }} completed in {{ job.elapsed }} seconds' }}"
+       error:
+         message: "{{ '{{ job_friendly_name }} FAILED! Please look at {{ job.url }}' }}"
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -248,9 +243,10 @@ EXAMPLES = '''
   tower_notification:
     name: webhook notification
     notification_type: webhook
-    url: http://www.example.com/hook
-    headers:
-      X-Custom-Header: value123
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -258,15 +254,16 @@ EXAMPLES = '''
   tower_notification:
     name: email notification
     notification_type: email
-    username: user
-    password: s3cr3t
-    sender: tower@example.com
-    recipients:
-      - user1@example.com
-    host: smtp.example.com
-    port: 25
-    use_tls: no
-    use_ssl: no
+    notification_configuration:
+      username: user
+      password: s3cr3t
+      sender: tower@example.com
+      recipients:
+        - user1@example.com
+      host: smtp.example.com
+      port: 25
+      use_tls: no
+      use_ssl: no
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -274,11 +271,12 @@ EXAMPLES = '''
   tower_notification:
     name: twilio notification
     notification_type: twilio
-    account_token: a_token
-    account_sid: a_sid
-    from_number: '+15551112222'
-    to_numbers:
-      - '+15553334444'
+    notification_configuration:
+      account_token: a_token
+      account_sid: a_sid
+      from_number: '+15551112222'
+      to_numbers:
+        - '+15553334444'
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -286,10 +284,11 @@ EXAMPLES = '''
   tower_notification:
     name: pagerduty notification
     notification_type: pagerduty
-    token: a_token
-    subdomain: sub
-    client_name: client
-    service_key: a_key
+    notification_configuration:
+      token: a_token
+      subdomain: sub
+      client_name: client
+      service_key: a_key
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -297,13 +296,14 @@ EXAMPLES = '''
   tower_notification:
     name: hipchat notification
     notification_type: hipchat
-    token: a_token
-    message_from: user1
-    api_url: https://hipchat.example.com
-    color: red
-    rooms:
-      - room-A
-    notify: yes
+    notification_configuration:
+      token: a_token
+      message_from: user1
+      api_url: https://hipchat.example.com
+      color: red
+      rooms:
+        - room-A
+      notify: yes
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
@@ -311,23 +311,22 @@ EXAMPLES = '''
   tower_notification:
     name: irc notification
     notification_type: irc
-    nickname: tower
-    password: s3cr3t
-    targets:
-      - user1
-    port: 8080
-    server: irc.example.com
-    use_ssl: no
+    notification_configuration:
+      nickname: tower
+      password: s3cr3t
+      targets:
+        - user1
+      port: 8080
+      server: irc.example.com
+      use_ssl: no
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Delete notification
   tower_notification:
     name: old notification
-    notification_type: email
     state: absent
     tower_config_file: "~/tower_cli.cfg"
-
 '''
 
 
@@ -354,12 +353,12 @@ def main():
         new_name=dict(),
         description=dict(),
         organization=dict(),
-        notification_type=dict(required=True, choices=[
+        notification_type=dict(choices=[
             'email', 'grafana', 'hipchat', 'irc', 'mattermost',
             'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook'
         ]),
         notification_configuration=dict(type='dict'),
-        messages=dict(type='dict', default={'started': None, 'success': None, 'error': None, 'workflow_approval': None}),
+        messages=dict(type='dict'),
         username=dict(),
         sender=dict(),
         recipients=dict(type='list', elements='str'),
@@ -383,7 +382,7 @@ def main():
         rooms=dict(type='list', elements='str'),
         notify=dict(type='bool'),
         url=dict(),
-        headers=dict(type='dict', default={}),
+        headers=dict(type='dict'),
         server=dict(),
         nickname=dict(),
         targets=dict(type='list', elements='str'),
