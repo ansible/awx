@@ -15,6 +15,7 @@ import {
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
 } from '@api';
+import LaunchPrompt from '@components/LaunchPrompt';
 
 function canLaunchWithoutPrompt(launchData) {
   return (
@@ -24,7 +25,8 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_limit_on_launch &&
     !launchData.ask_scm_branch_on_launch &&
     !launchData.survey_enabled &&
-    launchData.variables_needed_to_start.length === 0
+    (!launchData.variables_needed_to_start ||
+      launchData.variables_needed_to_start.length === 0)
   );
 }
 
@@ -39,11 +41,13 @@ class LaunchButton extends React.Component {
     super(props);
 
     this.state = {
-      launchError: null,
-      promptError: false,
+      showLaunchPrompt: false,
+      launchConfig: null,
+      launchError: false,
     };
 
     this.handleLaunch = this.handleLaunch.bind(this);
+    this.launchWithParams = this.launchWithParams.bind(this);
     this.handleRelaunch = this.handleRelaunch.bind(this);
     this.handleLaunchErrorClose = this.handleLaunchErrorClose.bind(this);
     this.handlePromptErrorClose = this.handlePromptErrorClose.bind(this);
@@ -54,38 +58,47 @@ class LaunchButton extends React.Component {
   }
 
   handlePromptErrorClose() {
-    this.setState({ promptError: false });
+    this.setState({ showLaunchPrompt: false });
   }
 
   async handleLaunch() {
-    const { history, resource } = this.props;
-
+    const { resource } = this.props;
     const readLaunch =
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readLaunch(resource.id)
         : JobTemplatesAPI.readLaunch(resource.id);
-
-    const launchJob =
-      resource.type === 'workflow_job_template'
-        ? WorkflowJobTemplatesAPI.launch(resource.id)
-        : JobTemplatesAPI.launch(resource.id);
-
     try {
       const { data: launchConfig } = await readLaunch;
 
       if (canLaunchWithoutPrompt(launchConfig)) {
-        const { data: job } = await launchJob;
-
-        history.push(
-          `/${
-            resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
-          }/${job.id}/output`
-        );
+        this.launchWithParams(null);
       } else {
-        this.setState({ promptError: true });
+        this.setState({
+          showLaunchPrompt: true,
+          launchConfig,
+        });
       }
     } catch (err) {
       this.setState({ launchError: err });
+    }
+  }
+
+  async launchWithParams(params) {
+    try {
+      const { history, resource } = this.props;
+      const jobPromise =
+        resource.type === 'workflow_job_template'
+          ? WorkflowJobTemplatesAPI.launch(resource.id, params)
+          : JobTemplatesAPI.launch(resource.id, params);
+
+      const { data: job } = await jobPromise;
+      history.push(
+        `/${
+          resource.type === 'workflow_job_template' ? 'jobs/workflow' : 'jobs'
+        }/${job.id}/output`
+      );
+    } catch (launchError) {
+      this.setState({ launchError });
     }
   }
 
@@ -125,7 +138,12 @@ class LaunchButton extends React.Component {
         const { data: job } = await relaunch;
         history.push(`/jobs/${job.id}/output`);
       } else {
-        this.setState({ promptError: true });
+        // TODO: restructure (async?) to send launch command after prompts
+        // TODO: does relaunch need different prompt treatment than launch?
+        this.setState({
+          showLaunchPrompt: true,
+          launchConfig: relaunchConfig,
+        });
       }
     } catch (err) {
       this.setState({ launchError: err });
@@ -133,8 +151,8 @@ class LaunchButton extends React.Component {
   }
 
   render() {
-    const { launchError, promptError } = this.state;
-    const { i18n, children } = this.props;
+    const { launchError, showLaunchPrompt, launchConfig } = this.state;
+    const { resource, i18n, children } = this.props;
     return (
       <Fragment>
         {children({
@@ -152,17 +170,13 @@ class LaunchButton extends React.Component {
             <ErrorDetail error={launchError} />
           </AlertModal>
         )}
-        {promptError && (
-          <AlertModal
-            isOpen={promptError}
-            variant="info"
-            title={i18n._(t`Attention!`)}
-            onClose={this.handlePromptErrorClose}
-          >
-            {i18n._(
-              t`Launching jobs with promptable fields is not supported at this time.`
-            )}
-          </AlertModal>
+        {showLaunchPrompt && (
+          <LaunchPrompt
+            config={launchConfig}
+            resource={resource}
+            onLaunch={this.launchWithParams}
+            onCancel={() => this.setState({ showLaunchPrompt: false })}
+          />
         )}
       </Fragment>
     );

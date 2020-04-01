@@ -9,7 +9,7 @@ import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
 import { FieldTooltip } from '@components/FormField';
 import { FormGroup } from '@patternfly/react-core';
 import Lookup from '@components/Lookup';
-import OptionsList from './shared/OptionsList';
+import OptionsList from '@components/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('credentials', {

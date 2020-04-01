@@ -7,9 +7,9 @@ import { ToolbarItem, Alert } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from '@api';
 import AnsibleSelect from '@components/AnsibleSelect';
 import CredentialChip from '@components/CredentialChip';
+import OptionsList from '@components/OptionsList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import Lookup from './Lookup';
-import OptionsList from './shared/OptionsList';
 
 const QS_CONFIG = getQSConfig('credentials', {
   page: 1,

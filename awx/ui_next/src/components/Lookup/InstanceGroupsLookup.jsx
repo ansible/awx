@@ -7,8 +7,8 @@ import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from '@api';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import { FieldTooltip } from '@components/FormField';
+import OptionsList from '@components/OptionsList';
 import Lookup from './Lookup';
-import OptionsList from './shared/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('instance_groups', {

@@ -7,8 +7,8 @@ import { OrganizationsAPI } from '@api';
 import { Organization } from '@types';
 import { FormGroup } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '@util/qs';
+import OptionsList from '@components/OptionsList';
 import Lookup from './Lookup';
-import OptionsList from './shared/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('organizations', {

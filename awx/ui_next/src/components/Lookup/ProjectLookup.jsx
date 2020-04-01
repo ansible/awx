@@ -7,9 +7,9 @@ import { FormGroup } from '@patternfly/react-core';
 import { ProjectsAPI } from '@api';
 import { Project } from '@types';
 import { FieldTooltip } from '@components/FormField';
+import OptionsList from '@components/OptionsList';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import Lookup from './Lookup';
-import OptionsList from './shared/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('project', {
