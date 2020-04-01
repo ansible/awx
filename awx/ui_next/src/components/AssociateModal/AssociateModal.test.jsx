@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import AssociateModal from './AssociateModal';
-import mockHosts from '../shared/data.hosts.json';
+import mockHosts from './data.hosts.json';
 
 jest.mock('@api');
 
