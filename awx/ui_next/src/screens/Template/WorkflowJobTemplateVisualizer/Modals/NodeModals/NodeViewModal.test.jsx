@@ -11,6 +11,7 @@ import NodeViewModal from './NodeViewModal';
 jest.mock('@api/models/JobTemplates');
 jest.mock('@api/models/WorkflowJobTemplates');
 WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
+WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({});
 JobTemplatesAPI.readLaunch.mockResolvedValue({});
 
 const dispatch = jest.fn();

@@ -28,12 +28,16 @@ function hasPromptData(launchData) {
 }
 
 function formatTimeout(timeout) {
-  if (typeof timeout === "undefined" || timeout === null) {
+  if (typeof timeout === 'undefined' || timeout === null) {
     return null;
   }
   const minutes = Math.floor(timeout / 60);
   const seconds = timeout - Math.floor(timeout / 60) * 60;
-  return <>{minutes} <Trans>min</Trans> {seconds} <Trans>sec</Trans></>;
+  return (
+    <>
+      {minutes} <Trans>min</Trans> {seconds} <Trans>sec</Trans>
+    </>
+  );
 }
 
 function PromptDetail({ i18n, resource, launchConfig = {} }) {
