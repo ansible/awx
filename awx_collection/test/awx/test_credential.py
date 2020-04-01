@@ -118,24 +118,27 @@ def test_ct_precedence_over_kind(run_module, admin_user, organization, cred_type
 
     cred = Credential.objects.get(name='A credential')
 
-    assert cred.credential_type == cred_type.name
+    assert cred.credential_type == cred_type
 
 
 @pytest.mark.django_db
 def test_input_overrides_old_fields(run_module, admin_user, organization):
+    # create the vault credential type
+    ct = CredentialType.defaults['vault']()
+    ct.save()
     result = run_module('tower_credential', dict(
         name='A Vault credential',
         organization=organization.name,
-        kind='Vault',
-        inputs={'vault_id': 'asdf'},
+        kind='vault',
         vault_id='1234',
-        state='present'
+        inputs={'vault_id': 'asdf'},
+        state='present',
     ), admin_user)
-    assert not result.get('failed', False), result
+    assert not result.get('failed', False), result.get('msg', result)
 
     cred = Credential.objects.get(name='A Vault credential')
 
-    assert cred.inputs.vault_id == 'asdf'
+    assert cred.inputs['vault_id'] == 'asdf'
 
 
 @pytest.mark.django_db

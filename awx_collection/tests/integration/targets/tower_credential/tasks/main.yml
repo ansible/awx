@@ -36,7 +36,7 @@
   set_fact:
     ssh_key_data: "{{ lookup('file', tempdir.stdout + '/id_rsa') }}"
 
-- name: Test deprication warnings
+- name: Test deprecation warnings
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     organization: Default

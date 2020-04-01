@@ -31,7 +31,7 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name (looked up via the name field.
-      required: True
+      required: False
       type: str
     description:
       description:
@@ -336,7 +336,7 @@ def main():
         team_id = module.resolve_name_to_id('teams', team)
 
     if kind:
-        module.deprecate(msg='The kind parameter has been depricated, please use credential_type instead', version="3.6")
+        module.deprecate(msg='The kind parameter has been deprecated, please use credential_type instead', version="3.6")
 
     cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
 
@@ -353,7 +353,7 @@ def main():
     credential_inputs = {}
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been depricated, please use inputs instead'.format(legacy_input), version="3.6")
+            module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="3.6")
             credential_inputs[legacy_input] = module.params.get(legacy_input)
     if inputs:
         credential_inputs.update(inputs)
