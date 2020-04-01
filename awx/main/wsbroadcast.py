@@ -132,6 +132,9 @@ class BroadcastWebsocketTask(WebsocketTask):
             if msg.type == aiohttp.WSMsgType.ERROR:
                 break
             elif msg.type == aiohttp.WSMsgType.TEXT:
+                if msg.data == 'PING':
+                    logger.debug('PONG')
+                    continue
                 try:
                     payload = json.loads(msg.data)
                 except json.JSONDecodeError:

@@ -18,6 +18,7 @@ from django.core.cache import cache as django_cache
 from jinja2 import Template
 import psutil
 
+from awx.main.consumers import broadcast_ping
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
 
@@ -417,6 +418,7 @@ class AutoscalePool(WorkerPool):
             # when the cluster heartbeat occurs, clean up internally
             if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
                 self.cleanup()
+                broadcast_ping()
             if self.should_grow:
                 self.up()
             # we don't care about "preferred queue" round robin distribution, just

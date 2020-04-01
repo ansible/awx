@@ -262,3 +262,15 @@ def emit_channel_notification(group, payload):
             "text": wrap_broadcast_msg(group, payload_dumped),
         },
     ))
+
+
+def broadcast_ping():
+    channel_layer = get_channel_layer()
+
+    run_sync(channel_layer.group_send(
+        settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+        {
+            "type": "internal.message",
+            "text": "PING"
+        },
+    ))
