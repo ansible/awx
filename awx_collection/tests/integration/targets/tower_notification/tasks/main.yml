@@ -18,9 +18,9 @@
     sender: maw
     recipients:
       - everyone
-    use_tls: True
+    use_tls: true
     host: all
-    use_ssl: False
+    use_ssl: false
     password: password
     port: 12
     channels:
@@ -48,7 +48,7 @@
       - Lounge
       - Dining Room
       - Cellar
-    notify: True
+    notify: true
     url: ansible.com
     headers:
       X-Custom-Header: value123
@@ -58,7 +58,7 @@
       - zombie
     state: absent
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
