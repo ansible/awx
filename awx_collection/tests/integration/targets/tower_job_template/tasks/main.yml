@@ -20,7 +20,7 @@
     state: present
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
-    
+
   register: result
 
 - name: Create Credential1
@@ -149,7 +149,7 @@
     playbook: hello_world.yml
     credential: "{{ cred3 }}"
     job_type: run
-    labels: 
+    labels:
       - "{{ lab1 }}"
     state: present
   register: result
@@ -161,14 +161,14 @@
 - name: Add survey to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
-    survey_enabled: True
+    survey_enabled: true
     survey_spec:
       name: ""
       description: ""
       spec:
         - question_name: "Q1"
           question_description: "The first question"
-          required: True
+          required: true
           type: "text"
           variable: "q1"
           min: 5
@@ -183,14 +183,14 @@
 - name: Re Add survey to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
-    survey_enabled: True
+    survey_enabled: true
     survey_spec:
       name: ""
       description: ""
       spec:
         - question_name: "Q1"
           question_description: "The first question"
-          required: True
+          required: true
           type: "text"
           variable: "q1"
           min: 5
@@ -205,14 +205,14 @@
 - name: Add question to survey to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
-    survey_enabled: True
+    survey_enabled: true
     survey_spec:
       name: ""
       description: ""
       spec:
         - question_name: "Q1"
           question_description: "The first question"
-          required: True
+          required: true
           type: "text"
           variable: "q1"
           min: 5
@@ -222,7 +222,7 @@
         - question_name: "Q2"
           type: "text"
           variable: "q2"
-          required: False
+          required: false
   register: result
 
 - assert:
@@ -232,7 +232,7 @@
 - name: Remove survey from Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
-    survey_enabled: False
+    survey_enabled: false
     survey_spec: {}
   register: result
 
