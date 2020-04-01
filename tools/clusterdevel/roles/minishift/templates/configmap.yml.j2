@@ -91,15 +91,6 @@ data:
                     'ROUTING': 'awx.main.routing.channel_routing',
                     'CONFIG': {'url': BROKER_URL}}
     }
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '{}:{}'.format("localhost", "11211")
-        },
-        'ephemeral': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
 ---
 apiVersion: v1
 kind: ConfigMap

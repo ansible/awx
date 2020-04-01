@@ -405,17 +405,6 @@ AWX_ISOLATED_PERIODIC_CHECK = 600
 # Verbosity level for isolated node management tasks
 AWX_ISOLATED_VERBOSITY = 0
 
-# Memcached django cache configuration
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-#         'LOCATION': '127.0.0.1:11211',
-#         'TIMEOUT': 864000,
-#         'KEY_PREFIX': 'tower_dev',
-#     }
-# }
-
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
@@ -458,7 +447,7 @@ CELERYBEAT_SCHEDULE = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'memcached:11211',
+        'LOCATION': 'unix:/var/run/memcached/memcached.sock'
     },
 }
 

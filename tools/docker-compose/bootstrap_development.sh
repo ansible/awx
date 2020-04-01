@@ -3,7 +3,6 @@ set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=memcached port=11211" all
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.sock" all
 
 # In case AWX in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
