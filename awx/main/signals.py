@@ -52,6 +52,7 @@ from awx.conf.utils import conf_to_dict
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
+analytics_logger = logging.getLogger('awx.analytics.activity_stream')
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
@@ -363,6 +364,22 @@ def model_serializer_mapping():
     }
 
 
+def emit_activity_stream_change(instance):
+    if 'migrate' in sys.argv:
+        # don't emit activity stream external logs during migrations, it
+        # could be really noisy
+        return
+    from awx.api.serializers import ActivityStreamSerializer
+    actor = None
+    if instance.actor:
+        actor = instance.actor.username
+    summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
+    analytics_logger.info('Activity Stream update entry for %s' % str(instance.object1),
+                          extra=dict(changes=instance.changes, relationship=instance.object_relationship_type,
+                          actor=actor, operation=instance.operation,
+                          object1=instance.object1, object2=instance.object2, summary_fields=summary_fields))
+
+
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
         # TODO: remove deprecated_group conditional in 3.3
@@ -399,6 +416,9 @@ def activity_stream_create(sender, instance, created, **kwargs):
         else:
             activity_entry.setting = conf_to_dict(instance)
             activity_entry.save()
+        connection.on_commit(
+            lambda: emit_activity_stream_change(activity_entry)
+        )
 
 
 def activity_stream_update(sender, instance, **kwargs):
@@ -430,6 +450,9 @@ def activity_stream_update(sender, instance, **kwargs):
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
+    connection.on_commit(
+        lambda: emit_activity_stream_change(activity_entry)
+    )
 
 
 def activity_stream_delete(sender, instance, **kwargs):
@@ -467,6 +490,9 @@ def activity_stream_delete(sender, instance, **kwargs):
         object1=object1,
         actor=get_current_user_or_none())
     activity_entry.save()
+    connection.on_commit(
+        lambda: emit_activity_stream_change(activity_entry)
+    )
 
 
 def activity_stream_associate(sender, instance, **kwargs):
@@ -540,6 +566,9 @@ def activity_stream_associate(sender, instance, **kwargs):
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel
                 activity_entry.save()
+            connection.on_commit(
+                lambda: emit_activity_stream_change(activity_entry)
+            )
 
 
 @receiver(current_user_getter)

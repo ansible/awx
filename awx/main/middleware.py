@@ -12,23 +12,19 @@ import urllib.parse
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 from django.db.migrations.executor import MigrationExecutor
-from django.db import IntegrityError, connection
-from django.utils.functional import curry
+from django.db import connection
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 from django.urls import reverse, resolve
 
-from awx.main.models import ActivityStream
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
 
 
 logger = logging.getLogger('awx.main.middleware')
-analytics_logger = logging.getLogger('awx.analytics.activity_stream')
 perf_logger = logging.getLogger('awx.analytics.performance')
 
 
@@ -74,63 +70,6 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
             ])
             os.remove(raw)
         return filepath
-
-
-class ActivityStreamMiddleware(threading.local, MiddlewareMixin):
-
-    def __init__(self, get_response=None):
-        self.disp_uid = None
-        self.instance_ids = []
-        super().__init__(get_response)
-
-    def process_request(self, request):
-        if hasattr(request, 'user') and request.user.is_authenticated:
-            user = request.user
-        else:
-            user = None
-
-        set_actor = curry(self.set_actor, user)
-        self.disp_uid = str(uuid.uuid1())
-        self.instance_ids = []
-        post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
-
-    def process_response(self, request, response):
-        drf_request = getattr(request, 'drf_request', None)
-        drf_user = getattr(drf_request, 'user', None)
-        if self.disp_uid is not None:
-            post_save.disconnect(dispatch_uid=self.disp_uid)
-
-        for instance in ActivityStream.objects.filter(id__in=self.instance_ids):
-            if drf_user and drf_user.id:       
-                from awx.api.serializers import ActivityStreamSerializer
-                summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
-                instance.actor = drf_user
-                try:
-                    instance.save(update_fields=['actor'])
-                    analytics_logger.info('Activity Stream update entry for %s' % str(instance.object1),
-                                          extra=dict(changes=instance.changes, relationship=instance.object_relationship_type,
-                                          actor=drf_user.username, operation=instance.operation,
-                                          object1=instance.object1, object2=instance.object2, summary_fields=summary_fields))
-                except IntegrityError:
-                    logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
-            # else:
-            #     obj1_type_actual = instance.object1_type.split(".")[-1]
-            #     if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
-            #         instance.delete()
-
-        self.instance_ids = []
-        return response
-
-    def set_actor(self, user, sender, instance, **kwargs):
-        if sender == ActivityStream:
-            if isinstance(user, User) and instance.actor is None:
-                user = User.objects.filter(id=user.id)
-                if user.exists():
-                    user = user[0]
-                    instance.actor = user
-            else:
-                if instance.id not in self.instance_ids:
-                    self.instance_ids.append(instance.id)
 
 
 class SessionTimeoutMiddleware(MiddlewareMixin):
