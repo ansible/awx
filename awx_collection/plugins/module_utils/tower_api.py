@@ -575,7 +575,13 @@ class TowerModule(AnsibleModule):
             self.exit_json(**self.json_output)
 
     # We need to be able to recursevly step through fields in the case of inputs for credentials.
-    # They are dicts and we can't just compare them at the top level because the dict returned from the tower api will have fields like $encrypted$
+    # They are dicts and we can't just compare them at the top level because the dict from the tower api may have more fields that we have.
+    # For example, say someone did:
+    #  - tower_credential:
+    #      name: 'a cred'
+    #      username: 'John'
+    # Our new dict would be like { 'username': 'new_name' }
+    # But the existing cred from tower might come back as: { 'username': 'new_name', 'password': '$encrypted$', 'field2': 'something else' }
     @staticmethod
     def compare_fields(new_item, existing_item):
         needs_update = False

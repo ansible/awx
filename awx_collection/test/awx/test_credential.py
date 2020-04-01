@@ -106,7 +106,7 @@ def test_create_custom_credential_type(run_module, admin_user):
 
 
 @pytest.mark.django_db
-def test_kind_ct_exclusivity(run_module, admin_user, organization, cred_type, silence_deprecation):
+def test_ct_precedence_over_kind(run_module, admin_user, organization, cred_type, silence_deprecation):
     result = run_module('tower_credential', dict(
         name='A credential',
         organization=organization.name,
@@ -114,22 +114,28 @@ def test_kind_ct_exclusivity(run_module, admin_user, organization, cred_type, si
         credential_type=cred_type.name,
         state='present'
     ), admin_user)
-    assert result.get('failed', False), result.get('msg', result)
-    assert result['msg'] == 'parameters are mutually exclusive: kind|credential_type'
+    assert not result.get('failed', False), result.get('msg', result)
+
+    cred = Credential.objects.get(name='A credential')
+
+    assert cred.credential_type == cred_type.name
 
 
 @pytest.mark.django_db
-def test_input_exclusivity(run_module, admin_user, organization):
+def test_input_overrides_old_fields(run_module, admin_user, organization):
     result = run_module('tower_credential', dict(
-        name='A credential',
+        name='A Vault credential',
         organization=organization.name,
-        kind='ssh',
-        inputs={'token': '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'},
-        security_token='7rEZK38DJl58A7RxA6EC7lLvUHbBQ1',
+        kind='Vault',
+        inputs={'vault_id': 'asdf'},
+        vault_id='1234',
         state='present'
     ), admin_user)
-    assert result.get('failed', False), result
-    assert result['msg'] == 'parameters are mutually exclusive: inputs|security_token'
+    assert not result.get('failed', False), result
+
+    cred = Credential.objects.get(name='A Vault credential')
+
+    assert cred.inputs.vault_id == 'asdf'
 
 
 @pytest.mark.django_db
