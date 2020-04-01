@@ -115,6 +115,10 @@ RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root && \
     chmod +rx /usr/bin/config-watcher && \
     chmod u+s /usr/bin/bwrap # https://github.com/ansible/awx/issues/5224
 
+# Create default awx rsyslog.conf
+RUN echo -e '$WorkDirectory /var/lib/awx/rsyslog\n$IncludeConfig /etc/rsyslog.d/*.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
+
+
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 

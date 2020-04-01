@@ -131,10 +131,9 @@ RUN for dir in /var/lib/awx/rsyslog /var/run/tower/rsyslog /var/log/tower/ /var/
 
 
 RUN chmod -R 0775 /var/lib/awx /var/lib/awx/rsyslog
-RUN chmod -R 0770 /var/lib/rsyslog                    # needed, or else: rsyslogd: imjournal: open on state file `/var/lib/rsyslog/imjournal.state' failed 
 ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
 RUN yum install -y rsyslog-omhttp
-RUN echo '$IncludeConfig /etc/rsyslog.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
+RUN echo -e '$WorkDirectory /var/lib/awx/rsyslog\n$IncludeConfig /etc/rsyslog.d/*.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
 RUN chmod 0775 /var/lib/awx/rsyslog/rsyslog.conf
 
 ENV HOME /var/lib/awx

@@ -7,7 +7,7 @@ from awx.main.utils.reload import supervisor_service_command
 
 def construct_rsyslog_conf_template(settings=settings):
     tmpl = ''
-    parts = ['$IncludeConfig /etc/rsyslog.conf']
+    parts = []
     if settings.LOG_AGGREGATOR_ENABLED:
         host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
         port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
@@ -63,6 +63,10 @@ def construct_rsyslog_conf_template(settings=settings):
             parts.append(
                 f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
             )
+    parts.extend([
+        '$WorkDirectory /var/lib/awx/rsyslog',
+        '$IncludeConfig /etc/rsyslog.d/*.conf'
+    ])
     tmpl = '\n'.join(parts)
     return tmpl
 

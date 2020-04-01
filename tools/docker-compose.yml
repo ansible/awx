@@ -9,6 +9,7 @@ services:
     hostname: awx
     command: launch_awx.sh
     environment:
+      PYTHONUNBUFFERED: 1
       CURRENT_UID:
       OS:
       SDB_HOST: 0.0.0.0
