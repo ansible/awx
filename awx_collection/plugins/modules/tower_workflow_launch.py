@@ -20,11 +20,34 @@ description:
     - Launch an Ansible Tower workflows. See
       U(https://www.ansible.com/tower) for an overview.
 options:
-    workflow_template:
+    name:
       description:
         - The name of the workflow template to run.
       required: True
       type: str
+      aliases:
+        - workflow_template
+    organization:
+      description:
+        - Organization the workflow job template exists in.
+        - Used to help lookup the object, cannot be modified using this module.
+        - If not provided, will lookup by name only, which does not work with duplicates.
+      required: False
+      type: str
+    inventory:
+      description:
+        - Inventory to use for the job, only used if prompt for inventory is set.
+      type: str
+    limit:
+      description:
+        - Limit to use for the I(job_template).
+      type: str
+    scm_branch:
+      description:
+        - A specific of the SCM project to run the template on.
+        - This is only applicable if your project allows for branch override.
+      type: str
+      version_added: "3.7"
     extra_vars:
       description:
         - Any extra vars required to launch the job.
@@ -34,25 +57,21 @@ options:
         - Wait for the workflow to complete.
       default: True
       type: bool
+    interval:
+      description:
+        - The interval to request an update from Tower.
+      required: False
+      default: 1
+      type: float
     timeout:
       description:
         - If waiting for the workflow to complete this will abort after this
           amount of seconds
       type: int
-
-requirements:
-  - "python >= 2.6"
-  - ansible-tower-cli >= 3.0.2
-
 extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = '''
-tower_version:
-    description: The version of Tower we connected to
-    returned: If connection to Tower works
-    type: str
-    sample: '3.4.0'
 job_info:
     description: dictionary containing information about the workflow executed
     returned: If workflow launched
@@ -70,7 +89,7 @@ EXAMPLES = '''
 
 - name: Launch a Workflow with parameters without waiting
   tower_workflow_launch:
-    workflow_template: "Test workflow"
+    name: "Test workflow"
     extra_vars: "---\nmy: var"
     wait: False
   delegate_to: localhost
@@ -78,89 +97,110 @@ EXAMPLES = '''
   register: workflow_task_info
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config
-
-try:
-    import tower_cli
-    from tower_cli.api import client
-    from tower_cli.conf import settings
-    from tower_cli.exceptions import ServerError, ConnectionError, BadRequest, TowerCLIError
-except ImportError:
-    pass
+from ..module_utils.tower_api import TowerModule
+import time
 
 
 def main():
+    # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        workflow_template=dict(required=True),
+        name=dict(required=True, aliases=['workflow_template']),
+        organization=dict(),
+        inventory=dict(),
+        limit=dict(),
         extra_vars=dict(),
-        wait=dict(default=True, type='bool'),
-        timeout=dict(default=None, type='int'),
+        wait=dict(required=False, default=True, type='bool'),
+        interval=dict(required=False, default=1.0, type='float'),
+        timeout=dict(required=False, default=None, type='int'),
     )
 
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True
-    )
+    # Create a module for ourselves
+    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
 
-    workflow_template = module.params.get('workflow_template')
-    extra_vars = module.params.get('extra_vars')
+    optional_args = {}
+    # Extract our parameters
+    name = module.params.get('name')
+    organization = module.params.get('organization')
+    inventory = module.params.get('inventory')
+    optional_args['limit'] = module.params.get('limit')
+    optional_args['extra_vars'] = module.params.get('extra_vars')
     wait = module.params.get('wait')
+    interval = module.params.get('interval')
     timeout = module.params.get('timeout')
 
-    # If we are going to use this result to return we can consider ourselfs changed
-    result = dict(
-        changed=False,
-        msg='initial message'
-    )
+    # Create a datastructure to pass into our job launch
+    post_data = {}
+    for key in optional_args.keys():
+        if optional_args[key]:
+            post_data[key] = optional_args[key]
 
-    tower_auth = tower_auth_config(module)
-    with settings.runtime_values(**tower_auth):
-        # First we will test the connection. This will be a test for both check and run mode
-        # Note, we are not using the tower_check_mode method here because we want to do more than just a ping test
-        # If we are in check mode we also want to validate that we can find the workflow
-        try:
-            ping_result = client.get('/ping').json()
-            # Stuff the version into the results as an FYI
-            result['tower_version'] = ping_result['version']
-        except(ServerError, ConnectionError, BadRequest) as excinfo:
-            result['msg'] = "Failed to reach Tower: {0}".format(excinfo)
-            module.fail_json(**result)
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if inventory:
+        post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
-        # Now that we know we can connect, lets verify that we can resolve the workflow_template
-        try:
-            workflow = tower_cli.get_resource("workflow").get(**{'name': workflow_template})
-        except TowerCLIError as e:
-            result['msg'] = "Failed to find workflow: {0}".format(e)
-            module.fail_json(**result)
 
-        # Since we were able to find the workflow, if we are in check mode we can return now
-        if module.check_mode:
-            result['msg'] = "Check mode passed"
-            module.exit_json(**result)
+    # Attempt to look up job_template based on the provided name
+    lookup_data = { 'name': name }
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    workflow_job_template = module.get_one('workflow_job_templates', **{ 'data':  lookup_data })
 
-        # We are no ready to run the workflow
-        try:
-            result['job_info'] = tower_cli.get_resource('workflow_job').launch(
-                workflow_job_template=workflow['id'],
-                monitor=False,
-                wait=wait,
-                timeout=timeout,
-                extra_vars=extra_vars
-            )
-            if wait:
-                # If we were waiting for a result we will fail if the workflow failed
-                if result['job_info']['failed']:
-                    result['msg'] = "Workflow execution failed"
-                    module.fail_json(**result)
-                else:
-                    module.exit_json(**result)
+    if workflow_job_template is None:
+        module.fail_json(msg="Unable to find workflow job template")
 
-            # We were not waiting and there should be no way we can make it here without the workflow fired off so we can return a success
-            module.exit_json(**result)
+    # The API will allow you to submit values to a jb launch that are not prompt on launch.
+    # Therefore, we will test to see if anything is set which is not prompt on launch and fail.
+    check_vars_to_prompts = {
+        'inventory': 'ask_inventory_on_launch',
+        'limit': 'ask_limit_on_launch',
+        'scm_branch': 'ask_scm_branch_on_launch',
+        'extra_vars': 'ask_variables_on_launch',
+    }
 
-        except TowerCLIError as e:
-            result['msg'] = "Failed to execute workflow: {0}".format(e)
-            module.fail_json(**result)
+    param_errors = []
+    for variable_name in check_vars_to_prompts:
+        if variable_name in post_data and not workflow_job_template[check_vars_to_prompts[variable_name]]:
+            param_errors.append("The field {0} was specified but the workflow job template does not allow for it to be overridden".format(variable_name))
+    if len(param_errors) > 0:
+        module.fail_json(msg="Parameters specified which can not be passed into wotkflow job template, see errors for details", **{'errors': param_errors})
+
+    # Launch the job
+    result = module.post_endpoint(workflow_job_template['related']['launch'], **{'data': post_data})
+
+    if result['status_code'] != 201:
+        module.fail_json(msg="Failed to launch workflow, see response for details", **{'response': result})
+
+    module.json_output['changed'] = True
+    module.json_output['id'] = result['json']['id']
+    module.json_output['status'] = result['json']['status']
+    # This is for backwards compatability
+    module.json_output['job_info'] = { 'id': result['json']['id'] }
+
+    if not wait:
+        module.exit_json(**module.json_output)
+
+    # Grab our start time to compare against for the timeout
+    start = time.time()
+
+    job_url = result['json']['url']
+    while not result['json']['finished']:
+        # If we are past our time out fail with a message
+        if timeout and timeout < time.time() - start:
+            module.json_output['msg'] = "Monitoring aborted due to timeout"
+            module.fail_json(**module.json_output)
+
+        # Put the process to sleep for our interval
+        time.sleep(interval)
+
+        result = module.get_endpoint(job_url)
+        module.json_output['status'] = result['json']['status']
+
+    # If the job has failed, we want to raise an Exception for that so we get a non-zero response.
+    if result['json']['failed']:
+        module.json_output['msg'] = 'Job with id {0} failed'.format(job_id)
+        module.fail_json(**module.json_output)
+
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
