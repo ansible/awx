@@ -426,7 +426,9 @@ def main():
         final_notification_configuration.update(notification_configuration)
 
     # Create the data that gets sent for create and update
-    new_fields = {'notification_configuration': final_notification_configuration}
+    new_fields = {}
+    if final_notification_configuration:
+        new_fields['notification_configuration'] = final_notification_configuration
     new_fields['name'] = new_name if new_name else name
     if description is not None:
         new_fields['description'] = description
