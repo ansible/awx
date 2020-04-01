@@ -5,13 +5,14 @@ collections:
   - name: azure.azcollection
     version: 0.1.1  # questionable https://github.com/ansible-collections/azure/issues/55
   - name: amazon.aws
-    version: 0.1.0
+    version: 0.1.1  # version 0.1.0 seems to have gone missing
   - name: theforeman.foreman
     version: 0.7.0  # contains the inventory plugin, but more patches are needed
   - name: google.cloud
     version: 0.0.9  # contains PR 167, should be good to go
   - name: openstack.cloud
     version: 0.0.1-dev85  # earlier had checksum mismatch
-  - name: alancoding.vmware  # FIXME needs patch https://github.com/ansible-collections/vmware/pull/58
+  - name: community.vmware
+    version: 0.3.1-dev1
   - name: ovirt.ovirt_collection
     version: 1.0.1  # new fix published, should be good to go

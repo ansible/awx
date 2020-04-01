@@ -2229,11 +2229,11 @@ class gce(PluginFileInjector):
 
 
 class vmware(PluginFileInjector):
-    plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
+    plugin_name = 'vmware_vm_inventory'
     initial_version = '2.9'  # Only tested with collection version
     ini_env_reference = 'VMWARE_INI_PATH'
     base_injector = 'managed'
-    namespace = 'alancoding'  # FIXME
+    namespace = 'community'
     collection = 'vmware'
 
     @property
@@ -2544,7 +2544,10 @@ class openstack(PluginFileInjector):
         return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self.get_script_env(inventory_update, private_data_dir, private_data_files)
+        env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        script_env = self.get_script_env(inventory_update, private_data_dir, private_data_files)
+        env.update(script_env)
+        return env
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         def use_host_name_for_name(a_bool_maybe):
