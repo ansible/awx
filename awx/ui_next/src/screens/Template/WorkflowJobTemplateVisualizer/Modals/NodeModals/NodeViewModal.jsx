@@ -20,38 +20,25 @@ import {
 
 function getNodeType(node) {
   const ujtType = node.type || node.unified_job_type;
-
-  let nodeType;
-  let nodeAPI;
   switch (ujtType) {
     case 'job_template':
     case 'job':
-      nodeType = 'job_template';
-      nodeAPI = JobTemplatesAPI;
-      break;
+      return ['job_template', JobTemplatesAPI];
     case 'project':
     case 'project_update':
-      nodeType = 'project_sync';
-      nodeAPI = ProjectsAPI;
-      break;
+      return ['project_sync', ProjectsAPI];
     case 'inventory_source':
     case 'inventory_update':
-      nodeType = 'inventory_source_sync';
-      nodeAPI = InventorySourcesAPI;
-      break;
+      return ['inventory_source_sync', InventorySourcesAPI];
     case 'workflow_job_template':
     case 'workflow_job':
-      nodeType = 'workflow_job_template';
-      nodeAPI = WorkflowJobTemplatesAPI;
-      break;
+      return ['workflow_job_template', WorkflowJobTemplatesAPI];
     case 'workflow_approval_template':
     case 'workflow_approval':
-      nodeType = 'approval';
-      nodeAPI = null;
-      break;
+      return ['approval', null];
     default:
+      return null;
   }
-  return [nodeType, nodeAPI];
 }
 
 function NodeViewModal({ i18n }) {

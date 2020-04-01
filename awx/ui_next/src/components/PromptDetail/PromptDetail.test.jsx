@@ -7,6 +7,8 @@ const mockTemplate = {
   name: 'Mock Template',
   description: 'mock description',
   unified_job_type: 'job',
+  created: '2019-08-08T19:24:05.344276Z',
+  modified: '2019-08-08T19:24:18.162949Z',
 };
 
 const mockPromptLaunch = {

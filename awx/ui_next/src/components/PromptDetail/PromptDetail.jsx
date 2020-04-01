@@ -2,10 +2,14 @@ import React from 'react';
 import { shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+
 import { Chip, ChipGroup } from '@patternfly/react-core';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-import { DetailList, Detail } from '@components/DetailList';
-import styled from 'styled-components';
+import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+
+import PromptProjectDetail from './PromptProjectDetail';
 
 const PromptHeader = styled.h2`
   font-weight: bold;
@@ -62,6 +66,34 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
         <Detail
           label={i18n._(t`Timeout`)}
           value={formatTimeout(resource?.timeout)}
+        />
+        {resource?.summary_fields?.organization && (
+          <Detail
+            label={i18n._(t`Organization`)}
+            value={
+              <Link
+                to={`/organizations/${resource?.summary_fields.organization.id}/details`}
+              >
+                {resource?.summary_fields?.organization.name}
+              </Link>
+            }
+          />
+        )}
+
+        {/* TODO: Add JT, WFJT, Inventory Source Details */}
+        {resource?.type === 'project' && (
+          <PromptProjectDetail resource={resource} />
+        )}
+
+        <UserDateDetail
+          label={i18n._(t`Created`)}
+          date={resource?.created}
+          user={resource?.summary_fields?.created_by}
+        />
+        <UserDateDetail
+          label={i18n._(t`Last Modified`)}
+          date={resource?.modified}
+          user={resource?.summary_fields?.modified_by}
         />
       </DetailList>
 
