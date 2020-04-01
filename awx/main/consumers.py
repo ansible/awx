@@ -213,31 +213,6 @@ def _dump_payload(payload):
         return None
 
 
-async def emit_channel_notification_async(group, payload):
-    from awx.main.wsbroadcast import wrap_broadcast_msg # noqa
-
-    payload_dumped = _dump_payload(payload)
-    if payload_dumped is None:
-        return
-
-    channel_layer = get_channel_layer()
-    await channel_layer.group_send(
-        group,
-        {
-            "type": "internal.message",
-            "text": payload_dumped
-        },
-    )
-
-    await channel_layer.group_send(
-        settings.BROADCAST_WEBSOCKET_GROUP_NAME,
-        {
-            "type": "internal.message",
-            "text": wrap_broadcast_msg(group, payload_dumped),
-        },
-    )
-
-
 def emit_channel_notification(group, payload):
     from awx.main.wsbroadcast import wrap_broadcast_msg # noqa
 
