@@ -3,6 +3,7 @@
 import logging
 import asyncio
 import datetime
+import re
 from datetime import datetime as dt
 
 from django.core.management.base import BaseCommand
@@ -26,18 +27,24 @@ class Command(BaseCommand):
                             help='print the internal state of any running broadcast websocket')
 
     @classmethod
+    def display_len(cls, s):
+        return len(re.sub('\x1b.*?m', '', s))
+
+    @classmethod
     def _format_lines(cls, host_stats, padding=5):
         widths = [0 for i in host_stats[0]]
         for entry in host_stats:
             for i, e in enumerate(entry):
-                if len(e) > widths[i]:
-                    widths[i] = len(e)
+                if Command.display_len(e) > widths[i]:
+                    widths[i] = Command.display_len(e)
         paddings = [padding for i in widths]
 
         lines = []
         for entry in host_stats:
             line = ""
             for pad, width, value in zip(paddings, widths, entry):
+                if len(value) > Command.display_len(value):
+                    width += len(value) - Command.display_len(value)
                 total_width = width + pad
                 line += f'{value:{total_width}}'
             lines.append(line)
@@ -47,6 +54,7 @@ class Command(BaseCommand):
     def get_connection_status(cls, me, hostnames, data):
         host_stats = [('hostame', 'state', 'start time', 'duration (sec)')]
         for h in hostnames:
+            connection_color = '91'    # red
             h = safe_name(h)
             prefix = f'awx_{h}'
             connection_state = data.get(f'{prefix}_connection', 'N/A')
@@ -55,10 +63,13 @@ class Command(BaseCommand):
             if connection_state is None:
                 connection_state = 'unknown'
             if connection_state == 'connected':
+                connection_color = '92' # green
                 connection_started = data.get(f'{prefix}_connection_start', 'Error')
                 if connection_started != 'Error':
                     connection_started = datetime.datetime.fromtimestamp(connection_started)
                     connection_duration = (dt.now() - connection_started).total_seconds()
+
+            connection_state = f'\033[{connection_color}m{connection_state}\033[0m'
 
             host_stats.append((h, connection_state, str(connection_started), str(connection_duration)))
 
