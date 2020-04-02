@@ -129,17 +129,18 @@ class AWXLogin extends Component {
       >
         <LoginForm
           className={hasAuthError || hasValidationError ? 'pf-m-error' : ''}
-          usernameLabel={i18n._(t`Username`)}
-          passwordLabel={i18n._(t`Password`)}
-          showHelperText={hasAuthError || hasValidationError}
           helperText={helperText}
-          usernameValue={username}
-          passwordValue={password}
-          isValidUsername={!hasValidationError}
           isValidPassword={!hasValidationError}
-          onChangeUsername={this.handleChangeUsername}
+          isValidUsername={!hasValidationError}
+          loginButtonLabel={i18n._(t`Log In`)}
           onChangePassword={this.handleChangePassword}
+          onChangeUsername={this.handleChangeUsername}
           onLoginButtonClick={this.handleLoginButtonClick}
+          passwordLabel={i18n._(t`Password`)}
+          passwordValue={password}
+          showHelperText={hasAuthError || hasValidationError}
+          usernameLabel={i18n._(t`Username`)}
+          usernameValue={username}
         />
       </LoginPage>
     );
