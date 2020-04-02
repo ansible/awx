@@ -26,7 +26,7 @@
     extra_opts: [--strip-components=1]
 
 - set_fact:
-    deployment_object: "sts"
+    deployment_object: "deployment"
 
 - name: Record deployment size
   shell: |

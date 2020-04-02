@@ -30,7 +30,7 @@
     kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
 
 - set_fact:
-    deployment_object: "sts"
+    deployment_object: "deployment"
 
 - name: Record deployment size
   shell: |
@@ -45,11 +45,12 @@
     kubernetes_deployment_replica_size: "{{ deployment_details.stdout | int }}"
   when: deployment_details.rc == 0
 
-- name: Delete existing Deployment
+- name: Delete existing Deployment (or StatefulSet)
   shell: |
+    {{ kubectl_or_oc }} delete sts \
+      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }} --ignore-not-found
     {{ kubectl_or_oc }} delete {{ deployment_object }} \
-      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }}
-  when: deployment_details.rc == 0
+      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }} --ignore-not-found
 
 - name: Get Postgres Service Detail
   shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
@@ -137,7 +138,7 @@
       shell: |
         POD=$({{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
           get pods -l=name=postgresql --field-selector status.phase=Running -o jsonpath="{.items[0].metadata.name}")
-        oc exec $POD -n {{ kubernetes_namespace }} -- bash -c "psql -tAc 'select version()'"
+        {{ kubectl_or_oc }} exec $POD -n {{ kubernetes_namespace }} -- bash -c "psql -tAc 'select version()'"
       register: pg_version
     - name: Upgrade postgres if necessary
       block:
@@ -200,9 +201,9 @@
       when: kubernetes_web_image is not defined
   when: docker_registry is defined
 
-- name: Determine StatefulSet api version
+- name: Determine Deployment api version
   set_fact:
-    kubernetes_statefulset_api_version: "{{ 'apps/v1' if kube_api_version is version('1.9', '>=') else 'apps/v1beta1' }}"
+    kubernetes_deployment_api_version: "{{ 'apps/v1' if kube_api_version is version('1.9', '>=') else 'apps/v1beta1' }}"
 
 - name: Render deployment templates
   set_fact:
