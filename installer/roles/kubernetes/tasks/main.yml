@@ -45,11 +45,12 @@
     kubernetes_deployment_replica_size: "{{ deployment_details.stdout | int }}"
   when: deployment_details.rc == 0
 
-- name: Delete existing Deployment
+- name: Delete existing Deployment (or StatefulSet)
   shell: |
+    {{ kubectl_or_oc }} delete sts \
+      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }} --ignore-not-found
     {{ kubectl_or_oc }} delete {{ deployment_object }} \
-      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }}
-  when: deployment_details.rc == 0
+      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }} --ignore-not-found
 
 - name: Get Postgres Service Detail
   shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
