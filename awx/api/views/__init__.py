@@ -1092,7 +1092,7 @@ class UserRolesList(SubListAttachDetachAPIView):
 
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
-            if role.content_object.organization and user not in role.content_object.organization.member_role:
+            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -4415,7 +4415,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
 
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
-            if role.content_object.organization and user not in role.content_object.organization.member_role:
+            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
