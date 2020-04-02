@@ -114,22 +114,6 @@
     that:
       - result is changed
 
-- name: Recreate with notification_configuration
-  tower_notification:
-    name: "{{ webhook_not }}"
-    organization: Default
-    notification_type: webhook
-    notification_configuration:
-      url: http://www.example.com/hook
-      headers:
-        X-Custom-Header: value123
-    state: present
-  register: result
-
-- assert:
-    that:
-      - result is not changed
-
 - name: Delete webhook notification
   tower_notification:
     name: "{{ webhook_not }}"

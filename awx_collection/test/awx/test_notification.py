@@ -82,3 +82,31 @@ def test_invalid_notification_configuration(run_module, admin_user, organization
     ), admin_user)
     assert result.get('failed', False), result.get('msg', result)
     assert 'Missing required fields for Notification Configuration' in result['msg']
+
+
+@pytest.mark.django_db
+@pytest.mark.xfail(reason='Handling API validation changes w.r.t. changed status is an open item')
+def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
+    nt_config = {
+        'url': 'http://www.example.com/hook',
+        'headers': {
+            'X-Custom-Header': 'value123'
+        }
+    }
+    result = run_module('tower_notification', dict(
+        name='foo-notification-template',
+        organization=organization.name,
+        notification_type='webhook',
+        notification_configuration=nt_config,
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.pop('changed', None), result
+
+    result = run_module('tower_notification', dict(
+        name='foo-notification-template',
+        organization=organization.name,
+        notification_type='webhook',
+        notification_configuration=nt_config,
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.pop('changed', None), result
