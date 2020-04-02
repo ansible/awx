@@ -10,7 +10,7 @@
     kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
 
 - set_fact:
-    deployment_object: "sts"
+    deployment_object: "deployment"
 
 - name: Record deployment size
   shell: |
