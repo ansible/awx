@@ -1,7 +1,6 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
@@ -59,28 +58,6 @@ def test_ctint_activity_stream(monkeypatch, get, user, settings):
     assert 'summary_fields' in response.data
     assert 'setting' in response.data['summary_fields']
     assert response.data['summary_fields']['setting'][0]['name'] == 'FOO'
-
-
-@pytest.mark.django_db
-def test_middleware_actor_added(monkeypatch, post, get, user, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
-    u = user('admin-poster', True)
-
-    url = reverse('api:organization_list')
-    response = post(url,
-                    dict(name='test-org', description='test-desc'),
-                    u,
-                    middleware=ActivityStreamMiddleware())
-    assert response.status_code == 201
-
-    org_id = response.data['id']
-    activity_stream = ActivityStream.objects.filter(organization__pk=org_id).first()
-
-    url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
-    response = get(url, u)
-
-    assert response.status_code == 200
-    assert response.data['summary_fields']['actor']['username'] == 'admin-poster'
 
 
 @pytest.mark.django_db
