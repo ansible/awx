@@ -35,7 +35,7 @@ const mockJobTemplate = {
   limit: '',
   name: 'Foo',
   playbook: 'Baz',
-  project: 3,
+  project: { id: 3, summary_fields: { organization: { id: 1 } } },
   scm_branch: '',
   skip_tags: '',
   summary_fields: {
@@ -239,6 +239,7 @@ describe('<JobTemplateEdit />', () => {
 
     const expected = {
       ...mockJobTemplate,
+      project: mockJobTemplate.project.id,
       ...updatedTemplateData,
     };
     delete expected.summary_fields;

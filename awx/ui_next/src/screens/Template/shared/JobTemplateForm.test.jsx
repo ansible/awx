@@ -14,7 +14,7 @@ describe('<JobTemplateForm />', () => {
     description: 'Bar',
     job_type: 'run',
     inventory: 2,
-    project: 3,
+    project: { id: 3, summary_fields: { organization: { id: 1 } } },
     playbook: 'Baz',
     type: 'job_template',
     scm_branch: 'Foo',

@@ -70,7 +70,7 @@ export const JobTemplate = shape({
   inventory: number,
   job_type: oneOf(['run', 'check']),
   playbook: string,
-  project: number,
+  project: shape({}),
 });
 
 export const Inventory = shape({

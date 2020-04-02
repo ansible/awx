@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
 import JobTemplateForm from '../shared/JobTemplateForm';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import { JobTemplatesAPI } from '@api';
 
 function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
@@ -12,7 +12,6 @@ function JobTemplateAdd() {
   async function handleSubmit(values) {
     const {
       labels,
-      organizationId,
       instanceGroups,
       initialInstanceGroups,
       credentials,
@@ -20,12 +19,13 @@ function JobTemplateAdd() {
     } = values;
 
     setFormSubmitError(null);
+    remainingValues.project = remainingValues.project.id;
     try {
       const {
         data: { id, type },
       } = await JobTemplatesAPI.create(remainingValues);
       await Promise.all([
-        submitLabels(id, labels, organizationId),
+        submitLabels(id, labels, values.project.summary_fields.organization.id),
         submitInstanceGroups(id, instanceGroups),
         submitCredentials(id, credentials),
       ]);
@@ -35,16 +35,7 @@ function JobTemplateAdd() {
     }
   }
 
-  async function submitLabels(templateId, labels = [], formOrg) {
-    let orgId = formOrg;
-
-    if (!orgId && labels.length > 0) {
-      const {
-        data: { results },
-      } = await OrganizationsAPI.read();
-      orgId = results[0].id;
-    }
-
+  async function submitLabels(templateId, labels = [], orgId) {
     const associationPromises = labels.map(label =>
       JobTemplatesAPI.associateLabel(templateId, label, orgId)
     );

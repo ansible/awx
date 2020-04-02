@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { withFormik, Field } from 'formik';
+import { withFormik, useField, useFormikContext } from 'formik';
 import {
   Form,
   FormGroup,
@@ -47,11 +47,9 @@ function JobTemplateForm({
   validateField,
   handleCancel,
   handleSubmit,
-  handleBlur,
   setFieldValue,
   submitError,
   i18n,
-  touched,
 }) {
   const [contentError, setContentError] = useState(false);
   const [project, setProject] = useState(null);
@@ -61,6 +59,35 @@ function JobTemplateForm({
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
   );
+
+  const { values: formikValues } = useFormikContext();
+  const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
+    name: 'job_type',
+    validate: required(null, i18n),
+  });
+  const [, inventoryMeta, inventoryHelpers] = useField('inventory');
+  const [projectField, projectMeta, projectHelpers] = useField({
+    name: 'project',
+    validate: () => handleProjectValidation(),
+  });
+
+  const [scmField, , scmHelpers] = useField('scm_branch');
+
+  const [playbookField, playbookMeta, playbookHelpers] = useField({
+    name: 'playbook',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
+  });
+
+  const [credentialField, , credentialHelpers] = useField('credentials');
+  const [labelsField, , labelsHelpers] = useField('labels');
+  const [limitField, limitMeta] = useField('limit');
+  const [verbosityField] = useField('verbosity');
+  const [diffModeField, , diffModeHelpers] = useField('diff_mode');
+  const [instanceGroupsField, , instanceGroupsHelpers] = useField(
+    'instanceGroups'
+  );
+  const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
+  const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
 
   const {
     request: fetchProject,
@@ -100,7 +127,7 @@ function JobTemplateForm({
   }, [loadRelatedInstanceGroups]);
 
   const handleProjectValidation = () => {
-    if (!project && touched.project) {
+    if (!project && projectMeta.touched) {
       return i18n._(t`Select a value for this field`);
     }
     if (project && project.status === 'never updated') {
@@ -112,11 +139,11 @@ function JobTemplateForm({
   const handleProjectUpdate = useCallback(
     newProject => {
       setProject(newProject);
-      setFieldValue('project', newProject.id);
-      setFieldValue('playbook', 0);
-      setFieldValue('scm_branch', '');
+      projectHelpers.setValue(newProject);
+      playbookHelpers.setValue(0);
+      scmHelpers.setValue('');
     },
-    [setFieldValue, setProject]
+    [setProject, projectHelpers, playbookHelpers, scmHelpers]
   );
 
   const jobTypeOptions = [
@@ -184,26 +211,15 @@ function JobTemplateForm({
             test environment setup, and report problems without
             executing the playbook.`)}
         >
-          <Field
-            name="job_type"
-            validate={required(null, i18n)}
-            onBlur={handleBlur}
-          >
-            {({ form, field }) => {
-              const isValid = !form.touched.job_type || !form.errors.job_type;
-              return (
-                <AnsibleSelect
-                  isValid={isValid}
-                  id="template-job-type"
-                  data={jobTypeOptions}
-                  {...field}
-                  onChange={(event, value) => {
-                    form.setFieldValue('job_type', value);
-                  }}
-                />
-              );
+          <AnsibleSelect
+            {...jobTypeField}
+            isValid={!jobTypeMeta.touched || !jobTypeMeta.error}
+            id="template-job-type"
+            data={jobTypeOptions}
+            onChange={(event, value) => {
+              jobTypeHelpers.setValue(value);
             }}
-          </Field>
+          />
         </FieldWithPrompt>
         <FieldWithPrompt
           fieldId="template-inventory"
@@ -214,108 +230,71 @@ function JobTemplateForm({
           tooltip={i18n._(t`Select the inventory containing the hosts
             you want this job to manage.`)}
         >
-          <Field name="inventory">
-            {({ form }) => (
-              <>
-                <InventoryLookup
-                  value={inventory}
-                  onBlur={() => {
-                    form.setFieldTouched('inventory');
-                  }}
-                  onChange={value => {
-                    form.setValues({
-                      ...form.values,
-                      inventory: value.id,
-                      organizationId: value.organization,
-                    });
-                    setInventory(value);
-                  }}
-                  required
-                  touched={form.touched.inventory}
-                  error={form.errors.inventory}
-                />
-                {(form.touched.inventory ||
-                  form.touched.ask_inventory_on_launch) &&
-                  form.errors.inventory && (
-                    <div
-                      className="pf-c-form__helper-text pf-m-error"
-                      aria-live="polite"
-                    >
-                      {form.errors.inventory}
-                    </div>
-                  )}
-              </>
+          <InventoryLookup
+            value={inventory}
+            onBlur={() => inventoryHelpers.setTouched()}
+            onChange={value => {
+              inventoryHelpers.setValue(value.id);
+              setInventory(value);
+            }}
+            required
+            touched={inventoryMeta.touched}
+            error={inventoryMeta.error}
+          />
+          {(inventoryMeta.touched || formikValues.ask_inventory_on_launch) &&
+            inventoryMeta.error && (
+              <div
+                className="pf-c-form__helper-text pf-m-error"
+                aria-live="polite"
+              >
+                {inventoryMeta.error}
+              </div>
             )}
-          </Field>
         </FieldWithPrompt>
-        <Field name="project" validate={handleProjectValidation}>
-          {({ form }) => (
-            <ProjectLookup
-              value={project}
-              onBlur={() => form.setFieldTouched('project')}
-              tooltip={i18n._(t`Select the project containing the playbook
+
+        <ProjectLookup
+          value={project}
+          onBlur={() => projectHelpers.setTouched()}
+          tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
-              isValid={!form.touched.project || !form.errors.project}
-              helperTextInvalid={form.errors.project}
-              onChange={handleProjectUpdate}
-              required
-            />
-          )}
-        </Field>
-        {project && project.allow_override && (
+          isValid={!projectMeta.touched || !projectMeta.error}
+          helperTextInvalid={projectMeta.error}
+          onChange={handleProjectUpdate}
+          required
+        />
+        {project?.allow_override && (
           <FieldWithPrompt
             fieldId="template-scm-branch"
             label={i18n._(t`SCM Branch`)}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
           >
-            <Field name="scm_branch">
-              {({ field }) => {
-                return (
-                  <TextInput
-                    id="template-scm-branch"
-                    {...field}
-                    onChange={(value, event) => {
-                      field.onChange(event);
-                    }}
-                  />
-                );
+            <TextInput
+              id="template-scm-branch"
+              {...scmField}
+              onChange={(value, event) => {
+                scmField.onChange(event);
               }}
-            </Field>
+            />
           </FieldWithPrompt>
         )}
-        <Field
-          name="playbook"
-          validate={required(i18n._(t`Select a value for this field`), i18n)}
-          onBlur={handleBlur}
+        <FormGroup
+          fieldId="template-playbook"
+          helperTextInvalid={playbookMeta.error}
+          isRequired
+          label={i18n._(t`Playbook`)}
         >
-          {({ field, form }) => {
-            const isValid = !form.touched.playbook || !form.errors.playbook;
-            return (
-              <FormGroup
-                fieldId="template-playbook"
-                helperTextInvalid={form.errors.playbook}
-                isRequired
-                isValid={isValid}
-                label={i18n._(t`Playbook`)}
-              >
-                <FieldTooltip
-                  content={i18n._(
-                    t`Select the playbook to be executed by this job.`
-                  )}
-                />
-                <PlaybookSelect
-                  projectId={form.values.project}
-                  isValid={isValid}
-                  form={form}
-                  field={field}
-                  onBlur={() => form.setFieldTouched('playbook')}
-                  onError={setContentError}
-                />
-              </FormGroup>
-            );
-          }}
-        </Field>
+          <FieldTooltip
+            content={i18n._(t`Select the playbook to be executed by this job.`)}
+          />
+          <PlaybookSelect
+            projectId={project?.id || projectField.value?.id}
+            isValid={!(playbookMeta.touched || playbookMeta.error)}
+            field={playbookField}
+            onBlur={() => playbookHelpers.setTouched()}
+            onError={setContentError}
+          />
+        </FormGroup>
         <FormFullWidthLayout>
           <FieldWithPrompt
             fieldId="template-credentials"
@@ -328,36 +307,26 @@ function JobTemplateForm({
                 credential at run time. If you select credentials and check "Prompt on launch", the selected
                 credential(s) become the defaults that can be updated at run time.`)}
           >
-            <Field name="credentials" fieldId="template-credentials">
-              {({ field }) => {
-                return (
-                  <MultiCredentialsLookup
-                    value={field.value}
-                    onChange={newCredentials =>
-                      setFieldValue('credentials', newCredentials)
-                    }
-                    onError={setContentError}
-                  />
-                );
-              }}
-            </Field>
+            <MultiCredentialsLookup
+              value={credentialField.value}
+              onChange={newCredentials =>
+                credentialHelpers.setValue(newCredentials)
+              }
+              onError={setContentError}
+            />
           </FieldWithPrompt>
-          <Field name="labels">
-            {({ field }) => (
-              <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-                <FieldTooltip
-                  content={i18n._(t`Optional labels that describe this job template,
+          <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
+            <FieldTooltip
+              content={i18n._(t`Optional labels that describe this job template,
                       such as 'dev' or 'test'. Labels can be used to group and filter
                       job templates and completed jobs.`)}
-                />
-                <LabelSelect
-                  value={field.value}
-                  onChange={labels => setFieldValue('labels', labels)}
-                  onError={setContentError}
-                />
-              </FormGroup>
-            )}
-          </Field>
+            />
+            <LabelSelect
+              value={labelsField.value}
+              onChange={labels => labelsHelpers.setValue(labels)}
+              onError={setContentError}
+            />
+          </FormGroup>
           <VariablesField
             id="template-variables"
             name="extra_vars"
@@ -394,20 +363,14 @@ function JobTemplateForm({
                   playbook. Multiple patterns are allowed. Refer to Ansible
                   documentation for more information and examples on patterns.`)}
             >
-              <Field name="limit">
-                {({ form, field }) => {
-                  return (
-                    <TextInput
-                      id="template-limit"
-                      {...field}
-                      isValid={!form.touched.job_type || !form.errors.job_type}
-                      onChange={(value, event) => {
-                        field.onChange(event);
-                      }}
-                    />
-                  );
+              <TextInput
+                id="template-limit"
+                {...limitField}
+                isValid={!limitMeta.touched || !limitMeta.error}
+                onChange={(value, event) => {
+                  limitField.onChange(event);
                 }}
-              </Field>
+              />
             </FieldWithPrompt>
             <FieldWithPrompt
               fieldId="template-verbosity"
@@ -417,15 +380,11 @@ function JobTemplateForm({
               tooltip={i18n._(t`Control the level of output ansible will
                 produce as the playbook executes.`)}
             >
-              <Field name="verbosity">
-                {({ field }) => (
-                  <AnsibleSelect
-                    id="template-verbosity"
-                    data={verbosityOptions}
-                    {...field}
-                  />
-                )}
-              </Field>
+              <AnsibleSelect
+                id="template-verbosity"
+                data={verbosityOptions}
+                {...verbosityField}
+              />
             </FieldWithPrompt>
             <FormField
               id="template-job-slicing"
@@ -456,32 +415,20 @@ function JobTemplateForm({
                 Ansible tasks, where supported. This is equivalent
                 to Ansible&#x2019s --diff mode.`)}
             >
-              <Field name="diff_mode">
-                {({ form, field }) => {
-                  return (
-                    <Switch
-                      id="template-show-changes"
-                      label={field.value ? i18n._(t`On`) : i18n._(t`Off`)}
-                      isChecked={field.value}
-                      onChange={checked =>
-                        form.setFieldValue(field.name, checked)
-                      }
-                    />
-                  );
-                }}
-              </Field>
+              <Switch
+                id="template-show-changes"
+                label={diffModeField.value ? i18n._(t`On`) : i18n._(t`Off`)}
+                isChecked={diffModeField.value}
+                onChange={checked => diffModeHelpers.setValue(checked)}
+              />
             </FieldWithPrompt>
             <FormFullWidthLayout>
-              <Field name="instanceGroups">
-                {({ field, form }) => (
-                  <InstanceGroupsLookup
-                    value={field.value}
-                    onChange={value => form.setFieldValue(field.name, value)}
-                    tooltip={i18n._(t`Select the Instance Groups for this Organization
+              <InstanceGroupsLookup
+                value={instanceGroupsField.value}
+                onChange={value => instanceGroupsHelpers.setValue(value)}
+                tooltip={i18n._(t`Select the Instance Groups for this Organization
                         to run on.`)}
-                  />
-                )}
-              </Field>
+              />
               <FieldWithPrompt
                 fieldId="template-tags"
                 label={i18n._(t`Job Tags`)}
@@ -493,14 +440,10 @@ function JobTemplateForm({
                     Refer to Ansible Tower documentation for details on
                     the usage of tags.`)}
               >
-                <Field name="job_tags">
-                  {({ field, form }) => (
-                    <TagMultiSelect
-                      value={field.value}
-                      onChange={value => form.setFieldValue(field.name, value)}
-                    />
-                  )}
-                </Field>
+                <TagMultiSelect
+                  value={jobTagsField.value}
+                  onChange={value => jobTagsHelpers.setValue(value)}
+                />
               </FieldWithPrompt>
               <FieldWithPrompt
                 fieldId="template-skip-tags"
@@ -513,14 +456,10 @@ function JobTemplateForm({
                     to Ansible Tower documentation for details on the usage
                     of tags.`)}
               >
-                <Field name="skip_tags">
-                  {({ field, form }) => (
-                    <TagMultiSelect
-                      value={field.value}
-                      onChange={value => form.setFieldValue(field.name, value)}
-                    />
-                  )}
-                </Field>
+                <TagMultiSelect
+                  value={skipTagsField.value}
+                  onChange={value => skipTagsHelpers.setValue(value)}
+                />
               </FieldWithPrompt>
               <FormGroup
                 fieldId="template-option-checkboxes"
@@ -636,10 +575,6 @@ const FormikApp = withFormik({
       },
     } = template;
 
-    const hasInventory = summary_fields.inventory
-      ? summary_fields.inventory.organization_id
-      : null;
-
     return {
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
@@ -655,7 +590,7 @@ const FormikApp = withFormik({
       description: template.description || '',
       job_type: template.job_type || 'run',
       inventory: template.inventory || null,
-      project: template.project || '',
+      project: template.project || null,
       scm_branch: template.scm_branch || '',
       playbook: template.playbook || '',
       labels: summary_fields.labels.results || [],
@@ -672,7 +607,6 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       use_fact_cache: template.use_fact_cache || false,
       host_config_key: template.host_config_key || '',
-      organizationId: hasInventory,
       initialInstanceGroups: [],
       instanceGroups: [],
       credentials: summary_fields.credentials || [],
