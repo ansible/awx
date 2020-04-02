@@ -32,7 +32,18 @@ data:
     stderr_logfile_maxbytes=0
 
     [program:daphne]
-    command = {{ uwsgi_bash }} '/var/lib/awx/venv/awx/bin/daphne -b 127.0.0.1 -p 8051 --websocket_timeout -1 awx.asgi:channel_layer'
+    command = {{ uwsgi_bash }} '/var/lib/awx/venv/awx/bin/daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer'
+    directory = /var/lib/awx
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [program:wsbroadcast]
+    command = awx-manage run_wsbroadcast
     directory = /var/lib/awx
     autostart = true
     autorestart = true
@@ -43,7 +54,7 @@ data:
     stderr_logfile_maxbytes=0
 
     [group:tower-processes]
-    programs=nginx,uwsgi,daphne
+    programs=nginx,uwsgi,daphne,wsbroadcast
     priority=5
 
     # TODO: Exit Handler
@@ -94,19 +105,8 @@ data:
     stderr_logfile=/dev/stderr
     stderr_logfile_maxbytes=0
 
-    [program:channels-worker]
-    command = awx-manage runworker --only-channels websocket.*
-    directory = /var/lib/awx
-    autostart = true
-    autorestart = true
-    stopwaitsecs = 5
-    stdout_logfile=/dev/stdout
-    stdout_logfile_maxbytes=0
-    stderr_logfile=/dev/stderr
-    stderr_logfile_maxbytes=0
-
     [group:tower-processes]
-    programs=dispatcher,callback-receiver,channels-worker
+    programs=dispatcher,callback-receiver
     priority=5
 
     # TODO: Exit Handler
@@ -128,3 +128,4 @@ data:
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+

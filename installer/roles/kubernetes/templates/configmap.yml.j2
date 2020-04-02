@@ -205,9 +205,8 @@ data:
     USE_X_FORWARDED_PORT = True
 
     AWX_CONTAINER_GROUP_DEFAULT_IMAGE = "{{ container_groups_image }}"
-    {% if candlepin_host is defined %}
-    REDHAT_CANDLEPIN_HOST = "{{ candlepin_host  | default('') }}"
-    REDHAT_CANDLEPIN_VERIFY = "{{ candlepin_verify | default('') }}"
+    REDHAT_CANDLEPIN_HOST = "{{ candlepin_host  | default(omit) }}"
+    REDHAT_CANDLEPIN_VERIFY = "{{ candlepin_verify | default(omit) }}"
     BROADCAST_WEBSOCKET_PORT = 8052
     BROADCAST_WEBSOCKET_PROTOCOL = 'http'
 
