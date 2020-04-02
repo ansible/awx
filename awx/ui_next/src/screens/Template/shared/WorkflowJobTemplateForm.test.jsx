@@ -74,7 +74,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
               template={mockTemplate}
               handleCancel={handleCancel}
               handleSubmit={handleSubmit}
-              webhook_key="sdfghjklmnbvcdsew435678iokjhgfd"
+              webhookKey="sdfghjklmnbvcdsew435678iokjhgfd"
             />
           )}
         />,
@@ -106,13 +106,14 @@ describe('<WorkflowJobTemplateForm/>', () => {
     const fields = [
       'FormField[name="name"]',
       'FormField[name="description"]',
-      'Field[name="organization"]',
-      'Field[name="inventory"]',
+      'FormGroup[label="Organization"]',
+      'FormGroup[label="Inventory"]',
       'FormField[name="limit"]',
       'FormField[name="scm_branch"]',
-      'Field[name="labels"]',
+      'FormGroup[label="Labels"]',
       'VariablesField',
     ];
+
     const assertField = field => {
       expect(wrapper.find(`${field}`).length).toBe(1);
     };
@@ -191,7 +192,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
     await act(() =>
       wrapper
-        .find('FormGroup[name="webhook_key"]')
+        .find('FormGroup[name="webhookKey"]')
         .find('Button[variant="tertiary"]')
         .prop('onClick')()
     );
@@ -201,8 +202,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
 
     wrapper.update();
-
-    expect(wrapper.find('Field[name="webhook_service"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[name="webhook_service"]').length).toBe(1);
 
     act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
     wrapper.update();
