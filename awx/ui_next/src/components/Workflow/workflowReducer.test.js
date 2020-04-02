@@ -16,6 +16,7 @@ const defaultState = {
   nodes: [],
   nodeToDelete: null,
   nodeToEdit: null,
+  nodeToView: null,
   showDeleteAllNodesModal: false,
   showLegend: false,
   showTools: false,

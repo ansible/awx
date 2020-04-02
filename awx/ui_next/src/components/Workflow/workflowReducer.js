@@ -17,6 +17,7 @@ export function initReducer() {
     nodes: [],
     nodeToDelete: null,
     nodeToEdit: null,
+    nodeToView: null,
     showDeleteAllNodesModal: false,
     showLegend: false,
     showTools: false,
@@ -93,6 +94,8 @@ export default function visualizerReducer(state, action) {
       return updateLink(state, action.linkType);
     case 'UPDATE_NODE':
       return updateNode(state, action.node);
+    case 'REFRESH_NODE':
+      return refreshNode(state, action.node);
     default:
       throw new Error(`Unrecognized action type: ${action.type}`);
   }
@@ -605,5 +608,19 @@ function updateNode(state, editedNode) {
     nodeToEdit: null,
     nodes: newNodes,
     unsavedChanges: true,
+  };
+}
+
+function refreshNode(state, refreshedNode) {
+  const { nodeToView, nodes } = state;
+  const newNodes = [...nodes];
+
+  const matchingNode = newNodes.find(node => node.id === nodeToView.id);
+  matchingNode.unifiedJobTemplate = refreshedNode.nodeResource;
+
+  return {
+    ...state,
+    nodes: newNodes,
+    nodeToView: matchingNode,
   };
 }
