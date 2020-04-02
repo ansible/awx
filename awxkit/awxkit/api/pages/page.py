@@ -318,7 +318,10 @@ class Page(object):
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
     def get_natural_key(self):
+        warn = "This object does not have a natural key: %s"
+
         if not getattr(self, 'NATURAL_KEY', None):
+            log.warning(warn, getattr(self, 'endpoint', ''))
             return None
 
         natural_key = {}
@@ -328,10 +331,12 @@ class Page(object):
                     # FIXME: use caching by url
                     natural_key[key] = self.related[key].get().get_natural_key()
                 except exc.Forbidden:
+                    log.warning("This object cannot be read: %s", getattr(self, 'endpoint', ''))
                     return None
             elif key in self:
                 natural_key[key] = self[key]
         if not natural_key:
+            log.warning(warn, getattr(self, 'endpoint', ''))
             return None
 
         natural_key['type'] = self['type']
@@ -397,6 +402,7 @@ class PageList(object):
         return self.__item_class__(self.connection).create(*a, **kw)
 
     def get_natural_key(self):
+        log.warning("This object does not have a natural key: %s", getattr(self, 'endpoint', ''))
         return None
 
 

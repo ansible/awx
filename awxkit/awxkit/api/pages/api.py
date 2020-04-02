@@ -1,10 +1,14 @@
 import itertools
+import logging
 
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 from . import base
 from . import page
 from ..mixins import has_create
+
+
+log = logging.getLogger(__name__)
 
 
 EXPORTABLE_RESOURCES = [
@@ -73,6 +77,8 @@ class ApiV2(base.Base):
         if 'POST' not in options.r.headers.get('Allow', ''):
             return self._options.setdefault(url, None)
 
+        # FIXME: if POST isn't in the actions, this is a view where we
+        # don't have write permissions.  Try to do something anyway.
         return self._options.setdefault(url, options.json['actions'].get('POST', {}))
 
     # Export methods
@@ -84,53 +90,60 @@ class ApiV2(base.Base):
         if options is None:  # Deprecated endpoint or insufficient permissions
             return None
 
-        try:
-            # Note: doing asset[key] automatically parses json blob strings, which can be a problem.
-            fields = {
-                key: asset.json[key] for key in options
-                if key in asset.json and key not in asset.related and key != 'id'
-            }
-            fields['natural_key'] = asset.get_natural_key()
+        # Note: doing asset[key] automatically parses json blob strings, which can be a problem.
+        fields = {
+            key: asset.json[key] for key in options
+            if key in asset.json and key not in asset.related and key != 'id'
+        }
+        fields['natural_key'] = asset.get_natural_key()
 
-            fk_fields = {
+        for key in options:
+            if not key in asset.related:
+                continue
+            try:
                 # FIXME: use caching by url
-                key: asset.related[key].get().get_natural_key() for key in options
-                if key in asset.related
-            }
+                fields[key] = asset.related[key].get().get_natural_key()
+            except exc.Forbidden:
+                log.warning("This object cannot be read: %s", asset.related[key])
+                pass  # FIXME: what if the fk is mandatory?
 
-            related = {}
-            for key, related_endpoint in asset.related.items():
-                if key in asset.json or not related_endpoint:
+        related = {}
+        for key, related_endpoint in asset.related.items():
+            if key in asset.json or not related_endpoint:
+                continue
+            if key == 'object_roles':
+                continue  # FIXME: we should aggregate all visited roles
+
+            rel = related_endpoint._create()
+            if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
+                by_natural_key = True
+                related_options = self._get_options(related_endpoint)
+                if related_options is None:
                     continue
-                if key == 'object_roles':  # FIXME
-                    continue
-                rel = related_endpoint._create()
+            elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
+                by_natural_key, related_options = False, None
+            else:
+                continue
 
-                if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
-                    by_natural_key = True
-                    related_options = self._get_options(related_endpoint)
-                    if related_options is None:
-                        continue
-                elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
-                    by_natural_key, related_options = False, None
-                else:
-                    continue
+            try:
+                # FIXME: use caching by url
+                data = rel.get(all_pages=True)
+            except exc.Forbidden:
+                log.warning("This object cannot be read: %s", related_endpoint)
+                continue
 
-                data = related_endpoint.get(all_pages=True)
-                if 'results' in data:
-                    related[key] = [
-                        x.get_natural_key() if by_natural_key else self._serialize_asset(x, related_options)
-                        for x in data.results
-                    ]
-                else:
-                    related[key] = data.json
-        except exc.Forbidden:
-            return None
+            if 'results' in data:
+                results = (
+                    x.get_natural_key() if by_natural_key else self._serialize_asset(x, related_options)
+                    for x in data.results
+                )
+                related[key] = [x for x in results if x is not None]
+            else:
+                related[key] = data.json
 
-        related_fields = {'related': related} if related else {}
+        if related:
+            fields['related'] = related
 
-        fields.update(fk_fields)
-        fields.update(related_fields)
         return fields
 
     def _get_assets(self, resource, value):
