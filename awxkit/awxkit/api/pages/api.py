@@ -1,5 +1,6 @@
 import itertools
 import logging
+import re
 
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
@@ -7,6 +8,7 @@ from . import base
 from . import page
 from ..mixins import has_create
 
+descRE = re.compile('^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +56,17 @@ class Api(base.Base):
 page.register_page(resources.api, Api)
 
 
+def parse_description(desc):
+    options = {}
+    for line in desc[desc.index('POST'):].splitlines():
+        match = descRE.match(line)
+        if not match:
+            continue
+        options[match.group(1)] = {'type': match.group(2),
+                                   'required': match.group(3) == 'required'}
+    return options
+
+
 class ApiV2(base.Base):
 
     # Common import/export methods
@@ -77,9 +90,10 @@ class ApiV2(base.Base):
         if 'POST' not in options.r.headers.get('Allow', ''):
             return self._options.setdefault(url, None)
 
-        # FIXME: if POST isn't in the actions, this is a view where we
-        # don't have write permissions.  Try to do something anyway.
-        return self._options.setdefault(url, options.json['actions'].get('POST', {}))
+        if 'POST' in options.json['actions']:
+            return self._options.setdefault(url, options.json['actions']['POST'])
+        else:
+            return self._options.setdefault(url, parse_description(options.json['description']))
 
     # Export methods
 
