@@ -75,7 +75,7 @@ class JobTemplates extends SchedulesMixin(
     return this.http.get(`${this.baseUrl}${id}/survey_spec/`);
   }
 
-  updateSurvey(id, survey = null) {
+  updateSurvey(id, survey) {
     return this.http.post(`${this.baseUrl}${id}/survey_spec/`, survey);
   }
 
