@@ -191,7 +191,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return rrule
 
     @classmethod
-    def rrulestr(cls, rrule, **kwargs):
+    def rrulestr(cls, rrule, fast_forward=True, **kwargs):
         """
         Apply our own custom rrule parsing requirements
         """
@@ -205,11 +205,17 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                     'A valid TZID must be provided (e.g., America/New_York)'
                 )
 
-        if 'MINUTELY' in rrule or 'HOURLY' in rrule:
+        if fast_forward and ('MINUTELY' in rrule or 'HOURLY' in rrule):
             try:
                 first_event = x[0]
-                if first_event < now() - datetime.timedelta(days=365 * 5):
-                    raise ValueError('RRULE values with more than 1000 events are not allowed.')
+                if first_event < now():
+                    # hourly/minutely rrules with far-past DTSTART values
+                    # are *really* slow to precompute
+                    # start *from* one week ago to speed things up drastically
+                    dtstart = x._rrule[0]._dtstart.strftime(':%Y%m%dT')
+                    new_start = (now() - datetime.timedelta(days=7)).strftime(':%Y%m%dT')
+                    new_rrule = rrule.replace(dtstart, new_start)
+                    return Schedule.rrulestr(new_rrule, fast_forward=False)
             except IndexError:
                 pass
         return x

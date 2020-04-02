@@ -1,6 +1,8 @@
+import datetime
 import pytest
 
 from django.utils.encoding import smart_str
+from django.utils.timezone import now
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Schedule
@@ -140,7 +142,6 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
     ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
     ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
     ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
-    ("DTSTART:19700101T000000Z RRULE:FREQ=MINUTELY;INTERVAL=1", "more than 1000 events are not allowed"),  # noqa
 ])
 def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
     job_template = JobTemplate.objects.create(
@@ -340,6 +341,40 @@ def test_months_with_31_days(post, admin_user):
         '2030-10-31 00:00:00-04:00',
         '2030-12-31 00:00:00-05:00',
     ]
+
+
+@pytest.mark.django_db
+@pytest.mark.timeout(3)
+@pytest.mark.parametrize('freq, delta, total_seconds', (
+    ('MINUTELY', 1, 60),
+    ('MINUTELY', 15, 15 * 60),
+    ('HOURLY', 1, 3600),
+    ('HOURLY', 4, 3600 * 4),
+))
+def test_really_old_dtstart(post, admin_user, freq, delta, total_seconds):
+    url = reverse('api:schedule_rrule')
+    # every <interval>, at the :30 second mark
+    rrule = f'DTSTART;TZID=America/New_York:20051231T000030 RRULE:FREQ={freq};INTERVAL={delta}'
+    start = now()
+    next_ten = post(url, {'rrule': rrule}, admin_user, expect=200).data['utc']
+
+    assert len(next_ten) == 10
+
+    # the first date is *in the future*
+    assert next_ten[0] >= start
+
+    # ...but *no more than* <interval> into the future
+    assert now() + datetime.timedelta(**{
+        'minutes' if freq == 'MINUTELY' else 'hours': delta
+    })
+
+    # every date in the list is <interval> greater than the last
+    for i, x in enumerate(next_ten):
+        if i == 0:
+            continue
+        assert x.second == 30
+        delta = (x - next_ten[i - 1])
+        assert delta.total_seconds() == total_seconds
 
 
 def test_dst_rollback_duplicates(post, admin_user):
