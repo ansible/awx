@@ -1,6 +1,6 @@
 import json
 import logging
-import datetime
+import time
 import hmac
 import asyncio
 
@@ -29,7 +29,7 @@ class WebsocketSecretAuthHelper:
 
     @classmethod
     def construct_secret(cls):
-        nonce_serialized = "{}".format(int((datetime.datetime.utcnow() - datetime.datetime.fromtimestamp(0)).total_seconds()))
+        nonce_serialized = f"{int(time.time())}"
         payload_dict = {
             'secret': settings.BROADCAST_WEBSOCKET_SECRET,
             'nonce': nonce_serialized
@@ -70,10 +70,12 @@ class WebsocketSecretAuthHelper:
             raise ValueError("Invalid secret")
 
         # Avoid timing attack and check the nonce after all the heavy lifting
-        now = datetime.datetime.utcnow()
-        nonce_parsed = datetime.datetime.fromtimestamp(int(nonce_parsed))
-        if (now - nonce_parsed).total_seconds() > nonce_tolerance:
-            raise ValueError("Potential replay attack or machine(s) time out of sync.")
+        now = int(time.time())
+        nonce_parsed = int(nonce_parsed)
+        nonce_diff = now - nonce_parsed
+        if abs(nonce_diff) > nonce_tolerance:
+            logger.warn(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
+            raise ValueError("Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
 
         return True
 
@@ -94,7 +96,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
             WebsocketSecretAuthHelper.is_authorized(self.scope)
         except Exception:
             # TODO: log ip of connected client
-            logger.warn("Broadcast client failed to authorize.")
+            logger.warn("Broadcast client failed to authorize for reason.")
             await self.close()
             return
 
