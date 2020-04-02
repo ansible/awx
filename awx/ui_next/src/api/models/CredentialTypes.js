@@ -5,6 +5,28 @@ class CredentialTypes extends Base {
     super(http);
     this.baseUrl = '/api/v2/credential_types/';
   }
+
+  async loadAllTypes(
+    acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault']
+  ) {
+    const pageSize = 200;
+    // The number of credential types a user can have is unlimited. In practice, it is unlikely for
+    // users to have more than a page at the maximum request size.
+    const {
+      data: { next, results },
+    } = await this.read({ page_size: pageSize });
+    let nextResults = [];
+    if (next) {
+      const { data } = await this.read({
+        page_size: pageSize,
+        page: 2,
+      });
+      nextResults = data.results;
+    }
+    return results
+      .concat(nextResults)
+      .filter(type => acceptableKinds.includes(type.kind));
+  }
 }
 
 export default CredentialTypes;

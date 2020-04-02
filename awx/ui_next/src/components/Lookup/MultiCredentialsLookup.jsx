@@ -17,27 +17,6 @@ const QS_CONFIG = getQSConfig('credentials', {
   order_by: 'name',
 });
 
-async function loadCredentialTypes() {
-  const pageSize = 200;
-  const acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault'];
-  // The number of credential types a user can have is unlimited. In practice, it is unlikely for
-  // users to have more than a page at the maximum request size.
-  const {
-    data: { next, results },
-  } = await CredentialTypesAPI.read({ page_size: pageSize });
-  let nextResults = [];
-  if (next) {
-    const { data } = await CredentialTypesAPI.read({
-      page_size: pageSize,
-      page: 2,
-    });
-    nextResults = data.results;
-  }
-  return results
-    .concat(nextResults)
-    .filter(type => acceptableKinds.includes(type.kind));
-}
-
 async function loadCredentials(params, selectedCredentialTypeId) {
   params.credential_type = selectedCredentialTypeId || 1;
   const { data } = await CredentialsAPI.read(params);
@@ -54,7 +33,7 @@ function MultiCredentialsLookup(props) {
   useEffect(() => {
     (async () => {
       try {
-        const types = await loadCredentialTypes();
+        const types = await CredentialTypesAPI.loadAllTypes();
         setCredentialTypes(types);
         const match = types.find(type => type.kind === 'ssh') || types[0];
         setSelectedType(match);
