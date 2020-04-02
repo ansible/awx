@@ -12,7 +12,19 @@ function WorkflowJobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
-    const { labels, organizationId, ...remainingValues } = values;
+    const {
+      labels,
+      inventory,
+      organization,
+      webhook_credential,
+      webhookKey,
+      ...remainingValues
+    } = values;
+    remainingValues.inventory = inventory?.id;
+    remainingValues.organization = organization?.id;
+    remainingValues.webhook_credential = webhook_credential?.id;
+    const organizationId =
+      organization?.id || inventory?.summary_fields?.organization.id || null;
     try {
       const {
         data: { id },

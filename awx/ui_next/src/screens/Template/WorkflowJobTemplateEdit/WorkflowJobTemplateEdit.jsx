@@ -11,10 +11,23 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
-    const { labels, ...remainingValues } = values;
+    const {
+      labels,
+      inventory,
+      organization,
+      webhook_credential,
+      webhookKey,
+      ...remainingValues
+    } = values;
+    remainingValues.inventory = inventory?.id;
+    remainingValues.organization = organization?.id;
+    remainingValues.webhook_credential = webhook_credential?.id || null;
+
+    const formOrgId =
+      organization?.id || inventory?.summary_fields?.organization.id || null;
     try {
       await Promise.all(
-        await submitLabels(labels, values.organization, template.organization)
+        await submitLabels(labels, formOrgId, template.organization)
       );
       await WorkflowJobTemplatesAPI.update(template.id, remainingValues);
       history.push(`/templates/workflow_job_template/${template.id}/details`);
@@ -60,7 +73,7 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
         template={template}
-        webhook_key={webhook_key}
+        webhookKey={webhook_key}
         submitError={formSubmitError}
       />
     </CardBody>
