@@ -319,14 +319,16 @@ class Page(object):
 
     def get_natural_key(self):
         if not getattr(self, 'NATURAL_KEY', None):
-            raise exc.NoNaturalKey(
-                "Page does not have a natural key: {}".format(getattr(self, 'endpoint', repr(self.__class__)))
-            )
+            return None
+
         natural_key = {}
         for key in self.NATURAL_KEY:
             if key in self.related:
-                # FIXME: use caching by url
-                natural_key[key] = self.related[key].get().get_natural_key()
+                try:
+                    # FIXME: use caching by url
+                    natural_key[key] = self.related[key].get().get_natural_key()
+                except exc.Forbidden:
+                    return None
             elif key in self:
                 natural_key[key] = self[key]
         if not natural_key:
@@ -395,7 +397,7 @@ class PageList(object):
         return self.__item_class__(self.connection).create(*a, **kw)
 
     def get_natural_key(self):
-        raise exc.NoNaturalKey
+        return None
 
 
 class TentativePage(str):

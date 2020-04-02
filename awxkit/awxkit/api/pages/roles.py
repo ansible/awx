@@ -1,4 +1,6 @@
 from awxkit.api.resources import resources
+import awxkit.exceptions as exc
+
 from . import base
 from . import page
 
@@ -14,8 +16,11 @@ class Role(base.Base):
             if name not in ('users', 'teams')
         ]
         if related_objs:
-            # FIXME: use caching by url
-            natural_key['content_object'] = related_objs[0].get().get_natural_key()
+            try:
+                # FIXME: use caching by url
+                natural_key['content_object'] = related_objs[0].get().get_natural_key()
+            except exc.Forbidden:
+                return None
 
         return natural_key
 

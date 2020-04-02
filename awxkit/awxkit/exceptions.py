@@ -106,8 +106,3 @@ class IsMigrating(Common):
 class ImportExportError(Exception):
 
     pass
-
-
-class NoNaturalKey(ImportExportError):
-
-    pass
