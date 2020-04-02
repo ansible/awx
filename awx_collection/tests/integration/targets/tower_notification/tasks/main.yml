@@ -9,7 +9,7 @@
     hipchat_not: "AWX-Collection-tests-tower_notification-hipchat-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     irc_not: "AWX-Collection-tests-tower_notification-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
-- name: Test deprication warnings
+- name: Test deprecation warnings
   tower_notification:
     name: "{{ slack_not }}"
     organization: Default
