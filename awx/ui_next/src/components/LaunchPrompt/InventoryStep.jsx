@@ -16,8 +16,8 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryStep({ i18n }) {
-  const history = useHistory();
   const [field, , helpers] = useField('inventory');
+  const history = useHistory();
 
   const {
     isLoading,

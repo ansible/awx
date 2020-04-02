@@ -1,7 +1,164 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
+import { useField } from 'formik';
+import { ToolbarItem } from '@patternfly/react-core';
+import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import AnsibleSelect from '@components/AnsibleSelect';
+import OptionsList from '@components/OptionsList';
+import ContentLoading from '@components/ContentLoading';
+import CredentialChip from '@components/CredentialChip';
+import { getQSConfig, parseQueryString } from '@util/qs';
+import useRequest from '@util/useRequest';
 
-function CredentialsStep() {
-  return <div />;
+const QS_CONFIG = getQSConfig('inventory', {
+  page: 1,
+  page_size: 5,
+  order_by: 'name',
+});
+
+function CredentialsStep({ i18n }) {
+  const [field, , helpers] = useField('credentials');
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const history = useHistory();
+
+  const isTypeSelected = !!selectedType;
+  const {
+    result: types,
+    error: typesError,
+    isLoading: isTypesLoading,
+    request: fetchTypes,
+  } = useRequest(
+    useCallback(async () => {
+      const loadedTypes = await CredentialTypesAPI.loadAllTypes();
+      if (!isTypeSelected && loadedTypes.length) {
+        const match =
+          loadedTypes.find(type => type.kind === 'ssh') || loadedTypes[0];
+        setSelectedType(match);
+      }
+      return loadedTypes;
+    }, [isTypeSelected]),
+    []
+  );
+
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
+
+  const {
+    result: { credentials, count },
+    error: credentialsError,
+    isLoading: isCredentialsLoading,
+    request: fetchCredentials,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const { data } = await CredentialsAPI.read({
+        ...params,
+        credential_type: selectedType.id || 1,
+      });
+      return {
+        credentials: data.results,
+        count: data.count,
+      };
+    }, [selectedType, history.location.search]),
+    { credentials: [], count: 0 }
+  );
+
+  useEffect(() => {
+    fetchCredentials();
+  }, [fetchCredentials]);
+
+  if (isTypesLoading) {
+    return <ContentLoading />;
+  }
+
+  const isVault = selectedType?.kind === 'vault';
+
+  const renderChip = ({ item, removeItem, canDelete }) => (
+    <CredentialChip
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+      credential={item}
+    />
+  );
+
+  return (
+    <>
+      {types && types.length > 0 && (
+        <ToolbarItem css=" display: flex; align-items: center;">
+          <div css="flex: 0 0 25%; margin-right: 32px">
+            {i18n._(t`Selected Category`)}
+          </div>
+          <AnsibleSelect
+            css="flex: 1 1 75%;"
+            id="multiCredentialsLookUp-select"
+            label={i18n._(t`Selected Category`)}
+            data={types.map(type => ({
+              key: type.id,
+              value: type.id,
+              label: type.name,
+              isDisabled: false,
+            }))}
+            value={selectedType && selectedType.id}
+            onChange={(e, id) => {
+              setSelectedType(types.find(o => o.id === parseInt(id, 10)));
+            }}
+          />
+        </ToolbarItem>
+      )}
+      <OptionsList
+        value={field.value || []}
+        options={credentials}
+        optionCount={count}
+        searchColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+            isDefault: true,
+          },
+          {
+            name: i18n._(t`Created By (Username)`),
+            key: 'created_by__username',
+          },
+          {
+            name: i18n._(t`Modified By (Username)`),
+            key: 'modified_by__username',
+          },
+        ]}
+        sortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+          },
+        ]}
+        multiple={isVault}
+        header={i18n._(t`Credentials`)}
+        name="credentials"
+        qsConfig={QS_CONFIG}
+        readOnly={false}
+        selectItem={item => {
+          const hasSameVaultID = val =>
+            val?.inputs?.vault_id !== undefined &&
+            val?.inputs?.vault_id === item?.inputs?.vault_id;
+          const hasSameKind = val => val.kind === item.kind;
+          const newItems = selectedItems.filter(i =>
+            isVault ? !hasSameVaultID(i) : !hasSameKind(i)
+          );
+          newItems.push(item);
+          setSelectedItems(newItems);
+        }}
+        deselectItem={item => {
+          setSelectedItems(selectedItems.filter(i => i.id !== item.id));
+        }}
+        renderItemChip={renderChip}
+      />
+      )
+    </>
+  );
 }
 
-export default CredentialsStep;
+export default withI18n()(CredentialsStep);
