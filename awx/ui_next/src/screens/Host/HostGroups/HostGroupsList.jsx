@@ -46,7 +46,7 @@ function HostGroupsList({ i18n, location, match, host }) {
         },
         actionsResponse,
       ] = await Promise.all([
-        HostsAPI.readGroups(hostId, params),
+        HostsAPI.readAllGroups(hostId, params),
         HostsAPI.readGroupsOptions(hostId),
       ]);
 

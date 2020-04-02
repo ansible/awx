@@ -71,7 +71,7 @@ describe('<HostGroupsList />', () => {
   let wrapper;
 
   beforeEach(async () => {
-    HostsAPI.readGroups.mockResolvedValue({
+    HostsAPI.readAllGroups.mockResolvedValue({
       data: {
         count: mockGroups.length,
         results: mockGroups,
@@ -114,7 +114,7 @@ describe('<HostGroupsList />', () => {
   });
 
   test('should fetch groups from api and render them in the list', async () => {
-    expect(HostsAPI.readGroups).toHaveBeenCalled();
+    expect(HostsAPI.readAllGroups).toHaveBeenCalled();
     expect(wrapper.find('HostGroupItem').length).toBe(3);
   });
 
@@ -165,7 +165,9 @@ describe('<HostGroupsList />', () => {
   });
 
   test('should show content error when api throws error on initial render', async () => {
-    HostsAPI.readGroups.mockImplementation(() => Promise.reject(new Error()));
+    HostsAPI.readAllGroups.mockImplementation(() =>
+      Promise.reject(new Error())
+    );
     await act(async () => {
       wrapper = mountWithContexts(<HostGroupsList host={host} />);
     });
@@ -224,7 +226,7 @@ describe('<HostGroupsList />', () => {
 
   test('expected api calls are made for multi-disassociation', async () => {
     expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(0);
-    expect(HostsAPI.readGroups).toHaveBeenCalledTimes(1);
+    expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(1);
     expect(wrapper.find('DataListCheck').length).toBe(3);
     wrapper.find('DataListCheck').forEach(el => {
       expect(el.props().checked).toBe(false);
@@ -246,7 +248,7 @@ describe('<HostGroupsList />', () => {
         .simulate('click');
     });
     expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(3);
-    expect(HostsAPI.readGroups).toHaveBeenCalledTimes(2);
+    expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(2);
   });
 
   test('should show error modal for failed disassociation', async () => {
