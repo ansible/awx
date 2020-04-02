@@ -23,6 +23,7 @@ import JobList from '@components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
 import InventoryHostFacts from '../InventoryHostFacts';
+import InventoryHostGroups from '../InventoryHostGroups';
 
 function InventoryHost({ i18n, setBreadcrumb, inventory }) {
   const location = useLocation();
@@ -146,6 +147,12 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
             path="/inventories/inventory/:id/hosts/:hostId/facts"
           >
             <InventoryHostFacts host={host} />
+          </Route>
+          <Route
+            key="groups"
+            path="/inventories/inventory/:id/hosts/:hostId/groups"
+          >
+            <InventoryHostGroups />
           </Route>
           <Route
             key="completed-jobs"
