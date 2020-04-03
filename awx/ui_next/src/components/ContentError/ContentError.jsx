@@ -25,6 +25,7 @@ function ContentError({ error, children, isNotFound, i18n }) {
       return null;
     }
   }
+  console.error(error);
   const is404 =
     isNotFound || (error && error.response && error.response.status === 404);
   const is401 = error && error.response && error.response.status === 401;

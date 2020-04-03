@@ -9,6 +9,7 @@ import AnsibleSelect from '@components/AnsibleSelect';
 import OptionsList from '@components/OptionsList';
 import ContentLoading from '@components/ContentLoading';
 import CredentialChip from '@components/CredentialChip';
+import ContentError from '@components/ContentError';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import useRequest from '@util/useRequest';
 
@@ -21,7 +22,6 @@ const QS_CONFIG = getQSConfig('inventory', {
 function CredentialsStep({ i18n }) {
   const [field, , helpers] = useField('credentials');
   const [selectedType, setSelectedType] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
   const history = useHistory();
 
   const isTypeSelected = !!selectedType;
@@ -54,10 +54,13 @@ function CredentialsStep({ i18n }) {
     request: fetchCredentials,
   } = useRequest(
     useCallback(async () => {
+      if (!selectedType) {
+        return { credentials: [], count: 0 };
+      }
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const { data } = await CredentialsAPI.read({
         ...params,
-        credential_type: selectedType.id || 1,
+        credential_type: selectedType.id,
       });
       return {
         credentials: data.results,
@@ -73,6 +76,10 @@ function CredentialsStep({ i18n }) {
 
   if (isTypesLoading) {
     return <ContentLoading />;
+  }
+
+  if (typesError || credentialsError) {
+    return <ContentError error={typesError || credentialsError} />;
   }
 
   const isVault = selectedType?.kind === 'vault';
@@ -110,53 +117,54 @@ function CredentialsStep({ i18n }) {
           />
         </ToolbarItem>
       )}
-      <OptionsList
-        value={field.value || []}
-        options={credentials}
-        optionCount={count}
-        searchColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
-            isDefault: true,
-          },
-          {
-            name: i18n._(t`Created By (Username)`),
-            key: 'created_by__username',
-          },
-          {
-            name: i18n._(t`Modified By (Username)`),
-            key: 'modified_by__username',
-          },
-        ]}
-        sortColumns={[
-          {
-            name: i18n._(t`Name`),
-            key: 'name',
-          },
-        ]}
-        multiple={isVault}
-        header={i18n._(t`Credentials`)}
-        name="credentials"
-        qsConfig={QS_CONFIG}
-        readOnly={false}
-        selectItem={item => {
-          const hasSameVaultID = val =>
-            val?.inputs?.vault_id !== undefined &&
-            val?.inputs?.vault_id === item?.inputs?.vault_id;
-          const hasSameKind = val => val.kind === item.kind;
-          const newItems = selectedItems.filter(i =>
-            isVault ? !hasSameVaultID(i) : !hasSameKind(i)
-          );
-          newItems.push(item);
-          setSelectedItems(newItems);
-        }}
-        deselectItem={item => {
-          setSelectedItems(selectedItems.filter(i => i.id !== item.id));
-        }}
-        renderItemChip={renderChip}
-      />
-      )
+      {!isCredentialsLoading && (
+        <OptionsList
+          value={field.value || []}
+          options={credentials}
+          optionCount={count}
+          searchColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+              isDefault: true,
+            },
+            {
+              name: i18n._(t`Created By (Username)`),
+              key: 'created_by__username',
+            },
+            {
+              name: i18n._(t`Modified By (Username)`),
+              key: 'modified_by__username',
+            },
+          ]}
+          sortColumns={[
+            {
+              name: i18n._(t`Name`),
+              key: 'name',
+            },
+          ]}
+          multiple={isVault}
+          header={i18n._(t`Credentials`)}
+          name="credentials"
+          qsConfig={QS_CONFIG}
+          readOnly={false}
+          selectItem={item => {
+            const hasSameVaultID = val =>
+              val?.inputs?.vault_id !== undefined &&
+              val?.inputs?.vault_id === item?.inputs?.vault_id;
+            const hasSameKind = val => val.kind === item.kind;
+            const newItems = field.value.filter(i =>
+              isVault ? !hasSameVaultID(i) : !hasSameKind(i)
+            );
+            newItems.push(item);
+            helpers.setValue(newItems);
+          }}
+          deselectItem={item => {
+            helpers.setValue(field.value.filter(i => i.id !== item.id));
+          }}
+          renderItemChip={renderChip}
+        />
+      )}
     </>
   );
 }

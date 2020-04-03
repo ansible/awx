@@ -66,6 +66,9 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     if (values.inventory) {
       postValues.inventory_id = values.inventory.id;
     }
+    if (values.credentials) {
+      postValues.credentials = values.credentials.map(c => c.id);
+    }
     onLaunch(postValues);
   };
 
