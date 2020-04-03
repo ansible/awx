@@ -4534,6 +4534,8 @@ class SchedulePreviewSerializer(BaseSerializer):
         try:
             Schedule.rrulestr(rrule_value)
         except Exception as e:
+            import traceback
+            logger.error(traceback.format_exc())
             raise serializers.ValidationError(_("rrule parsing failed validation: {}").format(e))
         return value
 
