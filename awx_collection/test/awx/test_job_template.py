@@ -112,7 +112,7 @@ def test_job_template_with_survey_spec(run_module, admin_user, project, inventor
     assert result.get('changed', False), result
     jt = JobTemplate.objects.get(pk=result['id'])
 
-    # assert jt.survey_spec == survey_spec
+    assert jt.survey_spec == survey_spec
 
     prior_ct = ActivityStream.objects.count()
     result = run_module('tower_job_template', dict(
@@ -130,3 +130,38 @@ def test_job_template_with_survey_spec(run_module, admin_user, project, inventor
 
     assert jt.survey_spec == survey_spec
     assert ActivityStream.objects.count() == prior_ct
+
+
+@pytest.mark.django_db
+def test_job_template_with_survey_encrypted_default(run_module, admin_user, project, inventory, silence_warning):
+    spec = {
+        "spec": [
+            {
+                "index": 0,
+                "question_name": "my question?",
+                "default": "very_secret_value",
+                "variable": "myvar",
+                "type": "password",
+                "required": False
+            }
+        ],
+        "description": "test",
+        "name": "test"
+    }
+    for i in range(2):
+        result = run_module('tower_job_template', dict(
+            name='foo',
+            playbook='helloworld.yml',
+            project=project.name,
+            inventory=inventory.name,
+            survey_spec=spec,
+            survey_enabled=True
+        ), admin_user)
+        assert not result.get('failed', False), result.get('msg', result)
+
+    assert result.get('changed', False), result  # not actually desired, but assert for sanity
+
+    silence_warning.assert_called_once_with(
+        "The field survey_spec of job_template {0} has encrypted data and "
+        "may inaccurately report task is changed.".format(result['id'])
+    )

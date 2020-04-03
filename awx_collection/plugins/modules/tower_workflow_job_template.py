@@ -209,6 +209,8 @@ def main():
             existing_spec = module.get_endpoint(spec_endpoint)
         if new_spec != existing_spec:
             module.json_output['changed'] = True
+            if existing_item and module.has_encrypted_values(existing_spec):
+                module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
             on_change = update_survey
 
     if state == 'absent':

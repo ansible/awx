@@ -123,9 +123,10 @@ def main():
     # These will be passed into the create/updates
     credential_type_params = {
         'name': new_name if new_name else name,
-        'kind': kind,
         'managed_by_tower': False,
     }
+    if kind:
+        credential_type_params['kind'] = kind
     if module.params.get('description'):
         credential_type_params['description'] = module.params.get('description')
     if module.params.get('inputs'):

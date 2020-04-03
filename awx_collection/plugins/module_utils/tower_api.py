@@ -44,6 +44,7 @@ class TowerModule(AnsibleModule):
     cookie_jar = CookieJar()
     authenticated = False
     config_name = 'tower_cli.cfg'
+    ENCRYPTED_STRING = "$encrypted$"
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -574,6 +575,45 @@ class TowerModule(AnsibleModule):
         else:
             self.exit_json(**self.json_output)
 
+    def _encrypted_changed_warning(self, field, old, warning=False):
+        if not warning:
+            return
+        self.warn(
+            'The field {0} of {1} {2} has encrypted data and may inaccurately report task is changed.'.format(
+                field, old.get('type', 'unknown'), old.get('id', 'unknown')
+            ))
+
+    @staticmethod
+    def has_encrypted_values(obj):
+        """Returns True if JSON-like python content in obj has $encrypted$
+        anywhere in the data as a value
+        """
+        if isinstance(obj, dict):
+            for val in obj.values():
+                if TowerModule.has_encrypted_values(val):
+                    return True
+        elif isinstance(obj, list):
+            for val in obj:
+                if TowerModule.has_encrypted_values(val):
+                    return True
+        elif obj == TowerModule.ENCRYPTED_STRING:
+            return True
+        return False
+
+    def objects_could_be_different(self, old, new, field_set=None, warning=False):
+        if field_set is None:
+            field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
+        for field in field_set:
+            new_field = new.get(field, None)
+            old_field = old.get(field, None)
+            if old_field != new_field:
+                return True  # Something doesn't match
+            elif self.has_encrypted_values(new_field) or field not in new:
+                # case of 'field not in new' - user password write-only field that API will not display
+                self._encrypted_changed_warning(field, old, warning=warning)
+                return True
+        return False
+
     def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
@@ -601,22 +641,17 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
             # Check to see if anything within the item requires the item to be updated
-            needs_update = False
-            for field in new_item:
-                existing_field = existing_item.get(field, None)
-                new_field = new_item.get(field, None)
-                # If the two items don't match and we are not comparing '' to None
-                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
-                    # Something doesn't match so let's update it
-                    needs_update = True
-                    break
+            needs_patch = self.objects_could_be_different(existing_item, new_item)
 
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
-            if needs_update:
+            if needs_patch:
                 response = self.patch_endpoint(item_url, **{'data': new_item})
                 if response['status_code'] == 200:
-                    self.json_output['changed'] = True
+                    # compare apples-to-apples, old API data to new API data
+                    # but do so considering the fields given in parameters
+                    self.json_output['changed'] = self.objects_could_be_different(
+                        existing_item, response['json'], field_set=new_item.keys(), warning=True)
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:

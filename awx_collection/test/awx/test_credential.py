@@ -82,30 +82,6 @@ def test_create_vault_credential(run_module, admin_user, organization, silence_d
 
 
 @pytest.mark.django_db
-def test_create_custom_credential_type(run_module, admin_user, silence_deprecation):
-    # Example from docs
-    result = run_module('tower_credential_type', dict(
-        name='Nexus',
-        description='Credentials type for Nexus',
-        kind='cloud',
-        inputs={"fields": [{"id": "server", "type": "string", "default": "", "label": ""}], "required": []},
-        injectors={'extra_vars': {'nexus_credential': 'test'}},
-        state='present',
-        validate_certs='false'
-    ), admin_user)
-    assert not result.get('failed', False), result.get('msg', result)
-    assert result.get('changed'), result
-
-    ct = CredentialType.objects.get(name='Nexus')
-
-    assert result['name'] == 'Nexus'
-    assert result['id'] == ct.pk
-
-    assert ct.inputs == {"fields": [{"id": "server", "type": "string", "default": "", "label": ""}], "required": []}
-    assert ct.injectors == {'extra_vars': {'nexus_credential': 'test'}}
-
-
-@pytest.mark.django_db
 def test_ct_precedence_over_kind(run_module, admin_user, organization, cred_type, silence_deprecation):
     result = run_module('tower_credential', dict(
         name='A credential',
@@ -155,16 +131,15 @@ def test_missing_credential_type(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_make_use_of_custom_credential_type(run_module, admin_user, cred_type):
-    Organization.objects.create(name='test-org')
-
+def test_make_use_of_custom_credential_type(run_module, organization, admin_user, cred_type):
     result = run_module('tower_credential', dict(
         name='Galaxy Token for Steve',
-        organization='test-org',
+        organization=organization.name,
         credential_type=cred_type.name,
-        inputs={'token': '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'},
-        state='present'
+        inputs={'token': '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'}
     ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', False), result
 
     cred = Credential.objects.get(name='Galaxy Token for Steve')
     assert cred.credential_type_id == cred_type.id
@@ -174,3 +149,30 @@ def test_make_use_of_custom_credential_type(run_module, admin_user, cred_type):
 
     assert result['name'] == "Galaxy Token for Steve"
     assert result['id'] == cred.pk
+
+
+@pytest.mark.django_db
+def test_secret_field_write_twice(run_module, organization, admin_user, cred_type, silence_warning):
+    val1 = '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'
+    result = run_module('tower_credential', dict(
+        name='Galaxy Token for Steve',
+        organization=organization.name,
+        credential_type=cred_type.name,
+        inputs={'token': val1}
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    Credential.objects.get(id=result['id']).inputs['token'] == val1
+
+    val2 = '7rEZ238DJl5837rxA6xxxlLvUHbBQ1'
+
+    result = run_module('tower_credential', dict(
+        name='Galaxy Token for Steve',
+        organization=organization.name,
+        credential_type=cred_type.name,
+        inputs={'token': val2}
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    Credential.objects.get(id=result['id']).inputs['token'] == val2
+    assert result.get('changed'), result
