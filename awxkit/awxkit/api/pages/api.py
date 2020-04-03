@@ -31,6 +31,7 @@ EXPORTABLE_RESOURCES = [
 EXPORTABLE_RELATIONS = [
     'Roles',
     'NotificationTemplates',
+    'Credentials',
 ]
 
 
@@ -125,8 +126,6 @@ class ApiV2(base.Base):
         for key, related_endpoint in asset.related.items():
             if key in asset.json or not related_endpoint:
                 continue
-            if key == 'object_roles':
-                continue  # FIXME: we should aggregate all visited roles
 
             rel = related_endpoint._create()
             if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
@@ -134,6 +133,8 @@ class ApiV2(base.Base):
                 related_options = self._get_options(related_endpoint)
                 if related_options is None:
                     continue
+                if 'id' not in related_options:
+                    continue  # This is a read-only or create-only endpoint.
             elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
                 by_natural_key, related_options = False, None
             else:
