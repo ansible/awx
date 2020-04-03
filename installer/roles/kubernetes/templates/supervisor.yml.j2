@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kubernetes_deployment_name }}-supervisor-config
+  namespace: {{ kubernetes_namespace }}
+data:
+  supervisor-web-config: |
+    [supervisord]
+    nodaemon = True
+    umask = 022
+
+    [program:nginx]
+    command = nginx -g "daemon off;"
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [program:uwsgi]
+    command = {{ uwsgi_bash }} '/var/lib/awx/venv/awx/bin/uwsgi --socket 127.0.0.1:8050 --module=awx.wsgi:application --vacuum --processes=5 --harakiri=120 --no-orphans --master --max-requests=1000 --master-fifo=/var/lib/awx/awxfifo --lazy-apps -b 32768'
+    directory = /var/lib/awx
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 15
+    stopsignal = INT
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [program:daphne]
+    command = {{ uwsgi_bash }} '/var/lib/awx/venv/awx/bin/daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer'
+    directory = /var/lib/awx
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [program:wsbroadcast]
+    command = awx-manage run_wsbroadcast
+    directory = /var/lib/awx
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [group:tower-processes]
+    programs=nginx,uwsgi,daphne,wsbroadcast
+    priority=5
+
+    # TODO: Exit Handler
+
+    [eventlistener:awx-config-watcher]
+    command=/usr/bin/config-watcher
+    stderr_logfile=/dev/stdout
+    stderr_logfile_maxbytes=0
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    events=TICK_60
+    priority=0
+
+    [unix_http_server]
+    file=/tmp/supervisor.sock
+
+    [supervisorctl]
+    serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+
+    [rpcinterface:supervisor]
+    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+  supervisor-task-config: |
+    [supervisord]
+    nodaemon = True
+    umask = 022
+
+    [program:dispatcher]
+    command = awx-manage run_dispatcher
+    directory = /var/lib/awx
+    environment = LANGUAGE="en_US.UTF-8",LANG="en_US.UTF-8",LC_ALL="en_US.UTF-8",LC_CTYPE="en_US.UTF-8"
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [program:callback-receiver]
+    command = awx-manage run_callback_receiver
+    directory = /var/lib/awx
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 5
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    stderr_logfile=/dev/stderr
+    stderr_logfile_maxbytes=0
+
+    [group:tower-processes]
+    programs=dispatcher,callback-receiver
+    priority=5
+
+    # TODO: Exit Handler
+
+    [eventlistener:awx-config-watcher]
+    command=/usr/bin/config-watcher
+    stderr_logfile=/dev/stdout
+    stderr_logfile_maxbytes=0
+    stdout_logfile=/dev/stdout
+    stdout_logfile_maxbytes=0
+    events=TICK_60
+    priority=0
+
+    [unix_http_server]
+    file=/tmp/supervisor.sock
+
+    [supervisorctl]
+    serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+
+    [rpcinterface:supervisor]
+    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
