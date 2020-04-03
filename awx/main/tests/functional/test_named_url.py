@@ -186,7 +186,11 @@ def test_group(get, admin_user):
 def test_inventory_source(get, admin_user):
     test_org = Organization.objects.create(name='test_org')
     test_inv = Inventory.objects.create(name='test_inv', organization=test_org)
-    test_source = InventorySource.objects.create(name='test_source', inventory=test_inv)
+    test_source = InventorySource.objects.create(
+        name='test_source',
+        inventory=test_inv,
+        source='ec2'
+    )
     url = reverse('api:inventory_source_detail', kwargs={'pk': test_source.pk})
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/test_source++test_inv++test_org/')

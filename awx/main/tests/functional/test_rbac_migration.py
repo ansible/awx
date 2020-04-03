@@ -24,7 +24,11 @@ def test_implied_organization_subquery_inventory():
             inventory = Inventory.objects.create(name='foo{}'.format(i))
         else:
             inventory = Inventory.objects.create(name='foo{}'.format(i), organization=org)
-        inv_src = InventorySource.objects.create(name='foo{}'.format(i), inventory=inventory)
+        inv_src = InventorySource.objects.create(
+            name='foo{}'.format(i),
+            inventory=inventory,
+            source='ec2'
+        )
     sources = UnifiedJobTemplate.objects.annotate(
         test_field=rbac.implicit_org_subquery(UnifiedJobTemplate, InventorySource)
     )

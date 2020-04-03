@@ -23,9 +23,9 @@ def _mk_project_update():
 
 
 def _mk_inventory_update():
-    source = InventorySource()
+    source = InventorySource(source='ec2')
     source.save()
-    iu = InventoryUpdate(inventory_source=source)
+    iu = InventoryUpdate(inventory_source=source, source='e2')
     return iu
 
 

@@ -197,9 +197,10 @@ class TestRelatedJobs:
         assert job.id in [jerb.id for jerb in group._get_related_jobs()]
 
     def test_related_group_update(self, group):
-        src = group.inventory_sources.create(name='foo')
+        src = group.inventory_sources.create(name='foo', source='ec2')
         job = InventoryUpdate.objects.create(
-            inventory_source=src
+            inventory_source=src,
+            source=src.source
         )
         assert job.id in [jerb.id for jerb in group._get_related_jobs()]
 

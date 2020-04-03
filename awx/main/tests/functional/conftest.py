@@ -568,7 +568,10 @@ def inventory_source_factory(inventory_factory):
 
 @pytest.fixture
 def inventory_update(inventory_source):
-    return InventoryUpdate.objects.create(inventory_source=inventory_source)
+    return InventoryUpdate.objects.create(
+        inventory_source=inventory_source,
+        source=inventory_source.source
+    )
 
 
 @pytest.fixture

@@ -297,7 +297,10 @@ class TestInstanceGroupOrdering:
         assert ad_hoc.preferred_instance_groups == [ig_inv, ig_org]
 
     def test_inventory_update_instance_groups(self, instance_group_factory, inventory_source, default_instance_group):
-        iu = InventoryUpdate.objects.create(inventory_source=inventory_source)
+        iu = InventoryUpdate.objects.create(
+            inventory_source=inventory_source,
+            source=inventory_source.source
+        )
         assert iu.preferred_instance_groups == [default_instance_group]
         ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
         ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])

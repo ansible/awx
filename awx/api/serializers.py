@@ -2034,11 +2034,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             res['credentials'] = self.reverse('api:inventory_source_credentials_list', kwargs={'pk': obj.pk})
         return res
 
-    def get_group(self, obj):  # TODO: remove in 3.3
-        if obj.deprecated_group:
-            return obj.deprecated_group.id
-        return None
-
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(InventorySourceSerializer, self).build_relational_field(field_name, relation_info)
         # SCM Project and inventory are read-only unless creating a new inventory.

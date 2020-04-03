@@ -228,7 +228,7 @@ class TestINIImports:
         assert inventory.hosts.count() == 1  # baseline worked
 
         inv_src2 = inventory.inventory_sources.create(
-            name='bar', overwrite=True
+            name='bar', overwrite=True, source='ec2'
         )
         os.environ['INVENTORY_SOURCE_ID'] = str(inv_src2.pk)
         os.environ['INVENTORY_UPDATE_ID'] = str(inv_src2.create_unified_job().pk)

@@ -382,10 +382,6 @@ def emit_activity_stream_change(instance):
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
-        # TODO: remove deprecated_group conditional in 3.3
-        # Skip recording any inventory source directly associated with a group.
-        if isinstance(instance, InventorySource) and instance.deprecated_group:
-            return
         _type = type(instance)
         if getattr(_type, '_deferred', False):
             return
@@ -457,10 +453,6 @@ def activity_stream_update(sender, instance, **kwargs):
 
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
-        return
-    # TODO: remove deprecated_group conditional in 3.3
-    # Skip recording any inventory source directly associated with a group.
-    if isinstance(instance, InventorySource) and instance.deprecated_group:
         return
     # Inventory delete happens in the task system rather than request-response-cycle.
     # If we trigger this handler there we may fall into db-integrity-related race conditions.
