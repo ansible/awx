@@ -34,9 +34,9 @@
                             <div class="List-tableHeader--info col-md-4" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="info" column-iterator="wf_maker_template" column-no-sort="true" column-label="" column-custom-class="" query-set="wf_maker_template_queryset"></div>
                         </div>
                     </div>
-                    <div ng-class="[template.success_class, {'List-tableRow--selected' : $stateParams['template_id'] == wf_maker_template.id}, {'List-tableRow--disabled': !wf_maker_template.summary_fields.user_capabilities.edit}]" id="{{ wf_maker_template.id }}" class="List-lookupLayout List-tableRow template_class" disable-row="{{ !wf_maker_template.summary_fields.user_capabilities.edit }}" ng-repeat="wf_maker_template in wf_maker_templates">
+                    <div ng-class="[template.success_class, {'List-tableRow--selected' : $stateParams['template_id'] == wf_maker_template.id}, {'List-tableRow--disabled': !wf_maker_template.summary_fields.user_capabilities.start}]" id="{{ wf_maker_template.id }}" class="List-lookupLayout List-tableRow template_class" disable-row="{{ !wf_maker_template.summary_fields.user_capabilities.start }}" ng-repeat="wf_maker_template in wf_maker_templates">
                         <div class="List-centerEnd select-column">
-                            <input type="radio" ng-model="wf_maker_template.checked" ng-value="1" ng-false-value="0" name="check_template_{{wf_maker_template.id}}" ng-click="selectTemplate(wf_maker_template)" ng-disabled="!wf_maker_template.summary_fields.user_capabilities.edit">
+                            <input type="radio" ng-model="wf_maker_template.checked" ng-value="1" ng-false-value="0" name="check_template_{{wf_maker_template.id}}" ng-click="selectTemplate(wf_maker_template)" ng-disabled="!wf_maker_template.summary_fields.user_capabilities.start">
                         </div>
                         <div class="d-flex h-100">
                             <div class="List-tableCell name-column col-md-8" ng-click="selectTemplate(wf_maker_template)">
