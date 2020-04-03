@@ -69,6 +69,8 @@ class Templates extends Component {
         schedule.id}`]: `${schedule && schedule.name}`,
       [`/templates/${template.type}/${template.id}/schedules/${schedule &&
         schedule.id}/details`]: i18n._(t`Schedule Details`),
+      [`/templates/${template.type}/${template.id}/schedules/${schedule &&
+        schedule.id}/edit`]: i18n._(t`Edit Details`),
     };
     this.setState({ breadcrumbConfig });
   };

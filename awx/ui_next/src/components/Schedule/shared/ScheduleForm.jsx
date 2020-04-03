@@ -3,6 +3,7 @@ import { shape, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
+import { RRule } from 'rrule';
 import { Config } from '@contexts/Config';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import { SchedulesAPI } from '@api';
@@ -12,10 +13,59 @@ import ContentLoading from '@components/ContentLoading';
 import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from '@components/FormField';
 import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
-import { dateToInputDateTime } from '@util/dates';
+import { dateToInputDateTime, formatDateStringUTC } from '@util/dates';
 import useRequest from '@util/useRequest';
 import { required } from '@util/validators';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
+
+const generateRunOnTheDay = (days = []) => {
+  if (
+    [
+      RRule.MO,
+      RRule.TU,
+      RRule.WE,
+      RRule.TH,
+      RRule.FR,
+      RRule.SA,
+      RRule.SU,
+    ].every(element => days.indexOf(element) > -1)
+  ) {
+    return 'day';
+  }
+  if (
+    [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR].every(
+      element => days.indexOf(element) > -1
+    )
+  ) {
+    return 'weekday';
+  }
+  if ([RRule.SA, RRule.SU].every(element => days.indexOf(element) > -1)) {
+    return 'weekendDay';
+  }
+  if (days.indexOf(RRule.MO) > -1) {
+    return 'monday';
+  }
+  if (days.indexOf(RRule.TU) > -1) {
+    return 'tuesday';
+  }
+  if (days.indexOf(RRule.WE) > -1) {
+    return 'wednesday';
+  }
+  if (days.indexOf(RRule.TH) > -1) {
+    return 'thursday';
+  }
+  if (days.indexOf(RRule.FR) > -1) {
+    return 'friday';
+  }
+  if (days.indexOf(RRule.SA) > -1) {
+    return 'saturday';
+  }
+  if (days.indexOf(RRule.SU) > -1) {
+    return 'sunday';
+  }
+
+  return null;
+};
 
 function ScheduleFormFields({ i18n, zoneOptions }) {
   const [startDateTime, startDateTimeMeta] = useField({
@@ -121,12 +171,121 @@ function ScheduleForm({
   submitError,
   ...rest
 }) {
+  let rruleError;
   const now = new Date();
   const closestQuarterHour = new Date(
     Math.ceil(now.getTime() / 900000) * 900000
   );
   const tomorrow = new Date(closestQuarterHour);
   tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const initialValues = {
+    daysOfWeek: [],
+    description: schedule.description || '',
+    end: 'never',
+    endDateTime: dateToInputDateTime(tomorrow),
+    frequency: 'none',
+    interval: 1,
+    name: schedule.name || '',
+    occurrences: 1,
+    runOn: 'day',
+    runOnDayMonth: 1,
+    runOnDayNumber: 1,
+    runOnTheDay: 'sunday',
+    runOnTheMonth: 1,
+    runOnTheOccurrence: 1,
+    startDateTime: dateToInputDateTime(closestQuarterHour),
+    timezone: schedule.timezone || 'America/New_York',
+  };
+
+  const overriddenValues = {};
+
+  if (Object.keys(schedule).length > 0) {
+    if (schedule.rrule) {
+      try {
+        const {
+          origOptions: {
+            bymonth,
+            bymonthday,
+            bysetpos,
+            byweekday,
+            count,
+            dtstart,
+            freq,
+            interval,
+          },
+        } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
+
+        if (dtstart) {
+          overriddenValues.startDateTime = dateToInputDateTime(
+            new Date(formatDateStringUTC(dtstart))
+          );
+        }
+
+        if (schedule.until) {
+          overriddenValues.end = 'onDate';
+          overriddenValues.endDateTime = schedule.until;
+        } else if (count) {
+          overriddenValues.end = 'after';
+          overriddenValues.occurrences = count;
+        }
+
+        if (interval) {
+          overriddenValues.interval = interval;
+        }
+
+        if (typeof freq === 'number') {
+          switch (freq) {
+            case RRule.MINUTELY:
+              if (schedule.dtstart !== schedule.dtend) {
+                overriddenValues.frequency = 'minute';
+              }
+              break;
+            case RRule.HOURLY:
+              overriddenValues.frequency = 'hour';
+              break;
+            case RRule.DAILY:
+              overriddenValues.frequency = 'day';
+              break;
+            case RRule.WEEKLY:
+              overriddenValues.frequency = 'week';
+              if (byweekday) {
+                overriddenValues.daysOfWeek = byweekday;
+              }
+              break;
+            case RRule.MONTHLY:
+              overriddenValues.frequency = 'month';
+              if (bymonthday) {
+                overriddenValues.runOnDayNumber = bymonthday;
+              } else if (bysetpos) {
+                overriddenValues.runOn = 'the';
+                overriddenValues.runOnTheOccurrence = bysetpos;
+                overriddenValues.runOnTheDay = generateRunOnTheDay(byweekday);
+              }
+              break;
+            case RRule.YEARLY:
+              overriddenValues.frequency = 'year';
+              if (bymonthday) {
+                overriddenValues.runOnDayNumber = bymonthday;
+                overriddenValues.runOnDayMonth = bymonth;
+              } else if (bysetpos) {
+                overriddenValues.runOn = 'the';
+                overriddenValues.runOnTheOccurrence = bysetpos;
+                overriddenValues.runOnTheDay = generateRunOnTheDay(byweekday);
+                overriddenValues.runOnTheMonth = bymonth;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      } catch (error) {
+        rruleError = error;
+      }
+    } else {
+      rruleError = new Error(i18n._(t`Schedule is missing rrule`));
+    }
+  }
 
   const {
     request: loadZoneInfo,
@@ -150,8 +309,8 @@ function ScheduleForm({
     loadZoneInfo();
   }, [loadZoneInfo]);
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  if (contentError || rruleError) {
+    return <ContentError error={contentError || rruleError} />;
   }
 
   if (contentLoading) {
@@ -163,24 +322,7 @@ function ScheduleForm({
       {() => {
         return (
           <Formik
-            initialValues={{
-              daysOfWeek: [],
-              description: schedule.description || '',
-              end: 'never',
-              endDateTime: dateToInputDateTime(tomorrow),
-              frequency: 'none',
-              interval: 1,
-              name: schedule.name || '',
-              occurrences: 1,
-              runOn: 'day',
-              runOnDayMonth: 1,
-              runOnDayNumber: 1,
-              runOnTheDay: 'sunday',
-              runOnTheMonth: 1,
-              runOnTheOccurrence: 1,
-              startDateTime: dateToInputDateTime(closestQuarterHour),
-              timezone: schedule.timezone || 'America/New_York',
-            }}
+            initialValues={Object.assign(initialValues, overriddenValues)}
             onSubmit={handleSubmit}
             validate={values => {
               const errors = {};
@@ -208,7 +350,7 @@ function ScheduleForm({
                 (runOnDayNumber < 1 || runOnDayNumber > 31)
               ) {
                 errors.runOn = i18n._(
-                  t`Please select a day number between 1 and 31`
+                  t`Please select a day number between 1 and 31.`
                 );
               }
 

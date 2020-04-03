@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
+import { object } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
+import { SchedulesAPI } from '@api';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
 
-function ScheduleAdd({ i18n, createSchedule }) {
+function ScheduleEdit({ i18n, schedule }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
   const location = useLocation();
@@ -20,13 +21,13 @@ function ScheduleAdd({ i18n, createSchedule }) {
       const rule = new RRule(buildRuleObj(values, i18n));
       const {
         data: { id: scheduleId },
-      } = await createSchedule({
+      } = await SchedulesAPI.update(schedule.id, {
         name: values.name,
         description: values.description,
         rrule: rule.toString().replace(/\n/g, ' '),
       });
 
-      history.push(`${pathRoot}schedules/${scheduleId}`);
+      history.push(`${pathRoot}schedules/${scheduleId}/details`);
     } catch (err) {
       setFormSubmitError(err);
     }
@@ -36,7 +37,10 @@ function ScheduleAdd({ i18n, createSchedule }) {
     <Card>
       <CardBody>
         <ScheduleForm
-          handleCancel={() => history.push(`${pathRoot}schedules`)}
+          schedule={schedule}
+          handleCancel={() =>
+            history.push(`${pathRoot}schedules/${schedule.id}/details`)
+          }
           handleSubmit={handleSubmit}
           submitError={formSubmitError}
         />
@@ -45,10 +49,10 @@ function ScheduleAdd({ i18n, createSchedule }) {
   );
 }
 
-ScheduleAdd.propTypes = {
-  createSchedule: func.isRequired,
+ScheduleEdit.propTypes = {
+  schedule: object.isRequired,
 };
 
-ScheduleAdd.defaultProps = {};
+ScheduleEdit.defaultProps = {};
 
-export default withI18n()(ScheduleAdd);
+export default withI18n()(ScheduleEdit);

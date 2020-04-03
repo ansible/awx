@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { RRule } from 'rrule';
 import {
   Checkbox as _Checkbox,
   FormGroup,
@@ -255,9 +256,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
           <div css="display: flex">
             <Checkbox
               label={i18n._(t`Sun`)}
-              isChecked={daysOfWeek.value.includes('SU')}
+              isChecked={daysOfWeek.value.includes(RRule.SU)}
               onChange={checked => {
-                updateDaysOfWeek('SU', checked);
+                updateDaysOfWeek(RRule.SU, checked);
               }}
               aria-label={i18n._(t`Sunday`)}
               id="schedule-days-of-week-sun"
@@ -265,9 +266,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Mon`)}
-              isChecked={daysOfWeek.value.includes('MO')}
+              isChecked={daysOfWeek.value.includes(RRule.MO)}
               onChange={checked => {
-                updateDaysOfWeek('MO', checked);
+                updateDaysOfWeek(RRule.MO, checked);
               }}
               aria-label={i18n._(t`Monday`)}
               id="schedule-days-of-week-mon"
@@ -275,9 +276,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Tue`)}
-              isChecked={daysOfWeek.value.includes('TU')}
+              isChecked={daysOfWeek.value.includes(RRule.TU)}
               onChange={checked => {
-                updateDaysOfWeek('TU', checked);
+                updateDaysOfWeek(RRule.TU, checked);
               }}
               aria-label={i18n._(t`Tuesday`)}
               id="schedule-days-of-week-tue"
@@ -285,9 +286,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Wed`)}
-              isChecked={daysOfWeek.value.includes('WE')}
+              isChecked={daysOfWeek.value.includes(RRule.WE)}
               onChange={checked => {
-                updateDaysOfWeek('WE', checked);
+                updateDaysOfWeek(RRule.WE, checked);
               }}
               aria-label={i18n._(t`Wednesday`)}
               id="schedule-days-of-week-wed"
@@ -295,9 +296,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Thu`)}
-              isChecked={daysOfWeek.value.includes('TH')}
+              isChecked={daysOfWeek.value.includes(RRule.TH)}
               onChange={checked => {
-                updateDaysOfWeek('TH', checked);
+                updateDaysOfWeek(RRule.TH, checked);
               }}
               aria-label={i18n._(t`Thursday`)}
               id="schedule-days-of-week-thu"
@@ -305,9 +306,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Fri`)}
-              isChecked={daysOfWeek.value.includes('FR')}
+              isChecked={daysOfWeek.value.includes(RRule.FR)}
               onChange={checked => {
-                updateDaysOfWeek('FR', checked);
+                updateDaysOfWeek(RRule.FR, checked);
               }}
               aria-label={i18n._(t`Friday`)}
               id="schedule-days-of-week-fri"
@@ -315,9 +316,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             />
             <Checkbox
               label={i18n._(t`Sat`)}
-              isChecked={daysOfWeek.value.includes('SA')}
+              isChecked={daysOfWeek.value.includes(RRule.SA)}
               onChange={checked => {
-                updateDaysOfWeek('SA', checked);
+                updateDaysOfWeek(RRule.SA, checked);
               }}
               aria-label={i18n._(t`Saturday`)}
               id="schedule-days-of-week-sat"

@@ -17,7 +17,7 @@ import RoutedTabs from '@components/RoutedTabs';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import { TabbedCardHeader } from '@components/Card';
-import { ScheduleDetail } from '@components/Schedule';
+import { ScheduleDetail, ScheduleEdit } from '@components/Schedule';
 import { SchedulesAPI } from '@api';
 
 function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
@@ -108,6 +108,11 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
           exact
         />
         {schedule && [
+          <Route
+            key="edit"
+            path={`${pathRoot}schedules/:id/edit`}
+            render={() => <ScheduleEdit schedule={schedule} />}
+          />,
           <Route
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
