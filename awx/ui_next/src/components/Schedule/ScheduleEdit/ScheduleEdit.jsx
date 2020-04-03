@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
-import { object } from 'prop-types';
+import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import { CardBody } from '@components/Card';
 import { SchedulesAPI } from '@api';
@@ -50,7 +50,7 @@ function ScheduleEdit({ i18n, schedule }) {
 }
 
 ScheduleEdit.propTypes = {
-  schedule: object.isRequired,
+  schedule: shape.isRequired,
 };
 
 ScheduleEdit.defaultProps = {};
