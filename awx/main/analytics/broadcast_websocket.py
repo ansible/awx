@@ -11,6 +11,7 @@ from prometheus_client import (
     Counter,
     Enum,
     CollectorRegistry,
+    parser,
 )
 
 from django.conf import settings
@@ -28,6 +29,11 @@ def dt_to_seconds(dt):
 
 def now_seconds():
     return dt_to_seconds(datetime.datetime.now())
+
+
+def safe_name(s):
+    # Replace all non alpha-numeric characters with _
+    return re.sub('[^0-9a-zA-Z]+', '_', s)
 
 
 # Second granularity; Per-minute
@@ -99,7 +105,8 @@ class BroadcastWebsocketStatsManager():
         Stringified verion of all the stats
         '''
         redis_conn = redis.Redis.from_url(settings.BROKER_URL)
-        return redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME)
+        stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
+        return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 
 
 class BroadcastWebsocketStats():
@@ -109,8 +116,8 @@ class BroadcastWebsocketStats():
         self._registry = CollectorRegistry()
 
         # TODO: More robust replacement
-        self.name = self.safe_name(self._local_hostname)
-        self.remote_name = self.safe_name(self._remote_hostname)
+        self.name = safe_name(self._local_hostname)
+        self.remote_name = safe_name(self._remote_hostname)
 
         self._messages_received_total = Counter(f'awx_{self.remote_name}_messages_received_total',
                                                 'Number of messages received, to be forwarded, by the broadcast websocket system',
@@ -122,6 +129,7 @@ class BroadcastWebsocketStats():
                                 'Websocket broadcast connection',
                                 states=['disconnected', 'connected'],
                                 registry=self._registry)
+        self._connection.state('disconnected')
         self._connection_start = Gauge(f'awx_{self.remote_name}_connection_start',
                                        'Time the connection was established',
                                        registry=self._registry)
@@ -130,10 +138,6 @@ class BroadcastWebsocketStats():
                                                    'Messages received per minute',
                                                    registry=self._registry)
         self._internal_messages_received_per_minute = FixedSlidingWindow()
-
-    def safe_name(self, s):
-        # Replace all non alpha-numeric characters with _
-        return re.sub('[^0-9a-zA-Z]+', '_', s)
 
     def unregister(self):
         self._registry.unregister(f'awx_{self.remote_name}_messages_received')
