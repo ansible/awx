@@ -31,6 +31,7 @@ EXPORTABLE_RESOURCES = [
 EXPORTABLE_RELATIONS = [
     'Roles',
     'NotificationTemplates',
+    'WorkflowJobTemplateNodes',
     'Credentials',
 ]
 
@@ -38,8 +39,10 @@ EXPORTABLE_RELATIONS = [
 EXPORTABLE_DEPENDENT_OBJECTS = [
     'Labels',
     'SurveySpec',
-    'WorkflowJobTemplateNodes',
     'Schedules',
+    # WFJT Nodes are a special case, we want full data for the create
+    # view and natural keys for the attach views.
+    'WorkflowJobTemplateNodes',
 ]
 
 
@@ -124,19 +127,19 @@ class ApiV2(base.Base):
 
         related = {}
         for key, related_endpoint in asset.related.items():
-            if key in asset.json or not related_endpoint:
+            if key in options or not related_endpoint:
                 continue
 
             rel = related_endpoint._create()
-            if rel.__class__.__name__ in EXPORTABLE_RELATIONS:
+            related_options = self._get_options(related_endpoint)
+            if related_options is None:  # This is a read-only endpoint.
+                continue
+            is_attach = 'id' in related_options  # This is not a create-only endpoint.
+
+            if rel.__class__.__name__ in EXPORTABLE_RELATIONS and is_attach:
                 by_natural_key = True
-                related_options = self._get_options(related_endpoint)
-                if related_options is None:
-                    continue
-                if 'id' not in related_options:
-                    continue  # This is a read-only or create-only endpoint.
             elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
-                by_natural_key, related_options = False, None
+                by_natural_key = False
             else:
                 continue
 
