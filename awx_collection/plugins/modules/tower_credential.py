@@ -194,7 +194,12 @@ options:
       required: False
       type: str
       version_added: "3.7"
+
 extends_documentation_fragment: awx.awx.auth
+
+notes:
+  - Values `inputs` and the other deprecated fields (such as `tenant`) are replacements of existing values.
+    See the last 4 examples for details.
 '''
 
 
@@ -224,6 +229,7 @@ EXAMPLES = '''
   slurp:
     src: '$HOME/.ssh/aws-private.pem'
   register: aws_ssh_key
+
 - name: Add Credential Into Tower
   tower_credential:
     name: Workshop Credential
@@ -242,6 +248,40 @@ EXAMPLES = '''
     tower_username: admin
     tower_password: ansible
     tower_host: https://localhost
+
+- name: Create a Vaiult credential (example for notes)
+  tower_credential:
+    name: Example password
+    credential_type: Vault
+    organization: Default
+    inputs:
+      vault_password: 'hello'
+      vault_id: 'My ID'
+
+- name: Bad password update (will replace vault_id)
+  tower_credential:
+    name: Example password
+    credential_type: Vault
+    organization: Default
+    inputs:
+      vault_password: 'new_password'
+
+- name: Another bad password update (will replace vault_id)
+  tower_credential:
+    name: Example password
+    credential_type: Vault
+    organization: Default
+    vault_password: 'new_password'
+
+- name: A safe way to update a password and keep vault_id
+  tower_credential:
+    name: Example password
+    credential_type: Vault
+    organization: Default
+    inputs:
+      vault_password: 'new_password'
+      vault_id: 'My ID'
+
 '''
 
 from ..module_utils.tower_api import TowerModule

@@ -177,7 +177,7 @@
     that:
       - result is changed
 
-- name: Create a valid SSH credential (new school) (no change)
+- name: Create a valid SSH credential (new school)
   tower_credential:
     name: "{{ ssh_cred_name2 }}"
     organization: Default
@@ -193,7 +193,7 @@
 # This should no longer be changed because we aren't passing any secure fields
 - assert:
     that:
-      - result is not changed
+      - result is changed
 
 - name: Create a valid SSH credential from lookup source (old school)
   tower_credential:
