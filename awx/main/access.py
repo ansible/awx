@@ -405,14 +405,6 @@ class BaseAccess(object):
                 # Cannot copy manual project without errors
                 user_capabilities[display_method] = False
                 continue
-            elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
-                try:
-                    if obj.deprecated_inventory_source and not obj.deprecated_inventory_source._can_update():
-                        user_capabilities[display_method] = False
-                        continue
-                except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
-                    user_capabilities[display_method] = False
-                    continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, (Project)):
                 if obj.scm_type == '':
                     user_capabilities[display_method] = False

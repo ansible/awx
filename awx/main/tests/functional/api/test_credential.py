@@ -972,7 +972,7 @@ def test_field_removal(put, organization, admin, credentialtype_ssh):
     ['insights_inventories', Inventory()],
     ['unifiedjobs', Job()],
     ['unifiedjobtemplates', JobTemplate()],
-    ['unifiedjobtemplates', InventorySource()],
+    ['unifiedjobtemplates', InventorySource(source='ec2')],
     ['projects', Project()],
     ['workflowjobnodes', WorkflowJobNode()],
 ])

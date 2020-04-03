@@ -821,7 +821,6 @@ class InventorySourceOptions(BaseModel):
     injectors = dict()
 
     SOURCE_CHOICES = [
-        ('', _('Manual')),
         ('file', _('File, Directory or Script')),
         ('scm', _('Sourced from a Project')),
         ('ec2', _('Amazon EC2')),
@@ -932,8 +931,8 @@ class InventorySourceOptions(BaseModel):
     source = models.CharField(
         max_length=32,
         choices=SOURCE_CHOICES,
-        blank=True,
-        default='',
+        blank=False,
+        default=None,
     )
     source_path = models.CharField(
         max_length=1024,
@@ -1237,14 +1236,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         on_delete=models.CASCADE,
     )
 
-    deprecated_group = models.OneToOneField(
-        'Group',
-        related_name='deprecated_inventory_source',
-        null=True,
-        default=None,
-        on_delete=models.CASCADE,
-    )
-
     source_project = models.ForeignKey(
         'Project',
         related_name='scm_inventory_sources',
@@ -1345,12 +1336,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_source_detail', kwargs={'pk': self.pk}, request=request)
 
-    @property
-    def can_update(self):
-        if self.source == '':
-            return False
-        return super(InventorySource, self).can_update
-
     def _can_update(self):
         if self.source == 'custom':
             return bool(self.source_script)
@@ -1419,16 +1404,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         return dict(error=list(error_notification_templates),
                     started=list(started_notification_templates),
                     success=list(success_notification_templates))
-
-    def clean_source(self):  # TODO: remove in 3.3
-        source = self.source
-        if source and self.deprecated_group:
-            qs = self.deprecated_group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-            existing_sources = qs.exclude(pk=self.pk)
-            if existing_sources.count():
-                s = u', '.join([x.deprecated_group.name for x in existing_sources])
-                raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
-        return source
 
     def clean_update_on_project_update(self):
         if self.update_on_project_update is True and \
@@ -1518,8 +1493,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         if self.inventory_source.inventory is not None:
             websocket_data.update(dict(inventory_id=self.inventory_source.inventory.pk))
 
-        if self.inventory_source.deprecated_group is not None:  # TODO: remove in 3.3
-            websocket_data.update(dict(group_id=self.inventory_source.deprecated_group.id))
         return websocket_data
 
     def get_absolute_url(self, request=None):

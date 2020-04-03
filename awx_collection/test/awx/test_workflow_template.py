@@ -68,7 +68,8 @@ def test_schema_with_branches(run_module, admin_user, organization, silence_depr
     )
     inv_src = InventorySource.objects.create(
         inventory=inv,
-        name='AWS servers'
+        name='AWS servers',
+        source='ec2'
     )
 
     result = run_module('tower_workflow_template', {

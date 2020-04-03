@@ -90,7 +90,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
         notification_templates.append(response.data['id'])
     i = Inventory.objects.create(name='test', organization=organization)
     i.save()
-    isrc = InventorySource.objects.create(name='test', inventory=i)
+    isrc = InventorySource.objects.create(name='test', inventory=i, source='ec2')
     isrc.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()

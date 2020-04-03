@@ -123,7 +123,11 @@ def test_delete_project_update_in_active_state(project, delete, admin, status):
 @pytest.mark.parametrize("status", list(TEST_STATES))
 @pytest.mark.django_db
 def test_delete_inventory_update_in_active_state(inventory_source, delete, admin, status):
-    i = InventoryUpdate.objects.create(inventory_source=inventory_source, status=status)
+    i = InventoryUpdate.objects.create(
+        inventory_source=inventory_source,
+        status=status,
+        source=inventory_source.source
+    )
     url = reverse('api:inventory_update_detail', kwargs={'pk': i.pk})
     delete(url, None, admin, expect=403)
 

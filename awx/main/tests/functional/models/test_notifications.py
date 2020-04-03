@@ -109,6 +109,7 @@ class TestJobNotificationMixin(object):
         kwargs = {}
         if JobClass is InventoryUpdate:
             kwargs['inventory_source'] = inventory_source
+            kwargs['source'] = inventory_source.source
         elif JobClass is ProjectUpdate:
             kwargs['project'] = project
 
