@@ -47,8 +47,33 @@ def test_create_workflow_job_template_node(run_module, admin_user, wfjt, job_tem
         "changed": True
     }
 
+    assert node.identifier == this_identifier
     assert node.workflow_job_template_id == wfjt.id
     assert node.unified_job_template_id == job_template.id
+
+
+@pytest.mark.django_db
+def test_create_workflow_job_template_node_no_template(run_module, admin_user, wfjt, job_template):
+    """This is a part of the API contract for creating approval nodes
+    and at some point in the future, tha feature will be supported by the collection
+    """
+    this_identifier = '42🐉'
+    result = run_module('tower_workflow_job_template_node', {
+        'identifier': this_identifier,
+        'workflow_job_template': wfjt.name,
+        'organization': wfjt.organization.name,
+    }, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', False), result
+
+    node = WorkflowJobTemplateNode.objects.get(pk=result['id'])
+    # node = WorkflowJobTemplateNode.objects.first()
+
+    assert result['id'] == node.id
+
+    assert node.identifier == this_identifier
+    assert node.workflow_job_template_id == wfjt.id
+    assert node.unified_job_template_id is None
 
 
 @pytest.mark.django_db
