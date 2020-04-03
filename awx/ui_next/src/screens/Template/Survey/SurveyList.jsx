@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { DataList, Button } from '@patternfly/react-core';
+import { DataList, Button as _Button } from '@patternfly/react-core';
 import ContentLoading from '@components/ContentLoading';
 import ContentEmpty from '@components/ContentEmpty';
 import AlertModal from '@components/AlertModal';
+import styled from 'styled-components';
+
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
+import SurveyPreviewModal from './SurveyPreviewModal';
+
+const Button = styled(_Button)`
+  margin: 20px;
+`;
 
 function SurveyList({
   isLoading,
@@ -20,7 +27,7 @@ function SurveyList({
   const questions = survey?.spec || [];
   const [selected, setSelected] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const isAllSelected =
     selected.length === questions?.length && selected.length > 0;
 
@@ -92,6 +99,21 @@ function SurveyList({
             onMoveDown={moveDown}
           />
         ))}
+        {isPreviewModalOpen && (
+          <SurveyPreviewModal
+            isPreviewModalOpen={isPreviewModalOpen}
+            onToggleModalOpen={() => setIsPreviewModalOpen(false)}
+            questions={questions}
+          />
+        )}
+
+        <Button
+          onClick={() => setIsPreviewModalOpen(true)}
+          variant="primary"
+          aria-label={i18n._(t`Preview`)}
+        >
+          Preview
+        </Button>
       </DataList>
     );
   }
