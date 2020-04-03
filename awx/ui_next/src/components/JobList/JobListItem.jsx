@@ -15,7 +15,6 @@ import DataListCell from '@components/DataListCell';
 import { RocketIcon } from '@patternfly/react-icons';
 import LaunchButton from '@components/LaunchButton';
 import StatusIcon from '@components/StatusIcon';
-import { toTitleCase } from '@util/strings';
 import { formatDateString } from '@util/dates';
 import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 import styled from 'styled-components';
@@ -35,6 +34,15 @@ function JobListItem({
   showTypeColumn = false,
 }) {
   const labelId = `check-action-${job.id}`;
+
+  const jobTypes = {
+    project_update: i18n._(t`SCM Update`),
+    inventory_update: i18n._(t`Inventory Sync`),
+    job: i18n._(t`Playbook Run`),
+    command: i18n._(t`Command`),
+    management_job: i18n._(t`Management Job`),
+    workflow_job: i18n._(t`Workflow Job`),
+  };
 
   return (
     <DataListItem aria-labelledby={labelId} id={`${job.id}`}>
@@ -62,7 +70,7 @@ function JobListItem({
             ...(showTypeColumn
               ? [
                   <DataListCell key="type" aria-label="type">
-                    {toTitleCase(job.type)}
+                    {jobTypes[job.type]}
                   </DataListCell>,
                 ]
               : []),
