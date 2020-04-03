@@ -8,8 +8,6 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     WorkflowJobTemplate, SchedulerStrings, scheduleResolve, timezonesResolve, Alert
 ) {
 
-    console.log(scheduleResolve);
-
     let schedule, scheduler, scheduleCredentials = [];
 
     /*
@@ -163,7 +161,6 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     function setUntil (scheduler) {
         let { until } = scheduleResolve;
         if(until !== ''){
-            console.log(until);
             const date = moment(until);
             const endDt =  moment.parseZone(date).format("MM/DD/YYYY");
             const endHour = date.format('HH');
