@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '@util/qs';
@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function InventoryHostList({ i18n, location, match }) {
+function InventoryHostList({ i18n }) {
   const [actions, setActions] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
@@ -28,10 +28,12 @@ function InventoryHostList({ i18n, location, match }) {
   const [hosts, setHosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState([]);
+  const { id } = useParams();
+  const { search } = useLocation();
 
-  const fetchHosts = (id, queryString) => {
+  const fetchHosts = (hostId, queryString) => {
     const params = parseQueryString(QS_CONFIG, queryString);
-    return InventoriesAPI.readHosts(id, params);
+    return InventoriesAPI.readHosts(hostId, params);
   };
 
   useEffect(() => {
@@ -45,7 +47,7 @@ function InventoryHostList({ i18n, location, match }) {
             data: { actions: optionActions },
           },
         ] = await Promise.all([
-          fetchHosts(match.params.id, location.search),
+          fetchHosts(id, search),
           InventoriesAPI.readOptions(),
         ]);
 
@@ -60,7 +62,7 @@ function InventoryHostList({ i18n, location, match }) {
     }
 
     fetchData();
-  }, [match.params.id, location]);
+  }, [id, search]);
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...hosts] : []);
@@ -86,7 +88,7 @@ function InventoryHostList({ i18n, location, match }) {
       try {
         const {
           data: { count, results },
-        } = await fetchHosts(match.params.id, location.search);
+        } = await fetchHosts(id, search);
 
         setHosts(results);
         setHostCount(count);
@@ -143,7 +145,7 @@ function InventoryHostList({ i18n, location, match }) {
                 ? [
                     <ToolbarAddButton
                       key="add"
-                      linkTo={`/inventories/inventory/${match.params.id}/hosts/add`}
+                      linkTo={`/inventories/inventory/${id}/hosts/add`}
                     />,
                   ]
                 : []),
@@ -160,8 +162,8 @@ function InventoryHostList({ i18n, location, match }) {
           <InventoryHostItem
             key={o.id}
             host={o}
-            detailUrl={`/inventories/inventory/${match.params.id}/hosts/${o.id}/details`}
-            editUrl={`/inventories/inventory/${match.params.id}/hosts/${o.id}/edit`}
+            detailUrl={`/inventories/inventory/${id}/hosts/${o.id}/details`}
+            editUrl={`/inventories/inventory/${id}/hosts/${o.id}/edit`}
             isSelected={selected.some(row => row.id === o.id)}
             onSelect={() => handleSelect(o)}
           />
@@ -170,7 +172,7 @@ function InventoryHostList({ i18n, location, match }) {
           canAdd && (
             <ToolbarAddButton
               key="add"
-              linkTo={`/inventories/inventory/${match.params.id}/add`}
+              linkTo={`/inventories/inventory/${id}/add`}
             />
           )
         }
@@ -190,4 +192,4 @@ function InventoryHostList({ i18n, location, match }) {
   );
 }
 
-export default withI18n()(withRouter(InventoryHostList));
+export default withI18n()(InventoryHostList);

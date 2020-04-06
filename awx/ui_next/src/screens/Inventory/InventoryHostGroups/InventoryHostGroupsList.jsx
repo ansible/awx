@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import useRequest from '@util/useRequest';
-import { HostsAPI } from '@api';
+import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
+import useRequest, {
+  useDismissableError,
+  useDeleteItems,
+} from '@util/useRequest';
+import useSelected from '@util/useSelected';
+import { HostsAPI, InventoriesAPI } from '@api';
 import DataListToolbar from '@components/DataListToolbar';
-import PaginatedDataList from '@components/PaginatedDataList';
+import AlertModal from '@components/AlertModal';
+import ErrorDetail from '@components/ErrorDetail';
+import PaginatedDataList, {
+  ToolbarAddButton,
+} from '@components/PaginatedDataList';
+import AssociateModal from '@components/AssociateModal';
+import DisassociateButton from '@components/DisassociateButton';
 import InventoryHostGroupItem from './InventoryHostGroupItem';
 
 const QS_CONFIG = getQSConfig('group', {
@@ -15,29 +25,36 @@ const QS_CONFIG = getQSConfig('group', {
   order_by: 'name',
 });
 
-function InventoryHostGroupsList({ i18n, location, match }) {
-  const [selected, setSelected] = useState([]);
-
-  const { hostId } = match.params;
+function InventoryHostGroupsList({ i18n }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { hostId, id: invId } = useParams();
+  const { search } = useLocation();
 
   const {
-    result: { groups, itemCount },
+    result: { groups, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchGroups,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(QS_CONFIG, search);
 
-      const {
-        data: { count, results },
-      } = await HostsAPI.readGroups(hostId, params);
+      const [
+        {
+          data: { count, results },
+        },
+        actionsResponse,
+      ] = await Promise.all([
+        HostsAPI.readAllGroups(hostId, params),
+        HostsAPI.readGroupsOptions(hostId),
+      ]);
 
       return {
-        itemCount: count,
         groups: results,
+        itemCount: count,
+        actions: actionsResponse.data.actions,
       };
-    }, [hostId, location]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       groups: [],
       itemCount: 0,
@@ -48,26 +65,68 @@ function InventoryHostGroupsList({ i18n, location, match }) {
     fetchGroups();
   }, [fetchGroups]);
 
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...groups] : []);
-  };
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
+    groups
+  );
 
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
+  const {
+    isLoading: isDisassociateLoading,
+    deleteItems: disassociateHosts,
+    deletionError: disassociateError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(group => HostsAPI.disassociateGroup(hostId, group))
+      );
+    }, [hostId, selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchGroups,
     }
+  );
+
+  const handleDisassociate = async () => {
+    await disassociateHosts();
+    setSelected([]);
   };
 
-  const isAllSelected =
-    selected.length > 0 && selected.length === groups.length;
+  const fetchGroupsToAssociate = useCallback(
+    params => {
+      return InventoriesAPI.readGroups(
+        invId,
+        mergeParams(params, { not__hosts: hostId })
+      );
+    },
+    [invId, hostId]
+  );
+
+  const { request: handleAssociate, error: associateError } = useRequest(
+    useCallback(
+      async groupsToAssociate => {
+        await Promise.all(
+          groupsToAssociate.map(group =>
+            HostsAPI.associateGroup(hostId, group.id)
+          )
+        );
+        fetchGroups();
+      },
+      [hostId, fetchGroups]
+    )
+  );
+
+  const { error, dismissError } = useDismissableError(
+    associateError || disassociateError
+  );
+
+  const canAdd =
+    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   return (
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isDisassociateLoading}
         items={groups}
         itemCount={itemCount}
         qsConfig={QS_CONFIG}
@@ -107,12 +166,64 @@ function InventoryHostGroupsList({ i18n, location, match }) {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={isSelected =>
+              setSelected(isSelected ? [...groups] : [])
+            }
             qsConfig={QS_CONFIG}
+            additionalControls={[
+              ...(canAdd
+                ? [
+                    <ToolbarAddButton
+                      key="add"
+                      onClick={() => setIsModalOpen(true)}
+                    />,
+                  ]
+                : []),
+              <DisassociateButton
+                key="disassociate"
+                onDisassociate={handleDisassociate}
+                itemsToDisassociate={selected}
+                modalTitle={i18n._(t`Disassociate group from host?`)}
+                modalNote={i18n._(t`
+                  Note that you may still see the group in the list after
+                  disassociating if the host is also a member of that group’s 
+                  children.  This list shows all groups the host is associated 
+                  with directly and indirectly.
+                `)}
+              />,
+            ]}
           />
         )}
+        emptyStateControls={
+          canAdd ? (
+            <ToolbarAddButton key="add" onClick={() => setIsModalOpen(true)} />
+          ) : null
+        }
       />
+      {isModalOpen && (
+        <AssociateModal
+          header={i18n._(t`Groups`)}
+          fetchRequest={fetchGroupsToAssociate}
+          isModalOpen={isModalOpen}
+          onAssociate={handleAssociate}
+          onClose={() => setIsModalOpen(false)}
+          title={i18n._(t`Select Groups`)}
+        />
+      )}
+      {error && (
+        <AlertModal
+          isOpen={error}
+          onClose={dismissError}
+          title={i18n._(t`Error!`)}
+          variant="error"
+        >
+          {associateError
+            ? i18n._(t`Failed to associate.`)
+            : i18n._(t`Failed to disassociate one or more groups.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
     </>
   );
 }
-export default withI18n()(withRouter(InventoryHostGroupsList));
+export default withI18n()(InventoryHostGroupsList);

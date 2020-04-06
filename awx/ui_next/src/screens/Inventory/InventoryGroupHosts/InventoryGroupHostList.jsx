@@ -14,10 +14,10 @@ import AlertModal from '@components/AlertModal';
 import DataListToolbar from '@components/DataListToolbar';
 import ErrorDetail from '@components/ErrorDetail';
 import PaginatedDataList from '@components/PaginatedDataList';
+import AssociateModal from '@components/AssociateModal';
+import DisassociateButton from '@components/DisassociateButton';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AssociateModal from './AssociateModal';
 import AddHostDropdown from './AddHostDropdown';
-import DisassociateButton from './DisassociateButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,

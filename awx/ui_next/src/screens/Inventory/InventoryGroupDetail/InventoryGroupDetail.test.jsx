@@ -36,12 +36,9 @@ describe('<InventoryGroupDetail />', () => {
         initialEntries: ['/inventories/inventory/1/groups/1/details'],
       });
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/:groupId"
-          component={() => (
-            <InventoryGroupDetail inventoryGroup={inventoryGroup} />
-          )}
-        />,
+        <Route path="/inventories/inventory/:id/groups/:groupId">
+          <InventoryGroupDetail inventoryGroup={inventoryGroup} />
+        </Route>,
         {
           context: {
             router: {

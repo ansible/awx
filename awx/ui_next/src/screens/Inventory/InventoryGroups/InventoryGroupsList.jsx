@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '@util/qs';
@@ -37,7 +37,7 @@ const useModal = () => {
   };
 };
 
-function InventoryGroupsList({ i18n, location, match }) {
+function InventoryGroupsList({ i18n }) {
   const [actions, setActions] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
@@ -47,7 +47,8 @@ function InventoryGroupsList({ i18n, location, match }) {
   const [selected, setSelected] = useState([]);
   const { isModalOpen, toggleModal } = useModal();
 
-  const inventoryId = match.params.id;
+  const { id: inventoryId } = useParams();
+  const { search } = useLocation();
   const fetchGroups = (id, queryString) => {
     const params = parseQueryString(QS_CONFIG, queryString);
     return InventoriesAPI.readGroups(id, params);
@@ -64,7 +65,7 @@ function InventoryGroupsList({ i18n, location, match }) {
             data: { actions: optionActions },
           },
         ] = await Promise.all([
-          fetchGroups(inventoryId, location.search),
+          fetchGroups(inventoryId, search),
           InventoriesAPI.readGroupsOptions(inventoryId),
         ]);
 
@@ -78,7 +79,7 @@ function InventoryGroupsList({ i18n, location, match }) {
       }
     }
     fetchData();
-  }, [inventoryId, location]);
+  }, [inventoryId, search]);
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...groups] : []);
@@ -138,7 +139,7 @@ function InventoryGroupsList({ i18n, location, match }) {
     try {
       const {
         data: { count, results },
-      } = await fetchGroups(inventoryId, location.search);
+      } = await fetchGroups(inventoryId, search);
       setGroups(results);
       setGroupCount(count);
     } catch (error) {
@@ -263,4 +264,4 @@ function InventoryGroupsList({ i18n, location, match }) {
     </>
   );
 }
-export default withI18n()(withRouter(InventoryGroupsList));
+export default withI18n()(InventoryGroupsList);

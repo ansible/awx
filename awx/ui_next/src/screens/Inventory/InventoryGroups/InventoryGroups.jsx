@@ -1,14 +1,14 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 
-import { Switch, Route, withRouter } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 
 import InventoryGroupAdd from '../InventoryGroupAdd/InventoryGroupAdd';
 
 import InventoryGroup from '../InventoryGroup/InventoryGroup';
 import InventoryGroupsList from './InventoryGroupsList';
 
-function InventoryGroups({ setBreadcrumb, inventory, location, match }) {
+function InventoryGroups({ setBreadcrumb, inventory }) {
   return (
     <Switch>
       <Route
@@ -34,7 +34,7 @@ function InventoryGroups({ setBreadcrumb, inventory, location, match }) {
         key="list"
         path="/inventories/inventory/:id/groups"
         render={() => {
-          return <InventoryGroupsList location={location} match={match} />;
+          return <InventoryGroupsList />;
         }}
       />
     </Switch>
@@ -42,4 +42,4 @@ function InventoryGroups({ setBreadcrumb, inventory, location, match }) {
 }
 
 export { InventoryGroups as _InventoryGroups };
-export default withI18n()(withRouter(InventoryGroups));
+export default withI18n()(InventoryGroups);
