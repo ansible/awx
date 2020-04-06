@@ -668,11 +668,12 @@ docker-compose-isolated-build: awx-devel-build
 	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
-MACHINE?=default
 docker-clean:
-	eval $$(docker-machine env $(MACHINE))
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	-docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
+	docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
+
+docker-clean-volumes:
+	docker volume rm tools_awx_db
 
 docker-refresh: docker-clean docker-compose
 
