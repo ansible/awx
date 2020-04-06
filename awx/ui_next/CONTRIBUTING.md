@@ -76,7 +76,7 @@ Note that mixins can be chained.  See the example below.
 
 Example of a model using multiple mixins:
 
-```
+```javascript
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
 
@@ -91,7 +91,7 @@ export default Organizations;
 
 Example of mocking a specific method for every test in a suite:
 
-```
+```javascript
 import { OrganizationsAPI } from '../../../../src/api';
 
 // Mocks out all available methods.  Comparable to:
@@ -164,7 +164,7 @@ Ideally, files should be named the same as the component they export, and tests 
 
 **File naming** - Since contexts export both consumer and provider (and potentially in withContext function form), the file can be simplified to be named after the consumer export.  In other words, the file containing the `Network` context components would be named `Network.jsx`.
 
-**Component naming and conventions** - In order to provide a consistent interface with react-router and lingui, as well as make their usage easier and less verbose, context components follow these conventions:
+**Component naming and conventions** - In order to provide a consistent interface with react-router and [lingui](https://lingui.js.org/), as well as make their usage easier and less verbose, context components follow these conventions:
 - Providers are wrapped in a component in the `FooProvider` format.
   - The value prop of the provider should be pulled from state.  This is recommended by the react docs, [here](https://reactjs.org/docs/context.html#caveats).
   - The provider should also be able to accept its value by prop for testing.
@@ -262,7 +262,7 @@ We have several React contexts that wrap much of the app, including those from r
 
 If you want to stub the value of a context, or assert actions taken on it, you can customize a contexts value by passing a second parameter to `mountWithContexts`. For example, this provides a custom value for the `Config` context:
 
-```
+```javascript
 const config = {
   custom_virtualenvs: ['foo', 'bar'],
 };
@@ -301,7 +301,7 @@ The lingui library provides various React helpers for dealing with both marking 
 
 **Note:** We try to avoid the `I18n` consumer, `i18nMark` function, or `<Trans>` component lingui gives us access to in this repo.  i18nMark does not actually replace the string in the UI (leading to the potential for untranslated bugs), and the other helpers are redundant.  Settling on a consistent, single pattern helps us ease the mental overhead of the need to understand the ins and outs of the lingui API.
 
-You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).  
+You can learn more about the ways lingui and its React helpers at [this link](https://lingui.js.org/tutorials/react-patterns.html).
 
 ### Setting up .po files to give to translation team
 
