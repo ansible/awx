@@ -190,7 +190,7 @@
       become_username: superuser
   register: result
 
-# This should no longer be changed because we aren't passing any secure fields
+# This shows as "changed" because these listed inputs replace the existing inputs from the previous task
 - assert:
     that:
       - result is changed
