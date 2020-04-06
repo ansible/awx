@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ kubernetes_deployment_name }}-rsyslog-config
+  namespace: {{ kubernetes_namespace }}
+data:
+  rsyslog-config: |
+    $WorkDirectory /var/lib/awx/rsyslog
+    $IncludeConfig /etc/rsyslog.d/*.conf
+    
