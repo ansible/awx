@@ -192,7 +192,7 @@ def main():
 
     inventory = module.params.get('inventory')
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     webhook_credential = module.params.get('webhook_credential')
     if webhook_credential:
