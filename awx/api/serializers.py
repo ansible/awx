@@ -3611,9 +3611,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         elif self.instance:
             ujt = self.instance.unified_job_template
         if ujt is None:
-            if 'workflow_job_template' in attrs:
-                return {'workflow_job_template': attrs['workflow_job_template']}
-            return {}
+            ret = {}
+            for fd in ('workflow_job_template', 'identifier'):
+                if fd in attrs:
+                    ret[fd] = attrs[fd]
+            return ret
 
         # build additional field survey_passwords to track redacted variables
         password_dict = {}
