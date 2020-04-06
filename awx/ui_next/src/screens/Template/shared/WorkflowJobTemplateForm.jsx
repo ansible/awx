@@ -338,14 +338,14 @@ function WorkflowJobTemplateForm({
             <Field id="wfjt-webhooks" name="hasWebhooks">
               {({ form }) => (
                 <Checkbox
-                  aria-label={i18n._(t`Enable Webhook`)}
+                  aria-label={i18n._(t`Enable Webhooks`)}
                   label={
                     <span>
-                      {i18n._(t`Enable Webhook`)}
+                      {i18n._(t`Enable Webhooks`)}
                       &nbsp;
                       <FieldTooltip
                         content={i18n._(
-                          t`Enable webhook for this workflow job template.`
+                          t`Enable webhooks for this workflow job template.`
                         )}
                       />
                     </span>
