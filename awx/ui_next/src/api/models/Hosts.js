@@ -1,5 +1,4 @@
 import Base from '../Base';
-import { TintSlashIcon } from '@patternfly/react-icons';
 
 class Hosts extends Base {
   constructor(http) {

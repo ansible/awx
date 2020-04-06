@@ -186,6 +186,12 @@ function HostGroupsList({ i18n, location, match, host }) {
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
                 modalTitle={i18n._(t`Disassociate group from host?`)}
+                modalNote={i18n._(t`
+                  Note that you may still see the group in the list after
+                  disassociating if the host is also a member of that group’s 
+                  children.  This list shows all groups the host is associated 
+                  with directly and indirectly.
+                `)}
               />,
             ]}
           />
