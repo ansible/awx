@@ -90,10 +90,9 @@ describe('<HostGroupsList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/hosts/:id/groups"
-          component={() => <HostGroupsList host={host} />}
-        />,
+        <Route path="/hosts/:id/groups">
+          <HostGroupsList host={host} />
+        </Route>,
         {
           context: {
             router: { history, route: { location: history.location } },

@@ -43,12 +43,9 @@ describe('<InventoryGroup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups"
-          component={() => (
-            <InventoryGroup setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <Route path="/inventories/inventory/:id/groups">
+          <InventoryGroup setBreadcrumb={() => {}} inventory={inventory} />
+        </Route>,
         { context: { router: { history } } }
       );
     });

@@ -24,10 +24,9 @@ describe('<InventoryGroupEdit />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/:groupId/edit"
-          component={() => <InventoryGroupEdit inventoryGroup={{ id: 2 }} />}
-        />,
+        <Route path="/inventories/inventory/:id/groups/:groupId/edit">
+          <InventoryGroupEdit inventoryGroup={{ id: 2 }} />
+        </Route>,
         {
           context: {
             router: {

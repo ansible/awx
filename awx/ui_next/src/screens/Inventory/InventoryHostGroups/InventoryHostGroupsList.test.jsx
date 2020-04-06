@@ -82,10 +82,9 @@ describe('<InventoryHostGroupsList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/hosts/:hostId/groups"
-          component={() => <InventoryHostGroupsList />}
-        />,
+        <Route path="/inventories/inventory/:id/hosts/:hostId/groups">
+          <InventoryHostGroupsList />
+        </Route>,
         {
           context: {
             router: { history, route: { location: history.location } },
