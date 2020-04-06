@@ -103,6 +103,7 @@ function JobTemplateForm({
       }
     }, [template, validateField])
   );
+
   const {
     request: loadRelatedInstanceGroups,
     error: instanceGroupError,
@@ -143,7 +144,7 @@ function JobTemplateForm({
       playbookHelpers.setValue(0);
       scmHelpers.setValue('');
     },
-    [setProject, projectHelpers, playbookHelpers, scmHelpers]
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const jobTypeOptions = [
@@ -289,7 +290,7 @@ function JobTemplateForm({
           />
           <PlaybookSelect
             projectId={project?.id || projectField.value?.id}
-            isValid={!(playbookMeta.touched || playbookMeta.error)}
+            isValid={!playbookMeta.touched || !playbookMeta.error}
             field={playbookField}
             onBlur={() => playbookHelpers.setTouched()}
             onError={setContentError}
