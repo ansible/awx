@@ -82,6 +82,7 @@
 - name: Create a workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
+    inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
 
