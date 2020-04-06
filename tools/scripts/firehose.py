@@ -196,11 +196,11 @@ def generate_events(events, job):
         # see: https://www.compose.com/articles/faster-performance-with-unlogged-tables-in-postgresql/
         cursor.execute('ALTER TABLE main_jobevent SET UNLOGGED')
 
-        cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename='main_jobevent' AND indexname != 'main_jobevent_pkey';")
+        cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename='main_jobevent' AND indexname != 'main_jobevent_pkey1';")
         indexes = cursor.fetchall()
 
         cursor.execute(
-            "SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey';"  # noqa
+            "SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey1';"  # noqa
         )
         constraints = cursor.fetchall()
 
