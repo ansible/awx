@@ -60,6 +60,8 @@ class Inventories extends Component {
       [`${inventoryHostsPath}/${nested?.id}/completed_jobs`]: i18n._(
         t`Completed Jobs`
       ),
+      [`${inventoryHostsPath}/${nested?.id}/facts`]: i18n._(t`Facts`),
+      [`${inventoryHostsPath}/${nested?.id}/groups`]: i18n._(t`Groups`),
 
       [inventoryGroupsPath]: i18n._(t`Groups`),
       [`${inventoryGroupsPath}/add`]: i18n._(t`Create New Group`),
