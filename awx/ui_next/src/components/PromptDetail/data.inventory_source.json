@@ -1,0 +1,118 @@
+{
+  "id":53,
+  "type":"inventory_source",
+  "url":"/api/v2/inventory_sources/53/",
+  "related":{
+     "named_url":"/api/v2/inventory_sources/src++Demo Inventory++Default/",
+     "created_by":"/api/v2/users/1/",
+     "modified_by":"/api/v2/users/1/",
+     "update":"/api/v2/inventory_sources/53/update/",
+     "inventory_updates":"/api/v2/inventory_sources/53/inventory_updates/",
+     "schedules":"/api/v2/inventory_sources/53/schedules/",
+     "activity_stream":"/api/v2/inventory_sources/53/activity_stream/",
+     "hosts":"/api/v2/inventory_sources/53/hosts/",
+     "groups":"/api/v2/inventory_sources/53/groups/",
+     "notification_templates_started":"/api/v2/inventory_sources/53/notification_templates_started/",
+     "notification_templates_success":"/api/v2/inventory_sources/53/notification_templates_success/",
+     "notification_templates_error":"/api/v2/inventory_sources/53/notification_templates_error/",
+     "inventory":"/api/v2/inventories/1/",
+     "source_project":"/api/v2/projects/8/",
+     "credentials":"/api/v2/inventory_sources/53/credentials/"
+  },
+  "summary_fields":{
+     "organization":{
+        "id":1,
+        "name":"Default",
+        "description":""
+     },
+     "inventory":{
+        "id":1,
+        "name":"Demo Inventory",
+        "description":"",
+        "has_active_failures":false,
+        "total_hosts":1,
+        "hosts_with_active_failures":0,
+        "total_groups":2,
+        "has_inventory_sources":true,
+        "total_inventory_sources":5,
+        "inventory_sources_with_failures":0,
+        "organization_id":1,
+        "kind":""
+     },
+     "source_project":{
+        "id":8,
+        "name":"Mock Project",
+        "description":"",
+        "status":"never updated",
+        "scm_type":"git"
+     },
+     "source_script": {
+       "name": "Mock Script",
+       "description": ""
+     },
+     "created_by":{
+        "id":1,
+        "username":"admin",
+        "first_name":"",
+        "last_name":""
+     },
+     "modified_by":{
+        "id":1,
+        "username":"admin",
+        "first_name":"",
+        "last_name":""
+     },
+     "user_capabilities":{
+        "edit":true,
+        "delete":true,
+        "start":true,
+        "schedule":true
+     },
+     "credential": {
+      "id": 8,
+      "name": "mock cred",
+      "description": "",
+      "kind": "vmware",
+      "cloud": true,
+      "credential_type_id": 7
+     },
+     "credentials":[
+      {
+        "id": 8,
+        "name": "mock cred",
+        "description": "",
+        "kind": "vmware",
+        "cloud": true,
+        "credential_type_id": 7
+       }
+     ]
+  },
+  "created":"2020-04-02T18:59:08.474167Z",
+  "modified":"2020-04-02T19:52:23.924252Z",
+  "name":"mock inv source",
+  "description":"mock description",
+  "source":"scm",
+  "source_path": "foo",
+  "source_script": "Mock Script",
+  "source_vars":"---\nfoo: bar",
+  "credential": 8,
+  "source_regions": "us-east-1,us-east-2",
+  "instance_filters": "filter1,filter2,filter3",
+  "group_by": "group1,group2,group3",
+  "overwrite":true,
+  "overwrite_vars":true,
+  "custom_virtualenv":null,
+  "timeout":0,
+  "verbosity":2,
+  "last_job_run":null,
+  "last_job_failed":false,
+  "next_job_run":null,
+  "status":"never updated",
+  "inventory":1,
+  "update_on_launch":true,
+  "update_cache_timeout":2,
+  "source_project":8,
+  "update_on_project_update":true,
+  "last_update_failed": true,
+  "last_updated":null
+}

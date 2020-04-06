@@ -10,6 +10,9 @@ import { VariablesDetail } from '@components/CodeMirrorInput';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 
 import PromptProjectDetail from './PromptProjectDetail';
+import PromptInventorySourceDetail from './PromptInventorySourceDetail';
+import PromptJobTemplateDetail from './PromptJobTemplateDetail';
+import PromptWFJobTemplateDetail from './PromptWFJobTemplateDetail';
 
 const PromptHeader = styled.h2`
   font-weight: bold;
@@ -83,6 +86,15 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
         {/* TODO: Add JT, WFJT, Inventory Source Details */}
         {resource?.type === 'project' && (
           <PromptProjectDetail resource={resource} />
+        )}
+        {resource?.type === 'inventory_source' && (
+          <PromptInventorySourceDetail resource={resource} />
+        )}
+        {resource?.type === 'job_template' && (
+          <PromptJobTemplateDetail resource={resource} />
+        )}
+        {resource?.type === 'workflow_job_template' && (
+          <PromptWFJobTemplateDetail resource={resource} />
         )}
 
         <UserDateDetail
