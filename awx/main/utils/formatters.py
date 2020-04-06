@@ -3,13 +3,13 @@
 
 from copy import copy
 import json
-import time
 import logging
 import traceback
 import socket
 from datetime import datetime
 
-
+from dateutil.tz import tzutc
+from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 
 
@@ -92,17 +92,12 @@ class LogstashFormatterBase(logging.Formatter):
         }
 
     @classmethod
-    def format_timestamp(cls, time):
-        tstamp = datetime.utcfromtimestamp(time)
-        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
-
-    @classmethod
     def format_exception(cls, exc_info):
         return ''.join(traceback.format_exception(*exc_info)) if exc_info else ''
 
     @classmethod
     def serialize(cls, message):
-        return bytes(json.dumps(message), 'utf-8')
+        return bytes(json.dumps(message, cls=DjangoJSONEncoder), 'utf-8')
 
 
 class LogstashFormatter(LogstashFormatterBase):
@@ -157,9 +152,6 @@ class LogstashFormatter(LogstashFormatterBase):
 
                 try:
                     data_for_log[key] = getattr(job_event, fd)
-                    if fd in ['created', 'modified'] and data_for_log[key] is not None:
-                        time_float = time.mktime(data_for_log[key].timetuple())
-                        data_for_log[key] = self.format_timestamp(time_float)
                 except Exception as e:
                     data_for_log[key] = 'Exception `{}` producing field'.format(e)
 
@@ -231,10 +223,12 @@ class LogstashFormatter(LogstashFormatterBase):
         return fields
 
     def format(self, record):
+        stamp = datetime.utcfromtimestamp(record.created)
+        stamp = stamp.replace(tzinfo=tzutc())
         message = {
             # Field not included, but exist in related logs
             # 'path': record.pathname
-            '@timestamp': self.format_timestamp(record.created),
+            '@timestamp': stamp,
             'message': record.getMessage(),
             'host': self.host,
 
