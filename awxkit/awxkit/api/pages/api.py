@@ -8,7 +8,7 @@ from . import base
 from . import page
 from ..mixins import has_create
 
-descRE = re.compile('^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')
+descRE = re.compile(r'^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')
 
 log = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class ApiV2(base.Base):
         fields['natural_key'] = asset.get_natural_key()
 
         for key in options:
-            if not key in asset.related:
+            if key not in asset.related:
                 continue
             try:
                 # FIXME: use caching by url
@@ -242,7 +242,7 @@ class ApiV2(base.Base):
             return
 
         endpoint = getattr(self, resource)
-        options = self._options[resource]
+        options = self._get_options(endpoint)
         assets = data[resource]
         for asset in assets:
             post_data = {}
