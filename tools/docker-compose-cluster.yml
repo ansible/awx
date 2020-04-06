@@ -109,6 +109,6 @@ services:
     user: ${CURRENT_UID}
     image: memcached:alpine
     container_name: tools_memcached_1
-    command: ["-s", "/var/run/memcached/memcached.sock", "-a", "0666"]
+    command: ["memcached", "-s", "/var/run/memcached/memcached.sock", "-a", "0666"]
     volumes:
       - "./memcached/:/var/run/memcached"
