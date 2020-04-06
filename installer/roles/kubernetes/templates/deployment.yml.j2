@@ -249,7 +249,7 @@ spec:
         - name: {{ kubernetes_deployment_name }}-redis
           image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
-          args: ["{{ kubernetes_redis_config_mount_path }}"]
+          args: ["redis-server", "{{ kubernetes_redis_config_mount_path }}"]
           ports:
             - name: redis
               protocol: TCP
