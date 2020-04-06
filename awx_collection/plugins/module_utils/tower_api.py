@@ -265,7 +265,14 @@ class TowerModule(AnsibleModule):
 
     def resolve_name_to_id(self, endpoint, name_or_id):
         # Try to resolve the object by name
-        response = self.get_endpoint(endpoint, **{'data': {'name': name_or_id}})
+        name_field = 'name'
+        if endpoint == 'users':
+            name_field = 'username'
+
+        response = self.get_endpoint(endpoint, **{'data': {name_field: name_or_id}})
+        if response['status_code'] == 400:
+            self.fail_json(msg="Unable to try and resolve {0} for {1} : {2}".format(endpoint, name_or_id, response['json']['detail']))
+
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
