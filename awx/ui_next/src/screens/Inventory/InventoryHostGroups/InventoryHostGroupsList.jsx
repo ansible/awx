@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
@@ -25,10 +25,10 @@ const QS_CONFIG = getQSConfig('group', {
   order_by: 'name',
 });
 
-function InventoryHostGroupsList({ i18n, location, match }) {
+function InventoryHostGroupsList({ i18n }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const { hostId, id: invId } = match.params;
+  const { hostId, id: invId } = useParams();
+  const { search } = useLocation();
 
   const {
     result: { groups, itemCount, actions },
@@ -37,7 +37,7 @@ function InventoryHostGroupsList({ i18n, location, match }) {
     request: fetchGroups,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(QS_CONFIG, search);
 
       const [
         {
@@ -54,7 +54,7 @@ function InventoryHostGroupsList({ i18n, location, match }) {
         itemCount: count,
         actions: actionsResponse.data.actions,
       };
-    }, [hostId, location]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       groups: [],
       itemCount: 0,
@@ -226,4 +226,4 @@ function InventoryHostGroupsList({ i18n, location, match }) {
     </>
   );
 }
-export default withI18n()(withRouter(InventoryHostGroupsList));
+export default withI18n()(InventoryHostGroupsList);

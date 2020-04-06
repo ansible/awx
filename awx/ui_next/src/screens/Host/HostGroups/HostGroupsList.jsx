@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
@@ -25,10 +25,11 @@ const QS_CONFIG = getQSConfig('group', {
   order_by: 'name',
 });
 
-function HostGroupsList({ i18n, location, match, host }) {
+function HostGroupsList({ i18n, host }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const hostId = match.params.id;
+  const { id: hostId } = useParams();
+  const { search } = useLocation();
   const invId = host.summary_fields.inventory.id;
 
   const {
@@ -38,7 +39,7 @@ function HostGroupsList({ i18n, location, match, host }) {
     request: fetchGroups,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
+      const params = parseQueryString(QS_CONFIG, search);
 
       const [
         {
@@ -55,7 +56,7 @@ function HostGroupsList({ i18n, location, match, host }) {
         itemCount: count,
         actions: actionsResponse.data.actions,
       };
-    }, [hostId, location]), // eslint-disable-line react-hooks/exhaustive-deps
+    }, [hostId, search]),
     {
       groups: [],
       itemCount: 0,
@@ -228,4 +229,4 @@ function HostGroupsList({ i18n, location, match, host }) {
     </>
   );
 }
-export default withI18n()(withRouter(HostGroupsList));
+export default withI18n()(HostGroupsList);
