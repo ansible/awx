@@ -27,7 +27,6 @@ kubernetes_redis_image: "redis"
 kubernetes_redis_image_tag: "latest"
 kubernetes_redis_config_mount_path: "/usr/local/etc/redis/redis.conf"
 
-memcached_hostname: localhost
 memcached_mem_request: 1
 memcached_cpu_request: 500
 

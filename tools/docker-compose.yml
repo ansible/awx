@@ -33,6 +33,7 @@ services:
       - "../:/awx_devel"
       - "../awx/projects/:/var/lib/awx/projects/"
       - "./redis/redis_socket_standalone:/var/run/redis/"
+      - "./memcached/:/var/run/memcached"
     privileged: true
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
@@ -50,10 +51,12 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
   memcached:
+    user: ${CURRENT_UID}
     image: memcached:alpine
     container_name: tools_memcached_1
-    ports:
-      - "11211:11211"
+    command: ["-s", "/var/run/memcached/memcached.sock", "-a", "0666"]
+    volumes:
+      - "./memcached/:/var/run/memcached"
   redis:
     image: redis:latest
     container_name: tools_redis_1

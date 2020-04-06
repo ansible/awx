@@ -8,7 +8,5 @@ postgresql_image: "postgres:{{postgresql_version}}"
 
 memcached_image: "memcached"
 memcached_version: "alpine"
-memcached_hostname: "memcached"
-memcached_port: "11211"
 
 compose_start_containers: true
