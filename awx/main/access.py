@@ -11,7 +11,6 @@ from functools import reduce
 from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -642,8 +641,8 @@ class UserAccess(BaseAccess):
                 # in these cases only superusers can modify orphan users
                 return False
             return not obj.roles.all().exclude(
-                content_type=ContentType.objects.get_for_model(User)
-            ).filter(ancestors__in=self.user.roles.all()).exists()
+                ancestors__in=self.user.roles.all()
+            ).exists()
         else:
             return self.is_all_org_admin(obj)
 
