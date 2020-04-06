@@ -108,10 +108,7 @@ class JobTemplateEdit extends Component {
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
-        this.submitLabels(
-          labels,
-          values.project.summary_fields.organization.id
-        ),
+        this.submitLabels(labels, template?.organization),
         this.submitInstanceGroups(instanceGroups, initialInstanceGroups),
         this.submitCredentials(credentials),
       ]);

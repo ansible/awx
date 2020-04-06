@@ -52,7 +52,7 @@ function JobTemplateForm({
   i18n,
 }) {
   const [contentError, setContentError] = useState(false);
-  const [project, setProject] = useState(null);
+  const [project, setProject] = useState(template?.summary_fields?.project);
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory
   );
@@ -282,6 +282,7 @@ function JobTemplateForm({
         <FormGroup
           fieldId="template-playbook"
           helperTextInvalid={playbookMeta.error}
+          isValid={!playbookMeta.touched || !playbookMeta.error}
           isRequired
           label={i18n._(t`Playbook`)}
         >
