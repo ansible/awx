@@ -89,7 +89,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             grafana_data['isRegion'] = self.isRegion
             grafana_data['dashboardId'] = self.dashboardId
             grafana_data['panelId'] = self.panelId
-            grafana_data['tags'] = self.annotation_tags
+            if self.annotation_tags:
+                grafana_data['tags'] = self.annotation_tags
             grafana_data['text'] = m.subject
             grafana_headers['Authorization'] = "Bearer {}".format(self.grafana_key)
             grafana_headers['Content-Type'] = "application/json"
