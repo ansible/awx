@@ -1425,7 +1425,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'job_template_admin_role').exists()
+            return Project.accessible_objects(self.user, 'use_role').exists()
 
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
@@ -1493,11 +1493,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
             return False
         if data is None:
             return True
-
-        # standard type of check for organization - cannot change the value
-        # unless posessing the respective job_template_admin_role, otherwise non-blocking
-        if not self.check_related('organization', Organization, data, obj=obj, role_field='job_template_admin_role'):
-            return False
 
         data = dict(data)
 
