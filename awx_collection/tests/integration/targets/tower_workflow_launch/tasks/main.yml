@@ -1,3 +1,4 @@
+---
 - name: Generate a random string for test
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
@@ -6,6 +7,11 @@
 - name: Generate names
   set_fact:
     wfjt_name1: "Testing Workflow Job Launch" #"AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}"
+
+- name: Clean up test workflow from any previous runs
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: absent
 
 - name: Create our workflow
   tower_workflow_job_template:
@@ -68,8 +74,3 @@
     that:
       - result is failed
       - "'Monitoring aborted due to timeout' in result.msg"
-
-- name: Cleanup workflow
-  tower_workflow_job_template:
-    name: "{{ wfjt_name1 }}"
-    state: absent

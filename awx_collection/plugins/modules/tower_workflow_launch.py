@@ -68,6 +68,12 @@ options:
         - If waiting for the workflow to complete this will abort after this
           amount of seconds
       type: int
+    tower_oauthtoken:
+      description:
+        - The Tower OAuth token to use.
+      required: False
+      type: str
+      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -108,6 +114,7 @@ def main():
         organization=dict(),
         inventory=dict(),
         limit=dict(),
+        scm_branch=dict(),
         extra_vars=dict(),
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=1.0, type='float'),
@@ -138,12 +145,11 @@ def main():
     if inventory:
         post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
-
     # Attempt to look up job_template based on the provided name
-    lookup_data = { 'name': name }
+    lookup_data = {'name': name}
     if organization:
         lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    workflow_job_template = module.get_one('workflow_job_templates', **{ 'data':  lookup_data })
+    workflow_job_template = module.get_one('workflow_job_templates', **{'data': lookup_data})
 
     if workflow_job_template is None:
         module.fail_json(msg="Unable to find workflow job template")
@@ -174,7 +180,7 @@ def main():
     module.json_output['id'] = result['json']['id']
     module.json_output['status'] = result['json']['status']
     # This is for backwards compatability
-    module.json_output['job_info'] = { 'id': result['json']['id'] }
+    module.json_output['job_info'] = {'id': result['json']['id']}
 
     if not wait:
         module.exit_json(**module.json_output)
@@ -197,7 +203,7 @@ def main():
 
     # If the job has failed, we want to raise an Exception for that so we get a non-zero response.
     if result['json']['failed']:
-        module.json_output['msg'] = 'Job with id {0} failed'.format(job_id)
+        module.json_output['msg'] = 'The workflow "{0}" failed'.format(name)
         module.fail_json(**module.json_output)
 
     module.exit_json(**module.json_output)
