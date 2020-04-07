@@ -108,11 +108,9 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
           exact
         />
         {schedule && [
-          <Route
-            key="edit"
-            path={`${pathRoot}schedules/:id/edit`}
-            render={() => <ScheduleEdit schedule={schedule} />}
-          />,
+          <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
+            <ScheduleEdit schedule={schedule} />
+          </Route>,
           <Route
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
