@@ -82,8 +82,8 @@ describe('<JobTemplateDetail />', () => {
     });
   });
 
-  test('should render SCM_Branch', async () => {
-    const SCMBranch = wrapper.find('Detail[label="SCM Branch"]');
+  test('should render Source Control Branch', async () => {
+    const SCMBranch = wrapper.find('Detail[label="Source Control Branch"]');
     expect(SCMBranch.prop('value')).toBe('Foo branch');
   });
 

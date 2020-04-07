@@ -137,7 +137,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
+            <Detail
+              label={i18n._(t`Source Control Branch`)}
+              value={scm_branch}
+            />
             <Detail label={i18n._(t`Limit`)} value={limit} />
             {typeof diff_mode === 'boolean' && (
               <Detail

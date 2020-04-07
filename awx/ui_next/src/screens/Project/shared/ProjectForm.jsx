@@ -170,7 +170,7 @@ function ProjectFormFields({
         helperTextInvalid={scmTypeMeta.error}
         isRequired
         isValid={!scmTypeMeta.touched || !scmTypeMeta.error}
-        label={i18n._(t`SCM Type`)}
+        label={i18n._(t`Source Control Credential Type`)}
       >
         <AnsibleSelect
           {...scmTypeField}
@@ -179,7 +179,7 @@ function ProjectFormFields({
             {
               value: '',
               key: '',
-              label: i18n._(t`Choose an SCM Type`),
+              label: i18n._(t`Choose a Source Control Type`),
               isDisabled: true,
             },
             ...scmTypeOptions.map(([value, label]) => {

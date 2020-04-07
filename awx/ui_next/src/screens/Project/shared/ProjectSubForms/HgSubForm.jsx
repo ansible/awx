@@ -19,7 +19,7 @@ const HgSubForm = ({
       i18n={i18n}
       tooltip={
         <span>
-          {i18n._(t`Example URLs for Mercurial SCM include:`)}
+          {i18n._(t`Example URLs for Mercurial Source Control include:`)}
           <ul css={{ margin: '10px 0 10px 20px' }}>
             <li>https://bitbucket.org/username/project</li>
             <li>ssh://hg@bitbucket.org/username/project</li>
@@ -32,7 +32,10 @@ const HgSubForm = ({
         </span>
       }
     />
-    <BranchFormField i18n={i18n} label={i18n._(t`SCM Branch/Tag/Revision`)} />
+    <BranchFormField
+      i18n={i18n}
+      label={i18n._(t`Source Control Branch/Tag/Revision`)}
+    />
     <ScmCredentialFormField
       credential={credential}
       onCredentialSelection={onCredentialSelection}

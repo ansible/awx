@@ -32,15 +32,18 @@ describe('PromptProjectDetail', () => {
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
-    assertDetail('SCM Type', 'Git');
-    assertDetail('SCM URL', 'https://github.com/ansible/ansible-tower-samples');
-    assertDetail('SCM Branch', 'foo');
-    assertDetail('SCM Refspec', 'refs/');
+    assertDetail('Source Control Type', 'Git');
+    assertDetail(
+      'Source Control URL',
+      'https://github.com/ansible/ansible-tower-samples'
+    );
+    assertDetail('Source Control Branch', 'foo');
+    assertDetail('Source Control Refspec', 'refs/');
     assertDetail('Cache Timeout', '3 Seconds');
     assertDetail('Ansible Environment', 'mock virtual env');
     assertDetail('Project Base Path', 'dir/foo/bar');
     assertDetail('Playbook Directory', '_6__demo_project');
-    assertDetail('SCM Credential', 'Scm: mock scm');
+    assertDetail('Source Control Credential', 'Scm: mock scm');
     expect(
       wrapper
         .find('Detail[label="Options"]')

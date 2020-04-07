@@ -50,15 +50,15 @@ function PromptProjectDetail({ i18n, resource }) {
   return (
     <>
       <Detail
-        label={i18n._(t`SCM Type`)}
+        label={i18n._(t`Source Control Type`)}
         value={scm_type === '' ? i18n._(t`Manual`) : toTitleCase(scm_type)}
       />
-      <Detail label={i18n._(t`SCM URL`)} value={scm_url} />
-      <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
-      <Detail label={i18n._(t`SCM Refspec`)} value={scm_refspec} />
+      <Detail label={i18n._(t`Source Control URL`)} value={scm_url} />
+      <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
+      <Detail label={i18n._(t`Source Control Refspec`)} value={scm_refspec} />
       {summary_fields?.credential?.id && (
         <Detail
-          label={i18n._(t`SCM Credential`)}
+          label={i18n._(t`Source Control Credential`)}
           value={
             <CredentialChip
               key={resource.summary_fields.credential.id}

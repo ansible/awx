@@ -140,7 +140,7 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
             )}
             {launchConfig.ask_scm_branch_on_launch && (
               <Detail
-                label={i18n._(t`SCM Branch`)}
+                label={i18n._(t`Source Control Branch`)}
                 value={defaults?.scm_branch}
               />
             )}

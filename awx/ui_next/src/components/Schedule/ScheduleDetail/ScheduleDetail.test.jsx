@@ -121,7 +121,9 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
-    expect(wrapper.find('Detail[label="SCM Branch"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
+      0
+    );
     expect(wrapper.find('Detail[label="Limit"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
@@ -209,7 +211,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(1);
     expect(
       wrapper
-        .find('Detail[label="SCM Branch"]')
+        .find('Detail[label="Source Control Branch"]')
         .find('dd')
         .text()
     ).toBe('foo/branch');

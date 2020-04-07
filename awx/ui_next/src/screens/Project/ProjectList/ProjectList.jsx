@@ -125,7 +125,7 @@ function ProjectList({ i18n }) {
                 ],
               },
               {
-                name: i18n._(t`SCM URL`),
+                name: i18n._(t`Source Control URL`),
                 key: 'scm_url',
               },
               {
