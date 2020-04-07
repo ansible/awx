@@ -11,6 +11,7 @@ import {
   TextInput,
   TextArea,
   Select,
+  SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
 
@@ -101,7 +102,14 @@ function SurveyPreviewModal({
                       onToggle={() => {}}
                       aria-label={i18n._(t`Multi-Select`)}
                       id={`survey-preview-multiSelect-${q.variable}`}
-                    />
+                    >
+                      {q.choices.length > 0 &&
+                        q.choices
+                          .split('\n')
+                          .map((option, index) => (
+                            <SelectOption key={index} value={option} />
+                          ))}
+                    </Select>
                   </FormGroup>
                 )}
               </div>
