@@ -192,75 +192,54 @@ class Project extends Component {
           <Switch>
             <Redirect from="/projects/:id" to="/projects/:id/details" exact />
             {project && (
-              <Route
-                path="/projects/:id/edit"
-                render={() => <ProjectEdit project={project} />}
-              />
+              <Route path="/projects/:id/edit">
+                <ProjectEdit project={project} />
+              </Route>
             )}
             {project && (
-              <Route
-                path="/projects/:id/details"
-                render={() => <ProjectDetail project={project} />}
-              />
+              <Route path="/projects/:id/details">
+                <ProjectDetail project={project} />
+              </Route>
             )}
             {project && (
-              <Route
-                path="/projects/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={project}
-                    apiModel={ProjectsAPI}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/access">
+                <ResourceAccessList resource={project} apiModel={ProjectsAPI} />
+              </Route>
             )}
             {canSeeNotificationsTab && (
-              <Route
-                path="/projects/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={ProjectsAPI}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={ProjectsAPI}
+                />
+              </Route>
             )}
-            <Route
-              path="/projects/:id/job_templates"
-              render={() => (
-                <ProjectJobTemplatesList id={Number(match.params.id)} />
-              )}
-            />
+            <Route path="/projects/:id/job_templates">
+              <ProjectJobTemplatesList id={Number(match.params.id)} />
+            </Route>
             {project?.scm_type && project.scm_type !== '' && (
-              <Route
-                path="/projects/:id/schedules"
-                render={() => (
-                  <Schedules
-                    setBreadcrumb={setBreadcrumb}
-                    unifiedJobTemplate={project}
-                    createSchedule={this.createSchedule}
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/schedules">
+                <Schedules
+                  setBreadcrumb={setBreadcrumb}
+                  unifiedJobTemplate={project}
+                  createSchedule={this.createSchedule}
+                  loadSchedules={this.loadSchedules}
+                  loadScheduleOptions={this.loadScheduleOptions}
+                />
+              </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/projects/${match.params.id}/details`}>
-                        {i18n._(`View Project Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/projects/${match.params.id}/details`}>
+                      {i18n._(`View Project Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
+            </Route>
             ,
           </Switch>
         </Card>

@@ -4,6 +4,7 @@ import {
   Switch,
   useHistory,
   useLocation,
+  useParams,
   useRouteMatch,
 } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -18,6 +19,7 @@ import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 function Jobs({ i18n }) {
   const history = useHistory();
   const location = useLocation();
+  const { id } = useParams();
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
     '/jobs': i18n._(t`Jobs`),
@@ -52,34 +54,22 @@ function Jobs({ i18n }) {
             />
           </PageSection>
         </Route>
-        <Route
-          path={`${match.path}/:id/details`}
-          render={({ match: m }) => (
-            <JobTypeRedirect id={m.params.id} path={m.path} view="details" />
-          )}
-        />
-        <Route
-          path={`${match.path}/:id/output`}
-          render={({ match: m }) => (
-            <JobTypeRedirect id={m.params.id} path={m.path} view="output" />
-          )}
-        />
-        <Route
-          path={`${match.path}/:type/:id`}
-          render={() => (
-            <Job
-              history={history}
-              location={location}
-              setBreadcrumb={buildBreadcrumbConfig}
-            />
-          )}
-        />
-        <Route
-          path={`${match.path}/:id`}
-          render={({ match: m }) => (
-            <JobTypeRedirect id={m.params.id} path={m.path} />
-          )}
-        />
+        <Route path={`${match.path}/:id/details`}>
+          <JobTypeRedirect id={id} path={match.path} view="details" />
+        </Route>
+        <Route path={`${match.path}/:id/output`}>
+          <JobTypeRedirect id={id} path={match.path} view="output" />
+        </Route>
+        <Route path={`${match.path}/:type/:id`}>
+          <Job
+            history={history}
+            location={location}
+            setBreadcrumb={buildBreadcrumbConfig}
+          />
+        </Route>
+        <Route path={`${match.path}/:id`}>
+          <JobTypeRedirect id={id} path={match.path} />
+        </Route>
       </Switch>
     </>
   );

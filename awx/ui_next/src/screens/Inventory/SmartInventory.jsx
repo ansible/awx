@@ -119,33 +119,27 @@ class SmartInventory extends Component {
               <Route
                 key="details"
                 path="/inventories/smart_inventory/:id/details"
-                render={() => (
-                  <SmartInventoryDetail
-                    hasSmartInventoryLoading={hasContentLoading}
-                    inventory={inventory}
-                  />
-                )}
-              />,
-              <Route
-                key="edit"
-                path="/inventories/smart_inventory/:id/edit"
-                render={() => <SmartInventoryEdit inventory={inventory} />}
-              />,
+              >
+                <SmartInventoryDetail
+                  hasSmartInventoryLoading={hasContentLoading}
+                  inventory={inventory}
+                />
+              </Route>,
+              <Route key="edit" path="/inventories/smart_inventory/:id/edit">
+                <SmartInventoryEdit inventory={inventory} />
+              </Route>,
               <Route
                 key="access"
                 path="/inventories/smart_inventory/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={inventory}
-                    apiModel={InventoriesAPI}
-                  />
-                )}
-              />,
-              <Route
-                key="hosts"
-                path="/inventories/smart_inventory/:id/hosts"
-                render={() => <SmartInventoryHosts inventory={inventory} />}
-              />,
+              >
+                <ResourceAccessList
+                  resource={inventory}
+                  apiModel={InventoriesAPI}
+                />
+              </Route>,
+              <Route key="hosts" path="/inventories/smart_inventory/:id/hosts">
+                <SmartInventoryHosts inventory={inventory} />
+              </Route>,
               <Route
                 key="completed_jobs"
                 path="/inventories/smart_inventory/:id/completed_jobs"
@@ -160,23 +154,19 @@ class SmartInventory extends Component {
                   }}
                 />
               </Route>,
-              <Route
-                key="not-found"
-                path="*"
-                render={() =>
-                  !hasContentLoading && (
-                    <ContentError isNotFound>
-                      {match.params.id && (
-                        <Link
-                          to={`/inventories/smart_inventory/${match.params.id}/details`}
-                        >
-                          {i18n._(`View Inventory Details`)}
-                        </Link>
-                      )}
-                    </ContentError>
-                  )
-                }
-              />,
+              <Route key="not-found" path="*">
+                {!hasContentLoading && (
+                  <ContentError isNotFound>
+                    {match.params.id && (
+                      <Link
+                        to={`/inventories/smart_inventory/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Inventory Details`)}
+                      </Link>
+                    )}
+                  </ContentError>
+                )}
+              </Route>,
             ]}
           </Switch>
         </Card>

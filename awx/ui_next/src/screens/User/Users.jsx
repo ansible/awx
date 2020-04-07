@@ -54,23 +54,24 @@ class Users extends Component {
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route path={`${match.path}/add`} render={() => <UserAdd />} />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <User
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <UsersList />} />
+          <Route path={`${match.path}/add`}>
+            <UserAdd />
+          </Route>
+          <Route path={`${match.path}/:id`}>
+            <Config>
+              {({ me }) => (
+                <User
+                  history={history}
+                  location={location}
+                  setBreadcrumb={this.setBreadcrumbConfig}
+                  me={me || {}}
+                />
+              )}
+            </Config>
+          </Route>
+          <Route path={`${match.path}`}>
+            <UsersList />
+          </Route>
         </Switch>
       </Fragment>
     );

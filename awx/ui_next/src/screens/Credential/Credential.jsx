@@ -98,59 +98,43 @@ function Credential({ i18n, setBreadcrumb }) {
             exact
           />
           {credential && [
-            <Route
-              key="details"
-              path="/credentials/:id/details"
-              render={() => <CredentialDetail credential={credential} />}
-            />,
-            <Route
-              key="edit"
-              path="/credentials/:id/edit"
-              render={() => <CredentialEdit credential={credential} />}
-            />,
+            <Route key="details" path="/credentials/:id/details">
+              <CredentialDetail credential={credential} />
+            </Route>,
+            <Route key="edit" path="/credentials/:id/edit">
+              <CredentialEdit credential={credential} />
+            </Route>,
             credential.organization && (
-              <Route
-                key="access"
-                path="/credentials/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={credential}
-                    apiModel={CredentialsAPI}
-                  />
-                )}
-              />
+              <Route key="access" path="/credentials/:id/access">
+                <ResourceAccessList
+                  resource={credential}
+                  apiModel={CredentialsAPI}
+                />
+              </Route>
             ),
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/credentials/${match.params.id}/details`}>
-                        {i18n._(`View Credential Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />,
-          ]}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
                 <ContentError isNotFound>
-                  {id && (
-                    <Link to={`/credentials/${id}/details`}>
+                  {match.params.id && (
+                    <Link to={`/credentials/${match.params.id}/details`}>
                       {i18n._(`View Credential Details`)}
                     </Link>
                   )}
                 </ContentError>
-              )
-            }
-          />
+              )}
+            </Route>,
+          ]}
+          <Route key="not-found" path="*">
+            {!hasContentLoading && (
+              <ContentError isNotFound>
+                {id && (
+                  <Link to={`/credentials/${id}/details`}>
+                    {i18n._(`View Credential Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            )}
+          </Route>
         </Switch>
       </Card>
     </PageSection>

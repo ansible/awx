@@ -137,21 +137,15 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
             <InventoryGroupHosts inventoryGroup={inventoryGroup} />
           </Route>,
         ]}
-        <Route
-          key="not-found"
-          path="*"
-          render={() => {
-            return (
-              <ContentError>
-                {inventory && (
-                  <Link to={`/inventories/inventory/${inventory.id}/details`}>
-                    {i18n._(t`View Inventory Details`)}
-                  </Link>
-                )}
-              </ContentError>
-            );
-          }}
-        />
+        <Route key="not-found" path="*">
+          <ContentError>
+            {inventory && (
+              <Link to={`/inventories/inventory/${inventory.id}/details`}>
+                {i18n._(t`View Inventory Details`)}
+              </Link>
+            )}
+          </ContentError>
+        </Route>
       </Switch>
     </>
   );
