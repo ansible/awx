@@ -16,7 +16,7 @@ options:
     description:
     - URL to your Tower or AWX instance.
     - If value not set, will try environment variable C(TOWER_HOST) and then config files
-    default: '127.0.0.1'
+    - If value not specified by any means, the value of C(127.0.0.1) will be used
     type: str
   tower_username:
     description:

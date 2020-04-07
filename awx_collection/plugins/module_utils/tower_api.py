@@ -47,7 +47,7 @@ class TowerModule(AnsibleModule):
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
-            tower_host=dict(required=False, default='127.0.0.1', fallback=(env_fallback, ['TOWER_HOST'])),
+            tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
             tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
             tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
             validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),

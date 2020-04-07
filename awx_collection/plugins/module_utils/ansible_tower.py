@@ -124,7 +124,7 @@ def tower_check_mode(module):
 class TowerModule(AnsibleModule):
     def __init__(self, argument_spec, **kwargs):
         args = dict(
-            tower_host=dict(default='127.0.0.1'),
+            tower_host=dict(),
             tower_username=dict(),
             tower_password=dict(no_log=True),
             validate_certs=dict(type='bool', aliases=['tower_verify_ssl']),
