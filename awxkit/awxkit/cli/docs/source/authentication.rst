@@ -22,7 +22,7 @@ value:
 
 .. code:: bash
 
-    export TOWER_TOKEN=6E5SXhld7AMOhpRveZsLJQsfs9VS8U
+    export TOWER_OAUTH_TOKEN=6E5SXhld7AMOhpRveZsLJQsfs9VS8U
 
 By ingesting this token, you can run subsequent CLI commands without having to
 specify your username and password each time:

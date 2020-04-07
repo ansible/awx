@@ -213,6 +213,7 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
+        - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
       version_added: "3.7"
       type: str
 extends_documentation_fragment: awx.awx.auth
