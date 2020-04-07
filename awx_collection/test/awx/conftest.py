@@ -163,6 +163,8 @@ def run_module(request, collection_import):
             raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
         # A module exception should never be a test expectation
         if 'exception' in result:
+            if "ModuleNotFoundError: No module named 'tower_cli'" in result['exception']:
+                pytest.skip('The tower-cli library is needed to run this test, module no longer supported.')
             raise Exception('Module encountered error:\n{0}'.format(result['exception']))
         return result
 
