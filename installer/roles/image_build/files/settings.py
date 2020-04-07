@@ -85,4 +85,5 @@ DATABASES = {
 if os.getenv("DATABASE_SSLMODE", False):
     DATABASES['default']['OPTIONS'] = {'sslmode': os.getenv("DATABASE_SSLMODE")}
 
+USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
