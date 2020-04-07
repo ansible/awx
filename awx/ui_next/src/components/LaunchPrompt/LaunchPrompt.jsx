@@ -19,14 +19,6 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
       component: <InventoryStep />,
     });
   }
-  // TODO: match old UI Logic:
-  // if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
-  //     (_.has(vm, 'promptDataClone.prompts.credentials.passwords.vault') &&
-  //     vm.promptDataClone.prompts.credentials.passwords.vault.length > 0) ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_key_unlock') ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.become_password') ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_password')
-  // ) {
   if (config.ask_credential_on_launch) {
     initialValues.credentials = resource?.summary_fields?.credentials || [];
     steps.push({
@@ -34,15 +26,18 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
       component: <CredentialsStep />,
     });
   }
+
+  // TODO: Add Credential Passwords step
+
   if (
-    config.ask_scm_branch_on_launch ||
-    (config.ask_variables_on_launch && !config.ignore_ask_variables) ||
-    config.ask_tags_on_launch ||
-    config.ask_diff_mode_on_launch ||
-    config.ask_skip_tags_on_launch ||
     config.ask_job_type_on_launch ||
     config.ask_limit_on_launch ||
-    config.ask_verbosity_on_launch
+    config.ask_verbosity_on_launch ||
+    config.ask_tags_on_launch ||
+    config.ask_skip_tags_on_launch ||
+    config.ask_variables_on_launch ||
+    config.ask_scm_branch_on_launch ||
+    config.ask_diff_mode_on_launch
   ) {
     steps.push({
       name: i18n._(t`Other Prompts`),
