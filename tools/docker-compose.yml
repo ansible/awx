@@ -50,6 +50,8 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - "awx_db:/var/lib/postgresql/data"
   memcached:
     user: ${CURRENT_UID}
     image: memcached:alpine
@@ -67,3 +69,6 @@ services:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
       - "./redis/redis_socket_standalone:/var/run/redis/"
     command: ["/usr/local/etc/redis/redis.conf"]
+
+volumes:
+  awx_db:
