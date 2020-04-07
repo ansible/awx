@@ -1466,7 +1466,7 @@ class BaseTask(object):
                                                            params.get('module'),
                                                            module_args,
                                                            ident=str(self.instance.pk))
-                self.event_ct = len(isolated_manager_instance.handled_events)
+                self.finished_callback(None)
             else:
                 res = ansible_runner.interface.run(**params)
                 status = res.status
