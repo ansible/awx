@@ -1,6 +1,8 @@
-import pytest
 import base64
 import json
+import time
+
+import pytest
 
 from django.db import connection
 from django.test.utils import override_settings
@@ -324,6 +326,38 @@ def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
     # checks that RefreshTokens are rotated (new RefreshToken issued)
     assert RefreshToken.objects.filter(token=new_refresh_token).count() == 1
     assert original_refresh_token.revoked # is not None
+
+
+@pytest.mark.django_db
+def test_refresh_token_expiration_is_respected(oauth_application, post, get, delete, admin):
+    response = post(
+        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
+    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
+    refresh_url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
+    short_lived = {
+        'ACCESS_TOKEN_EXPIRE_SECONDS': 1,
+        'AUTHORIZATION_CODE_EXPIRE_SECONDS': 1,
+        'REFRESH_TOKEN_EXPIRE_SECONDS': 1
+    }
+    time.sleep(1)
+    with override_settings(OAUTH2_PROVIDER=short_lived):
+        response = post(
+            refresh_url,
+            data='grant_type=refresh_token&refresh_token=' + refresh_token.token,
+            content_type='application/x-www-form-urlencoded',
+            HTTP_AUTHORIZATION='Basic ' + smart_str(base64.b64encode(smart_bytes(':'.join([
+                oauth_application.client_id, oauth_application.client_secret
+            ]))))
+        )
+    assert response.status_code == 403
+    assert b'The refresh token has expired.' in response.content
+    assert RefreshToken.objects.filter(token=refresh_token).exists()
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
 
 
 
