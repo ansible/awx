@@ -26,8 +26,10 @@ def construct_rsyslog_conf_template(settings=settings):
                     port = parsed.port
             except ValueError:
                 port = settings.LOG_AGGREGATOR_PORT
-
         parts.extend([
+            '$WorkDirectory /var/lib/awx/rsyslog',
+            '$IncludeConfig /etc/rsyslog.d/*.conf',
+            '$ModLoad imuxsock',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',
         ])
@@ -63,10 +65,14 @@ def construct_rsyslog_conf_template(settings=settings):
             parts.append(
                 f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
             )
-    parts.extend([
-        '$WorkDirectory /var/lib/awx/rsyslog',
-        '$IncludeConfig /etc/rsyslog.d/*.conf'
-    ])
+    else:
+        # If logging is disabled, add a valid config and discard all messages
+        parts = [
+            '$WorkDirectory /var/lib/awx/rsyslog',
+            '$IncludeConfig /etc/rsyslog.d/*.conf',
+            '*.* stop'
+            f'action(type="omfwd" target="localhost" port="9000" protocol="udp")'
+        ]
     tmpl = '\n'.join(parts)
     return tmpl
 

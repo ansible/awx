@@ -166,7 +166,7 @@ class SettingLoggingTest(GenericAPIView):
         # Error if logging is not enabled
         enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED', False)
         if not enabled:
-            return Response({'error': 'Logging not enabled'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Logging not enabled'}, status=status.HTTP_409_CONFLICT)
         
         # Send test message to configured logger based on db settings
         logging.getLogger('awx').error('AWX Connection Test Message')
@@ -183,7 +183,11 @@ class SettingLoggingTest(GenericAPIView):
         else:
             # if http/https by this point, domain is reacheable
             return Response(status=status.HTTP_202_ACCEPTED)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        if protocol is 'udp':
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.settimeout(.5)
             s.connect((hostname, int(port)))
