@@ -50,7 +50,7 @@ function ScheduleEdit({ i18n, schedule }) {
 }
 
 ScheduleEdit.propTypes = {
-  schedule: shape.isRequired,
+  schedule: shape({}).isRequired,
 };
 
 ScheduleEdit.defaultProps = {};
