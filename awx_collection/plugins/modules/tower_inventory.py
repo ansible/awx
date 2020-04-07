@@ -40,7 +40,6 @@ options:
     variables:
       description:
         - Inventory variables.
-      required: False
       type: dict
     kind:
       description:
@@ -63,7 +62,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -89,16 +87,16 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
+        description=dict(),
         organization=dict(required=True),
-        variables=dict(type='dict', required=False),
+        variables=dict(type='dict'),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

@@ -99,7 +99,6 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use
       type: str
-      required: False
       default: ''
     organization:
       description:
@@ -123,7 +122,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -178,27 +176,27 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        scm_type=dict(required=False, choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
-        scm_url=dict(required=False),
-        local_path=dict(required=False),
-        scm_branch=dict(required=False, default=''),
-        scm_refspec=dict(required=False, default=''),
-        scm_credential=dict(required=False),
-        scm_clean=dict(required=False, type='bool', default=False),
-        scm_delete_on_update=dict(required=False, type='bool', default=False),
-        scm_update_on_launch=dict(required=False, type='bool', default=False),
-        scm_update_cache_timeout=dict(required=False, type='int', default=0),
-        scm_allow_override=dict(required=False, type='bool'),
-        job_timeout=dict(required=False, type='int', default=0),
-        custom_virtualenv=dict(required=False, type='str'),
+        description=dict(),
+        scm_type=dict(choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
+        scm_url=dict(),
+        local_path=dict(),
+        scm_branch=dict(default=''),
+        scm_refspec=dict(default=''),
+        scm_credential=dict(),
+        scm_clean=dict(type='bool', default=False),
+        scm_delete_on_update=dict(type='bool', default=False),
+        scm_update_on_launch=dict(type='bool', default=False),
+        scm_update_cache_timeout=dict(type='int', default=0),
+        scm_allow_override=dict(type='bool'),
+        job_timeout=dict(type='int', default=0),
+        custom_virtualenv=dict(),
         organization=dict(required=True),
-        state=dict(required=False, choices=['present', 'absent'], default='present'),
-        wait=dict(required=False, type='bool', default=True),
+        state=dict(choices=['present', 'absent'], default='present'),
+        wait=dict(type='bool', default=True),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

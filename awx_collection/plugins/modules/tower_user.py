@@ -31,36 +31,30 @@ options:
     first_name:
       description:
         - First name of the user.
-      required: False
       type: str
     last_name:
       description:
         - Last name of the user.
-      required: False
       type: str
     email:
       description:
         - Email address of the user.
-      required: False
       type: str
     is_superuser:
       description:
         - Designates that this user has all permissions without explicitly assigning them.
-      required: False
       type: bool
       default: False
       aliases: ['superuser']
     is_system_auditor:
       description:
         - User is a system wide auditor.
-      required: False
       type: bool
       default: False
       aliases: ['auditor']
     password:
       description:
         - Write-only field used to change the password.
-      required: False
       type: str
     state:
       description:
@@ -71,7 +65,6 @@ options:
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -121,18 +114,18 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        username=dict(required=True, type='str'),
-        first_name=dict(required=False, type='str'),
-        last_name=dict(required=False, type='str'),
-        email=dict(required=False, type='str'),
-        is_superuser=dict(required=False, type='bool', default=False, aliases=['superuser']),
-        is_system_auditor=dict(required=False, type='bool', default=False, aliases=['auditor']),
-        password=dict(required=False, type='str', no_log=True),
+        username=dict(required=True),
+        first_name=dict(),
+        last_name=dict(),
+        email=dict(),
+        is_superuser=dict(type='bool', default=False, aliases=['superuser']),
+        is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
+        password=dict(no_log=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     username = module.params.get('username')

@@ -32,7 +32,6 @@ options:
     description:
       description:
         - The description of the credential type to give more detail about it.
-      required: False
       type: str
     kind:
       description:
@@ -41,33 +40,28 @@ options:
           net can be used for creating credential types. Refer to the Ansible
           for more information.
       choices: [ 'ssh', 'vault', 'net', 'scm', 'cloud', 'insights' ]
-      required: False
       type: str
     inputs:
       description:
         - >-
           Enter inputs using either JSON or YAML syntax. Refer to the Ansible
           Tower documentation for example syntax.
-      required: False
       type: dict
     injectors:
       description:
         - >-
           Enter injectors using either JSON or YAML syntax. Refer to the
           Ansible Tower documentation for example syntax.
-      required: False
       type: dict
     state:
       description:
         - Desired state of the resource.
-      required: False
       default: "present"
       choices: ["present", "absent"]
       type: str
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -109,15 +103,15 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        kind=dict(required=False, choices=list(KIND_CHOICES.keys())),
-        inputs=dict(type='dict', required=False),
-        injectors=dict(type='dict', required=False),
+        description=dict(),
+        kind=dict(choices=list(KIND_CHOICES.keys())),
+        inputs=dict(type='dict'),
+        injectors=dict(type='dict'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

@@ -44,13 +44,11 @@ options:
     hosts:
       description:
         - List of hosts that should be put in this group.
-      required: False
       type: list
       elements: str
     children:
       description:
         - List of groups that should be nested inside in this group.
-      required: False
       type: list
       elements: str
       aliases:
@@ -64,13 +62,11 @@ options:
     new_name:
       description:
         - A new name for this group (for renaming)
-      required: False
       type: str
       version_added: "3.7"
     tower_oauthtoken:
       description:
         - The Tower OAuth token to use.
-      required: False
       type: str
       version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
@@ -95,17 +91,17 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(required=False),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
-        variables=dict(type='dict', required=False),
+        variables=dict(type='dict'),
         hosts=dict(type='list', elements='str'),
         children=dict(type='list', elements='str', aliases=['groups']),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
