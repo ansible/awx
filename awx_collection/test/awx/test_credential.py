@@ -32,7 +32,7 @@ def cred_type():
 
 
 @pytest.mark.django_db
-def test_create_machine_credential(run_module, admin_user, organization):
+def test_create_machine_credential(run_module, admin_user, organization, silence_deprecation):
     Organization.objects.create(name='test-org')
     # create the ssh credential type
     ct = CredentialType.defaults['ssh']()
@@ -55,7 +55,7 @@ def test_create_machine_credential(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_create_vault_credential(run_module, admin_user, organization):
+def test_create_vault_credential(run_module, admin_user, organization, silence_deprecation):
     # https://github.com/ansible/ansible/issues/61324
     Organization.objects.create(name='test-org')
     ct = CredentialType.defaults['vault']()
@@ -82,7 +82,7 @@ def test_create_vault_credential(run_module, admin_user, organization):
 
 
 @pytest.mark.django_db
-def test_create_custom_credential_type(run_module, admin_user):
+def test_create_custom_credential_type(run_module, admin_user, silence_deprecation):
     # Example from docs
     result = run_module('tower_credential_type', dict(
         name='Nexus',
@@ -122,7 +122,7 @@ def test_ct_precedence_over_kind(run_module, admin_user, organization, cred_type
 
 
 @pytest.mark.django_db
-def test_input_overrides_old_fields(run_module, admin_user, organization):
+def test_input_overrides_old_fields(run_module, admin_user, organization, silence_deprecation):
     # create the vault credential type
     ct = CredentialType.defaults['vault']()
     ct.save()
