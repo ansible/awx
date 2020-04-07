@@ -171,7 +171,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
+      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').invoke('onChange')(
         true,
         {
           currentTarget: { value: true, type: 'change', checked: true },
@@ -180,7 +180,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     });
     wrapper.update();
     expect(
-      wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
+      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').prop('isChecked')
     ).toBe(true);
 
     expect(
