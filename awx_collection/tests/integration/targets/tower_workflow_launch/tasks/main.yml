@@ -27,7 +27,7 @@
 
 - name: Connect to Tower server but request an invalid workflow
   tower_workflow_launch:
-    validate_certs: False
+    validate_certs: false
     workflow_template: "Does Not Exist"
   ignore_errors: true
   register: result
@@ -39,10 +39,10 @@
 
 - name: Run the workflow without waiting (this should just give us back a job ID)
   tower_workflow_launch:
-    validate_certs: False
+    validate_certs: false
     workflow_template: "{{ wfjt_name1 }}"
-    wait: False
-  ignore_errors: True
+    wait: false
+  ignore_errors: true
   register: result
 
 - assert:
@@ -52,9 +52,9 @@
 
 - name: Kick off a workflow and wait for it
   tower_workflow_launch:
-    validate_certs: False
+    validate_certs: false
     workflow_template: "{{ wfjt_name1 }}"
-  ignore_errors: True
+  ignore_errors: true
   register: result
 
 - assert:
@@ -64,10 +64,10 @@
 
 - name: Kick off a workflow and wait for it, but only for a second
   tower_workflow_launch:
-    validate_certs: False
+    validate_certs: false
     workflow_template: "{{ wfjt_name1 }}"
     timeout: 1
-  ignore_errors: True
+  ignore_errors: true
   register: result
 
 - assert:
