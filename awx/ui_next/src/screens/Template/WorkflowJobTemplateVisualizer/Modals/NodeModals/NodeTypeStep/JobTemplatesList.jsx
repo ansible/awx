@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
@@ -15,23 +15,20 @@ const QS_CONFIG = getQSConfig('job_templates', {
   order_by: 'name',
 });
 
-function JobTemplatesList({
-  i18n,
-  history,
-  nodeResource,
-  onUpdateNodeResource,
-}) {
+function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [jobTemplates, setJobTemplates] = useState([]);
+
+  const location = useLocation();
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       setJobTemplates([]);
       setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const params = parseQueryString(QS_CONFIG, location.search);
       try {
         const { data } = await JobTemplatesAPI.read(params, {
           role_level: 'execute_role',
@@ -44,7 +41,7 @@ function JobTemplatesList({
         setIsLoading(false);
       }
     })();
-  }, [history.location]);
+  }, [location]);
 
   return (
     <PaginatedDataList
@@ -106,4 +103,4 @@ JobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(JobTemplatesList));
+export default withI18n()(JobTemplatesList);

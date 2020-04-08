@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withFormik, useField, useFormikContext } from 'formik';
@@ -639,4 +638,4 @@ const FormikApp = withFormik({
 })(JobTemplateForm);
 
 export { JobTemplateForm as _JobTemplateForm };
-export default withI18n()(withRouter(FormikApp));
+export default withI18n()(FormikApp);

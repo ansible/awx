@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
@@ -15,18 +15,20 @@ const QS_CONFIG = getQSConfig('projects', {
   order_by: 'name',
 });
 
-function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
+function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState([]);
+
+  const location = useLocation();
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       setProjects([]);
       setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const params = parseQueryString(QS_CONFIG, location.search);
       try {
         const { data } = await ProjectsAPI.read(params);
         setProjects(data.results);
@@ -37,7 +39,7 @@ function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
         setIsLoading(false);
       }
     })();
-  }, [history.location]);
+  }, [location]);
 
   return (
     <PaginatedDataList
@@ -109,4 +111,4 @@ ProjectsList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(ProjectsList));
+export default withI18n()(ProjectsList);

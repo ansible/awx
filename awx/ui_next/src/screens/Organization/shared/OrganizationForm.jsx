@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -206,4 +205,4 @@ OrganizationForm.contextTypes = {
 };
 
 export { OrganizationForm as _OrganizationForm };
-export default withI18n()(withRouter(OrganizationForm));
+export default withI18n()(OrganizationForm);
