@@ -54,11 +54,7 @@ describe('<SurveyList />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <SurveyList
-          survey={surveyData}
-          deleteSurvey={deleteSurvey}
-          canAddAndEditSurvey
-        />
+        <SurveyList survey={surveyData} deleteSurvey={deleteSurvey} canEdit />
       );
     });
     wrapper.update();

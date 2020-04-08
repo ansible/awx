@@ -96,9 +96,10 @@ describe('<SurveyListItem />', () => {
         <SurveyListItem question={newItem} isChecked={false} isFirst isLast />
       );
     });
-    expect(wrapper.find('Chip').length).toBe(9);
+    expect(wrapper.find('Chip').length).toBe(6);
     wrapper
       .find('Chip')
+      .filter(chip => chip.prop('isOverFlowChip') !== true)
       .map(chip => expect(chip.prop('isReadOnly')).toBe(true));
   });
   test('items that are no required should have no an asterisk', () => {

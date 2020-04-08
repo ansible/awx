@@ -13,7 +13,13 @@ import FormField, {
   FieldTooltip,
 } from '@components/FormField';
 import AnsibleSelect from '@components/AnsibleSelect';
-import { required, noWhiteSpace, combine } from '@util/validators';
+import {
+  required,
+  noWhiteSpace,
+  combine,
+  maxLength,
+  defaultIsNotAvailable,
+} from '@util/validators';
 
 function AnswerTypeField({ i18n }) {
   const [field] = useField({
@@ -156,6 +162,7 @@ function SurveyQuestionForm({
               <FormField
                 id="question-default"
                 name="default"
+                validate={maxLength(formik.values.max, i18n)}
                 type={formik.values.type === 'text' ? 'text' : 'number'}
                 label={i18n._(t`Default answer`)}
               />
@@ -191,6 +198,7 @@ function SurveyQuestionForm({
                 <FormField
                   id="question-default"
                   name="default"
+                  validate={defaultIsNotAvailable(formik.values.choices, i18n)}
                   type={
                     formik.values.type === 'multiplechoice'
                       ? 'text'

@@ -4,7 +4,8 @@ import { withI18n } from '@lingui/react';
 import { Link } from 'react-router-dom';
 import {
   Button as _Button,
-  Chip as _Chip,
+  Chip,
+  ChipGroup,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItemCells,
@@ -29,11 +30,8 @@ const Button = styled(_Button)`
   padding-left: 0;
 `;
 const Required = styled.span`
-  color: red;
-  margin-left: 5px;
-`;
-const Chip = styled(_Chip)`
-  margin-right: 5px;
+  color: var(--pf-global--danger-color--100);
+  margin-left: var(--pf-global--spacer--xs);
 `;
 
 const Label = styled.b`
@@ -41,7 +39,7 @@ const Label = styled.b`
 `;
 
 function SurveyListItem({
-  canAddAndEditSurvey,
+  canEdit,
   question,
   i18n,
   isLast,
@@ -67,7 +65,7 @@ function SurveyListItem({
               <Button
                 variant="plain"
                 aria-label={i18n._(t`move up`)}
-                isDisabled={isFirst || !canAddAndEditSurvey}
+                isDisabled={isFirst || !canEdit}
                 onClick={() => onMoveUp(question)}
               >
                 <CaretUpIcon />
@@ -77,7 +75,7 @@ function SurveyListItem({
               <Button
                 variant="plain"
                 aria-label={i18n._(t`move down`)}
-                isDisabled={isLast || !canAddAndEditSurvey}
+                isDisabled={isLast || !canEdit}
                 onClick={() => onMoveDown(question)}
               >
                 <CaretDownIcon />
@@ -86,7 +84,7 @@ function SurveyListItem({
           </Stack>
         </DataListAction>
         <DataListCheck
-          isDisabled={!canAddAndEditSurvey}
+          isDisabled={!canEdit}
           checked={isChecked}
           onChange={onSelect}
           aria-labelledby="survey check"
@@ -120,12 +118,15 @@ function SurveyListItem({
                 <span>{i18n._(t`encrypted`).toUpperCase()}</span>
               )}
               {[question.type].includes('multiselect') &&
-                question.default.length > 0 &&
-                question.default.split('\n').map(chip => (
-                  <Chip key={chip} isReadOnly>
-                    {chip}
-                  </Chip>
-                ))}
+                question.default.length > 0 && (
+                  <ChipGroup numChips={5}>
+                    {question.default.split('\n').map(chip => (
+                      <Chip key={chip} isReadOnly>
+                        {chip}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                )}
               {![question.type].includes('password') &&
                 ![question.type].includes('multiselect') && (
                   <span>{question.default}</span>

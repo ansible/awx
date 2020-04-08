@@ -9,7 +9,7 @@ import ErrorDetail from '@components/ErrorDetail';
 import useRequest, { useDismissableError } from '@util/useRequest';
 import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
-function TemplateSurvey({ template, canAddAndEditSurvey, i18n }) {
+function TemplateSurvey({ template, canEdit, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
 
   const { templateType } = useParams();
@@ -85,7 +85,7 @@ function TemplateSurvey({ template, canAddAndEditSurvey, i18n }) {
   return (
     <>
       <Switch>
-        {canAddAndEditSurvey && (
+        {canEdit && (
           <Route path="/templates/:templateType/:id/survey/add">
             <SurveyQuestionAdd
               survey={survey}
@@ -93,7 +93,7 @@ function TemplateSurvey({ template, canAddAndEditSurvey, i18n }) {
             />
           </Route>
         )}
-        {canAddAndEditSurvey && (
+        {canEdit && (
           <Route path="/templates/:templateType/:id/survey/edit/:variable">
             <SurveyQuestionEdit
               survey={survey}
@@ -109,7 +109,7 @@ function TemplateSurvey({ template, canAddAndEditSurvey, i18n }) {
             toggleSurvey={toggleSurvey}
             updateSurvey={updateSurveySpec}
             deleteSurvey={deleteSurvey}
-            canAddAndEditSurvey={canAddAndEditSurvey}
+            canEdit={canEdit}
           />
         </Route>
       </Switch>

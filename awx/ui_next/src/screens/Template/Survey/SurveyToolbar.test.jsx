@@ -36,7 +36,7 @@ describe('<SurveyToolbar />', () => {
           isAllSelected
           onToggleDeleteModal={jest.fn()}
           onToggleSurvey={jest.fn()}
-          canAddAndEditSurvey
+          canEdit
         />
       );
     });
@@ -96,7 +96,7 @@ describe('<SurveyToolbar />', () => {
           isAllSelected
           onToggleDelete={jest.fn()}
           onToggleSurvey={jest.fn()}
-          canAddAndEditSurvey={false}
+          canEdit={false}
         />
       );
     });

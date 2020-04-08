@@ -274,7 +274,7 @@ class WorkflowJobTemplate extends Component {
               <Route path="/templates/:templateType/:id/survey">
                 <TemplateSurvey
                   template={template}
-                  canAddAndEditSurvey={canAddAndEditSurvey}
+                  canEdit={canAddAndEditSurvey}
                 />
               </Route>
             )}

@@ -18,7 +18,7 @@ const DataToolbar = styled(_DataToolbar)`
 `;
 
 function SurveyToolbar({
-  canAddAndEditSurvey,
+  canEdit,
   isAllSelected,
   onSelectAll,
   i18n,
@@ -27,14 +27,14 @@ function SurveyToolbar({
   isDeleteDisabled,
   onToggleDeleteModal,
 }) {
-  isDeleteDisabled = !canAddAndEditSurvey || isDeleteDisabled;
+  isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
   return (
     <DataToolbar id="survey-toolbar">
       <DataToolbarContent>
         <DataToolbarItem>
           <Checkbox
-            isDisabled={!canAddAndEditSurvey}
+            isDisabled={!canEdit}
             isChecked={isAllSelected}
             onChange={isChecked => {
               onSelectAll(isChecked);
@@ -50,14 +50,14 @@ function SurveyToolbar({
             label={i18n._(t`On`)}
             labelOff={i18n._(t`Off`)}
             isChecked={surveyEnabled}
-            isDisabled={!canAddAndEditSurvey}
+            isDisabled={!canEdit}
             onChange={() => onToggleSurvey(!surveyEnabled)}
           />
         </DataToolbarItem>
         <DataToolbarGroup>
           <DataToolbarItem>
             <ToolbarAddButton
-              isDisabled={!canAddAndEditSurvey}
+              isDisabled={!canEdit}
               linkTo={`${match.url}/add`}
             />
           </DataToolbarItem>

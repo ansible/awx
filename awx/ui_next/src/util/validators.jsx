@@ -36,6 +36,17 @@ export function minMaxValue(min, max, i18n) {
   };
 }
 
+export function defaultIsNotAvailable(choices, i18n) {
+  return defaultValue => {
+    if (!choices.includes(defaultValue)) {
+      return i18n._(
+        t`Default choice must be answered from the choices listed.`
+      );
+    }
+    return undefined;
+  };
+}
+
 export function requiredEmail(i18n) {
   return value => {
     if (!value) {
