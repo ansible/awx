@@ -44,7 +44,7 @@ function Jobs({ i18n }) {
   function TypeRedirect({ view }) {
     const { id } = useParams();
     const { path } = useRouteMatch();
-    return <JobTypeRedirect id={id} path={path} view={view || undefined} />;
+    return <JobTypeRedirect id={id} path={path} view={view} />;
   }
 
   return (
