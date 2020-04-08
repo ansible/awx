@@ -7,6 +7,17 @@ import FormField, { FieldTooltip } from '@components/FormField';
 import { TagMultiSelect } from '@components/MultiSelect';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { VariablesField } from '@components/CodeMirrorInput';
+import styled from 'styled-components';
+
+const FieldHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: var(--pf-c-form__label--PaddingBottom);
+
+  label {
+    --pf-c-form__label--PaddingBottom: 0px;
+  }
+`;
 
 function OtherPromptsStep({ config, i18n }) {
   return (
@@ -131,12 +142,28 @@ function VerbosityField({ i18n }) {
 function ShowChangesToggle({ i18n }) {
   const [field, , helpers] = useField('diff_mode');
   return (
-    <Switch
-      id="prompt-show-changes"
-      label={i18n._(t`Show Changes`)}
-      isChecked={field.value}
-      onChange={helpers.setValue}
-    />
+    <FormGroup fieldId="prompt-show-changes">
+      <FieldHeader>
+        {' '}
+        <label className="pf-c-form__label" htmlFor="prompt-show-changes">
+          <span className="pf-c-form__label-text">
+            {i18n._(t`Show Changes`)}
+            <FieldTooltip
+              content={i18n._(t`If enabled, show the changes made
+              by Ansible tasks, where supported. This is equivalent to Ansible’s
+              --diff mode.`)}
+            />
+          </span>
+        </label>
+      </FieldHeader>
+      <Switch
+        id="prompt-show-changes"
+        label={i18n._(t`On`)}
+        labelOff={i18n._(t`Off`)}
+        isChecked={field.value}
+        onChange={helpers.setValue}
+      />
+    </FormGroup>
   );
 }
 
@@ -149,24 +176,5 @@ function TagField({ id, name, label, tooltip }) {
     </FormGroup>
   );
 }
-
-/*
-  tooltips:
-  verbosity: Control the level of output ansible will produce as the playbook executes.
-  job tags: Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.
-  skip tags: Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.
-  show changes: If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode.
-  extra variables: Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.
-
-  JSON:
-  {
-  "somevar": "somevalue",
-  "password": "magic"
-  }
-  YAML:
-  ---
-  somevar: somevalue
-  password: magic
-*/
 
 export default withI18n()(OtherPromptsStep);

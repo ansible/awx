@@ -22,7 +22,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   if (config.ask_credential_on_launch) {
     initialValues.credentials = resource?.summary_fields?.credentials || [];
     steps.push({
-      name: i18n._(t`Credential`),
+      name: i18n._(t`Credentials`),
       component: <CredentialsStep />,
     });
   }
