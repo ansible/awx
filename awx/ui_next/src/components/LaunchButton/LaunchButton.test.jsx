@@ -62,7 +62,7 @@ describe('LaunchButton', () => {
     button.prop('onClick')();
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
-    expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, null);
+    expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
 
@@ -99,7 +99,7 @@ describe('LaunchButton', () => {
     button.prop('onClick')();
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
-    expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, null);
+    expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/workflow/9000/output');
   });
 

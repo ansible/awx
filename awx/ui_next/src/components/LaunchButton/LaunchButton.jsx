@@ -71,7 +71,7 @@ class LaunchButton extends React.Component {
       const { data: launchConfig } = await readLaunch;
 
       if (canLaunchWithoutPrompt(launchConfig)) {
-        this.launchWithParams(null);
+        this.launchWithParams({});
       } else {
         this.setState({
           showLaunchPrompt: true,
