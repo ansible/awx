@@ -65,14 +65,6 @@ def construct_rsyslog_conf_template(settings=settings):
             parts.append(
                 f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
             )
-    else:
-        # If logging is disabled, add a valid config and discard all messages
-        parts = [
-            '$WorkDirectory /var/lib/awx/rsyslog',
-            '$IncludeConfig /etc/rsyslog.d/*.conf',
-            '*.* stop'
-            f'action(type="omfwd" target="localhost" port="9000" protocol="udp")'
-        ]
     tmpl = '\n'.join(parts)
     return tmpl
 

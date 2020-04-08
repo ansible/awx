@@ -123,7 +123,7 @@ ADD tools/docker-compose/entrypoint.sh /
 ADD tools/scripts/awx-python /usr/bin/awx-python
 
 # Pre-create things that we need to write to
-RUN for dir in /var/lib/awx/rsyslog /var/run/rsyslog /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+RUN for dir in /var/lib/awx /var/lib/awx/rsyslog /var/run/rsyslog /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
     do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done && \
     \
     for file in /etc/passwd /etc/supervisord.conf /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
@@ -133,7 +133,7 @@ RUN for dir in /var/lib/awx/rsyslog /var/run/rsyslog /var/log/tower/ /var/lib/aw
 RUN chmod -R 0775 /var/lib/awx /var/lib/awx/rsyslog
 ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
 RUN yum install -y rsyslog-omhttp
-RUN echo -e '$WorkDirectory /var/lib/awx/rsyslog\n$IncludeConfig /etc/rsyslog.d/*.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
+ADD tools/docker-compose/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 RUN chmod 0775 /var/lib/awx/rsyslog/rsyslog.conf
 
 ENV HOME /var/lib/awx
