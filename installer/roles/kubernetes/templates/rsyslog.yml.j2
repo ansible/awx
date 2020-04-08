@@ -6,6 +6,4 @@ metadata:
 data:
   rsyslog-config: |
     $WorkDirectory /var/lib/awx/rsyslog
-    $IncludeConfig /etc/rsyslog.d/*.conf
-    *.* stop
-    action(type="omfwd" target="localhost" port="9000" protocol="udp")
+    
