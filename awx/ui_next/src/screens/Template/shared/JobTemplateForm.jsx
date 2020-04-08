@@ -139,9 +139,13 @@ function JobTemplateForm({
 
   const handleProjectUpdate = useCallback(
     newProject => {
+      if (project?.id !== newProject?.id) {
+        // Clear the selected playbook value when a different project is selected or
+        // when the project is deselected.
+        playbookHelpers.setValue(0);
+      }
       setProject(newProject);
       projectHelpers.setValue(newProject);
-      playbookHelpers.setValue(0);
       scmHelpers.setValue('');
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
