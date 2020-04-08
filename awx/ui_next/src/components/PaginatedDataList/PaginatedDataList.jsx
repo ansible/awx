@@ -43,11 +43,13 @@ class PaginatedDataList extends React.Component {
     this.pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
   }
 
-  handleSetPageSize(event, pageSize) {
+  handleSetPageSize(event, pageSize, page) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(replaceParams(oldParams, { page_size: pageSize }));
+    this.pushHistoryState(
+      replaceParams(oldParams, { page_size: pageSize, page })
+    );
   }
 
   pushHistoryState(params) {
