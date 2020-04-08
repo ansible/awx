@@ -681,9 +681,6 @@ docker-compose-cluster-elk: docker-auth awx/projects
 prometheus:
 	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
 
-minishift-dev:
-	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
-
 clean-elk:
 	docker stop tools_kibana_1
 	docker stop tools_logstash_1
