@@ -97,7 +97,7 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
-ADD rsyslog.repo /etc/yum.repos.d/
+ADD rsyslog.repo /etc/yum.repos.d/rsyslog.repo
 RUN yum install -y rsyslog-omhttp
 
 # Pre-create things that we need to write to
@@ -115,9 +115,8 @@ RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root && \
     chmod +rx /usr/bin/config-watcher && \
     chmod u+s /usr/bin/bwrap # https://github.com/ansible/awx/issues/5224
 
-# Create default awx rsyslog.conf
+# Create default awx rsyslog config
 ADD rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
-
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
