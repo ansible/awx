@@ -25,7 +25,6 @@ def construct_rsyslog_conf_template(settings=settings):
                 port = parsed.port
         except ValueError:
             port = settings.LOG_AGGREGATOR_PORT
-    
     max_bytes = settings.MAX_EVENT_RES_DATA
     parts.extend([
         '$WorkDirectory /var/lib/awx/rsyslog',
@@ -67,6 +66,8 @@ def construct_rsyslog_conf_template(settings=settings):
         parts.append(
             f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
         )
+    else:
+        parts.append(f'action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
     tmpl = '\n'.join(parts)
     return tmpl
 
