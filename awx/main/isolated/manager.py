@@ -268,13 +268,6 @@ class IsolatedManager(object):
         # in the final sync
         self.consume_events()
 
-        # emit an EOF event
-        event_data = {
-            'event': 'EOF',
-            'final_counter': len(self.handled_events)
-        }
-        self.event_handler(event_data)
-
         return status, rc
 
     def consume_events(self):
@@ -420,8 +413,4 @@ class IsolatedManager(object):
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()
-        else:
-            # emit an EOF event
-            event_data = {'event': 'EOF', 'final_counter': 0}
-            self.event_handler(event_data)
         return status, rc
