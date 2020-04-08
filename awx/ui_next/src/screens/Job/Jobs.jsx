@@ -19,7 +19,6 @@ import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 function Jobs({ i18n }) {
   const history = useHistory();
   const location = useLocation();
-  const { id } = useParams();
   const match = useRouteMatch();
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
     '/jobs': i18n._(t`Jobs`),
@@ -42,6 +41,12 @@ function Jobs({ i18n }) {
     [i18n]
   );
 
+  function TypeRedirect({ view }) {
+    const { id } = useParams();
+    const { path } = useRouteMatch();
+    return <JobTypeRedirect id={id} path={path} view={view || undefined} />;
+  }
+
   return (
     <>
       <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
@@ -55,10 +60,10 @@ function Jobs({ i18n }) {
           </PageSection>
         </Route>
         <Route path={`${match.path}/:id/details`}>
-          <JobTypeRedirect id={id} path={match.path} view="details" />
+          <TypeRedirect view="details" />
         </Route>
         <Route path={`${match.path}/:id/output`}>
-          <JobTypeRedirect id={id} path={match.path} view="output" />
+          <TypeRedirect view="output" />
         </Route>
         <Route path={`${match.path}/:type/:id`}>
           <Job
@@ -68,7 +73,7 @@ function Jobs({ i18n }) {
           />
         </Route>
         <Route path={`${match.path}/:id`}>
-          <JobTypeRedirect id={id} path={match.path} />
+          <TypeRedirect />
         </Route>
       </Switch>
     </>
