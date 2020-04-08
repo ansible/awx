@@ -23,7 +23,7 @@ logger = logging.getLogger('awx.main.models.events')
 
 
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
-           'InventoryUpdateEvent', 'SystemJobEvent']
+           'InventoryUpdateEvent', 'SystemJobEvent', 'BasePlaybookEvent']
 
 
 def sanitize_event_keys(kwargs, valid_keys):
@@ -110,7 +110,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
     VALID_KEYS = [
         'event', 'event_data', 'playbook', 'play', 'role', 'task', 'created',
         'counter', 'uuid', 'stdout', 'parent_uuid', 'start_line', 'end_line',
-        'host_id', 'host_name', 'verbosity',
+        'host_id', 'host_name', 'verbosity', 'skip_save'
     ]
 
     class Meta:
@@ -192,6 +192,8 @@ class BasePlaybookEvent(CreatedModifiedModel):
     EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
     LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
+    skip_save = False
+
     event = models.CharField(
         max_length=100,
         choices=EVENT_CHOICES,
@@ -262,7 +264,11 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
     @property
     def event_level(self):
-        return self.LEVEL_FOR_EVENT.get(self.event, 0)
+        return BasePlaybookEvent._level_event(self.event)
+
+    @classmethod
+    def _level_event(self, event):
+        return BasePlaybookEvent.LEVEL_FOR_EVENT.get(event, 0)
 
     def get_host_status_counts(self):
         return create_host_status_counts(getattr(self, 'event_data', {}))
@@ -406,12 +412,13 @@ class BasePlaybookEvent(CreatedModifiedModel):
                 kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
         except (KeyError, ValueError):
             kwargs.pop('created', None)
-
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
         workflow_job_id = kwargs.pop('workflow_job_id', None)
+        skip_save = kwargs.pop('skip_save', False)
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
+        setattr(event, 'skip_save', skip_save)
         event._update_from_event_data()
         return event
 

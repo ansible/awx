@@ -58,7 +58,7 @@ from awx.main.models import (
     UnifiedJob, Notification,
     Inventory, InventorySource, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
-    JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
+    BasePlaybookEvent, JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
     build_safe_env, enforce_bigint_pk_migration
 )
 from awx.main.constants import ACTIVE_STATES
@@ -1212,7 +1212,6 @@ class BaseTask(object):
             else:
                 event_data['host_name'] = ''
                 event_data['host_id'] = ''
-
         if isinstance(self, RunProjectUpdate):
             # it's common for Ansible's SCM modules to print
             # error messages on failure that contain the plaintext
@@ -1228,10 +1227,19 @@ class BaseTask(object):
                 event_data = json.loads(event_data_json)
             except json.JSONDecodeError:
                 pass
+        elif isinstance(self, RunJob) and self.instance.gather_event_types in ("none", "errors"):
+            event_level = BasePlaybookEvent._level_event(event_data.get("event"))
+            failed = event_data.get("event") in BasePlaybookEvent.FAILED_EVENTS
+            skip_save = event_level in [0,3]
+            if self.instance.gather_event_types == "errors":
+                skip_save = skip_save and not failed
+            event_data["skip_save"] = skip_save
 
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
-        self.event_ct += 1
+
+        if not event_data.get("skip_save", False):
+            self.event_ct += 1
 
         '''
         Handle artifacts

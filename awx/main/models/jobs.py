@@ -29,7 +29,7 @@ from awx.api.versioning import reverse
 from awx.main.models.base import (
     BaseModel, CreatedModifiedModel,
     prevent_search, accepts_json,
-    JOB_TYPE_CHOICES, NEW_JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
+    JOB_TYPE_CHOICES, NEW_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, JOB_EVENTS_COLLECTED_CHOICES,
     VarsDictProperty
 )
 from awx.main.models.events import JobEvent, SystemJobEvent
@@ -159,6 +159,12 @@ class JobOptions(BaseModel):
             "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting "
             "facts at the end of a playbook run to the database and caching facts for use by Ansible."),
     )
+    gather_event_types = models.CharField(
+        max_length=64,
+        choices=JOB_EVENTS_COLLECTED_CHOICES,
+        default='all',
+    )
+
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

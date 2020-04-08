@@ -29,6 +29,10 @@ PERM_INVENTORY_DEPLOY = 'run'
 PERM_INVENTORY_CHECK  = 'check'
 PERM_INVENTORY_SCAN   = 'scan'
 
+JOB_EVENTS_ALL = "all"
+JOB_EVENTS_ONLY_ERRORS = "errors"
+JOB_EVENTS_NONE = "none"
+
 JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
     (PERM_INVENTORY_CHECK, _('Check')),
@@ -48,6 +52,12 @@ AD_HOC_JOB_TYPE_CHOICES = [
 PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
     (PERM_INVENTORY_CHECK, _('Check')),
+]
+
+JOB_EVENTS_COLLECTED_CHOICES = [
+    (JOB_EVENTS_ALL, _("All")),
+    (JOB_EVENTS_ONLY_ERRORS, _("Only events that contain errors")),
+    (JOB_EVENTS_NONE, _("Only Headers")),
 ]
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'vmware', 'gce', 'azure_rm', 'openstack', 'rhv', 'custom', 'satellite6', 'cloudforms', 'scm', 'tower',]

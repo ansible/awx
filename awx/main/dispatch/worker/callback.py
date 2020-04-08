@@ -152,7 +152,8 @@ class CallbackBrokerWorker(BaseWorker):
                     return
 
                 event = cls.create_from_data(**body)
-                self.buff.setdefault(cls, []).append(event)
+                if not event.skip_save:
+                    self.buff.setdefault(cls, []).append(event)
 
             retries = 0
             while retries <= self.MAX_RETRIES:

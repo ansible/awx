@@ -31,7 +31,7 @@ from awx.main.models.jobs import (  # noqa
 )
 from awx.main.models.events import (  # noqa
     AdHocCommandEvent, InventoryUpdateEvent, JobEvent, ProjectUpdateEvent,
-    SystemJobEvent,
+    SystemJobEvent, BasePlaybookEvent,
 )
 from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
 from awx.main.models.schedules import Schedule # noqa
