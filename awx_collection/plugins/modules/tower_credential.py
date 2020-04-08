@@ -319,7 +319,7 @@ def main():
         description=dict(),
         organization=dict(),
         credential_type=dict(),
-        inputs=dict(type='dict'),
+        inputs=dict(type='dict', no_log=True),
         user=dict(),
         team=dict(),
         # These are for backwards compatability
