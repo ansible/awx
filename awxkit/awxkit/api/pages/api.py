@@ -282,13 +282,33 @@ class ApiV2(base.Base):
                 pass  # admin role
 
     def _assign_related(self, page, name, related_set):
-        pass  # FIXME
+        endpoint = page.related[name]
+        if isinstance(related_set, dict):  # Relateds that are just json blobs, e.g. survey_spec
+            endpoint.post(related_set)
+            return
+
+        if 'natural_key' not in related_set[0]:  # It is an attach set
+            for item in related_set:
+                rel_page = self._get_by_natural_key(item)
+                if rel_page is None:
+                    continue  # FIXME
+                endpoint.post({'id': rel_page['id']})
+        else:  # It is a create set
+            for item in related_set:
+                data = {key: value for key, value in item.items()
+                        if key not in ('natural_key', 'related')}
+                endpoint.post(data)
+                # FIXME: deal with objects that themselves have relateds, e.g. WFJT Nodes
+
+        # FIXME: deal with pruning existing relations that do not match the import set
 
     def _assign_related_assets(self, resource, assets):
         for asset in assets:
             page = self._get_by_natural_key(asset['natural_key'])
             # FIXME: deal with `page is None` case
             for name, S in asset.get('related', {}).items():
+                if not S:
+                    continue
                 if name == 'roles':
                     self._assign_roles(page, S)
                 else:
