@@ -14,6 +14,8 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
     append_nul = False
 
     def emit(self, msg):
+        if not settings.LOG_AGGREGATOR_ENABLED:
+            return
         if not os.path.exists(settings.LOGGING['handlers']['external_logger']['address']):
             return
         return super(RSysLogHandler, self).emit(msg)
