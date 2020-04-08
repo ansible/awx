@@ -106,8 +106,8 @@ function SurveyPreviewModal({
                       {q.choices.length > 0 &&
                         q.choices
                           .split('\n')
-                          .map((option, index) => (
-                            <SelectOption key={index} value={option} />
+                          .map(option => (
+                            <SelectOption key={option} value={option} />
                           ))}
                     </Select>
                   </FormGroup>
