@@ -100,11 +100,13 @@ class JobTemplateEdit extends Component {
       instanceGroups,
       initialInstanceGroups,
       credentials,
+      webhook_credential,
       ...remainingValues
     } = values;
 
     this.setState({ formSubmitError: null });
     remainingValues.project = values.project.id;
+    remainingValues.webhook_credential = webhook_credential?.id || null;
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([

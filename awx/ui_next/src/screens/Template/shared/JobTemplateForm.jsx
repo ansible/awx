@@ -40,6 +40,9 @@ import {
 import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
+import WebhookSubForm from './WebhooksSubForm';
+
+const { origin } = document.location;
 
 function JobTemplateForm({
   template,
@@ -57,6 +60,10 @@ function JobTemplateForm({
   );
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
+  );
+
+  const [enableWebhooks, setEnableWebhooks] = useState(
+    Boolean(template.webhook_service)
   );
 
   const { values: formikValues } = useFormikContext();
@@ -87,6 +94,10 @@ function JobTemplateForm({
   );
   const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
   const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
+  const webhookService = useField('webhook_service');
+  const webhookUrl = useField('webhook_url');
+  const webhookKey = useField('webhook_key');
+  const webhookCredential = useField('webhook_credential');
 
   const {
     request: fetchProject,
@@ -174,16 +185,23 @@ function JobTemplateForm({
   ];
   let callbackUrl;
   if (template?.related) {
-    const { origin } = document.location;
     const path = template.related.callback || `${template.url}callback`;
     callbackUrl = `${origin}${path}`;
   }
 
-  if (instanceGroupLoading || hasProjectLoading) {
+  if (
+    instanceGroupLoading ||
+    hasProjectLoading
+    // credentialContentLoading
+  ) {
     return <ContentLoading />;
   }
 
-  if (instanceGroupError || projectContentError) {
+  if (
+    instanceGroupError ||
+    projectContentError
+    //  credentialContentError
+  ) {
     return <ContentError error={contentError} />;
   }
 
@@ -498,6 +516,39 @@ function JobTemplateForm({
                       setAllowCallbacks(checked);
                     }}
                   />
+                  <Checkbox
+                    aria-label={i18n._(t`Enable Webhook`)}
+                    label={
+                      <span>
+                        {i18n._(t`Enable Webhook`)}
+                        &nbsp;
+                        <FieldTooltip
+                          content={i18n._(
+                            t`Enable webhook for this workflow job template.`
+                          )}
+                        />
+                      </span>
+                    }
+                    id="wfjt-enabled-webhooks"
+                    isChecked={
+                      Boolean(webhookService[0].value) || enableWebhooks
+                    }
+                    onChange={checked => {
+                      setEnableWebhooks(checked);
+                      webhookService[2].setValue(
+                        !checked ? '' : webhookService[1].initialValue
+                      );
+                      webhookUrl[2].setValue(
+                        !checked ? '' : webhookUrl[1].initialValue
+                      );
+                      webhookKey[2].setValue(
+                        !checked ? '' : webhookKey[1].initialValue
+                      );
+                      webhookCredential[2].setValue(
+                        !checked ? null : webhookCredential[1].initialValue
+                      );
+                    }}
+                  />
                   <CheckboxField
                     id="option-concurrent"
                     name="allow_simultaneous"
@@ -516,6 +567,7 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
+            <WebhookSubForm enableWebhooks={enableWebhooks} />
             {allowCallbacks && (
               <>
                 {callbackUrl && (
@@ -616,6 +668,12 @@ const FormikApp = withFormik({
       instanceGroups: [],
       credentials: summary_fields.credentials || [],
       extra_vars: template.extra_vars || '---\n',
+      webhook_service: template.webhook_service || '',
+      webhook_url: template?.related?.webhook_receiver
+        ? `${origin}${template.related.webhook_receiver}`
+        : '',
+      webhook_key: template.webhook_key || '',
+      webhook_credential: template?.summary_fields?.webhook_credential || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {
