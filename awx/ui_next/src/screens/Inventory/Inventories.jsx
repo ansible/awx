@@ -85,14 +85,12 @@ class Inventories extends Component {
       <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route
-            path={`${match.path}/inventory/add`}
-            render={() => <InventoryAdd />}
-          />
-          <Route
-            path={`${match.path}/smart_inventory/add`}
-            render={() => <SmartInventoryAdd />}
-          />
+          <Route path={`${match.path}/inventory/add`}>
+            <InventoryAdd />
+          </Route>
+          <Route path={`${match.path}/smart_inventory/add`}>
+            <SmartInventoryAdd />
+          </Route>
           <Route path={`${match.path}/inventory/:id`}>
             <Config>
               {({ me }) => (
@@ -119,7 +117,9 @@ class Inventories extends Component {
               </Config>
             )}
           />
-          <Route path={`${match.path}`} render={() => <InventoryList />} />
+          <Route path={`${match.path}`}>
+            <InventoryList />
+          </Route>
         </Switch>
       </>
     );

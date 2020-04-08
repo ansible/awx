@@ -176,61 +176,46 @@ class Organization extends Component {
               exact
             />
             {organization && (
-              <Route
-                path="/organizations/:id/edit"
-                render={() => <OrganizationEdit organization={organization} />}
-              />
+              <Route path="/organizations/:id/edit">
+                <OrganizationEdit organization={organization} />
+              </Route>
             )}
             {organization && (
-              <Route
-                path="/organizations/:id/details"
-                render={() => (
-                  <OrganizationDetail organization={organization} />
-                )}
-              />
+              <Route path="/organizations/:id/details">
+                <OrganizationDetail organization={organization} />
+              </Route>
             )}
             {organization && (
-              <Route
-                path="/organizations/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={organization}
-                    apiModel={OrganizationsAPI}
-                  />
-                )}
-              />
+              <Route path="/organizations/:id/access">
+                <ResourceAccessList
+                  resource={organization}
+                  apiModel={OrganizationsAPI}
+                />
+              </Route>
             )}
-            <Route
-              path="/organizations/:id/teams"
-              render={() => <OrganizationTeams id={Number(match.params.id)} />}
-            />
+            <Route path="/organizations/:id/teams">
+              <OrganizationTeams id={Number(match.params.id)} />
+            </Route>
             {canSeeNotificationsTab && (
-              <Route
-                path="/organizations/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={OrganizationsAPI}
-                  />
-                )}
-              />
+              <Route path="/organizations/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={OrganizationsAPI}
+                />
+              </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/organizations/${match.params.id}/details`}>
-                        {i18n._(`View Organization Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/organizations/${match.params.id}/details`}>
+                      {i18n._(`View Organization Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
+            </Route>
             ,
           </Switch>
         </Card>

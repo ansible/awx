@@ -119,54 +119,43 @@ class User extends Component {
           <Switch>
             <Redirect from="/users/:id" to="/users/:id/details" exact />
             {user && (
-              <Route
-                path="/users/:id/edit"
-                render={() => <UserEdit user={user} />}
-              />
+              <Route path="/users/:id/edit">
+                <UserEdit user={user} />
+              </Route>
             )}
             {user && (
-              <Route
-                path="/users/:id/details"
-                render={() => <UserDetail user={user} />}
-              />
+              <Route path="/users/:id/details">
+                <UserDetail user={user} />
+              </Route>
             )}
             <Route path="/users/:id/organizations">
               <UserOrganizations id={Number(match.params.id)} />
             </Route>
-            <Route
-              path="/users/:id/teams"
-              render={() => <UserTeams id={Number(match.params.id)} />}
-            />
+            <Route path="/users/:id/teams">
+              <UserTeams id={Number(match.params.id)} />
+            </Route>
             {user && (
-              <Route
-                path="/users/:id/access"
-                render={() => (
-                  <span>
-                    this needs a different access list from regular resources
-                    like proj, inv, jt
-                  </span>
-                )}
-              />
+              <Route path="/users/:id/access">
+                <span>
+                  this needs a different access list from regular resources like
+                  proj, inv, jt
+                </span>
+              </Route>
             )}
-            <Route
-              path="/users/:id/tokens"
-              render={() => <UserTokens id={Number(match.params.id)} />}
-            />
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/users/${match.params.id}/details`}>
-                        {i18n._(`View User Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
+            <Route path="/users/:id/tokens">
+              <UserTokens id={Number(match.params.id)} />
+            </Route>
+            <Route key="not-found" path="*">
+              !hasContentLoading && (
+              <ContentError isNotFound>
+                {match.params.id && (
+                  <Link to={`/users/${match.params.id}/details`}>
+                    {i18n._(`View User Details`)}
+                  </Link>
+                )}
+              </ContentError>
+              )
+            </Route>
             ,
           </Switch>
         </Card>

@@ -87,38 +87,31 @@ function Team({ i18n, setBreadcrumb }) {
             </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/edit"
-              render={() => <TeamEdit team={team} />}
-            />
+            <Route path="/teams/:id/edit">
+              <TeamEdit team={team} />
+            </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/users"
-              render={() => <span>Coming soon :)</span>}
-            />
+            <Route path="/teams/:id/users">
+              <span>Coming soon :)</span>
+            </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/access"
-              render={() => <span>Coming soon :)</span>}
-            />
+            <Route path="/teams/:id/access">
+              <span>Coming soon :)</span>
+            </Route>
           )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {id && (
-                    <Link to={`/teams/${id}/details`}>
-                      {i18n._(`View Team Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
+          <Route key="not-found" path="*">
+            {!hasContentLoading && (
+              <ContentError isNotFound>
+                {id && (
+                  <Link to={`/teams/${id}/details`}>
+                    {i18n._(`View Team Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            )}
+          </Route>
         </Switch>
       </Card>
     </PageSection>

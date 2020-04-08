@@ -8,13 +8,9 @@ import InventoryHostGroupsList from './InventoryHostGroupsList';
 function InventoryHostGroups() {
   return (
     <Switch>
-      <Route
-        key="list"
-        path="/inventories/inventory/:id/hosts/:hostId/groups"
-        render={() => {
-          return <InventoryHostGroupsList />;
-        }}
-      />
+      <Route key="list" path="/inventories/inventory/:id/hosts/:hostId/groups">
+        <InventoryHostGroupsList />
+      </Route>
     </Switch>
   );
 }

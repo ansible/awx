@@ -210,61 +210,52 @@ class WorkflowJobTemplate extends Component {
               <Route
                 key="wfjt-details"
                 path="/templates/workflow_job_template/:id/details"
-                render={() => (
-                  <WorkflowJobTemplateDetail
-                    template={template}
-                    webhook_key={webhook_key}
-                  />
-                )}
-              />
+              >
+                <WorkflowJobTemplateDetail
+                  template={template}
+                  webhook_key={webhook_key}
+                />
+              </Route>
             )}
             {template && (
-              <Route
-                path="/templates/workflow_job_template/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={template}
-                    apiModel={WorkflowJobTemplatesAPI}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/access">
+                <ResourceAccessList
+                  resource={template}
+                  apiModel={WorkflowJobTemplatesAPI}
+                />
+              </Route>
             )}
             {canSeeNotificationsTab && (
-              <Route
-                path="/templates/workflow_job_template/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={WorkflowJobTemplatesAPI}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={WorkflowJobTemplatesAPI}
+                />
+              </Route>
             )}
             {template && (
               <Route
                 key="wfjt-edit"
                 path="/templates/workflow_job_template/:id/edit"
-                render={() => (
-                  <WorkflowJobTemplateEdit
-                    template={template}
-                    webhook_key={webhook_key}
-                  />
-                )}
-              />
+              >
+                <WorkflowJobTemplateEdit
+                  template={template}
+                  webhook_key={webhook_key}
+                />
+              </Route>
             )}
             {template && (
               <Route
                 key="wfjt-visualizer"
                 path="/templates/workflow_job_template/:id/visualizer"
-                render={() => (
-                  <AppendBody>
-                    <FullPage>
-                      <Visualizer template={template} />
-                    </FullPage>
-                  </AppendBody>
-                )}
-              />
+              >
+                <AppendBody>
+                  <FullPage>
+                    <Visualizer template={template} />
+                  </FullPage>
+                </AppendBody>
+              </Route>
             )}
             {template?.id && (
               <Route path="/templates/workflow_job_template/:id/completed_jobs">
@@ -276,39 +267,32 @@ class WorkflowJobTemplate extends Component {
               </Route>
             )}
             {template?.id && (
-              <Route
-                path="/templates/workflow_job_template/:id/schedules"
-                render={() => (
-                  <Schedules
-                    setBreadcrumb={setBreadcrumb}
-                    unifiedJobTemplate={template}
-                    createSchedule={this.createSchedule}
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/schedules">
+                <Schedules
+                  setBreadcrumb={setBreadcrumb}
+                  unifiedJobTemplate={template}
+                  createSchedule={this.createSchedule}
+                  loadSchedules={this.loadSchedules}
+                  loadScheduleOptions={this.loadScheduleOptions}
+                />
+              </Route>
             )}
             {template && (
               <Route path="/templates/:templateType/:id/survey">
                 <TemplateSurvey template={template} />
               </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() => (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/workflow_job_template/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )}
-            />
+            <Route key="not-found" path="*">
+              <ContentError isNotFound>
+                {match.params.id && (
+                  <Link
+                    to={`/templates/workflow_job_template/${match.params.id}/details`}
+                  >
+                    {i18n._(`View Template Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            </Route>
           </Switch>
         </Card>
       </PageSection>

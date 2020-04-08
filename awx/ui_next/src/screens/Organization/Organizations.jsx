@@ -55,26 +55,24 @@ class Organizations extends Component {
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route
-            path={`${match.path}/add`}
-            render={() => <OrganizationAdd />}
-          />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <Organization
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <OrganizationsList />} />
+          <Route path={`${match.path}/add`}>
+            <OrganizationAdd />
+          </Route>
+          <Route path={`${match.path}/:id`}>
+            <Config>
+              {({ me }) => (
+                <Organization
+                  history={history}
+                  location={location}
+                  setBreadcrumb={this.setBreadcrumbConfig}
+                  me={me || {}}
+                />
+              )}
+            </Config>
+          </Route>
+          <Route path={`${match.path}`}>
+            <OrganizationsList />
+          </Route>
         </Switch>
       </Fragment>
     );

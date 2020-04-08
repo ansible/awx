@@ -111,26 +111,17 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
           <Route
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
-            render={() => {
-              return <ScheduleDetail schedule={schedule} />;
-            }}
-          />,
+          >
+            <ScheduleDetail schedule={schedule} />
+          </Route>,
         ]}
-        <Route
-          key="not-found"
-          path="*"
-          render={() => {
-            return (
-              <ContentError>
-                {unifiedJobTemplate && (
-                  <Link to={`${pathRoot}details`}>
-                    {i18n._(t`View Details`)}
-                  </Link>
-                )}
-              </ContentError>
-            );
-          }}
-        />
+        <Route key="not-found" path="*">
+          <ContentError>
+            {unifiedJobTemplate && (
+              <Link to={`${pathRoot}details`}>{i18n._(t`View Details`)}</Link>
+            )}
+          </ContentError>
+        </Route>
       </Switch>
     </>
   );

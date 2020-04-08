@@ -80,14 +80,12 @@ class Templates extends Component {
       <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route
-            path={`${match.path}/job_template/add`}
-            render={() => <JobTemplateAdd />}
-          />
-          <Route
-            path={`${match.path}/workflow_job_template/add`}
-            render={() => <WorkflowJobTemplateAdd />}
-          />
+          <Route path={`${match.path}/job_template/add`}>
+            <JobTemplateAdd />
+          </Route>
+          <Route path={`${match.path}/workflow_job_template/add`}>
+            <WorkflowJobTemplateAdd />
+          </Route>
           <Route
             path={`${match.path}/job_template/:id`}
             render={({ match: newRouteMatch }) => (
@@ -119,7 +117,9 @@ class Templates extends Component {
               </Config>
             )}
           />
-          <Route path={`${match.path}`} render={() => <TemplateList />} />
+          <Route path={`${match.path}`}>
+            <TemplateList />
+          </Route>
         </Switch>
       </>
     );

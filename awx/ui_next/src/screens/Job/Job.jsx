@@ -124,53 +124,34 @@ class Job extends Component {
               to="/jobs/:type/:id/output"
               exact
             />
-            <Route
-              key="workflow-details"
-              path="/jobs/workflow/:id/details"
-              render={() =>
-                job &&
-                job.type === 'workflow_job' && <WorkflowDetail job={job} />
-              }
-            />
-            <Route
-              key="workflow-output"
-              path="/jobs/workflow/:id/output"
-              render={() =>
-                job &&
-                job.type === 'workflow_job' && <WorkflowOutput job={job} />
-              }
-            />
+            {job &&
+              job.type === 'workflow_job' && [
+                <Route key="workflow-details" path="/jobs/workflow/:id/details">
+                  <WorkflowDetail job={job} />
+                </Route>,
+                <Route key="workflow-output" path="/jobs/workflow/:id/output">
+                  <WorkflowOutput job={job} />
+                </Route>,
+              ]}
             {job &&
               job.type !== 'workflow_job' && [
-                <Route
-                  key="details"
-                  path="/jobs/:type/:id/details"
-                  render={() => (
-                    <JobDetail type={match.params.type} job={job} />
+                <Route key="details" path="/jobs/:type/:id/details">
+                  <JobDetail type={match.params.type} job={job} />
+                </Route>,
+                <Route key="output" path="/jobs/:type/:id/output">
+                  <JobOutput type={match.params.type} job={job} />
+                </Route>,
+                <Route key="not-found" path="*">
+                  {!hasContentLoading && (
+                    <ContentError isNotFound>
+                      <Link
+                        to={`/jobs/${match.params.type}/${match.params.id}/details`}
+                      >
+                        {i18n._(`View Job Details`)}
+                      </Link>
+                    </ContentError>
                   )}
-                />,
-                <Route
-                  key="output"
-                  path="/jobs/:type/:id/output"
-                  render={() => (
-                    <JobOutput type={match.params.type} job={job} />
-                  )}
-                />,
-                <Route
-                  key="not-found"
-                  path="*"
-                  render={() =>
-                    !hasContentLoading && (
-                      <ContentError isNotFound>
-                        <Link
-                          to={`/jobs/${match.params.type}/${match.params.id}/details`}
-                        >
-                          {i18n._(`View Job Details`)}
-                        </Link>
-                      </ContentError>
-                    )
-                  }
-                />,
+                </Route>,
               ]}
           </Switch>
         </Card>

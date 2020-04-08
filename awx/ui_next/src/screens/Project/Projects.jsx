@@ -62,23 +62,24 @@ class Projects extends Component {
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route path={`${match.path}/add`} render={() => <ProjectAdd />} />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <Project
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <ProjectsList />} />
+          <Route path={`${match.path}/add`}>
+            <ProjectAdd />
+          </Route>
+          <Route path={`${match.path}/:id`}>
+            <Config>
+              {({ me }) => (
+                <Project
+                  history={history}
+                  location={location}
+                  setBreadcrumb={this.setBreadcrumbConfig}
+                  me={me || {}}
+                />
+              )}
+            </Config>
+          </Route>
+          <Route path={`${match.path}`}>
+            <ProjectsList />
+          </Route>
         </Switch>
       </Fragment>
     );
