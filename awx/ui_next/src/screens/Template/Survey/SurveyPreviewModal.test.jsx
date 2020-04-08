@@ -64,13 +64,16 @@ const questions = [
 
 describe('<SurveyPreviewModal />', () => {
   let wrapper;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SurveyPreviewModal questions={questions} isPreviewModalOpen />
       );
     });
     waitForElement(wrapper, 'Form');
+  });
+  afterAll(() => {
+    wrapper.unmount();
   });
   test('renders successfully', async () => {
     expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
