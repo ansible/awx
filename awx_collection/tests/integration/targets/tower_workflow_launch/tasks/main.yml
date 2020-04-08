@@ -6,12 +6,7 @@
 
 - name: Generate names
   set_fact:
-    wfjt_name1: "Testing Workflow Job Launch" #"AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}"
-
-- name: Clean up test workflow from any previous runs
-  tower_workflow_job_template:
-    name: "{{ wfjt_name1 }}"
-    state: absent
+    wfjt_name1: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}"
 
 - name: Create our workflow
   tower_workflow_job_template:
@@ -50,18 +45,6 @@
       - result is not failed
       - "'id' in result['job_info']"
 
-- name: Kick off a workflow and wait for it
-  tower_workflow_launch:
-    validate_certs: false
-    workflow_template: "{{ wfjt_name1 }}"
-  ignore_errors: true
-  register: result
-
-- assert:
-    that:
-      - result is not failed
-      - "'id' in result['job_info']"
-
 - name: Kick off a workflow and wait for it, but only for a second
   tower_workflow_launch:
     validate_certs: false
@@ -74,3 +57,21 @@
     that:
       - result is failed
       - "'Monitoring aborted due to timeout' in result.msg"
+
+- name: Kick off a workflow and wait for it
+  tower_workflow_launch:
+    validate_certs: false
+    workflow_template: "{{ wfjt_name1 }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - "'id' in result['job_info']"
+
+- name: Clean up test workflow
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: absent
+
