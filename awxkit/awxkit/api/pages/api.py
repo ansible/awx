@@ -113,7 +113,6 @@ class ApiV2(base.Base):
             key: asset.json[key] for key in options
             if key in asset.json and key not in asset.related and key != 'id'
         }
-        fields['natural_key'] = asset.get_natural_key()
 
         for key in options:
             if key not in asset.related:
@@ -122,8 +121,9 @@ class ApiV2(base.Base):
                 # FIXME: use caching by url
                 fields[key] = asset.related[key].get().get_natural_key()
             except exc.Forbidden:
-                log.warning("This object cannot be read: %s", asset.related[key])
-                pass  # FIXME: what if the fk is mandatory?
+                log.warning("This foreign key cannot be read: %s", asset.related[key])
+                if options[key]['required']:
+                    return None  # This is a mandatory foreign key
 
         related = {}
         for key, related_endpoint in asset.related.items():
@@ -147,7 +147,7 @@ class ApiV2(base.Base):
                 # FIXME: use caching by url
                 data = rel.get(all_pages=True)
             except exc.Forbidden:
-                log.warning("This object cannot be read: %s", related_endpoint)
+                log.warning("These related objects cannot be read: %s", related_endpoint)
                 continue
 
             if 'results' in data:
@@ -162,6 +162,7 @@ class ApiV2(base.Base):
         if related:
             fields['related'] = related
 
+        fields['natural_key'] = asset.get_natural_key()
         return fields
 
     def _get_assets(self, resource, value):
