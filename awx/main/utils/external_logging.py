@@ -26,9 +26,11 @@ def construct_rsyslog_conf_template(settings=settings):
                     port = parsed.port
             except ValueError:
                 port = settings.LOG_AGGREGATOR_PORT
+        max_bytes = settings.MAX_EVENT_RES_DATA
         parts.extend([
             '$WorkDirectory /var/lib/awx/rsyslog',
             '$IncludeConfig /etc/rsyslog.d/*.conf',
+            f'$MaxMessageSize {max_bytes}b',
             '$ModLoad imuxsock',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
             'template(name="awx" type="string" string="%msg%")',

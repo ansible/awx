@@ -11,6 +11,8 @@ from django.conf import settings
 
 class RSysLogHandler(logging.handlers.SysLogHandler):
 
+    append_nul = False
+
     def emit(self, msg):
         if not os.path.exists(settings.LOGGING['handlers']['external_logger']['address']):
             return
