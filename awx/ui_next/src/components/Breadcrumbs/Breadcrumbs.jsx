@@ -7,7 +7,7 @@ import {
   BreadcrumbItem,
   BreadcrumbHeading,
 } from '@patternfly/react-core';
-import { Link, Route, withRouter, useRouteMatch } from 'react-router-dom';
+import { Link, Route, useRouteMatch } from 'react-router-dom';
 
 import styled from 'styled-components';
 
@@ -16,21 +16,22 @@ const PageSection = styled(PFPageSection)`
   padding-bottom: 10px;
 `;
 
-const Breadcrumbs = ({ breadcrumbConfig, match }) => {
+const Breadcrumbs = ({ breadcrumbConfig }) => {
   const { light } = PageSectionVariants;
 
   return (
     <PageSection variant={light}>
       <Breadcrumb>
         <Route path="/:path">
-          <Crumb breadcrumbConfig={breadcrumbConfig} match={match} />
+          <Crumb breadcrumbConfig={breadcrumbConfig} />
         </Route>
       </Breadcrumb>
     </PageSection>
   );
 };
 
-const Crumb = ({ breadcrumbConfig, match }) => {
+const Crumb = ({ breadcrumbConfig }) => {
+  const match = useRouteMatch();
   const crumb = breadcrumbConfig[match.url];
 
   let crumbElement = (
@@ -49,16 +50,11 @@ const Crumb = ({ breadcrumbConfig, match }) => {
     crumbElement = null;
   }
 
-  function NextCrumb() {
-    const routeMatch = useRouteMatch();
-    return <Crumb breadcrumbConfig={breadcrumbConfig} match={routeMatch} />;
-  }
-
   return (
     <Fragment>
       {crumbElement}
       <Route path={`${match.url}/:path`}>
-        <NextCrumb />
+        <Crumb breadcrumbConfig={breadcrumbConfig} />
       </Route>
     </Fragment>
   );
@@ -72,4 +68,4 @@ Crumb.propTypes = {
   breadcrumbConfig: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
-export default withRouter(Breadcrumbs);
+export default Breadcrumbs;
