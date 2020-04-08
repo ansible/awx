@@ -239,10 +239,10 @@ class ApiV2(base.Base):
         if frozen_key is not None and frozen_key not in self._natural_key and fetch:
             pass  # FIXME
 
-        from awxkit.api.mixins import has_status
+        from awxkit.api.pages import projects
 
         _page = self._natural_key.get(frozen_key)
-        if isinstance(_page, has_status.HasStatus) and not _page.is_completed:
+        if isinstance(_page, projects.Project) and not _page.is_completed:
             _page.wait_until_completed()
             _page = _page.get()
             self._natural_key[frozen_key] = _page
