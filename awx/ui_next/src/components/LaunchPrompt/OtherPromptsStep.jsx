@@ -2,7 +2,7 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { FormGroup } from '@patternfly/react-core';
+import { Form, FormGroup, Switch } from '@patternfly/react-core';
 import FormField, { FieldTooltip } from '@components/FormField';
 import { TagMultiSelect } from '@components/MultiSelect';
 import AnsibleSelect from '@components/AnsibleSelect';
@@ -10,17 +10,8 @@ import { VariablesField } from '@components/CodeMirrorInput';
 
 function OtherPromptsStep({ config, i18n }) {
   return (
-    <>
-      {config.ask_job_type_on_launch && (
-        <FormField
-          id="prompt-job-type"
-          name="job_type"
-          label={i18n._(t`Job Type`)}
-          tooltip={i18n._(t`For job templates, select run to execute the playbook.
-        Select check to only check playbook syntax, test environment setup,
-        and report problems without executing the playbook.`)}
-        />
-      )}
+    <Form>
+      {config.ask_job_type_on_launch && <JobTypeField i18n={i18n} />}
       {config.ask_limit_on_launch && (
         <FormField
           id="prompt-limit"
@@ -33,7 +24,7 @@ function OtherPromptsStep({ config, i18n }) {
         />
       )}
       {config.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}
-      {/* TODO: Show Changes toggle? */}
+      {config.ask_diff_mode_on_launch && <ShowChangesToggle i18n={i18n} />}
       {config.ask_tags_on_launch && (
         <TagField
           id="prompt-job-tags"
@@ -61,15 +52,53 @@ function OtherPromptsStep({ config, i18n }) {
           id="prompt-variables"
           name="extra_vars"
           label={i18n._(t`Variables`)}
-          promptId="prompt-ask-variables-on-launch"
         />
       )}
-    </>
+    </Form>
+  );
+}
+
+function JobTypeField({ i18n }) {
+  const [field, meta, helpers] = useField('job_type');
+  const options = [
+    {
+      value: '',
+      key: '',
+      label: i18n._(t`Choose a job type`),
+      isDisabled: true,
+    },
+    { value: 'run', key: 'run', label: i18n._(t`Run`), isDisabled: false },
+    {
+      value: 'check',
+      key: 'check',
+      label: i18n._(t`Check`),
+      isDisabled: false,
+    },
+  ];
+  const isValid = !(meta.touched && meta.error);
+  return (
+    <FormGroup
+      fieldId="propmt-job-type"
+      label={i18n._(t`Job Type`)}
+      isValid={isValid}
+    >
+      <FieldTooltip
+        content={i18n._(t`For job templates, select run to execute the playbook.
+      Select check to only check playbook syntax, test environment setup,
+      and report problems without executing the playbook.`)}
+      />
+      <AnsibleSelect
+        id="prompt-job-type"
+        data={options}
+        {...field}
+        onChange={(event, value) => helpers.setValue(value)}
+      />
+    </FormGroup>
   );
 }
 
 function VerbosityField({ i18n }) {
-  const [field, meta] = useField('verbosity');
+  const [field, meta, helpers] = useField('verbosity');
   const options = [
     { value: '0', key: '0', label: i18n._(t`0 (Normal)`) },
     { value: '1', key: '1', label: i18n._(t`1 (Verbose)`) },
@@ -89,8 +118,25 @@ function VerbosityField({ i18n }) {
         content={i18n._(t`Control the level of output ansible
           will produce as the playbook executes.`)}
       />
-      <AnsibleSelect id="prompt-verbosity" data={options} {...field} />
+      <AnsibleSelect
+        id="prompt-verbosity"
+        data={options}
+        {...field}
+        onChange={(event, value) => helpers.setValue(value)}
+      />
     </FormGroup>
+  );
+}
+
+function ShowChangesToggle({ i18n }) {
+  const [field, , helpers] = useField('diff_mode');
+  return (
+    <Switch
+      id="prompt-show-changes"
+      label={i18n._(t`Show Changes`)}
+      isChecked={field.value}
+      onChange={helpers.setValue}
+    />
   );
 }
 
