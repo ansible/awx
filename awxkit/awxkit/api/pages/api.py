@@ -71,6 +71,16 @@ def parse_description(desc):
     return options
 
 
+def remove_encrypted(value):
+    if value == '$encrypted$':
+        return ''
+    if isinstance(value, list):
+        return [remove_encrypted(item) for item in value]
+    if isinstance(value, dict):
+        return {k: remove_encrypted(v) for k, v in value.items()}
+    return value
+
+
 class ApiV2(base.Base):
 
     # Common import/export methods
@@ -163,7 +173,7 @@ class ApiV2(base.Base):
             fields['related'] = related
 
         fields['natural_key'] = asset.get_natural_key()
-        return fields
+        return remove_encrypted(fields)
 
     def _get_assets(self, resource, value):
         endpoint = getattr(self, resource)
