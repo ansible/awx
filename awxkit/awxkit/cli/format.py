@@ -16,7 +16,7 @@ def add_authentication_arguments(parser, env):
     )
     auth.add_argument(
         '--conf.token',
-        default=env.get('TOWER_TOKEN', ''),
+        default=env.get('TOWER_OAUTH_TOKEN', env.get('TOWER_TOKEN', '')),
         help='an OAuth2.0 token (get one by using `awx login`)',
         metavar='TEXT',
     )

@@ -15,20 +15,25 @@ options:
   tower_host:
     description:
     - URL to your Tower or AWX instance.
+    - If value not set, will try environment variable C(TOWER_HOST) and then config files
+    - If value not specified by any means, the value of C(127.0.0.1) will be used
     type: str
   tower_username:
     description:
     - Username for your Tower or AWX instance.
+    - If value not set, will try environment variable C(TOWER_USERNAME) and then config files
     type: str
   tower_password:
     description:
     - Password for your Tower or AWX instance.
+    - If value not set, will try environment variable C(TOWER_PASSWORD) and then config files
     type: str
   validate_certs:
     description:
     - Whether to allow insecure connections to Tower or AWX.
     - If C(no), SSL certificates will not be validated.
     - This should only be used on personally controlled sites using self-signed certificates.
+    - If value not set, will try environment variable C(TOWER_VERIFY_SSL) and then config files
     type: bool
     aliases: [ tower_verify_ssl ]
   tower_config_file:

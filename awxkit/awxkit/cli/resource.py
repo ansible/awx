@@ -102,7 +102,7 @@ class Login(CustomCommand):
         else:
             fmt = client.get_config('format')
             if fmt == 'human':
-                print('export TOWER_TOKEN={}'.format(token))
+                print('export TOWER_OAUTH_TOKEN={}'.format(token))
             else:
                 print(to_str(FORMATTERS[fmt]({'token': token}, '.')).strip())
 
