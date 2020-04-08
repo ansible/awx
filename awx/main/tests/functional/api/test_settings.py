@@ -255,6 +255,7 @@ def _mock_logging_defaults():
         value = settings_registry.get_setting_field(key).get_default()
         setattr(mock_settings_obj, key, value)
         mock_settings_json[key] = value
+    setattr(mock_settings_obj, 'MAX_EVENT_RES_DATA', 700000)
     return mock_settings_obj, mock_settings_json
 
 

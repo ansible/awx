@@ -36,44 +36,105 @@ data_loggly = {
 # name this whatever you want
 @pytest.mark.parametrize(
     'enabled, type, host, port, protocol, expected_config', [
-        (True, 'loggly', 'http://logs-01.loggly.com/inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/', None, 'https', 
-            '''$IncludeConfig /etc/rsyslog.conf\ninput(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")
-action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" ''' +
-            'errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")'),
-        (True, 'other', 'localhost', 9000, 'udp', 
-            '''$IncludeConfig /etc/rsyslog.conf
-input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")
-action(type="omfwd" target="localhost" port="9000" protocol="udp" action.resumeRetryCount="-1" template="awx")'''),
-        (True, 'other', 'localhost', 9000, 'tcp', 
-            '''$IncludeConfig /etc/rsyslog.conf
-input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")
-action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" template="awx")'''),
-        (False, 'loggly', 'http://logs-01.loggly.com/inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/', 8080, 'https', 
-            '''$IncludeConfig /etc/rsyslog.conf'''),
-        (True, 'splunk', 'https://yoursplunk:8088/services/collector/event', None, None,
-            '''$IncludeConfig /etc/rsyslog.conf
-input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")
-module(load="omhttp")
-action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" ''' +
-            'errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")'),
-        (True, 'splunk', 'https://yoursplunk/services/collector/event', 8088, None,
-            '''$IncludeConfig /etc/rsyslog.conf
-input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")
-module(load="omhttp")
-action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" ''' +
-            'errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")'),
-        (True, 'splunk', 'https://yoursplunk/services/collector/event', 8088, 'https',
-            '''$IncludeConfig /etc/rsyslog.conf
-input(type="imuxsock" Socket="/var/run/rsyslog/rsyslog.sock" unlink="on")
-template(name="awx" type="string" string="%msg%")
-module(load="omhttp")
-action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" ''' +
-            'errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")'),
+        (
+            True,
+            'loggly',
+            'http://logs-01.loggly.com/inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/',
+            None,
+            'https',
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
+            ])
+        ),
+        (
+            True,  # localhost w/ custom UDP port
+            'other',
+            'localhost',
+            9000,
+            'udp',
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")',
+                'action(type="omfwd" target="localhost" port="9000" protocol="udp" action.resumeRetryCount="-1" template="awx")',  # noqa
+            ])
+        ),
+        (
+            True,  # localhost w/ custom TCP port
+            'other',
+            'localhost',
+            9000,
+            'tcp',
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")',
+                'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" template="awx")',  # noqa
+            ])
+        ),
+        (
+            True,  # https, default port 443
+            'splunk',
+            'https://yoursplunk/services/collector/event',
+            None,
+            None,
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
+        (
+            True,  # http, default port 80
+            'splunk',
+            'http://yoursplunk/services/collector/event',
+            None,
+            None,
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
+        (
+            True,  # https, custom port in URL string
+            'splunk',
+            'https://yoursplunk:8088/services/collector/event',
+            None,
+            None,
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
+        (
+            True,  # https, custom port explicitly specified
+            'splunk',
+            'https://yoursplunk/services/collector/event',
+            8088,
+            None,
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
+        (
+            True,  # no scheme specified in URL, default to https, respect custom port
+            'splunk',
+            'yoursplunk.org/services/collector/event',
+            8088,
+            'https',
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
+        (
+            True,  # respect custom http-only port
+            'splunk',
+            'http://yoursplunk.org/services/collector/event',
+            8088,
+            None,
+            '\n'.join([
+                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
+            ])
+        ),
     ]
 )
 def test_rsyslog_conf_template(enabled, type, host, port, protocol, expected_config):
@@ -96,4 +157,4 @@ def test_rsyslog_conf_template(enabled, type, host, port, protocol, expected_con
     tmpl = construct_rsyslog_conf_template(mock_settings)
     
     # check validity of created template
-    assert tmpl in expected_config
+    assert expected_config in tmpl

@@ -67,7 +67,6 @@ def construct_rsyslog_conf_template(settings=settings):
         parts.append(
             f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
         )
-    # parts.append('$IncludeConfig /var/lib/awx/rsyslog/*.conf')
     tmpl = '\n'.join(parts)
     return tmpl
 
