@@ -294,7 +294,7 @@ function JobTemplateDetail({ i18n, template }) {
         {job_tags && job_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Job tags`)}
+            label={i18n._(t`Job Tags`)}
             value={
               <ChipGroup numChips={5}>
                 {job_tags.split(',').map(jobTag => (
@@ -309,7 +309,7 @@ function JobTemplateDetail({ i18n, template }) {
         {skip_tags && skip_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Skip tags`)}
+            label={i18n._(t`Skip Tags`)}
             value={
               <ChipGroup numChips={5}>
                 {skip_tags.split(',').map(skipTag => (
