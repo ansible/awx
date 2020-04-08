@@ -241,7 +241,7 @@ def test_logging_aggregator_connection_test_requires_superuser(post, alice):
 @pytest.mark.django_db
 def test_logging_aggregator_connection_test_not_enabled(post, admin):
     url = reverse('api:setting_logging_test')
-    resp = post(url, {}, user=admin, expect=400)
+    resp = post(url, {}, user=admin, expect=409)
     assert 'Logging not enabled' in resp.data.get('error')
 
 

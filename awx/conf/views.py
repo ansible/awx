@@ -184,7 +184,7 @@ class SettingLoggingTest(GenericAPIView):
             # if http/https by this point, domain is reacheable
             return Response(status=status.HTTP_202_ACCEPTED)
 
-        if protocol is 'udp':
+        if protocol == 'udp':
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         else:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
