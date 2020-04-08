@@ -215,17 +215,22 @@ Using `docker exec`, this will create a session in the running *awx* container, 
 If you want to start and use the development environment, you'll first need to bootstrap it by running the following command:
 
 ```bash
-(container)# /bootstrap_development.sh
+(container)# /usr/bin/bootstrap_development.sh
 ```
 
-The above will do all the setup tasks, including running database migrations, so it may take a couple minutes.
+The above will do all the setup tasks, including running database migrations, so it may take a couple minutes. Once it's done it
+will drop you back to the shell.
 
-Now you can start each service individually, or start all services in a pre-configured tmux session like so:
+In order to launch all developer services:
 
 ```bash
-(container)# cd /awx_devel
-(container)# make server
+(container)# /usr/bin/launch_awx.sh
 ```
+
+`launch_awx.sh` also calls `bootstrap_development.sh` so if all you are doing is launching the supervisor to start all services, you don't
+need to call `bootstrap_development.sh` first.
+
+
 
 ### Post Build Steps
 
