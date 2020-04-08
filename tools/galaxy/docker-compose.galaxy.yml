@@ -1,0 +1,74 @@
+---
+version: "3.7"
+
+services:
+  api:
+    image: "gcr.io/ansible-tower-engineering/galaxy_ng:latest"
+    container_name: galaxy_api
+    command: ['run', 'api-reload']
+    ports:
+      - "5001:8000"
+    env_file:
+      - './galaxy/galaxy.env'
+    environment:
+      WITH_MIGRATIONS: "1"
+    volumes:
+      - "./galaxy/settings.py:/etc/pulp/settings.py"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+      - "./galaxy/entrypoints.d/:/entrypoints.d/"
+    depends_on:
+      - postgres
+      - galaxy-redis
+
+  resource-manager:
+    image: "gcr.io/ansible-tower-engineering/galaxy_ng:latest"
+    container_name: galaxy_resource_manager
+    command: ['run', 'resource-manager']
+    env_file:
+      - './galaxy/galaxy.env'
+    volumes:
+      - "./galaxy/settings.py:/etc/pulp/settings.py"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - galaxy-redis
+
+  worker:
+    image: "gcr.io/ansible-tower-engineering/galaxy_ng:latest"
+    container_name: galaxy_worker
+    command: ['run', 'worker']
+    env_file:
+      - './galaxy/galaxy.env'
+    volumes:
+      - "./galaxy/settings.py:/etc/pulp/settings.py"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - galaxy-redis
+
+  content-app:
+    image: "gcr.io/ansible-tower-engineering/galaxy_ng:latest"
+    container_name: galaxy_content_app
+    command: ['run', 'content-app']
+    ports:
+      - "24816:24816"
+    env_file:
+      - './galaxy/galaxy.env'
+    volumes:
+      - "./galaxy/settings.py:/etc/pulp/settings.py"
+      - "pulp_artifact:/var/lib/pulp/artifact"
+    depends_on:
+      - postgres
+      - galaxy-redis
+
+  galaxy-redis:
+    image: "redis:5"
+    container_name: galaxy_redis
+    volumes:
+      - "redis_data:/data"
+
+
+volumes:
+  pulp_artifact: {}
+  pg_data: {}
+  redis_data: {}

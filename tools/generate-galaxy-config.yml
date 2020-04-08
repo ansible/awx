@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    clone_location: '/tmp/galaxy_ng'
+  tasks:
+    - name: Clone the Galaxy repo
+      git:
+        repo: 'git@github.com:ansible/galaxy_ng.git'
+        dest: "{{ clone_location }}"
+        force: yes
+
+    - name: Construct env file
+      copy:
+        content: |
+          {{ lookup('file', clone_location + '/dev/common/galaxy_ng.env') }}
+          {{ lookup('file', clone_location + '/dev/standalone/galaxy_ng.env') }}
+        dest: "{{ playbook_dir }}/galaxy/galaxy.env"
+
+    - name: Copy settings file
+      copy:
+        src: "{{ clone_location + '/dev/common/settings.py' }}"
+        dest: "{{ playbook_dir }}/galaxy/settings.py"
+
+    - name: Patch settings values
+      lineinfile:
+        path: "{{ playbook_dir }}/galaxy/galaxy.env"
+        regexp: '^PULP_REDIS_HOST='
+        line: PULP_REDIS_HOST=galaxy-redis

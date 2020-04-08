@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '3.7'
 services:
   # Primary AWX Development Container
   awx:
@@ -53,6 +53,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - "awx_db:/var/lib/postgresql/data"
+      - "./init-postgres.sh:/docker-entrypoint-initdb.d/init-postgres.sh"
   memcached:
     user: ${CURRENT_UID}
     image: memcached:alpine
