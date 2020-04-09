@@ -53,7 +53,10 @@ def construct_rsyslog_conf_template(settings=settings):
             'healthchecktimeout="20000"',
         ]
         if parsed.path:
-            params.append(f'restpath="{parsed.path[1:]}"')
+            path = urlparse.quote(parsed.path[1:])
+            if parsed.query:
+                path = f'{path}?{urlparse.quote(parsed.query)}'
+            params.append(f'restpath="{path}"')
         username = getattr(settings, 'LOG_AGGREGATOR_USERNAME', '')
         password = getattr(settings, 'LOG_AGGREGATOR_PASSWORD', '')
         if username:
