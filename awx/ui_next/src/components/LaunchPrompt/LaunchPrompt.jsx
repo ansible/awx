@@ -71,7 +71,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   if (config.survey_enabled) {
     steps.push({
       name: i18n._(t`Survey`),
-      component: <SurveyStep />,
+      component: <SurveyStep template={resource} />,
     });
   }
   steps.push({
