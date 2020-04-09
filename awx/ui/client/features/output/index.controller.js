@@ -784,7 +784,10 @@ function OutputIndexController (
     const isGatherEventSpecialHandlingRequired = (resource.model.get('gather_event_types') !== defaultGather);
 
     render.requestAnimationFrame(() => {
-        render.init($scope, { toggles: vm.toggleLineEnabled });
+        render.init($scope, {
+            toggles: vm.toggleLineEnabled,
+            isGatherEventSpecialHandlingRequired
+        });
 
         status.init(resource);
         page.init(resource.events);

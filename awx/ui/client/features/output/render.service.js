@@ -36,7 +36,7 @@ const hasAnsi = input => re.test(input);
 let $scope;
 
 function JobRenderService ($q, $compile, $sce, $window) {
-    this.init = (_$scope_, { toggles }) => {
+    this.init = (_$scope_, { toggles, isGatherEventSpecialHandlingRequired }) => {
         $scope = _$scope_;
         this.setScope();
 
@@ -52,6 +52,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
 
         this.records = {};
         this.uuids = {};
+        this.isGatherEventSpecialHandlingRequired = isGatherEventSpecialHandlingRequired;
     };
 
     this.setCollapseAll = value => {
@@ -372,6 +373,14 @@ function JobRenderService ($q, $compile, $sce, $window) {
         let directives = '';
 
         if (record.isMissing) {
+            if (this.isGatherEventSpecialHandlingRequired) {
+                // if a non-default gather_event_types filter is found on the job details, we don't
+                // know if missing event groups should be clickable for download so make none of
+                // them clickable.
+                return `<div id="${record.uuid}" class="at-Stdout-row">
+                    <div class="at-Stdout-toggle"></div>
+                    <div class="at-Stdout-line">...</div></div>`;
+            }
             return `<div id="${record.uuid}" class="at-Stdout-row">
                 <div class="at-Stdout-toggle"></div>
                 <div class="at-Stdout-line at-Stdout-line--clickable" ng-click="vm.showMissingEvents('${record.uuid}')">...</div></div>`;
