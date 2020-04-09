@@ -163,6 +163,12 @@ class JobOptions(BaseModel):
         max_length=64,
         choices=JOB_EVENTS_COLLECTED_CHOICES,
         default='all',
+        help_text=_(
+            "Filters certain events before they are written to the database. "
+            "Events are still emitted to external loggers but their stdout will be hidden and the "
+            "filtered events will not show up in the database. This field can be used to limit "
+            "number of events recorded for extremely large jobs."
+        )
     )
 
 
