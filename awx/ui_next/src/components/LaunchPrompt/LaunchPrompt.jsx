@@ -29,6 +29,30 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
 
   // TODO: Add Credential Passwords step
 
+  if (config.ask_job_type_on_launch) {
+    initialValues.job_type = resource.job_type || '';
+  }
+  if (config.ask_limit_on_launch) {
+    initialValues.limit = resource.limit || '';
+  }
+  if (config.ask_verbosity_on_launch) {
+    initialValues.verbosity = resource.verbosity || 0;
+  }
+  if (config.ask_tags_on_launch) {
+    initialValues.job_tags = resource.job_tags || '';
+  }
+  if (config.ask_skip_tags_on_launch) {
+    initialValues.skip_tags = resource.skip_tags || '';
+  }
+  if (config.ask_variables_on_launch) {
+    initialValues.extra_vars = resource.extra_vars || '---';
+  }
+  if (config.ask_scm_branch_on_launch) {
+    initialValues.scm_branch = resource.scm_branch || '';
+  }
+  if (config.ask_diff_mode_on_launch) {
+    initialValues.diff_mode = resource.diff_mode || false;
+  }
   if (
     config.ask_job_type_on_launch ||
     config.ask_limit_on_launch ||
@@ -39,30 +63,6 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     config.ask_scm_branch_on_launch ||
     config.ask_diff_mode_on_launch
   ) {
-    if (config.ask_job_type_on_launch) {
-      initialValues.job_type = resource.job_type || '';
-    }
-    if (config.ask_limit_on_launch) {
-      initialValues.limit = resource.limit || '';
-    }
-    if (config.ask_verbosity_on_launch) {
-      initialValues.verbosity = resource.verbosity || 0;
-    }
-    if (config.ask_tags_on_launch) {
-      initialValues.job_tags = resource.job_tags || '';
-    }
-    if (config.ask_skip_tags_on_launch) {
-      initialValues.skip_tags = resource.skip_tags || '';
-    }
-    if (config.ask_variables_on_launch) {
-      initialValues.extra_vars = resource.extra_vars || '---';
-    }
-    if (config.ask_scm_branch_on_launch) {
-      initialValues.scm_branch = resource.scm_branch || '';
-    }
-    if (config.ask_diff_mode_on_launch) {
-      initialValues.diff_mode = resource.diff_mode || false;
-    }
     steps.push({
       name: i18n._(t`Other Prompts`),
       component: <OtherPromptsStep config={config} />,
