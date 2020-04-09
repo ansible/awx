@@ -32,7 +32,7 @@ def construct_rsyslog_conf_template(settings=settings):
         '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
         '$ModLoad imuxsock',
         'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
-        'template(name="awx" type="string" string="%msg%")',
+        'template(name="awx" type="string" string="%rawmsg-after-pri%")',
     ])
     if protocol.startswith('http'):
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst

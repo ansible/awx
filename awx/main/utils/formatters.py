@@ -97,7 +97,7 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
-        return ' ' + json.dumps(message, cls=DjangoJSONEncoder) + '\000'
+        return json.dumps(message, cls=DjangoJSONEncoder) + '\n'
 
 
 class LogstashFormatter(LogstashFormatterBase):

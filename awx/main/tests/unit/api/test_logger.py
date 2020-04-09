@@ -43,7 +43,7 @@ data_loggly = {
             None,
             'https',
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
             ])
         ),
@@ -54,7 +54,7 @@ data_loggly = {
             9000,
             'udp',
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")',
                 'action(type="omfwd" target="localhost" port="9000" protocol="udp" action.resumeRetryCount="-1" template="awx")',  # noqa
             ])
         ),
@@ -65,7 +65,7 @@ data_loggly = {
             9000,
             'tcp',
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")',
                 'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" template="awx")',  # noqa
             ])
         ),
@@ -76,7 +76,7 @@ data_loggly = {
             None,
             None,
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
@@ -87,7 +87,7 @@ data_loggly = {
             None,
             None,
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
@@ -98,7 +98,7 @@ data_loggly = {
             None,
             None,
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
@@ -109,7 +109,7 @@ data_loggly = {
             8088,
             None,
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
@@ -120,7 +120,7 @@ data_loggly = {
             8088,
             'https',
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
@@ -131,7 +131,7 @@ data_loggly = {
             8088,
             None,
             '\n'.join([
-                'template(name="awx" type="string" string="%msg%")\nmodule(load="omhttp")',
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
                 'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/external.err" healthchecktimeout="20000" restpath="services/collector/event")',  # noqa
             ])
         ),
