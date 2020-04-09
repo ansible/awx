@@ -2243,222 +2243,96 @@ class vmware(PluginFileInjector):
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(vmware, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['strict'] = True
         ret['properties'] = [
             "name",
-            "config.cpuHotAddEnabled",
-            "config.cpuHotRemoveEnabled",
-            "config.instanceUuid",
-            "config.hardware.numCPU",
-            "config.template",
-            "config.name",
-            "guest.hostName",
-            "guest.ipAddress",
-            "guest.guestId",
-            "guest.guestState",
-            "runtime.maxMemoryUsage",
-            "customValue",
-            # not in the defaults
-            "vpmcsupported",
-            "vpmcenabled",
-            "vmxconfigchecksum",
-            "vmstorageobjectid",
-            "vmnpivwwnupdatesupported",
-            "vmnpivwwnsupported",
-            "vmnpivwwndisablesupported",
-            "vmfsnativesnapshotsupported",
-            "vm",
-            "virtualmmuusagesupported",
-            "virtualmmuusageignored",
-            "virtualexecusageignored",
-            "vflashcachereservation",
-            "vflashcacheallocation",
-            "version",
-            "vassertsenabled",
-            "vappconfig",
+            "ansible_ssh_host",
+            "ansible_host",
+            "ansible_uuid",
+            "availablefield",
+            "capability",  # nested properties
+            "config",  # nested properties
+            "configissue",
+            "configstatus",
+            "customvalue",
+            "datastore",
+            "effectiverole",
+            "guest",  # nested properties
+            "guestheartbeatstatus",
+            "layout",
+            "layoutex",
+            "name",
+            "network",
+            "overallstatus",
+            "parentvapp",
+            "permission",
+            "recenttask",
+            "resourcepool",
+            "rootsnapshot",
+            "runtime",  # nested properties
+            "snapshot",
+            "storage",  # nested properties
+            "summary",  # repeat of other properties
+            "tag",
+            "triggeredalarmstate",
             "value",
-            "uuid",
-            'triggeredalarmstate',
-            'toolsversionstatus2',
-            'toolsversionstatus',
-            'toolsversion',
-            'toolsupdatestatus',
-            'toolssynctimesupported',
-            'toolsstatus',
-            'toolsrunningstatus',
-            'toolsrebootpredictsupported',
-            'toolsinstalltype',
-            'toolsinstallermounted',
-            'toolsautoupdatesupported',
-            'tools',
-            'timestamp',
-            'template',
-            'tag',
-            'swapstorageobjectid',
-            'swapplacementsupported',
-            'swapplacement',
-            'suspendtime',
-            'suspendinterval',
-            'summary',  # vim.vm.Summary
-            'storage',  # vim.vm.StorageInfo
-            'snapshotoperationssupported',
-            'snapshotinbackground',
-            'snapshotconfigsupported',
-            'snapshot',
-            'settingvideoramsizesupported',
-            'settingscreenresolutionsupported',
-            'settingdisplaytopologysupported',
-            'settingdisplaytopologymodessupported',
-            'sesparsedisksupported',
-            'securebootsupported',
-            'screen',
-            'scheduledhardwareupgradeinfo',
-            's1acpimanagementsupported',
-            'runtime',  # vim.vm.RuntimeInfo
-            'rootsnapshot',
-            'reverttosnapshotsupported',
-            'resourcepool',
-            'repconfig',
-            'recordreplaysupported',
-            'recordreplaystate',
-            'recenttask',
-            'quiescedsnapshotssupported',
-            'quiescedforkparent',
-            'quickstats',
-            'question',
-            'powerstate',
-            'powerpolicy',
-            'poweredonmonitortypechangesupported',
-            'poweredoffsnapshotssupported',
-            'pervmevcsupported',
-            'permission',
-            'perdatastoreusage',
-            'paused',
-            'parentvapp',
-            'overallstatus',
-            'onlinestandby',
-            'offlinefeaturerequirement',
-            'nummksconnections',
-            'npivwwnonnonrdmvmsupported',
-            'npivworldwidenametype',
-            'npivtemporarydisabled',
-            'npivportworldwidename',
-            'npivonnonrdmdisks',
-            'npivnodeworldwidename',
-            'npivdesiredportwwns',
-            'npivdesirednodewwns',
-            'networkshaper',
-            'network',  # vim.dvs.DistributedVirtualPortgroup
-            'net',
-            'nestedhvsupported',
-            'nestedhvenabled',
-            'needsecondaryreason',
-            'name',
-            'multiplesnapshotssupported',
-            'multiplecorespersocketsupported',
-            'modified',
-            'minrequiredevcmodekey',
-            'migrateencryption',
-            'messagebustunnelenabled',
-            'messagebussupported',
-            'memorysnapshotssupported',
-            'memoryreservationlocksupported',
-            'memoryreservationlockedtomax',
-            'memoryoverhead',
-            'memoryhotaddenabled',
-            'memoryallocation',
-            'memoryaffinity',
-            'maxmksconnections',
-            'maxmemoryusage',
-            'maxcpuusage',
-            'managedby',
-            'locksnapshotssupported',
-            'locationid',
-            'layoutex',
-            'layout',
-            'latencysensitivity',
-            'keyid',
-            'ipstack',
-            'ipaddress',
-            'interactiveguestoperationsready',
-            'instantclonefrozen',
-            'instanceuuid',
-            'initialoverhead',
-            'hotplugmemorylimit',
-            'hotplugmemoryincrementsize',
-            'hostname',
-            'hostbasedreplicationsupported',
-            'host',
-            'hardware',
-            'gueststatechangesupported',
-            'gueststate',
-            'guestoperationsready',
-            'guestkernelcrashed',
-            'guestintegrityinfo',
-            'guestid',
-            'guestheartbeatstatus',
-            'guestfullname',
-            'guestfamily',
-            'guestautolocksupported',
-            'guestautolockenabled',
-            'guest',  # Object of type 'vim.vm.GuestInfo' is not JSON serializable
-            'generationinfo',
-            'ftinfo',
-            'forkconfiginfo',
-            'flags',
-            'firmware',
-            'files',
-            'featurerequirementsupported',
-            'featurerequirement',
-            'featuremask',
-            'faulttolerancestate',
-            'extraconfig',
-            'effectiverole',
-            'dynamictype',
-            'dynamicproperty',
-            'disksharessupported',
-            'diskonlysnapshotonsuspendedvmsupported',
-            'disk',
-            'disablesnapshotssupported',
-            'device',
-            'defaultpowerops',
-            'datastoreurl',
-            'datastore',  # some kind of datastore object
-            'dasvmprotection',  # Object of type 'vim.Datastore' is not JSON serializable
-            'customvalue',
-            'cryptostate',
-            'createdate',
-            'cpuhotremoveenabled',
-            'cpuhotaddenabled',
-            'cpufeaturemasksupported',
-            'cpufeaturemask',
-            'cpuallocation',
-            'cpuaffinity',
-            'runtime.consolidationneeded',
-            'consolepreferencessupported',
-            'consolepreferences',
-            'connectionstate',
-            'configstatus',
-            'configissue',
-            'config',  # Object of type 'vim.vm.ConfigInfo' is not JSON serializable
-            'cleanpoweroff',
-            'changeversion',
-            'changetrackingsupported',
-            'changetrackingenabled',
-            'capability',  # non-python object, bug
-            'canconnectusbdevices',
-            'boottime',
-            'bootretryoptionssupported',
-            'bootoptionssupported',
-            'bootoptions',
-            'availablefield',
-            'appstate',
-            'appheartbeatstatus',
-            'ansible_uuid',
-            'ansible_ssh_host',
-            'ansible_host',
-            'annotation',
-            'alternateguestname'
         ]
+        # ret['properties'] = ["all"]  # causes UnknownWsdlTypeError exception
+        ret['with_nested_properties'] = True
+        # ret['with_sanitized_property_name'] = True  # needs adjustment
+        # ret['filters'] = [  # needs implemented
+        #     'runtime.powerstate == "poweredOn"'
+        # ]
+        # these are the defaults, so we don't put them in
+        # ret['keyed_groups'] = [
+        #     {
+        #         'prefix': '', 'separator': '',
+        #         # 'key': '"None" if not config.guest_id else config.guest_id'
+        #         # 'key': 'config.get("guest_id") | default([])'  # also in guest dict, depending on branch
+        #         'key': 'config.guestId'
+        #     },
+        #     {
+        #         'prefix': '', 'separator': '',
+        #         'key': "'templates' if config.template else 'guests'"
+        #     }
+        # ]
+        ret['property_name_format'] = 'lower_case'
+
+        # process custom options
+        vmware_opts = dict(inventory_update.source_vars_dict.items())
+        if inventory_update.instance_filters:
+            vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
+        if inventory_update.group_by:
+            vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
+
+        alias_pattern = vmware_opts.get('alias_pattern')
+        if alias_pattern:
+            ret.setdefault('hostnames', [])
+            for alias in alias_pattern.split(','):  # make best effort
+                striped_alias = alias.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_alias:
+                    continue
+                ret['hostnames'].append(striped_alias)
+
+        host_pattern = vmware_opts.get('host_pattern')  # not working in script
+        if host_pattern:
+            pass  # does not appear to have an option for this
+
+        host_filters = vmware_opts.get('host_filters')
+        if host_filters:
+            pass
+            # ret['resources'] = host_filters.split(',')  # does not follow same pattern
+
+        groupby_patterns = vmware_opts.get('groupby_patterns')
+        if groupby_patterns:
+            ret.setdefault('keyed_groups', [])
+            for pattern in groupby_patterns.split(','):
+                stripped_pattern = pattern.replace('{', '').replace('}', '').strip()  # make best effort
+                ret['keyed_groups'].append({
+                    'prefix': '', 'separator': '',
+                    'key': stripped_pattern
+                })
+
         return ret
 
     def build_script_private_data(self, inventory_update, private_data_dir):
