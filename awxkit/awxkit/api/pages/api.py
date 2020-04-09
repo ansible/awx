@@ -266,20 +266,24 @@ class ApiV2(base.Base):
             for field, value in asset.items():
                 if field not in options:
                     continue
-                if options[field]['type'] == 'id':
+                if options[field]['type'] in ('id', 'integer') and isinstance(value, dict):
                     page = self._get_by_natural_key(value)
                     post_data[field] = page['id'] if page is not None else None
                 else:
                     post_data[field] = value
 
             page = self._get_by_natural_key(asset['natural_key'], fetch=False)
-            if page is None:
-                if resource == 'users':
-                    # We should only impose a default password if the resource doesn't exist.
-                    post_data.setdefault('password', 'abc123')
-                page = endpoint.post(post_data)
-            else:
-                page = page.put(post_data)
+            try:
+                if page is None:
+                    if resource == 'users':
+                        # We should only impose a default password if the resource doesn't exist.
+                        post_data.setdefault('password', 'abc123')
+                    page = endpoint.post(post_data)
+                else:
+                    page = page.put(post_data)
+            except exc.Common:
+                log.exception("post_data: %r", post_data)
+                raise
 
             self._register_page(page)
 
