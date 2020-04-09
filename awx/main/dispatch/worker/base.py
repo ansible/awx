@@ -118,9 +118,14 @@ class AWXConsumerRedis(AWXConsumerBase):
 
         queue = redis.Redis.from_url(settings.BROKER_URL)
         while True:
-            res = queue.blpop(self.queues)
-            res = json.loads(res[1])
-            self.process_task(res)
+            try:
+                res = queue.blpop(self.queues)
+                res = json.loads(res[1])
+                self.process_task(res)
+            except redis.exceptions.RedisError:
+                logger.exception(f"encountered an error communicating with redis")
+            except (json.JSONDecodeError, KeyError):
+                logger.exception(f"failed to decode JSON message from redis")
             if self.should_stop:
                 return
 
