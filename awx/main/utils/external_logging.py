@@ -58,7 +58,8 @@ def construct_rsyslog_conf_template(settings=settings):
         password = getattr(settings, 'LOG_AGGREGATOR_PASSWORD', '')
         if username:
             params.append(f'uid="{username}"')
-        if password:
+        if username and password:
+            # you can only have a basic auth password if there's a username
             params.append(f'pwd="{password}"')
         params = ' '.join(params)
         parts.extend(['module(load="omhttp")', f'action({params})'])
