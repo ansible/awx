@@ -299,6 +299,20 @@ function(NotificationsList, i18n) {
                     awPopOver: "<p>" + i18n._("The amount of time (in seconds) to run before the task is canceled. Defaults to 0 for no job timeout.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                gather_event_types: {
+                    defaultText: i18n._('Choose gather event types'),
+                    label: i18n._('Gather Event Types'),
+                    type: 'select',
+                    ngOptions: 'v.label for v in gather_event_types_options track by v.value',
+                    "default": 1,
+                    required: false,
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Set the event types that will be saved to the database or shown as output. Events that are filtered out with this setting will still be emitted to external logging systems.") + "</p>",
+                    dataTitle: i18n._('Gather Event Types'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                },
                 diff_mode: {
                     label: i18n._('Show Changes'),
                     type: 'toggleSwitch',

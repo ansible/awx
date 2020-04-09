@@ -218,6 +218,7 @@ export default
 
                 $scope.$watch('verbosity', sync_verbosity_select2);
                 $scope.$watch('job_type', sync_job_type_select2);
+                $scope.$watch('gather_event_types', sync_gather_event_types_select2);
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -367,6 +368,20 @@ export default
                     scope: $scope,
                     model: 'job_type',
                     options: 'job_type_options',
+                }));
+            }
+
+            function sync_gather_event_types_select2(newValue) {
+                if (newValue === 0 || (newValue && typeof newValue !== 'object')) {
+                    $scope.gather_event_types = { value: newValue };
+                    return;
+                }
+                select2LoadDefer.push(CreateSelect2({
+                    element:'#job_template_gather_event_types',
+                    multiple: false,
+                    scope: $scope,
+                    model: 'gather_event_types',
+                    options: 'gather_event_types_options',
                 }));
             }
 
@@ -698,6 +713,14 @@ export default
                 url: defaultUrl,
                 field: 'webhook_service',
                 variable: 'webhook_service_options',
+                callback: 'choicesReady'
+            });
+
+            GetChoices({
+                scope: $scope,
+                url: defaultUrl,
+                field: 'gather_event_types',
+                variable: 'gather_event_types_options',
                 callback: 'choicesReady'
             });
 

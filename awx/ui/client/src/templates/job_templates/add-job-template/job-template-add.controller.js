@@ -40,6 +40,7 @@
             $scope.allow_callbacks = false;
             $scope.playbook_options = [];
             $scope.webhook_service_options = [];
+            $scope.gather_event_types_options = [];
             $scope.mode = "add";
             $scope.parseType = 'yaml';
             $scope.credentialNotPresent = false;
@@ -203,6 +204,12 @@
                             $scope.verbosity = $scope.verbosity_options[verbosity];
                         }
                     }
+                    var gather_event_types;
+                    for (gather_event_types in $scope.gather_event_types_options) {
+                        if ($scope.gather_event_types_options[gather_event_types].isDefault) {
+                            $scope.gather_event_types = $scope.gather_event_types_options[gather_event_types];
+                        }
+                    }
                     $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
                     const virtualEnvs = ConfigData.custom_virtualenvs || [];
                     $scope.custom_virtualenvs_options = virtualEnvs;
@@ -253,6 +260,14 @@
                         options: 'webhook_service_options',
                         model: 'webhook_service'
                     });
+                    CreateSelect2({
+                        element:'#job_template_gather_event_types',
+                        addNew: false,
+                        multiple: false,
+                        scope: $scope,
+                        options: 'gather_event_types_options',
+                        model: 'gather_event_types'
+                    });
                 }
             });
 
@@ -262,6 +277,14 @@
                 url: defaultUrl,
                 field: 'verbosity',
                 variable: 'verbosity_options',
+                callback: 'choicesReadyVerbosity'
+            });
+
+            GetChoices({
+                scope: $scope,
+                url: defaultUrl,
+                field: 'gather_event_types',
+                variable: 'gather_event_types_options',
                 callback: 'choicesReadyVerbosity'
             });
 
