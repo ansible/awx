@@ -98,8 +98,6 @@ spec:
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
               mountPath: "/var/run/rsyslog"
-            - name: rsyslog-dir
-              mountPath: "/var/lib/awx/rsyslog/"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
               mountPath: "/etc/pki/ca-trust/source/anchors/"
@@ -148,11 +146,6 @@ spec:
               subPath: supervisor_task.conf
               readOnly: true
 
-            - name: {{ kubernetes_deployment_name }}-rsyslog-config
-              mountPath: "/var/lib/awx/rsyslog/rsyslog.conf"
-              subPath: rsyslog.conf
-              readOnly: true
-
             - name: {{ kubernetes_deployment_name }}-secret-key
               mountPath: "/etc/tower/SECRET_KEY"
               subPath: SECRET_KEY
@@ -189,8 +182,6 @@ spec:
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
               mountPath: "/var/run/rsyslog"
-            - name: rsyslog-dir
-              mountPath: "/var/lib/awx/rsyslog/"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
               mountPath: "/etc/pki/ca-trust/source/anchors/"
@@ -336,8 +327,6 @@ spec:
           emptyDir: {}
         - name: rsyslog-socket
           emptyDir: {}
-        - name: rsyslog-dir
-          emptyDir: {}
 {% if ca_trust_dir is defined %}
         - name: {{ kubernetes_deployment_name }}-ca-trust-dir
           hostPath:
@@ -413,13 +402,6 @@ spec:
             items:
               - key: supervisor-task-config
                 path: 'supervisor_task.conf'
-
-        - name: {{ kubernetes_deployment_name }}-rsyslog-config
-          configMap:
-            name: {{ kubernetes_deployment_name }}-rsyslog-config
-            items:
-              - key: rsyslog-config
-                path: 'rsyslog.conf'
 
         - name: {{ kubernetes_deployment_name }}-secret-key
           secret:
