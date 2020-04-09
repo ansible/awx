@@ -331,7 +331,7 @@ class Page(object):
                     # FIXME: use caching by url
                     natural_key[key] = self.related[key].get().get_natural_key()
                 except exc.Forbidden:
-                    log.warning("This foreign key cannot be read: %s", getattr(self, 'endpoint', ''))
+                    log.warning("This foreign key cannot be read: %s", self.related[key])
                     return None
             elif key in self:
                 natural_key[key] = self[key]

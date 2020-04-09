@@ -129,11 +129,13 @@ class ApiV2(base.Base):
                 continue
             try:
                 # FIXME: use caching by url
-                fields[key] = asset.related[key].get().get_natural_key()
+                natural_key = asset.related[key].get().get_natural_key()
             except exc.Forbidden:
                 log.warning("This foreign key cannot be read: %s", asset.related[key])
-                if options[key]['required']:
-                    return None  # This is a mandatory foreign key
+                return None
+            if natural_key is None:
+                return None  # This is an unresolvable foreign key
+            fields[key] = natural_key
 
         related = {}
         for key, related_endpoint in asset.related.items():
@@ -172,7 +174,11 @@ class ApiV2(base.Base):
         if related:
             fields['related'] = related
 
-        fields['natural_key'] = asset.get_natural_key()
+        natural_key = asset.get_natural_key()
+        if natural_key is None:
+            return None
+        fields['natural_key'] = natural_key
+
         return remove_encrypted(fields)
 
     def _get_assets(self, resource, value):
