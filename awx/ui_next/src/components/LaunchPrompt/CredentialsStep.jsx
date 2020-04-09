@@ -24,7 +24,6 @@ function CredentialsStep({ i18n }) {
   const [selectedType, setSelectedType] = useState(null);
   const history = useHistory();
 
-  const isTypeSelected = !!selectedType;
   const {
     result: types,
     error: typesError,
@@ -33,13 +32,13 @@ function CredentialsStep({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const loadedTypes = await CredentialTypesAPI.loadAllTypes();
-      if (!isTypeSelected && loadedTypes.length) {
+      if (loadedTypes.length) {
         const match =
           loadedTypes.find(type => type.kind === 'ssh') || loadedTypes[0];
         setSelectedType(match);
       }
       return loadedTypes;
-    }, [isTypeSelected]),
+    }, []),
     []
   );
 
