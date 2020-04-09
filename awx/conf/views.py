@@ -4,6 +4,7 @@
 # Python
 import collections
 import logging
+import subprocess
 import sys
 import socket
 from socket import SHUT_RDWR
@@ -173,6 +174,14 @@ class SettingLoggingTest(GenericAPIView):
         
         hostname = getattr(settings, 'LOG_AGGREGATOR_HOST', None)
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', None)
+
+        try:
+            subprocess.check_output(
+                ['rsyslogd', '-N1', '-f', '/var/lib/awx/rsyslog/rsyslog.conf'],
+                stderr=subprocess.STDOUT
+            )
+        except subprocess.CalledProcessError as exc:
+            return Response({'error': exc.output}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check to ensure port is open at host
         if protocol in ['udp', 'tcp']:
