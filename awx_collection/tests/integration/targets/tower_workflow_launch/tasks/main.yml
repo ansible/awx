@@ -1,0 +1,91 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    wfjt_name1: "AWX-Collection-tests-tower_workflow_launch--wfjt1-{{ test_id }}"
+
+- name: Create our workflow
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: present
+
+- name: Add a node
+  tower_workflow_job_template_node:
+    workflow_job_template: "{{ wfjt_name1 }}"
+    unified_job_template: "Demo Job Template"
+    identifier: leaf
+  register: new_node
+
+- name: Connect to Tower server but request an invalid workflow
+  tower_workflow_launch:
+    workflow_template: "Does Not Exist"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Unable to find workflow job template' in result.msg"
+
+- name: Run the workflow without waiting (this should just give us back a job ID)
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+    wait: false
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - "'id' in result['job_info']"
+
+- name: Kick off a workflow and wait for it, but only for a second
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+    timeout: 1
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Monitoring aborted due to timeout' in result.msg"
+
+- name: Kick off a workflow and wait for it
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - "'id' in result['job_info']"
+
+- name: Prompt the workflow's extra_vars on launch
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: present
+    ask_variables_on_launch: true
+
+- name: Kick off a workflow with extra_vars
+  tower_workflow_launch:
+    workflow_template: "{{ wfjt_name1 }}"
+    extra_vars:
+      var1: My First Variable
+      var2: My Second Variable
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
+- name: Clean up test workflow
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: absent
