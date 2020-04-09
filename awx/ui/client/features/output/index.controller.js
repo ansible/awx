@@ -777,6 +777,12 @@ function OutputIndexController (
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
     vm.debug = _debug;
 
+    // If event gathering filter is non-default, we can't expect any particular counter to
+    // arrive. This flag lets the stream service know it needs to do some special
+    // handling of events to be compatible with the filtering.
+    const [[defaultGather]] = resource.model.options('actions.GET.gather_event_types.choices');
+    const isGatherEventSpecialHandlingRequired = (resource.model.get('gather_event_types') !== defaultGather);
+
     render.requestAnimationFrame(() => {
         render.init($scope, { toggles: vm.toggleLineEnabled });
 
@@ -799,6 +805,7 @@ function OutputIndexController (
         let showFollowTip = true;
         const rates = [];
         stream.init({
+            isGatherEventSpecialHandlingRequired,
             onFrames,
             onFrameRate (rate) {
                 rates.push(rate);

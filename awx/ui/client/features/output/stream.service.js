@@ -10,13 +10,14 @@ import {
 const rx = [];
 
 function OutputStream ($q) {
-    this.init = ({ onFrames, onFrameRate, onStop }) => {
+    this.init = ({ isGatherEventSpecialHandlingRequired, onFrames, onFrameRate, onStop }) => {
         this.hooks = {
             onFrames,
             onFrameRate,
             onStop,
         };
 
+        this.isGatherEventSpecialHandlingRequired = isGatherEventSpecialHandlingRequired;
         this.bufferInit();
     };
 
@@ -173,6 +174,15 @@ function OutputStream ($q) {
                 }
 
                 this.bufferAdd(data);
+
+                if (data.event === EVENT_STATS_PLAY) {
+                    if (this.isGatherEventSpecialHandlingRequired) {
+                        // If a non-default gather_event_types is detected, just dump the
+                        // events we have and trigger the stopping callback once the stats
+                        // event is received.
+                        this.counters.ready = data.counter;
+                    }
+                }
 
                 if (this.counters.total % OUTPUT_PAGE_SIZE === 0) {
                     this.setFramesPerRender();
