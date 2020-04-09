@@ -409,6 +409,27 @@ class TestGenericRun():
         [task.event_handler(event_data) for i in range(20)]
         assert 20 == task.event_ct
 
+    def test_event_count_gather_event_types(self):
+        task = tasks.RunJob()
+        task.dispatcher = mock.MagicMock()
+        task.instance = Job(gather_event_types="none")
+        task.event_ct = 0
+        event_data = [
+            {"event": "playbook_on_play_start"},
+            {"event": "runner_on_ok"},
+            {"event": "runner_on_failed"},
+            {"event": "verbose"},
+            {"event": "playbook_on_stats"}
+        ]
+
+        [task.event_handler(event) for event in event_data]
+        assert 2 == task.event_ct
+
+        task.event_ct = 0
+        task.instance = Job(gather_event_types="errors")
+        [task.event_handler(event) for event in event_data]
+        assert 3 == task.event_ct
+
     def test_finished_callback_eof(self):
         task = tasks.RunJob()
         task.dispatcher = mock.MagicMock()
