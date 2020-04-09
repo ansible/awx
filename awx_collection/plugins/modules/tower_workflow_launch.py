@@ -128,7 +128,6 @@ def main():
     organization = module.params.get('organization')
     inventory = module.params.get('inventory')
     optional_args['limit'] = module.params.get('limit')
-    optional_args['extra_vars'] = module.params.get('extra_vars')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
