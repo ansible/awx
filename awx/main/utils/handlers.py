@@ -18,7 +18,14 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
             return
         if not os.path.exists(settings.LOGGING['handlers']['external_logger']['address']):
             return
-        return super(RSysLogHandler, self).emit(msg)
+        try:
+            return super(RSysLogHandler, self).emit(msg)
+        except ConnectionRefusedError:
+            # rsyslogd has gone to lunch; this generally means that it's just
+            # been restarted (due to a configuration change)
+            # unfortunately, we can't log that because...rsyslogd is down (and
+            # would just us back ddown this code path)
+            pass
 
 
 ColorHandler = logging.StreamHandler
