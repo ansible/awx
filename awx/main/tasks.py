@@ -288,7 +288,7 @@ def handle_setting_changes(setting_keys):
         setting.startswith('LOG_AGGREGATOR')
         for setting in setting_keys
     ]):
-        reconfigure_rsyslog()
+        connection.on_commit(reconfigure_rsyslog)
 
 
 @task(queue='tower_broadcast_all')
