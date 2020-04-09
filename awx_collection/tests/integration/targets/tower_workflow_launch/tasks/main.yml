@@ -70,6 +70,26 @@
       - result is not failed
       - "'id' in result['job_info']"
 
+- name: Prompt the workflow's extra_vars on launch
+  tower_workflow_job_template:
+    name: "{{ wfjt_name1 }}"
+    state: present
+    ask_variables_on_launch: true
+
+- name: Kick off a workflow with extra_vars
+  tower_workflow_launch:
+    validate_certs: false
+    workflow_template: "{{ wfjt_name1 }}"
+    extra_vars:
+      var1: My First Variable
+      var2: My Second Variable
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
 - name: Clean up test workflow
   tower_workflow_job_template:
     name: "{{ wfjt_name1 }}"
