@@ -241,12 +241,12 @@ def silence_deprecation():
     """The deprecation warnings are stored in a global variable
     they will create cross-test interference. Use this to turn them off.
     """
-    with mock.patch('ansible.module_utils.basic.AnsibleModule.deprecate'):
-        yield
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.deprecate') as this_mock:
+        yield this_mock
 
 
 @pytest.fixture
 def silence_warning():
     """Warnings use global variable, same as deprecations."""
-    with mock.patch('ansible.module_utils.basic.AnsibleModule.warn'):
-        yield
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.warn') as this_mock:
+        yield this_mock
