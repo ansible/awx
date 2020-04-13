@@ -40,6 +40,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     related: {
       webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
     },
+    webhook_key: 'sdfghjklmnbvcdsew435678iokjhgfd',
   };
 
   beforeEach(async () => {
@@ -74,7 +75,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
               template={mockTemplate}
               handleCancel={handleCancel}
               handleSubmit={handleSubmit}
-              webhookKey="sdfghjklmnbvcdsew435678iokjhgfd"
             />
           )}
         />,
@@ -172,7 +172,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').invoke('onChange')(
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
         true,
         {
           currentTarget: { value: true, type: 'change', checked: true },
@@ -181,7 +181,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     });
     wrapper.update();
     expect(
-      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').prop('isChecked')
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
 
     expect(
@@ -192,7 +192,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
     await act(() =>
       wrapper
-        .find('FormGroup[name="webhookKey"]')
+        .find('FormGroup[name="webhook_key"]')
         .find('Button[variant="tertiary"]')
         .prop('onClick')()
     );

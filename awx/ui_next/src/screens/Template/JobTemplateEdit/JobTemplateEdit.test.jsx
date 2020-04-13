@@ -35,7 +35,7 @@ const mockJobTemplate = {
   limit: '',
   name: 'Foo',
   playbook: 'Baz',
-  project: { id: 3, summary_fields: { organization: { id: 1 } } },
+  project: 3,
   scm_branch: '',
   skip_tags: '',
   summary_fields: {

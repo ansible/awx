@@ -17,18 +17,18 @@ function WorkflowJobTemplateAdd() {
       inventory,
       organization,
       webhook_credential,
-      webhookKey,
-      ...remainingValues
+      webhook_key,
+      ...templatePayload
     } = values;
-    remainingValues.inventory = inventory?.id;
-    remainingValues.organization = organization?.id;
-    remainingValues.webhook_credential = webhook_credential?.id;
+    templatePayload.inventory = inventory?.id;
+    templatePayload.organization = organization?.id;
+    templatePayload.webhook_credential = webhook_credential?.id;
     const organizationId =
-      organization?.id || inventory?.summary_fields?.organization.id || null;
+      organization?.id || inventory?.summary_fields?.organization.id;
     try {
       const {
         data: { id },
-      } = await WorkflowJobTemplatesAPI.create(remainingValues);
+      } = await WorkflowJobTemplatesAPI.create(templatePayload);
       await Promise.all(await submitLabels(id, labels, organizationId));
       history.push(`/templates/workflow_job_template/${id}/details`);
     } catch (err) {

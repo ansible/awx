@@ -85,8 +85,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
     act(() => {
       wrapper
         .find('SelectOption')
-        .find('button')
-        .at(2)
+        .find('button[aria-label="Label 3"]')
         .prop('onClick')();
     });
 

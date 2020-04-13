@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
-import { useRouteMatch, useParams, withRouter } from 'react-router-dom';
+import { useRouteMatch, useParams } from 'react-router-dom';
 
 import PropTypes, { shape } from 'prop-types';
 
@@ -67,7 +67,7 @@ function WorkflowJobTemplateForm({
   ] = useField('webhook_service');
 
   const [webhookKeyField, webhookKeyMeta, webhookKeyHelpers] = useField(
-    'webhookKey'
+    'webhook_key'
   );
 
   const [hasWebhooks, setHasWebhooks] = useState(
@@ -339,7 +339,7 @@ function WorkflowJobTemplateForm({
                 fieldId="wfjt-webhook-key"
                 type="text"
                 id="wfjt-webhook-key"
-                name="webhookKey"
+                name="webhook_key"
                 label={i18n._(t`Webhook Key`)}
               >
                 <FieldTooltip
@@ -397,7 +397,7 @@ WorkflowJobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {}, webhookKey }) {
+  mapPropsToValues({ template = {} }) {
     return {
       name: template.name || '',
       description: template.description || '',
@@ -417,7 +417,7 @@ const FormikApp = withFormik({
       webhook_url: template?.related?.webhook_receiver
         ? `${urlOrigin}${template.related.webhook_receiver}`
         : '',
-      webhookKey: webhookKey || null,
+      webhook_key: template.webhook_key || '',
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {
@@ -430,4 +430,4 @@ const FormikApp = withFormik({
 })(WorkflowJobTemplateForm);
 
 export { WorkflowJobTemplateForm as _WorkflowJobTemplateForm };
-export default withI18n()(withRouter(FormikApp));
+export default withI18n()(FormikApp);

@@ -100,8 +100,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     act(() => {
       wrapper
         .find('SelectOption')
-        .find('button')
-        .at(2)
+        .find('button[aria-label="Label 3"]')
         .prop('onClick')();
     });
 
@@ -110,8 +109,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     act(() =>
       wrapper
         .find('SelectOption')
-        .find('button')
-        .at(0)
+        .find('button[aria-label="Label 1"]')
         .prop('onClick')()
     );
 

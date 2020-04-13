@@ -25,7 +25,7 @@ import LaunchButton from '@components/LaunchButton';
 import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
-function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
+function WorkflowJobTemplateDetail({ template, i18n }) {
   const {
     id,
     ask_inventory_on_launch,
@@ -38,6 +38,7 @@ function WorkflowJobTemplateDetail({ template, i18n, webhook_key }) {
     summary_fields,
     related,
     webhook_credential,
+    webhook_key,
   } = template;
 
   const urlOrigin = window.location.origin;

@@ -39,6 +39,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
       user_capabilities: { edit: true, delete: true },
     },
     webhook_service: 'Github',
+    webhook_key: 'Foo webhook key',
   };
 
   beforeEach(async () => {
@@ -52,7 +53,6 @@ describe('<WorkflowJobTemplateDetail/>', () => {
           component={() => (
             <WorkflowJobTemplateDetail
               template={template}
-              webhook_key="Foo webhook key"
               hasContentLoading={false}
               onSetContentLoading={() => {}}
             />
