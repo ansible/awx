@@ -45,7 +45,7 @@ function Template({ i18n, me, setBreadcrumb }) {
           role_level: 'notification_admin_role',
         }),
       ]);
-      if (data?.related?.webhook_key) {
+      if (data.webhook_service && data?.related?.webhook_key) {
         const {
           data: { webhook_key },
         } = await JobTemplatesAPI.readWebhookKey(templateId);

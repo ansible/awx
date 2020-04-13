@@ -292,6 +292,49 @@ describe('<JobTemplateForm />', () => {
     );
   });
 
+  test('webhooks should render properly, without data', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/1/edit'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/edit"
+          component={() => (
+            <JobTemplateForm
+              template={{
+                ...mockData,
+                webhook_credential: null,
+                webhook_key: '',
+                webhook_service: 'github',
+                related: { webhook_receiver: '' },
+              }}
+              handleSubmit={jest.fn()}
+              handleCancel={jest.fn()}
+            />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(
+      wrapper.find('TextInputBase#template-webhook_key').prop('value')
+    ).toBe('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.');
+    expect(
+      wrapper.find('Button[aria-label="Update webhook key"]').prop('isDisabled')
+    ).toBe(true);
+  });
   test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
     let wrapper;

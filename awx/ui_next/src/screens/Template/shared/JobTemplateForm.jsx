@@ -40,7 +40,7 @@ import {
 import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
-import WebhookSubForm from './WebhooksSubForm';
+import WebhookSubForm from './WebhookSubForm';
 
 const { origin } = document.location;
 
@@ -94,10 +94,6 @@ function JobTemplateForm({
   );
   const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
   const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
-  const webhookService = useField('webhook_service');
-  const webhookUrl = useField('webhook_url');
-  const webhookKey = useField('webhook_key');
-  const webhookCredential = useField('webhook_credential');
 
   const {
     request: fetchProject,
@@ -189,19 +185,11 @@ function JobTemplateForm({
     callbackUrl = `${origin}${path}`;
   }
 
-  if (
-    instanceGroupLoading ||
-    hasProjectLoading
-    // credentialContentLoading
-  ) {
+  if (instanceGroupLoading || hasProjectLoading) {
     return <ContentLoading />;
   }
 
-  if (
-    instanceGroupError ||
-    projectContentError
-    //  credentialContentError
-  ) {
+  if (instanceGroupError || projectContentError) {
     return <ContentError error={contentError} />;
   }
 
@@ -530,23 +518,9 @@ function JobTemplateForm({
                       </span>
                     }
                     id="wfjt-enabled-webhooks"
-                    isChecked={
-                      Boolean(webhookService[0].value) || enableWebhooks
-                    }
+                    isChecked={enableWebhooks}
                     onChange={checked => {
                       setEnableWebhooks(checked);
-                      webhookService[2].setValue(
-                        !checked ? '' : webhookService[1].initialValue
-                      );
-                      webhookUrl[2].setValue(
-                        !checked ? '' : webhookUrl[1].initialValue
-                      );
-                      webhookKey[2].setValue(
-                        !checked ? '' : webhookKey[1].initialValue
-                      );
-                      webhookCredential[2].setValue(
-                        !checked ? null : webhookCredential[1].initialValue
-                      );
                     }}
                   />
                   <CheckboxField
@@ -624,7 +598,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {} }) {
+  mapPropsToValues({ template = {}, i18n }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -671,8 +645,10 @@ const FormikApp = withFormik({
       webhook_service: template.webhook_service || '',
       webhook_url: template?.related?.webhook_receiver
         ? `${origin}${template.related.webhook_receiver}`
-        : '',
-      webhook_key: template.webhook_key || '',
+        : i18n._(t`a new webhook url will be generated on save.`).toUpperCase(),
+      webhook_key:
+        template.webhook_key ||
+        i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
       webhook_credential: template?.summary_fields?.webhook_credential || null,
     };
   },
