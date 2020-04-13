@@ -93,14 +93,19 @@ class ApiV2(base.Base):
                 continue
 
             rel = related_endpoint._create()
+            is_relation = rel.__class__.__name__ in EXPORTABLE_RELATIONS
+            is_dependent = rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS
+            if not (is_relation or is_dependent):
+                continue
+
             related_options = utils.get_post_fields(related_endpoint, self._cache)
             if related_options is None:  # This is a read-only endpoint.
                 continue
             is_attach = 'id' in related_options  # This is not a create-only endpoint.
 
-            if rel.__class__.__name__ in EXPORTABLE_RELATIONS and is_attach:
+            if is_relation and is_attach:
                 by_natural_key = True
-            elif rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS:
+            elif is_dependent:
                 by_natural_key = False
             else:
                 continue

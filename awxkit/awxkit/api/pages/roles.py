@@ -1,5 +1,4 @@
 from awxkit.api.resources import resources
-import awxkit.exceptions as exc
 
 from . import base
 from . import page
