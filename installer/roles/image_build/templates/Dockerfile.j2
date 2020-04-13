@@ -107,16 +107,17 @@ RUN for dir in /home/awx /var/run/supervisor /var/lib/awx /var/lib/awx/rsyslog /
     for file in /etc/passwd /var/run/nginx.pid; \
     do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
+# Create default awx rsyslog config
+ADD rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
+
 # Fix up permissions
 RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root && \
     find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+w && \
+    chgrp root /var/lib/awx/rsyslog/rsyslog.conf && \
     chmod +rx /usr/bin/launch_awx.sh && \
     chmod +rx /usr/bin/launch_awx_task.sh && \
     chmod +rx /usr/bin/config-watcher && \
     chmod u+s /usr/bin/bwrap # https://github.com/ansible/awx/issues/5224
-
-# Create default awx rsyslog config
-ADD rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
