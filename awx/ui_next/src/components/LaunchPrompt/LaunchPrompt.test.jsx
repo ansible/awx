@@ -3,6 +3,8 @@ import { act, isElementOfType } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import LaunchPrompt from './LaunchPrompt';
 import InventoryStep from './InventoryStep';
+import CredentialsStep from './CredentialsStep';
+import OtherPromptsStep from './OtherPromptsStep';
 import PreviewStep from './PreviewStep';
 import { InventoriesAPI } from '@api';
 
@@ -69,7 +71,7 @@ describe('LaunchPrompt', () => {
 
     expect(steps).toHaveLength(5);
     expect(steps[0].name).toEqual('Inventory');
-    expect(steps[1].name).toEqual('Credential');
+    expect(steps[1].name).toEqual('Credentials');
     expect(steps[2].name).toEqual('Other Prompts');
     expect(steps[3].name).toEqual('Survey');
     expect(steps[4].name).toEqual('Preview');
@@ -95,6 +97,52 @@ describe('LaunchPrompt', () => {
     expect(steps).toHaveLength(2);
     expect(steps[0].name).toEqual('Inventory');
     expect(isElementOfType(steps[0].component, InventoryStep)).toEqual(true);
+    expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
+  });
+
+  test('should add credentials step', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <LaunchPrompt
+          config={{
+            ...config,
+            ask_credential_on_launch: true,
+          }}
+          resource={resource}
+          onLaunch={noop}
+          onCancel={noop}
+        />
+      );
+    });
+    const steps = wrapper.find('Wizard').prop('steps');
+
+    expect(steps).toHaveLength(2);
+    expect(steps[0].name).toEqual('Credentials');
+    expect(isElementOfType(steps[0].component, CredentialsStep)).toEqual(true);
+    expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
+  });
+
+  test('should add other prompts step', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <LaunchPrompt
+          config={{
+            ...config,
+            ask_verbosity_on_launch: true,
+          }}
+          resource={resource}
+          onLaunch={noop}
+          onCancel={noop}
+        />
+      );
+    });
+    const steps = wrapper.find('Wizard').prop('steps');
+
+    expect(steps).toHaveLength(2);
+    expect(steps[0].name).toEqual('Other Prompts');
+    expect(isElementOfType(steps[0].component, OtherPromptsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
 });

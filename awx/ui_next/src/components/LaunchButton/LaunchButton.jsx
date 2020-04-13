@@ -88,8 +88,8 @@ class LaunchButton extends React.Component {
       const { history, resource } = this.props;
       const jobPromise =
         resource.type === 'workflow_job_template'
-          ? WorkflowJobTemplatesAPI.launch(resource.id, params)
-          : JobTemplatesAPI.launch(resource.id, params);
+          ? WorkflowJobTemplatesAPI.launch(resource.id, params || {})
+          : JobTemplatesAPI.launch(resource.id, params || {});
 
       const { data: job } = await jobPromise;
       history.push(

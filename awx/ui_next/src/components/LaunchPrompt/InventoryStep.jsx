@@ -8,6 +8,7 @@ import { getQSConfig, parseQueryString } from '@util/qs';
 import useRequest from '@util/useRequest';
 import OptionsList from '@components/OptionsList';
 import ContentLoading from '@components/ContentLoading';
+import ContentError from '@components/ContentError';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
@@ -16,12 +17,12 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryStep({ i18n }) {
-  const history = useHistory();
   const [field, , helpers] = useField('inventory');
+  const history = useHistory();
 
   const {
     isLoading,
-    // error,
+    error,
     result: { inventories, count },
     request: fetchInventories,
   } = useRequest(
@@ -45,6 +46,9 @@ function InventoryStep({ i18n }) {
 
   if (isLoading) {
     return <ContentLoading />;
+  }
+  if (error) {
+    return <ContentError error={error} />;
   }
 
   return (
