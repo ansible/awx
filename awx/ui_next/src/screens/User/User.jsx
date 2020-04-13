@@ -146,17 +146,16 @@ class User extends Component {
               <UserTokens id={Number(match.params.id)} />
             </Route>
             <Route key="not-found" path="*">
-              !hasContentLoading && (
-              <ContentError isNotFound>
-                {match.params.id && (
-                  <Link to={`/users/${match.params.id}/details`}>
-                    {i18n._(`View User Details`)}
-                  </Link>
-                )}
-              </ContentError>
-              )
+              {!hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/users/${match.params.id}/details`}>
+                      {i18n._(`View User Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
             </Route>
-            ,
           </Switch>
         </Card>
       </PageSection>
