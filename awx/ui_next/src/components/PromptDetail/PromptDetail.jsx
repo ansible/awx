@@ -48,30 +48,16 @@ function hasPromptData(launchData) {
   );
 }
 
-function removeOverrides(resource, overrides) {
-  const filteredResource = Object.keys(overrides).reduce(
-    (acc, value) => {
-      let root;
-      let nested;
-
-      ({
-        [value]: acc[value],
-        summary_fields: { [value]: acc[value], ...nested },
-        ...root
-      } = acc);
-
-      const filtered = {
-        ...root,
-        summary_fields: {
-          ...nested,
-        },
-      };
-
-      return filtered;
-    },
-    { ...resource }
-  );
-  return filteredResource;
+function omitOverrides(resource, overrides) {
+  const clonedResource = {
+    ...resource,
+    summary_fields: { ...resource.summary_fields },
+  };
+  Object.keys(overrides).forEach(keyToOmit => {
+    delete clonedResource[keyToOmit];
+    delete clonedResource.summary_fields[keyToOmit];
+  });
+  return clonedResource;
 }
 
 // TODO: When prompting is hooked up, update function
@@ -143,7 +129,7 @@ function partitionPromptDetails(resource, launchConfig) {
     }
   }
 
-  const withoutOverrides = removeOverrides(resource, overrides);
+  const withoutOverrides = omitOverrides(resource, overrides);
 
   return [withoutOverrides, overrides];
 }
