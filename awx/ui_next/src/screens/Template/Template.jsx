@@ -6,7 +6,6 @@ import {
   Switch,
   Route,
   Redirect,
-  withRouter,
   Link,
   useLocation,
   useParams,
@@ -224,4 +223,4 @@ function Template({ i18n, me, setBreadcrumb }) {
 }
 
 export { Template as _Template };
-export default withI18n()(withRouter(Template));
+export default withI18n()(Template);

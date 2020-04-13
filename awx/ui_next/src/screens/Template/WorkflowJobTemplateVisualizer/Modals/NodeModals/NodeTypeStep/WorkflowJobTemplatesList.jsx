@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
@@ -16,7 +16,6 @@ const QS_CONFIG = getQSConfig('workflow_job_templates', {
 });
 
 function WorkflowJobTemplatesList({
-  history,
   i18n,
   nodeResource,
   onUpdateNodeResource,
@@ -26,12 +25,14 @@ function WorkflowJobTemplatesList({
   const [isLoading, setIsLoading] = useState(true);
   const [workflowJobTemplates, setWorkflowJobTemplates] = useState([]);
 
+  const location = useLocation();
+
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       setWorkflowJobTemplates([]);
       setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const params = parseQueryString(QS_CONFIG, location.search);
       try {
         const { data } = await WorkflowJobTemplatesAPI.read(params, {
           role_level: 'execute_role',
@@ -44,7 +45,7 @@ function WorkflowJobTemplatesList({
         setIsLoading(false);
       }
     })();
-  }, [history.location]);
+  }, [location]);
 
   return (
     <PaginatedDataList
@@ -110,4 +111,4 @@ WorkflowJobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(WorkflowJobTemplatesList));
+export default withI18n()(WorkflowJobTemplatesList);

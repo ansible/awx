@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CardBody } from '@components/Card';
 
 import { TeamsAPI } from '@api';
@@ -50,5 +50,4 @@ TeamEdit.contextTypes = {
   custom_virtualenvs: PropTypes.arrayOf(PropTypes.string),
 };
 
-export { TeamEdit as _TeamEdit };
-export default withRouter(TeamEdit);
+export default TeamEdit;

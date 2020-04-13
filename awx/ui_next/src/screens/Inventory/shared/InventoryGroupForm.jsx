@@ -1,5 +1,4 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { Formik } from 'formik';
 import { Form, Card } from '@patternfly/react-core';
@@ -67,4 +66,4 @@ function InventoryGroupForm({
   );
 }
 
-export default withI18n()(withRouter(InventoryGroupForm));
+export default withI18n()(InventoryGroupForm);

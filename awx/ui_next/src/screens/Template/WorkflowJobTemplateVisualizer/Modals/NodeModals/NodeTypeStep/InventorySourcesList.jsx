@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
@@ -15,23 +15,19 @@ const QS_CONFIG = getQSConfig('inventory_sources', {
   order_by: 'name',
 });
 
-function InventorySourcesList({
-  history,
-  i18n,
-  nodeResource,
-  onUpdateNodeResource,
-}) {
+function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
   const [inventorySources, setInventorySources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       setInventorySources([]);
       setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const params = parseQueryString(QS_CONFIG, location.search);
       try {
         const { data } = await InventorySourcesAPI.read(params);
         setInventorySources(data.results);
@@ -42,7 +38,7 @@ function InventorySourcesList({
         setIsLoading(false);
       }
     })();
-  }, [history.location]);
+  }, [location]);
 
   return (
     <PaginatedDataList
@@ -110,4 +106,4 @@ InventorySourcesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(InventorySourcesList));
+export default withI18n()(InventorySourcesList);
