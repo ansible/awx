@@ -288,8 +288,6 @@ describe('<ProjectForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
 
-    console.log(wrapper.debug());
-
     const scmTypeSelect = wrapper.find(
       'FormGroup[label="Source Control Credential Type"] FormSelect'
     );
