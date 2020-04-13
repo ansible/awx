@@ -1114,15 +1114,21 @@ ManagedCredentialType(
             'label': ugettext_noop('Verify SSL'),
             'type': 'boolean',
             'secret': False
+        }, {
+            'id': 'oauth_token',
+            'label': ugettext_noop('OAuth Token'),
+            'type': 'string',
+            'secret': True
         }],
-        'required': ['host', 'username', 'password'],
+        'required': ['host'],
     },
     injectors={
         'env': {
             'TOWER_HOST': '{{host}}',
             'TOWER_USERNAME': '{{username}}',
             'TOWER_PASSWORD': '{{password}}',
-            'TOWER_VERIFY_SSL': '{{verify_ssl}}'
+            'TOWER_VERIFY_SSL': '{{verify_ssl}}',
+            'TOWER_OAUTH_TOKEN': '{{oauth_token}}'
         }
     },
 )
