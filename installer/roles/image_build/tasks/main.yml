@@ -148,7 +148,7 @@
   copy:
     src: rsyslog.conf
     dest: "{{ docker_base_path }}/rsyslog.conf"
-    mode: '0700'
+    mode: '0660'
   delegate_to: localhost
 
 - name: Stage supervisor.conf

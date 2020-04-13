@@ -98,6 +98,8 @@ spec:
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
               mountPath: "/var/run/rsyslog"
+            - name: rsyslog-dir
+              mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
               mountPath: "/etc/pki/ca-trust/source/anchors/"
@@ -182,6 +184,8 @@ spec:
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
               mountPath: "/var/run/rsyslog"
+            - name: rsyslog-dir
+              mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
               mountPath: "/etc/pki/ca-trust/source/anchors/"
@@ -326,6 +330,8 @@ spec:
         - name: supervisor-socket
           emptyDir: {}
         - name: rsyslog-socket
+          emptyDir: {}
+        - name: rsyslog-dir
           emptyDir: {}
 {% if ca_trust_dir is defined %}
         - name: {{ kubernetes_deployment_name }}-ca-trust-dir
