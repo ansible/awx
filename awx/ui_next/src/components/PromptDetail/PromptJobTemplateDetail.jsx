@@ -7,6 +7,8 @@ import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
 import { Detail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import CredentialChip from '@components/CredentialChip';
+import Sparkline from '@components/Sparkline';
+import { toTitleCase } from '@util/strings';
 
 function PromptJobTemplateDetail({ i18n, resource }) {
   const {
@@ -61,14 +63,32 @@ function PromptJobTemplateDetail({ i18n, resource }) {
     );
   }
 
+  const inventoryKind =
+    summary_fields?.inventory?.kind === 'smart'
+      ? 'smart_inventory'
+      : 'inventory';
+
+  const recentJobs = summary_fields.recent_jobs.map(job => ({
+    ...job,
+    type: 'job',
+  }));
+
   return (
     <>
-      <Detail label={i18n._(t`Job Type`)} value={job_type} />
+      {summary_fields.recent_jobs?.length > 0 && (
+        <Detail
+          value={<Sparkline jobs={recentJobs} />}
+          label={i18n._(t`Activity`)}
+        />
+      )}
+      <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job_type)} />
       {summary_fields?.inventory && (
         <Detail
           label={i18n._(t`Inventory`)}
           value={
-            <Link to={`/inventories/${summary_fields.inventory?.id}/details`}>
+            <Link
+              to={`/${inventoryKind}/${summary_fields.inventory?.id}/details`}
+            >
               {summary_fields.inventory?.name}
             </Link>
           }
@@ -84,7 +104,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           }
         />
       )}
-      <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
+      <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
       <Detail label={i18n._(t`Playbook`)} value={playbook} />
       <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
       <Detail label={i18n._(t`Limit`)} value={limit} />
@@ -103,6 +123,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           />
         </React.Fragment>
       )}
+      {optionsList && <Detail label={i18n._(t`Options`)} value={optionsList} />}
       {summary_fields?.credentials?.length > 0 && (
         <Detail
           fullWidth
@@ -172,7 +193,6 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           }
         />
       )}
-      {optionsList && <Detail label={i18n._(t`Options`)} value={optionsList} />}
       {extra_vars && (
         <VariablesDetail
           label={i18n._(t`Variables`)}

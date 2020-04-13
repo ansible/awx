@@ -38,10 +38,10 @@ describe('PromptJobTemplateDetail', () => {
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
 
-    assertDetail('Job Type', 'run');
+    assertDetail('Job Type', 'Run');
     assertDetail('Inventory', 'Demo Inventory');
     assertDetail('Project', 'Mock Project');
-    assertDetail('SCM Branch', 'Foo branch');
+    assertDetail('Source Control Branch', 'Foo branch');
     assertDetail('Playbook', 'ping.yml');
     assertDetail('Forks', '2');
     assertDetail('Limit', 'alpha:beta');
