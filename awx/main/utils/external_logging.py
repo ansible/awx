@@ -60,11 +60,21 @@ def construct_rsyslog_conf_template(settings=settings):
             params.append(f'restpath="{path}"')
         username = getattr(settings, 'LOG_AGGREGATOR_USERNAME', '')
         password = getattr(settings, 'LOG_AGGREGATOR_PASSWORD', '')
-        if username:
+        if getattr(settings, 'LOG_AGGREGATOR_TYPE', None) == 'splunk':
+            # splunk has a weird authorization header <shrug>
+            if password:
+                # from omhttp docs:
+                # https://www.rsyslog.com/doc/v8-stable/configuration/modules/omhttp.html
+                # > Currently only a single additional header/key pair is
+                # > configurable, further development is needed to support
+                # > arbitrary header key/value lists.
+                params.append('httpheaderkey="Authorization"')
+                params.append(f'httpheadervalue="Splunk {password}"')
+        elif username:
             params.append(f'uid="{username}"')
-        if username and password:
-            # you can only have a basic auth password if there's a username
-            params.append(f'pwd="{password}"')
+            if password:
+                # you can only have a basic auth password if there's a username
+                params.append(f'pwd="{password}"')
         params = ' '.join(params)
         parts.extend(['module(load="omhttp")', f'action({params})'])
     elif protocol and host and port:
