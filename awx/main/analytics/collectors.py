@@ -222,7 +222,7 @@ def query_info(since, collection_type):
 
 
 # Copies Job Events from db to a .csv to be shipped
-@table_version('events_table.csv', '1.0')
+@table_version('events_table.csv', '1.1')
 @table_version('unified_jobs_table.csv', '1.0')
 @table_version('unified_job_template_table.csv', '1.0')
 def copy_tables(since, full_path):
@@ -248,7 +248,12 @@ def copy_tables(since, full_path):
                               main_jobevent.role, 
                               main_jobevent.job_id, 
                               main_jobevent.host_id, 
-                              main_jobevent.host_name
+                              main_jobevent.host_name,
+                              CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP) AS start,
+                              CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP) AS end,
+                              main_jobevent.event_data::json->'duration' AS duration,
+                              main_jobevent.event_data::json->'res'->'warnings' AS warnings,
+                              main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
