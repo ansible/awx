@@ -11,6 +11,7 @@ def construct_rsyslog_conf_template(settings=settings):
     host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
+    timeout = str(getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5) * 1000)
     if protocol.startswith('http'):
         scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
@@ -49,8 +50,8 @@ def construct_rsyslog_conf_template(settings=settings):
             f'skipverifyhost="{skip_verify}"',
             'action.resumeRetryCount="-1"',
             'template="awx"',
-            'errorfile="/var/log/tower/external.err"',
-            'healthchecktimeout="20000"',
+            'errorfile="/var/log/tower/rsyslog.err"',
+            f'healthchecktimeout="{timeout}"',
         ]
         if parsed.path:
             path = urlparse.quote(parsed.path[1:])

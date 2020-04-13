@@ -214,7 +214,6 @@
     - 'deployment'
     - 'supervisor'
     - 'launch_awx'
-    - 'rsyslog'
   no_log: true
 
 - name: Apply Deployment
@@ -226,7 +225,6 @@
     - "{{ deployment }}"
     - "{{ supervisor }}"
     - "{{ launch_awx }}"
-    - "{{ rsyslog }}"
   no_log: true
 
 - name: Delete any existing management pod
