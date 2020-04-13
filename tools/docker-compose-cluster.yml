@@ -58,7 +58,6 @@ services:
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx-3
-    entrypoint: ["bash"]
     command: launch_awx.sh
     working_dir: "/awx_devel"
     environment:
