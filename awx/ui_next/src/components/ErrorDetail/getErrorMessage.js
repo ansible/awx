@@ -1,9 +1,9 @@
 export default function getErrorMessage(response) {
-  if (typeof response.data === 'string') {
-    return response.data;
-  }
   if (!response.data) {
     return null;
+  }
+  if (typeof response.data === 'string') {
+    return response.data;
   }
   if (response.data.detail) {
     return response.data.detail;

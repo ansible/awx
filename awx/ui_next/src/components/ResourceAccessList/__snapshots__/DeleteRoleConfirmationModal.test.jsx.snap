@@ -322,7 +322,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               className="pf-c-backdrop"
             >
               <FocusTrap
-                _createFocusTrap={[Function]}
                 active={true}
                 className="pf-l-bullseye"
                 focusTrapOptions={
@@ -331,7 +330,6 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   }
                 }
                 paused={false}
-                tag="div"
               >
                 <div
                   className="pf-l-bullseye"

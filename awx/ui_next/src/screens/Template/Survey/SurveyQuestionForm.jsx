@@ -13,13 +13,7 @@ import FormField, {
   FieldTooltip,
 } from '@components/FormField';
 import AnsibleSelect from '@components/AnsibleSelect';
-import {
-  required,
-  noWhiteSpace,
-  combine,
-  maxLength,
-  defaultIsNotAvailable,
-} from '@util/validators';
+import { required, noWhiteSpace, combine, maxLength } from '@util/validators';
 
 function AnswerTypeField({ i18n }) {
   const [field] = useField({
@@ -72,6 +66,17 @@ function SurveyQuestionForm({
   submitError,
   i18n,
 }) {
+  const defaultIsNotAvailable = choices => {
+    return defaultValue => {
+      if (!choices.includes(defaultValue)) {
+        return i18n._(
+          t`Default choice must be answered from the choices listed.`
+        );
+      }
+      return undefined;
+    };
+  };
+
   return (
     <Formik
       initialValues={{

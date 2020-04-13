@@ -41,6 +41,5 @@ describe('ErrorDetail', () => {
     );
     wrapper.find('Expandable').prop('onToggle')();
     wrapper.update();
-    // console.log(wrapper.find('ErrorDetail').prop('error'));
   });
 });
