@@ -89,11 +89,7 @@ class ApiV2(base.Base):
         if getattr(self, '_options', None) is None:
             self._options = {}
 
-        if isinstance(_page, page.TentativePage):
-            url = str(_page)
-        else:
-            url = _page.url
-
+        url = _page.url if isinstance(_page, page.Page) else str(_page)
         if url in self._options:
             return self._options[url]
 
@@ -101,13 +97,21 @@ class ApiV2(base.Base):
         warning = options.r.headers.get('Warning', '')
         if '299' in warning and 'deprecated' in warning:
             return self._options.setdefault(url, None)
-        if 'POST' not in options.r.headers.get('Allow', ''):
-            return self._options.setdefault(url, None)
 
-        if 'POST' in options.json['actions']:
-            return self._options.setdefault(url, options.json['actions']['POST'])
+        return self._options.setdefault(url, options)
+
+    def _get_post_fields(self, _page):
+        options_page = self._get_options(_page)
+        if options_page is None:
+            return None
+
+        if 'POST' not in options_page.r.headers.get('Allow', ''):
+            return None
+
+        if 'POST' in options_page.json['actions']:
+            return options_page.json['actions']['POST']
         else:
-            return self._options.setdefault(url, parse_description(options.json['description']))
+            return parse_description(options_page.json['description'])
 
     # Export methods
 
@@ -143,7 +147,7 @@ class ApiV2(base.Base):
                 continue
 
             rel = related_endpoint._create()
-            related_options = self._get_options(related_endpoint)
+            related_options = self._get_post_fields(related_endpoint)
             if related_options is None:  # This is a read-only endpoint.
                 continue
             is_attach = 'id' in related_options  # This is not a create-only endpoint.
@@ -183,7 +187,7 @@ class ApiV2(base.Base):
 
     def _get_assets(self, resource, value):
         endpoint = getattr(self, resource)
-        options = self._get_options(endpoint)
+        options = self._get_post_fields(endpoint)
         if options is None:
             return None
 
@@ -232,7 +236,7 @@ class ApiV2(base.Base):
 
     def _register_existing_assets(self, resource):
         endpoint = getattr(self, resource)
-        options = self._get_options(endpoint)
+        options = self._get_post_fields(endpoint)
         if options is None:
             return
 
@@ -255,11 +259,14 @@ class ApiV2(base.Base):
         return _page
 
     def _create_assets(self, data, resource):
+        # FIXME: this method should work with any list-create
+        # endpoint, so that we can use it with create relations, e.g. WFJT Nodes
+
         if resource not in data or resource not in EXPORTABLE_RESOURCES:
             return
 
         endpoint = getattr(self, resource)
-        options = self._get_options(endpoint)
+        options = self._get_post_fields(endpoint)
         assets = data[resource]
         for asset in assets:
             post_data = {}
