@@ -280,7 +280,7 @@ class IsolatedManager(object):
         if os.path.exists(events_path):
             for event in set(os.listdir(events_path)) - self.handled_events:
                 path = os.path.join(events_path, event)
-                if os.path.exists(path):
+                if os.path.exists(path) and os.path.isfile(path):
                     try:
                         event_data = json.load(
                             open(os.path.join(events_path, event), 'r')
