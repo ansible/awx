@@ -77,7 +77,7 @@ describe('PromptDetail', () => {
       assertDetail('Job Type', 'run');
       assertDetail('Credential', 'Demo Credential');
       assertDetail('Inventory', 'Demo Inventory');
-      assertDetail('SCM Branch', '123');
+      assertDetail('Source Control Branch', '123');
       assertDetail('Limit', '3');
       assertDetail('Verbosity', '1 (Verbose)');
       assertDetail('Job Tags', 'onetwothree');
@@ -113,7 +113,7 @@ describe('PromptDetail', () => {
         'Job Type',
         'Credential',
         'Inventory',
-        'SCM Branch',
+        'Source Control Branch',
         'Limit',
         'Verbosity',
         'Job Tags',

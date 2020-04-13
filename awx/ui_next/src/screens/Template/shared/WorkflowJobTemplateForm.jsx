@@ -288,7 +288,7 @@ function WorkflowJobTemplateForm({
             />
             <FormField
               type="text"
-              label={i18n._(t`SCM Branch`)}
+              label={i18n._(t`Source Control Branch`)}
               tooltip={i18n._(
                 t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`
               )}

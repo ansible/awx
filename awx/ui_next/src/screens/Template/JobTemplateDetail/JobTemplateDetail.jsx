@@ -206,7 +206,10 @@ function JobTemplateDetail({ i18n, template }) {
         ) : (
           renderMissingDataDetail(i18n._(t`Project`))
         )}
-        <Detail label={i18n._(t`SCM Branch`)} value={template.scm_branch} />
+        <Detail
+          label={i18n._(t`Source Control Branch`)}
+          value={template.scm_branch}
+        />
         <Detail label={i18n._(t`Playbook`)} value={playbook} />
         <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
         <Detail label={i18n._(t`Limit`)} value={limit} />

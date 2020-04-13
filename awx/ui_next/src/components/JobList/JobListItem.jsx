@@ -36,7 +36,7 @@ function JobListItem({
   const labelId = `check-action-${job.id}`;
 
   const jobTypes = {
-    project_update: i18n._(t`SCM Update`),
+    project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
     command: i18n._(t`Command`),

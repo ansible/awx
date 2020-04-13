@@ -54,7 +54,7 @@ const ManualSubForm = ({
             assigned to other projects. Create a new directory there and make
             sure the playbook files can be read by the "awx" system user,
             or have ${brandName} directly retrieve your playbooks from
-            source control using the SCM Type option above.`)}
+            source control using the Source Control Type option above.`)}
         </Alert>
       )}
       <FormField

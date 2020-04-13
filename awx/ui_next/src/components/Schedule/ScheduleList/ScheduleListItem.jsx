@@ -33,7 +33,7 @@ function ScheduleListItem({ i18n, isSelected, onSelect, schedule }) {
   const jobTypeLabels = {
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
-    project_update: i18n._(t`SCM Update`),
+    project_update: i18n._(t`Source Control Update`),
     system_job: i18n._(t`Management Job`),
     workflow_job: i18n._(t`Workflow Job`),
   };

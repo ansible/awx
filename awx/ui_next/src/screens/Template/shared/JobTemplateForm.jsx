@@ -270,7 +270,7 @@ function JobTemplateForm({
         {project?.allow_override && (
           <FieldWithPrompt
             fieldId="template-scm-branch"
-            label={i18n._(t`SCM Branch`)}
+            label={i18n._(t`Source Control Branch`)}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
           >

@@ -217,7 +217,7 @@ const credentialTypes = [
         },
         {
           id: 'ssh_key_data',
-          label: 'SCM Private Key',
+          label: 'Source Control Private Key',
           type: 'string',
           format: 'ssh_private_key',
           secret: true,
