@@ -156,6 +156,8 @@ class IsolatedManager(object):
             '- /env/ssh_key',
             # don't rsync kube config files
             '- .kubeconfig*'
+            # don't rsync files created by rsync itself
+            '- .~tmp~'
         ]
 
         for filename, data in (
