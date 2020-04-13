@@ -317,8 +317,11 @@ class Page(object):
         page_cls = get_registered_page(endpoint)
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
-    def get_natural_key(self):
+    def get_natural_key(self, cache=None):
         warn = "This object does not have a natural key: %s"
+
+        if cache is None:
+            cache = PageCache()
 
         if not getattr(self, 'NATURAL_KEY', None):
             log.warning(warn, getattr(self, 'endpoint', ''))
@@ -327,12 +330,10 @@ class Page(object):
         natural_key = {}
         for key in self.NATURAL_KEY:
             if key in self.related:
-                try:
-                    # FIXME: use caching by url
-                    natural_key[key] = self.related[key].get().get_natural_key()
-                except exc.Forbidden:
-                    log.warning("This foreign key cannot be read: %s", self.related[key])
+                related_endpoint = cache.get_page(self.related[key])
+                if related_endpoint is None:
                     return None
+                natural_key[key] = related_endpoint.get_natural_key(cache=cache)
             elif key in self:
                 natural_key[key] = self[key]
         if not natural_key:
@@ -401,7 +402,7 @@ class PageList(object):
     def create(self, *a, **kw):
         return self.__item_class__(self.connection).create(*a, **kw)
 
-    def get_natural_key(self):
+    def get_natural_key(self, cache=None):
         log.warning("This object does not have a natural key: %s", getattr(self, 'endpoint', ''))
         return None
 
@@ -536,19 +537,47 @@ class TentativePage(str):
 class PageCache(object):
     def __init__(self):
         self.options = {}
+        self.pages_by_url = {}
 
     def get_options(self, page):
-        url = page.url if isinstance(page, Page) else str(page)
+        url = page.endpoint if isinstance(page, Page) else str(page)
         if url in self.options:
             return self.options[url]
 
         try:
             options = page.options()
         except exc.Common:
+            log.error("This endpoint raised an error: %s", url)
             return self.options.setdefault(url, None)
 
         warning = options.r.headers.get('Warning', '')
         if '299' in warning and 'deprecated' in warning:
+            log.warning("This endpoint is deprecated: %s", url)
             return self.options.setdefault(url, None)
 
         return self.options.setdefault(url, options)
+
+    def set_page(self, page):
+        self.pages_by_url[page.endpoint] = page
+        if 'results' in page:
+            for p in page.results:
+                self.set_page(p)
+        return page
+
+    def get_page(self, page):
+        url = page.endpoint if isinstance(page, Page) else str(page)
+        if url in self.pages_by_url:
+            return self.pages_by_url[url]
+
+        try:
+            page = page.get(all_pages=True)
+        except exc.Common:
+            log.error("This endpoint raised an error: %s", url)
+            return self.pages_by_url.setdefault(url, None)
+
+        warning = page.r.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            log.warning("This endpoint is deprecated: %s", url)
+            return self.pages_by_url.setdefault(url, None)
+
+        return self.set_page(page)

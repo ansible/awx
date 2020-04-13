@@ -78,14 +78,13 @@ class ApiV2(base.Base):
         for key in options:
             if key not in asset.related:
                 continue
-            try:
-                # FIXME: use caching by url
-                natural_key = asset.related[key].get().get_natural_key()
-            except exc.Forbidden:
-                log.warning("This foreign key cannot be read: %s", asset.related[key])
-                return None
+
+            related_endpoint = self._cache.get_page(asset.related[key])
+            if related_endpoint is None:
+                return None  # This foreign key is unreadable
+            natural_key = related_endpoint.get_natural_key(self._cache)
             if natural_key is None:
-                return None  # This is an unresolvable foreign key
+                return None  # This foreign key has unresolvable dependencies
             fields[key] = natural_key
 
         related = {}
@@ -106,16 +105,13 @@ class ApiV2(base.Base):
             else:
                 continue
 
-            try:
-                # FIXME: use caching by url
-                data = rel.get(all_pages=True)
-            except exc.Forbidden:
-                log.warning("These related objects cannot be read: %s", related_endpoint)
+            data = self._cache.get_page(related_endpoint)
+            if data is None:
                 continue
 
             if 'results' in data:
                 results = (
-                    x.get_natural_key() if by_natural_key else self._serialize_asset(x, related_options)
+                    x.get_natural_key(self._cache) if by_natural_key else self._serialize_asset(x, related_options)
                     for x in data.results
                 )
                 related[key] = [x for x in results if x is not None]
@@ -125,7 +121,7 @@ class ApiV2(base.Base):
         if related:
             fields['related'] = related
 
-        natural_key = asset.get_natural_key()
+        natural_key = asset.get_natural_key(self._cache)
         if natural_key is None:
             return None
         fields['natural_key'] = natural_key
@@ -144,7 +140,7 @@ class ApiV2(base.Base):
             pk = pk_or_name(self, resource, value)  # TODO: decide whether to support multiple
             results = endpoint.get(id=pk).results
         else:
-            results = endpoint.get(all_pages=True).results
+            results = self._cache.get_page(endpoint).results
 
         assets = (self._serialize_asset(asset, options) for asset in results)
         return [asset for asset in assets if asset is not None]
@@ -174,7 +170,7 @@ class ApiV2(base.Base):
             yield page_resource[page_cls]
 
     def _register_page(self, page):
-        natural_key = freeze(page.get_natural_key())
+        natural_key = freeze(page.get_natural_key(self._cache))
         # FIXME: we need to keep a reference for the case where we
         # don't have a natural key, so we can delete
         if natural_key is not None:
@@ -189,7 +185,7 @@ class ApiV2(base.Base):
         if options is None:
             return
 
-        results = endpoint.get(all_pages=True).results
+        results = self._cache.get_page(endpoint).results
         for pg in results:
             self._register_page(pg)
 
@@ -237,6 +233,7 @@ class ApiV2(base.Base):
                     page = endpoint.post(post_data)
                 else:
                     page = page.put(post_data)
+                # FIXME: created pages need to be put in the cache
             except exc.Common:
                 log.exception("post_data: %r", post_data)
                 raise
@@ -274,7 +271,7 @@ class ApiV2(base.Base):
             for item in related_set:
                 data = {key: value for key, value in item.items()
                         if key not in ('natural_key', 'related')}
-                endpoint.post(data)
+                endpoint.post(data)  # FIXME: add the page to the cache
                 # FIXME: deal with objects that themselves have relateds, e.g. WFJT Nodes
 
         # FIXME: deal with pruning existing relations that do not match the import set

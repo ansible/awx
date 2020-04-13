@@ -9,18 +9,20 @@ class Role(base.Base):
 
     NATURAL_KEY = ('name',)
 
-    def get_natural_key(self):
-        natural_key = super(Role, self).get_natural_key()
+    def get_natural_key(self, cache=None):
+        if cache is None:
+            cache = page.PageCache()
+
+        natural_key = super(Role, self).get_natural_key(cache=cache)
         related_objs = [
             related for name, related in self.related.items()
             if name not in ('users', 'teams')
         ]
         if related_objs:
-            try:
-                # FIXME: use caching by url
-                natural_key['content_object'] = related_objs[0].get().get_natural_key()
-            except exc.Forbidden:
+            related_endpoint = cache.get_page(related_objs[0])
+            if related_endpoint is None:
                 return None
+            natural_key['content_object'] = related_endpoint.get_natural_key(cache=cache)
 
         return natural_key
 
