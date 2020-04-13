@@ -531,3 +531,24 @@ class TentativePage(str):
 
     def __ne__(self, other):
         return self.endpoint != other
+
+
+class PageCache(object):
+    def __init__(self):
+        self.options = {}
+
+    def get_options(self, page):
+        url = page.url if isinstance(page, Page) else str(page)
+        if url in self.options:
+            return self.options[url]
+
+        try:
+            options = page.options()
+        except exc.Common:
+            return self.options.setdefault(url, None)
+
+        warning = options.r.headers.get('Warning', '')
+        if '299' in warning and 'deprecated' in warning:
+            return self.options.setdefault(url, None)
+
+        return self.options.setdefault(url, options)
