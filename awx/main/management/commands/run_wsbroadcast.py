@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
     @classmethod
     def get_connection_status(cls, me, hostnames, data):
-        host_stats = [('hostame', 'state', 'start time', 'duration (sec)')]
+        host_stats = [('hostname', 'state', 'start time', 'duration (sec)')]
         for h in hostnames:
             connection_color = '91'    # red
             h = safe_name(h)
@@ -77,7 +77,7 @@ class Command(BaseCommand):
 
     @classmethod
     def get_connection_stats(cls, me, hostnames, data):
-        host_stats = [('hostame', 'total', 'per minute')]
+        host_stats = [('hostname', 'total', 'per minute')]
         for h in hostnames:
             h = safe_name(h)
             prefix = f'awx_{h}'
