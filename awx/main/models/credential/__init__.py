@@ -1103,22 +1103,26 @@ ManagedCredentialType(
         }, {
             'id': 'username',
             'label': ugettext_noop('Username'),
-            'type': 'string'
+            'type': 'string',
+            'help_text': ugettext_noop('The Ansible Tower user to authenticate as.'
+                                       'This should not be set if an OAuth token is being used.')
         }, {
             'id': 'password',
             'label': ugettext_noop('Password'),
             'type': 'string',
             'secret': True,
         }, {
+            'id': 'oauth_token',
+            'label': ugettext_noop('OAuth Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('An OAuth token to use to authenticate to Tower with.'
+                                       'This should not be set if username/password are being used.')
+        }, {
             'id': 'verify_ssl',
             'label': ugettext_noop('Verify SSL'),
             'type': 'boolean',
             'secret': False
-        }, {
-            'id': 'oauth_token',
-            'label': ugettext_noop('OAuth Token'),
-            'type': 'string',
-            'secret': True
         }],
         'required': ['host'],
     },
