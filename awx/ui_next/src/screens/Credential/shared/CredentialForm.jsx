@@ -13,12 +13,17 @@ import {
   FormColumnLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import { ManualSubForm, SourceControlSubForm } from './CredentialSubForms';
+import {
+  GoogleComputeEngineSubForm,
+  ManualSubForm,
+  SourceControlSubForm,
+} from './CredentialSubForms';
 
 function CredentialFormFields({
   i18n,
   credentialTypes,
   formik,
+  gceCredentialTypeId,
   initialValues,
   scmCredentialTypeId,
   sshCredentialTypeId,
@@ -106,6 +111,7 @@ function CredentialFormFields({
             <Title size="md">{i18n._(t`Type Details`)}</Title>
             {
               {
+                [gceCredentialTypeId]: <GoogleComputeEngineSubForm />,
                 [sshCredentialTypeId]: <ManualSubForm />,
                 [scmCredentialTypeId]: <SourceControlSubForm />,
               }[formik.values.credential_type]
@@ -130,22 +136,26 @@ function CredentialForm({
     organization: credential?.summary_fields?.organization || null,
     credential_type: credential.credential_type || '',
     inputs: {
-      username: credential?.inputs?.username || '',
-      password: credential?.inputs?.password || '',
-      ssh_key_data: credential?.inputs?.ssh_key_data || '',
-      ssh_public_key_data: credential?.inputs?.ssh_public_key_data || '',
-      ssh_key_unlock: credential?.inputs?.ssh_key_unlock || '',
       become_method: credential?.inputs?.become_method || '',
-      become_username: credential?.inputs?.become_username || '',
       become_password: credential?.inputs?.become_password || '',
+      become_username: credential?.inputs?.become_username || '',
+      password: credential?.inputs?.password || '',
+      project: credential?.inputs?.project || '',
+      ssh_key_data: credential?.inputs?.ssh_key_data || '',
+      ssh_key_unlock: credential?.inputs?.ssh_key_unlock || '',
+      ssh_public_key_data: credential?.inputs?.ssh_public_key_data || '',
+      username: credential?.inputs?.username || '',
     },
   };
 
   const scmCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].kind === 'scm')
+    .filter(key => credentialTypes[key].namespace === 'scm')
     .map(key => credentialTypes[key].id)[0];
   const sshCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].kind === 'ssh')
+    .filter(key => credentialTypes[key].namespace === 'ssh')
+    .map(key => credentialTypes[key].id)[0];
+  const gceCredentialTypeId = Object.keys(credentialTypes)
+    .filter(key => credentialTypes[key].namespace === 'gce')
     .map(key => credentialTypes[key].id)[0];
 
   return (
@@ -168,6 +178,7 @@ function CredentialForm({
           'become_username',
           'become_password',
         ];
+        const gceKeys = ['username', 'ssh_key_data', 'project'];
         if (parseInt(values.credential_type, 10) === scmCredentialTypeId) {
           Object.keys(values.inputs).forEach(key => {
             if (scmKeys.indexOf(key) < 0) {
@@ -182,6 +193,14 @@ function CredentialForm({
               delete values.inputs[key];
             }
           });
+        } else if (
+          parseInt(values.credential_type, 10) === gceCredentialTypeId
+        ) {
+          Object.keys(values.inputs).forEach(key => {
+            if (gceKeys.indexOf(key) < 0) {
+              delete values.inputs[key];
+            }
+          });
         }
         onSubmit(values);
       }}
@@ -193,6 +212,7 @@ function CredentialForm({
               formik={formik}
               initialValues={initialValues}
               credentialTypes={credentialTypes}
+              gceCredentialTypeId={gceCredentialTypeId}
               scmCredentialTypeId={scmCredentialTypeId}
               sshCredentialTypeId={sshCredentialTypeId}
               {...rest}

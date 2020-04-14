@@ -12,16 +12,14 @@ import {
 } from './SharedFields';
 
 const SourceControlSubForm = () => (
-  <>
-    <FormColumnLayout>
-      <UsernameFormField />
-      <PasswordFormField />
-      <SSHKeyUnlockField />
-    </FormColumnLayout>
+  <FormColumnLayout>
+    <UsernameFormField />
+    <PasswordFormField />
+    <SSHKeyUnlockField />
     <FormFullWidthLayout>
       <SSHKeyDataField />
     </FormFullWidthLayout>
-  </>
+  </FormColumnLayout>
 );
 
 export default withI18n()(SourceControlSubForm);

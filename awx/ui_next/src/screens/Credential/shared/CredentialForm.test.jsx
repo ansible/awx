@@ -4,6 +4,8 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import CredentialForm from './CredentialForm';
 
+jest.mock('@api');
+
 const machineCredential = {
   id: 3,
   type: 'credential',
@@ -180,6 +182,104 @@ const sourceControlCredential = {
   kubernetes: false,
 };
 
+const gceCredential = {
+  id: 9,
+  type: 'credential',
+  url: '/api/v2/credentials/9/',
+  related: {
+    named_url:
+      '/api/v2/credentials/a gce cred++Google Compute Engine+cloud++Default/',
+    created_by: '/api/v2/users/1/',
+    modified_by: '/api/v2/users/1/',
+    organization: '/api/v2/organizations/4/',
+    activity_stream: '/api/v2/credentials/9/activity_stream/',
+    access_list: '/api/v2/credentials/9/access_list/',
+    object_roles: '/api/v2/credentials/9/object_roles/',
+    owner_users: '/api/v2/credentials/9/owner_users/',
+    owner_teams: '/api/v2/credentials/9/owner_teams/',
+    copy: '/api/v2/credentials/9/copy/',
+    input_sources: '/api/v2/credentials/9/input_sources/',
+    credential_type: '/api/v2/credential_types/10/',
+  },
+  summary_fields: {
+    organization: {
+      id: 4,
+      name: 'Default',
+      description: '',
+    },
+    credential_type: {
+      id: 10,
+      name: 'Google Compute Engine',
+      description: '',
+    },
+    created_by: {
+      id: 1,
+      username: 'admin',
+      first_name: '',
+      last_name: '',
+    },
+    modified_by: {
+      id: 1,
+      username: 'admin',
+      first_name: '',
+      last_name: '',
+    },
+    object_roles: {
+      admin_role: {
+        description: 'Can manage all aspects of the credential',
+        name: 'Admin',
+        id: 287,
+      },
+      use_role: {
+        description: 'Can use the credential in a job template',
+        name: 'Use',
+        id: 288,
+      },
+      read_role: {
+        description: 'May view settings for the credential',
+        name: 'Read',
+        id: 289,
+      },
+    },
+    user_capabilities: {
+      edit: true,
+      delete: true,
+      copy: true,
+      use: true,
+    },
+    owners: [
+      {
+        id: 1,
+        type: 'user',
+        name: 'admin',
+        description: ' ',
+        url: '/api/v2/users/1/',
+      },
+      {
+        id: 4,
+        type: 'organization',
+        name: 'Default',
+        description: '',
+        url: '/api/v2/organizations/4/',
+      },
+    ],
+  },
+  created: '2020-04-13T17:33:27.625773Z',
+  modified: '2020-04-13T17:33:27.625882Z',
+  name: 'a gce cred',
+  description: '',
+  organization: 4,
+  credential_type: 10,
+  inputs: {
+    project: 'test123',
+    username: 'test123.iam.gserviceaccount.com',
+    ssh_key_data: '$encrypted$',
+  },
+  kind: 'gce',
+  cloud: true,
+  kubernetes: false,
+};
+
 const credentialTypes = [
   {
     id: 2,
@@ -313,36 +413,71 @@ const credentialTypes = [
     },
     injectors: {},
   },
+  {
+    id: 10,
+    type: 'credential_type',
+    url: '/api/v2/credential_types/10/',
+    related: {
+      credentials: '/api/v2/credential_types/10/credentials/',
+      activity_stream: '/api/v2/credential_types/10/activity_stream/',
+    },
+    summary_fields: {
+      user_capabilities: {
+        edit: false,
+        delete: false,
+      },
+    },
+    created: '2020-04-09T19:20:27.090665Z',
+    modified: '2020-04-09T19:21:11.575214Z',
+    name: 'Google Compute Engine',
+    description: '',
+    kind: 'cloud',
+    namespace: 'gce',
+    managed_by_tower: true,
+    inputs: {
+      fields: [
+        {
+          id: 'username',
+          label: 'Service Account Email Address',
+          type: 'string',
+          help_text:
+            'The email address assigned to the Google Compute Engine service account.',
+        },
+        {
+          id: 'project',
+          label: 'Project',
+          type: 'string',
+          help_text:
+            'The Project ID is the GCE assigned identification. It is often constructed as three words or two words followed by a three-digit number. Examples: project-id-000 and another-project-id',
+        },
+        {
+          id: 'ssh_key_data',
+          label: 'RSA Private Key',
+          type: 'string',
+          format: 'ssh_private_key',
+          secret: true,
+          multiline: true,
+          help_text:
+            'Paste the contents of the PEM file associated with the service account email.',
+        },
+      ],
+      required: ['username', 'ssh_key_data'],
+    },
+    injectors: {},
+  },
 ];
 
 describe('<CredentialForm />', () => {
   let wrapper;
-  let onCancel;
-  let onSubmit;
+  const onCancel = jest.fn();
+  const onSubmit = jest.fn();
 
   const addFieldExpects = () => {
+    expect(wrapper.find('FormGroup').length).toBe(4);
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="Username"]').length).toBe(0);
-    expect(wrapper.find('FormGroup[label="Password"]').length).toBe(0);
-    expect(wrapper.find('FormGroup[label="SSH Private Key"]').length).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Signed SSH Certificate"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Private Key Passphrase"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Privelege Escalation Method"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Privilege Escalation Username"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Privilege Escalation Password"]').length
-    ).toBe(0);
   };
 
   const machineFieldExpects = () => {
@@ -371,6 +506,7 @@ describe('<CredentialForm />', () => {
   };
 
   const sourceFieldExpects = () => {
+    expect(wrapper.find('FormGroup').length).toBe(8);
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
@@ -379,138 +515,217 @@ describe('<CredentialForm />', () => {
     expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="SSH Private Key"]').length).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="Signed SSH Certificate"]').length
-    ).toBe(0);
-    expect(
       wrapper.find('FormGroup[label="Private Key Passphrase"]').length
     ).toBe(1);
-    expect(
-      wrapper.find('FormGroup[label="Privelege Escalation Method"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Privilege Escalation Username"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('FormGroup[label="Privilege Escalation Password"]').length
-    ).toBe(0);
   };
 
-  beforeEach(() => {
-    onCancel = jest.fn();
-    onSubmit = jest.fn();
-    wrapper = mountWithContexts(
-      <CredentialForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        credential={machineCredential}
-        credentialTypes={credentialTypes}
-      />
-    );
-  });
+  const gceFieldExpects = () => {
+    expect(wrapper.find('FormGroup').length).toBe(8);
+    expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Service account JSON file"]').length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Service account email address"]').length
+    ).toBe(1);
+    expect(wrapper.find('FormGroup[label="Project"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="RSA private key"]').length).toBe(1);
+  };
 
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
-  test('Initially renders successfully', () => {
-    expect(wrapper.length).toBe(1);
-  });
-
-  test('should display form fields on add properly', () => {
-    wrapper = mountWithContexts(
-      <CredentialForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        credentialTypes={credentialTypes}
-      />
-    );
-    addFieldExpects();
-  });
-
-  test('should display form fields for machine credential properly', () => {
-    wrapper = mountWithContexts(
-      <CredentialForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        credential={machineCredential}
-        credentialTypes={credentialTypes}
-      />
-    );
-    machineFieldExpects();
-  });
-
-  test('should display form fields for source control credential properly', () => {
-    wrapper = mountWithContexts(
-      <CredentialForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        credential={sourceControlCredential}
-        credentialTypes={credentialTypes}
-      />
-    );
-    sourceFieldExpects();
-  });
-
-  test('should update form values', async () => {
-    // name and description change
-    act(() => {
-      wrapper.find('input#credential-name').simulate('change', {
-        target: { value: 'new Foo', name: 'name' },
-      });
-      wrapper.find('input#credential-description').simulate('change', {
-        target: { value: 'new Bar', name: 'description' },
+  describe('Add', () => {
+    beforeAll(async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credentialTypes={credentialTypes}
+          />
+        );
       });
     });
-    wrapper.update();
-    expect(wrapper.find('input#credential-name').prop('value')).toEqual(
-      'new Foo'
-    );
-    expect(wrapper.find('input#credential-description').prop('value')).toEqual(
-      'new Bar'
-    );
-    // organization change
-    act(() => {
-      wrapper.find('OrganizationLookup').invoke('onBlur')();
-      wrapper.find('OrganizationLookup').invoke('onChange')({
+    afterAll(() => {
+      wrapper.unmount();
+    });
+    test('should display form fields on add properly', async () => {
+      addFieldExpects();
+    });
+    test('should update form values', async () => {
+      // name and description change
+      await act(async () => {
+        wrapper.find('input#credential-name').simulate('change', {
+          target: { value: 'new Foo', name: 'name' },
+        });
+        wrapper.find('input#credential-description').simulate('change', {
+          target: { value: 'new Bar', name: 'description' },
+        });
+      });
+      wrapper.update();
+      expect(wrapper.find('input#credential-name').prop('value')).toEqual(
+        'new Foo'
+      );
+      expect(
+        wrapper.find('input#credential-description').prop('value')
+      ).toEqual('new Bar');
+      // organization change
+      await act(async () => {
+        wrapper.find('OrganizationLookup').invoke('onBlur')();
+        wrapper.find('OrganizationLookup').invoke('onChange')({
+          id: 3,
+          name: 'organization',
+        });
+      });
+      wrapper.update();
+      expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
         id: 3,
         name: 'organization',
       });
     });
-    wrapper.update();
-    expect(wrapper.find('OrganizationLookup').prop('value')).toEqual({
-      id: 3,
-      name: 'organization',
+    test('should display cred type subform when scm type select has a value', async () => {
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 1);
+      });
+      wrapper.update();
+      machineFieldExpects();
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 2);
+      });
+      wrapper.update();
+      sourceFieldExpects();
+    });
+    test('should update expected fields when gce service account json file uploaded', async () => {
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 10);
+      });
+      wrapper.update();
+      gceFieldExpects();
+      expect(wrapper.find('input#credential-username').prop('value')).toBe('');
+      expect(wrapper.find('input#credential-project').prop('value')).toBe('');
+      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
+        ''
+      );
+      await act(async () => {
+        wrapper.find('FileUpload').invoke('onChange')({
+          name: 'foo.json',
+          text: () =>
+            '{"client_email":"testemail@ansible.com","project_id":"test123","private_key":"-----BEGIN PRIVATE KEY-----\\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\\n-----END PRIVATE KEY-----\\n"}',
+        });
+      });
+      wrapper.update();
+      expect(wrapper.find('input#credential-username').prop('value')).toBe(
+        'testemail@ansible.com'
+      );
+      expect(wrapper.find('input#credential-project').prop('value')).toBe(
+        'test123'
+      );
+      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
+        '-----BEGIN PRIVATE KEY-----\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n-----END PRIVATE KEY-----\n'
+      );
+    });
+    test('should clear expected fields when file clear button clicked', async () => {
+      await act(async () => {
+        wrapper.find('FileUploadField').invoke('onClearButtonClick')();
+      });
+      wrapper.update();
+      expect(wrapper.find('input#credential-username').prop('value')).toBe('');
+      expect(wrapper.find('input#credential-project').prop('value')).toBe('');
+      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
+        ''
+      );
+    });
+    test('should show error when error thrown parsing JSON', async () => {
+      expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
+        'Select a JSON formatted service account key to autopopulate the following fields.'
+      );
+      await act(async () => {
+        wrapper.find('FileUpload').invoke('onChange')({
+          name: 'foo.json',
+          text: () => '{not good json}',
+        });
+      });
+      wrapper.update();
+      expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
+        'There was an error parsing the file. Please check the file formatting and try again.'
+      );
+    });
+    test('should call handleCancel when Cancel button is clicked', async () => {
+      expect(onCancel).not.toHaveBeenCalled();
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+      expect(onCancel).toBeCalled();
     });
   });
 
-  test('should display cred type subform when scm type select has a value', async () => {
-    wrapper = mountWithContexts(
-      <CredentialForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        credentialTypes={credentialTypes}
-      />
-    );
-    addFieldExpects();
-    await act(async () => {
-      await wrapper
-        .find('AnsibleSelect[id="credential_type"]')
-        .invoke('onChange')(null, 1);
+  describe('Edit', () => {
+    afterEach(() => {
+      wrapper.unmount();
     });
-    wrapper.update();
-    machineFieldExpects();
-    await act(async () => {
-      await wrapper
-        .find('AnsibleSelect[id="credential_type"]')
-        .invoke('onChange')(null, 2);
-    });
-    wrapper.update();
-    sourceFieldExpects();
-  });
+    test('Initially renders successfully', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={machineCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
 
-  test('should call handleCancel when Cancel button is clicked', async () => {
-    expect(onCancel).not.toHaveBeenCalled();
-    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
-    expect(onCancel).toBeCalled();
+      expect(wrapper.length).toBe(1);
+    });
+
+    test('should display form fields for machine credential properly', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={machineCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
+
+      machineFieldExpects();
+    });
+
+    test('should display form fields for source control credential properly', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={sourceControlCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
+
+      sourceFieldExpects();
+    });
+
+    test('should display form fields for gce credential properly', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <CredentialForm
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            credential={gceCredential}
+            credentialTypes={credentialTypes}
+          />
+        );
+      });
+
+      gceFieldExpects();
+    });
   });
 });
