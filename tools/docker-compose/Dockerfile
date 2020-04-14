@@ -123,7 +123,7 @@ ADD tools/docker-compose/entrypoint.sh /
 ADD tools/scripts/awx-python /usr/bin/awx-python
 
 # Pre-create things that we need to write to
-RUN for dir in /var/lib/awx /var/lib/awx/rsyslog /var/lib/awx/rsyslog/conf.d /var/run/rsyslog /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+RUN for dir in /var/lib/awx /var/lib/awx/rsyslog /var/lib/awx/rsyslog/conf.d /var/run/awx-rsyslog /var/log/tower/ /var/lib/awx/projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
     do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done && \
     \
     for file in /etc/passwd /etc/supervisord.conf /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \

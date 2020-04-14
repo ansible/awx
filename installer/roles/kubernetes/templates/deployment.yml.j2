@@ -97,7 +97,7 @@ spec:
             - name: supervisor-socket
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
-              mountPath: "/var/run/rsyslog"
+              mountPath: "/var/run/awx-rsyslog"
             - name: rsyslog-dir
               mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
@@ -183,7 +183,7 @@ spec:
             - name: supervisor-socket
               mountPath: "/var/run/supervisor"
             - name: rsyslog-socket
-              mountPath: "/var/run/rsyslog"
+              mountPath: "/var/run/awx-rsyslog"
             - name: rsyslog-dir
               mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
