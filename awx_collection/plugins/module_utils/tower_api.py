@@ -307,9 +307,9 @@ class TowerModule(AnsibleModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to Tower (if we've not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
+        # Authenticate to Tower (if we don't have a token and if not already done so)
+        if not self.oauth_token and not self.authenticated:
+            # This method will set a cookie in the cookie jar for us and also an oauth_token
             self.authenticate(**kwargs)
         if self.oauth_token:
             # If we have a oauth token, we just use a bearer header
@@ -683,7 +683,7 @@ class TowerModule(AnsibleModule):
             return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
 
     def logout(self):
-        if self.oauth_token_id is not None and self.username and self.password:
+        if self.authenticated:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (
