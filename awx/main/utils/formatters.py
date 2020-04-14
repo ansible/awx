@@ -244,4 +244,7 @@ class LogstashFormatter(LogstashFormatterBase):
         if record.exc_info:
             message.update(self.get_debug_fields(record))
 
+        if settings.LOG_AGGREGATOR_TYPE == 'splunk':
+            # splunk messages must have a top level "event" key
+            message = {'event': message}
         return self.serialize(message)

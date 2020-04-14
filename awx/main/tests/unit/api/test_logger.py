@@ -158,3 +158,17 @@ def test_rsyslog_conf_template(enabled, type, host, port, protocol, expected_con
     
     # check validity of created template
     assert expected_config in tmpl
+
+
+def test_splunk_auth():
+    mock_settings, _ = _mock_logging_defaults()
+    # Set test settings
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'splunk')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'example.org')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PASSWORD', 'SECRET-TOKEN')
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert 'httpheaderkey="Authorization" httpheadervalue="Splunk SECRET-TOKEN"' in tmpl
