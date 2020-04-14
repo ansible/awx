@@ -81,10 +81,10 @@ data:
     priority=0
 
     [unix_http_server]
-    file=/tmp/supervisor.sock
+    file=/var/run/supervisor/supervisor.web.sock
 
     [supervisorctl]
-    serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+    serverurl=unix:///var/run/supervisor/supervisor.web.sock ; use a unix:// URL  for a unix socket
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
@@ -140,4 +140,3 @@ data:
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
-
