@@ -1043,6 +1043,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'dispatcher',
         },
+        'wsbroadcast': {
+            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false', 'dynamic_level_filter'],
+            'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
         'celery.beat': {
             'class':'logging.StreamHandler',
             'level': 'ERROR'
@@ -1129,6 +1138,9 @@ LOGGING = {
         },
         'awx.main.dispatch': {
             'handlers': ['dispatcher'],
+        },
+        'awx.main.wsbroadcast': {
+            'handlers': ['wsbroadcast'],
         },
         'awx.isolated.manager.playbooks': {
             'handlers': ['management_playbooks'],
