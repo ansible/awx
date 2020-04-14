@@ -16,6 +16,8 @@
       "schedules": "/api/v2/job_templates/7/schedules/",
       "activity_stream": "/api/v2/job_templates/7/activity_stream/",
       "launch": "/api/v2/job_templates/7/launch/",
+      "webhook_key": "/api/v2/job_templates/7/webhook_key/",
+      "webhook_receiver": "/api/v2/job_templates/7/github/",
       "notification_templates_started": "/api/v2/job_templates/7/notification_templates_started/",
       "notification_templates_success": "/api/v2/job_templates/7/notification_templates_success/",
       "notification_templates_error": "/api/v2/job_templates/7/notification_templates_error/",
@@ -24,7 +26,9 @@
       "object_roles": "/api/v2/job_templates/7/object_roles/",
       "instance_groups": "/api/v2/job_templates/7/instance_groups/",
       "slice_workflow_jobs": "/api/v2/job_templates/7/slice_workflow_jobs/",
-      "copy": "/api/v2/job_templates/7/copy/"
+      "copy": "/api/v2/job_templates/7/copy/",
+      "callback": "/api/v2/job_templates/7/callback/",
+      "webhook_credential": "/api/v2/credentials/8/"
   },
   "summary_fields": {
       "inventory": {
@@ -63,6 +67,14 @@
           "description": "",
           "status": "successful",
           "failed": false
+      },
+      "webhook_credential": {
+          "id": 8,
+          "name": "GitHub Cred",
+          "description": "",
+          "kind": "github_token",
+          "cloud": false,
+          "credential_type_id": 12
       },
       "created_by": {
           "id": 1,
@@ -123,6 +135,12 @@
               "status": "successful",
               "finished": "2019-10-01T14:34:35.142483Z",
               "type": "job"
+          },
+          {
+              "id": 13,
+              "status": "successful",
+              "finished": "2019-10-01T14:34:35.142483Z",
+              "type": "job"
           }
       ],
       "extra_credentials": [],
@@ -174,5 +192,7 @@
   "diff_mode": false,
   "allow_simultaneous": true,
   "custom_virtualenv": null,
-  "job_slice_count": 1
+  "job_slice_count": 1,
+  "webhook_service": "github",
+  "webhook_credential": 8
 }

@@ -8,6 +8,7 @@ import { toTitleCase } from '@util/strings';
 
 import { Chip, ChipGroup } from '@patternfly/react-core';
 import { VariablesDetail } from '@components/CodeMirrorInput';
+import CredentialChip from '@components/CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 
 import PromptProjectDetail from './PromptProjectDetail';
@@ -172,7 +173,6 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
           />
         )}
 
-        {/* TODO: Add JT, WFJT, Inventory Source Details */}
         {details?.type === 'project' && (
           <PromptProjectDetail resource={details} />
         )}
@@ -211,14 +211,16 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
             {overrides?.credentials && (
               <Detail
                 fullWidth
-                label={i18n._(t`Credential`)}
+                label={i18n._(t`Credentials`)}
                 rows={4}
                 value={
                   <ChipGroup numChips={5}>
                     {overrides.credentials.map(cred => (
-                      <Chip key={cred.id} isReadOnly>
-                        {cred.name}
-                      </Chip>
+                      <CredentialChip
+                        key={cred.id}
+                        credential={cred}
+                        isReadOnly
+                      />
                     ))}
                   </ChipGroup>
                 }

@@ -24,12 +24,14 @@ function PromptJobTemplateDetail({ i18n, resource }) {
     job_type,
     limit,
     playbook,
+    related,
     scm_branch,
     skip_tags,
     summary_fields,
-    url,
     use_fact_cache,
     verbosity,
+    webhook_key,
+    webhook_service,
   } = resource;
 
   const VERBOSITY = {
@@ -114,23 +116,49 @@ function PromptJobTemplateDetail({ i18n, resource }) {
         value={diff_mode ? 'On' : 'Off'}
       />
       <Detail label={i18n._(t` Job Slicing`)} value={job_slice_count} />
-      {host_config_key && (
-        <React.Fragment>
-          <Detail label={i18n._(t`Host Config Key`)} value={host_config_key} />
-          <Detail
-            label={i18n._(t`Provisioning Callback URL`)}
-            value={`${window.location.origin + url}callback/`}
-          />
-        </React.Fragment>
+      <Detail label={i18n._(t`Host Config Key`)} value={host_config_key} />
+      {related?.callback && (
+        <Detail
+          label={i18n._(t`Provisioning Callback URL`)}
+          value={`${window.location.origin}${related.callback}`}
+        />
+      )}
+      <Detail
+        label={i18n._(t`Webhook Service`)}
+        value={toTitleCase(webhook_service)}
+      />
+      {related.webhook_receiver && (
+        <Detail
+          label={i18n._(t`Webhook URL`)}
+          value={`${window.location.origin}${related.webhook_receiver}`}
+        />
+      )}
+      <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+      {summary_fields?.webhook_credential && (
+        <Detail
+          fullWidth
+          label={i18n._(t`Webhook Credential`)}
+          value={
+            <CredentialChip
+              key={summary_fields.webhook_credential?.id}
+              credential={summary_fields.webhook_credential}
+              isReadOnly
+            />
+          }
+        />
       )}
       {optionsList && <Detail label={i18n._(t`Options`)} value={optionsList} />}
       {summary_fields?.credentials?.length > 0 && (
         <Detail
           fullWidth
           label={i18n._(t`Credentials`)}
-          value={summary_fields.credentials.map(chip => (
-            <CredentialChip key={chip.id} credential={chip} isReadOnly />
-          ))}
+          value={
+            <ChipGroup numChips={5}>
+              {summary_fields.credentials.map(cred => (
+                <CredentialChip key={cred.id} credential={cred} isReadOnly />
+              ))}
+            </ChipGroup>
+          }
         />
       )}
       {summary_fields?.labels?.results?.length > 0 && (
