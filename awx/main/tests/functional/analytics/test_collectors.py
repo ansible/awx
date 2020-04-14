@@ -36,6 +36,8 @@ def sqlite_copy_expert(request):
         for line in sql.split('\n'):
             if line.find('main_jobevent.event_data::') == -1:
                 sql_new.append(line)
+            elif not line.endswith(','):
+                sql_new[-1] = sql_new[-1].rstrip(',')
         sql = '\n'.join(sql_new)
 
         self.execute(sql)
