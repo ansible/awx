@@ -27,9 +27,9 @@ function formatTimeout(timeout) {
   const minutes = Math.floor(timeout / 60);
   const seconds = timeout - Math.floor(timeout / 60) * 60;
   return (
-    <>
-      {minutes} <Trans>min</Trans> {seconds} <Trans>sec</Trans>
-    </>
+    <Trans>
+      {minutes} min {seconds} sec
+    </Trans>
   );
 }
 
