@@ -71,7 +71,14 @@ function NodeViewModal({ i18n }) {
     request: fetchNodeDetail,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
+      let { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
+      if (data?.type === 'job_template') {
+        const {
+          data: { results = [] },
+        } = await JobTemplatesAPI.readInstanceGroups(data.id);
+        data = Object.assign(data, { instance_groups: results });
+      }
+
       return data;
     }, [nodeAPI, unifiedJobTemplate.id]),
     null
