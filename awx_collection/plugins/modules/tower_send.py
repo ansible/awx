@@ -9,13 +9,17 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
 ---
 module: tower_send
+deprecated:
+  removed_in: "3.7"
+  why: Deprecated in favor of upcoming C(_import) module.
+  alternative: Once published, use M(tower_import) instead.
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.8"
 short_description: Send assets to Ansible Tower.
