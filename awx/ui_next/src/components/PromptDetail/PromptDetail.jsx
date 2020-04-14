@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { toTitleCase } from '@util/strings';
 
-import { Chip, ChipGroup } from '@patternfly/react-core';
+import { Chip, ChipGroup, Divider } from '@patternfly/react-core';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import CredentialChip from '@components/CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
@@ -200,6 +200,7 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
 
       {hasPromptData(launchConfig) && hasOverrides && (
         <>
+          <Divider css="margin-top: var(--pf-global--spacer--lg)" />
           <PromptHeader>{i18n._(t`Prompted Values`)}</PromptHeader>
           <DetailList aria-label="Prompt Overrides">
             {overrides?.job_type && (
