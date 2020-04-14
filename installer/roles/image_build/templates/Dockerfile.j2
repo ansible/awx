@@ -97,16 +97,23 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
+ADD rsyslog.repo /etc/yum.repos.d/rsyslog.repo
+RUN yum install -y rsyslog-omhttp
+
 # Pre-create things that we need to write to
-RUN for dir in /home/awx /var/log/tower /var/log/nginx /var/lib/nginx; \
+RUN for dir in /home/awx /var/run/supervisor /var/lib/awx /var/lib/awx/rsyslog /var/lib/awx/rsyslog/conf.d /var/run/rsyslog /var/log/tower /var/log/nginx /var/lib/nginx; \
     do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done && \
     \
     for file in /etc/passwd /var/run/nginx.pid; \
     do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
 
+# Create default awx rsyslog config
+ADD rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
+
 # Fix up permissions
 RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root && \
     find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+w && \
+    chgrp root /var/lib/awx/rsyslog/rsyslog.conf && \
     chmod +rx /usr/bin/launch_awx.sh && \
     chmod +rx /usr/bin/launch_awx_task.sh && \
     chmod +rx /usr/bin/config-watcher && \

@@ -4,7 +4,7 @@ The `requirements.txt` and `requirements_ansible.txt` files are generated from `
 
 ## How To Use
 
-Commands should from inside `./requirements` directory of the awx repository.
+Commands should be run from inside the `./requirements` directory of the awx repository.
 
 Make sure you have `patch, awk, python3, python2, python3-venv, python2-virtualenv, pip2, pip3` installed. The development container image should have all these.
 
@@ -145,7 +145,3 @@ in the top-level Makefile.
 Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
 Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
 
-### requests-futures
-
-This can be removed when a solution for the external log queuing is ready.
-https://github.com/ansible/awx/pull/5092

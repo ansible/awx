@@ -17,7 +17,7 @@ export default [
     'ProcessErrors',
     'ngToast',
     '$filter',
-    function(
+    function (
         $rootScope, $scope, $stateParams,
         systemActivityStreamForm,
         systemLoggingForm,
@@ -41,8 +41,8 @@ export default [
             formTracker.setCurrentSystem(activeSystemForm);
         }
 
-        var activeForm = function(tab) {
-            if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
+        var activeForm = function (tab) {
+            if (!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
                 systemVm.activeSystemForm = tab;
                 formTracker.setCurrentSystem(systemVm.activeSystemForm);
             } else {
@@ -52,7 +52,7 @@ export default [
                     label: i18n._('Discard changes'),
                     "class": "btn Form-cancelButton",
                     "id": "formmodal-cancel-button",
-                    onClick: function() {
+                    onClick: function () {
                         $scope.$parent.vm.populateFromApi();
                         $scope.$parent[formTracker.currentFormName()].$setPristine();
                         systemVm.activeSystemForm = tab;
@@ -61,15 +61,15 @@ export default [
                     }
                 }, {
                     label: i18n._('Save changes'),
-                    onClick: function() {
+                    onClick: function () {
                         $scope.$parent.vm.formSave()
-                        .then(function() {
-                            $scope.$parent[formTracker.currentFormName()].$setPristine();
-                            $scope.$parent.vm.populateFromApi();
-                            systemVm.activeSystemForm = tab;
-                            formTracker.setCurrentSystem(systemVm.activeSystemForm);
-                            $('#FormModal-dialog').dialog('close');
-                        });
+                            .then(function () {
+                                $scope.$parent[formTracker.currentFormName()].$setPristine();
+                                $scope.$parent.vm.populateFromApi();
+                                systemVm.activeSystemForm = tab;
+                                formTracker.setCurrentSystem(systemVm.activeSystemForm);
+                                $('#FormModal-dialog').dialog('close');
+                            });
                     },
                     "class": "btn btn-primary",
                     "id": "formmodal-save-button"
@@ -80,9 +80,9 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: i18n._('Misc. System'), value: 'misc'},
-            {label: i18n._('Activity Stream'), value: 'activity_stream'},
-            {label: i18n._('Logging'), value: 'logging'},
+            { label: i18n._('Misc. System'), value: 'misc' },
+            { label: i18n._('Activity Stream'), value: 'activity_stream' },
+            { label: i18n._('Logging'), value: 'logging' },
         ];
 
         var systemForms = [{
@@ -97,14 +97,14 @@ export default [
         }];
 
         var forms = _.map(systemForms, 'formDef');
-        _.each(forms, function(form) {
+        _.each(forms, function (form) {
             var keys = _.keys(form.fields);
-            _.each(keys, function(key) {
-                if($scope.configDataResolve[key].type === 'choice') {
+            _.each(keys, function (key) {
+                if ($scope.configDataResolve[key].type === 'choice') {
                     // Create options for dropdowns
                     var optionsGroup = key + '_options';
                     $scope.$parent.$parent[optionsGroup] = [];
-                    _.each($scope.configDataResolve[key].choices, function(choice){
+                    _.each($scope.configDataResolve[key].choices, function (choice) {
                         $scope.$parent.$parent[optionsGroup].push({
                             name: choice[0],
                             label: choice[1],
@@ -121,7 +121,7 @@ export default [
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
                 awPopOver: ($scope.configDataResolve[key].defined_in_file) ?
-                    null: $scope.configDataResolve[key].help_text,
+                    null : $scope.configDataResolve[key].help_text,
                 label: $scope.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
@@ -138,7 +138,7 @@ export default [
 
         $scope.$parent.$parent.parseType = 'json';
 
-        _.each(systemForms, function(form) {
+        _.each(systemForms, function (form) {
             generator.inject(form.formDef, {
                 id: form.id,
                 mode: 'edit',
@@ -150,37 +150,37 @@ export default [
 
         var dropdownRendered = false;
 
-        $scope.$on('populated', function() {
+        $scope.$on('populated', function () {
             populateLogAggregator(false);
         });
 
-        $scope.$on('LOG_AGGREGATOR_TYPE_populated', function(e, data, flag) {
+        $scope.$on('LOG_AGGREGATOR_TYPE_populated', function (e, data, flag) {
             populateLogAggregator(flag);
         });
 
-        $scope.$on('LOG_AGGREGATOR_PROTOCOL_populated', function(e, data, flag) {
+        $scope.$on('LOG_AGGREGATOR_PROTOCOL_populated', function (e, data, flag) {
             populateLogAggregator(flag);
         });
 
-        function populateLogAggregator(flag){
+        function populateLogAggregator(flag) {
 
-            if($scope.$parent.$parent.LOG_AGGREGATOR_TYPE !== null) {
+            if ($scope.$parent.$parent.LOG_AGGREGATOR_TYPE !== null) {
                 $scope.$parent.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_TYPE });
             }
 
-            if($scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL !== null) {
+            if ($scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL !== null) {
                 $scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL = _.find($scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL });
             }
 
-            if($scope.$parent.$parent.LOG_AGGREGATOR_LEVEL !== null) {
+            if ($scope.$parent.$parent.LOG_AGGREGATOR_LEVEL !== null) {
                 $scope.$parent.$parent.LOG_AGGREGATOR_LEVEL = _.find($scope.$parent.$parent.LOG_AGGREGATOR_LEVEL_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_LEVEL });
             }
 
-            if(flag !== undefined){
+            if (flag !== undefined) {
                 dropdownRendered = flag;
             }
 
-            if(!dropdownRendered) {
+            if (!dropdownRendered) {
                 dropdownRendered = true;
                 CreateSelect2({
                     element: '#configuration_logging_template_LOG_AGGREGATOR_TYPE',
@@ -193,33 +193,52 @@ export default [
             }
         }
 
-        $scope.$parent.vm.testLogging = function() {
-            Rest.setUrl("/api/v2/settings/logging/test/");
-            Rest.post($scope.$parent.vm.getFormPayload())
-                .then(() => {
-                    ngToast.success({
-                        content: `<i class="fa fa-check-circle
-                            Toast-successIcon"></i>` +
-                                i18n._('Log aggregator test successful.')
-                    });
-                })
-                .catch(({data, status}) => {
-                    if (status === 500) {
-                        ngToast.danger({
-                            content: '<i class="fa fa-exclamation-triangle Toast-successIcon"></i>' +
-                                i18n._('Log aggregator test failed. <br> Detail: ') + $filter('sanitize')(data.error),
-                            additionalClasses: "LogAggregator-failedNotification"
+        $scope.$watchGroup(['configuration_logging_template_form.$pending', 'configuration_logging_template_form.$dirty', '!logAggregatorEnabled'], (vals) => {
+            if (vals.some(val => val === true)) {
+                $scope.$parent.vm.disableTestButton = true;
+                $scope.$parent.vm.testTooltip = i18n._('Save and enable log aggregation before testing the log aggregator.');
+            } else {
+                $scope.$parent.vm.disableTestButton = false;
+                $scope.$parent.vm.testTooltip = i18n._('Send a test log message to the configured log aggregator.');
+            }
+        });
+
+        $scope.$parent.vm.testLogging = function () {
+            if (!$scope.$parent.vm.disableTestButton) {
+                $scope.$parent.vm.disableTestButton = true;
+                Rest.setUrl("/api/v2/settings/logging/test/");
+                Rest.post({})
+                    .then(() => {
+                        $scope.$parent.vm.disableTestButton = false;
+                        ngToast.success({
+                            dismissButton: false,
+                            dismissOnTimeout: true,
+                            content: `<i class="fa fa-check-circle
+                                Toast-successIcon"></i>` +
+                                i18n._('Log aggregator test sent successfully.')
                         });
-                    } else {
-                        ProcessErrors($scope, data, status, null,
-                            {
-                                hdr: i18n._('Error!'),
-                                msg: i18n._('There was an error testing the ' +
-                                    'log aggregator. Returned status: ') +
-                                    status
+                    })
+                    .catch(({ data, status }) => {
+                        $scope.$parent.vm.disableTestButton = false;
+                        if (status === 400 || status === 500) {
+                            ngToast.danger({
+                                dismissButton: false,
+                                dismissOnTimeout: true,
+                                content: '<i class="fa fa-exclamation-triangle Toast-successIcon"></i>' +
+                                    i18n._('Log aggregator test failed. <br> Detail: ') + $filter('sanitize')(data.error),
+                                additionalClasses: "LogAggregator-failedNotification"
                             });
-                    }
-                });
+                        } else {
+                            ProcessErrors($scope, data, status, null,
+                                {
+                                    hdr: i18n._('Error!'),
+                                    msg: i18n._('There was an error testing the ' +
+                                        'log aggregator. Returned status: ') +
+                                        status
+                                });
+                        }
+                    });
+            }
         };
 
         angular.extend(systemVm, {

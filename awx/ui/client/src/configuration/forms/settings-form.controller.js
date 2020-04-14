@@ -92,6 +92,7 @@ export default [
         var populateFromApi = function() {
             SettingsService.getCurrentValues()
                 .then(function(data) {
+                    $scope.logAggregatorEnabled = data.LOG_AGGREGATOR_ENABLED;
                     // these two values need to be unnested from the
                     // OAUTH2_PROVIDER key
                     data.ACCESS_TOKEN_EXPIRE_SECONDS = data
@@ -538,8 +539,11 @@ export default [
             var payload = {};
             payload[key] = $scope[key];
             SettingsService.patchConfiguration(payload)
-                .then(function() {
+                .then(function(data) {
                     //TODO consider updating form values with returned data here
+                    if (key === 'LOG_AGGREGATOR_ENABLED') {
+                        $scope.logAggregatorEnabled = data.LOG_AGGREGATOR_ENABLED;
+                    }
                 })
                 .catch(function(data) {
                     //Change back on unsuccessful update

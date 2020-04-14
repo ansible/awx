@@ -73,6 +73,7 @@ from awx.main.utils import (get_ssh_version, update_scm_url,
                             get_awx_version)
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -140,6 +141,9 @@ def dispatch_startup():
     # and Tower fall out of use/support, we can probably just _assume_ that
     # everybody has moved to bigint, and remove this code entirely
     enforce_bigint_pk_migration()
+    
+    # Update Tower's rsyslog.conf file based on loggins settings in the db
+    reconfigure_rsyslog()
 
 
 def inform_cluster_of_shutdown():
@@ -279,6 +283,12 @@ def handle_setting_changes(setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
+
+    if any([
+        setting.startswith('LOG_AGGREGATOR')
+        for setting in setting_keys
+    ]):
+        connection.on_commit(reconfigure_rsyslog)
 
 
 @task(queue='tower_broadcast_all')

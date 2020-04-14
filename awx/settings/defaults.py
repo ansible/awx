@@ -1011,8 +1011,9 @@ LOGGING = {
             'formatter': 'simple',
         },
         'external_logger': {
-            'class': 'awx.main.utils.handlers.AWXProxyHandler',
+            'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
+            'address': '/var/run/rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter'],
         },
         'tower_warnings': {

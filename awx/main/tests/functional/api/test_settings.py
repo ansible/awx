@@ -5,17 +5,13 @@
 # Python
 import pytest
 import os
-import time
 
 from django.conf import settings
-
-# Mock
-from unittest import mock
 
 # AWX
 from awx.api.versioning import reverse
 from awx.conf.models import Setting
-from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
+from awx.conf.registry import settings_registry
 
 
 TEST_GIF_LOGO = 'data:image/gif;base64,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' # NOQA
@@ -237,73 +233,95 @@ def test_ui_settings(get, put, patch, delete, admin):
 
 
 @pytest.mark.django_db
-def test_logging_aggregrator_connection_test_requires_superuser(get, post, alice):
+def test_logging_aggregator_connection_test_requires_superuser(post, alice):
     url = reverse('api:setting_logging_test')
     post(url, {}, user=alice, expect=403)
 
 
-@pytest.mark.parametrize('key', [
-    'LOG_AGGREGATOR_TYPE',
-    'LOG_AGGREGATOR_HOST',
+@pytest.mark.django_db
+def test_logging_aggregator_connection_test_not_enabled(post, admin):
+    url = reverse('api:setting_logging_test')
+    resp = post(url, {}, user=admin, expect=409)
+    assert 'Logging not enabled' in resp.data.get('error')
+
+
+def _mock_logging_defaults():
+    # Pre-populate settings obj with defaults
+    class MockSettings:
+        pass
+    mock_settings_obj = MockSettings()
+    mock_settings_json = dict()
+    for key in settings_registry.get_registered_settings(category_slug='logging'):
+        value = settings_registry.get_setting_field(key).get_default()
+        setattr(mock_settings_obj, key, value)
+        mock_settings_json[key] = value
+    setattr(mock_settings_obj, 'MAX_EVENT_RES_DATA', 700000)
+    return mock_settings_obj, mock_settings_json
+
+
+
+@pytest.mark.parametrize('key, value, error', [
+    ['LOG_AGGREGATOR_TYPE', 'logstash', 'Cannot enable log aggregator without providing host.'],
+    ['LOG_AGGREGATOR_HOST', 'https://logstash', 'Cannot enable log aggregator without providing type.']
 ])
 @pytest.mark.django_db
-def test_logging_aggregrator_connection_test_bad_request(get, post, admin, key):
-    url = reverse('api:setting_logging_test')
-    resp = post(url, {}, user=admin, expect=400)
-    assert 'This field is required.' in resp.data.get(key, [])
-
-
-@pytest.mark.django_db
-def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
-    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
-        url = reverse('api:setting_logging_test')
-        user_data = {
-            'LOG_AGGREGATOR_TYPE': 'logstash',
-            'LOG_AGGREGATOR_HOST': 'localhost',
-            'LOG_AGGREGATOR_PORT': 8080,
-            'LOG_AGGREGATOR_USERNAME': 'logger',
-            'LOG_AGGREGATOR_PASSWORD': 'mcstash'
-        }
-        post(url, user_data, user=admin, expect=200)
-        args, kwargs = perform_test.call_args_list[0]
-        create_settings = kwargs['custom_settings']
-        for k, v in user_data.items():
-            assert hasattr(create_settings, k)
-            assert getattr(create_settings, k) == v
-
-
-@pytest.mark.django_db
-def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch, post, admin):
+def test_logging_aggregator_missing_settings(put, post, admin, key, value, error):
+    _, mock_settings = _mock_logging_defaults()
+    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
+    mock_settings[key] = value
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
-    patch(url, user=admin, data={'LOG_AGGREGATOR_PASSWORD': 'password123'}, expect=200)
-    time.sleep(1)  # log settings are cached slightly
+    response = put(url, data=mock_settings, user=admin, expect=400)
+    assert error in str(response.data)
 
-    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
-        url = reverse('api:setting_logging_test')
-        user_data = {
-            'LOG_AGGREGATOR_TYPE': 'logstash',
-            'LOG_AGGREGATOR_HOST': 'localhost',
-            'LOG_AGGREGATOR_PORT': 8080,
-            'LOG_AGGREGATOR_USERNAME': 'logger',
-            'LOG_AGGREGATOR_PASSWORD': '$encrypted$'
-        }
-        post(url, user_data, user=admin, expect=200)
-        args, kwargs = perform_test.call_args_list[0]
-        create_settings = kwargs['custom_settings']
-        assert getattr(create_settings, 'LOG_AGGREGATOR_PASSWORD') == 'password123'
+
+@pytest.mark.parametrize('type, host, port, username, password',  [
+    ['logstash', 'localhost', 8080, 'logger', 'mcstash'],
+    ['loggly', 'http://logs-01.loggly.com/inputs/1fd38090-hash-h4a$h-8d80-t0k3n71/tag/http/', None, None, None],
+    ['splunk', 'https://yoursplunk:8088/services/collector/event', None, None, None],
+    ['other', '97.221.40.41', 9000, 'logger', 'mcstash'], 
+    ['sumologic', 'https://endpoint5.collection.us2.sumologic.com/receiver/v1/http/Zagnw_f9XGr_zZgd-_EPM0hb8_rUU7_RU8Q==',
+        None, None, None]
+])
+@pytest.mark.django_db
+def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, username, password):
+    _, mock_settings = _mock_logging_defaults()
+    # type = 'splunk'
+    # host = 'https://yoursplunk:8088/services/collector/event'
+    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
+    mock_settings['LOG_AGGREGATOR_TYPE'] = type
+    mock_settings['LOG_AGGREGATOR_HOST'] = host
+    if port:
+        mock_settings['LOG_AGGREGATOR_PORT'] = port
+    if username:
+        mock_settings['LOG_AGGREGATOR_USERNAME'] = username
+    if password:
+        mock_settings['LOG_AGGREGATOR_PASSWORD'] = password
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    response = put(url, data=mock_settings, user=admin, expect=200)
+    assert type in response.data.get('LOG_AGGREGATOR_TYPE')
+    assert host in response.data.get('LOG_AGGREGATOR_HOST')
+    if port:
+        assert port == response.data.get('LOG_AGGREGATOR_PORT')
+    if username:
+        assert username in response.data.get('LOG_AGGREGATOR_USERNAME')
+    if password:   # Note: password should be encrypted
+        assert '$encrypted$' in response.data.get('LOG_AGGREGATOR_PASSWORD')
 
 
 @pytest.mark.django_db
-def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):
-    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
-        perform_test.side_effect = LoggingConnectivityException('404: Not Found')
-        url = reverse('api:setting_logging_test')
-        resp = post(url, {
-            'LOG_AGGREGATOR_TYPE': 'logstash',
-            'LOG_AGGREGATOR_HOST': 'localhost',
-            'LOG_AGGREGATOR_PORT': 8080
-        }, user=admin, expect=500)
-        assert resp.data == {'error': '404: Not Found'}
+def test_logging_aggregator_connection_test_valid(put, post, admin):
+    _, mock_settings = _mock_logging_defaults()
+    type = 'other'
+    host = 'https://localhost'
+    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
+    mock_settings['LOG_AGGREGATOR_TYPE'] = type
+    mock_settings['LOG_AGGREGATOR_HOST'] = host
+    # POST to save these mock settings
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    put(url, data=mock_settings, user=admin, expect=200)
+    # "Test" the logger
+    url = reverse('api:setting_logging_test')
+    post(url, {}, user=admin, expect=202)
 
 
 @pytest.mark.django_db

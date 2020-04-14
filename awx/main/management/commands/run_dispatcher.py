@@ -7,7 +7,6 @@ from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
 
-from awx.main.utils.handlers import AWXProxyHandler
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
@@ -56,11 +55,6 @@ class Command(BaseCommand):
         reaper.reap()
         consumer = None
 
-        # don't ship external logs inside the dispatcher's parent process
-        # this exists to work around a race condition + deadlock bug on fork
-        # in cpython itself:
-        # https://bugs.python.org/issue37429
-        AWXProxyHandler.disable()
         try:
             queues = ['tower_broadcast_all', get_local_queuename()]
             consumer = AWXConsumerPG(

@@ -53,8 +53,20 @@ data:
     stderr_logfile=/dev/stderr
     stderr_logfile_maxbytes=0
 
+    [program:awx-rsyslogd]
+    command = rsyslogd -n -i /var/run/rsyslog/rsyslog.pid -f /var/lib/awx/rsyslog/rsyslog.conf
+    autostart = true
+    autorestart = true
+    stopwaitsecs = 1
+    stopsignal=KILL
+    stopasgroup=true
+    killasgroup=true
+    redirect_stderr=true
+    stdout_logfile=/dev/stderr
+    stdout_logfile_maxbytes=0
+
     [group:tower-processes]
-    programs=nginx,uwsgi,daphne,wsbroadcast
+    programs=nginx,uwsgi,daphne,wsbroadcast,awx-rsyslogd
     priority=5
 
     # TODO: Exit Handler
@@ -69,10 +81,10 @@ data:
     priority=0
 
     [unix_http_server]
-    file=/tmp/supervisor.sock
+    file=/var/run/supervisor/supervisor.web.sock
 
     [supervisorctl]
-    serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+    serverurl=unix:///var/run/supervisor/supervisor.web.sock ; use a unix:// URL  for a unix socket
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
@@ -128,4 +140,3 @@ data:
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
-
