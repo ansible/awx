@@ -162,7 +162,7 @@ def main():
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
 
-    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
+    module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI export command.", version="3.7")
 
     if not HAS_TOWER_CLI:
         module.fail_json(msg='ansible-tower-cli required for this module')
