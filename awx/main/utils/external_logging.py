@@ -11,7 +11,7 @@ def construct_rsyslog_conf_template(settings=settings):
     host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
-    timeout = str(getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5) * 1000)
+    timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
     if protocol.startswith('http'):
         scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
@@ -51,7 +51,7 @@ def construct_rsyslog_conf_template(settings=settings):
             'action.resumeRetryCount="-1"',
             'template="awx"',
             'errorfile="/var/log/tower/rsyslog.err"',
-            f'healthchecktimeout="{timeout}"',
+            f'action.resumeInterval="{timeout}"'
         ]
         if parsed.path:
             path = urlparse.quote(parsed.path[1:])
@@ -79,7 +79,7 @@ def construct_rsyslog_conf_template(settings=settings):
         parts.extend(['module(load="omhttp")', f'action({params})'])
     elif protocol and host and port:
         parts.append(
-            f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" template="awx")'  # noqa
+            f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" action.resumeInterval="{timeout}" template="awx")'  # noqa
         )
     else:
         parts.append(f'action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
