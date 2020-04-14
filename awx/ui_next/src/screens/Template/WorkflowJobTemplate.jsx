@@ -32,7 +32,6 @@ class WorkflowJobTemplate extends Component {
       contentError: null,
       hasContentLoading: true,
       template: null,
-      webhook_key: null,
       isNotifAdmin: false,
     };
     this.createSchedule = this.createSchedule.bind(this);
@@ -59,11 +58,9 @@ class WorkflowJobTemplate extends Component {
     this.setState({ contentError: null });
     try {
       const { data } = await WorkflowJobTemplatesAPI.readDetail(id);
+      let webhookKey;
       if (data?.related?.webhook_key) {
-        const {
-          data: { webhook_key },
-        } = await WorkflowJobTemplatesAPI.readWebhookKey(id);
-        this.setState({ webhook_key });
+        webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
       }
       if (data?.summary_fields?.webhook_credential) {
         const {
@@ -83,7 +80,7 @@ class WorkflowJobTemplate extends Component {
       });
       setBreadcrumb(data);
       this.setState({
-        template: data,
+        template: { ...data, webhook_key: webhookKey.data.webhook_key },
         isNotifAdmin: notifAdminRes.data.results.length > 0,
       });
     } catch (err) {
@@ -114,7 +111,6 @@ class WorkflowJobTemplate extends Component {
       contentError,
       hasContentLoading,
       template,
-      webhook_key,
       isNotifAdmin,
     } = this.state;
 
@@ -211,10 +207,7 @@ class WorkflowJobTemplate extends Component {
                 key="wfjt-details"
                 path="/templates/workflow_job_template/:id/details"
               >
-                <WorkflowJobTemplateDetail
-                  template={template}
-                  webhook_key={webhook_key}
-                />
+                <WorkflowJobTemplateDetail template={template} />
               </Route>
             )}
             {template && (
@@ -239,10 +232,7 @@ class WorkflowJobTemplate extends Component {
                 key="wfjt-edit"
                 path="/templates/workflow_job_template/:id/edit"
               >
-                <WorkflowJobTemplateEdit
-                  template={template}
-                  webhook_key={webhook_key}
-                />
+                <WorkflowJobTemplateEdit template={template} />
               </Route>
             )}
             {template && (

@@ -29,10 +29,15 @@ const mockTemplate = {
 describe('<WorkflowJobTemplateEdit/>', () => {
   let wrapper;
   let history;
+
   beforeEach(async () => {
     LabelsAPI.read.mockResolvedValue({
       data: {
-        results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+        results: [
+          { name: 'Label 1', id: 1 },
+          { name: 'Label 2', id: 2 },
+          { name: 'Label 3', id: 3 },
+        ],
       },
     });
     OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
@@ -71,29 +76,65 @@ describe('<WorkflowJobTemplateEdit/>', () => {
   });
 
   test('api is called to properly to save the updated template.', async () => {
-    await act(async () => {
-      await wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
-        id: 6,
-        name: 'Alex',
-        description: 'Apollo and Athena',
-        inventory: 1,
-        organization: 1,
-        labels: [{ name: 'Label 2', id: 2 }, { name: 'Generated Label' }],
-        scm_branch: 'master',
-        limit: '5000',
-        variables: '---',
+    act(() => {
+      wrapper.find('input#wfjt-name').simulate('change', {
+        target: { value: 'Alex', name: 'name' },
       });
+      wrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: 'Apollo and Athena', name: 'description' },
+      });
+      wrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: 'master', name: 'scm_branch' },
+      });
+      wrapper.find('input#wfjt-description').simulate('change', {
+        target: { value: '5000', name: 'limit' },
+      });
+      wrapper
+        .find('LabelSelect')
+        .find('SelectToggle')
+        .simulate('click');
+    });
+
+    wrapper.update();
+
+    act(() => {
+      wrapper
+        .find('SelectOption')
+        .find('button[aria-label="Label 3"]')
+        .prop('onClick')();
+    });
+
+    wrapper.update();
+
+    act(() =>
+      wrapper
+        .find('SelectOption')
+        .find('button[aria-label="Label 1"]')
+        .prop('onClick')()
+    );
+
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')();
     });
 
     expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalledWith(6, {
-      id: 6,
       name: 'Alex',
       description: 'Apollo and Athena',
       inventory: 1,
       organization: 1,
       scm_branch: 'master',
       limit: '5000',
-      variables: '---',
+      extra_vars: '---',
+      webhook_credential: null,
+      webhook_url: '',
+      webhook_service: '',
+      allow_simultaneous: false,
+      ask_inventory_on_launch: false,
+      ask_limit_on_launch: false,
+      ask_scm_branch_on_launch: false,
+      ask_variables_on_launch: false,
     });
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.disassociateLabel).toBeCalledWith(6, {

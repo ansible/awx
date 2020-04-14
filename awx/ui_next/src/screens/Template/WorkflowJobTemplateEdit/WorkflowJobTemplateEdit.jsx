@@ -6,17 +6,30 @@ import { getAddedAndRemoved } from '@util/lists';
 import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
 import { WorkflowJobTemplateForm } from '../shared';
 
-function WorkflowJobTemplateEdit({ template, webhook_key }) {
+function WorkflowJobTemplateEdit({ template }) {
   const history = useHistory();
   const [formSubmitError, setFormSubmitError] = useState(null);
 
   const handleSubmit = async values => {
-    const { labels, ...remainingValues } = values;
+    const {
+      labels,
+      inventory,
+      organization,
+      webhook_credential,
+      webhook_key,
+      ...templatePayload
+    } = values;
+    templatePayload.inventory = inventory?.id;
+    templatePayload.organization = organization?.id;
+    templatePayload.webhook_credential = webhook_credential?.id || null;
+
+    const formOrgId =
+      organization?.id || inventory?.summary_fields?.organization.id || null;
     try {
       await Promise.all(
-        await submitLabels(labels, values.organization, template.organization)
+        await submitLabels(labels, formOrgId, template.organization)
       );
-      await WorkflowJobTemplatesAPI.update(template.id, remainingValues);
+      await WorkflowJobTemplatesAPI.update(template.id, templatePayload);
       history.push(`/templates/workflow_job_template/${template.id}/details`);
     } catch (err) {
       setFormSubmitError(err);
@@ -60,7 +73,6 @@ function WorkflowJobTemplateEdit({ template, webhook_key }) {
         handleSubmit={handleSubmit}
         handleCancel={handleCancel}
         template={template}
-        webhook_key={webhook_key}
         submitError={formSubmitError}
       />
     </CardBody>

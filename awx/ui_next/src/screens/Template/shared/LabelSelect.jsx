@@ -47,7 +47,7 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
 
   const renderOptions = opts => {
     return opts.map(option => (
-      <SelectOption key={option.id} value={option}>
+      <SelectOption key={option.id} aria-label={option.name} value={option}>
         {option.name}
       </SelectOption>
     ));

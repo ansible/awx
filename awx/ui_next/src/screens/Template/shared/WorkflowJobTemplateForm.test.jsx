@@ -40,6 +40,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     related: {
       webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
     },
+    webhook_key: 'sdfghjklmnbvcdsew435678iokjhgfd',
   };
 
   beforeEach(async () => {
@@ -74,7 +75,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
               template={mockTemplate}
               handleCancel={handleCancel}
               handleSubmit={handleSubmit}
-              webhook_key="sdfghjklmnbvcdsew435678iokjhgfd"
             />
           )}
         />,
@@ -106,13 +106,14 @@ describe('<WorkflowJobTemplateForm/>', () => {
     const fields = [
       'FormField[name="name"]',
       'FormField[name="description"]',
-      'Field[name="organization"]',
-      'Field[name="inventory"]',
+      'FormGroup[label="Organization"]',
+      'FormGroup[label="Inventory"]',
       'FormField[name="limit"]',
       'FormField[name="scm_branch"]',
-      'Field[name="labels"]',
+      'FormGroup[label="Labels"]',
       'VariablesField',
     ];
+
     const assertField = field => {
       expect(wrapper.find(`${field}`).length).toBe(1);
     };
@@ -171,7 +172,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
-      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').invoke('onChange')(
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
         true,
         {
           currentTarget: { value: true, type: 'change', checked: true },
@@ -180,7 +181,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     });
     wrapper.update();
     expect(
-      wrapper.find('Checkbox[aria-label="Enable Webhooks"]').prop('isChecked')
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
 
     expect(
@@ -201,8 +202,7 @@ describe('<WorkflowJobTemplateForm/>', () => {
     ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
 
     wrapper.update();
-
-    expect(wrapper.find('Field[name="webhook_service"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[name="webhook_service"]').length).toBe(1);
 
     act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
     wrapper.update();

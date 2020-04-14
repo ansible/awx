@@ -15,9 +15,11 @@ jest.mock('@api/models/Inventories');
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;
   let history;
+  const handleSubmit = jest.fn();
+  const handleCancel = jest.fn();
   beforeEach(async () => {
     WorkflowJobTemplatesAPI.create.mockResolvedValue({ data: { id: 1 } });
-    OrganizationsAPI.read.mockResolvedValue({ results: [{ id: 1 }] });
+    OrganizationsAPI.read.mockResolvedValue({ data: { results: [{ id: 1 }] } });
     LabelsAPI.read.mockResolvedValue({
       data: {
         results: [
@@ -36,7 +38,12 @@ describe('<WorkflowJobTemplateAdd/>', () => {
         wrapper = mountWithContexts(
           <Route
             path="/templates/workflow_job_template/add"
-            component={() => <WorkflowJobTemplateAdd />}
+            component={() => (
+              <WorkflowJobTemplateAdd
+                handleSubmit={handleSubmit}
+                handleCancel={handleCancel}
+              />
+            )}
           />,
           {
             context: {
@@ -63,16 +70,48 @@ describe('<WorkflowJobTemplateAdd/>', () => {
 
   test('calls workflowJobTemplatesAPI with correct information on submit', async () => {
     await act(async () => {
-      await wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
-        name: 'Alex',
-        labels: [{ name: 'Foo', id: 1 }, { name: 'bar', id: 2 }],
-        organizationId: 1,
+      wrapper.find('input#wfjt-name').simulate('change', {
+        target: { value: 'Alex', name: 'name' },
       });
+
+      wrapper
+        .find('LabelSelect')
+        .find('SelectToggle')
+        .simulate('click');
     });
-    expect(WorkflowJobTemplatesAPI.create).toHaveBeenCalledWith({
+
+    wrapper.update();
+
+    act(() => {
+      wrapper
+        .find('SelectOption')
+        .find('button[aria-label="Label 3"]')
+        .prop('onClick')();
+    });
+
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('form').simulate('submit');
+    });
+    await expect(WorkflowJobTemplatesAPI.create).toHaveBeenCalledWith({
       name: 'Alex',
+      allow_simultaneous: false,
+      ask_inventory_on_launch: false,
+      ask_limit_on_launch: false,
+      ask_scm_branch_on_launch: false,
+      ask_variables_on_launch: false,
+      description: '',
+      extra_vars: '---',
+      inventory: undefined,
+      limit: '',
+      organization: undefined,
+      scm_branch: '',
+      webhook_credential: undefined,
+      webhook_service: '',
+      webhook_url: '',
     });
-    expect(WorkflowJobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(2);
+
+    expect(WorkflowJobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(1);
   });
 
   test('handleCancel navigates the user to the /templates', async () => {
@@ -95,10 +134,16 @@ describe('<WorkflowJobTemplateAdd/>', () => {
 
     WorkflowJobTemplatesAPI.create.mockRejectedValue(error);
     await act(async () => {
-      wrapper.find('WorkflowJobTemplateForm').invoke('handleSubmit')({
-        name: 'Foo',
+      wrapper.find('input#wfjt-name').simulate('change', {
+        target: { value: 'Alex', name: 'name' },
       });
     });
+
+    wrapper.update();
+    await act(async () => {
+      wrapper.find('form').simulate('submit');
+    });
+
     expect(WorkflowJobTemplatesAPI.create).toHaveBeenCalled();
     wrapper.update();
     expect(wrapper.find('WorkflowJobTemplateForm').prop('submitError')).toEqual(
