@@ -29,11 +29,12 @@ def supervisor_service_command(command, service='*', communicate=True):
         restart_stdout, restart_err = supervisor_process.communicate()
         restart_code = supervisor_process.returncode
         if restart_code or restart_err:
-            logger.error('supervisorctl {} errored with exit code `{}`, stdout:\n{}stderr:\n{}'.format(
-                command, restart_code, restart_stdout.strip(), restart_err.strip()))
+            logger.error('supervisorctl {} {} errored with exit code `{}`, stdout:\n{}stderr:\n{}'.format(
+                command, service, restart_code, restart_stdout.strip(), restart_err.strip()))
         else:
-            logger.info('supervisorctl {} finished, stdout:\n{}'.format(
-                command, restart_stdout.strip()))
+            logger.debug(
+                'supervisorctl {} {} succeeded'.format(command, service)
+            )
     else:
         logger.info('Submitted supervisorctl {} command, not waiting for result'.format(command))
 
