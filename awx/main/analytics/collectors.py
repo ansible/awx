@@ -248,8 +248,8 @@ def copy_tables(since, full_path):
                               main_jobevent.role, 
                               main_jobevent.job_id, 
                               main_jobevent.host_id, 
-                              main_jobevent.host_name,
-                              CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
+                              main_jobevent.host_name
+                              , CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
                               CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
                               main_jobevent.event_data::json->'duration' AS duration,
                               main_jobevent.event_data::json->'res'->'warnings' AS warnings,
