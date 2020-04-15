@@ -69,7 +69,7 @@ def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, j
     job_name = job_template.create_unified_job().name
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        collectors.copy_tables(time_start, tmpdir)
+        collectors.copy_tables(time_start, tmpdir, subset='unified_jobs')
         with open(os.path.join(tmpdir, 'unified_jobs_table.csv')) as f:
             lines = ''.join([l for l in f])
 

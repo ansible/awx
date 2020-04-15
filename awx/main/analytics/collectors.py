@@ -232,7 +232,7 @@ def query_info(since, collection_type):
 @table_version('unified_job_template_table.csv', '1.0')
 @table_version('workflow_job_node_table.csv', '1.0')
 @table_version('workflow_job_template_node_table.csv', '1.0')
-def copy_tables(since, full_path):
+def copy_tables(since, full_path, subset=None):
     def _copy_table(table, query, path):
         file_path = os.path.join(path, table + '_table.csv')
         file = open(file_path, 'w', encoding='utf-8')
@@ -264,7 +264,8 @@ def copy_tables(since, full_path):
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
-    _copy_table(table='events', query=events_query, path=full_path)
+    if not subset or 'events' in subset:
+        _copy_table(table='events', query=events_query, path=full_path)
 
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -292,7 +293,8 @@ def copy_tables(since, full_path):
                                  WHERE (main_unifiedjob.created > {0} OR main_unifiedjob.finished > {0})
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
+    if not subset or 'unified_jobs' in subset:
+        _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
@@ -311,8 +313,9 @@ def copy_tables(since, full_path):
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
-                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
-    _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
+                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''  
+    if not subset or 'unified_job_template' in subset:
+        _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,
@@ -344,7 +347,8 @@ def copy_tables(since, full_path):
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
                                  WHERE main_workflowjobnode.modified > {}
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
+    if not subset or 'workflow_job_node' in subset:
+        _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
     workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
                                  main_workflowjobtemplatenode.created,
@@ -372,7 +376,8 @@ def copy_tables(since, full_path):
                                      FROM main_workflowjobtemplatenode_always_nodes
                                      GROUP BY from_workflowjobtemplatenode_id
                                  ) always_nodes ON main_workflowjobtemplatenode.id = always_nodes.from_workflowjobtemplatenode_id
-                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)
+                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''   
+    if not subset or 'workflow_job_template_node' in subset:
+        _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)
 
     return
