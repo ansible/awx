@@ -133,22 +133,26 @@ class ApiV2(base.Base):
 
         return utils.remove_encrypted(fields)
 
-    def _get_assets(self, resource, value):
-        endpoint = getattr(self, resource)
-        options = utils.get_post_fields(endpoint, self._cache)
-        if options is None:
+    def _export_list(self, endpoint):
+        post_fields = utils.get_post_fields(endpoint, self._cache)
+        if post_fields is None:
             return None
 
-        if value:
-            from awxkit.cli.options import pk_or_name
+        if isinstance(endpoint, page.TentativePage):
+            endpoint = self._cache.get_page(endpoint)
+            if endpoint is None:
+                return None
 
-            pk = pk_or_name(self, resource, value)  # TODO: decide whether to support multiple
-            results = endpoint.get(id=pk).results
-        else:
-            results = self._cache.get_page(endpoint).results
-
-        assets = (self._serialize_asset(asset, options) for asset in results)
+        assets = (self._serialize_asset(asset, post_fields) for asset in endpoint.results)
         return [asset for asset in assets if asset is not None]
+
+    def _filtered_list(self, endpoint, value):
+        if isinstance(value, int) or value.isdecimal():
+            return endpoint.get(id=int(value))
+        options = self._cache.get_options(endpoint)
+        identifier = next(field for field in options['search_fields']
+                          if field in ('name', 'username', 'hostname'))
+        return endpoint.get(**{identifier: value})
 
     def export_assets(self, **kwargs):
         self._cache = page.PageCache()
@@ -160,7 +164,10 @@ class ApiV2(base.Base):
         for resource in EXPORTABLE_RESOURCES:
             value = kwargs.get(resource)
             if all_resources or value is not None:
-                data[resource] = self._get_assets(resource, value)
+                endpoint = getattr(self, resource)
+                if value:
+                    endpoint = self._filtered_list(endpoint, value)
+                data[resource] = self._export_list(endpoint)
 
         return data
 
