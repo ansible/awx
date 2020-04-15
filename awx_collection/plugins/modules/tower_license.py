@@ -62,7 +62,6 @@ def main():
             data=dict(type='dict', required=True),
             eula_accepted=dict(type='bool', required=True),
         ),
-        supports_check_mode=True
     )
 
     json_output = {'changed': False}

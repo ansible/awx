@@ -68,10 +68,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True,
-    )
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     job_id = module.params.get('job_id')
