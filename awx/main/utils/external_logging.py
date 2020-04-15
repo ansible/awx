@@ -8,10 +8,25 @@ from awx.main.utils.reload import supervisor_service_command
 def construct_rsyslog_conf_template(settings=settings):
     tmpl = ''
     parts = []
+    enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED')
     host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
+    max_bytes = settings.MAX_EVENT_RES_DATA
+    parts.extend([
+        '$WorkDirectory /var/lib/awx/rsyslog',
+        f'$MaxMessageSize {max_bytes}',
+        '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
+        'module(load="imuxsock" SysSock.Use="off")',
+        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
+        'template(name="awx" type="string" string="%rawmsg-after-pri%")',
+    ])
+    if not enabled:
+        parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
+        tmpl = '\n'.join(parts)
+        return tmpl
+        
     if protocol.startswith('http'):
         scheme = 'https'
         # urlparse requires '//' to be provided if scheme is not specified
@@ -26,19 +41,10 @@ def construct_rsyslog_conf_template(settings=settings):
                 port = parsed.port
         except ValueError:
             port = settings.LOG_AGGREGATOR_PORT
-    max_bytes = settings.MAX_EVENT_RES_DATA
-    parts.extend([
-        '$WorkDirectory /var/lib/awx/rsyslog',
-        f'$MaxMessageSize {max_bytes}',
-        '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
-        'module(load="imuxsock" SysSock.Use="off")',
-        'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
-        'template(name="awx" type="string" string="%rawmsg-after-pri%")',
-    ])
-    if protocol.startswith('http'):
+
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
-        ssl = "on" if parsed.scheme == 'https' else "off"
-        skip_verify = "off" if settings.LOG_AGGREGATOR_VERIFY_CERT else "on"
+        ssl = 'on' if parsed.scheme == 'https' else 'off'
+        skip_verify = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
         if not port:
             port = 443 if parsed.scheme == 'https' else 80
 
@@ -82,7 +88,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" action.resumeInterval="{timeout}" template="awx")'  # noqa
         )
     else:
-        parts.append(f'action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
+        parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
     tmpl = '\n'.join(parts)
     return tmpl
 
