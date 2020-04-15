@@ -55,6 +55,7 @@ AWX_ISOLATED_USERNAME = 'awx'
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'  # noqa
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'  # noqa
 LOGGING['handlers']['dispatcher']['filename'] = '/var/log/tower/dispatcher.log'  # noqa
+LOGGING['handlers']['wsbroadcast']['filename'] = '/var/log/tower/wsbroadcast.log'  # noqa
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'  # noqa
 LOGGING['handlers']['management_playbooks']['filename'] = '/var/log/tower/management_playbooks.log'  # noqa
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'  # noqa

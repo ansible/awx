@@ -4,9 +4,11 @@ import logging
 import asyncio
 import datetime
 import re
+import redis
 from datetime import datetime as dt
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from awx.main.analytics.broadcast_websocket import (
     BroadcastWebsocketStatsManager,
@@ -55,8 +57,8 @@ class Command(BaseCommand):
         host_stats = [('hostname', 'state', 'start time', 'duration (sec)')]
         for h in hostnames:
             connection_color = '91'    # red
-            h = safe_name(h)
-            prefix = f'awx_{h}'
+            h_safe = safe_name(h)
+            prefix = f'awx_{h_safe}'
             connection_state = data.get(f'{prefix}_connection', 'N/A')
             connection_started = 'N/A'
             connection_duration = 'N/A'
@@ -67,7 +69,7 @@ class Command(BaseCommand):
                 connection_started = data.get(f'{prefix}_connection_start', 'Error')
                 if connection_started != 'Error':
                     connection_started = datetime.datetime.fromtimestamp(connection_started)
-                    connection_duration = (dt.now() - connection_started).total_seconds()
+                    connection_duration = int((dt.now() - connection_started).total_seconds())
 
             connection_state = f'\033[{connection_color}m{connection_state}\033[0m'
 
@@ -79,10 +81,10 @@ class Command(BaseCommand):
     def get_connection_stats(cls, me, hostnames, data):
         host_stats = [('hostname', 'total', 'per minute')]
         for h in hostnames:
-            h = safe_name(h)
-            prefix = f'awx_{h}'
-            messages_total = data.get(f'{prefix}_messages_received', 'N/A')
-            messages_per_minute = data.get(f'{prefix}_messages_received_per_minute', 'N/A')
+            h_safe = safe_name(h)
+            prefix = f'awx_{h_safe}'
+            messages_total = data.get(f'{prefix}_messages_received', '0')
+            messages_per_minute = data.get(f'{prefix}_messages_received_per_minute', '0')
 
             host_stats.append((h, str(int(messages_total)), str(int(messages_per_minute))))
 
@@ -90,7 +92,12 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+            try:
+                stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+            except redis.exceptions.ConnectionError as e:
+                print(f"Unable to get Broadcast Websocket Status. Failed to connect to redis {e}")
+                return
+
             data = {}
             for family in stats_all:
                 if family.type == 'gauge' and len(family.samples) > 1:
@@ -101,7 +108,7 @@ class Command(BaseCommand):
                 else:
                     data[family.name] = family.samples[0].value
             me = Instance.objects.me()
-            hostnames = [i.hostname for i in Instance.objects.exclude(hostname=me.hostname)]
+            hostnames = [i.hostname for i in Instance.objects.exclude(Q(hostname=me.hostname) | Q(rampart_groups__controller__isnull=False))]
 
             host_stats = Command.get_connection_status(me, hostnames, data)
             lines = Command._format_lines(host_stats)
