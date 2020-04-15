@@ -464,7 +464,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='instance_group',
-            field=models.ForeignKey(on_delete=models.SET_NULL, default=None, blank=True, to='main.InstanceGroup', help_text='The Rampart/Instance group the job was run under', null=True),
+            field=models.ForeignKey(on_delete=models.SET_NULL, default=None, blank=True, to='main.InstanceGroup', help_text='The Instance group the job was run under', null=True),
         ),
         migrations.AddField(
             model_name='unifiedjobtemplate',

@@ -707,7 +707,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         null=True,
         default=None,
         on_delete=polymorphic.SET_NULL,
-        help_text=_('The Rampart/Instance group the job was run under'),
+        help_text=_('The Instance group the job was run under'),
     )
     organization = models.ForeignKey(
         'Organization',
