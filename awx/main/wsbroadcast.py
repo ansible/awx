@@ -93,7 +93,7 @@ class WebsocketTask():
         try:
             async with aiohttp.ClientSession(headers={'secret': secret_val},
                                              timeout=timeout) as session:
-                async with session.ws_connect(uri, ssl=self.verify_ssl) as websocket:
+                async with session.ws_connect(uri, ssl=self.verify_ssl, heartbeat=20) as websocket:
                     self.stats.record_connection_established()
                     attempt = 0
                     await self.run_loop(websocket)
@@ -105,17 +105,14 @@ class WebsocketTask():
             raise
         except client_exceptions.ClientConnectorError as e:
             logger.warn(f"Failed to connect to {self.remote_host}: '{e}'. Reconnecting ...")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
         except asyncio.TimeoutError:
             logger.warn(f"Timeout while trying to connect to {self.remote_host}. Reconnecting ...")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
             logger.warn(f"Websocket broadcast client exception {type(e)} {e}")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
+
+        self.stats.record_connection_lost()
+        self.start(attempt=attempt + 1)
 
     def start(self, attempt=0):
         self.async_task = self.event_loop.create_task(self.connect(attempt=attempt))
