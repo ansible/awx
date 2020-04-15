@@ -348,7 +348,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True, required_one_of=[['kind', 'credential_type']])
+    module = TowerModule(argument_spec=argument_spec, required_one_of=[['kind', 'credential_type']])
 
     # Extract our parameters
     name = module.params.get('name')

@@ -117,7 +117,6 @@ def main():
     # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
-        supports_check_mode=True,
         required_one_of=[['name', 'settings']],
         mutually_exclusive=[['name', 'settings']],
         required_if=[['name', 'present', ['value']]]
