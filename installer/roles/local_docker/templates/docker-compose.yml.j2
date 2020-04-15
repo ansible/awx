@@ -20,6 +20,7 @@ services:
     user: root
     restart: unless-stopped
     volumes:
+      - supervisor-socket:/var/run/supervisor
       - rsyslog-socket:/var/run/awx-rsyslog/
       - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
@@ -77,6 +78,7 @@ services:
     user: root
     restart: unless-stopped
     volumes:
+      - supervisor-socket:/var/run/supervisor
       - rsyslog-socket:/var/run/awx-rsyslog/
       - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
