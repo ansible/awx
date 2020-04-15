@@ -47,8 +47,9 @@ class Projects extends Component {
       [`${projectSchedulesPath}/add`]: i18n._(t`Create New Schedule`),
       [`${projectSchedulesPath}/${nested?.id}`]: `${nested?.name}`,
       [`${projectSchedulesPath}/${nested?.id}/details`]: i18n._(
-        t`Edit Details`
+        t`Schedule Details`
       ),
+      [`${projectSchedulesPath}/${nested?.id}/edit`]: i18n._(t`Edit Details`),
     };
 
     this.setState({ breadcrumbConfig });

@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { RRule } from 'rrule';
 import { SchedulesAPI } from '@api';
-import ScheduleAdd from './ScheduleAdd';
+import ScheduleEdit from './ScheduleEdit';
 
 jest.mock('@api/models/Schedules');
 
@@ -15,22 +15,52 @@ SchedulesAPI.readZoneInfo.mockResolvedValue({
   ],
 });
 
-let wrapper;
-
-const createSchedule = jest.fn().mockImplementation(() => {
-  return {
-    data: {
-      id: 1,
-    },
-  };
+SchedulesAPI.update.mockResolvedValue({
+  data: {
+    id: 27,
+  },
 });
 
-describe('<ScheduleAdd />', () => {
+let wrapper;
+
+const mockSchedule = {
+  rrule:
+    'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+  id: 27,
+  type: 'schedule',
+  url: '/api/v2/schedules/27/',
+  summary_fields: {
+    user_capabilities: {
+      edit: true,
+      delete: true,
+    },
+  },
+  created: '2020-04-02T18:43:12.664142Z',
+  modified: '2020-04-02T18:43:12.664185Z',
+  name: 'mock schedule',
+  description: '',
+  extra_data: {},
+  inventory: null,
+  scm_branch: null,
+  job_type: null,
+  job_tags: null,
+  skip_tags: null,
+  limit: null,
+  diff_mode: null,
+  verbosity: null,
+  unified_job_template: 11,
+  enabled: true,
+  dtstart: '2020-04-02T18:45:00Z',
+  dtend: '2020-04-02T18:45:00Z',
+  next_run: '2020-04-02T18:45:00Z',
+  timezone: 'America/New_York',
+  until: '',
+};
+
+describe('<ScheduleEdit />', () => {
   beforeAll(async () => {
     await act(async () => {
-      wrapper = mountWithContexts(
-        <ScheduleAdd createSchedule={createSchedule} />
-      );
+      wrapper = mountWithContexts(<ScheduleEdit schedule={mockSchedule} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
@@ -49,7 +79,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run once schedule',
       rrule:
@@ -69,7 +99,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run every 10 minutes 10 times',
       rrule:
@@ -89,7 +119,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run every hour until date',
       rrule:
@@ -108,7 +138,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run daily',
       rrule:
@@ -129,7 +159,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run weekly on mon/wed/fri',
       rrule: `DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=${RRule.MO},${RRule.WE},${RRule.FR}`,
@@ -150,7 +180,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run on the first day of the month',
       rrule:
@@ -174,7 +204,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run monthly on the last Tuesday',
       rrule:
@@ -197,7 +227,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the first day of March',
       rrule:
@@ -221,7 +251,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the second Friday in April',
       rrule:
@@ -245,7 +275,7 @@ describe('<ScheduleAdd />', () => {
         timezone: 'America/New_York',
       });
     });
-    expect(createSchedule).toHaveBeenCalledWith({
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the first weekday in October',
       rrule:
