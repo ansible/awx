@@ -4,6 +4,7 @@ import logging
 import asyncio
 import datetime
 import re
+import redis
 from datetime import datetime as dt
 
 from django.core.management.base import BaseCommand
@@ -91,7 +92,12 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+            try:
+                stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+            except redis.exceptions.ConnectionError as e:
+                print(f"Unable to get Broadcast Websocket Status. Failed to connect to redis {e}")
+                return
+
             data = {}
             for family in stats_all:
                 if family.type == 'gauge' and len(family.samples) > 1:
