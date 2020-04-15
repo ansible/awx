@@ -4,6 +4,8 @@ import { withI18n } from '@lingui/react';
 import { Link } from 'react-router-dom';
 import {
   Button as _Button,
+  Chip,
+  ChipGroup,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItemCells,
@@ -27,8 +29,17 @@ const Button = styled(_Button)`
   padding-bottom: 0;
   padding-left: 0;
 `;
+const Required = styled.span`
+  color: var(--pf-global--danger-color--100);
+  margin-left: var(--pf-global--spacer--xs);
+`;
+
+const Label = styled.b`
+  margin-right: 20px;
+`;
 
 function SurveyListItem({
+  canEdit,
   question,
   i18n,
   isLast,
@@ -54,7 +65,7 @@ function SurveyListItem({
               <Button
                 variant="plain"
                 aria-label={i18n._(t`move up`)}
-                isDisabled={isFirst}
+                isDisabled={isFirst || !canEdit}
                 onClick={() => onMoveUp(question)}
               >
                 <CaretUpIcon />
@@ -64,7 +75,7 @@ function SurveyListItem({
               <Button
                 variant="plain"
                 aria-label={i18n._(t`move down`)}
-                isDisabled={isLast}
+                isDisabled={isLast || !canEdit}
                 onClick={() => onMoveDown(question)}
               >
                 <CaretDownIcon />
@@ -73,6 +84,7 @@ function SurveyListItem({
           </Stack>
         </DataListAction>
         <DataListCheck
+          isDisabled={!canEdit}
           checked={isChecked}
           onChange={onSelect}
           aria-labelledby="survey check"
@@ -80,12 +92,46 @@ function SurveyListItem({
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name">
-              <Link to={`survey/edit/${question.variable}`}>
-                {question.question_name}
-              </Link>
+              <>
+                <Link to={`survey/edit/${question.variable}`}>
+                  {question.question_name}
+                </Link>
+                {question.required && (
+                  <Required
+                    aria-label={i18n._(t`Required`)}
+                    className="pf-c-form__label-required"
+                    aria-hidden="true"
+                  >
+                    *
+                  </Required>
+                )}
+              </>
             </DataListCell>,
-            <DataListCell key="type">{question.type}</DataListCell>,
-            <DataListCell key="default">{question.default}</DataListCell>,
+
+            <DataListCell key="type">
+              <Label>{i18n._(t`Type:`)}</Label>
+              {question.type}
+            </DataListCell>,
+            <DataListCell key="default">
+              <Label>{i18n._(t`Default:`)}</Label>
+              {[question.type].includes('password') && (
+                <span>{i18n._(t`encrypted`).toUpperCase()}</span>
+              )}
+              {[question.type].includes('multiselect') &&
+                question.default.length > 0 && (
+                  <ChipGroup numChips={5}>
+                    {question.default.split('\n').map(chip => (
+                      <Chip key={chip} isReadOnly>
+                        {chip}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                )}
+              {![question.type].includes('password') &&
+                ![question.type].includes('multiselect') && (
+                  <span>{question.default}</span>
+                )}
+            </DataListCell>,
           ]}
         />
       </DataListItemRow>

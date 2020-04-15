@@ -21,4 +21,25 @@ describe('ErrorDetail', () => {
     );
     expect(wrapper).toHaveLength(1);
   });
+  test('testing errors', () => {
+    const wrapper = mountWithContexts(
+      <ErrorDetail
+        error={
+          new Error({
+            response: {
+              config: {
+                method: 'patch',
+              },
+              data: {
+                project: ['project error'],
+                inventory: ['inventory error'],
+              },
+            },
+          })
+        }
+      />
+    );
+    wrapper.find('Expandable').prop('onToggle')();
+    wrapper.update();
+  });
 });

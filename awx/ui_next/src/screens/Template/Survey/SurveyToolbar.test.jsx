@@ -36,6 +36,7 @@ describe('<SurveyToolbar />', () => {
           isAllSelected
           onToggleDeleteModal={jest.fn()}
           onToggleSurvey={jest.fn()}
+          canEdit
         />
       );
     });
@@ -83,5 +84,32 @@ describe('<SurveyToolbar />', () => {
 
     expect(wrapper.find('Switch').length).toBe(1);
     expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
+  });
+  test('all action buttons in toolbar are disabled', () => {
+    let wrapper;
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyToolbar
+          surveyEnabled
+          isDeleteDisabled={false}
+          onSelectAll={jest.fn()}
+          isAllSelected
+          onToggleDelete={jest.fn()}
+          onToggleSurvey={jest.fn()}
+          canEdit={false}
+        />
+      );
+    });
+    expect(
+      wrapper
+        .find('DataToolbar')
+        .find('Checkbox')
+        .prop('isDisabled')
+    ).toBe(true);
+    expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+      true
+    );
   });
 });

@@ -22,6 +22,7 @@ function SurveyList({
   toggleSurvey,
   updateSurvey,
   deleteSurvey,
+  canEdit,
   i18n,
 }) {
   const questions = survey?.spec || [];
@@ -97,6 +98,7 @@ function SurveyList({
             onSelect={() => handleSelect(question)}
             onMoveUp={moveUp}
             onMoveDown={moveDown}
+            canEdit={canEdit}
           />
         ))}
         {isPreviewModalOpen && (
@@ -169,6 +171,7 @@ function SurveyList({
         surveyEnabled={surveyEnabled}
         onToggleSurvey={toggleSurvey}
         isDeleteDisabled={selected?.length === 0}
+        canEdit={canEdit}
         onToggleDeleteModal={() => setIsDeleteModalOpen(true)}
       />
       {content}

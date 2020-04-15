@@ -6,9 +6,11 @@ import InventoryStep from './InventoryStep';
 import CredentialsStep from './CredentialsStep';
 import OtherPromptsStep from './OtherPromptsStep';
 import PreviewStep from './PreviewStep';
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI, CredentialsAPI, CredentialTypesAPI } from '@api';
 
 jest.mock('@api/models/Inventories');
+jest.mock('@api/models/CredentialTypes');
+jest.mock('@api/models/Credentials');
 
 let config;
 const resource = {
@@ -25,6 +27,10 @@ describe('LaunchPrompt', () => {
         count: 1,
       },
     });
+    CredentialsAPI.read.mockResolvedValue({
+      data: { results: [{ id: 1 }], count: 1 },
+    });
+    CredentialTypesAPI.loadAllTypes({ data: { results: [{ type: 'ssh' }] } });
 
     config = {
       can_start_without_user_input: false,

@@ -2,9 +2,10 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
+import styled from 'styled-components';
 
 import {
-  DataToolbar,
+  DataToolbar as _DataToolbar,
   DataToolbarContent,
   DataToolbarGroup,
   DataToolbarItem,
@@ -12,7 +13,12 @@ import {
 import { Switch, Checkbox, Button } from '@patternfly/react-core';
 import { ToolbarAddButton } from '@components/PaginatedDataList';
 
+const DataToolbar = styled(_DataToolbar)`
+  margin-left: 52px;
+`;
+
 function SurveyToolbar({
+  canEdit,
   isAllSelected,
   onSelectAll,
   i18n,
@@ -21,12 +27,14 @@ function SurveyToolbar({
   isDeleteDisabled,
   onToggleDeleteModal,
 }) {
+  isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
   return (
     <DataToolbar id="survey-toolbar">
       <DataToolbarContent>
         <DataToolbarItem>
           <Checkbox
+            isDisabled={!canEdit}
             isChecked={isAllSelected}
             onChange={isChecked => {
               onSelectAll(isChecked);
@@ -42,12 +50,16 @@ function SurveyToolbar({
             label={i18n._(t`On`)}
             labelOff={i18n._(t`Off`)}
             isChecked={surveyEnabled}
+            isDisabled={!canEdit}
             onChange={() => onToggleSurvey(!surveyEnabled)}
           />
         </DataToolbarItem>
         <DataToolbarGroup>
           <DataToolbarItem>
-            <ToolbarAddButton linkTo={`${match.url}/add`} />
+            <ToolbarAddButton
+              isDisabled={!canEdit}
+              linkTo={`${match.url}/add`}
+            />
           </DataToolbarItem>
           <DataToolbarItem>
             <Button

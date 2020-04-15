@@ -48,6 +48,7 @@ describe('<WorkflowJobTemplate/>', () => {
               { name: 'Label 3', id: 3 },
             ],
           },
+          user_capabilities: {},
         },
         related: {
           webhook_key: '/api/v2/workflow_job_templates/57/webhook_key/',

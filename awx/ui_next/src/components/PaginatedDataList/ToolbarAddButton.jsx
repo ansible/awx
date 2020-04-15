@@ -5,7 +5,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-function ToolbarAddButton({ linkTo, onClick, i18n }) {
+function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
   if (!linkTo && !onClick) {
     throw new Error(
       'ToolbarAddButton requires either `linkTo` or `onClick` prop'
@@ -15,6 +15,7 @@ function ToolbarAddButton({ linkTo, onClick, i18n }) {
     return (
       <Tooltip content={i18n._(t`Add`)} position="top">
         <Button
+          isDisabled={isDisabled}
           component={Link}
           to={linkTo}
           variant="primary"

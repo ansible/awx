@@ -43,6 +43,7 @@ describe('<SurveyList />', () => {
     await act(async () => {
       wrapper.find('Switch').invoke('onChange')(true);
     });
+
     wrapper.update();
 
     expect(toggleSurvey).toHaveBeenCalled();
@@ -53,14 +54,14 @@ describe('<SurveyList />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <SurveyList survey={surveyData} deleteSurvey={deleteSurvey} />
+        <SurveyList survey={surveyData} deleteSurvey={deleteSurvey} canEdit />
       );
     });
     wrapper.update();
+
     expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
       true
     );
-
     expect(
       wrapper.find('Checkbox[aria-label="Select all"]').prop('isChecked')
     ).toBe(false);
@@ -81,6 +82,7 @@ describe('<SurveyList />', () => {
     act(() => {
       wrapper.find('Button[variant="danger"]').invoke('onClick')();
     });
+
     wrapper.update();
 
     await act(() =>
@@ -88,6 +90,7 @@ describe('<SurveyList />', () => {
     );
     expect(deleteSurvey).toHaveBeenCalled();
   });
+
   test('should render Preview button ', async () => {
     let wrapper;
 
@@ -97,6 +100,7 @@ describe('<SurveyList />', () => {
 
     expect(wrapper.find('Button[aria-label="Preview"]').length).toBe(1);
   });
+
   test('Preview button should render Modal', async () => {
     let wrapper;
 
@@ -108,6 +112,7 @@ describe('<SurveyList />', () => {
 
     expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
   });
+
   test('Modal close button should close modal', async () => {
     let wrapper;
 
@@ -119,10 +124,33 @@ describe('<SurveyList />', () => {
 
     expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
 
-    wrapper.find('Modal').prop('onClose')();
+    act(() => wrapper.find('Modal').prop('onClose')());
+
     wrapper.update();
 
     expect(wrapper.find('SurveyPreviewModal').length).toBe(0);
+  });
+
+  test('user without edit/delete permission cannot delete', async () => {
+    const deleteSurvey = jest.fn();
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SurveyList survey={surveyData} deleteSurvey={deleteSurvey} />
+      );
+    });
+
+    expect(
+      wrapper
+        .find('DataToolbar')
+        .find('Checkbox')
+        .prop('isDisabled')
+    ).toBe(true);
+    expect(wrapper.find('Switch').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('ToolbarAddButton').prop('isDisabled')).toBe(true);
+    expect(wrapper.find('Button[variant="danger"]').prop('isDisabled')).toBe(
+      true
+    );
   });
 });
 
