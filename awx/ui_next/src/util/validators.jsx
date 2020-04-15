@@ -25,6 +25,15 @@ export function maxLength(max, i18n) {
   };
 }
 
+export function minLength(min, i18n) {
+  return value => {
+    if (value.trim().length < min) {
+      return i18n._(t`This field must be at least ${min} characters`);
+    }
+    return undefined;
+  };
+}
+
 export function minMaxValue(min, max, i18n) {
   return value => {
     if (value < min || value > max) {
@@ -57,10 +66,21 @@ export function noWhiteSpace(i18n) {
   };
 }
 
+export function integer(i18n) {
+  return value => {
+    const str = String(value);
+    if (/[^0-9]/.test(str)) {
+      return i18n._(t`This field must be an integer`);
+    }
+    return undefined;
+  };
+}
+
 export function combine(validators) {
   return value => {
     for (let i = 0; i < validators.length; i++) {
-      const error = validators[i](value);
+      const validate = validators[i];
+      const error = validate ? validate(value) : null;
       if (error) {
         return error;
       }

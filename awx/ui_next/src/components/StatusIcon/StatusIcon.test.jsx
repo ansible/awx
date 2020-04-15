@@ -27,7 +27,6 @@ describe('StatusIcon', () => {
   });
   test('renders a successful status when host status is "ok"', () => {
     const wrapper = mount(<StatusIcon status="ok" />);
-    wrapper.debug();
     expect(wrapper).toHaveLength(1);
     expect(wrapper.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
     expect(wrapper.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
