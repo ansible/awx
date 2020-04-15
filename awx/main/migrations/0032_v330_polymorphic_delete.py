@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjob',
             name='instance_group',
-            field=models.ForeignKey(blank=True, default=None, help_text='The Rampart/Instance group the job was run under', null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, to='main.InstanceGroup'),
+            field=models.ForeignKey(blank=True, default=None, help_text='The Instance group the job was run under', null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, to='main.InstanceGroup'),
         ),
     ]
