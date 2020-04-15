@@ -8,6 +8,7 @@ ENV LC_ALL en_US.UTF-8
 
 ADD tools/docker-compose/ansible_nightly.repo /etc/yum.repos.d/ansible_nightly.repo
 ADD tools/docker-compose/google-cloud-sdk.repo /etc/yum.repos.d/
+ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
 
 # sync with installer/roles/image_build/templates/Dockerfile.j2
 RUN dnf -y update && \
@@ -50,6 +51,7 @@ RUN dnf -y update && \
     python3-setuptools \
     python3-pycurl \
     rsync \
+    rsyslog-omhttp \
     subversion \
     sudo \
     swig \
@@ -120,6 +122,7 @@ ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /
+ADD tools/docker-compose/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/scripts/awx-python /usr/bin/awx-python
 
 # Pre-create things that we need to write to
@@ -128,13 +131,6 @@ RUN for dir in /var/lib/awx /var/lib/awx/rsyslog /var/lib/awx/rsyslog/conf.d /va
     \
     for file in /etc/passwd /etc/supervisord.conf /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
     do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
-
-
-RUN chmod -R 0775 /var/lib/awx /var/lib/awx/rsyslog
-ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
-RUN yum install -y rsyslog-omhttp
-ADD tools/docker-compose/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
-RUN chmod 0775 /var/lib/awx/rsyslog/rsyslog.conf
 
 ENV HOME /var/lib/awx
 ENV PATH="/usr/local/n/versions/node/10.15.0/bin:${PATH}"
