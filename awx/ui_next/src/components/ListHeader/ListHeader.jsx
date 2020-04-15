@@ -65,7 +65,13 @@ class ListHeader extends React.Component {
   }
 
   handleRemoveAll() {
-    this.pushHistoryState(null);
+    // remove everything in oldParams except for page_size and order_by
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
+    const oldParamsClone = { ...oldParams };
+    delete oldParamsClone.page_size;
+    delete oldParamsClone.order_by;
+    this.pushHistoryState(removeParams(qsConfig, oldParams, oldParamsClone));
   }
 
   handleSort(key, order) {
