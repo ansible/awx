@@ -7,26 +7,14 @@
   set_fact:
     sched1: "AWX-Collection-tests-tower_schedule-sched1-{{ test_id }}"
 
-#    rrule: 
-#    description:
-#    extra_data:
-#    inventory:
-#    scm_branch:
-#    job_type:
-#    job_tags:
-#    skip_tags:
-#    limit:
-#    diff_mode:
-#    verbosity:
-
 - name: Try to create without an rrule
   tower_schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
-    enabled: True
+    enabled: true
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -48,11 +36,11 @@
     job_tags: other_tags
     skip_tags: some_tags
     limit: node1
-    diff_mode: True
+    diff_mode: true
     verbosity: 4
-    enabled: True
+    enabled: true
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -66,7 +54,7 @@
     unified_job_template: "Demo Job Template"
     rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -79,7 +67,7 @@
     unified_job_template: "Demo Job Template"
     rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -89,9 +77,9 @@
   tower_schedule:
     name: "{{ sched1 }}"
     state: present
-    enabled: "False"
+    enabled: "false"
   register: result
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
