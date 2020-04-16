@@ -72,11 +72,19 @@ function NodeViewModal({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       let { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
+
       if (data?.type === 'job_template') {
         const {
           data: { results = [] },
         } = await JobTemplatesAPI.readInstanceGroups(data.id);
         data = Object.assign(data, { instance_groups: results });
+      }
+
+      if (data?.related?.webhook_receiver) {
+        const {
+          data: { webhook_key },
+        } = await nodeAPI?.readWebhookKey(data.id);
+        data = Object.assign(data, { webhook_key });
       }
 
       return data;

@@ -11,9 +11,23 @@ import NodeViewModal from './NodeViewModal';
 jest.mock('@api/models/JobTemplates');
 jest.mock('@api/models/WorkflowJobTemplates');
 WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
-WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({});
+WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
+  data: {
+    id: 1,
+    type: 'workflow_job_template',
+    related: {
+      webhook_receiver: '/api/v2/job_templates/7/gitlab/',
+    },
+  },
+});
+WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
+  data: {
+    webhook_key: 'Pim3mRXT0',
+  },
+});
 JobTemplatesAPI.readLaunch.mockResolvedValue({});
 JobTemplatesAPI.readInstanceGroups.mockResolvedValue({});
+JobTemplatesAPI.readWebhookKey.mockResolvedValue({});
 JobTemplatesAPI.readDetail.mockResolvedValue({
   data: {
     id: 1,
@@ -74,6 +88,7 @@ describe('NodeViewModal', () => {
       expect(JobTemplatesAPI.readDetail).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
       expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
+      expect(WorkflowJobTemplatesAPI.readWebhookKey).toHaveBeenCalledWith(1);
     });
 
     test('Close button dispatches as expected', () => {
@@ -125,6 +140,7 @@ describe('NodeViewModal', () => {
       });
       waitForLoaded(wrapper);
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readWebhookKey).not.toHaveBeenCalledWith();
       expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
       expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(1);
       expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);

@@ -5,6 +5,7 @@ import mockData from './data.job_template.json';
 
 const mockJT = {
   ...mockData,
+  webhook_key: 'PiM3n2',
   instance_groups: [
     {
       id: 1,
@@ -49,9 +50,24 @@ describe('PromptJobTemplateDetail', () => {
     assertDetail('Show Changes', 'Off');
     assertDetail('Job Slicing', '1');
     assertDetail('Host Config Key', 'a1b2c3');
+    assertDetail('Webhook Service', 'Github');
+    assertDetail('Webhook Key', 'PiM3n2');
+    expect(wrapper.find('StatusIcon')).toHaveLength(2);
+    expect(wrapper.find('Detail[label="Webhook URL"] dd').text()).toEqual(
+      expect.stringContaining('/api/v2/job_templates/7/github/')
+    );
     expect(
       wrapper.find('Detail[label="Provisioning Callback URL"] dd').text()
     ).toEqual(expect.stringContaining('/api/v2/job_templates/7/callback/'));
+    expect(
+      wrapper
+        .find('Detail[label="Webhook Credential"]')
+        .containsAllMatchingElements([
+          <span>
+            <strong>Github Token:</strong>GitHub Cred
+          </span>,
+        ])
+    ).toEqual(true);
     expect(
       wrapper.find('Detail[label="Credentials"]').containsAllMatchingElements([
         <span>
