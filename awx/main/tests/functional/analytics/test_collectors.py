@@ -12,6 +12,9 @@ from awx.main.analytics import collectors
 from awx.main.models import (
     ProjectUpdate,
     InventorySource,
+    WorkflowJob,
+    WorkflowJobNode,
+    JobTemplate,
 )
 
 
@@ -29,6 +32,8 @@ def sqlite_copy_expert(request):
 
         sql = sql.replace('COPY (', '')
         sql = sql.replace(') TO STDOUT WITH CSV HEADER', '')
+        # sqlite equivalent
+        sql = sql.replace('ARRAY_AGG', 'GROUP_CONCAT')
 
         # Remove JSON style queries
         # TODO: could replace JSON style queries with sqlite kind of equivalents
@@ -76,3 +81,57 @@ def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, j
             assert project_update_name in lines
             assert inventory_update_name in lines
             assert job_name in lines
+
+
+@pytest.fixture
+def workflow_job(states=['new', 'new', 'new', 'new', 'new']):
+    """
+    Workflow topology:
+           node[0]
+            /\
+          s/  \f
+          /    \
+    node[1,5] node[3]
+         /       \
+       s/         \f
+       /           \
+    node[2]       node[4]
+    """
+    wfj = WorkflowJob.objects.create()
+    jt = JobTemplate.objects.create(name='test-jt')
+    nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 6)]
+    for node, state in zip(nodes, states):
+        if state:
+            node.job = jt.create_job()
+            node.job.status = state
+            node.job.save()
+            node.save()
+    nodes[0].success_nodes.add(nodes[1])
+    nodes[0].success_nodes.add(nodes[5])
+    nodes[1].success_nodes.add(nodes[2])
+    nodes[0].failure_nodes.add(nodes[3])
+    nodes[3].failure_nodes.add(nodes[4])
+    return wfj
+
+
+@pytest.mark.django_db
+def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
+    time_start = now()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        collectors.copy_tables(time_start, tmpdir, subset='workflow_job_node_query')
+        with open(os.path.join(tmpdir, 'workflow_job_node_table.csv')) as f:
+            reader = csv.reader(f)
+            # Pop the headers
+            next(reader)
+            lines = [l for l in reader]
+
+            ids = [int(l[0]) for l in lines]
+
+            assert ids == list(workflow_job.workflow_nodes.all().values_list('id', flat=True))
+
+            for index, relationship in zip([7, 8, 9], ['success_nodes', 'failure_nodes', 'always_nodes']):
+                for i, l in enumerate(lines):
+                    related_nodes = [int(e) for e in l[index].split(',')] if l[index] else []
+                    assert related_nodes == list(getattr(workflow_job.workflow_nodes.all()[i], relationship).all().values_list('id', flat=True)), \
+                            f"(right side) workflow_nodes.all()[{i}].{relationship}.all()"
