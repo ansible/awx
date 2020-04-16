@@ -26,6 +26,7 @@ options:
     rrule:
       description:
         - A value representing the schedules iCal recurrence rule.
+        - See rrule plugin for help constructing this value
       required: False
       type: str
     name:
@@ -125,6 +126,23 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
+- name: Build a schedule for Demo Job Template
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+  register: result
+  ignore_errors: True
+
+- name: Build the same schedule using the rrule plugin
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2019-12-19 13:05:51') }}"
+  register: result
+  ignore_errors: True
 '''
 
 from ..module_utils.tower_api import TowerModule

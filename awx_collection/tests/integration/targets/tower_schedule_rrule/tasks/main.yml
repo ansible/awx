@@ -1,0 +1,252 @@
+---
+- name: Test too many params
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'You may only pass one schedule type in at a time' in result.msg"
+
+- name: Test invalid frequency
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'john', start_date='2020-4-16 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Frequency of john is invalid' in result.msg"
+
+- name: Test an invalid start date
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', start_date='invalid') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Parameter start_date must be in the format YYYY-MM-DD' in result.msg"
+
+- name: Test with a valid start date (no time) (also tests none frequency and count)
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', start_date='2020-04-16') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T000000 RRULE:FREQ=DAILY;COUNT=1;INTERVAL=1'
+
+- name: Test with a valid start date and time
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', start_date='2020-04-16 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=DAILY;COUNT=1;INTERVAL=1'
+
+- name: Test end_on as count
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MINUTELY;COUNT=2;INTERVAL=1'
+
+- name: Test end_on as date
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'minute', start_date='2020-4-16 03:45:07', end_on='2020-4-17 03:45:07') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MINUTELY;UNTIL=20200417T034507;INTERVAL=1'
+
+- name: Test end_on as junk
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'minute', start_date='2020-4-16 03:45:07', end_on='junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"Parameter end_on must either be an integer or in the format YYYY-MM-DD" in result.msg'
+
+- name: Test on_days as junk
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2020-4-16 03:45:07', on_days='junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"Parameter on_days must only contain values monday, tuesday, wednesday, thursday, friday, saturday, sunday" in result.msg'
+
+- name: Test on_days as a single day
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2020-4-16 03:45:07', on_days='saturday') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=WEEKLY;BYDAY=SA;INTERVAL=1'
+
+- name: Test on_days as multiple days (with some whitespaces)
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2020-4-16 03:45:07', on_days='saturday,monday , friday') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=WEEKLY;BYDAY=MO,FR,SA;INTERVAL=1'
+
+- name: Test combo of both month_day_number and on_the
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', on_the='something', month_day_number='else') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"Month based frquencies can have month_day_number or on_the but not both" in result.msg'
+
+- name: Test month_day_number as not an integer
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', month_day_number='junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"month_day_number must be between 1 and 31" in result.msg'
+
+- name: Test month_day_number < 1
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', month_day_number='0') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"month_day_number must be between 1 and 31" in result.msg'
+
+- name: Test month_day_number > 31
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', month_day_number='32') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"month_day_number must be between 1 and 31" in result.msg'
+
+- name: Test valid month_day_number
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', month_day_number='18') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MONTHLY;BYMONTHDAY=18;INTERVAL=1'
+
+- name: Test on_the as junk
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', on_the='junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"on_the parameter must be two space seperated words" in result.msg'
+
+- name: Test on_the with invalid occurance
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', on_the='junk wednesday') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"The first string of the on_the parameter is not valid" in result.msg'
+
+- name: Test on_the with invalid weekday
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', on_the='second junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - '"Weekday portion of on_the parameter is not valid" in result.msg'
+
+- name: Test a valid on_the
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', on_the='second sunday') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MONTHLY;BYSETPOS=2;BYDAY=SU;INTERVAL=1'
+
+- name: Test an invalid timezone
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', timezone='junk') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is failed
+      - "'Timezone parameter is not valid' in result.msg"
+
+- name: Test an valid timezone
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month', start_date='2020-4-16 03:45:07', timezone='Zulu') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+      - result.msg == 'DTSTART;TZID=Zulu:20200416T034507 RRULE:FREQ=MONTHLY;INTERVAL=1'
+
+- name: Test an empty schedule
+  debug:
+    msg: "{{ query('awx.awx.tower_schedule_rrule', 'month') }}"
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
