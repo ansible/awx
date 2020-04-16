@@ -25,6 +25,7 @@
         dest: "{{ dest }}"
         set_remote_user: false
         rsync_opts:
+          - "--blocking-io"
           - "--rsh=$RSH"
       environment:
         RSH: "oc rsh --config={{ ansible_kubectl_config }}"
