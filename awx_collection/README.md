@@ -51,8 +51,9 @@ oauth_token = LEdCpKVKc4znzffcpQL5vLG8oyeku6
 ## Release and Upgrade Notes
 
 Notable releases of the `awx.awx` collection:
- - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection
- - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/)
+
+ - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection.
+ - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).
 
 The following notes are changes that may require changes to playbooks:
 
