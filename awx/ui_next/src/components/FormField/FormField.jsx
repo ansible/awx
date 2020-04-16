@@ -1,18 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
-import {
-  FormGroup,
-  TextInput,
-  TextArea,
-  Tooltip,
-} from '@patternfly/react-core';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
+import { FormGroup, TextInput, TextArea } from '@patternfly/react-core';
+import FieldTooltip from './FieldTooltip';
 
 function FormField(props) {
   const {
@@ -40,15 +30,7 @@ function FormField(props) {
           isValid={isValid}
           label={label}
         >
-          {tooltip && (
-            <Tooltip
-              content={tooltip}
-              maxWidth={tooltipMaxWidth}
-              position="right"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
-          )}
+          <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextArea
             id={id}
             isRequired={isRequired}
@@ -69,15 +51,7 @@ function FormField(props) {
           isValid={isValid}
           label={label}
         >
-          {tooltip && (
-            <Tooltip
-              content={tooltip}
-              maxWidth={tooltipMaxWidth}
-              position="right"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
-          )}
+          <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextInput
             id={id}
             isRequired={isRequired}
