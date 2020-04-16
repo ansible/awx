@@ -14,7 +14,7 @@ hijack cookies will only get the `session_id` itself, which does not imply any c
 a limited time, and can be revoked at any time.
 
 > Note: The CSRF token will by default allow HTTP.  To increase security, the `CSRF_COOKIE_SECURE` setting should
-be set to False.  
+be set to True.
 
 
 ## Usage
