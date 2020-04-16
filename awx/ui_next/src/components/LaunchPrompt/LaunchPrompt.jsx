@@ -8,6 +8,7 @@ import CredentialsStep from './CredentialsStep';
 import OtherPromptsStep from './OtherPromptsStep';
 import SurveyStep from './SurveyStep';
 import PreviewStep from './PreviewStep';
+import mergeExtraVars from './mergeExtraVars';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   const steps = [];
@@ -69,6 +70,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     });
   }
   if (config.survey_enabled) {
+    initialValues.survey = {};
     steps.push({
       name: i18n._(t`Survey`),
       component: <SurveyStep template={resource} />,
@@ -93,7 +95,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     setValue('limit', values.limit);
     setValue('job_tags', values.job_tags);
     setValue('skip_tags', values.skip_tags);
-    setValue('extra_vars', values.extra_vars);
+    setValue('extra_vars', mergeExtraVars(values.extra_vars, values.survey));
     onLaunch(postValues);
   };
 
