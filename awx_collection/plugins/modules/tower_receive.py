@@ -9,13 +9,17 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
 ---
 module: tower_receive
+deprecated:
+  removed_in: "3.7"
+  why: Deprecated in favor of upcoming C(_export) module.
+  alternative: Once published, use M(tower_export) instead.
 author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.8"
 short_description: Receive assets from Ansible Tower.

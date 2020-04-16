@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'status': ['preview'],
+ANSIBLE_METADATA = {'status': ['deprecated'],
                     'supported_by': 'community',
                     'metadata_version': '1.1'}
 
@@ -16,6 +16,10 @@ ANSIBLE_METADATA = {'status': ['preview'],
 DOCUMENTATION = '''
 ---
 module: tower_workflow_template
+deprecated:
+  removed_in: "3.7"
+  why: Deprecated in favor of C(_workflow_job_template) and C(_workflow_job_template_node) modules.
+  alternative: Use M(tower_workflow_job_template) and M(_workflow_job_template_node) instead.
 author: "Adrien Fleury (@fleu42)"
 version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower workflow template.
