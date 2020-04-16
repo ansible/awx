@@ -25,8 +25,9 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
         # return job
         jobs_pg = self.related.workflow_jobs.get(id=result.workflow_job)
         if jobs_pg.count != 1:
-            msg = "workflow_job_template launched (id:{}) but job not found in response at {}/workflow_jobs/" % \
-                  (result.json['workflow_job'], self.url)
+            msg = "workflow_job_template launched (id:{}) but job not found in response at {}/workflow_jobs/".format(
+                result.json['workflow_job'], self.url
+            )
             raise exc.UnexpectedAWXState(msg)
         return jobs_pg.results[0]
 

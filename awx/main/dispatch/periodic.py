@@ -22,7 +22,7 @@ class Scheduler(Scheduler):
 
         def run():
             ppid = os.getppid()
-            logger.warn(f'periodic beat started')
+            logger.warn('periodic beat started')
             while True:
                 if os.getppid() != ppid:
                     # if the parent PID changes, this process has been orphaned

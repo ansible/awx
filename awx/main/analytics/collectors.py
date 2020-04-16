@@ -309,6 +309,6 @@ def copy_tables(since, full_path):
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
-                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
     _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
     return

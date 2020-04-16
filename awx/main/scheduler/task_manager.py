@@ -226,7 +226,7 @@ class TaskManager():
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
                 task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
-                logger.debug('Submitting isolated {} to queue {}.'.format(
+                logger.debug('Submitting isolated {} to queue {} on node {}.'.format(
                              task.log_format, task.instance_group.name, task.execution_node))
             elif controller_node:
                 task.instance_group = rampart_group

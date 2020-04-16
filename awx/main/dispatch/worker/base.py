@@ -123,9 +123,9 @@ class AWXConsumerRedis(AWXConsumerBase):
                 res = json.loads(res[1])
                 self.process_task(res)
             except redis.exceptions.RedisError:
-                logger.exception(f"encountered an error communicating with redis")
+                logger.exception("encountered an error communicating with redis")
             except (json.JSONDecodeError, KeyError):
-                logger.exception(f"failed to decode JSON message from redis")
+                logger.exception("failed to decode JSON message from redis")
             if self.should_stop:
                 return
 
