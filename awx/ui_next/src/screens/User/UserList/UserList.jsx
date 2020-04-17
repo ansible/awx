@@ -212,7 +212,7 @@ class UsersList extends Component {
                 <UserListItem
                   key={o.id}
                   user={o}
-                  detailUrl={`${match.url}/${o.id}`}
+                  detailUrl={`${match.url}/${o.id}/details`}
                   isSelected={selected.some(row => row.id === o.id)}
                   onSelect={() => this.handleSelect(o)}
                 />

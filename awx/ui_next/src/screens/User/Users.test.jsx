@@ -6,7 +6,7 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import Users from './Users';
 
 describe('<Users />', () => {
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(<Users />);
   });
 
