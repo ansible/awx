@@ -105,6 +105,7 @@ except ImportError:
 if len(missing_modules) > 0:
     raise AnsibleError('You are missing the modules {0}'.format(', '.join(missing_modules)))
 
+
 class LookupModule(LookupBase):
     frequencies = {
         'none': DAILY,
