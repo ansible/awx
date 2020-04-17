@@ -58,9 +58,14 @@ function SurveyStep({ template, i18n }) {
   );
 }
 
+// This is a nested Formik form to perform validation on individual
+// survey questions. When changes to the inner form occur (onBlur), the
+// values for all questions are added to the outer form's `survey` field
+// as a single object.
 function SurveySubForm({ survey, initialValues, i18n }) {
   const [, , surveyFieldHelpers] = useField('survey');
   useEffect(() => {
+    // set survey initial values to parent form
     surveyFieldHelpers.setValue(initialValues);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
@@ -74,10 +79,6 @@ function SurveySubForm({ survey, initialValues, i18n }) {
     integer: NumberField,
     float: NumberField,
   };
-  // This is a nested Formik form to perform validation on individual
-  // survey questions. When changes to the inner form occur (onBlur), the
-  // values for all questions are added to the outer form's `survey` field
-  // as a single object.
   return (
     <Formik initialValues={initialValues}>
       {({ values }) => (
