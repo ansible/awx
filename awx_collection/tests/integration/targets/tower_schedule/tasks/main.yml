@@ -60,7 +60,7 @@
     that:
       - result is changed
 
-- name: Rebuild the same scedule
+- name: Rebuild the same schedule
   tower_schedule:
     name: "{{ sched1 }}"
     state: present
