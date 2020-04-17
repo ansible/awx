@@ -2243,7 +2243,7 @@ class vmware(PluginFileInjector):
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(vmware, self).inventory_as_dict(inventory_update, private_data_dir)
-        ret['strict'] = True
+        ret['strict'] = False
         ret['properties'] = [
             "name",
             "ansible_ssh_host",
@@ -2279,23 +2279,6 @@ class vmware(PluginFileInjector):
         ]
         # ret['properties'] = ["all"]  # causes UnknownWsdlTypeError exception
         ret['with_nested_properties'] = True
-        # ret['with_sanitized_property_name'] = True  # needs adjustment
-        # ret['filters'] = [  # needs implemented
-        #     'runtime.powerstate == "poweredOn"'
-        # ]
-        # these are the defaults, so we don't put them in
-        # ret['keyed_groups'] = [
-        #     {
-        #         'prefix': '', 'separator': '',
-        #         # 'key': '"None" if not config.guest_id else config.guest_id'
-        #         # 'key': 'config.get("guest_id") | default([])'  # also in guest dict, depending on branch
-        #         'key': 'config.guestId'
-        #     },
-        #     {
-        #         'prefix': '', 'separator': '',
-        #         'key': "'templates' if config.template else 'guests'"
-        #     }
-        # ]
         ret['property_name_format'] = 'lower_case'
 
         # process custom options
