@@ -95,19 +95,16 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
         except Exception:
-            # TODO: log ip of connected client
-            logger.warn("Broadcast client failed to authorize for reason.")
+            logger.warn(f"client '{self.channel_name}' failed to authorize against the broadcast endpoint.")
             await self.close()
             return
 
-        # TODO: log ip of connected client
-        logger.info(f"Broadcast client connected.")
         await self.accept()
         await self.channel_layer.group_add(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
+        logger.info(f"client '{self.channel_name}' joined the broadcast group.")
 
     async def disconnect(self, code):
-        # TODO: log ip of disconnected client
-        logger.info("Client disconnected")
+        logger.info("client '{self.channel_name}' disconnected from the broadcast group.")
         await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
 
     async def internal_message(self, event):
