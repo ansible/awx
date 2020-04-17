@@ -8,6 +8,9 @@ DOCUMENTATION = """
     author: John Westcott IV (@john-westcott-iv)
     version_added: "3.7"
     short_description: Generate an rrule string which can be used for Tower Schedules
+    requirements:
+      - pytz
+      - python.dateutil
     description:
       - Returns a string based on criteria which represent an rule
     options:
@@ -85,11 +88,22 @@ _raw:
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
-from dateutil.rrule import rrule, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, MO, TU, WE, TH, FR, SA, SU
 from datetime import datetime
 import re
-import pytz
 
+missing_modules = []
+try:
+    import pytz
+except ImportError:
+    missing_modules.append('pytz')
+
+try:
+    from dateutil.rrule import rrule, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, MO, TU, WE, TH, FR, SA, SU
+except ImportError:
+    missing_modules.append('python.dateutil')
+
+if len(missing_modules) > 0:
+    raise AnsibleError('You are missing the modules {0}'.format(', '.join(missing_modules)))
 
 class LookupModule(LookupBase):
     frequencies = {
