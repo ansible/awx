@@ -1,3 +1,6 @@
+host_filters:
+- config.name == "only_my_server"
+- somevar == "bar"
 keyed_groups:
 - key: fouo
   prefix: ''

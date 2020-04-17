@@ -2320,8 +2320,12 @@ class vmware(PluginFileInjector):
 
         host_filters = vmware_opts.get('host_filters')
         if host_filters:
-            pass
-            # ret['resources'] = host_filters.split(',')  # does not follow same pattern
+            ret.setdefault('host_filters', [])
+            for hf in host_filters.split(','):
+                striped_hf = hf.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_hf:
+                    continue
+                ret['host_filters'].append(striped_hf)
 
         groupby_patterns = vmware_opts.get('groupby_patterns')
         if groupby_patterns:

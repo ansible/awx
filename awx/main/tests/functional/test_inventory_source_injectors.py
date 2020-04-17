@@ -16,7 +16,7 @@ DATA = os.path.join(os.path.dirname(data.__file__), 'inventory')
 
 TEST_SOURCE_FIELDS = {
     'vmware': {
-        'instance_filters': 'foobaa',
+        'instance_filters': '{{ config.name == "only_my_server" }},{{ somevar == "bar"}}',
         'group_by': 'fouo'
     },
     'ec2': {
