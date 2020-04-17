@@ -108,6 +108,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, code):
         # TODO: log ip of disconnected client
         logger.info("Client disconnected")
+        await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
 
     async def internal_message(self, event):
         await self.send(event['text'])
@@ -131,6 +132,14 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             await self.accept()
             await self.send_json({"close": True})
             await self.close()
+
+    async def disconnect(self, code):
+        current_groups = set(self.scope['session'].pop('groups') if 'groups' in self.scope['session'] else [])
+        for group_name in current_groups:
+            await self.channel_layer.group_discard(
+                group_name,
+                self.channel_name,
+            )
 
     @database_sync_to_async
     def user_can_see_object_id(self, user_access, oid):
