@@ -32,6 +32,8 @@ class ItemNotDefined(Exception):
 
 
 class TowerModule(AnsibleModule):
+    # This gets set by the make process so whatever is in here is irrelevant
+    _COLLECTION_VERSION = "11.0.0"
     url = None
     honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
     host = '127.0.0.1'
@@ -94,6 +96,9 @@ class TowerModule(AnsibleModule):
             self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
 
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
+
+        # Load the ping page and check the module
+        self.check_version()
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
@@ -434,15 +439,13 @@ class TowerModule(AnsibleModule):
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
 
-    def default_check_mode(self):
-        '''Execute check mode logic for Ansible Tower modules'''
-        if self.check_mode:
-            try:
-                result = self.get_endpoint('ping')
-                self.exit_json(**{'changed': True, 'tower_version': '{0}'.format(result['json']['version'])})
-            except(Exception) as excinfo:
-                self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
+    def check_version(self):
+        # Load the ping page
+        response = self.get_endpoint('ping')
 
+        if self._COLLECTION_VERSION != response['json']['version']:
+            self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, response['json']['version']))
+        
     def delete_if_needed(self, existing_item, on_delete=None):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,

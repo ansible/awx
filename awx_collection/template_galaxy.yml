@@ -8,6 +8,12 @@
     collection_version: 0.0.1  # not for updating, pass in extra_vars
 
   tasks:
+    - name: Set the collection version in the tower_api.py file
+      replace:
+        path: "{{ playbook_dir }}/plugins/module_utils/tower_api.py"
+        regexp: '^    _COLLECTION_VERSION =.*'
+        replace: '    _COLLECTION_VERSION = "{{ collection_version }}"'
+
     - name: Do file content replacements for non-default namespace or package name
       block:
 
