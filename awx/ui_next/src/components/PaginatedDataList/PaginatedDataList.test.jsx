@@ -22,7 +22,7 @@ describe('<PaginatedDataList />', () => {
     jest.restoreAllMocks();
   });
 
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     mountWithContexts(
       <PaginatedDataList
         items={mockData}
@@ -83,11 +83,11 @@ describe('<PaginatedDataList />', () => {
     );
 
     const pagination = wrapper.find('Pagination');
-    pagination.prop('onPerPageSelect')(null, 25);
-    expect(history.location.search).toEqual('?item.page_size=25');
+    pagination.prop('onPerPageSelect')(null, 25, 2);
+    expect(history.location.search).toEqual('?item.page=2&item.page_size=25');
     wrapper.update();
     // since page_size = 5 is the default, that should be strip out of the search
-    pagination.prop('onPerPageSelect')(null, 5);
-    expect(history.location.search).toEqual('');
+    pagination.prop('onPerPageSelect')(null, 5, 2);
+    expect(history.location.search).toEqual('?item.page=2');
   });
 });
