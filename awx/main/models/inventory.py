@@ -2038,6 +2038,10 @@ class ec2(PluginFileInjector):
             # Using the plugin, but still want dashes whitelisted
             ret['use_contrib_script_compatible_sanitization'] = True
 
+        if source_vars.get('nested_groups') is False:
+            for this_keyed_group in keyed_groups:
+                this_keyed_group.pop('parent_group', None)
+
         if keyed_groups:
             ret['keyed_groups'] = keyed_groups
 
