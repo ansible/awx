@@ -80,17 +80,19 @@ class Search extends React.Component {
     const { searchKey, searchValue } = this.state;
     const { onSearch, qsConfig } = this.props;
 
-    const isNonStringField =
-      qsConfig.integerFields.find(field => field === searchKey) ||
-      qsConfig.dateFields.find(field => field === searchKey);
+    if (searchValue) {
+      const isNonStringField =
+        qsConfig.integerFields.find(field => field === searchKey) ||
+        qsConfig.dateFields.find(field => field === searchKey);
 
-    const actualSearchKey = isNonStringField
-      ? searchKey
-      : `${searchKey}__icontains`;
+      const actualSearchKey = isNonStringField
+        ? searchKey
+        : `${searchKey}__icontains`;
 
-    onSearch(actualSearchKey, searchValue);
+      onSearch(actualSearchKey, searchValue);
 
-    this.setState({ searchValue: '' });
+      this.setState({ searchValue: '' });
+    }
   }
 
   handleSearchInputChange(searchValue) {
@@ -276,13 +278,16 @@ class Search extends React.Component {
                       onChange={this.handleSearchInputChange}
                       onKeyDown={this.handleTextKeyDown}
                     />
-                    <Button
-                      variant={ButtonVariant.control}
-                      aria-label={i18n._(t`Search submit button`)}
-                      onClick={this.handleSearch}
-                    >
-                      <SearchIcon />
-                    </Button>
+                    <div css={!searchValue && `cursor:not-allowed`}>
+                      <Button
+                        variant={ButtonVariant.control}
+                        isDisabled={!searchValue}
+                        aria-label={i18n._(t`Search submit button`)}
+                        onClick={this.handleSearch}
+                      >
+                        <SearchIcon />
+                      </Button>
+                    </div>
                   </InputGroup>
                 )}
             </DataToolbarFilter>

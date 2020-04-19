@@ -92,4 +92,53 @@ describe('<Search />', () => {
       .handleDropdownSelect({ target: { innerText: 'Description' } });
     expect(wrapper.state('searchKey')).toEqual('description');
   });
+
+  test('attempt to search with empty string', () => {
+    const searchButton = 'button[aria-label="Search submit button"]';
+    const searchTextInput = 'input[aria-label="Search text input"]';
+    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const onSearch = jest.fn();
+    const wrapper = mountWithContexts(
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
+        clearAllFilters={() => {}}
+        collapseListedFiltersBreakpoint="md"
+      >
+        <DataToolbarContent>
+          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+        </DataToolbarContent>
+      </DataToolbar>
+    );
+
+    wrapper.find(searchTextInput).instance().value = '';
+    wrapper.find(searchTextInput).simulate('change');
+    wrapper.find(searchButton).simulate('click');
+
+    expect(onSearch).toHaveBeenCalledTimes(0);
+  });
+
+  test('search with a valid string', () => {
+    const searchButton = 'button[aria-label="Search submit button"]';
+    const searchTextInput = 'input[aria-label="Search text input"]';
+    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const onSearch = jest.fn();
+    const wrapper = mountWithContexts(
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
+        clearAllFilters={() => {}}
+        collapseListedFiltersBreakpoint="md"
+      >
+        <DataToolbarContent>
+          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+        </DataToolbarContent>
+      </DataToolbar>
+    );
+
+    wrapper.find(searchTextInput).instance().value = 'test-321';
+    wrapper.find(searchTextInput).simulate('change');
+    wrapper.find(searchButton).simulate('click');
+
+    expect(onSearch).toHaveBeenCalledTimes(1);
+    expect(onSearch).toBeCalledWith('name__icontains', 'test-321');
+  });
 });
