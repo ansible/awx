@@ -2053,17 +2053,34 @@ class ec2(PluginFileInjector):
         compose_dict.update(self._compat_compose_vars())
         # plugin provides "aws_ec2", but not this which the script gave
         ret['groups'] = {'ec2': True}
-        # public_ip as hostname is non-default plugin behavior, script behavior
-        ret['hostnames'] = [
-            'network-interface.addresses.association.public-ip',
-            'dns-name',
-            'private-dns-name'
-        ]
+        if source_vars.get('hostname_variable') is not None:
+            hnames = []
+            for expr in source_vars.get('hostname_variable').split(','):
+                if expr == 'public_dns_name':
+                    hnames.append('dns-name')
+                elif not expr.startswith('tag:') and '_' in expr:
+                    hnames.append(expr.replace('_', '-'))
+                else:
+                    hnames.append(expr)
+            ret['hostnames'] = hnames
+        else:
+            # public_ip as hostname is non-default plugin behavior, script behavior
+            ret['hostnames'] = [
+                'network-interface.addresses.association.public-ip',
+                'dns-name',
+                'private-dns-name'
+            ]
         # The script returned only running state by default, the plugin does not
         # https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options
         # options: pending | running | shutting-down | terminated | stopping | stopped
         inst_filters['instance-state-name'] = ['running']
         # end compatibility content
+
+        if source_vars.get('destination_variable') or source_vars.get('vpc_destination_variable'):
+            for fd in ('destination_variable', 'vpc_destination_variable'):
+                if source_vars.get(fd):
+                    compose_dict['ansible_host'] = source_vars.get(fd)
+                    break
 
         if compose_dict:
             ret['compose'] = compose_dict

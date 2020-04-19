@@ -39,5 +39,5 @@ properties:
 - triggeredalarmstate
 - value
 property_name_format: lower_case
-strict: true
+strict: false
 with_nested_properties: true

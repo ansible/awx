@@ -39,7 +39,9 @@ TEST_SOURCE_FIELDS = {
 INI_TEST_VARS = {
     'ec2': {
         'boto_profile': '/tmp/my_boto_stuff',
-        'iam_role_arn': 'arn:aws:iam::123456789012:role/test-role'
+        'iam_role_arn': 'arn:aws:iam::123456789012:role/test-role',
+        'hostname_variable': 'public_dns_name',
+        'destination_variable': 'public_dns_name'
     },
     'gce': {},
     'openstack': {

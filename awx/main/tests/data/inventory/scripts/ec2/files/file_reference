@@ -2,9 +2,10 @@
 base_source_var = value_of_var
 boto_profile = /tmp/my_boto_stuff
 iam_role_arn = arn:aws:iam::123456789012:role/test-role
+hostname_variable = public_dns_name
+destination_variable = public_dns_name
 regions = us-east-2,ap-south-1
 regions_exclude = us-gov-west-1,cn-north-1
-destination_variable = public_dns_name
 vpc_destination_variable = ip_address
 route53 = False
 all_instances = True

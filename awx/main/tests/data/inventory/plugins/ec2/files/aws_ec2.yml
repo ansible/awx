@@ -1,6 +1,6 @@
 boto_profile: /tmp/my_boto_stuff
 compose:
-  ansible_host: public_ip_address
+  ansible_host: public_dns_name
   ec2_account_id: owner_id
   ec2_ami_launch_index: ami_launch_index | string
   ec2_architecture: architecture
@@ -50,9 +50,7 @@ filters:
 groups:
   ec2: true
 hostnames:
-- network-interface.addresses.association.public-ip
 - dns-name
-- private-dns-name
 iam_role_arn: arn:aws:iam::123456789012:role/test-role
 keyed_groups:
 - key: placement.availability_zone
