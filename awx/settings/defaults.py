@@ -1106,9 +1106,9 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },
-        'celery': {  # for celerybeat connection warnings
+        'daphne': {
             'handlers': ['console', 'file', 'tower_warnings'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'rest_framework.request': {
             'handlers': ['console', 'file', 'tower_warnings'],
@@ -1138,6 +1138,10 @@ LOGGING = {
         },
         'awx.main.dispatch': {
             'handlers': ['dispatcher'],
+        },
+        'awx.main.consumers': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'INFO',
         },
         'awx.main.wsbroadcast': {
             'handlers': ['wsbroadcast'],
