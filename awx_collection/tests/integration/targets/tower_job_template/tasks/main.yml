@@ -12,6 +12,7 @@
     jt1: "AWX-Collection-tests-tower_job_template-jt1-{{ test_id }}"
     jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
+    email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -45,6 +46,22 @@
   tower_label:
     name: "{{ lab1 }}"
     organization: Default
+
+- name: Add email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    username: user
+    password: s3cr3t
+    sender: tower@example.com
+    recipients:
+      - user1@example.com
+    host: smtp.example.com
+    port: 25
+    use_tls: false
+    use_ssl: false
+    state: present
 
 - name: Create Job Template 1
   tower_job_template:
@@ -240,6 +257,37 @@
     that:
       - "result is changed"
 
+- name: Add started notification to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add started notification to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Remove started notification to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
@@ -286,3 +334,9 @@
     state: absent
 
 # You can't delete a label directly so no cleanup needed
+
+- name: Delete email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
