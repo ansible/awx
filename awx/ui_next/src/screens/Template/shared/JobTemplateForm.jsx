@@ -40,6 +40,9 @@ import {
 import { JobTemplatesAPI, ProjectsAPI } from '@api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
+import WebhookSubForm from './WebhookSubForm';
+
+const { origin } = document.location;
 
 function JobTemplateForm({
   template,
@@ -57,6 +60,10 @@ function JobTemplateForm({
   );
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
+  );
+
+  const [enableWebhooks, setEnableWebhooks] = useState(
+    Boolean(template.webhook_service)
   );
 
   const { values: formikValues } = useFormikContext();
@@ -174,7 +181,6 @@ function JobTemplateForm({
   ];
   let callbackUrl;
   if (template?.related) {
-    const { origin } = document.location;
     const path = template.related.callback || `${template.url}callback`;
     callbackUrl = `${origin}${path}`;
   }
@@ -498,6 +504,25 @@ function JobTemplateForm({
                       setAllowCallbacks(checked);
                     }}
                   />
+                  <Checkbox
+                    aria-label={i18n._(t`Enable Webhook`)}
+                    label={
+                      <span>
+                        {i18n._(t`Enable Webhook`)}
+                        &nbsp;
+                        <FieldTooltip
+                          content={i18n._(
+                            t`Enable webhook for this workflow job template.`
+                          )}
+                        />
+                      </span>
+                    }
+                    id="wfjt-enabled-webhooks"
+                    isChecked={enableWebhooks}
+                    onChange={checked => {
+                      setEnableWebhooks(checked);
+                    }}
+                  />
                   <CheckboxField
                     id="option-concurrent"
                     name="allow_simultaneous"
@@ -516,6 +541,7 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
+            <WebhookSubForm enableWebhooks={enableWebhooks} />
             {allowCallbacks && (
               <>
                 {callbackUrl && (
@@ -572,7 +598,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {} }) {
+  mapPropsToValues({ template = {}, i18n }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -616,6 +642,14 @@ const FormikApp = withFormik({
       instanceGroups: [],
       credentials: summary_fields.credentials || [],
       extra_vars: template.extra_vars || '---\n',
+      webhook_service: template.webhook_service || '',
+      webhook_url: template?.related?.webhook_receiver
+        ? `${origin}${template.related.webhook_receiver}`
+        : i18n._(t`a new webhook url will be generated on save.`).toUpperCase(),
+      webhook_key:
+        template.webhook_key ||
+        i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
+      webhook_credential: template?.summary_fields?.webhook_credential || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

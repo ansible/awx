@@ -2,6 +2,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { sleep } from '@testUtils/testUtils';
+import { Route } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import JobTemplateForm from './JobTemplateForm';
 import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '@api';
 
@@ -34,6 +36,10 @@ describe('<JobTemplateForm />', () => {
         { id: 2, kind: 'ssh', name: 'Bar' },
       ],
     },
+    related: { webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/' },
+    webhook_key: 'webhook key',
+    webhook_service: 'github',
+    webhook_credential: 7,
   };
   const mockInstanceGroups = [
     {
@@ -85,6 +91,9 @@ describe('<JobTemplateForm />', () => {
     });
     JobTemplatesAPI.readInstanceGroups.mockReturnValue({
       data: { results: mockInstanceGroups },
+    });
+    JobTemplatesAPI.updateWebhookKey.mockReturnValue({
+      data: { webhook_key: 'webhook key' },
     });
     ProjectsAPI.readPlaybooks.mockReturnValue({
       data: ['debug.yml'],
@@ -209,6 +218,123 @@ describe('<JobTemplateForm />', () => {
     ]);
   });
 
+  test('webhooks and enable concurrent jobs functions properly', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/1/edit'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/edit"
+          component={() => (
+            <JobTemplateForm
+              template={mockData}
+              handleSubmit={jest.fn()}
+              handleCancel={jest.fn()}
+            />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    act(() => {
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
+        true,
+        {
+          currentTarget: { value: true, type: 'change', checked: true },
+        }
+      );
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
+    ).toBe(true);
+
+    expect(
+      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
+    ).toBe(true);
+    expect(
+      wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('value')
+    ).toBe('webhook key');
+    await act(() =>
+      wrapper.find('Button[aria-label="Update webhook key"]').prop('onClick')()
+    );
+    expect(JobTemplatesAPI.updateWebhookKey).toBeCalledWith('1');
+    expect(
+      wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
+    ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
+
+    wrapper.update();
+
+    expect(wrapper.find('FormGroup[name="webhook_service"]').length).toBe(1);
+
+    await act(async () =>
+      wrapper.find('AnsibleSelect#webhook_service').prop('onChange')(
+        {},
+        'gitlab'
+      )
+    );
+    wrapper.update();
+
+    expect(wrapper.find('AnsibleSelect#webhook_service').prop('value')).toBe(
+      'gitlab'
+    );
+  });
+
+  test('webhooks should render properly, without data', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['/templates/job_template/1/edit'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/edit"
+          component={() => (
+            <JobTemplateForm
+              template={{
+                ...mockData,
+                webhook_credential: null,
+                webhook_key: '',
+                webhook_service: 'github',
+                related: { webhook_receiver: '' },
+              }}
+              handleSubmit={jest.fn()}
+              handleCancel={jest.fn()}
+            />
+          )}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(
+      wrapper.find('TextInputBase#template-webhook_key').prop('value')
+    ).toBe('A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.');
+    expect(
+      wrapper.find('Button[aria-label="Update webhook key"]').prop('isDisabled')
+    ).toBe(true);
+  });
   test('should call handleSubmit when Submit button is clicked', async () => {
     const handleSubmit = jest.fn();
     let wrapper;

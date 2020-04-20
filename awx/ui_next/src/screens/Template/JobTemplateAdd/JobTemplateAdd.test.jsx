@@ -152,6 +152,10 @@ describe('<JobTemplateAdd />', () => {
       project: 2,
       playbook: 'Baz',
       inventory: 2,
+      webhook_credential: undefined,
+      webhook_key: '',
+      webhook_service: '',
+      webhook_url: '',
     });
   });
 

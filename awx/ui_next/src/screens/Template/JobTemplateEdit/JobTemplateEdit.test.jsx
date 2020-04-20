@@ -62,6 +62,12 @@ const mockJobTemplate = {
   type: 'job_template',
   use_fact_cache: false,
   verbosity: '0',
+  webhook_credential: null,
+  webhook_key: 'webhook Key',
+  webhook_service: 'gitlab',
+  related: {
+    webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
+  },
 };
 
 const mockRelatedCredentials = {
@@ -245,6 +251,8 @@ describe('<JobTemplateEdit />', () => {
     delete expected.summary_fields;
     delete expected.id;
     delete expected.type;
+    delete expected.related;
+    expected.webhook_url = `${window.location.origin}${mockJobTemplate.related.webhook_receiver}`;
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, expected);
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(4);
@@ -308,6 +316,12 @@ describe('<JobTemplateEdit />', () => {
           { id: 1, kind: 'cloud', name: 'Foo' },
           { id: 2, kind: 'ssh', name: 'Bar' },
         ],
+        webhook_credential: {
+          id: 7,
+          name: 'webhook credential',
+          kind: 'github_token',
+          credential_type_id: 12,
+        },
       },
     };
     await act(async () =>
