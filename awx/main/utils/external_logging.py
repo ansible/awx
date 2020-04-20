@@ -23,6 +23,10 @@ def construct_rsyslog_conf_template(settings=settings):
         'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
         'template(name="awx" type="string" string="%rawmsg-after-pri%")',
     ])
+
+    def escape_quotes(x):
+        return x.replace('"', '\\"')
+
     if not enabled:
         parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
         tmpl = '\n'.join(parts)
@@ -36,7 +40,7 @@ def construct_rsyslog_conf_template(settings=settings):
             host = '%s://%s' % (scheme, host) if scheme else '//%s' % host
         parsed = urlparse.urlsplit(host)
 
-        host = parsed.hostname
+        host = escape_quotes(parsed.hostname)
         try:
             if parsed.port:
                 port = parsed.port
@@ -65,8 +69,8 @@ def construct_rsyslog_conf_template(settings=settings):
             if parsed.query:
                 path = f'{path}?{urlparse.quote(parsed.query)}'
             params.append(f'restpath="{path}"')
-        username = getattr(settings, 'LOG_AGGREGATOR_USERNAME', '')
-        password = getattr(settings, 'LOG_AGGREGATOR_PASSWORD', '')
+        username = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_USERNAME', ''))
+        password = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_PASSWORD', ''))
         if getattr(settings, 'LOG_AGGREGATOR_TYPE', None) == 'splunk':
             # splunk has a weird authorization header <shrug>
             if password:
