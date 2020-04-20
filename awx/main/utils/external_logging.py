@@ -1,3 +1,5 @@
+import os
+
 import urllib.parse as urlparse
 
 from django.conf import settings
@@ -13,12 +15,18 @@ def construct_rsyslog_conf_template(settings=settings):
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
+    max_disk_space = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_GB', 1)
+    spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
+
+    if not os.access(spool_directory, os.W_OK):
+        spool_directory = '/var/lib/awx'
+
     max_bytes = settings.MAX_EVENT_RES_DATA
     parts.extend([
         '$WorkDirectory /var/lib/awx/rsyslog',
         f'$MaxMessageSize {max_bytes}',
         '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
-        'main_queue(queue.spoolDirectory="/var/lib/awx" queue.maxdiskspace="1g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',
+        f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
         'module(load="imuxsock" SysSock.Use="off")',
         'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on")',
         'template(name="awx" type="string" string="%rawmsg-after-pri%")',

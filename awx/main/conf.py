@@ -787,6 +787,29 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
+    field_class=fields.IntegerField,
+    default=1,
+    min_value=1,
+    label=_('Maximum disk persistance for external log aggregation (in GB)'),
+    help_text=_('Amount of data to store (in gigabytes) during an outage of '
+                'the external log aggregator (defaults to 1). '
+                'Equivalent to the rsyslogd queue.maxdiskspace setting.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
+    field_class=fields.CharField,
+    default='/var/lib/awx',
+    label=_('File system location for rsyslogd disk persistence'),
+    help_text=_('Location to persist logs that should be retried after an outage '
+                'of the external log aggregator (defaults to /var/lib/awx). '
+                'Equivalent to the rsyslogd queue.spoolDirectory setting.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(
