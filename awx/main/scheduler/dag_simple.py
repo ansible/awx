@@ -123,7 +123,7 @@ class SimpleDAG(object):
         self.root_nodes.discard(to_obj_ord)
 
         if from_obj_ord is None and to_obj_ord is None:
-            raise LookupError("From object {} and to object not found".format(from_obj, to_obj))
+            raise LookupError("From object {} and to object {} not found".format(from_obj, to_obj))
         elif from_obj_ord is None:
             raise LookupError("From object not found {}".format(from_obj))
         elif to_obj_ord is None:

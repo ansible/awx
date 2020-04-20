@@ -91,7 +91,7 @@ class CallbackBrokerWorker(BaseWorker):
                     for e in events:
                         try:
                             if (
-                                isinstance(exc, IntegrityError),
+                                isinstance(exc, IntegrityError) and
                                 getattr(e, 'host_id', '')
                             ):
                                 # this is one potential IntegrityError we can

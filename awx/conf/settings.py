@@ -410,7 +410,7 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to set read only setting "%s".', name)
-            raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
+            raise ImproperlyConfigured('Setting "{}" is read only.'.format(name))
 
         try:
             data = field.to_representation(value)
@@ -441,7 +441,7 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to delete read only setting "%s".', name)
-            raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
+            raise ImproperlyConfigured('Setting "{}" is read only.'.format(name))
         for setting in Setting.objects.filter(key=name, user__isnull=True):
             setting.delete()
             # pre_delete handler will delete from cache.

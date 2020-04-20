@@ -3668,7 +3668,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                         attrs.get('survey_passwords', {}).pop(key, None)
                     else:
                         errors.setdefault('extra_vars', []).append(
-                            _('"$encrypted$ is a reserved keyword, may not be used for {var_name}."'.format(key))
+                            _('"$encrypted$ is a reserved keyword, may not be used for {}."'.format(key))
                         )
 
         # Launch configs call extra_vars extra_data for historical reasons

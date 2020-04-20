@@ -79,7 +79,7 @@ class URLRegistry(object):
         for url_pattern, method_pattern in url_iterable:
             if url_pattern in self.store and method_pattern in self.store[url_pattern]:
                 if method_pattern.pattern == not_provided:
-                    exc_msg = '"{0.pattern}" already has methodless registration.'.format(url_pattern, method_pattern)
+                    exc_msg = '"{0.pattern}" already has methodless registration.'.format(url_pattern)
                 else:
                     exc_msg = ('"{0.pattern}" already has registered method "{1.pattern}"'
                                .format(url_pattern, method_pattern))

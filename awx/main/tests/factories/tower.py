@@ -220,7 +220,7 @@ def create_job_template(name, roles=None, persisted=True, webhook_service='', **
     if 'organization' in kwargs:
         org = kwargs['organization']
         if type(org) is not Organization:
-            org = mk_organization(org, '%s-desc'.format(org), persisted=persisted)
+            org = mk_organization(org, org, persisted=persisted)
 
     if 'credential' in kwargs:
         cred = kwargs['credential']
@@ -298,7 +298,7 @@ def create_organization(name, roles=None, persisted=True, **kwargs):
     labels = {}
     notification_templates = {}
 
-    org = mk_organization(name, '%s-desc'.format(name), persisted=persisted)
+    org = mk_organization(name, name, persisted=persisted)
 
     if 'inventories' in kwargs:
         for i in kwargs['inventories']:
