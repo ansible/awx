@@ -568,6 +568,9 @@ AWX_ROLES_ENABLED = True
 # Note: This setting may be overridden by database settings.
 AWX_COLLECTIONS_ENABLED = True
 
+# show playbooks that are links in the UI
+AWX_SHOW_PLAYBOOK_LINKS = False
+
 # Settings for primary galaxy server, should be set in the UI
 PRIMARY_GALAXY_URL = ''
 PRIMARY_GALAXY_USERNAME = ''

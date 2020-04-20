@@ -436,6 +436,16 @@ register(
 )
 
 register(
+    'AWX_SHOW_PLAYBOOK_LINKS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Show linked playbooks'),
+    help_text=_('Show playbooks that are in directories which are symbolic links'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'PRIMARY_GALAXY_URL',
     field_class=fields.URLField,
     required=False,
