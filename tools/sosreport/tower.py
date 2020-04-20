@@ -28,6 +28,8 @@ SOSREPORT_TOWER_DIRS = [
     "/var/log/tower",
     "/var/log/nginx",
     "/var/log/supervisor",
+    "/etc/opt/rh/rh-redis5/redis.conf",
+    "/etc/redis.conf",
     "/var/log/dist-upgrade",
     "/var/log/installer",
     "/var/log/unattended-upgrades",
