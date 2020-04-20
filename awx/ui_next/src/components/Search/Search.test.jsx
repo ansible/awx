@@ -3,6 +3,7 @@ import {
   DataToolbar,
   DataToolbarContent,
 } from '@patternfly/react-core/dist/umd/experimental';
+import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import Search from './Search';
 
@@ -91,5 +92,38 @@ describe('<Search />', () => {
       .instance()
       .handleDropdownSelect({ target: { innerText: 'Description' } });
     expect(wrapper.state('searchKey')).toEqual('description');
+  });
+
+  test('filter keys are properly labeled', () => {
+    const columns = [
+      { name: 'Name', key: 'name', isDefault: true },
+      { name: 'Type', key: 'type', options: [['foo', 'Foo Bar!']] },
+      { name: 'Description', key: 'description' },
+    ];
+    const query =
+      '?organization.or__type=foo&organization.name=bar&item.page_size=10';
+    const history = createMemoryHistory({
+      initialEntries: [`/organizations/${query}`],
+    });
+    const wrapper = mountWithContexts(
+      <DataToolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
+        clearAllFilters={() => {}}
+        collapseListedFiltersBreakpoint="md"
+      >
+        <DataToolbarContent>
+          <Search qsConfig={QS_CONFIG} columns={columns} />
+        </DataToolbarContent>
+      </DataToolbar>,
+      { context: { router: { history } } }
+    );
+    const typeFilterWrapper = wrapper.find(
+      'DataToolbarFilter[categoryName="Type"]'
+    );
+    expect(typeFilterWrapper.prop('chips')).toContain('Foo Bar!');
+    const nameFilterWrapper = wrapper.find(
+      'DataToolbarFilter[categoryName="Name"]'
+    );
+    expect(nameFilterWrapper.prop('chips')).toContain('bar');
   });
 });

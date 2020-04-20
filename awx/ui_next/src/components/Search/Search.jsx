@@ -148,6 +148,16 @@ class Search extends React.Component {
       return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
     };
 
+    const getChipLabel = (value, colKey) => {
+      const currentSearchColumn = columns.find(({ key }) => key === colKey);
+      if (currentSearchColumn?.options?.length) {
+        return currentSearchColumn.options.find(
+          ([optVal]) => optVal === value
+        )[1];
+      }
+      return value.toString();
+    };
+
     const getChipsByKey = () => {
       const queryParams = parseQueryString(qsConfig, location.search);
 
@@ -173,10 +183,12 @@ class Search extends React.Component {
 
         if (Array.isArray(queryParams[key])) {
           queryParams[key].forEach(val =>
-            queryParamsByKey[columnKey].chips.push(val.toString())
+            queryParamsByKey[columnKey].chips.push(getChipLabel(val, columnKey))
           );
         } else {
-          queryParamsByKey[columnKey].chips.push(queryParams[key].toString());
+          queryParamsByKey[columnKey].chips.push(
+            getChipLabel(queryParams[key], columnKey)
+          );
         }
       });
 

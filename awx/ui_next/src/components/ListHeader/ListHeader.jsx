@@ -53,15 +53,35 @@ class ListHeader extends React.Component {
     this.pushHistoryState(replaceParams(oldParams, { [key]: value }));
   }
 
-  handleRemove(key, value) {
+  handleRemove(key, chipValue) {
+    const { searchColumns } = this.props;
+
+    // converts chip's value to the value as understood by the API
+    const getValFromChip = chipVal => {
+      for (let i = 0; i < searchColumns.length; i++) {
+        const col = searchColumns[i];
+        if (col?.options?.length) {
+          for (let j = 0; j < col.options.length; j++) {
+            const opt = col.options[j];
+            const [optVal, optLabel] = opt;
+            if (chipVal === optLabel) {
+              return optVal;
+            }
+          }
+        }
+      }
+
+      if (parseInt(chipVal, 10)) {
+        return parseInt(chipVal, 10);
+      }
+      return chipVal;
+    };
+
     const { location, qsConfig } = this.props;
-    let oldParams = parseQueryString(qsConfig, location.search);
-    if (parseInt(value, 10)) {
-      oldParams = removeParams(qsConfig, oldParams, {
-        [key]: parseInt(value, 10),
-      });
-    }
-    this.pushHistoryState(removeParams(qsConfig, oldParams, { [key]: value }));
+    const oldParams = parseQueryString(qsConfig, location.search);
+    this.pushHistoryState(
+      removeParams(qsConfig, oldParams, { [key]: getValFromChip(chipValue) })
+    );
   }
 
   handleRemoveAll() {
