@@ -254,7 +254,7 @@ def main():
     if scm_credential is not None:
         project_fields['credential'] = scm_credential_id
     if scm_allow_override is not None:
-        project_fields['scm_allow_override'] = scm_allow_override
+        project_fields['allow_override'] = scm_allow_override
     if scm_type == '':
         project_fields['local_path'] = local_path
 
