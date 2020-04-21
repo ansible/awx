@@ -3,6 +3,8 @@
   set_fact:
     project_name1: "AWX-Collection-tests-tower_project-project1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     project_name2: "AWX-Collection-tests-tower_project-project2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name3: "AWX-Collection-tests-tower_project-project3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt1: "AWX-Collection-tests-tower_project-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     scm_cred_name: "AWX-Collection-tests-tower_project-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     org_name: "AWX-Collection-tests-tower_project-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     cred_name: "AWX-Collection-tests-tower_project-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
@@ -117,6 +119,54 @@
     that:
       - "result.msg =='The credentials Non Existing Credential was not found on the Tower server' or
         result.msg =='Failed to update project, credential not found: Non Existing Credential'"
+
+- name: Create a git project without credentials without waiting
+  tower_project:
+    name: "{{ project_name3 }}"
+    organization: Default
+    scm_type: git
+    scm_branch: empty_branch
+    scm_url: https://github.com/ansible/test-playbooks
+    scm_allow_override: true
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Create a job template that overrides the project scm_branch
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ project_name3 }}"
+    inventory: "Demo Inventory"
+    scm_branch: master
+    playbook: debug.yml
+
+- name: Launch "{{ jt1 }}"
+  tower_job_launch:
+    job_template: "{{ jt1 }}"
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: wait for "{{ result.id }}"
+  tower_job_wait:
+    job_id: "{{ result.id }}"
+
+- name: Delete the test job_template
+  tower_job_template:
+    name: "{{ jt1 }}"
+    project: "{{ project_name3 }}"
+    inventory: "Demo Inventory"
+    state: absent
+
+- name: Delete the test project
+  tower_project:
+    name: "{{ project_name3 }}"
+    organization: Default
+    state: absent
 
 - name: Delete the test project
   tower_project:
