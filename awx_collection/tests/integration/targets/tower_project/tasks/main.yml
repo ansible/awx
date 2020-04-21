@@ -127,7 +127,7 @@
     scm_type: git
     scm_branch: empty_branch
     scm_url: https://github.com/ansible/test-playbooks
-    scm_allow_override: true
+    allow_override: true
   register: result
 
 - assert:
@@ -151,9 +151,14 @@
     that:
       - result is changed
 
-- name: wait for "{{ result.id }}"
+- name: "wait for job {{ result.id }}"
   tower_job_wait:
     job_id: "{{ result.id }}"
+  register: job
+
+- assert:
+    that:
+      - job is successful
 
 - name: Delete the test job_template
   tower_job_template:
@@ -162,13 +167,13 @@
     inventory: "Demo Inventory"
     state: absent
 
-- name: Delete the test project
+- name: Delete the test project 3
   tower_project:
     name: "{{ project_name3 }}"
     organization: Default
     state: absent
 
-- name: Delete the test project
+- name: Delete the test project 2
   tower_project:
     name: "{{ project_name2 }}"
     organization: "{{ org_name }}"
@@ -186,7 +191,7 @@
     that:
       - result is changed
 
-- name: Delete the other test project
+- name: Delete the test project 1
   tower_project:
     name: "{{ project_name1 }}"
     organization: Default
