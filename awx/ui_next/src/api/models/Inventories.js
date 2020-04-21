@@ -25,7 +25,9 @@ class Inventories extends InstanceGroupsMixin(Base) {
   }
 
   readHosts(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/hosts/`, { params });
+    return this.http.get(`${this.baseUrl}${id}/hosts/`, {
+      params,
+    });
   }
 
   async readHostDetail(inventoryId, hostId) {
@@ -45,7 +47,9 @@ class Inventories extends InstanceGroupsMixin(Base) {
   }
 
   readGroups(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/groups/`, { params });
+    return this.http.get(`${this.baseUrl}${id}/groups/`, {
+      params,
+    });
   }
 
   readGroupsOptions(id) {
@@ -60,6 +64,12 @@ class Inventories extends InstanceGroupsMixin(Base) {
     return this.http.post(`${this.baseUrl}${inventoryId}/groups/`, {
       id: groupId,
       disassociate: true,
+    });
+  }
+
+  readSources(inventoryId, params) {
+    return this.http.get(`${this.baseUrl}${inventoryId}/inventory_sources/`, {
+      params,
     });
   }
 }

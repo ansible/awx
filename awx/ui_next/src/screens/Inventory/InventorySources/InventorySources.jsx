@@ -1,10 +1,16 @@
-import React, { Component } from 'react';
-import { CardBody } from '@components/Card';
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
 
-class InventorySources extends Component {
-  render() {
-    return <CardBody>Coming soon :)</CardBody>;
-  }
+import InventorySourceList from './InventorySourceList';
+
+function InventorySources() {
+  return (
+    <Switch>
+      <Route path="/inventories/:inventoryType/:id/sources">
+        <InventorySourceList />
+      </Route>
+    </Switch>
+  );
 }
 
 export default InventorySources;
