@@ -73,6 +73,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
 - [Node 10.x LTS version](https://nodejs.org/en/download/)
 - [NPM 6.x LTS](https://docs.npmjs.com/)
+- Python 3.6+
 
 ### System Requirements
 
