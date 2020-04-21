@@ -67,8 +67,7 @@ function TemplateList({ i18n }) {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const isAllSelected =
-    selected.length === templates.length && selected.length > 0;
+  const isAllSelected = selected.length === count && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteTemplates,

@@ -57,8 +57,7 @@ function ProjectList({ i18n }) {
     fetchProjects();
   }, [fetchProjects]);
 
-  const isAllSelected =
-    selected.length === projects.length && selected.length > 0;
+  const isAllSelected = selected.length === itemCount && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteProjects,

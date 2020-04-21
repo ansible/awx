@@ -151,8 +151,7 @@ function InventoryGroupsList({ i18n }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected =
-    selected.length > 0 && selected.length === groups.length;
+  const isAllSelected = selected.length > 0 && selected.length === groupCount;
 
   return (
     <>

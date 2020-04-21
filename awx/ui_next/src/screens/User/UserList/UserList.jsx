@@ -139,8 +139,7 @@ class UsersList extends Component {
 
     const canAdd =
       actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-    const isAllSelected =
-      selected.length === users.length && selected.length > 0;
+    const isAllSelected = selected.length === itemCount && selected.length > 0;
 
     return (
       <Fragment>

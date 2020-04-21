@@ -57,7 +57,7 @@ function HostList({ i18n }) {
     fetchHosts();
   }, [fetchHosts]);
 
-  const isAllSelected = selected.length === hosts.length && selected.length > 0;
+  const isAllSelected = selected.length === count && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteHosts,

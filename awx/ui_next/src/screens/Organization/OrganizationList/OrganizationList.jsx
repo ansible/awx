@@ -60,7 +60,7 @@ function OrganizationsList({ i18n }) {
   }, [fetchOrganizations]);
 
   const isAllSelected =
-    selected.length === organizations.length && selected.length > 0;
+    selected.length === organizationCount && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteOrganizations,

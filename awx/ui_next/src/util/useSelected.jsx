@@ -11,9 +11,9 @@ import { useState } from 'react';
  * }
  */
 
-export default function useSelected(list = []) {
+export default function useSelected(itemCount) {
   const [selected, setSelected] = useState([]);
-  const isAllSelected = selected.length > 0 && selected.length === list.length;
+  const isAllSelected = selected.length > 0 && selected.length === itemCount;
 
   const handleSelect = row => {
     if (selected.some(s => s.id === row.id)) {

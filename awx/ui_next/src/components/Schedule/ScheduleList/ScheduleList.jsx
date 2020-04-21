@@ -62,8 +62,7 @@ function ScheduleList({
     fetchSchedules();
   }, [fetchSchedules]);
 
-  const isAllSelected =
-    selected.length === schedules.length && selected.length > 0;
+  const isAllSelected = selected.length === itemCount && selected.length > 0;
 
   const {
     isLoading: isDeleteLoading,

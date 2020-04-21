@@ -102,7 +102,7 @@ function InventoryHostList({ i18n }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected = selected.length > 0 && selected.length === hosts.length;
+  const isAllSelected = selected.length > 0 && selected.length === hostCount;
 
   return (
     <>

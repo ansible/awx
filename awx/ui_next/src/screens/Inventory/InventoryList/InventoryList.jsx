@@ -58,8 +58,7 @@ function InventoryList({ i18n }) {
     fetchInventories();
   }, [fetchInventories]);
 
-  const isAllSelected =
-    selected.length === inventories.length && selected.length > 0;
+  const isAllSelected = selected.length === itemCount && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteTeams,

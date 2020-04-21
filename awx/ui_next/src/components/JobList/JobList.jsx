@@ -65,7 +65,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     fetchJobs();
   }, [fetchJobs]);
 
-  const isAllSelected = selected.length === jobs.length && selected.length > 0;
+  const isAllSelected = selected.length === itemCount && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteJobs,

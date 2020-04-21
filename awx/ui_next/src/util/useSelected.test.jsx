@@ -4,6 +4,7 @@ import { mount } from 'enzyme';
 import useSelected from './useSelected';
 
 const array = [{ id: '1' }, { id: '2' }, { id: '3' }];
+const itemCount = 3;
 
 const TestHook = ({ callback }) => {
   callback();
@@ -49,7 +50,7 @@ describe('useSelected hook', () => {
   test('should return expected isAllSelected value', () => {
     testHook(() => {
       ({ selected, isAllSelected, handleSelect, setSelected } = useSelected(
-        array
+        itemCount
       ));
     });
 

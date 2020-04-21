@@ -143,8 +143,7 @@ function ProjectJobTemplatesList({ i18n }) {
     <ToolbarAddButton key="add" linkTo="/templates/job_template/add/" />
   );
 
-  const isAllSelected =
-    selected.length === templates.length && selected.length > 0;
+  const isAllSelected = selected.length === count && selected.length > 0;
 
   return (
     <>

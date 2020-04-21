@@ -57,7 +57,7 @@ function TeamList({ i18n }) {
     fetchTeams();
   }, [fetchTeams]);
 
-  const isAllSelected = selected.length === teams.length && selected.length > 0;
+  const isAllSelected = selected.length === itemCount && selected.length > 0;
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteTeams,

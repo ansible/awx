@@ -57,7 +57,7 @@ function InventoryGroupHostList({ i18n }) {
   );
 
   const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
-    hosts
+    hostCount
   );
 
   useEffect(() => {
