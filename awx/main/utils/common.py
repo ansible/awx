@@ -56,6 +56,7 @@ __all__ = [
     'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
     'get_custom_venv_choices', 'get_external_account', 'task_manager_bulk_reschedule',
     'schedule_task_manager', 'classproperty', 'create_temporary_fifo', 'truncate_stdout',
+    'StubLicense'
 ]
 
 
