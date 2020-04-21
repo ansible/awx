@@ -199,6 +199,7 @@ function SurveyQuestionForm({
                     t`Each answer choice must be on a separate line.`
                   )}
                   isRequired
+                  rows="10"
                 />
                 <FormField
                   id="question-default"

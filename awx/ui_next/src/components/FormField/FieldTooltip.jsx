@@ -8,19 +8,26 @@ const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
 `;
 
-function FieldTooltip({ content }) {
+function FieldTooltip({ content, ...rest }) {
+  if (!content) {
+    return null;
+  }
   return (
     <Tooltip
       position="right"
       content={content}
       trigger="click mouseenter focus"
+      {...rest}
     >
       <QuestionCircleIcon />
     </Tooltip>
   );
 }
 FieldTooltip.propTypes = {
-  content: node.isRequired,
+  content: node,
+};
+FieldTooltip.defaultProps = {
+  content: null,
 };
 
 export default FieldTooltip;
