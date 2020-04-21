@@ -83,11 +83,13 @@ options:
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
       default: 0
-    scm_allow_override:
+    allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
       type: bool
       version_added: "3.7"
+      aliases:
+        - scm_allow_override
     job_timeout:
       version_added: "2.8"
       description:
@@ -188,7 +190,7 @@ def main():
         scm_delete_on_update=dict(type='bool', default=False),
         scm_update_on_launch=dict(type='bool', default=False),
         scm_update_cache_timeout=dict(type='int', default=0),
-        scm_allow_override=dict(type='bool'),
+        allow_override=dict(type='bool', aliases=['scm_allow_override']),
         job_timeout=dict(type='int', default=0),
         custom_virtualenv=dict(),
         organization=dict(required=True),
@@ -214,7 +216,7 @@ def main():
     scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
-    scm_allow_override = module.params.get('scm_allow_override')
+    allow_override = module.params.get('allow_override')
     job_timeout = module.params.get('job_timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
@@ -253,8 +255,8 @@ def main():
         project_fields['description'] = description
     if scm_credential is not None:
         project_fields['credential'] = scm_credential_id
-    if scm_allow_override is not None:
-        project_fields['scm_allow_override'] = scm_allow_override
+    if allow_override is not None:
+        project_fields['allow_override'] = allow_override
     if scm_type == '':
         project_fields['local_path'] = local_path
 
