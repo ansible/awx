@@ -215,8 +215,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/ec2.ini\" target=\"_blank\">" +
-                    i18n._("view ec2.ini in the Ansible github repo.") + "</a></p>" +
+                    "<a href=\"https://github.com/ansible-collections/community.aws/blob/master/scripts/inventory/ec2.ini\" target=\"_blank\">" +
+                    i18n._("view ec2.ini in the community.aws repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -239,8 +239,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/vmware_inventory.ini\" target=\"_blank\">" +
-                    i18n._("view vmware_inventory.ini in the Ansible github repo.") + "</a></p>" +
+                    "<a href=\"https://github.com/ansible-collections/vmware/blob/master/scripts/inventory/vmware_inventory.ini\" target=\"_blank\">" +
+                    i18n._("view vmware_inventory.ini in the vmware community repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -314,8 +314,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 dataTitle: i18n._("Source Variables"),
                 dataPlacement: 'right',
                 awPopOver: "<p>" + i18n._("Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables ") +
-                    "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/azure_rm.ini\" target=\"_blank\">" +
-                    i18n._("view azure_rm.ini in the Ansible github repo.") + "</a></p>" +
+                    "<a href=\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/azure_rm.ini\" target=\"_blank\">" +
+                    i18n._("view azure_rm.ini in the Ansible community.general github repo.") + "</a></p>" +
                     "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     i18n._("JSON:") + "<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
