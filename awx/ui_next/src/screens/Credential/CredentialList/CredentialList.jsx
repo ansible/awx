@@ -55,7 +55,8 @@ function CredentialList({ i18n }) {
   }, [fetchCredentials]);
 
   const isAllSelected =
-    selected.length > 0 && selected.length === credentials.length;
+    selected.length > 0 && selected.length === credentialCount;
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteCredentials,
