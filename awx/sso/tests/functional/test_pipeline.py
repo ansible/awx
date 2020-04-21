@@ -193,6 +193,10 @@ class TestSAMLAttr():
                     {'team': 'Red', 'organization': 'Default1'},
                     {'team': 'Green', 'organization': 'Default1'},
                     {'team': 'Green', 'organization': 'Default3'},
+                    {
+                        'team': 'Yellow', 'team_alias': 'Yellow_Alias',
+                        'organization': 'Default4', 'organization_alias': 'Default4_Alias'
+                    },
                 ]
             }
         return MockSettings()
@@ -284,4 +288,19 @@ class TestSAMLAttr():
 
             assert Team.objects.get(name='Green', organization__name='Default1').member_role.members.count() == 3
             assert Team.objects.get(name='Green', organization__name='Default3').member_role.members.count() == 3
+
+    def test_update_user_teams_alias_by_saml_attr(self, orgs, users, kwargs, mock_settings):
+        with mock.patch('django.conf.settings', mock_settings):
+            u1 = users[0]
+
+            # Test getting teams from attribute with team->org mapping
+            kwargs['response']['attributes']['groups'] = ['Yellow']
+
+            # Ensure team and org will be created
+            update_user_teams_by_saml_attr(None, None, u1, **kwargs)
+
+            assert Team.objects.filter(name='Yellow', organization__name='Default4').count() == 0
+            assert Team.objects.filter(name='Yellow_Alias', organization__name='Default4_Alias').count() == 1
+            assert Team.objects.get(
+                name='Yellow_Alias', organization__name='Default4_Alias').member_role.members.count() == 1
 
