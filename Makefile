@@ -644,7 +644,6 @@ detect-schema-change: genschema
 	diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
-	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
 
 docker-compose-build: awx-devel-build
@@ -666,7 +665,7 @@ docker-clean:
 	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
-docker-clean-volumes:
+docker-clean-volumes: docker-compose-clean
 	docker volume rm tools_awx_db
 
 docker-refresh: docker-clean docker-compose
