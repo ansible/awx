@@ -5,6 +5,7 @@ import shutil
 import csv
 
 from django.utils.timezone import now
+from datetime import timedelta
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 
 from awx.main.analytics import collectors
@@ -73,7 +74,7 @@ def test_copy_tables_unified_job_query(
     Ensure that various unified job types are in the output of the query.
     """
 
-    time_start = now()
+    time_start = now() - timedelta(hours=9)
     inv_src = InventorySource.objects.create(
         name="inventory_update1", inventory=inventory, source="gce"
     )
@@ -130,7 +131,7 @@ def workflow_job(states=["new", "new", "new", "new", "new"]):
 
 @pytest.mark.django_db
 def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
-    time_start = now()
+    time_start = now() - timedelta(hours=9)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         collectors.copy_tables(time_start, tmpdir, subset="workflow_job_node_query")
