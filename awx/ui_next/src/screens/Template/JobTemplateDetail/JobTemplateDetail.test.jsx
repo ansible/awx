@@ -30,7 +30,6 @@ describe('<JobTemplateDetail />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   test('should render successfully with missing summary fields', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -137,5 +136,17 @@ describe('<JobTemplateDetail />', () => {
       'Modal[title="Error!"]',
       el => el.length === 0
     );
+  });
+  test('webhook fields should render properly', () => {
+    expect(wrapper.find('Detail[label="Webhook Service"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook Service"]').prop('value')).toBe(
+      'GitHub'
+    );
+    expect(wrapper.find('Detail[label="Webhook URL"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook URL"]').prop('value')).toContain(
+      'api/v2/job_templates/7/github/'
+    );
+    expect(wrapper.find('Detail[label="Webhook Key"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook Credential"]').length).toBe(1);
   });
 });
