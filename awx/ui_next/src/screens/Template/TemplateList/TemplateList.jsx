@@ -227,6 +227,7 @@ function TemplateList({ i18n }) {
               detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
+              fetchTemplates={fetchTemplates}
             />
           )}
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
