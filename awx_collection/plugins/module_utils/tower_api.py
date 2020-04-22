@@ -34,6 +34,13 @@ class ItemNotDefined(Exception):
 class TowerModule(AnsibleModule):
     # This gets set by the make process so whatever is in here is irrelevant
     _COLLECTION_VERSION = "11.0.0"
+    _COLLECTION_TYPE = "awx"
+    # This maps the collections type (awx/tower) to the values returned by the API
+    # Those values can be found in awx/api/generics.py line 204
+    collection_to_version = {
+        'awx': 'AWX',
+        'tower': 'Red Hat Ansible Tower',
+    }
     url = None
     honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
     host = '127.0.0.1'
@@ -47,6 +54,7 @@ class TowerModule(AnsibleModule):
     authenticated = False
     config_name = 'tower_cli.cfg'
     ENCRYPTED_STRING = "$encrypted$"
+    version_checked = False
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -96,9 +104,6 @@ class TowerModule(AnsibleModule):
             self.fail_json(msg="Unable to resolve tower_host ({1}): {0}".format(hostname, e))
 
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
-
-        # Load the ping page and check the module
-        self.check_version()
 
     def load_config_files(self):
         # Load configs like TowerCLI would have from least import to most
@@ -379,6 +384,19 @@ class TowerModule(AnsibleModule):
         finally:
             self.url = self.url._replace(query=None)
 
+        if not self.version_checked:
+            tower_type = response.getheader('X-API-Product-Name', None)
+            tower_version = response.getheader('X-API-Product-Version', None)
+            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(
+                    self._COLLECTION_TYPE, tower_type
+                ))
+            elif self._COLLECTION_VERSION != tower_version:
+                self.warn("You are running collection version {0} but connecting to tower version {1}".format(
+                    self._COLLECTION_VERSION, tower_version
+                ))
+            self.version_checked = True
+
         response_body = ''
         try:
             response_body = response.read()
@@ -439,13 +457,6 @@ class TowerModule(AnsibleModule):
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
 
-    def check_version(self):
-        # Load the ping page
-        response = self.get_endpoint('ping')
-
-        if self._COLLECTION_VERSION != response['json']['version']:
-            self.warn("You are running collection version {0} but connecting to tower version {1}".format(self._COLLECTION_VERSION, response['json']['version']))
-        
     def delete_if_needed(self, existing_item, on_delete=None):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,

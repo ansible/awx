@@ -14,6 +14,12 @@
         regexp: '^    _COLLECTION_VERSION =.*'
         replace: '    _COLLECTION_VERSION = "{{ collection_version }}"'
 
+    - name: Set the collection type in the tower_api.py file
+      replace:
+        path: "{{ playbook_dir }}/plugins/module_utils/tower_api.py"
+        regexp: '^    _COLLECTION_TYPE =.*'
+        replace: '    _COLLECTION_TYPE = "{{ collection_namespace }}"'
+
     - name: Do file content replacements for non-default namespace or package name
       block:
 
