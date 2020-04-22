@@ -230,7 +230,9 @@ def query_info(since, collection_type):
 @table_version('events_table.csv', '1.1')
 @table_version('unified_jobs_table.csv', '1.0')
 @table_version('unified_job_template_table.csv', '1.0')
-def copy_tables(since, full_path):
+@table_version('workflow_job_node_table.csv', '1.0')
+@table_version('workflow_job_template_node_table.csv', '1.0')
+def copy_tables(since, full_path, subset=None):
     def _copy_table(table, query, path):
         file_path = os.path.join(path, table + '_table.csv')
         file = open(file_path, 'w', encoding='utf-8')
@@ -262,7 +264,8 @@ def copy_tables(since, full_path):
                               FROM main_jobevent 
                               WHERE main_jobevent.created > {}
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
-    _copy_table(table='events', query=events_query, path=full_path)
+    if not subset or 'events' in subset:
+        _copy_table(table='events', query=events_query, path=full_path)
 
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -290,7 +293,8 @@ def copy_tables(since, full_path):
                                  WHERE (main_unifiedjob.created > {0} OR main_unifiedjob.finished > {0})
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
-    _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
+    if not subset or 'unified_jobs' in subset:
+        _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
     unified_job_template_query = '''COPY (SELECT main_unifiedjobtemplate.id, 
                                  main_unifiedjobtemplate.polymorphic_ctype_id,
@@ -309,6 +313,71 @@ def copy_tables(since, full_path):
                                  main_unifiedjobtemplate.status 
                                  FROM main_unifiedjobtemplate, django_content_type
                                  WHERE main_unifiedjobtemplate.polymorphic_ctype_id = django_content_type.id
-                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''
-    _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
+                                 ORDER BY main_unifiedjobtemplate.id ASC) TO STDOUT WITH CSV HEADER'''  
+    if not subset or 'unified_job_template' in subset:
+        _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
+
+    workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
+                                 main_workflowjobnode.created,
+                                 main_workflowjobnode.modified, 
+                                 main_workflowjobnode.job_id, 
+                                 main_workflowjobnode.unified_job_template_id, 
+                                 main_workflowjobnode.workflow_job_id, 
+                                 main_workflowjobnode.inventory_id, 
+                                 success_nodes.nodes AS success_nodes,
+                                 failure_nodes.nodes AS failure_nodes,
+                                 always_nodes.nodes AS always_nodes,
+                                 main_workflowjobnode.do_not_run, 
+                                 main_workflowjobnode.all_parents_must_converge
+                                 FROM main_workflowjobnode
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_success_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) success_nodes ON main_workflowjobnode.id = success_nodes.from_workflowjobnode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_failure_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) failure_nodes ON main_workflowjobnode.id = failure_nodes.from_workflowjobnode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobnode_id, ARRAY_AGG(to_workflowjobnode_id) AS nodes
+                                     FROM main_workflowjobnode_always_nodes
+                                     GROUP BY from_workflowjobnode_id
+                                 ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
+                                 WHERE main_workflowjobnode.modified > {}
+                                 ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))    
+    if not subset or 'workflow_job_node' in subset:
+        _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
+
+    workflow_job_template_node_query = '''COPY (SELECT main_workflowjobtemplatenode.id, 
+                                 main_workflowjobtemplatenode.created,
+                                 main_workflowjobtemplatenode.modified, 
+                                 main_workflowjobtemplatenode.unified_job_template_id, 
+                                 main_workflowjobtemplatenode.workflow_job_template_id, 
+                                 main_workflowjobtemplatenode.inventory_id, 
+                                 success_nodes.nodes AS success_nodes,
+                                 failure_nodes.nodes AS failure_nodes,
+                                 always_nodes.nodes AS always_nodes,
+                                 main_workflowjobtemplatenode.all_parents_must_converge
+                                 FROM main_workflowjobtemplatenode
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_success_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) success_nodes ON main_workflowjobtemplatenode.id = success_nodes.from_workflowjobtemplatenode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_failure_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) failure_nodes ON main_workflowjobtemplatenode.id = failure_nodes.from_workflowjobtemplatenode_id
+                                 LEFT JOIN (
+                                     SELECT from_workflowjobtemplatenode_id, ARRAY_AGG(to_workflowjobtemplatenode_id) AS nodes
+                                     FROM main_workflowjobtemplatenode_always_nodes
+                                     GROUP BY from_workflowjobtemplatenode_id
+                                 ) always_nodes ON main_workflowjobtemplatenode.id = always_nodes.from_workflowjobtemplatenode_id
+                                 ORDER BY main_workflowjobtemplatenode.id ASC) TO STDOUT WITH CSV HEADER'''   
+    if not subset or 'workflow_job_template_node' in subset:
+        _copy_table(table='workflow_job_template_node', query=workflow_job_template_node_query, path=full_path)
+
     return
