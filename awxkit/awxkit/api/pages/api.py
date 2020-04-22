@@ -62,46 +62,46 @@ class ApiV2(base.Base):
 
     # Export methods
 
-    def _serialize_asset(self, asset, options):
+    def _export(self, _page, post_fields):
         # Drop any (credential_type) assets that are being managed by the Tower instance.
-        if asset.json.get('managed_by_tower'):
+        if _page.json.get('managed_by_tower'):
             return None
-        if options is None:  # Deprecated endpoint or insufficient permissions
+        if post_fields is None:  # Deprecated endpoint or insufficient permissions
             return None
 
-        # Note: doing asset[key] automatically parses json blob strings, which can be a problem.
+        # Note: doing _page[key] automatically parses json blob strings, which can be a problem.
         fields = {
-            key: asset.json[key] for key in options
-            if key in asset.json and key not in asset.related and key != 'id'
+            key: _page.json[key] for key in post_fields
+            if key in _page.json and key not in _page.related and key != 'id'
         }
 
-        for key in options:
-            if key not in asset.related:
+        for key in post_fields:
+            if key not in _page.related:
                 continue
 
-            related_endpoint = self._cache.get_page(asset.related[key])
-            if related_endpoint is None:
+            rel_endpoint = self._cache.get_page(_page.related[key])
+            if rel_endpoint is None:
                 return None  # This foreign key is unreadable
-            natural_key = related_endpoint.get_natural_key(self._cache)
+            natural_key = rel_endpoint.get_natural_key(self._cache)
             if natural_key is None:
                 return None  # This foreign key has unresolvable dependencies
             fields[key] = natural_key
 
         related = {}
-        for key, related_endpoint in asset.related.items():
-            if key in options or not related_endpoint:
+        for key, rel_endpoint in _page.related.items():
+            if key in post_fields or not rel_endpoint:
                 continue
 
-            rel = related_endpoint._create()
+            rel = rel_endpoint._create()
             is_relation = rel.__class__.__name__ in EXPORTABLE_RELATIONS
             is_dependent = rel.__class__.__name__ in EXPORTABLE_DEPENDENT_OBJECTS
             if not (is_relation or is_dependent):
                 continue
 
-            related_options = utils.get_post_fields(related_endpoint, self._cache)
-            if related_options is None:  # This is a read-only endpoint.
+            rel_post_fields = utils.get_post_fields(rel_endpoint, self._cache)
+            if rel_post_fields is None:  # This is a read-only endpoint.
                 continue
-            is_attach = 'id' in related_options  # This is not a create-only endpoint.
+            is_attach = 'id' in rel_post_fields  # This is not a create-only endpoint.
 
             if is_relation and is_attach:
                 by_natural_key = True
@@ -110,23 +110,23 @@ class ApiV2(base.Base):
             else:
                 continue
 
-            data = self._cache.get_page(related_endpoint)
-            if data is None:
+            rel_page = self._cache.get_page(rel_endpoint)
+            if rel_page is None:
                 continue
 
-            if 'results' in data:
+            if 'results' in rel_page:
                 results = (
-                    x.get_natural_key(self._cache) if by_natural_key else self._serialize_asset(x, related_options)
-                    for x in data.results
+                    x.get_natural_key(self._cache) if by_natural_key else self._export(x, rel_post_fields)
+                    for x in rel_page.results
                 )
                 related[key] = [x for x in results if x is not None]
             else:
-                related[key] = data.json
+                related[key] = rel_page.json
 
         if related:
             fields['related'] = related
 
-        natural_key = asset.get_natural_key(self._cache)
+        natural_key = _page.get_natural_key(self._cache)
         if natural_key is None:
             return None
         fields['natural_key'] = natural_key
@@ -143,7 +143,7 @@ class ApiV2(base.Base):
             if endpoint is None:
                 return None
 
-        assets = (self._serialize_asset(asset, post_fields) for asset in endpoint.results)
+        assets = (self._export(asset, post_fields) for asset in endpoint.results)
         return [asset for asset in assets if asset is not None]
 
     def _filtered_list(self, endpoint, value):
@@ -206,13 +206,7 @@ class ApiV2(base.Base):
         if frozen_key is not None and frozen_key not in self._natural_key and fetch:
             pass  # FIXME
 
-        from awxkit.api.pages import projects
-
         _page = self._natural_key.get(frozen_key)
-        if isinstance(_page, projects.Project) and not _page.is_completed:
-            _page.wait_until_completed()
-            _page = _page.get()
-            self._natural_key[frozen_key] = _page
         return _page
 
     def _create_assets(self, data, resource):
@@ -231,26 +225,27 @@ class ApiV2(base.Base):
                 if field not in options:
                     continue
                 if options[field]['type'] in ('id', 'integer') and isinstance(value, dict):
-                    page = self._get_by_natural_key(value)
-                    post_data[field] = page['id'] if page is not None else None
+                    _page = self._get_by_natural_key(value)
+                    post_data[field] = _page['id'] if _page is not None else None
                 else:
                     post_data[field] = value
 
-            page = self._get_by_natural_key(asset['natural_key'], fetch=False)
+            _page = self._get_by_natural_key(asset['natural_key'], fetch=False)
             try:
-                if page is None:
+                if _page is None:
                     if resource == 'users':
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
-                    page = endpoint.post(post_data)
+                    _page = endpoint.post(post_data)
                 else:
-                    page = page.put(post_data)
+                    _page = _page.put(post_data)
                 # FIXME: created pages need to be put in the cache
-            except exc.Common:
-                log.exception("post_data: %r", post_data)
-                raise
+            except exc.Common as e:
+                log.error("Object import failed: %s.", e)
+                log.debug("post_data: %r", post_data)
+                continue
 
-            self._register_page(page)
+            self._register_page(_page)
 
     def _assign_roles(self, page, roles):
         role_endpoint = page.json['related']['roles']
@@ -278,7 +273,10 @@ class ApiV2(base.Base):
                 rel_page = self._get_by_natural_key(item)
                 if rel_page is None:
                     continue  # FIXME
-                endpoint.post({'id': rel_page['id']})
+                try:
+                    endpoint.post({'id': rel_page['id']})
+                except exc.NoContent:  # desired exception on successful (dis)association
+                    pass
         else:  # It is a create set
             for item in related_set:
                 data = {key: value for key, value in item.items()
@@ -301,6 +299,8 @@ class ApiV2(base.Base):
                     self._assign_related(page, name, S)
 
     def import_assets(self, data):
+        self._cache = page.PageCache()
+
         for resource in self._dependent_resources(data):
             self._register_existing_assets(resource)
             self._create_assets(data, resource)
