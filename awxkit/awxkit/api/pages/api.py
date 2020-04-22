@@ -191,15 +191,14 @@ class ApiV2(base.Base):
 
             self._natural_key[natural_key] = page
 
-    def _register_existing_assets(self, resource):
-        endpoint = getattr(self, resource)
-        options = utils.get_post_fields(endpoint, self._cache)
-        if options is None:
+    def _register_existing_assets(self, endpoint):
+        post_fields = utils.get_post_fields(endpoint, self._cache)
+        if post_fields is None:
             return
 
         results = self._cache.get_page(endpoint).results
-        for pg in results:
-            self._register_page(pg)
+        for _page in results:
+            self._register_page(_page)
 
     def _get_by_natural_key(self, key, fetch=True):
         frozen_key = freeze(key)
@@ -209,22 +208,14 @@ class ApiV2(base.Base):
         _page = self._natural_key.get(frozen_key)
         return _page
 
-    def _create_assets(self, data, resource):
-        # FIXME: this method should work with any list-create
-        # endpoint, so that we can use it with create relations, e.g. WFJT Nodes
-
-        if resource not in data or resource not in EXPORTABLE_RESOURCES:
-            return
-
-        endpoint = getattr(self, resource)
-        options = utils.get_post_fields(endpoint, self._cache)
-        assets = data[resource]
+    def _import_list(self, endpoint, assets):
+        post_fields = utils.get_post_fields(endpoint, self._cache)
         for asset in assets:
             post_data = {}
             for field, value in asset.items():
-                if field not in options:
+                if field not in post_fields:
                     continue
-                if options[field]['type'] in ('id', 'integer') and isinstance(value, dict):
+                if post_fields[field]['type'] in ('id', 'integer') and isinstance(value, dict):
                     _page = self._get_by_natural_key(value)
                     post_data[field] = _page['id'] if _page is not None else None
                 else:
@@ -233,7 +224,7 @@ class ApiV2(base.Base):
             _page = self._get_by_natural_key(asset['natural_key'], fetch=False)
             try:
                 if _page is None:
-                    if resource == 'users':
+                    if asset['natural_key']['type'] == 'user':
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
                     _page = endpoint.post(post_data)
@@ -262,52 +253,59 @@ class ApiV2(base.Base):
             else:
                 pass  # admin role
 
-    def _assign_related(self, page, name, related_set):
-        endpoint = page.related[name]
+    def _assign_related(self, _page, name, related_set):
+        endpoint = _page.related[name]
         if isinstance(related_set, dict):  # Relateds that are just json blobs, e.g. survey_spec
             endpoint.post(related_set)
             return
 
         if 'natural_key' not in related_set[0]:  # It is an attach set
+            # Try to impedance match
+            related = endpoint.get(all_pages=True)
+            existing = {rel['id'] for rel in related.results}
             for item in related_set:
                 rel_page = self._get_by_natural_key(item)
                 if rel_page is None:
                     continue  # FIXME
+                if rel_page['id'] in existing:
+                    continue
                 try:
-                    endpoint.post({'id': rel_page['id']})
+                    post_data = {'id': rel_page['id']}
+                    endpoint.post(post_data)
                 except exc.NoContent:  # desired exception on successful (dis)association
                     pass
+                except exc.Common as e:
+                    log.error("Object association failed: %s.", e)
+                    log.debug("post_data: %r", post_data)
+                    raise
         else:  # It is a create set
-            for item in related_set:
-                data = {key: value for key, value in item.items()
-                        if key not in ('natural_key', 'related')}
-                endpoint.post(data)  # FIXME: add the page to the cache
-                # FIXME: deal with objects that themselves have relateds, e.g. WFJT Nodes
+            self._import_list(endpoint, related_set)
 
         # FIXME: deal with pruning existing relations that do not match the import set
 
-    def _assign_related_assets(self, resource, assets):
+    def _assign_related_assets(self, assets):
         for asset in assets:
-            page = self._get_by_natural_key(asset['natural_key'])
-            # FIXME: deal with `page is None` case
+            _page = self._get_by_natural_key(asset['natural_key'])
+            # FIXME: deal with `_page is None` case
             for name, S in asset.get('related', {}).items():
                 if not S:
                     continue
                 if name == 'roles':
-                    self._assign_roles(page, S)
+                    self._assign_roles(_page, S)
                 else:
-                    self._assign_related(page, name, S)
+                    self._assign_related(_page, name, S)
 
     def import_assets(self, data):
         self._cache = page.PageCache()
 
         for resource in self._dependent_resources(data):
-            self._register_existing_assets(resource)
-            self._create_assets(data, resource)
+            endpoint = getattr(self, resource)
+            self._register_existing_assets(endpoint)
+            self._import_list(endpoint, data.get(resource) or [])
             # FIXME: should we delete existing unpatched assets?
 
-        for resource, assets in data.items():
-            self._assign_related_assets(resource, assets)
+        for assets in data.values():
+            self._assign_related_assets(assets)
 
 
 page.register_page(resources.v2, ApiV2)
