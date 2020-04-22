@@ -199,7 +199,7 @@ class ProjectOptions(models.Model):
         results = []
         project_path = self.get_project_path()
         if project_path:
-            for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=True):
                 if skip_directory(dirpath):
                     continue
                 for filename in filenames:
