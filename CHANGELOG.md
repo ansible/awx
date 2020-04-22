@@ -2,6 +2,15 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 11.1.0 (Apr 22, 2020)
+- Changed rsyslogd to persist queued events to disk (to prevent a risk of out-of-memory errors) (https://github.com/ansible/awx/issues/6746)
+- Added the ability to configure the destination and maximum disk size of rsyslogd spool (in the event of a log aggregator outage) (https://github.com/ansible/awx/pull/6763)
+- Added the ability to discover playbooks in project clones from symlinked directories (https://github.com/ansible/awx/pull/6773)
+- Fixed a bug that caused certain log aggregator settings to break logging integration (https://github.com/ansible/awx/issues/6760)
+- Fixed a bug that caused playbook execution in container groups to sometimes unexpectedly deadlock (https://github.com/ansible/awx/issues/6692)
+- Improved stability of the new redis clustering implementation (https://github.com/ansible/awx/pull/6739 https://github.com/ansible/awx/pull/6720)
+- Improved stability of the new rsyslogd-based logging implementation (https://github.com/ansible/awx/pull/6796)
+
 ## 11.0.0 (Apr 16, 2020)
 - As of AWX 11.0.0, Kubernetes-based deployments use a Deployment rather than a StatefulSet.
 - Reimplemented external logging support using rsyslogd to improve reliability and address a number of issues (https://github.com/ansible/awx/issues/5155)
