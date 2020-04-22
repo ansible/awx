@@ -2251,7 +2251,7 @@ class gce(PluginFileInjector):
 
 class vmware(PluginFileInjector):
     plugin_name = 'vmware_vm_inventory'
-    initial_version = '2.9'  # Only tested with collection version
+    # initial_version = '2.9'  # Ready 4/22/2020, waiting for release
     ini_env_reference = 'VMWARE_INI_PATH'
     base_injector = 'managed'
     namespace = 'community'
@@ -2271,23 +2271,23 @@ class vmware(PluginFileInjector):
             "ansible_ssh_host",
             "ansible_host",
             "ansible_uuid",
-            "availableField",  # optional?
-            "configIssue",  # optional?
-            "configStatus",  # optional?
-            "customValue",  # optional?
+            "availableField",
+            "configIssue",
+            "configStatus",
+            "customValue",  # optional
             "datastore",
-            "effectiveRole",  # optional?
-            "guestHeartbeatStatus",  # optonal?
-            "layout",  # optional?
-            "layoutEx",  # optional?
+            "effectiveRole",
+            "guestHeartbeatStatus",  # optonal
+            "layout",  # optional
+            "layoutEx",  # optional
             "name",
             "network",
-            "overallStatus",  # optional?
-            "parentVApp",  # optional?
+            "overallStatus",
+            "parentVApp",  # optional
             "permission",
-            "recentTask",  # optional?
+            "recentTask",
             "resourcePool",
-            "rootSnapshot",  # optional?
+            "rootSnapshot",
             "snapshot",  # optional
             "tag",
             "triggeredAlarmState",
@@ -2302,12 +2302,15 @@ class vmware(PluginFileInjector):
             "summary",  # repeat of other properties
         ]
         ret['properties'] = UPPERCASE_PROPS + NESTED_PROPS
-        ret['compose'] = {}
+        ret['compose'] = {'ansible_host': 'guest.ipAddress'}  # default value
+        ret['compose']['ansible_ssh_host'] = ret['compose']['ansible_host']
+        # the ansible_uuid was unique every host, every import, from the script
+        ret['compose']['ansible_uuid'] = '99999999 | random | to_uuid'
         for prop in UPPERCASE_PROPS:
             if prop == prop.lower():
                 continue
             ret['compose'][prop.lower()] = prop
-        # ret['with_nested_properties'] = True  # only dacrystal/topic/vmware-inventory-plugin-enhancements
+        ret['with_nested_properties'] = True
         # ret['property_name_format'] = 'lower_case'  # only dacrystal/topic/vmware-inventory-plugin-property-format
 
         # process custom options

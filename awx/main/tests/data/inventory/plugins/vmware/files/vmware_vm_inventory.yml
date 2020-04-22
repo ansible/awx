@@ -1,4 +1,7 @@
 compose:
+  ansible_host: guest.ipAddress
+  ansible_ssh_host: guest.ipAddress
+  ansible_uuid: 99999999 | random | to_uuid
   availablefield: availableField
   configissue: configIssue
   configstatus: configStatus
@@ -53,3 +56,4 @@ properties:
 - storage
 - summary
 strict: false
+with_nested_properties: true
