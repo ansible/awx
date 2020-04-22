@@ -5,6 +5,7 @@ username = fooo
 password = fooo
 server = https://foo.invalid
 base_source_var = value_of_var
-host_filters = {{ config.name == "only_my_server" }},{{ somevar == "bar"}}
-groupby_patterns = fouo
+alias_pattern = {{ config.foo }}
+host_filters = {{ config.zoo == "DC0_H0_VM0" }}
+groupby_patterns = {{ config.asdf }}
 

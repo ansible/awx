@@ -1,43 +1,55 @@
-host_filters:
-- config.name == "only_my_server"
-- somevar == "bar"
+compose:
+  availablefield: availableField
+  configissue: configIssue
+  configstatus: configStatus
+  customvalue: customValue
+  effectiverole: effectiveRole
+  guestheartbeatstatus: guestHeartbeatStatus
+  layoutex: layoutEx
+  overallstatus: overallStatus
+  parentvapp: parentVApp
+  recenttask: recentTask
+  resourcepool: resourcePool
+  rootsnapshot: rootSnapshot
+  triggeredalarmstate: triggeredAlarmState
+filters:
+- config.zoo == "DC0_H0_VM0"
+hostnames:
+- config.foo
 keyed_groups:
-- key: fouo
+- key: config.asdf
   prefix: ''
   separator: ''
 plugin: community.vmware.vmware_vm_inventory
 properties:
-- name
 - ansible_ssh_host
 - ansible_host
 - ansible_uuid
-- availablefield
-- capability
-- config
-- configissue
-- configstatus
-- customvalue
+- availableField
+- configIssue
+- configStatus
+- customValue
 - datastore
-- effectiverole
-- guest
-- guestheartbeatstatus
+- effectiveRole
+- guestHeartbeatStatus
 - layout
-- layoutex
+- layoutEx
 - name
 - network
-- overallstatus
-- parentvapp
+- overallStatus
+- parentVApp
 - permission
-- recenttask
-- resourcepool
-- rootsnapshot
-- runtime
+- recentTask
+- resourcePool
+- rootSnapshot
 - snapshot
+- tag
+- triggeredAlarmState
+- value
+- capability
+- config
+- guest
+- runtime
 - storage
 - summary
-- tag
-- triggeredalarmstate
-- value
-property_name_format: lower_case
 strict: false
-with_nested_properties: true

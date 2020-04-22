@@ -53,6 +53,9 @@ INI_TEST_VARS = {
     'rhv': {},  # there are none
     'tower': {},  # there are none
     'vmware': {
+        'alias_pattern': "{{ config.foo }}",
+        'host_filters': '{{ config.zoo == "DC0_H0_VM0" }}',
+        'groupby_patterns': "{{ config.asdf }}",
         # setting VMWARE_VALIDATE_CERTS is duplicated with env var
     },
     'azure_rm': {

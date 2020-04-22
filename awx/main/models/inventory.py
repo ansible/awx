@@ -2265,42 +2265,50 @@ class vmware(PluginFileInjector):
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(vmware, self).inventory_as_dict(inventory_update, private_data_dir)
         ret['strict'] = False
-        ret['properties'] = [
-            "name",
+        # Documentation of props, see
+        # https://github.com/ansible/ansible/blob/devel/docs/docsite/rst/scenario_guides/vmware_scenarios/vmware_inventory_vm_attributes.rst
+        UPPERCASE_PROPS = [
             "ansible_ssh_host",
             "ansible_host",
             "ansible_uuid",
-            "availablefield",
-            "capability",  # nested properties
-            "config",  # nested properties
-            "configissue",
-            "configstatus",
-            "customvalue",
+            "availableField",  # optional?
+            "configIssue",  # optional?
+            "configStatus",  # optional?
+            "customValue",  # optional?
             "datastore",
-            "effectiverole",
-            "guest",  # nested properties
-            "guestheartbeatstatus",
-            "layout",
-            "layoutex",
+            "effectiveRole",  # optional?
+            "guestHeartbeatStatus",  # optonal?
+            "layout",  # optional?
+            "layoutEx",  # optional?
             "name",
             "network",
-            "overallstatus",
-            "parentvapp",
+            "overallStatus",  # optional?
+            "parentVApp",  # optional?
             "permission",
-            "recenttask",
-            "resourcepool",
-            "rootsnapshot",
-            "runtime",  # nested properties
-            "snapshot",
-            "storage",  # nested properties
-            "summary",  # repeat of other properties
+            "recentTask",  # optional?
+            "resourcePool",
+            "rootSnapshot",  # optional?
+            "snapshot",  # optional
             "tag",
-            "triggeredalarmstate",
-            "value",
+            "triggeredAlarmState",
+            "value"
         ]
-        # ret['properties'] = ["all"]  # causes UnknownWsdlTypeError exception
-        ret['with_nested_properties'] = True
-        ret['property_name_format'] = 'lower_case'
+        NESTED_PROPS = [
+            "capability",
+            "config",
+            "guest",
+            "runtime",
+            "storage",
+            "summary",  # repeat of other properties
+        ]
+        ret['properties'] = UPPERCASE_PROPS + NESTED_PROPS
+        ret['compose'] = {}
+        for prop in UPPERCASE_PROPS:
+            if prop == prop.lower():
+                continue
+            ret['compose'][prop.lower()] = prop
+        # ret['with_nested_properties'] = True  # only dacrystal/topic/vmware-inventory-plugin-enhancements
+        # ret['property_name_format'] = 'lower_case'  # only dacrystal/topic/vmware-inventory-plugin-property-format
 
         # process custom options
         vmware_opts = dict(inventory_update.source_vars_dict.items())
@@ -2320,16 +2328,18 @@ class vmware(PluginFileInjector):
 
         host_pattern = vmware_opts.get('host_pattern')  # not working in script
         if host_pattern:
-            pass  # does not appear to have an option for this
+            stripped_hp = host_pattern.replace('{', '').replace('}', '').strip()  # make best effort
+            ret['compose']['ansible_host'] = stripped_hp
+            ret['compose']['ansible_ssh_host'] = stripped_hp
 
         host_filters = vmware_opts.get('host_filters')
         if host_filters:
-            ret.setdefault('host_filters', [])
+            ret.setdefault('filters', [])
             for hf in host_filters.split(','):
                 striped_hf = hf.replace('{', '').replace('}', '').strip()  # make best effort
                 if not striped_hf:
                     continue
-                ret['host_filters'].append(striped_hf)
+                ret['filters'].append(striped_hf)
 
         groupby_patterns = vmware_opts.get('groupby_patterns')
         if groupby_patterns:
