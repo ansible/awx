@@ -3,7 +3,7 @@ collections:
   - name: awx.awx
     version: 9.3.0
   - name: azure.azcollection
-    version: 0.1.1  # questionable https://github.com/ansible-collections/azure/issues/55
+    version: 0.1.2
   - name: amazon.aws
     version: 0.1.1  # version 0.1.0 seems to have gone missing
   - name: theforeman.foreman
@@ -13,6 +13,6 @@ collections:
   - name: openstack.cloud
     version: 0.0.1-dev85  # earlier had checksum mismatch
   - name: community.vmware
-    version: 0.3.1-dev1
+    version: 0.4.0  # first to contain necessary grouping and filtering features
   - name: ovirt.ovirt_collection
     version: 1.0.1  # new fix published, should be good to go

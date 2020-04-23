@@ -25,9 +25,6 @@ keyed_groups:
   separator: ''
 plugin: community.vmware.vmware_vm_inventory
 properties:
-- ansible_ssh_host
-- ansible_host
-- ansible_uuid
 - availableField
 - configIssue
 - configStatus
