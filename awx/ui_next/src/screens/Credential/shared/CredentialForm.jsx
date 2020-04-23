@@ -105,19 +105,18 @@ function CredentialFormFields({
           }}
         />
       </FormGroup>
-      {formik.values.credential_type !== undefined &&
-        formik.values.credential_type !== '' && (
-          <SubFormLayout>
-            <Title size="md">{i18n._(t`Type Details`)}</Title>
+      {credTypeField.value !== undefined && credTypeField.value !== '' && (
+        <SubFormLayout>
+          <Title size="md">{i18n._(t`Type Details`)}</Title>
+          {
             {
-              {
-                [gceCredentialTypeId]: <GoogleComputeEngineSubForm />,
-                [sshCredentialTypeId]: <ManualSubForm />,
-                [scmCredentialTypeId]: <SourceControlSubForm />,
-              }[formik.values.credential_type]
-            }
-          </SubFormLayout>
-        )}
+              [gceCredentialTypeId]: <GoogleComputeEngineSubForm />,
+              [sshCredentialTypeId]: <ManualSubForm />,
+              [scmCredentialTypeId]: <SourceControlSubForm />,
+            }[credTypeField.value]
+          }
+        </SubFormLayout>
+      )}
     </>
   );
 }
