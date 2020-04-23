@@ -942,6 +942,7 @@ LOG_AGGREGATOR_VERIFY_CERT = True
 LOG_AGGREGATOR_LEVEL = 'INFO'
 LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
+LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in clustered Tower,

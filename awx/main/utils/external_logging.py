@@ -22,6 +22,8 @@ def construct_rsyslog_conf_template(settings=settings):
         spool_directory = '/var/lib/awx'
 
     max_bytes = settings.MAX_EVENT_RES_DATA
+    if settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
+        parts.append('$DebugLevel 2')
     parts.extend([
         '$WorkDirectory /var/lib/awx/rsyslog',
         f'$MaxMessageSize {max_bytes}',
