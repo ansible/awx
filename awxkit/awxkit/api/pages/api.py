@@ -195,9 +195,14 @@ class ApiV2(base.Base):
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
                     _page = endpoint.post(post_data)
+                    if asset['natural_key']['type'] == 'project':
+                        # When creating a project, we need to wait for its
+                        # first project update to finish so that associated
+                        # JTs have valid options for playbook names
+                        _page.wait_until_completed()
                 else:
                     _page = _page.put(post_data)
-            except exc.Common as e:
+            except (exc.Common, AssertionError) as e:
                 log.error("Object import failed: %s.", e)
                 log.debug("post_data: %r", post_data)
                 continue
