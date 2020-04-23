@@ -3,13 +3,18 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import PromptProjectDetail from './PromptProjectDetail';
 import mockProject from './data.project.json';
 
+function assertDetail(wrapper, label, value) {
+  expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+  expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+}
+
 describe('PromptProjectDetail', () => {
   let wrapper;
+  const config = {
+    project_base_dir: 'dir/foo/bar',
+  };
 
   beforeAll(() => {
-    const config = {
-      project_base_dir: 'dir/foo/bar',
-    };
     wrapper = mountWithContexts(
       <PromptProjectDetail resource={mockProject} />,
       {
@@ -27,23 +32,19 @@ describe('PromptProjectDetail', () => {
   });
 
   test('should render expected details', () => {
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
-    }
-
-    assertDetail('Source Control Type', 'Git');
+    assertDetail(wrapper, 'Source Control Type', 'Git');
     assertDetail(
+      wrapper,
       'Source Control URL',
       'https://github.com/ansible/ansible-tower-samples'
     );
-    assertDetail('Source Control Branch', 'foo');
-    assertDetail('Source Control Refspec', 'refs/');
-    assertDetail('Cache Timeout', '3 Seconds');
-    assertDetail('Ansible Environment', 'mock virtual env');
-    assertDetail('Project Base Path', 'dir/foo/bar');
-    assertDetail('Playbook Directory', '_6__demo_project');
-    assertDetail('Source Control Credential', 'Scm: mock scm');
+    assertDetail(wrapper, 'Source Control Branch', 'foo');
+    assertDetail(wrapper, 'Source Control Refspec', 'refs/');
+    assertDetail(wrapper, 'Cache Timeout', '3 Seconds');
+    assertDetail(wrapper, 'Ansible Environment', 'mock virtual env');
+    assertDetail(wrapper, 'Project Base Path', 'dir/foo/bar');
+    assertDetail(wrapper, 'Playbook Directory', '_6__demo_project');
+    assertDetail(wrapper, 'Source Control Credential', 'Scm: mock scm');
     expect(
       wrapper
         .find('Detail[label="Options"]')
@@ -54,5 +55,16 @@ describe('PromptProjectDetail', () => {
           <li>Allow Branch Override</li>,
         ])
     ).toEqual(true);
+  });
+
+  test('should render "Deleted" details', () => {
+    delete mockProject.summary_fields.organization;
+    wrapper = mountWithContexts(
+      <PromptProjectDetail resource={mockProject} />,
+      {
+        context: { config },
+      }
+    );
+    assertDetail(wrapper, 'Organization', 'Deleted');
   });
 });

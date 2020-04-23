@@ -10,7 +10,6 @@ import {
   TextListItemVariants,
   TextListVariants,
 } from '@patternfly/react-core';
-import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
 import AlertModal from '@components/AlertModal';
@@ -18,18 +17,17 @@ import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import CredentialChip from '@components/CredentialChip';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import {
+  Detail,
+  DetailList,
+  DeletedDetail,
+  UserDateDetail,
+} from '@components/DetailList';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
 import LaunchButton from '@components/LaunchButton';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import { JobTemplatesAPI } from '@api';
-
-const MissingDetail = styled(Detail)`
-  dd& {
-    color: red;
-  }
-`;
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -133,10 +131,6 @@ function JobTemplateDetail({ i18n, template }) {
     </TextList>
   );
 
-  const renderMissingDataDetail = value => (
-    <MissingDetail label={value} value={i18n._(t`Deleted`)} />
-  );
-
   const inventoryValue = (kind, id) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
@@ -180,7 +174,7 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          renderMissingDataDetail(i18n._(t`Project`))
+          <DeletedDetail label={i18n._(t`Organization`)} />
         )}
         {summary_fields.inventory ? (
           <Detail
@@ -191,8 +185,9 @@ function JobTemplateDetail({ i18n, template }) {
             )}
           />
         ) : (
-          !ask_inventory_on_launch &&
-          renderMissingDataDetail(i18n._(t`Inventory`))
+          !ask_inventory_on_launch && (
+            <DeletedDetail label={i18n._(t`Inventory`)} />
+          )
         )}
         {summary_fields.project ? (
           <Detail
@@ -204,7 +199,7 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          renderMissingDataDetail(i18n._(t`Project`))
+          <DeletedDetail label={i18n._(t`Project`)} />
         )}
         <Detail
           label={i18n._(t`Source Control Branch`)}

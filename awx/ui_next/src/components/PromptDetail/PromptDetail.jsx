@@ -34,6 +34,21 @@ function formatTimeout(timeout) {
   );
 }
 
+function buildResourceLink(resource) {
+  const link = {
+    job_template: `/templates/job_template/${resource.id}/details`,
+    project: `/projects/${resource.id}/details`,
+    inventory_source: `/inventories/inventory/${resource.inventory}/sources/${resource.id}/details`,
+    workflow_job_template: `/templates/workflow_job_template/${resource.id}/details`,
+  };
+
+  return link[(resource?.type)] ? (
+    <Link to={link[resource.type]}>{resource.name}</Link>
+  ) : (
+    resource.name
+  );
+}
+
 function hasPromptData(launchData) {
   return (
     launchData.ask_credential_on_launch ||
@@ -150,7 +165,7 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
   return (
     <>
       <DetailList gutter="sm">
-        <Detail label={i18n._(t`Name`)} value={details.name} />
+        <Detail label={i18n._(t`Name`)} value={buildResourceLink(resource)} />
         <Detail label={i18n._(t`Description`)} value={details.description} />
         <Detail
           label={i18n._(t`Type`)}
@@ -160,19 +175,6 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
           label={i18n._(t`Timeout`)}
           value={formatTimeout(details?.timeout)}
         />
-        {details?.summary_fields?.organization && (
-          <Detail
-            label={i18n._(t`Organization`)}
-            value={
-              <Link
-                to={`/organizations/${details?.summary_fields.organization.id}/details`}
-              >
-                {details?.summary_fields?.organization.name}
-              </Link>
-            }
-          />
-        )}
-
         {details?.type === 'project' && (
           <PromptProjectDetail resource={details} />
         )}
@@ -185,17 +187,20 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
         {details?.type === 'workflow_job_template' && (
           <PromptWFJobTemplateDetail resource={details} />
         )}
-
-        <UserDateDetail
-          label={i18n._(t`Created`)}
-          date={details?.created}
-          user={details?.summary_fields?.created_by}
-        />
-        <UserDateDetail
-          label={i18n._(t`Last Modified`)}
-          date={details?.modified}
-          user={details?.summary_fields?.modified_by}
-        />
+        {details?.created && (
+          <UserDateDetail
+            label={i18n._(t`Created`)}
+            date={details.created}
+            user={details?.summary_fields?.created_by}
+          />
+        )}
+        {details?.modified && (
+          <UserDateDetail
+            label={i18n._(t`Last Modified`)}
+            date={details?.modified}
+            user={details?.summary_fields?.modified_by}
+          />
+        )}
       </DetailList>
 
       {hasPromptData(launchConfig) && hasOverrides && (

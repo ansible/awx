@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
-import { Detail } from '@components/DetailList';
+import { Detail, DeletedDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import CredentialChip from '@components/CredentialChip';
 import Sparkline from '@components/Sparkline';
@@ -13,6 +13,7 @@ import { toTitleCase } from '@util/strings';
 function PromptJobTemplateDetail({ i18n, resource }) {
   const {
     allow_simultaneous,
+    ask_inventory_on_launch,
     become_enabled,
     diff_mode,
     extra_vars,
@@ -84,7 +85,21 @@ function PromptJobTemplateDetail({ i18n, resource }) {
         />
       )}
       <Detail label={i18n._(t`Job Type`)} value={toTitleCase(job_type)} />
-      {summary_fields?.inventory && (
+      {summary_fields?.organization ? (
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            <Link
+              to={`/organizations/${summary_fields.organization.id}/details`}
+            >
+              {summary_fields?.organization.name}
+            </Link>
+          }
+        />
+      ) : (
+        <DeletedDetail label={i18n._(t`Organization`)} />
+      )}
+      {summary_fields?.inventory ? (
         <Detail
           label={i18n._(t`Inventory`)}
           value={
@@ -95,8 +110,12 @@ function PromptJobTemplateDetail({ i18n, resource }) {
             </Link>
           }
         />
+      ) : (
+        !ask_inventory_on_launch && (
+          <DeletedDetail label={i18n._(t`Inventory`)} />
+        )
       )}
-      {summary_fields?.project && (
+      {summary_fields?.project ? (
         <Detail
           label={i18n._(t`Project`)}
           value={
@@ -105,6 +124,8 @@ function PromptJobTemplateDetail({ i18n, resource }) {
             </Link>
           }
         />
+      ) : (
+        <DeletedDetail label={i18n._(t`Project`)} />
       )}
       <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
       <Detail label={i18n._(t`Playbook`)} value={playbook} />

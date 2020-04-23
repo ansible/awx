@@ -3,6 +3,11 @@ import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
 import mockInvSource from './data.inventory_source.json';
 
+function assertDetail(wrapper, label, value) {
+  expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+  expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+}
+
 describe('PromptInventorySourceDetail', () => {
   let wrapper;
 
@@ -21,18 +26,13 @@ describe('PromptInventorySourceDetail', () => {
   });
 
   test('should render expected details', () => {
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
-    }
-
-    assertDetail('Inventory', 'Demo Inventory');
-    assertDetail('Source', 'scm');
-    assertDetail('Project', 'Mock Project');
-    assertDetail('Inventory File', 'foo');
-    assertDetail('Custom Inventory Script', 'Mock Script');
-    assertDetail('Verbosity', '2 (More Verbose)');
-    assertDetail('Cache Timeout', '2 Seconds');
+    assertDetail(wrapper, 'Inventory', 'Demo Inventory');
+    assertDetail(wrapper, 'Source', 'scm');
+    assertDetail(wrapper, 'Project', 'Mock Project');
+    assertDetail(wrapper, 'Inventory File', 'foo');
+    assertDetail(wrapper, 'Custom Inventory Script', 'Mock Script');
+    assertDetail(wrapper, 'Verbosity', '2 (More Verbose)');
+    assertDetail(wrapper, 'Cache Timeout', '2 Seconds');
     expect(
       wrapper
         .find('Detail[label="Regions"]')
@@ -73,5 +73,13 @@ describe('PromptInventorySourceDetail', () => {
           <li>Update on Project Update</li>,
         ])
     ).toEqual(true);
+  });
+
+  test('should render "Deleted" details', () => {
+    delete mockInvSource.summary_fields.organization;
+    wrapper = mountWithContexts(
+      <PromptInventorySourceDetail resource={mockInvSource} />
+    );
+    assertDetail(wrapper, 'Organization', 'Deleted');
   });
 });
