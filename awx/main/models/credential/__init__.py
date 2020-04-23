@@ -800,6 +800,10 @@ ManagedCredentialType(
             'label': ugettext_noop('Project (Tenant Name)'),
             'type': 'string',
         }, {
+            'id': 'project_domain_name',
+            'label': ugettext_noop('Project (Domain Name)'),
+            'type': 'string',
+        }, {
             'id': 'domain',
             'label': ugettext_noop('Domain Name'),
             'type': 'string',
