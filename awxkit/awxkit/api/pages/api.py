@@ -44,12 +44,6 @@ EXPORTABLE_DEPENDENT_OBJECTS = [
 ]
 
 
-def freeze(key):
-    if key is None:
-        return None
-    return frozenset((k, freeze(v) if isinstance(v, dict) else v) for k, v in key.items())
-
-
 class Api(base.Base):
 
     pass
@@ -181,33 +175,6 @@ class ApiV2(base.Base):
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
             yield page_resource[page_cls]
 
-    def _register_page(self, page):
-        natural_key = freeze(page.get_natural_key(self._cache))
-        # FIXME: we need to keep a reference for the case where we
-        # don't have a natural key, so we can delete
-        if natural_key is not None:
-            if getattr(self, '_natural_key', None) is None:
-                self._natural_key = {}
-
-            self._natural_key[natural_key] = page
-
-    def _register_existing_assets(self, endpoint):
-        post_fields = utils.get_post_fields(endpoint, self._cache)
-        if post_fields is None:
-            return
-
-        results = self._cache.get_page(endpoint).results
-        for _page in results:
-            self._register_page(_page)
-
-    def _get_by_natural_key(self, key, fetch=True):
-        frozen_key = freeze(key)
-        if frozen_key is not None and frozen_key not in self._natural_key and fetch:
-            pass  # FIXME
-
-        _page = self._natural_key.get(frozen_key)
-        return _page
-
     def _import_list(self, endpoint, assets):
         post_fields = utils.get_post_fields(endpoint, self._cache)
         for asset in assets:
@@ -216,12 +183,12 @@ class ApiV2(base.Base):
                 if field not in post_fields:
                     continue
                 if post_fields[field]['type'] in ('id', 'integer') and isinstance(value, dict):
-                    _page = self._get_by_natural_key(value)
+                    _page = self._cache.get_by_natural_key(value)
                     post_data[field] = _page['id'] if _page is not None else None
                 else:
                     post_data[field] = value
 
-            _page = self._get_by_natural_key(asset['natural_key'], fetch=False)
+            _page = self._cache.get_by_natural_key(asset['natural_key'])
             try:
                 if _page is None:
                     if asset['natural_key']['type'] == 'user':
@@ -230,20 +197,19 @@ class ApiV2(base.Base):
                     _page = endpoint.post(post_data)
                 else:
                     _page = _page.put(post_data)
-                # FIXME: created pages need to be put in the cache
             except exc.Common as e:
                 log.error("Object import failed: %s.", e)
                 log.debug("post_data: %r", post_data)
                 continue
 
-            self._register_page(_page)
+            self._cache.set_page(_page)
 
     def _assign_roles(self, page, roles):
         role_endpoint = page.json['related']['roles']
         for role in roles:
             if 'content_object' not in role:
                 continue  # admin role
-            obj_page = self._get_by_natural_key(role['content_object'])
+            obj_page = self._cache.get_by_natural_key(role['content_object'])
             if obj_page is not None:
                 role_page = obj_page.get_object_role(role['name'], by_name=True)
                 try:
@@ -264,7 +230,7 @@ class ApiV2(base.Base):
             related = endpoint.get(all_pages=True)
             existing = {rel['id'] for rel in related.results}
             for item in related_set:
-                rel_page = self._get_by_natural_key(item)
+                rel_page = self._cache.get_by_natural_key(item)
                 if rel_page is None:
                     continue  # FIXME
                 if rel_page['id'] in existing:
@@ -285,7 +251,7 @@ class ApiV2(base.Base):
 
     def _assign_related_assets(self, assets):
         for asset in assets:
-            _page = self._get_by_natural_key(asset['natural_key'])
+            _page = self._cache.get_by_natural_key(asset['natural_key'])
             if _page is None:
                 log.error("Related object with natural key not found: %r", asset['natural_key'])
                 continue
@@ -302,7 +268,8 @@ class ApiV2(base.Base):
 
         for resource in self._dependent_resources(data):
             endpoint = getattr(self, resource)
-            self._register_existing_assets(endpoint)
+            # Load up existing objects, so that we can try to update or link to them
+            self._cache.get_page(endpoint)
             self._import_list(endpoint, data.get(resource) or [])
             # FIXME: should we delete existing unpatched assets?
 

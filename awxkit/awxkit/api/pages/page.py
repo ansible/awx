@@ -15,6 +15,7 @@ from awxkit.utils import (
     is_list_or_tuple,
     to_str
 )
+from awxkit.api import utils
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry
 from awxkit.config import config
@@ -360,6 +361,8 @@ def exception_from_status_code(status_code):
 
 class PageList(object):
 
+    NATURAL_KEY = None
+
     @property
     def __item_class__(self):
         """Returns the class representing a single 'Page' item
@@ -538,6 +541,7 @@ class PageCache(object):
     def __init__(self):
         self.options = {}
         self.pages_by_url = {}
+        self.pages_by_natural_key = {}
 
     def get_options(self, page):
         url = page.endpoint if isinstance(page, Page) else str(page)
@@ -559,6 +563,10 @@ class PageCache(object):
 
     def set_page(self, page):
         self.pages_by_url[page.endpoint] = page
+        if getattr(page, 'NATURAL_KEY', None):
+            natural_key = page.get_natural_key(cache=self)
+            if natural_key is not None:
+                self.pages_by_natural_key[utils.freeze(natural_key)] = page.endpoint
         if 'results' in page:
             for p in page.results:
                 self.set_page(p)
@@ -581,3 +589,8 @@ class PageCache(object):
             return self.pages_by_url.setdefault(url, None)
 
         return self.set_page(page)
+
+    def get_by_natural_key(self, natural_key):
+        endpoint = self.pages_by_natural_key.get(utils.freeze(natural_key))
+        if endpoint:
+            return self.get_page(endpoint)

@@ -4,6 +4,12 @@ import re
 descRE = re.compile(r'^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')
 
 
+def freeze(key):
+    if key is None:
+        return None
+    return frozenset((k, freeze(v) if isinstance(v, dict) else v) for k, v in key.items())
+
+
 def parse_description(desc):
     options = {}
     for line in desc[desc.index('POST'):].splitlines():
