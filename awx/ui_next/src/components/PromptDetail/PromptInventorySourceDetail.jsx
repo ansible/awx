@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
-import { Detail } from '@components/DetailList';
+import { Detail, MissingDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import CredentialChip from '@components/CredentialChip';
 
@@ -57,6 +57,20 @@ function PromptInventorySourceDetail({ i18n, resource }) {
 
   return (
     <>
+      {summary_fields?.organization ? (
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            <Link
+              to={`/organizations/${summary_fields.organization.id}/details`}
+            >
+              {summary_fields?.organization.name}
+            </Link>
+          }
+        />
+      ) : (
+        <MissingDetail label={i18n._(t`Organization`)} />
+      )}
       {summary_fields?.inventory && (
         <Detail
           label={i18n._(t`Inventory`)}

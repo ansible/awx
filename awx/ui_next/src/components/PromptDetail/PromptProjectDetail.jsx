@@ -3,8 +3,9 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Config } from '@contexts/Config';
 import { List, ListItem } from '@patternfly/react-core';
+import { Link } from 'react-router-dom';
 
-import { Detail } from '@components/DetailList';
+import { Detail, MissingDetail } from '@components/DetailList';
 import CredentialChip from '@components/CredentialChip';
 import { toTitleCase } from '@util/strings';
 
@@ -49,6 +50,20 @@ function PromptProjectDetail({ i18n, resource }) {
 
   return (
     <>
+      {summary_fields?.organization ? (
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            <Link
+              to={`/organizations/${summary_fields.organization.id}/details`}
+            >
+              {summary_fields?.organization.name}
+            </Link>
+          }
+        />
+      ) : (
+        <MissingDetail label={i18n._(t`Organization`)} />
+      )}
       <Detail
         label={i18n._(t`Source Control Type`)}
         value={scm_type === '' ? i18n._(t`Manual`) : toTitleCase(scm_type)}

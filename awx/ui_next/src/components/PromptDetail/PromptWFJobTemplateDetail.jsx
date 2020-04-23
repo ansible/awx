@@ -52,6 +52,18 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
           label={i18n._(t`Activity`)}
         />
       )}
+      {summary_fields?.organization && (
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            <Link
+              to={`/organizations/${summary_fields.organization.id}/details`}
+            >
+              {summary_fields?.organization.name}
+            </Link>
+          }
+        />
+      )}
       {summary_fields?.inventory && (
         <Detail
           label={i18n._(t`Inventory`)}
