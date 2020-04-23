@@ -74,8 +74,10 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
+    requirements/collections_requirements.yml \
     /tmp/requirements/
 RUN cd /tmp && VENV_BASE="/var/lib/awx/venv" make requirements_awx requirements_ansible_py3
+RUN cd /tmp && COLLECTION_BASE="/var/lib/awx/vendor/inventory_collections" make requirements_collections
 
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN echo "{{ awx_version }}" > /var/lib/awx/.tower_version && \

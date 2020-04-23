@@ -1612,6 +1612,11 @@ class PluginFileInjector(object):
     # base injector should be one of None, "managed", or "template"
     # this dictates which logic to borrow from playbook injectors
     base_injector = None
+    # every source should have collection, but these are set here
+    # so that a source without a collection will have null values
+    namespace = None
+    collection = None
+    collection_migration = '2.9'  # Starting with this version, we use collections
 
     def __init__(self, ansible_version):
         # This is InventoryOptions instance, could be source or inventory update
@@ -1638,7 +1643,11 @@ class PluginFileInjector(object):
         """
         if self.plugin_name is None:
             raise NotImplementedError('At minimum the plugin name is needed for inventory plugin use.')
-        return {'plugin': self.plugin_name}
+        if self.initial_version is None or Version(self.ansible_version) >= Version(self.collection_migration):
+            proper_name = f'{self.namespace}.{self.collection}.{self.plugin_name}'
+        else:
+            proper_name = self.plugin_name
+        return {'plugin': proper_name}
 
     def inventory_contents(self, inventory_update, private_data_dir):
         """Returns a string that is the content for the inventory file for the inventory plugin
@@ -1693,7 +1702,10 @@ class PluginFileInjector(object):
         return injected_env
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self._get_shared_env(inventory_update, private_data_dir, private_data_files)
+        env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
+        if self.initial_version is None or Version(self.ansible_version) >= Version(self.collection_migration):
+            env['ANSIBLE_COLLECTIONS_PATHS'] = settings.INVENTORY_COLLECTIONS_ROOT
+        return env
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         injected_env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
@@ -1738,6 +1750,8 @@ class azure_rm(PluginFileInjector):
     initial_version = '2.8'  # Driven by unsafe group names issue, hostvars, host names
     ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'azure'
+    collection = 'azcollection'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(azure_rm, self).get_plugin_env(*args, **kwargs)
@@ -1869,9 +1883,11 @@ class azure_rm(PluginFileInjector):
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
     # blocked by https://github.com/ansible/ansible/issues/54059
-    # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
+    initial_version = '2.9'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
     base_injector = 'managed'
+    namespace = 'amazon'
+    collection = 'aws'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(ec2, self).get_plugin_env(*args, **kwargs)
@@ -2011,6 +2027,9 @@ class ec2(PluginFileInjector):
                 grouping_data['key'] += ' | regex_replace("{rx}", "_")'.format(rx=legacy_regex)
         # end compatibility content
 
+        if source_vars.get('iam_role_arn', None):
+            ret['iam_role_arn'] = source_vars['iam_role_arn']
+
         # This was an allowed ec2.ini option, also plugin option, so pass through
         if source_vars.get('boto_profile', None):
             ret['boto_profile'] = source_vars['boto_profile']
@@ -2018,6 +2037,10 @@ class ec2(PluginFileInjector):
         elif not replace_dash:
             # Using the plugin, but still want dashes whitelisted
             ret['use_contrib_script_compatible_sanitization'] = True
+
+        if source_vars.get('nested_groups') is False:
+            for this_keyed_group in keyed_groups:
+                this_keyed_group.pop('parent_group', None)
 
         if keyed_groups:
             ret['keyed_groups'] = keyed_groups
@@ -2030,17 +2053,34 @@ class ec2(PluginFileInjector):
         compose_dict.update(self._compat_compose_vars())
         # plugin provides "aws_ec2", but not this which the script gave
         ret['groups'] = {'ec2': True}
-        # public_ip as hostname is non-default plugin behavior, script behavior
-        ret['hostnames'] = [
-            'network-interface.addresses.association.public-ip',
-            'dns-name',
-            'private-dns-name'
-        ]
+        if source_vars.get('hostname_variable') is not None:
+            hnames = []
+            for expr in source_vars.get('hostname_variable').split(','):
+                if expr == 'public_dns_name':
+                    hnames.append('dns-name')
+                elif not expr.startswith('tag:') and '_' in expr:
+                    hnames.append(expr.replace('_', '-'))
+                else:
+                    hnames.append(expr)
+            ret['hostnames'] = hnames
+        else:
+            # public_ip as hostname is non-default plugin behavior, script behavior
+            ret['hostnames'] = [
+                'network-interface.addresses.association.public-ip',
+                'dns-name',
+                'private-dns-name'
+            ]
         # The script returned only running state by default, the plugin does not
         # https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options
         # options: pending | running | shutting-down | terminated | stopping | stopped
         inst_filters['instance-state-name'] = ['running']
         # end compatibility content
+
+        if source_vars.get('destination_variable') or source_vars.get('vpc_destination_variable'):
+            for fd in ('destination_variable', 'vpc_destination_variable'):
+                if source_vars.get(fd):
+                    compose_dict['ansible_host'] = source_vars.get(fd)
+                    break
 
         if compose_dict:
             ret['compose'] = compose_dict
@@ -2108,6 +2148,8 @@ class gce(PluginFileInjector):
     initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
     ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'google'
+    collection = 'cloud'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(gce, self).get_plugin_env(*args, **kwargs)
@@ -2208,13 +2250,111 @@ class gce(PluginFileInjector):
 
 
 class vmware(PluginFileInjector):
-    # plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
+    plugin_name = 'vmware_vm_inventory'
+    # initial_version = '2.9'  # Ready 4/22/2020, waiting for release
     ini_env_reference = 'VMWARE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'community'
+    collection = 'vmware'
 
     @property
     def script_name(self):
         return 'vmware_inventory.py'  # exception
+
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(vmware, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['strict'] = False
+        # Documentation of props, see
+        # https://github.com/ansible/ansible/blob/devel/docs/docsite/rst/scenario_guides/vmware_scenarios/vmware_inventory_vm_attributes.rst
+        UPPERCASE_PROPS = [
+            "ansible_ssh_host",
+            "ansible_host",
+            "ansible_uuid",
+            "availableField",
+            "configIssue",
+            "configStatus",
+            "customValue",  # optional
+            "datastore",
+            "effectiveRole",
+            "guestHeartbeatStatus",  # optonal
+            "layout",  # optional
+            "layoutEx",  # optional
+            "name",
+            "network",
+            "overallStatus",
+            "parentVApp",  # optional
+            "permission",
+            "recentTask",
+            "resourcePool",
+            "rootSnapshot",
+            "snapshot",  # optional
+            "tag",
+            "triggeredAlarmState",
+            "value"
+        ]
+        NESTED_PROPS = [
+            "capability",
+            "config",
+            "guest",
+            "runtime",
+            "storage",
+            "summary",  # repeat of other properties
+        ]
+        ret['properties'] = UPPERCASE_PROPS + NESTED_PROPS
+        ret['compose'] = {'ansible_host': 'guest.ipAddress'}  # default value
+        ret['compose']['ansible_ssh_host'] = ret['compose']['ansible_host']
+        # the ansible_uuid was unique every host, every import, from the script
+        ret['compose']['ansible_uuid'] = '99999999 | random | to_uuid'
+        for prop in UPPERCASE_PROPS:
+            if prop == prop.lower():
+                continue
+            ret['compose'][prop.lower()] = prop
+        ret['with_nested_properties'] = True
+        # ret['property_name_format'] = 'lower_case'  # only dacrystal/topic/vmware-inventory-plugin-property-format
+
+        # process custom options
+        vmware_opts = dict(inventory_update.source_vars_dict.items())
+        if inventory_update.instance_filters:
+            vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
+        if inventory_update.group_by:
+            vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
+
+        alias_pattern = vmware_opts.get('alias_pattern')
+        if alias_pattern:
+            ret.setdefault('hostnames', [])
+            for alias in alias_pattern.split(','):  # make best effort
+                striped_alias = alias.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_alias:
+                    continue
+                ret['hostnames'].append(striped_alias)
+
+        host_pattern = vmware_opts.get('host_pattern')  # not working in script
+        if host_pattern:
+            stripped_hp = host_pattern.replace('{', '').replace('}', '').strip()  # make best effort
+            ret['compose']['ansible_host'] = stripped_hp
+            ret['compose']['ansible_ssh_host'] = stripped_hp
+
+        host_filters = vmware_opts.get('host_filters')
+        if host_filters:
+            ret.setdefault('filters', [])
+            for hf in host_filters.split(','):
+                striped_hf = hf.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_hf:
+                    continue
+                ret['filters'].append(striped_hf)
+
+        groupby_patterns = vmware_opts.get('groupby_patterns')
+        if groupby_patterns:
+            ret.setdefault('keyed_groups', [])
+            for pattern in groupby_patterns.split(','):
+                stripped_pattern = pattern.replace('{', '').replace('}', '').strip()  # make best effort
+                ret['keyed_groups'].append({
+                    'prefix': '', 'separator': '',
+                    'key': stripped_pattern
+                })
+
+        return ret
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2246,6 +2386,8 @@ class openstack(PluginFileInjector):
     plugin_name = 'openstack'
     # minimum version of 2.7.8 may be theoretically possible
     initial_version = '2.8'  # Driven by consistency with other sources
+    namespace = 'openstack'
+    collection = 'cloud'
 
     @property
     def script_name(self):
@@ -2297,7 +2439,10 @@ class openstack(PluginFileInjector):
         return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self.get_script_env(inventory_update, private_data_dir, private_data_files)
+        env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        script_env = self.get_script_env(inventory_update, private_data_dir, private_data_files)
+        env.update(script_env)
+        return env
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         def use_host_name_for_name(a_bool_maybe):
@@ -2309,12 +2454,10 @@ class openstack(PluginFileInjector):
             else:
                 return 'uuid'
 
-        ret = dict(
-            plugin=self.plugin_name,
-            fail_on_errors=True,
-            expand_hostvars=True,
-            inventory_hostname=use_host_name_for_name(False),
-        )
+        ret = super(openstack, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['fail_on_errors'] = True
+        ret['expand_hostvars'] = True
+        ret['inventory_hostname'] = use_host_name_for_name(False)
         # Note: mucking with defaults will break import integrity
         # For the plugin, we need to use the same defaults as the old script
         # or else imports will conflict. To find script defaults you have
@@ -2339,8 +2482,10 @@ class openstack(PluginFileInjector):
 class rhv(PluginFileInjector):
     """ovirt uses the custom credential templating, and that is all
     """
-    # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
+    plugin_name = 'ovirt'
     base_injector = 'template'
+    namespace = 'ovirt'
+    collection = 'ovirt_collection'
 
     @property
     def script_name(self):
@@ -2350,8 +2495,10 @@ class rhv(PluginFileInjector):
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
     ini_env_reference = 'FOREMAN_INI_PATH'
-    # initial_version = '2.8'  # FIXME: turn on after plugin is validated
+    initial_version = '2.9'
     # No base injector, because this does not work in playbooks. Bug??
+    namespace = 'theforeman'
+    collection = 'foreman'
 
     @property
     def script_name(self):
@@ -2413,11 +2560,42 @@ class satellite6(PluginFileInjector):
         # this assumes that this is merged
         # https://github.com/ansible/ansible/pull/52693
         credential = inventory_update.get_cloud_credential()
-        ret = {}
+        ret = super(satellite6, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
         if credential:
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
+
+        # Compatibility content
+        group_by_hostvar = {
+            "environment":           {"prefix": "foreman_environment_",
+                                      "separator": "",
+                                      "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
+                                             "regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')"},  # NOQA: W605
+            "location":              {"prefix": "foreman_location_",
+                                      "separator": "",
+                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "organization":          {"prefix": "foreman_organization_",
+                                      "separator": "",
+                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "lifecycle_environment": {"prefix": "foreman_lifecycle_environment_",
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+            "content_view":          {"prefix": "foreman_content_view_",
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['content_view_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"}
+            }
+        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
+        ret['legacy_hostvars'] = True
+        ret['want_facts'] = True
+        ret['want_params'] = True
+
         return ret
 
 
@@ -2425,6 +2603,8 @@ class cloudforms(PluginFileInjector):
     # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
     ini_env_reference = 'CLOUDFORMS_INI_PATH'
     # Also no base_injector because this does not work in playbooks
+    # namespace = ''  # does not have a collection
+    # collection = ''
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2460,6 +2640,8 @@ class tower(PluginFileInjector):
     plugin_name = 'tower'
     base_injector = 'template'
     initial_version = '2.8'  # Driven by "include_metadata" hostvars
+    namespace = 'awx'
+    collection = 'awx'
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(tower, self).get_script_env(inventory_update, private_data_dir, private_data_files)
@@ -2468,6 +2650,7 @@ class tower(PluginFileInjector):
         return env
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(tower, self).inventory_as_dict(inventory_update, private_data_dir)
         # Credentials injected as env vars, same as script
         try:
             # plugin can take an actual int type
@@ -2475,11 +2658,9 @@ class tower(PluginFileInjector):
         except ValueError:
             # inventory_id could be a named URL
             identifier = iri_to_uri(inventory_update.instance_filters)
-        return {
-            'plugin': self.plugin_name,
-            'inventory_id': identifier,
-            'include_metadata': True  # used for license check
-        }
+        ret['inventory_id'] = identifier
+        ret['include_metadata'] = True  # used for license check
+        return ret
 
 
 for cls in PluginFileInjector.__subclasses__():

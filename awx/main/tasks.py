@@ -2407,7 +2407,7 @@ class RunInventoryUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [self.get_path_to('..', 'plugins', 'inventory')]
+        return [self.get_path_to('..', 'plugins', 'inventory'), settings.INVENTORY_COLLECTIONS_ROOT]
 
     def build_private_data(self, inventory_update, private_data_dir):
         """

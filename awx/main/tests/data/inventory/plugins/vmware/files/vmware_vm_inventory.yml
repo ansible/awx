@@ -1,0 +1,59 @@
+compose:
+  ansible_host: guest.ipAddress
+  ansible_ssh_host: guest.ipAddress
+  ansible_uuid: 99999999 | random | to_uuid
+  availablefield: availableField
+  configissue: configIssue
+  configstatus: configStatus
+  customvalue: customValue
+  effectiverole: effectiveRole
+  guestheartbeatstatus: guestHeartbeatStatus
+  layoutex: layoutEx
+  overallstatus: overallStatus
+  parentvapp: parentVApp
+  recenttask: recentTask
+  resourcepool: resourcePool
+  rootsnapshot: rootSnapshot
+  triggeredalarmstate: triggeredAlarmState
+filters:
+- config.zoo == "DC0_H0_VM0"
+hostnames:
+- config.foo
+keyed_groups:
+- key: config.asdf
+  prefix: ''
+  separator: ''
+plugin: community.vmware.vmware_vm_inventory
+properties:
+- ansible_ssh_host
+- ansible_host
+- ansible_uuid
+- availableField
+- configIssue
+- configStatus
+- customValue
+- datastore
+- effectiveRole
+- guestHeartbeatStatus
+- layout
+- layoutEx
+- name
+- network
+- overallStatus
+- parentVApp
+- permission
+- recentTask
+- resourcePool
+- rootSnapshot
+- snapshot
+- tag
+- triggeredAlarmState
+- value
+- capability
+- config
+- guest
+- runtime
+- storage
+- summary
+strict: false
+with_nested_properties: true

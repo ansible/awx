@@ -169,7 +169,7 @@ class AnsibleInventoryLoader(object):
             self.tmp_private_dir = build_proot_temp_dir()
             logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
             kwargs['proot_temp_dir'] = self.tmp_private_dir
-            kwargs['proot_show_paths'] = [functioning_dir(self.source)]
+            kwargs['proot_show_paths'] = [functioning_dir(self.source), settings.INVENTORY_COLLECTIONS_ROOT]
         logger.debug("Running from `{}` working directory.".format(cwd))
 
         if self.venv_path != settings.ANSIBLE_VENV_PATH:
