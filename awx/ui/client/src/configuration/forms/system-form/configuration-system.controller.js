@@ -199,7 +199,7 @@ export default [
                 $scope.$parent.vm.testTooltip = i18n._('Save and enable log aggregation before testing the log aggregator.');
             } else {
                 $scope.$parent.vm.disableTestButton = false;
-                $scope.$parent.vm.testTooltip = i18n._('Send a test log message to the configured log aggregator.');
+                $scope.$parent.vm.testTooltip = i18n._('Send a test log message to the configured external log service.  Note: The awx logger must be enabled.');
             }
         });
 
