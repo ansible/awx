@@ -68,6 +68,7 @@ describe('<InventorySourceList />', () => {
     });
   });
   afterEach(() => {
+    wrapper.unmount();
     jest.clearAllMocks();
   });
   test('should mount properly', async () => {
@@ -123,6 +124,97 @@ describe('<InventorySourceList />', () => {
     );
     expect(InventorySourcesAPI.destroy).toHaveBeenCalledWith(1);
   });
+  test('should throw error after deletion failure', async () => {
+    InventorySourcesAPI.destroy.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'delete',
+            url: '/api/v2/inventory_sources/',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+
+    await waitForElement(wrapper, 'InventorySourceList', el => el.length > 0);
+
+    await act(async () =>
+      wrapper.find('DataListCheck').prop('onChange')({ id: 1 })
+    );
+    wrapper.update();
+
+    await act(async () =>
+      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
+    );
+    wrapper.update();
+
+    await act(async () =>
+      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find("AlertModal[aria-label='Delete Error']").length).toBe(
+      1
+    );
+  });
+  test('displays error after unseccessful read sources fetch', async () => {
+    InventorySourcesAPI.readOptions.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'get',
+            url: '/api/v2/inventories/inventory_sources/',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    InventoriesAPI.readSources.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'get',
+            url: '/api/v2/inventories/inventory_sources/',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+
+    await act(async () => {
+      wrapper = mountWithContexts(<InventorySourceList />);
+    });
+
+    await waitForElement(wrapper, 'ContentError', el => el.length > 0);
+
+    expect(wrapper.find('ContentError').length).toBe(1);
+  });
+
+  test('displays error after unseccessful read options fetch', async () => {
+    InventorySourcesAPI.readOptions.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'options',
+            url: '/api/v2/inventory_sources/',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+
+    await act(async () => {
+      wrapper = mountWithContexts(<InventorySourceList />);
+    });
+
+    await waitForElement(wrapper, 'InventorySourceList', el => el.length > 0);
+
+    expect(wrapper.find('ContentError').length).toBe(1);
+  });
 });
 
 describe('<InventorySourceList /> RBAC testing', () => {
@@ -156,12 +248,12 @@ describe('<InventorySourceList /> RBAC testing', () => {
         },
       },
     });
-    let wrapper;
+    let newWrapper;
     const history = createMemoryHistory({
-      initialEntries: ['/inventories/inventory/1/sources'],
+      initialEntries: ['/inventories/inventory/2/sources'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(
+      newWrapper = mountWithContexts(
         <Route path="/inventories/:inventoryType/:id/sources">
           <InventorySourceList />
         </Route>,
@@ -171,15 +263,20 @@ describe('<InventorySourceList /> RBAC testing', () => {
               history,
               route: {
                 location: { search: '' },
-                match: { params: { id: 1 } },
+                match: { params: { id: 2 } },
               },
             },
           },
         }
       );
     });
-
-    await waitForElement(wrapper, 'InventorySourceList', el => el.length > 0);
-    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    await waitForElement(
+      newWrapper,
+      'InventorySourceList',
+      el => el.length > 0
+    );
+    expect(newWrapper.find('ToolbarAddButton').length).toBe(0);
+    newWrapper.unmount();
+    jest.clearAllMocks();
   });
 });

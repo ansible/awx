@@ -85,7 +85,6 @@ function InventorySourceList({ i18n }) {
     await handleDeleteSources();
     setSelected([]);
   };
-
   const canAdd =
     sourceChoicesOptions &&
     Object.prototype.hasOwnProperty.call(sourceChoicesOptions, 'POST');
@@ -97,7 +96,7 @@ function InventorySourceList({ i18n }) {
         hasContentLoading={isLoading || isDeleteLoading}
         items={sources}
         itemCount={sourceCount}
-        pluralizedItemName={i18n._(t`Sources`)}
+        pluralizedItemName={i18n._(t`Inventory Sources`)}
         qsConfig={QS_CONFIG}
         renderToolbar={props => (
           <DatalistToolbar
@@ -116,15 +115,16 @@ function InventorySourceList({ i18n }) {
                 key="delete"
                 onDelete={handleDelete}
                 itemsToDelete={selected}
-                pluralizedItemName={i18n._(t`Inventory Source`)}
+                pluralizedItemName={i18n._(t`Inventory Sources`)}
               />,
             ]}
           />
         )}
         renderItem={inventorySource => {
+          let label;
           sourceChoices.forEach(([scMatch, scLabel]) => {
             if (inventorySource.source === scMatch) {
-              inventorySource.source = scLabel;
+              label = scLabel;
             }
           });
           return (
@@ -132,6 +132,7 @@ function InventorySourceList({ i18n }) {
               key={inventorySource.id}
               source={inventorySource}
               onSelect={() => handleSelect(inventorySource)}
+              label={label}
               detailUrl={`${detailUrl}${inventorySource.id}`}
               isSelected={selected.some(row => row.id === inventorySource.id)}
             />
@@ -140,6 +141,7 @@ function InventorySourceList({ i18n }) {
       />
       {deletionError && (
         <AlertModal
+          aria-label={i18n._(t`Delete Error`)}
           isOpen={deletionError}
           variant="error"
           title={i18n._(t`Error!`)}
