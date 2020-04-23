@@ -286,7 +286,9 @@ class ApiV2(base.Base):
     def _assign_related_assets(self, assets):
         for asset in assets:
             _page = self._get_by_natural_key(asset['natural_key'])
-            # FIXME: deal with `_page is None` case
+            if _page is None:
+                log.error("Related object with natural key not found: %r", asset['natural_key'])
+                continue
             for name, S in asset.get('related', {}).items():
                 if not S:
                     continue
