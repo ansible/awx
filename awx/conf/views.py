@@ -170,7 +170,13 @@ class SettingLoggingTest(GenericAPIView):
             return Response({'error': 'Logging not enabled'}, status=status.HTTP_409_CONFLICT)
         
         # Send test message to configured logger based on db settings
-        logging.getLogger('awx').error('AWX Connection Test Message')
+        try:
+            default_logger = settings.LOG_AGGREGATOR_LOGGERS[0]
+            if default_logger != 'awx':
+                default_logger = f'awx.analytics.{default_logger}'
+        except IndexError:
+            default_logger = 'awx'
+        logging.getLogger(default_logger).error('AWX Connection Test Message')
         
         hostname = getattr(settings, 'LOG_AGGREGATOR_HOST', None)
         protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', None)
