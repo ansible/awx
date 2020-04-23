@@ -130,7 +130,7 @@ override that location by setting the variable `custom_venvs_path`.
 
 You can use the variables file like so:
 
-    $ ansible-playbook install.yml --extra-vars "@venv_vars.yaml"
+    $ ansible-playbook -i inventory install.yml --extra-vars "@venv_vars.yaml"
 
 Once the AWX API is available, you will need to update the `CUSTOM_VENV_PATHS`
 setting as described in `Preparing a New Custom Virtualenv`.
