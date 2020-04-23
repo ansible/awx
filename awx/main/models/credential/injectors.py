@@ -77,7 +77,7 @@ def _openstack_data(cred):
                           username=cred.get_input('username', default=''),
                           password=cred.get_input('password', default=''),
                           project_name=cred.get_input('project', default=''),
-                          project_domain_name=cred.get_input('project_domain_name'))
+                          project_domain_name=cred.get_input('project_domain_name', default=''))
     if cred.has_input('domain'):
         openstack_auth['domain_name'] = cred.get_input('domain', default='')
     verify_state = cred.get_input('verify_ssl', default=True)
