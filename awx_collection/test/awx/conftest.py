@@ -245,7 +245,7 @@ def silence_deprecation():
         yield this_mock
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def silence_warning():
     """Warnings use global variable, same as deprecations."""
     with mock.patch('ansible.module_utils.basic.AnsibleModule.warn') as this_mock:
