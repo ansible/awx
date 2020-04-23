@@ -2737,9 +2737,12 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
-        # Specify empty SSH args (should disable ControlPersist entirely for
-        # ad hoc commands).
-        env.setdefault('ANSIBLE_SSH_ARGS', '')
+        # Create a directory for ControlPath sockets that is unique to each
+        # ad hoc command and visible inside the proot environment (when enabled).
+        cp_dir = os.path.join(private_data_dir, 'cp')
+        if not os.path.exists(cp_dir):
+            os.mkdir(cp_dir, 0o700)
+        env['ANSIBLE_SSH_CONTROL_PATH'] = cp_dir
 
         return env
 
