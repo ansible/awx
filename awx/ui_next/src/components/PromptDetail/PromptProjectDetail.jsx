@@ -5,7 +5,7 @@ import { Config } from '@contexts/Config';
 import { List, ListItem } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 
-import { Detail, MissingDetail } from '@components/DetailList';
+import { Detail, DeletedDetail } from '@components/DetailList';
 import CredentialChip from '@components/CredentialChip';
 import { toTitleCase } from '@util/strings';
 
@@ -62,7 +62,7 @@ function PromptProjectDetail({ i18n, resource }) {
           }
         />
       ) : (
-        <MissingDetail label={i18n._(t`Organization`)} />
+        <DeletedDetail label={i18n._(t`Organization`)} />
       )}
       <Detail
         label={i18n._(t`Source Control Type`)}

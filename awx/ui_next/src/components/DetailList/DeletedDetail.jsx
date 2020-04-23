@@ -11,12 +11,12 @@ const Detail = styled(_Detail)`
   }
 `;
 
-function MissingDetail({ i18n, label }) {
+function DeletedDetail({ i18n, label }) {
   return <Detail label={label} value={i18n._(t`Deleted`)} />;
 }
 
-MissingDetail.propTypes = {
+DeletedDetail.propTypes = {
   label: node.isRequired,
 };
 
-export default withI18n()(MissingDetail);
+export default withI18n()(DeletedDetail);

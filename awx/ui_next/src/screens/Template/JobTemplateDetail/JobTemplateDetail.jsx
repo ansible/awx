@@ -20,7 +20,7 @@ import CredentialChip from '@components/CredentialChip';
 import {
   Detail,
   DetailList,
-  MissingDetail,
+  DeletedDetail,
   UserDateDetail,
 } from '@components/DetailList';
 import DeleteButton from '@components/DeleteButton';
@@ -174,7 +174,7 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          <MissingDetail label={i18n._(t`Organization`)} />
+          <DeletedDetail label={i18n._(t`Organization`)} />
         )}
         {summary_fields.inventory ? (
           <Detail
@@ -186,7 +186,7 @@ function JobTemplateDetail({ i18n, template }) {
           />
         ) : (
           !ask_inventory_on_launch && (
-            <MissingDetail label={i18n._(t`Inventory`)} />
+            <DeletedDetail label={i18n._(t`Inventory`)} />
           )
         )}
         {summary_fields.project ? (
@@ -199,7 +199,7 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          <MissingDetail label={i18n._(t`Project`)} />
+          <DeletedDetail label={i18n._(t`Project`)} />
         )}
         <Detail
           label={i18n._(t`Source Control Branch`)}

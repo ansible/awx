@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
-import { Detail, MissingDetail } from '@components/DetailList';
+import { Detail, DeletedDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import CredentialChip from '@components/CredentialChip';
 import Sparkline from '@components/Sparkline';
@@ -97,7 +97,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           }
         />
       ) : (
-        <MissingDetail label={i18n._(t`Organization`)} />
+        <DeletedDetail label={i18n._(t`Organization`)} />
       )}
       {summary_fields?.inventory ? (
         <Detail
@@ -112,7 +112,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
         />
       ) : (
         !ask_inventory_on_launch && (
-          <MissingDetail label={i18n._(t`Inventory`)} />
+          <DeletedDetail label={i18n._(t`Inventory`)} />
         )
       )}
       {summary_fields?.project ? (
@@ -125,7 +125,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           }
         />
       ) : (
-        <MissingDetail label={i18n._(t`Project`)} />
+        <DeletedDetail label={i18n._(t`Project`)} />
       )}
       <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
       <Detail label={i18n._(t`Playbook`)} value={playbook} />

@@ -18,6 +18,11 @@ const mockJT = {
   ],
 };
 
+function assertDetail(wrapper, label, value) {
+  expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+  expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+}
+
 describe('PromptJobTemplateDetail', () => {
   let wrapper;
 
@@ -34,24 +39,19 @@ describe('PromptJobTemplateDetail', () => {
   });
 
   test('should render expected details', () => {
-    function assertDetail(label, value) {
-      expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
-    }
-
-    assertDetail('Job Type', 'Run');
-    assertDetail('Inventory', 'Demo Inventory');
-    assertDetail('Project', 'Mock Project');
-    assertDetail('Source Control Branch', 'Foo branch');
-    assertDetail('Playbook', 'ping.yml');
-    assertDetail('Forks', '2');
-    assertDetail('Limit', 'alpha:beta');
-    assertDetail('Verbosity', '3 (Debug)');
-    assertDetail('Show Changes', 'Off');
-    assertDetail('Job Slicing', '1');
-    assertDetail('Host Config Key', 'a1b2c3');
-    assertDetail('Webhook Service', 'Github');
-    assertDetail('Webhook Key', 'PiM3n2');
+    assertDetail(wrapper, 'Job Type', 'Run');
+    assertDetail(wrapper, 'Inventory', 'Demo Inventory');
+    assertDetail(wrapper, 'Project', 'Mock Project');
+    assertDetail(wrapper, 'Source Control Branch', 'Foo branch');
+    assertDetail(wrapper, 'Playbook', 'ping.yml');
+    assertDetail(wrapper, 'Forks', '2');
+    assertDetail(wrapper, 'Limit', 'alpha:beta');
+    assertDetail(wrapper, 'Verbosity', '3 (Debug)');
+    assertDetail(wrapper, 'Show Changes', 'Off');
+    assertDetail(wrapper, 'Job Slicing', '1');
+    assertDetail(wrapper, 'Host Config Key', 'a1b2c3');
+    assertDetail(wrapper, 'Webhook Service', 'Github');
+    assertDetail(wrapper, 'Webhook Key', 'PiM3n2');
     expect(wrapper.find('StatusIcon')).toHaveLength(2);
     expect(wrapper.find('Detail[label="Webhook URL"] dd').text()).toEqual(
       expect.stringContaining('/api/v2/job_templates/7/github/')
@@ -111,5 +111,17 @@ describe('PromptJobTemplateDetail', () => {
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---foo: bar'
     );
+  });
+
+  test('should render "Deleted" details', () => {
+    delete mockJT.summary_fields.inventory;
+    delete mockJT.summary_fields.organization;
+    delete mockJT.summary_fields.project;
+
+    wrapper = mountWithContexts(<PromptJobTemplateDetail resource={mockJT} />);
+
+    assertDetail(wrapper, 'Inventory', 'Deleted');
+    assertDetail(wrapper, 'Organization', 'Deleted');
+    assertDetail(wrapper, 'Project', 'Deleted');
   });
 });
