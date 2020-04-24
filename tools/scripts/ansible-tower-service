@@ -1,13 +1,15 @@
 #!/bin/bash
 
-SERVICES="ansible-tower.service supervisord.service"
+if [ -f /etc/sysconfig/ansible-tower ]; then
+	source /etc/sysconfig/ansible-tower
+fi
 
 case "$1" in
 	start|stop|restart)
-		systemctl $1 ansible-tower.service
+		exec systemctl $1 ansible-tower.service
 		;;
 	status)
-		systemctl status $SERVICES
+		exec systemctl status ansible-tower.service $TOWER_SERVICES
 		;;
         *)
                 echo "Usage: ansible-tower-service start|stop|restart|status"
