@@ -144,9 +144,9 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential_type)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing credential type, this will return on its own
-        module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
+
+    # If the state was present and we can let the module build or update the existing credential type, this will return on its own
+    module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
 
 
 if __name__ == '__main__':

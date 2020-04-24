@@ -40,19 +40,15 @@
     that:
       - "result is changed"
 
-- name: Delete the source inventory
+- name: Delete the inventory source with an invalid cred, source_project, sourece_script specified
   tower_inventory_source:
     name: "{{ openstack_inv_source }}"
-    description: Source for Test inventory
     inventory: "{{ openstack_inv }}"
-    credential: "{{ openstack_cred }}"
-    overwrite: true
-    update_on_launch: true
-    source_vars:
-      private: false
-    source: openstack
+    credential: "Does Not Exit"
+    source_project: "Does Not Exist"
+    source_script: "Does Not Exist"
     state: absent
-
+    
 - assert:
     that:
       - "result is changed"

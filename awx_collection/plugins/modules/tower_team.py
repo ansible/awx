@@ -102,6 +102,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(team)
+
     # Create the data that gets sent for create and update
     team_fields = {
         'name': new_name if new_name else name,
@@ -110,12 +114,8 @@ def main():
     if description is not None:
         team_fields['description'] = description
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(team)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing team, this will return on its own
-        module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
+    # If the state was present and we can let the module build or update the existing team, this will return on its own
+    module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
 
 
 if __name__ == '__main__':
