@@ -810,6 +810,16 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_RSYSLOGD_DEBUG',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable rsyslogd debugging'),
+    help_text=_('Enabled high verbosity debugging for rsyslogd.  '
+                'Useful for debugging connection issues for external log aggregation.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(
