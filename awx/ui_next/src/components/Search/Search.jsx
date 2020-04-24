@@ -150,6 +150,16 @@ class Search extends React.Component {
       return paramsArr.filter(key => defaultParamsKeys.indexOf(key) === -1);
     };
 
+    const getLabelFromValue = (value, colKey) => {
+      const currentSearchColumn = columns.find(({ key }) => key === colKey);
+      if (currentSearchColumn?.options?.length) {
+        return currentSearchColumn.options.find(
+          ([optVal]) => optVal === value
+        )[1];
+      }
+      return value.toString();
+    };
+
     const getChipsByKey = () => {
       const queryParams = parseQueryString(qsConfig, location.search);
 
@@ -175,10 +185,16 @@ class Search extends React.Component {
 
         if (Array.isArray(queryParams[key])) {
           queryParams[key].forEach(val =>
-            queryParamsByKey[columnKey].chips.push(val.toString())
+            queryParamsByKey[columnKey].chips.push({
+              key: `${key}:${val}`,
+              node: <span>{getLabelFromValue(val, columnKey)}</span>,
+            })
           );
         } else {
-          queryParamsByKey[columnKey].chips.push(queryParams[key].toString());
+          queryParamsByKey[columnKey].chips.push({
+            key: `${key}:${queryParams[key]}`,
+            node: <span>{getLabelFromValue(queryParams[key], columnKey)}</span>,
+          });
         }
       });
 
@@ -215,8 +231,9 @@ class Search extends React.Component {
           ({ key, name, options, isBoolean, booleanLabels = {} }) => (
             <DataToolbarFilter
               chips={chipsByKey[key] ? chipsByKey[key].chips : []}
-              deleteChip={(unusedKey, val) => {
-                onRemove(chipsByKey[key].key, val);
+              deleteChip={(unusedKey, chip) => {
+                const [columnKey, ...value] = chip.key.split(':');
+                onRemove(columnKey, value.join(':'));
               }}
               categoryName={chipsByKey[key] ? chipsByKey[key].label : key}
               key={key}
@@ -231,7 +248,10 @@ class Search extends React.Component {
                     onSelect={(event, selection) =>
                       this.handleFilterDropdownSelect(key, event, selection)
                     }
-                    selections={chipsByKey[key].chips}
+                    selections={chipsByKey[key].chips.map(chip => {
+                      const [, ...value] = chip.key.split(':');
+                      return value.join(':');
+                    })}
                     isExpanded={isFilterDropdownOpen}
                     placeholderText={`Filter By ${name}`}
                   >
