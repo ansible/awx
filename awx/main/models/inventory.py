@@ -2251,7 +2251,7 @@ class gce(PluginFileInjector):
 
 class vmware(PluginFileInjector):
     plugin_name = 'vmware_vm_inventory'
-    # initial_version = '2.9'  # Ready 4/22/2020, waiting for release
+    initial_version = '2.9'
     ini_env_reference = 'VMWARE_INI_PATH'
     base_injector = 'managed'
     namespace = 'community'
@@ -2268,9 +2268,6 @@ class vmware(PluginFileInjector):
         # Documentation of props, see
         # https://github.com/ansible/ansible/blob/devel/docs/docsite/rst/scenario_guides/vmware_scenarios/vmware_inventory_vm_attributes.rst
         UPPERCASE_PROPS = [
-            "ansible_ssh_host",
-            "ansible_host",
-            "ansible_uuid",
             "availableField",
             "configIssue",
             "configStatus",
@@ -2343,15 +2340,25 @@ class vmware(PluginFileInjector):
                 if not striped_hf:
                     continue
                 ret['filters'].append(striped_hf)
+        else:
+            # default behavior filters by power state
+            ret['filters'] = ['runtime.powerState == "poweredOn"']
 
         groupby_patterns = vmware_opts.get('groupby_patterns')
+        ret.setdefault('keyed_groups', [])
         if groupby_patterns:
-            ret.setdefault('keyed_groups', [])
             for pattern in groupby_patterns.split(','):
                 stripped_pattern = pattern.replace('{', '').replace('}', '').strip()  # make best effort
                 ret['keyed_groups'].append({
                     'prefix': '', 'separator': '',
                     'key': stripped_pattern
+                })
+        else:
+            # default groups from script
+            for entry in ('guest.guestId', '"templates" if config.template else "guests"'):
+                ret['keyed_groups'].append({
+                    'prefix': '', 'separator': '',
+                    'key': entry
                 })
 
         return ret
