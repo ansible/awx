@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { Formik, useField } from 'formik';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import {
   Form,
   FormGroup,
@@ -12,8 +11,6 @@ import {
 import FormField, { FieldTooltip } from '@components/FormField';
 import AnsibleSelect from '@components/AnsibleSelect';
 import ContentLoading from '@components/ContentLoading';
-import ContentError from '@components/ContentError';
-import useRequest from '@util/useRequest';
 import {
   required,
   minMaxValue,

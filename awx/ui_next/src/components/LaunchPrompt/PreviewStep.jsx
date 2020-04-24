@@ -1,17 +1,22 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
+import yaml from 'js-yaml';
 import PromptDetail from '@components/PromptDetail';
-import { encodeExtraVars } from './mergeExtraVars';
+import mergeExtraVars, { maskPasswords } from './mergeExtraVars';
 
 function PreviewStep({ resource, config, survey }) {
   const { values } = useFormikContext();
+  const passwordFields = survey.spec
+    .filter(q => q.type === 'password')
+    .map(q => q.variable);
+  const masked = maskPasswords(values.survey, passwordFields);
   return (
     <PromptDetail
       resource={resource}
       launchConfig={config}
-      promptResponses={{
+      overrides={{
         ...values,
-        extra_vars: encodeExtraVars(values.extra_vars, values.survey),
+        extra_vars: yaml.safeDump(mergeExtraVars(values.extra_vars, masked)),
       }}
     />
   );

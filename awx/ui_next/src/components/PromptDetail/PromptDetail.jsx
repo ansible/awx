@@ -76,86 +76,7 @@ function omitOverrides(resource, overrides) {
   return clonedResource;
 }
 
-// TODO: When prompting is hooked up, update function
-// to filter based on prompt overrides
-function partitionPromptDetails(resource, userResponses, launchConfig) {
-  const { defaults = {} } = launchConfig;
-  const overrides = {};
-
-  if (launchConfig.ask_credential_on_launch) {
-    let isEqual;
-    const defaultCreds = defaults.credentials;
-    const currentCreds = resource?.summary_fields?.credentials;
-
-    if (defaultCreds?.length === currentCreds?.length) {
-      isEqual = currentCreds.every(cred => {
-        return defaultCreds.some(item => item.id === cred.id);
-      });
-    } else {
-      isEqual = false;
-    }
-
-    if (!isEqual) {
-      overrides.credentials = resource?.summary_fields?.credentials;
-    }
-  }
-  if (launchConfig.ask_diff_mode_on_launch) {
-    if (defaults.diff_mode !== resource.diff_mode) {
-      overrides.diff_mode = resource.diff_mode;
-    }
-  }
-  if (launchConfig.ask_inventory_on_launch) {
-    if (defaults.inventory.id !== resource.inventory) {
-      overrides.inventory = resource?.summary_fields?.inventory;
-    }
-  }
-  if (launchConfig.ask_job_type_on_launch) {
-    if (defaults.job_type !== resource.job_type) {
-      overrides.job_type = resource.job_type;
-    }
-  }
-  if (launchConfig.ask_limit_on_launch) {
-    if (defaults.limit !== resource.limit) {
-      overrides.limit = resource.limit;
-    }
-  }
-  if (launchConfig.ask_scm_branch_on_launch) {
-    if (defaults.scm_branch !== resource.scm_branch) {
-      overrides.scm_branch = resource.scm_branch;
-    }
-  }
-  if (launchConfig.ask_skip_tags_on_launch) {
-    if (defaults.skip_tags !== resource.skip_tags) {
-      overrides.skip_tags = resource.skip_tags;
-    }
-  }
-  if (launchConfig.ask_tags_on_launch) {
-    if (defaults.job_tags !== resource.job_tags) {
-      overrides.job_tags = resource.job_tags;
-    }
-  }
-  if (launchConfig.ask_variables_on_launch) {
-    if (defaults.extra_vars !== resource.extra_vars) {
-      overrides.extra_vars = resource.extra_vars;
-    }
-  }
-  if (launchConfig.ask_verbosity_on_launch) {
-    if (defaults.verbosity !== resource.verbosity) {
-      overrides.verbosity = resource.verbosity;
-    }
-  }
-
-  const withoutOverrides = omitOverrides(resource, overrides);
-
-  return [withoutOverrides, overrides];
-}
-
-function PromptDetail({
-  i18n,
-  resource,
-  launchConfig = {},
-  promptResponses = {},
-}) {
+function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
   const VERBOSITY = {
     0: i18n._(t`0 (Normal)`),
     1: i18n._(t`1 (Verbose)`),
@@ -164,12 +85,6 @@ function PromptDetail({
     4: i18n._(t`4 (Connection Debug)`),
   };
 
-  // const [details, overrides] = partitionPromptDetails(
-  //   resource,
-  //   promptResponses,
-  //   launchConfig
-  // );
-  const overrides = promptResponses;
   const details = omitOverrides(resource, overrides);
   const hasOverrides = Object.keys(overrides).length > 0;
 
