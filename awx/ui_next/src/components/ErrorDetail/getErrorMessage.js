@@ -1,5 +1,5 @@
 export default function getErrorMessage(response) {
-  if (!response.data) {
+  if (!response?.data) {
     return null;
   }
   if (typeof response.data === 'string') {

@@ -23,24 +23,8 @@ import {
   combine,
 } from '@util/validators';
 
-function SurveyStep({ template, i18n }) {
-  const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
-    useCallback(async () => {
-      const { data } =
-        template.type === 'workflow_job_template'
-          ? await WorkflowJobTemplatesAPI.readSurvey(template.id)
-          : await JobTemplatesAPI.readSurvey(template.id);
-      return data;
-    }, [template])
-  );
-  useEffect(() => {
-    fetchSurvey();
-  }, [fetchSurvey]);
-
-  if (error) {
-    return <ContentError error={error} />;
-  }
-  if (isLoading || !survey) {
+function SurveyStep({ survey, i18n }) {
+  if (!survey) {
     return <ContentLoading />;
   }
 

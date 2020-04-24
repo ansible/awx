@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import useRequest from '@util/useRequest';
+import ContentError from '@components/ContentError';
 import InventoryStep from './InventoryStep';
 import CredentialsStep from './CredentialsStep';
 import OtherPromptsStep from './OtherPromptsStep';
@@ -11,6 +14,30 @@ import PreviewStep from './PreviewStep';
 import mergeExtraVars from './mergeExtraVars';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
+  const {
+    result: survey,
+    request: fetchSurvey,
+    error: surveyError,
+  } = useRequest(
+    useCallback(async () => {
+      if (!config.survey_enabled) {
+        return {};
+      }
+      const { data } =
+        resource.type === 'workflow_job_template'
+          ? await WorkflowJobTemplatesAPI.readSurvey(resource.id)
+          : await JobTemplatesAPI.readSurvey(resource.id);
+      return data;
+    }, [config.survey_enabled, resource])
+  );
+  useEffect(() => {
+    fetchSurvey();
+  }, [fetchSurvey]);
+
+  if (surveyError) {
+    return <ContentError error={surveyError} />;
+  }
+
   const steps = [];
   const initialValues = {};
   if (config.ask_inventory_on_launch) {
@@ -73,12 +100,14 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     initialValues.survey = {};
     steps.push({
       name: i18n._(t`Survey`),
-      component: <SurveyStep template={resource} />,
+      component: <SurveyStep survey={survey} />,
     });
   }
   steps.push({
     name: i18n._(t`Preview`),
-    component: <PreviewStep />,
+    component: (
+      <PreviewStep resource={resource} config={config} survey={survey} />
+    ),
     nextButtonText: i18n._(t`Launch`),
   });
 

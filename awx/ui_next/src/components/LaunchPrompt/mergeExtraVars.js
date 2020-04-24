@@ -9,3 +9,8 @@ export default function mergeExtraVars(extraVars, survey = {}) {
 }
 
 // TODO: "safe" version that obscures passwords for preview step
+
+export function encodeExtraVars(extraVars, survey = {}) {
+  const vars = mergeExtraVars(extraVars, survey);
+  return yaml.safeDump(vars);
+}

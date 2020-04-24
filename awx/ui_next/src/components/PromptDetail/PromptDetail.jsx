@@ -78,7 +78,7 @@ function omitOverrides(resource, overrides) {
 
 // TODO: When prompting is hooked up, update function
 // to filter based on prompt overrides
-function partitionPromptDetails(resource, launchConfig) {
+function partitionPromptDetails(resource, userResponses, launchConfig) {
   const { defaults = {} } = launchConfig;
   const overrides = {};
 
@@ -150,7 +150,12 @@ function partitionPromptDetails(resource, launchConfig) {
   return [withoutOverrides, overrides];
 }
 
-function PromptDetail({ i18n, resource, launchConfig = {} }) {
+function PromptDetail({
+  i18n,
+  resource,
+  launchConfig = {},
+  promptResponses = {},
+}) {
   const VERBOSITY = {
     0: i18n._(t`0 (Normal)`),
     1: i18n._(t`1 (Verbose)`),
@@ -159,7 +164,13 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
     4: i18n._(t`4 (Connection Debug)`),
   };
 
-  const [details, overrides] = partitionPromptDetails(resource, launchConfig);
+  // const [details, overrides] = partitionPromptDetails(
+  //   resource,
+  //   promptResponses,
+  //   launchConfig
+  // );
+  const overrides = promptResponses;
+  const details = omitOverrides(resource, overrides);
   const hasOverrides = Object.keys(overrides).length > 0;
 
   return (
