@@ -1,4 +1,18 @@
 #!/bin/bash
 
-# Redirect to systemctl
-exec systemctl $@ ansible-tower.service
+if [ -f /etc/sysconfig/ansible-tower ]; then
+	source /etc/sysconfig/ansible-tower
+fi
+
+case "$1" in
+	start|stop|restart)
+		exec systemctl $1 ansible-tower.service
+		;;
+	status)
+		exec systemctl status ansible-tower.service $TOWER_SERVICES
+		;;
+        *)
+                echo "Usage: ansible-tower-service start|stop|restart|status"
+                exit 1
+                ;;
+esac
