@@ -1,4 +1,16 @@
 #!/bin/bash
 
-# Redirect to systemctl
-exec systemctl $@ ansible-tower.service
+SERVICES="ansible-tower.service supervisord.service"
+
+case "$1" in
+	start|stop|restart)
+		systemctl $1 ansible-tower.service
+		;;
+	status)
+		systemctl status $SERVICES
+		;;
+        *)
+                echo "Usage: ansible-tower-service start|stop|restart|status"
+                exit 1
+                ;;
+esac
