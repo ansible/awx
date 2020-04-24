@@ -62,9 +62,24 @@ if [ ! -d "$base_dir/awx/awx" ]
 then
 	mkdir -p $base_dir/awx
   ln -s $(shell pwd)/awx_collection $base_dir/awx/awx
-	git clone  $base_dir/awx/awx
 else
   echo "awx collection already exists"
+fi
+
+if [ ! -d "$base_dir/community/general" ]
+then
+	mkdir -p $base_dir/community
+	git clone https://github.com/ansible-collections/community.general.git $base_dir/community/general
+else
+  echo "community general collection already exists"
+fi
+
+if [ ! -d "$base_dir/ansible/posix" ]
+then
+	mkdir -p $base_dir/ansible
+	git clone https://github.com/ansible-collections/ansible.posix.git $base_dir/ansible/posix
+else
+  echo "posix collection already exists"
 fi
 
 echo "-- confirmation of what is installed --"
