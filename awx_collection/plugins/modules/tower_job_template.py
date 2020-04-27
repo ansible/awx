@@ -414,6 +414,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     # Create the data that gets sent for create and update
     new_fields = {}
     new_fields['name'] = new_name if new_name else name
@@ -490,23 +494,19 @@ def main():
                 module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
             on_change = update_survey
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='job_templates', item_type='job_template',
-            associations={
-                'credentials': credentials_ids,
-                'labels': labels_ids,
-                'notification_templates_success': notification_success_ids,
-                'notification_templates_started': notification_start_ids,
-                'notification_templates_error': notification_error_ids
-            },
-            on_create=on_change, on_update=on_change,
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='job_templates', item_type='job_template',
+        associations={
+            'credentials': credentials_ids,
+            'labels': labels_ids,
+            'notification_templates_success': notification_success_ids,
+            'notification_templates_started': notification_start_ids,
+            'notification_templates_error': notification_error_ids
+        },
+        on_create=on_change, on_update=on_change,
+    )
 
 
 if __name__ == '__main__':

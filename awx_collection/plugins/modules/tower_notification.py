@@ -403,6 +403,11 @@ def main():
     messages = module.params.get('messages')
     state = module.params.get('state')
 
+    # Deprecation warnings
+    for legacy_input in OLD_INPUT_NAMES:
+        if module.params.get(legacy_input) is not None:
+            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
+
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
     if organization:
@@ -416,11 +421,14 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     # Create notification_configuration from legacy inputs
     final_notification_configuration = {}
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
             final_notification_configuration[legacy_input] = module.params.get(legacy_input)
     # Give anything in notification_configuration prescedence over the individual inputs
     if notification_configuration is not None:
@@ -440,17 +448,13 @@ def main():
     if messages is not None:
         new_fields['messages'] = messages
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='notification_templates', item_type='notification_template',
-            associations={
-            }
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='notification_templates', item_type='notification_template',
+        associations={
+        }
+    )
 
 
 if __name__ == '__main__':

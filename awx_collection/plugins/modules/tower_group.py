@@ -123,6 +123,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(group)
+
     # Create the data that gets sent for create and update
     group_fields = {
         'name': new_name if new_name else name,
@@ -149,15 +153,11 @@ def main():
         if id_list:
             association_fields[relationship] = id_list
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(group)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing group, this will return on its own
-        module.create_or_update_if_needed(
-            group, group_fields, endpoint='groups', item_type='group',
-            associations=association_fields
-        )
+    # If the state was present we can let the module build or update the existing group, this will return on its own
+    module.create_or_update_if_needed(
+        group, group_fields, endpoint='groups', item_type='group',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':

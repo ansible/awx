@@ -108,6 +108,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(organization)
+
     # Create the data that gets sent for create and update
     org_fields = {'name': name}
     if description is not None:
@@ -117,12 +121,8 @@ def main():
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(organization)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing organization, this will return on its own
-        module.create_or_update_if_needed(organization, org_fields, endpoint='organizations', item_type='organization')
+    # If the state was present and we can let the module build or update the existing organization, this will return on its own
+    module.create_or_update_if_needed(organization, org_fields, endpoint='organizations', item_type='organization')
 
 
 if __name__ == '__main__':

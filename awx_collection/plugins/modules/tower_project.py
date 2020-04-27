@@ -236,6 +236,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(project)
+
     # Create the data that gets sent for create and update
     project_fields = {
         'name': name,
@@ -260,7 +264,7 @@ def main():
     if scm_type == '':
         project_fields['local_path'] = local_path
 
-    if state != 'absent' and (scm_update_cache_timeout != 0 and scm_update_on_launch is not True):
+    if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
 
     # If we are doing a not manual project, register our on_change method
@@ -269,12 +273,8 @@ def main():
     if wait and scm_type != '':
         on_change = wait_for_project_update
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(project)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing project, this will return on its own
-        module.create_or_update_if_needed(project, project_fields, endpoint='projects', item_type='project', on_create=on_change, on_update=on_change)
+    # If the state was present and we can let the module build or update the existing project, this will return on its own
+    module.create_or_update_if_needed(project, project_fields, endpoint='projects', item_type='project', on_create=on_change, on_update=on_change)
 
 
 if __name__ == '__main__':
