@@ -175,6 +175,13 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
 
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     inventory = module.params.get('inventory')
     if inventory:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
@@ -182,9 +189,6 @@ def main():
     webhook_credential = module.params.get('webhook_credential')
     if webhook_credential:
         new_fields['webhook_credential'] = module.resolve_name_to_id('webhook_credential', webhook_credential)
-
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else name
@@ -213,16 +217,12 @@ def main():
                 module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
             on_change = update_survey
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='workflow_job_templates', item_type='workflow_job_template',
-            on_create=on_change, on_update=on_change
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='workflow_job_templates', item_type='workflow_job_template',
+        on_create=on_change, on_update=on_change
+    )
 
 
 if __name__ == '__main__':

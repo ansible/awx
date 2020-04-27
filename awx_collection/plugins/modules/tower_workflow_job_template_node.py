@@ -218,6 +218,13 @@ def main():
         workflow_job_template_id = wfjt_data['id']
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     unified_job_template = module.params.get('unified_job_template')
     if unified_job_template:
         new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
@@ -225,9 +232,6 @@ def main():
     inventory = module.params.get('inventory')
     if inventory:
         new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
-
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
 
     # Create the data that gets sent for create and update
     for field_name in (
@@ -262,16 +266,12 @@ def main():
     # In the case of a new object, the utils need to know it is a node
     new_fields['type'] = 'workflow_job_template_node'
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
-            associations=association_fields
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':

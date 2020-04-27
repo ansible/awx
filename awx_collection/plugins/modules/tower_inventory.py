@@ -119,6 +119,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory)
+
     # Create the data that gets sent for create and update
     inventory_fields = {
         'name': name,
@@ -131,16 +135,12 @@ def main():
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(inventory)
-    elif state == 'present':
-        # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
-        if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
-            module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
+    # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
+    if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+        module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
-        # If the state was present and we can let the module build or update the existing inventory, this will return on its own
-        module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
+    # If the state was present and we can let the module build or update the existing inventory, this will return on its own
+    module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
 
 
 if __name__ == '__main__':

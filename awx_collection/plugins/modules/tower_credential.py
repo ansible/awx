@@ -382,9 +382,14 @@ def main():
         'name': name,
         'credential_type': cred_type_id,
     }
+
     if organization:
         lookup_data['organization'] = org_id
     credential = module.get_one('credentials', **{'data': lookup_data})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(credential)
 
     # Create credential input from legacy inputs
     credential_inputs = {}
@@ -415,14 +420,10 @@ def main():
         if team:
             credential_fields['team'] = team_id
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(credential)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing group, this will return on its own
-        module.create_or_update_if_needed(
-            credential, credential_fields, endpoint='credentials', item_type='credential'
-        )
+    # If the state was present we can let the module build or update the existing group, this will return on its own
+    module.create_or_update_if_needed(
+        credential, credential_fields, endpoint='credentials', item_type='credential'
+    )
 
 
 if __name__ == '__main__':

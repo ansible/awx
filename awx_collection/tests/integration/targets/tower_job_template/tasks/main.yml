@@ -147,10 +147,11 @@
 - name: Delete Job Template 1
   tower_job_template:
     name: "{{ jt1 }}"
-    project: "{{ proj1 }}"
-    inventory: Demo Inventory
     playbook: hello_world.yml
     job_type: run
+    project: "Does Not Exist"
+    inventory: "Does Not Exist"
+    webhook_credential: "Does Not Exist"
     state: absent
   register: result
 
