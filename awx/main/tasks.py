@@ -2074,29 +2074,34 @@ class RunProjectUpdate(BaseTask):
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
         # Set up the public Galaxy server, if enabled
+        galaxy_configured = False
         if settings.PUBLIC_GALAXY_ENABLED:
-            galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]
+            galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]  # static setting
         else:
+            galaxy_configured = True
             galaxy_servers = []
         # Set up fallback Galaxy servers, if configured
         if settings.FALLBACK_GALAXY_SERVERS:
+            galaxy_configured = True
             galaxy_servers = settings.FALLBACK_GALAXY_SERVERS + galaxy_servers
         # Set up the primary Galaxy server, if configured
         if settings.PRIMARY_GALAXY_URL:
+            galaxy_configured = True
             galaxy_servers = [{'id': 'primary_galaxy'}] + galaxy_servers
             for key in GALAXY_SERVER_FIELDS:
                 value = getattr(settings, 'PRIMARY_GALAXY_{}'.format(key.upper()))
                 if value:
                     galaxy_servers[0][key] = value
-        for server in galaxy_servers:
-            for key in GALAXY_SERVER_FIELDS:
-                if not server.get(key):
-                    continue
-                env_key = ('ANSIBLE_GALAXY_SERVER_{}_{}'.format(server.get('id', 'unnamed'), key)).upper()
-                env[env_key] = server[key]
-        if galaxy_servers:
-            # now set the precedence of galaxy servers
-            env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
+        if galaxy_configured:
+            for server in galaxy_servers:
+                for key in GALAXY_SERVER_FIELDS:
+                    if not server.get(key):
+                        continue
+                    env_key = ('ANSIBLE_GALAXY_SERVER_{}_{}'.format(server.get('id', 'unnamed'), key)).upper()
+                    env[env_key] = server[key]
+            if galaxy_servers:
+                # now set the precedence of galaxy servers
+                env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
