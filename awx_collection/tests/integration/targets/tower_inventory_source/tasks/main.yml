@@ -48,7 +48,7 @@
     source_project: "Does Not Exist"
     source_script: "Does Not Exist"
     state: absent
-    
+
 - assert:
     that:
       - "result is changed"
