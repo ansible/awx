@@ -10,6 +10,7 @@ clouds:
       auth_url: https://foo.invalid
       domain_name: fooo
       password: fooo
+      project_domain_name: fooo
       project_name: fooo
       username: fooo
     private: false

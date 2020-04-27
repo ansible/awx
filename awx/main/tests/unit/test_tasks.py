@@ -184,6 +184,51 @@ def test_openstack_client_config_generation(mocker, source, expected, private_da
 
 
 @pytest.mark.parametrize("source,expected", [
+    (None, True), (False, False), (True, True)
+])
+def test_openstack_client_config_generation_with_project_domain_name(mocker, source, expected, private_data_dir):
+    update = tasks.RunInventoryUpdate()
+    credential_type = CredentialType.defaults['openstack']()
+    inputs = {
+        'host': 'https://keystone.openstack.example.org',
+        'username': 'demo',
+        'password': 'secrete',
+        'project': 'demo-project',
+        'domain': 'my-demo-domain',
+        'project_domain_name': 'project-domain',
+    }
+    if source is not None:
+        inputs['verify_ssl'] = source
+    credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
+
+    inventory_update = mocker.Mock(**{
+        'source': 'openstack',
+        'source_vars_dict': {},
+        'get_cloud_credential': mocker.Mock(return_value=credential),
+        'get_extra_credentials': lambda x: [],
+        'ansible_virtualenv_path': '/venv/foo'
+    })
+    cloud_config = update.build_private_data(inventory_update, private_data_dir)
+    cloud_credential = yaml.safe_load(
+        cloud_config.get('credentials')[credential]
+    )
+    assert cloud_credential['clouds'] == {
+        'devstack': {
+            'auth': {
+                'auth_url': 'https://keystone.openstack.example.org',
+                'password': 'secrete',
+                'project_name': 'demo-project',
+                'username': 'demo',
+                'domain_name': 'my-demo-domain',
+                'project_domain_name': 'project-domain',
+            },
+            'verify': expected,
+            'private': True,
+        }
+    }
+
+
+@pytest.mark.parametrize("source,expected", [
     (False, False), (True, True)
 ])
 def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected, private_data_dir):
