@@ -403,6 +403,11 @@ def main():
     messages = module.params.get('messages')
     state = module.params.get('state')
 
+    # Deprecation warnings
+    for legacy_input in OLD_INPUT_NAMES:
+        if module.params.get(legacy_input) is not None:
+            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
+
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
     if organization:
@@ -424,7 +429,6 @@ def main():
     final_notification_configuration = {}
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
             final_notification_configuration[legacy_input] = module.params.get(legacy_input)
     # Give anything in notification_configuration prescedence over the individual inputs
     if notification_configuration is not None:
