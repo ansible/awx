@@ -108,6 +108,7 @@ def run_module(request, collection_import):
             sanitize_dict(py_data)
             resp._content = bytes(json.dumps(django_response.data), encoding='utf8')
             resp.status_code = django_response.status_code
+            resp.headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': '11.0.0'}
 
             if request.config.getoption('verbose') > 0:
                 logger.info(
@@ -120,7 +121,11 @@ def run_module(request, collection_import):
 
         def new_open(self, method, url, **kwargs):
             r = new_request(self, method, url, **kwargs)
-            return mock.MagicMock(read=mock.MagicMock(return_value=r._content), status=r.status_code)
+            m = mock.MagicMock(read=mock.MagicMock(return_value=r._content),
+                               status=r.status_code,
+                               getheader=mock.MagicMock(side_effect=r.headers.get)
+                               )
+            return m
 
         stdout_buffer = io.StringIO()
         # Requies specific PYTHONPATH, see docs
