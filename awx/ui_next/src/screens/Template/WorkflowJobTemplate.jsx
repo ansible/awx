@@ -59,7 +59,7 @@ class WorkflowJobTemplate extends Component {
     try {
       const { data } = await WorkflowJobTemplatesAPI.readDetail(id);
       let webhookKey;
-      if (data?.related?.webhook_key) {
+      if (data?.webhook_service && data?.related?.webhook_key) {
         webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
       }
       if (data?.summary_fields?.webhook_credential) {
@@ -80,7 +80,7 @@ class WorkflowJobTemplate extends Component {
       });
       setBreadcrumb(data);
       this.setState({
-        template: { ...data, webhook_key: webhookKey.data.webhook_key },
+        template: { ...data, webhook_key: webhookKey?.data.webhook_key },
         isNotifAdmin: notifAdminRes.data.results.length > 0,
       });
     } catch (err) {

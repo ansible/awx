@@ -17,10 +17,15 @@ import { FormColumnLayout } from '@components/FormLayout';
 import { CredentialLookup } from '@components/Lookup';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { FieldTooltip } from '@components/FormField';
-import { JobTemplatesAPI, CredentialTypesAPI } from '@api';
+import {
+  JobTemplatesAPI,
+  WorkflowJobTemplatesAPI,
+  CredentialTypesAPI,
+} from '@api';
 
-function WebhookSubForm({ i18n, enableWebhooks }) {
-  const { id, templateType } = useParams();
+function WebhookSubForm({ i18n, enableWebhooks, templateType }) {
+  const { id } = useParams();
+
   const { pathname } = useLocation();
 
   const { origin } = document.location;
@@ -83,11 +88,15 @@ function WebhookSubForm({ i18n, enableWebhooks }) {
 
   const { request: fetchWebhookKey, error: webhookKeyError } = useRequest(
     useCallback(async () => {
+      const updateWebhookKey =
+        templateType === 'job_template'
+          ? JobTemplatesAPI.updateWebhookKey(id)
+          : WorkflowJobTemplatesAPI.updateWebhookKey(id);
       const {
         data: { webhook_key: key },
-      } = await JobTemplatesAPI.updateWebhookKey(id);
+      } = await updateWebhookKey;
       webhookKeyHelpers.setValue(key);
-    }, [webhookKeyHelpers, id])
+    }, [webhookKeyHelpers, id, templateType])
   );
 
   const changeWebhookKey = async () => {

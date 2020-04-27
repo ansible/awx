@@ -1,26 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { t } from '@lingui/macro';
-import { useRouteMatch, useParams } from 'react-router-dom';
 
 import PropTypes, { shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
 import { useField, withFormik } from 'formik';
-import {
-  Form,
-  FormGroup,
-  InputGroup,
-  Button,
-  TextInput,
-  Checkbox,
-} from '@patternfly/react-core';
+import { Form, FormGroup, Checkbox } from '@patternfly/react-core';
 import { required } from '@util/validators';
-import { SyncAltIcon } from '@patternfly/react-icons';
 
-import AnsibleSelect from '@components/AnsibleSelect';
-import { WorkflowJobTemplatesAPI, CredentialTypesAPI } from '@api';
-
-import useRequest from '@util/useRequest';
 import FormField, {
   FieldTooltip,
   FormSubmitError,
@@ -30,26 +17,25 @@ import {
   FormFullWidthLayout,
   FormCheckboxLayout,
 } from '@components/FormLayout';
-import ContentLoading from '@components/ContentLoading';
 import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
 import { InventoryLookup } from '@components/Lookup';
 import { VariablesField } from '@components/CodeMirrorInput';
 import FormActionGroup from '@components/FormActionGroup';
 import ContentError from '@components/ContentError';
 import CheckboxField from '@components/FormField/CheckboxField';
 import LabelSelect from './LabelSelect';
+import WebhookSubForm from './WebhookSubForm';
+import { WorkFlowJobTemplate } from '@types';
 
 const urlOrigin = window.location.origin;
+
 function WorkflowJobTemplateForm({
+  template,
   handleSubmit,
   handleCancel,
   i18n,
   submitError,
 }) {
-  const { id } = useParams();
-  const wfjtAddMatch = useRouteMatch('/templates/workflow_job_template/add');
-
   const [hasContentError, setContentError] = useState(null);
 
   const [organizationField, organizationMeta, organizationHelpers] = useField(
@@ -60,125 +46,12 @@ function WorkflowJobTemplateForm({
   );
   const [labelsField, , labelsHelpers] = useField('labels');
 
-  const [
-    webhookServiceField,
-    webhookServiceMeta,
-    webhookServiceHelpers,
-  ] = useField('webhook_service');
-
-  const [webhookKeyField, webhookKeyMeta, webhookKeyHelpers] = useField(
-    'webhook_key'
+  const [enableWebhooks, setEnableWebhooks] = useState(
+    Boolean(template.webhook_service)
   );
 
-  const [hasWebhooks, setHasWebhooks] = useState(
-    Boolean(webhookServiceField.value)
-  );
-
-  const [
-    webhookCredentialField,
-    webhookCredentialMeta,
-    webhookCredentialHelpers,
-  ] = useField('webhook_credential');
-
-  const [webhookUrlField, webhookUrlMeta, webhookUrlHelpers] = useField(
-    'webhook_url'
-  );
-
-  const webhookServiceOptions = [
-    {
-      value: '',
-      key: '',
-      label: i18n._(t`Choose a Webhook Service`),
-      isDisabled: true,
-    },
-    {
-      value: 'github',
-      key: 'github',
-      label: i18n._(t`GitHub`),
-      isDisabled: false,
-    },
-    {
-      value: 'gitlab',
-      key: 'gitlab',
-      label: i18n._(t`GitLab`),
-      isDisabled: false,
-    },
-  ];
-
-  const storeWebhookValues = webhookServiceValue => {
-    if (
-      webhookServiceValue === webhookServiceMeta.initialValue ||
-      webhookServiceValue === ''
-    ) {
-      webhookCredentialHelpers.setValue(webhookCredentialMeta.initialValue);
-      webhookUrlHelpers.setValue(webhookUrlMeta.initialValue);
-      webhookServiceHelpers.setValue(webhookServiceMeta.initialValue);
-      webhookKeyHelpers.setValue(webhookKeyMeta.initialValue);
-    } else {
-      webhookCredentialHelpers.setValue(null);
-      webhookUrlHelpers.setValue(
-        `${urlOrigin}/api/v2/workflow_job_templates/${id}/${webhookServiceValue}/`
-      );
-      webhookKeyHelpers.setValue(
-        i18n._(t`a new webhook key will be generated on save.`).toUpperCase()
-      );
-    }
-  };
-
-  const handleWebhookEnablement = (enabledWebhooks, webhookServiceValue) => {
-    if (!enabledWebhooks) {
-      webhookCredentialHelpers.setValue(null);
-      webhookServiceHelpers.setValue('');
-      webhookUrlHelpers.setValue('');
-      webhookKeyHelpers.setValue('');
-    } else {
-      storeWebhookValues(webhookServiceValue);
-    }
-  };
-
-  const {
-    request: loadCredentialType,
-    error: contentError,
-    contentLoading,
-    result: credTypeId,
-  } = useRequest(
-    useCallback(async () => {
-      let results;
-      if (webhookServiceField.value) {
-        results = await CredentialTypesAPI.read({
-          namespace: `${webhookServiceField.value}_token`,
-        });
-        // TODO: Consider how to handle the situation where the results returns
-        // and empty array, or any of the other values is undefined or null (data, results, id)
-      }
-      return results?.data?.results[0]?.id;
-    }, [webhookServiceField.value])
-  );
-
-  useEffect(() => {
-    loadCredentialType();
-  }, [loadCredentialType]);
-
-  // TODO: Convert this function below to useRequest. Might want to create a new
-  // webhookkey component that handles all of that api calls.  Will also need
-  // to move this api call out of WorkflowJobTemplate.jsx and add it to workflowJobTemplateDetai.jsx
-  const changeWebhookKey = async () => {
-    try {
-      const {
-        data: { webhook_key: key },
-      } = await WorkflowJobTemplatesAPI.updateWebhookKey(id);
-      webhookKeyHelpers.setValue(key);
-    } catch (err) {
-      setContentError(err);
-    }
-  };
-
-  if (hasContentError || contentError) {
-    return <ContentError error={contentError || hasContentError} />;
-  }
-
-  if (contentLoading) {
-    return <ContentLoading />;
+  if (hasContentError) {
+    return <ContentError error={hasContentError} />;
   }
 
   return (
@@ -232,7 +105,7 @@ function WorkflowJobTemplateForm({
         />
         <FormField
           type="text"
-          label={i18n._(t`SCM Branch`)}
+          label={i18n._(t`Source Control Branch`)}
           tooltip={i18n._(
             t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`
           )}
@@ -274,16 +147,15 @@ function WorkflowJobTemplateForm({
               &nbsp;
               <FieldTooltip
                 content={i18n._(
-                  t`Enable webhook for this workflow job template.`
+                  t`Enable Webhook for this workflow job template.`
                 )}
               />
             </span>
           }
           id="wfjt-enabled-webhooks"
-          isChecked={Boolean(webhookServiceField.value) || hasWebhooks}
+          isChecked={enableWebhooks}
           onChange={checked => {
-            setHasWebhooks(checked);
-            handleWebhookEnablement(checked, webhookServiceField.value);
+            setEnableWebhooks(checked);
           }}
         />
         <CheckboxField
@@ -295,92 +167,10 @@ function WorkflowJobTemplateForm({
           label={i18n._(t`Enable Concurrent Jobs`)}
         />
       </FormCheckboxLayout>
-      {hasWebhooks && (
-        <FormColumnLayout>
-          <FormGroup
-            name="webhook_service"
-            fieldId="webhook_service"
-            helperTextInvalid={webhookServiceMeta.error}
-            isValid={!(webhookServiceMeta.touched || webhookServiceMeta.error)}
-            label={i18n._(t`Webhook Service`)}
-          >
-            <FieldTooltip content={i18n._(t`Select a webhook service`)} />
-            <AnsibleSelect
-              id="webhook_service"
-              data={webhookServiceOptions}
-              value={webhookServiceField.value}
-              onChange={(event, val) => {
-                storeWebhookValues(val);
-
-                webhookServiceHelpers.setValue(val);
-              }}
-            />
-          </FormGroup>
-          {!wfjtAddMatch && (
-            <>
-              <FormGroup
-                type="text"
-                fieldId="wfjt-webhookURL"
-                label={i18n._(t`Webhook URL`)}
-                id="wfjt-webhook-url"
-                name="webhook_url"
-              >
-                <FieldTooltip
-                  content={i18n._(
-                    t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
-                  )}
-                />
-                <TextInput
-                  aria-label={i18n._(t`Webhook URL`)}
-                  value={webhookUrlField.value}
-                  isReadOnly
-                />
-              </FormGroup>
-              <FormGroup
-                fieldId="wfjt-webhook-key"
-                type="text"
-                id="wfjt-webhook-key"
-                name="webhook_key"
-                label={i18n._(t`Webhook Key`)}
-              >
-                <FieldTooltip
-                  content={i18n._(
-                    t`Webhook services can use this as a shared secret.`
-                  )}
-                />
-                <InputGroup>
-                  <TextInput
-                    isReadOnly
-                    aria-label="wfjt-webhook-key"
-                    value={webhookKeyField.value}
-                  />
-                  <Button variant="tertiary" onClick={changeWebhookKey}>
-                    <SyncAltIcon />
-                  </Button>
-                </InputGroup>
-              </FormGroup>
-            </>
-          )}
-          {credTypeId && (
-            // TODO: Consider how to handle the situation where the results returns
-            // an empty array, or any of the other values is undefined or null
-            // (data, results, id)
-            <CredentialLookup
-              label={i18n._(t`Webhook Credential`)}
-              tooltip={i18n._(
-                t`Optionally select the credential to use to send status updates back to the webhook service.`
-              )}
-              credentialTypeId={credTypeId}
-              onChange={value => {
-                webhookCredentialHelpers.setValue(value || null);
-              }}
-              isValid={!webhookCredentialMeta.error}
-              helperTextInvalid={webhookCredentialMeta.error}
-              value={webhookCredentialField.value}
-            />
-          )}
-        </FormColumnLayout>
-      )}
+      <WebhookSubForm
+        enableWebhooks={enableWebhooks}
+        templateType={template.type}
+      />
       {submitError && <FormSubmitError error={submitError} />}
       <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
     </Form>
@@ -388,6 +178,7 @@ function WorkflowJobTemplateForm({
 }
 
 WorkflowJobTemplateForm.propTypes = {
+  template: WorkFlowJobTemplate,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   submitError: shape({}),
@@ -395,6 +186,12 @@ WorkflowJobTemplateForm.propTypes = {
 
 WorkflowJobTemplateForm.defaultProps = {
   submitError: null,
+  template: {
+    name: '',
+    description: '',
+    inventory: undefined,
+    project: undefined,
+  },
 };
 
 const FormikApp = withFormik({

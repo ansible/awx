@@ -13,6 +13,7 @@ import {
   InventoriesAPI,
 } from '@api';
 
+jest.mock('@api/models/CredentialTypes');
 jest.mock('@api/models/WorkflowJobTemplates');
 jest.mock('@api/models/Labels');
 jest.mock('@api/models/Organizations');
@@ -183,7 +184,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
-
     expect(
       wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
     ).toBe(true);
@@ -191,23 +191,25 @@ describe('<WorkflowJobTemplateForm/>', () => {
       wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('value')
     ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
     await act(() =>
-      wrapper
-        .find('FormGroup[name="webhook_key"]')
-        .find('Button[variant="tertiary"]')
-        .prop('onClick')()
+      wrapper.find('Button[aria-label="Update webhook key"]').prop('onClick')()
     );
     expect(WorkflowJobTemplatesAPI.updateWebhookKey).toBeCalledWith('6');
     expect(
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
     ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
-
     wrapper.update();
     expect(wrapper.find('FormGroup[name="webhook_service"]').length).toBe(1);
-
-    act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
+    expect(wrapper.find('AnsibleSelect#webhook_service').length).toBe(1);
+    await act(async () => {
+      wrapper.find('AnsibleSelect#webhook_service').prop('onChange')(
+        {},
+        'gitlab'
+      );
+    });
     wrapper.update();
-
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('gitlab');
+    expect(wrapper.find('AnsibleSelect#webhook_service').prop('value')).toBe(
+      'gitlab'
+    );
   });
 
   test('handleSubmit is called on submit button click', async () => {
