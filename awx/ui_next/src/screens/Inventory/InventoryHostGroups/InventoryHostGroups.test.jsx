@@ -2,9 +2,27 @@ import React from 'react';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { HostsAPI } from '@api';
 import InventoryHostGroups from './InventoryHostGroups';
 
 jest.mock('@api');
+HostsAPI.readAllGroups.mockResolvedValue({
+  data: {
+    count: 1,
+    results: [
+      {
+        id: 1,
+        url: 'www.google.com',
+        summary_fields: {
+          inventory: { id: 1, name: 'foo' },
+          user_capabilities: { edit: true },
+        },
+        name: 'Bar',
+      },
+    ],
+  },
+});
+HostsAPI.readGroupsOptions.mockResolvedValue({ data: { actions: {} } });
 
 describe('<InventoryHostGroups />', () => {
   test('initially renders successfully', async () => {
