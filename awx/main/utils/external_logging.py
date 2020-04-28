@@ -60,6 +60,7 @@ def construct_rsyslog_conf_template(settings=settings):
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
         ssl = 'on' if parsed.scheme == 'https' else 'off'
         skip_verify = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
+        allow_unsigned = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
         if not port:
             port = 443 if parsed.scheme == 'https' else 80
 
@@ -68,6 +69,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'server="{host}"',
             f'serverport="{port}"',
             f'usehttps="{ssl}"',
+            f'allowunsignedcerts="{allow_unsigned}"',
             f'skipverifyhost="{skip_verify}"',
             'action.resumeRetryCount="-1"',
             'template="awx"',

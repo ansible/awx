@@ -198,6 +198,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory_source)
+
     # Create the data that gets sent for create and update
     inventory_source_fields = {
         'name': new_name if new_name else name,
@@ -234,12 +238,8 @@ def main():
     if state == 'present' and not inventory_source and not inventory_source_fields['source']:
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(inventory_source)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
-        module.create_or_update_if_needed(inventory_source, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source')
+    # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
+    module.create_or_update_if_needed(inventory_source, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source')
 
 
 if __name__ == '__main__':

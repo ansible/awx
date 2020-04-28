@@ -60,15 +60,6 @@ msgstr "<b>我同意最终用户许可证协议</b>"
 msgid "<b>User analytics</b>: This data is used to enhance future releases of the Tower Software and help streamline customer experience and success."
 msgstr "<b>用户分析</b>：这些数据用于增强未来的 Tower 软件发行版本，并帮助简化客户体验和成功。"
 
-#: client/src/license/license.partial.html:119
-msgid ""
-"<div class=\"License-separator\"></div>\n"
-"\t\t\t\t\t\t<div translate=\"\">OR</div>\n"
-"\t\t\t\t\t\t<div class=\"License-separator\"></div>"
-msgstr "<div class=\"License-separator\"></div>\n"
-"\\t\\t\\t\\t\\t\\t<div translate=\"\">或</div>\n"
-"\\t\\t\\t\\t\\t\\t<div class=\"License-separator\"></div>"
-
 #: client/src/login/loginModal/loginModal.partial.html:26
 msgid ""
 "<i class=\"LoginModal-alertIcon fa fa-exclamation-triangle\"></i>\n"
