@@ -2,6 +2,29 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 11.2.0 (Apr 29, 2020)
+
+- Inventory updates now use collection-based plugins by default (in Ansible 2.9+):
+    - amazon.aws.aws_ec2
+    - community.vmware.vmware_vm_inventory
+    - azure.azcollection.azure_rm
+    - google.cloud.gcp_compute
+    - theforeman.foreman.foreman
+    - openstack.cloud.openstack
+    - ovirt.ovirt_collection.ovirt
+    - awx.awx.tower
+- Added support for Approle and LDAP/AD mechanisms to the Hashicorp Vault credential plugin (https://github.com/ansible/awx/issues/5076)
+- Added Project (Domain Name) support for the OpenStack Keystone v3 API (https://github.com/ansible/awx/issues/6831)
+- Added a new setting for raising log verbosity for rsyslogd (https://github.com/ansible/awx/pull/6818)
+- Added the ability to monitor stdout in the CLI for running jobs and workflow jobs (https://github.com/ansible/awx/issues/6165)
+- Fixed a bug which broke AWX's external logging support when configured with HTTPS endpoints that utilize self-signed certificates (https://github.com/ansible/awx/issues/6851)
+- Fixed a local docker installer bug that mistakenly attempted to upgrade PostgreSQL when an external pg_hostname is specified (https://github.com/ansible/awx/pull/5398)
+- Fixed a race condition that caused task container crashes when pods are quickly brought down and back up (https://github.com/ansible/awx/issues/6750)
+- Fixed a bug that caused 404 errors when attempting to view the second page of the workflow approvals view (https://github.com/ansible/awx/issues/6803)
+- Fixed a bug that prevented the use of ANSIBLE_SSH_ARGS for ad-hoc-commands (https://github.com/ansible/awx/pull/6811)
+- Fixed a bug that broke AWX installs/upgrades on Red Hat OpenShift (https://github.com/ansible/awx/issues/6791)
+
+
 ## 11.1.0 (Apr 22, 2020)
 - Changed rsyslogd to persist queued events to disk (to prevent a risk of out-of-memory errors) (https://github.com/ansible/awx/issues/6746)
 - Added the ability to configure the destination and maximum disk size of rsyslogd spool (in the event of a log aggregator outage) (https://github.com/ansible/awx/pull/6763)
