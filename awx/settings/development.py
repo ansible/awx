@@ -10,7 +10,6 @@ import copy
 import sys
 import traceback
 import uuid
-import platform
 
 # Centos-7 doesn't include the svg mime type
 # /usr/lib64/python/mimetypes.py
@@ -177,10 +176,10 @@ CLUSTER_HOST_ID = socket.gethostname()
 if 'Docker Desktop' in os.getenv('OS', ''):
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
 else:
-    if platform.system() == 'Darwin':
-        os.environ['SDB_NOTIFY_HOST'] = os.popen('ipconfig getifaddr en0').read().strip()
-    else:
+    try:
         os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    except Exception:
+        pass
 
 WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
 AWX_CALLBACK_PROFILE = True
