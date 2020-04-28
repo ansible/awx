@@ -117,19 +117,19 @@ class AWXConsumerRedis(AWXConsumerBase):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
 
-        retry = 0
+        time_to_sleep = 1
         while True:
             queue = redis.Redis.from_url(settings.BROKER_URL)
             while True:
                 try:
                     res = queue.blpop(self.queues)
-                    retry = 0
+                    time_to_sleep = 1
                     res = json.loads(res[1])
                     self.process_task(res)
                 except redis.exceptions.RedisError:
-                    logger.exception(f"encountered an error communicating with redis. Reconnect attempt {retry}")
-                    retry += 1
-                    time.sleep(min(retry * 2, 30))
+                    time_to_sleep = min(time_to_sleep*2, 30)
+                    logger.exception(f"encountered an error communicating with redis. Reconnect attempt in {time_to_sleep} seconds")
+                    time.sleep(time_to_sleep)
                 except (json.JSONDecodeError, KeyError):
                     logger.exception("failed to decode JSON message from redis")
                 if self.should_stop:
