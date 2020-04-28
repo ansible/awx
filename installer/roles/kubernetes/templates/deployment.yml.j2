@@ -136,7 +136,7 @@ spec:
             - name: {{ kubernetes_deployment_name }}-launch-awx-task
               mountPath: "/usr/bin/launch_awx_task.sh"
               subPath: "launch_awx_task.sh"
-              readOnly: true  
+              readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
               mountPath: "/supervisor.conf"
@@ -212,7 +212,7 @@ spec:
             - name: {{ kubernetes_deployment_name }}-launch-awx-task
               mountPath: "/usr/bin/launch_awx_task.sh"
               subPath: "launch_awx_task.sh"
-              readOnly: true  
+              readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
               mountPath: "/supervisor.conf"
@@ -447,8 +447,10 @@ metadata:
 {% for key, value in kubernetes_ingress_annotations.items() %}
     {{ key }}: {{ value }}
 {% endfor %}
+{% endif %}
 
 spec:
+{% if kubernetes_ingress_hostname is defined %}
 {% if kubernetes_ingress_tls_secret is defined %}
   tls:
   - hosts:
