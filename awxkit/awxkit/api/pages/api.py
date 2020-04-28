@@ -61,6 +61,7 @@ class ApiV2(base.Base):
         if _page.json.get('managed_by_tower'):
             return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
+            log.error("Object export failed: %s", _page.endpoint)
             return None
 
         # Note: doing _page[key] automatically parses json blob strings, which can be a problem.
@@ -74,8 +75,12 @@ class ApiV2(base.Base):
                 continue
 
             rel_endpoint = self._cache.get_page(_page.related[key])
-            if rel_endpoint is None:
-                return None  # This foreign key is unreadable
+            if rel_endpoint is None:  # This foreign key is unreadable
+                if post_fields[key].get('required'):
+                    log.error("Foreign key export failed: %s", _page.related[key])
+                    return None
+                log.error("Foreign key export failed, setting to null: %s", _page.related[key])
+                continue
             natural_key = rel_endpoint.get_natural_key(self._cache)
             if natural_key is None:
                 return None  # This foreign key has unresolvable dependencies
