@@ -104,9 +104,11 @@
     unified_job_template: "{{ jt1_name }}"
     workflow: "{{ wfjt_name }}"
 
-- name: Delete a workflow job template
+- name: Delete a workflow job template with an invalid inventory and webook_credential
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
+    inventory: "Does Not Exist"
+    webhook_credential: "Does Not Exist"
     state: absent
   register: result
 

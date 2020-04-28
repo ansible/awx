@@ -119,6 +119,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(host)
+
     # Create the data that gets sent for create and update
     host_fields = {
         'name': new_name if new_name else name,
@@ -130,12 +134,8 @@ def main():
     if variables is not None:
         host_fields['variables'] = json.dumps(variables)
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(host)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing host, this will return on its own
-        module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
+    # If the state was present and we can let the module build or update the existing host, this will return on its own
+    module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
 
 
 if __name__ == '__main__':

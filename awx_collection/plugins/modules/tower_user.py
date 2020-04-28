@@ -147,6 +147,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     # Create the data that gets sent for create and update
     new_fields = {}
     if username:
@@ -164,12 +168,8 @@ def main():
     if password:
         new_fields['password'] = password
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
 
 
 if __name__ == '__main__':

@@ -1,3 +1,5 @@
+compose:
+  ansible_ssh_host: foreman['ip6'] | default(foreman['ip'], true)
 keyed_groups:
 - key: foreman['environment_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')
   prefix: foreman_environment_

@@ -364,18 +364,16 @@ def main():
     # End backwards compatability
     state = module.params.get('state')
 
-    # Attempt to look up the related items the user specified (these will fail the module if not found)
-    if organization:
-        org_id = module.resolve_name_to_id('organizations', organization)
-    if user:
-        user_id = module.resolve_name_to_id('users', user)
-    if team:
-        team_id = module.resolve_name_to_id('teams', team)
-
+    # Deprication warnings
+    for legacy_input in OLD_INPUT_NAMES:
+        if module.params.get(legacy_input) is not None:
+            module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="3.6")
     if kind:
         module.deprecate(msg='The kind parameter has been deprecated, please use credential_type instead', version="3.6")
 
     cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
+    if organization:
+        org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up the object based on the provided name, credential type and optional organization
     lookup_data = {
@@ -384,13 +382,23 @@ def main():
     }
     if organization:
         lookup_data['organization'] = org_id
+
     credential = module.get_one('credentials', **{'data': lookup_data})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(credential)
+
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    if user:
+        user_id = module.resolve_name_to_id('users', user)
+    if team:
+        team_id = module.resolve_name_to_id('teams', team)
 
     # Create credential input from legacy inputs
     credential_inputs = {}
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="3.6")
             credential_inputs[legacy_input] = module.params.get(legacy_input)
     if inputs:
         credential_inputs.update(inputs)
@@ -415,14 +423,10 @@ def main():
         if team:
             credential_fields['team'] = team_id
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(credential)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing group, this will return on its own
-        module.create_or_update_if_needed(
-            credential, credential_fields, endpoint='credentials', item_type='credential'
-        )
+    # If the state was present we can let the module build or update the existing group, this will return on its own
+    module.create_or_update_if_needed(
+        credential, credential_fields, endpoint='credentials', item_type='credential'
+    )
 
 
 if __name__ == '__main__':

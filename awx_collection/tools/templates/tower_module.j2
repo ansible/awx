@@ -188,6 +188,10 @@ def main():
         }
     })
 
+    if state is 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     # Create the data that gets sent for create and update
     new_fields = {}
 {% for option in item['json']['actions']['POST'] %}
@@ -203,20 +207,16 @@ def main():
 {% endif %}
 {% endfor %}
 
-    if state is 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state is 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='{{ item_type }}', item_type='{{ singular_item_type }}',
-            associations={
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='{{ item_type }}', item_type='{{ singular_item_type }}',
+        associations={
 {% for association in associations[item_type] | default([]) %}
-                '{{ association['endpoint'] }}': {{ association['related_item'] }}_ids,
+            '{{ association['endpoint'] }}': {{ association['related_item'] }}_ids,
 {% endfor %}
-            }
-        )
+        }
+    )
 
 
 if __name__ == '__main__':
