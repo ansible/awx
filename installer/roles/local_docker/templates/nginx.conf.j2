@@ -52,7 +52,7 @@ http {
 
         ssl_certificate /etc/nginx/awxweb.pem;
         ssl_certificate_key /etc/nginx/awxweb_key.pem;
-        {% elif if (ssl_certificate is defined) and (ssl_certificate_key is not defined) %}
+        {% elif (ssl_certificate is defined) and (ssl_certificate_key is not defined) %}
         listen 8053 ssl;
 
         ssl_certificate /etc/nginx/awxweb.pem;
