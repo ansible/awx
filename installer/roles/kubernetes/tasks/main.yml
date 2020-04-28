@@ -64,7 +64,7 @@
       template:
         src: postgresql-persistent.yml.j2
         dest: "{{ kubernetes_base_path }}/postgresql-persistent.yml"
-        mode: "0600"
+        mode: '0600'
 
     - name: Deploy and Activate Postgres (OpenShift)
       shell: |
@@ -209,11 +209,11 @@
   set_fact:
     "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"
   with_items:
-    - "configmap"
-    - "secret"
-    - "deployment"
-    - "supervisor"
-    - "launch_awx"
+    - 'configmap'
+    - 'secret'
+    - 'deployment'
+    - 'supervisor'
+    - 'launch_awx'
   no_log: true
 
 - name: Apply Deployment
