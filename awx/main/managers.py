@@ -121,6 +121,17 @@ class InstanceManager(models.Manager):
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
         with advisory_lock('instance_registration_%s' % hostname):
+            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                # detect any instances with the same IP address.
+                # if one exists, set it to None
+                inst_conflicting_ip = self.filter(ip_address=ip_address).exclude(hostname=hostname)
+                if inst_conflicting_ip.exists():
+                    for other_inst in inst_conflicting_ip:
+                        other_hostname = other_inst.hostname
+                        other_inst.ip_address = None
+                        other_inst.save(update_fields=['ip_address'])
+                        logger.warning("IP address {0} conflict detected, ip address unset for host {1}.".format(ip_address, other_hostname))
+
             instance = self.filter(hostname=hostname)
             if instance.exists():
                 instance = instance.get()
