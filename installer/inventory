@@ -28,8 +28,8 @@ dockerhub_base=ansible
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
-# Ingress Configuratio
-ingress_hostname=awx.example.org
+# Kubernetes and Openshift Ingress Configuration
+#kubernetes_ingress_hostname=awx.example.org
 
 # Kubernetes Ingress Configuration
 # You can use the variables below to configure Kubernetes Ingress

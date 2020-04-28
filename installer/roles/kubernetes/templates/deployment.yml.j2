@@ -555,11 +555,11 @@ spec:
 {% if kubernetes_ingress_tls_secret is defined %}
   tls:
   - hosts:
-    - {{ ingress_hostname }}
+    - {{ kubernetes_ingress_hostname }}
     secretName: {{ kubernetes_ingress_tls_secret }}
 {% endif %}
   rules:
-  - host: {{ ingress_hostname }}
+  - host: {{ kubernetes_ingress_hostname }}
     http:
       paths:
       - path: /
@@ -581,7 +581,7 @@ metadata:
   name: {{ kubernetes_deployment_name }}-web-svc
   namespace: {{ kubernetes_namespace }}
 spec:
-  host: {{ ingress_hostname }}
+  host: {{ kubernetes_ingress_hostname }}
   port:
     targetPort: http
   tls:
