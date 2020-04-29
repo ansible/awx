@@ -6,7 +6,7 @@ import pytest
 from ansible.errors import AnsibleError
 
 from awx.main.models import Schedule
-
+from awx.api.serializers import SchedulePreviewSerializer
 
 @pytest.mark.django_db
 def test_create_schedule(run_module, job_template, admin_user):
@@ -54,7 +54,12 @@ def test_create_schedule(run_module, job_template, admin_user):
 ])
 def test_rrule_lookup_plugin(collection_import, freq, kwargs, expect):
     LookupModule = collection_import('plugins.lookup.tower_schedule_rrule').LookupModule
-    assert LookupModule.get_rrule(freq, kwargs) == expect
+    generated_rule = LookupModule.get_rrule(freq, kwargs)
+    assert generated_rule == expect
+    rrule_checker = SchedulePreviewSerializer()
+    # Try to run our generated rrule through the awx validator
+    # This will raise its own exception on failure
+    rrule_checker.validate_rrule(generated_rule)
 
 
 @pytest.mark.parametrize("freq", ('none', 'minute', 'hour', 'day', 'week', 'month'))
