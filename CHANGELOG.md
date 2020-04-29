@@ -17,6 +17,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Added Project (Domain Name) support for the OpenStack Keystone v3 API (https://github.com/ansible/awx/issues/6831)
 - Added a new setting for raising log verbosity for rsyslogd (https://github.com/ansible/awx/pull/6818)
 - Added the ability to monitor stdout in the CLI for running jobs and workflow jobs (https://github.com/ansible/awx/issues/6165)
+- Fixed a bug which prevented the AWX CLI from properly installing with newer versions of pip (https://github.com/ansible/awx/issues/6870)
 - Fixed a bug which broke AWX's external logging support when configured with HTTPS endpoints that utilize self-signed certificates (https://github.com/ansible/awx/issues/6851)
 - Fixed a local docker installer bug that mistakenly attempted to upgrade PostgreSQL when an external pg_hostname is specified (https://github.com/ansible/awx/pull/5398)
 - Fixed a race condition that caused task container crashes when pods are quickly brought down and back up (https://github.com/ansible/awx/issues/6750)
