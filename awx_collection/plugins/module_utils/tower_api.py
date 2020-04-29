@@ -33,7 +33,7 @@ class ItemNotDefined(Exception):
 
 class TowerModule(AnsibleModule):
     # This gets set by the make process so whatever is in here is irrelevant
-    _COLLECTION_VERSION = "11.0.0"
+    _COLLECTION_VERSION = "11.1.0"
     _COLLECTION_TYPE = "awx"
     # This maps the collections type (awx/tower) to the values returned by the API
     # Those values can be found in awx/api/generics.py line 204
@@ -338,6 +338,9 @@ class TowerModule(AnsibleModule):
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
 
+        with open('/tmp/john', 'w') as f:
+            f.write("{}".format(self.url.geturl()))
+
         try:
             response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
         except(SSLValidationError) as ssl_err:
@@ -385,8 +388,15 @@ class TowerModule(AnsibleModule):
             self.url = self.url._replace(query=None)
 
         if not self.version_checked:
-            tower_type = response.getheader('X-API-Product-Name', None)
-            tower_version = response.getheader('X-API-Product-Version', None)
+            # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
+            # First try to get the headers in PY3 format and then drop down to PY2.
+            try:
+                tower_type = response.getheader('X-API-Product-Name', None)
+                tower_version = response.getheader('X-API-Product-Version', None)
+            except Exception:
+                tower_type = response.info().getheader('X-API-Product-Name', None)
+                tower_version = response.info().getheader('X-API-Product-Version', None)
+
             if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
                 self.warn("You are using the {0} version of this collection but connecting to {1}".format(
                     self._COLLECTION_TYPE, tower_type
