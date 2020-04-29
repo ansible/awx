@@ -9,6 +9,7 @@ import {
   TextListItem,
   TextListItemVariants,
   TextListVariants,
+  Label,
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 
@@ -53,6 +54,9 @@ function JobTemplateDetail({ i18n, template }) {
     use_fact_cache,
     url,
     verbosity,
+    webhook_service,
+    related: { webhook_receiver },
+    webhook_key,
   } = template;
   const [contentError, setContentError] = useState(null);
   const [deletionError, setDeletionError] = useState(null);
@@ -239,6 +243,35 @@ function JobTemplateDetail({ i18n, template }) {
               value={generateCallBackUrl}
             />
           </React.Fragment>
+        )}
+        {webhook_service && (
+          <Detail
+            label={i18n._(t`Webhook Service`)}
+            value={
+              webhook_service === 'github'
+                ? i18n._(t`GitHub`)
+                : i18n._(t`GitLab`)
+            }
+          />
+        )}
+        {webhook_receiver && (
+          <Detail
+            label={i18n._(t`Webhook URL`)}
+            value={`${document.location.origin}${webhook_receiver}`}
+          />
+        )}
+        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+        {summary_fields.webhook_credential && (
+          <Detail
+            label={i18n._(t`Webhook Credential`)}
+            value={
+              <Link
+                to={`/credentials/${summary_fields.webhook_credential.id}/details`}
+              >
+                <Label>{summary_fields.webhook_credential.name}</Label>
+              </Link>
+            }
+          />
         )}
         {renderOptionsField && (
           <Detail label={i18n._(t`Options`)} value={renderOptions} />
