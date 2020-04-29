@@ -38,7 +38,10 @@ services:
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
     {% endif %}
-    {% if ssl_certificate is defined %}
+    {% if (ssl_certificate is defined) and (ssl_certificate_key is defined) %}
+      - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
+      - "{{ ssl_certificate_key +':/etc/nginx/awxweb_key.pem:ro' }}"
+    {% elif (ssl_certificate is defined) and (ssl_certificate_key is not defined) %}
       - "{{ ssl_certificate +':/etc/nginx/awxweb.pem:ro' }}"
     {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
