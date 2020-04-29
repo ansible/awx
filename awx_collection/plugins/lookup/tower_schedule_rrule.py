@@ -133,7 +133,8 @@ class LookupModule(LookupBase):
         'last': -1,
     }
 
-    def parse_date_time(self, date_string):
+    @staticmethod
+    def parse_date_time(date_string):
         try:
             return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
         except ValueError:
@@ -145,18 +146,23 @@ class LookupModule(LookupBase):
 
         frequency = terms[0].lower()
 
-        if frequency not in self.frequencies:
-            raise AnsibleError('Frequency of {0} is invalid'.format(terms[0]))
+        return self.get_rrule(frequency, kwargs)
+
+    @staticmethod
+    def get_rrule(frequency, kwargs):
+
+        if frequency not in LookupModule.frequencies:
+            raise AnsibleError('Frequency of {0} is invalid'.format(frequency))
 
         rrule_kwargs = {
-            'freq': self.frequencies[frequency],
+            'freq': LookupModule.frequencies[frequency],
             'interval': kwargs.get('every', 1),
         }
 
         # All frequencies can use a start date
         if 'start_date' in kwargs:
             try:
-                rrule_kwargs['dtstart'] = self.parse_date_time(kwargs['start_date'])
+                rrule_kwargs['dtstart'] = LookupModule.parse_date_time(kwargs['start_date'])
             except Exception:
                 raise AnsibleError('Parameter start_date must be in the format YYYY-MM-DD [HH:MM:SS]')
 
@@ -171,7 +177,7 @@ class LookupModule(LookupBase):
                     rrule_kwargs['count'] = end_on
                 else:
                     try:
-                        rrule_kwargs['until'] = self.parse_date_time(end_on)
+                        rrule_kwargs['until'] = LookupModule.parse_date_time(end_on)
                     except Exception:
                         raise AnsibleError('Parameter end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]')
 
@@ -180,9 +186,9 @@ class LookupModule(LookupBase):
                 days = []
                 for day in kwargs['on_days'].split(','):
                     day = day.strip()
-                    if day not in self.weekdays:
-                        raise AnsibleError('Parameter on_days must only contain values {0}'.format(', '.join(self.weekdays.keys())))
-                    days.append(self.weekdays[day])
+                    if day not in LookupModule.weekdays:
+                        raise AnsibleError('Parameter on_days must only contain values {0}'.format(', '.join(LookupModule.weekdays.keys())))
+                    days.append(LookupModule.weekdays[day])
 
                 rrule_kwargs['byweekday'] = days
 
@@ -207,13 +213,13 @@ class LookupModule(LookupBase):
                     except Exception:
                         raise AnsibleError('on_the parameter must be two space seperated words')
 
-                    if weekday not in self.weekdays:
+                    if weekday not in LookupModule.weekdays:
                         raise AnsibleError('Weekday portion of on_the parameter is not valid')
-                    if occurance not in self.set_positions:
+                    if occurance not in LookupModule.set_positions:
                         raise AnsibleError('The first string of the on_the parameter is not valid')
 
-                    rrule_kwargs['byweekday'] = self.weekdays[weekday]
-                    rrule_kwargs['bysetpos'] = self.set_positions[occurance]
+                    rrule_kwargs['byweekday'] = LookupModule.weekdays[weekday]
+                    rrule_kwargs['bysetpos'] = LookupModule.set_positions[occurance]
 
         my_rule = rrule.rrule(**rrule_kwargs)
 
