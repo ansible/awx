@@ -70,7 +70,6 @@ DOCUMENTATION = """
           - Second string is one of sunday, monday, tuesday, wednesday, thursday, friday
           - Used for month type schedules
           - Can not be used with month_day_number parameters
-    extends_documentation_fragment: awx.awx.auth
 """
 
 EXAMPLES = """
