@@ -98,7 +98,7 @@ except ImportError:
     missing_modules.append('pytz')
 
 try:
-    from dateutil.rrule import rrule, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, MO, TU, WE, TH, FR, SA, SU
+    from dateutil import rrule
 except ImportError:
     missing_modules.append('python.dateutil')
 
@@ -108,22 +108,22 @@ if len(missing_modules) > 0:
 
 class LookupModule(LookupBase):
     frequencies = {
-        'none': DAILY,
-        'minute': MINUTELY,
-        'hour': HOURLY,
-        'day': DAILY,
-        'week': WEEKLY,
-        'month': MONTHLY,
+        'none': rrule.DAILY,
+        'minute': rrule.MINUTELY,
+        'hour': rrule.HOURLY,
+        'day': rrule.DAILY,
+        'week': rrule.WEEKLY,
+        'month': rrule.MONTHLY,
     }
 
     weekdays = {
-        'monday': MO,
-        'tuesday': TU,
-        'wednesday': WE,
-        'thursday': TH,
-        'friday': FR,
-        'saturday': SA,
-        'sunday': SU,
+        'monday': rrule.MO,
+        'tuesday': rrule.TU,
+        'wednesday': rrule.WE,
+        'thursday': rrule.TH,
+        'friday': rrule.FR,
+        'saturday': rrule.SA,
+        'sunday': rrule.SU,
     }
 
     set_positions = {
@@ -216,7 +216,7 @@ class LookupModule(LookupBase):
                     rrule_kwargs['byweekday'] = self.weekdays[weekday]
                     rrule_kwargs['bysetpos'] = self.set_positions[occurance]
 
-        my_rule = rrule(**rrule_kwargs)
+        my_rule = rrule.rrule(**rrule_kwargs)
 
         # All frequencies can use a timezone but rrule can't support the format that tower uses.
         # So we will do a string manip here if we need to
