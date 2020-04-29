@@ -176,7 +176,10 @@ CLUSTER_HOST_ID = socket.gethostname()
 if 'Docker Desktop' in os.getenv('OS', ''):
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
 else:
-    os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    try:
+        os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    except Exception:
+        pass
 
 WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
 AWX_CALLBACK_PROFILE = True
