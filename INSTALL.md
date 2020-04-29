@@ -10,7 +10,6 @@ This document provides a guide for installing AWX.
     + [AWX branding](#awx-branding)
     + [Prerequisites](#prerequisites)
     + [System Requirements](#system-requirements)
-    + [AWX Tunables](#awx-tunables)
     + [Choose a deployment platform](#choose-a-deployment-platform)
     + [Official vs Building Images](#official-vs-building-images)
   * [Upgrading from previous versions](#upgrading-from-previous-versions)
@@ -49,7 +48,17 @@ This document provides a guide for installing AWX.
 
 ### Clone the repo
 
-If you have not already done so, you will need to clone, or create a local copy, of the [AWX repo](https://github.com/ansible/awx). For more on how to clone the repo, view [git clone help](https://git-scm.com/docs/git-clone).
+If you have not already done so, you will need to clone, or create a local copy, of the [AWX repo](https://github.com/ansible/awx). We generally recommend that you view the releases page:
+
+https://github.com/ansible/awx/releases
+
+...and clone the latest stable release, e.g.,
+
+`git clone -b x.y.z https://github.com/ansible/awx.git`
+
+Please note that deploying from `HEAD` (or the latest commit) is **not** stable, and that if you want to do this, you should proceed at your own risk (also, see the section #official-vs-building-images for building your own image).
+
+For more on how to clone the repo, view [git clone help](https://git-scm.com/docs/git-clone).
 
 Once you have a local copy, run commands within the root of the project tree.
 
@@ -84,10 +93,6 @@ The system that runs the AWX service will need to satisfy the following requirem
 - At least 20GB of space
 - Running Docker, Openshift, or Kubernetes
 - If you choose to use an external PostgreSQL database, please note that the minimum version is 10+.
-
-### AWX Tunables
-
-**TODO** add tunable bits
 
 ### Choose a deployment platform
 
@@ -144,7 +149,7 @@ $ ansible-playbook -i inventory install.yml -e @vars.yml
 
 ### Prerequisites
 
-To complete a deployment to OpenShift, you will obviously need access to an OpenShift cluster. For demo and testing purposes, you can use [Minishift](https://github.com/minishift/minishift) to create a single node cluster running inside a virtual machine.
+To complete a deployment to OpenShift, you will need access to an OpenShift cluster. For demo and testing purposes, you can use [Minishift](https://github.com/minishift/minishift) to create a single node cluster running inside a virtual machine.
 
 When using OpenShift for deploying AWX make sure you have correct privileges to add the security context 'privileged', otherwise the installation will fail. The privileged context is needed because of the use of [the bubblewrap tool](https://github.com/containers/bubblewrap) to add an additional layer of security when using containers.
 
