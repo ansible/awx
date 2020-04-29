@@ -187,13 +187,13 @@ class Search extends React.Component {
           queryParams[key].forEach(val =>
             queryParamsByKey[columnKey].chips.push({
               key: `${key}:${val}`,
-              node: <span>{getLabelFromValue(val, columnKey)}</span>,
+              node: getLabelFromValue(val, columnKey),
             })
           );
         } else {
           queryParamsByKey[columnKey].chips.push({
             key: `${key}:${queryParams[key]}`,
-            node: <span>{getLabelFromValue(queryParams[key], columnKey)}</span>,
+            node: getLabelFromValue(queryParams[key], columnKey),
           });
         }
       });
