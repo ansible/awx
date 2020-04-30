@@ -128,7 +128,7 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
 
 
 @pytest.mark.django_db
-def test_job_template_extra_credentials_prompts_access(
+def test_job_template_credentials_prompts_access(
         rando, post, inventory, project, machine_credential, vault_credential):
     jt = JobTemplate.objects.create(
         name = 'test-jt',
@@ -149,14 +149,14 @@ def test_job_template_extra_credentials_prompts_access(
 @pytest.mark.django_db
 class TestJobTemplateCredentials:
 
-    def test_job_template_cannot_add_extra_credentials(self, job_template, credential, rando):
+    def test_job_template_cannot_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.read_role.members.add(rando)
         # without permission to credential, user can not attach it
         assert not JobTemplateAccess(rando).can_attach(
             job_template, credential, 'credentials', {})
 
-    def test_job_template_can_add_extra_credentials(self, job_template, credential, rando):
+    def test_job_template_can_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.use_role.members.add(rando)
         # user has permission to apply credential

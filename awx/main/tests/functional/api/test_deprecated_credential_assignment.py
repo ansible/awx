@@ -25,41 +25,6 @@ def job_template(job_template, project, inventory):
 
 
 @pytest.mark.django_db
-def test_extra_credentials_filtering(get, job_template, admin,
-                                     machine_credential, vault_credential, credential):
-    job_template.credentials.add(machine_credential)
-    job_template.credentials.add(vault_credential)
-    job_template.credentials.add(credential)
-    url = reverse(
-        'api:job_template_extra_credentials_list',
-        kwargs={'pk': job_template.pk}
-    )
-    resp = get(url, admin, expect=200)
-    assert resp.data['count'] == 1
-    assert resp.data['results'][0]['id'] == credential.pk
-
-
-@pytest.mark.django_db
-def test_extra_credentials_requires_cloud_or_net(get, post, job_template, admin,
-                                                 machine_credential, vault_credential, credential,
-                                                 net_credential):
-    url = reverse(
-        'api:job_template_extra_credentials_list',
-        kwargs={'pk': job_template.pk}
-    )
-
-    for cred in (machine_credential, vault_credential):
-        resp = post(url, {'associate': True, 'id': cred.pk}, admin, expect=400)
-        assert 'Extra credentials must be network or cloud.' in smart_str(resp.content)
-
-    post(url, {'associate': True, 'id': credential.pk}, admin, expect=204)
-    assert get(url, admin).data['count'] == 1
-
-    post(url, {'associate': True, 'id': net_credential.pk}, admin, expect=204)
-    assert get(url, admin).data['count'] == 2
-
-
-@pytest.mark.django_db
 def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_credential):
     url = reverse(
         'api:job_template_credentials_list',
@@ -113,52 +78,6 @@ def test_prevent_multiple_machine_creds_at_launch(get, post, job_template, admin
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     resp = post(url, {'credentials': creds}, admin)
     assert 'Cannot assign multiple Machine credentials.' in smart_str(resp.content)
-
-
-@pytest.mark.django_db
-def test_extra_credentials_unique_by_kind(get, post, job_template, admin,
-                                          credentialtype_aws):
-    url = reverse(
-        'api:job_template_extra_credentials_list',
-        kwargs={'pk': job_template.pk}
-    )
-
-    def _new_cred(name):
-        return {
-            'name': name,
-            'credential_type': credentialtype_aws.pk,
-            'inputs': {
-                'username': 'bob',
-                'password': 'secret',
-            }
-        }
-
-    post(url, _new_cred('First Cred'), admin, expect=201)
-    assert get(url, admin).data['count'] == 1
-
-    resp = post(url, _new_cred('Second Cred'), admin, expect=400)
-    assert 'Cannot assign multiple Amazon Web Services credentials.' in smart_str(resp.content)
-
-
-@pytest.mark.django_db
-def test_extra_credentials_at_launch(get, post, job_template, admin, credential):
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'extra_credentials': [credential.pk]}, admin, expect=201).data['job']
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-
-    assert len(summary_fields['credentials']) == 1
-
-
-@pytest.mark.django_db
-def test_modify_extra_credentials_at_launch(get, post, job_template, admin,
-                                            machine_credential, vault_credential, credential):
-    job_template.credentials.add(machine_credential)
-    job_template.credentials.add(vault_credential)
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    pk = post(url, {'extra_credentials': [credential.pk]}, admin, expect=201).data['job']
-
-    summary_fields = get(reverse('api:job_detail', kwargs={'pk': pk}), admin).data['summary_fields']
-    assert len(summary_fields['credentials']) == 3
 
 
 @pytest.mark.django_db
@@ -227,25 +146,6 @@ def test_vault_credential_with_password_at_launch(get, post, job_template, admin
             'vault_password': 'testing123'
         }, admin, expect=201)
         signal_start.assert_called_with(vault_password='testing123')
-
-
-@pytest.mark.django_db
-def test_extra_creds_prompted_at_launch(get, post, job_template, admin, net_credential):
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    resp = post(url, {'extra_credentials': [net_credential.pk]}, admin, expect=201)
-
-    summary_fields = get(
-        reverse('api:job_detail', kwargs={'pk': resp.data['job']}),
-        admin
-    ).data['summary_fields']
-    assert len(summary_fields['credentials']) == 1
-
-
-@pytest.mark.django_db
-def test_invalid_mixed_credentials_specification(get, post, job_template, admin, net_credential):
-    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    post(url=url, data={'credentials': [net_credential.pk], 'extra_credentials': [net_credential.pk]},
-         user=admin, expect=400)
 
 
 @pytest.mark.django_db

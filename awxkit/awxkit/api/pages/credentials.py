@@ -362,9 +362,7 @@ class Credentials(page.PageList, Credential):
 
 
 page.register_page([resources.credentials,
-                    resources.related_credentials,
-                    resources.job_extra_credentials,
-                    resources.job_template_extra_credentials],
+                    resources.related_credentials],
                    Credentials)
 
 

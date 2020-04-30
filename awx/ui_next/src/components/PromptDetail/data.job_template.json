@@ -9,7 +9,6 @@
       "labels": "/api/v2/job_templates/7/labels/",
       "inventory": "/api/v2/inventories/1/",
       "project": "/api/v2/projects/6/",
-      "extra_credentials": "/api/v2/job_templates/7/extra_credentials/",
       "credentials": "/api/v2/job_templates/7/credentials/",
       "last_job": "/api/v2/jobs/12/",
       "jobs": "/api/v2/job_templates/7/jobs/",
@@ -143,7 +142,6 @@
               "type": "job"
           }
       ],
-      "extra_credentials": [],
       "credentials": [
         {
           "id": 1, "kind": "ssh" , "name": "Credential 1"

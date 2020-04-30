@@ -283,7 +283,3 @@ of what happened.
    - Job template has machine & cloud credentials, set to prompt for credential on launch
    - Schedule for job template provides no credentials
    - Spawned job still uses all job template credentials
-
-**Credentials Deprecated Behavior**
-   - Manual launch providing `"extra_credentials": []` should launch with no job credentials
-   - Such jobs cannot have schedules created from them
