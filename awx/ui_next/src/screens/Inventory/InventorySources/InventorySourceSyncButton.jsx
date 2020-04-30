@@ -1,0 +1,139 @@
+import React, { useCallback, useState, useEffect } from 'react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
+import PropTypes from 'prop-types';
+import { Button, Tooltip } from '@patternfly/react-core';
+import { SyncIcon, MinusCircleIcon } from '@patternfly/react-icons';
+import useRequest, { useDismissableError } from '@util/useRequest';
+import AlertModal from '@components/AlertModal/AlertModal';
+import ErrorDetail from '@components/ErrorDetail/ErrorDetail';
+import { InventoryUpdatesAPI, InventorySourcesAPI } from '@api';
+
+function InventorySourceSyncButton({
+  onCancelSyncLoading,
+  onStartSyncLoading,
+  source,
+  i18n,
+}) {
+  const [updateStatus, setUpdateStatus] = useState(source.status);
+
+  const {
+    isLoading: startSyncLoading,
+    error: startSyncError,
+    request: startSyncProcess,
+  } = useRequest(
+    useCallback(async () => {
+      let syncStatus;
+
+      const {
+        data: { can_update },
+      } = await InventorySourcesAPI.allowSyncStart(source.id);
+      if (can_update) {
+        syncStatus = await InventorySourcesAPI.startSyncSource(source.id);
+      } else {
+        throw new Error(
+          i18n._(
+            t`You do not have permission to start this inventory source sync`
+          )
+        );
+      }
+
+      setUpdateStatus(syncStatus.data.status);
+
+      return syncStatus.data.status;
+    }, [source.id, i18n]),
+    {}
+  );
+
+  const {
+    isLoading: cancelSyncLoading,
+    error: cancelSyncError,
+    request: cancelSyncProcess,
+  } = useRequest(
+    useCallback(async () => {
+      const {
+        data: {
+          summary_fields: {
+            current_update: { id },
+          },
+        },
+      } = await InventorySourcesAPI.readDetail(source.id);
+      const {
+        data: { can_cancel },
+      } = await InventoryUpdatesAPI.allowSyncCancel(id);
+      if (can_cancel) {
+        await InventoryUpdatesAPI.cancelSyncSource(id);
+        setUpdateStatus(null);
+      } else {
+        throw new Error(
+          i18n._(
+            t`You do not have permission to cancel this inventory source sync`
+          )
+        );
+      }
+    }, [source.id, i18n])
+  );
+
+  useEffect(() => onStartSyncLoading(startSyncLoading), [
+    onStartSyncLoading,
+    startSyncLoading,
+  ]);
+
+  useEffect(() => onCancelSyncLoading(cancelSyncLoading), [
+    onCancelSyncLoading,
+    cancelSyncLoading,
+  ]);
+
+  const { error, dismissError } = useDismissableError(
+    cancelSyncError || startSyncError
+  );
+
+  return (
+    <>
+      {updateStatus === 'pending' ? (
+        <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
+          <Button
+            isDisabled={cancelSyncLoading || startSyncLoading}
+            aria-label={i18n._(t`Cancel sync source`)}
+            variant="plain"
+            onClick={cancelSyncProcess}
+          >
+            <MinusCircleIcon />
+          </Button>
+        </Tooltip>
+      ) : (
+        <Tooltip content={i18n._(t`Start sync process`)} position="top">
+          <Button
+            isDisabled={cancelSyncLoading || startSyncLoading}
+            aria-label={i18n._(t`Start sync source`)}
+            variant="plain"
+            onClick={startSyncProcess}
+          >
+            <SyncIcon />
+          </Button>
+        </Tooltip>
+      )}
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {startSyncError
+            ? i18n._(t`Failed to sync inventory source.`)
+            : i18n._(t`Failed to cancel inventory source sync.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+    </>
+  );
+}
+
+InventorySourceSyncButton.propTypes = {
+  onCancelSyncLoading: PropTypes.func.isRequired,
+  onStartSyncLoading: PropTypes.func.isRequired,
+  source: PropTypes.shape({}),
+};
+
+export default withI18n()(InventorySourceSyncButton);
