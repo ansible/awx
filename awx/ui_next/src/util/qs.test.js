@@ -652,6 +652,28 @@ describe('qs (qs.js)', () => {
       });
     });
 
+    it('should not remove empty string values', () => {
+      const oldParams = {
+        foo: '',
+      };
+      const newParams = {
+        foo: 'two',
+      };
+      expect(mergeParams(oldParams, newParams)).toEqual({
+        foo: ['', 'two'],
+      });
+
+      const oldParams2 = {
+        foo: 'one',
+      };
+      const newParams2 = {
+        foo: '',
+      };
+      expect(mergeParams(oldParams2, newParams2)).toEqual({
+        foo: ['one', ''],
+      });
+    });
+
     it('should retain unaltered params', () => {
       const oldParams = {
         foo: 'one',

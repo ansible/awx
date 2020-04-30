@@ -208,7 +208,7 @@ function mergeParam(oldVal, newVal) {
   if (!newVal && newVal !== '') {
     return oldVal;
   }
-  if (!oldVal) {
+  if (!oldVal && oldVal !== '') {
     return newVal;
   }
   let merged;

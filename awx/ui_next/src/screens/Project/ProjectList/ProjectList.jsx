@@ -115,7 +115,7 @@ function ProjectList({ i18n }) {
               },
               {
                 name: i18n._(t`Type`),
-                key: 'type',
+                key: 'scm_type',
                 options: [
                   [``, i18n._(t`Manual`)],
                   [`git`, i18n._(t`Git`)],
