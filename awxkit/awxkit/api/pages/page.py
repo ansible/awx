@@ -562,6 +562,7 @@ class PageCache(object):
         return self.options.setdefault(url, options)
 
     def set_page(self, page):
+        log.debug("set_page: %s", page.endpoint)
         self.pages_by_url[page.endpoint] = page
         if getattr(page, 'NATURAL_KEY', None):
             natural_key = page.get_natural_key(cache=self)
@@ -588,9 +589,11 @@ class PageCache(object):
             log.warning("This endpoint is deprecated: %s", url)
             return self.pages_by_url.setdefault(url, None)
 
+        log.debug("get_page: %s", page.endpoint)
         return self.set_page(page)
 
     def get_by_natural_key(self, natural_key):
         endpoint = self.pages_by_natural_key.get(utils.freeze(natural_key))
+        log.debug("get_by_natural_key: %s, endpoint: %s", repr(natural_key), endpoint)
         if endpoint:
             return self.get_page(endpoint)
