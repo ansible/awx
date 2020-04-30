@@ -439,13 +439,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             field = self._meta.get_field(field_name)
             if isinstance(field, models.ManyToManyField):
                 old_value = set(old_value.all())
-                if getattr(self, '_deprecated_credential_launch', False):
-                    # TODO: remove this code branch when support for `extra_credentials` goes away
-                    new_value = set(kwargs[field_name])
-                else:
-                    new_value = set(kwargs[field_name]) - old_value
-                    if not new_value:
-                        continue
+                new_value = set(kwargs[field_name]) - old_value
+                if not new_value:
+                    continue
 
             if new_value == old_value:
                 # no-op case: Fields the same as template's value

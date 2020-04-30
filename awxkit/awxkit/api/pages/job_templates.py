@@ -189,16 +189,6 @@ class JobTemplate(
                     dict(id=kwargs['vault_credential']))
         return ret
 
-    def add_extra_credential(self, credential):
-        with suppress(exc.NoContent):
-            self.related.extra_credentials.post(
-                dict(id=credential.id, associate=True))
-
-    def remove_extra_credential(self, credential):
-        with suppress(exc.NoContent):
-            self.related.extra_credentials.post(
-                dict(id=credential.id, disassociate=True))
-
     def add_credential(self, credential):
         with suppress(exc.NoContent):
             self.related.credentials.post(

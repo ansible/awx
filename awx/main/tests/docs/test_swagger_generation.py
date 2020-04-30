@@ -105,9 +105,6 @@ class TestSwaggerGeneration():
             'get', 'put', 'patch', 'delete'
         ]
 
-        # Test deprecated paths
-        assert paths['/api/v2/jobs/{id}/extra_credentials/']['get']['deprecated'] is True
-
     @pytest.mark.parametrize('path', [
         '/api/',
         '/api/v2/',

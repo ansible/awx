@@ -413,9 +413,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         if 'extra_vars' in validated_kwargs:
             unified_job.handle_extra_data(validated_kwargs['extra_vars'])
 
-        if not getattr(self, '_deprecated_credential_launch', False):
-            # Create record of provided prompts for relaunch and rescheduling
-            unified_job.create_config_from_prompts(kwargs, parent=self)
+        # Create record of provided prompts for relaunch and rescheduling
+        unified_job.create_config_from_prompts(kwargs, parent=self)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ

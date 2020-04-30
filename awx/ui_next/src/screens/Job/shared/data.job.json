@@ -7,7 +7,6 @@
       "labels": "/api/v2/jobs/2/labels/",
       "inventory": "/api/v2/inventories/1/",
       "project": "/api/v2/projects/6/",
-      "extra_credentials": "/api/v2/jobs/2/extra_credentials/",
       "credentials": "/api/v2/jobs/2/credentials/",
       "unified_job_template": "/api/v2/job_templates/7/",
       "stdout": "/api/v2/jobs/2/stdout/",
@@ -80,7 +79,6 @@
           "count": 0,
           "results": []
       },
-      "extra_credentials": [],
       "credentials": [
           {
               "id": 1,

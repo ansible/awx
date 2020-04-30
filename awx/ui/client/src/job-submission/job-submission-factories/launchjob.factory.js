@@ -123,9 +123,9 @@ export default
                         if(!Empty(scope.selected_credentials.machine)) {
                             job_launch_data.credential_id = scope.selected_credentials.machine.id;
                         }
-                        job_launch_data.extra_credentials = [];
+                        job_launch_data.credentials = [];
                         scope.selected_credentials.extra.forEach((extraCredential) => {
-                            job_launch_data.extra_credentials.push(extraCredential.id);
+                            job_launch_data.credentials.push(extraCredential.id);
                         });
                     }
 

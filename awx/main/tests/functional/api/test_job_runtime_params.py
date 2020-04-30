@@ -304,7 +304,7 @@ def test_job_launch_with_default_creds(machine_credential, vault_credential, dep
 @pytest.mark.django_db
 def test_job_launch_JT_enforces_unique_credentials_kinds(machine_credential, credentialtype_aws, deploy_jobtemplate):
     """
-    JT launching should require that extra_credentials have distinct CredentialTypes
+    JT launching should require that credentials have distinct CredentialTypes
     """
     creds = []
     for i in range(2):

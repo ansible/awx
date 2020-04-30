@@ -9,7 +9,6 @@
         "labels": "/api/v2/job_templates/7/labels/",
         "inventory": "/api/v2/inventories/1/",
         "project": "/api/v2/projects/6/",
-        "extra_credentials": "/api/v2/job_templates/7/extra_credentials/",
         "credentials": "/api/v2/job_templates/7/credentials/",
         "last_job": "/api/v2/jobs/12/",
         "jobs": "/api/v2/job_templates/7/jobs/",
@@ -118,7 +117,6 @@
             "finished": "2019-10-01T14:34:35.142483Z",
             "type": "job"
         }],
-        "extra_credentials": [],
         "credentials": [{
                 "id": 1,
                 "kind": "ssh",
