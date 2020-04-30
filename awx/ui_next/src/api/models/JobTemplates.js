@@ -19,10 +19,6 @@ class JobTemplates extends SchedulesMixin(
     this.readWebhookKey = this.readWebhookKey.bind(this);
   }
 
-  copyTemplate(id, data) {
-    return this.http.post(`${this.baseUrl}${id}/copy/`, data);
-  }
-
   launch(id, data) {
     return this.http.post(`${this.baseUrl}${id}/launch/`, data);
   }

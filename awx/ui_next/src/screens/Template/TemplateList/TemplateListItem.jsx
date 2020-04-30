@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button,
@@ -20,18 +20,18 @@ import {
 } from '@patternfly/react-icons';
 import { timeOfDay } from '@util/dates';
 
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
 import LaunchButton from '@components/LaunchButton';
 import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 import styled from 'styled-components';
-import CopyButton from './CopyButton';
+import CopyButton from '@components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 16px;
-  grid-template-columns: repeat(2, 40px);
+  grid-template-columns: repeat(3, 40px);
 `;
 
 function TemplateListItem({
@@ -42,9 +42,23 @@ function TemplateListItem({
   detailUrl,
   fetchTemplates,
 }) {
-  const [disableButtons, setDisableButtons] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
   const labelId = `check-action-${template.id}`;
   const canLaunch = template.summary_fields.user_capabilities.start;
+
+  const copyTemplate = useCallback(async () => {
+    if (template.type === 'job_template') {
+      await JobTemplatesAPI.copy(template.id, {
+        name: `${template.name} @ ${timeOfDay()}`,
+      });
+    } else {
+      await WorkflowJobTemplatesAPI.copy(template.id, {
+        name: `${template.name} @ ${timeOfDay()}`,
+      });
+    }
+    await fetchTemplates();
+  }, [fetchTemplates, template.id, template.name, template.type]);
 
   const missingResourceIcon =
     template.type === 'job_template' &&
@@ -55,7 +69,7 @@ function TemplateListItem({
     <DataListItem aria-labelledby={labelId} id={`${template.id}`}>
       <DataListItemRow>
         <DataListCheck
-          isDisabled={disableButtons}
+          isDisabled={isDisabled}
           id={`select-jobTemplate-${template.id}`}
           checked={isSelected}
           onChange={onSelect}
@@ -100,7 +114,7 @@ function TemplateListItem({
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (
                   <Button
-                    isDisabled={disableButtons}
+                    isDisabled={isDisabled}
                     aria-label={i18n._(t`Launch template`)}
                     css="grid-column: 1"
                     variant="plain"
@@ -112,37 +126,31 @@ function TemplateListItem({
               </LaunchButton>
             </Tooltip>
           )}
-          {template.summary_fields.user_capabilities.edit ? (
-            <>
-              <Tooltip content={i18n._(t`Edit Template`)} position="top">
-                <Button
-                  isDisabled={disableButtons}
-                  aria-label={i18n._(t`Edit Template`)}
-                  css="grid-column: 2"
-                  variant="plain"
-                  component={Link}
-                  to={`/templates/${template.type}/${template.id}/edit`}
-                >
-                  <PencilAltIcon />
-                </Button>
-              </Tooltip>
-              {template.summary_fields.user_capabilities.copy && (
-                <CopyButton
-                  isDisabled={disableButtons}
-                  css="grid-column: 3"
-                  itemName={template.name}
-                  disableButtons={setDisableButtons}
-                  copyItem={async () => {
-                    await JobTemplatesAPI.copyTemplate(template.id, {
-                      name: `${template.name}@${timeOfDay()}`,
-                    });
-                    await fetchTemplates();
-                  }}
-                />
-              )}
-            </>
-          ) : (
-            ''
+          {template.summary_fields.user_capabilities.edit && (
+            <Tooltip content={i18n._(t`Edit Template`)} position="top">
+              <Button
+                isDisabled={isDisabled}
+                aria-label={i18n._(t`Edit Template`)}
+                css="grid-column: 2"
+                variant="plain"
+                component={Link}
+                to={`/templates/${template.type}/${template.id}/edit`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </Tooltip>
+          )}
+          {template.summary_fields.user_capabilities.copy && (
+            <CopyButton
+              helperText={{
+                tooltip: i18n._(t`Copy Template`),
+                errorMessage: i18n._(t`Failed to copy template.`),
+              }}
+              isDisabled={isDisabled}
+              onLoading={() => setIsDisabled(true)}
+              onDoneLoading={() => setIsDisabled(false)}
+              copyItem={copyTemplate}
+            />
           )}
         </DataListAction>
       </DataListItemRow>

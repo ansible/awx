@@ -128,7 +128,7 @@ describe('<CredentialList />', () => {
     });
     await waitForElement(
       wrapper,
-      'Modal',
+      'Modal[aria-label="Deletion Error"]',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
     await act(async () => {

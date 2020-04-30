@@ -106,6 +106,7 @@ function CredentialList({ i18n }) {
             <CredentialListItem
               key={item.id}
               credential={item}
+              fetchCredentials={fetchCredentials}
               detailUrl={`/credentials/${item.id}/details`}
               isSelected={selected.some(row => row.id === item.id)}
               onSelect={() => handleSelect(item)}
@@ -134,6 +135,7 @@ function CredentialList({ i18n }) {
         />
       </Card>
       <AlertModal
+        aria-label={i18n._(t`Deletion Error`)}
         isOpen={deletionError}
         variant="error"
         title={i18n._(t`Error!`)}

@@ -234,6 +234,7 @@ function TemplateList({ i18n }) {
         />
       </Card>
       <AlertModal
+        aria-label={i18n._(t`Deletion Error`)}
         isOpen={deletionError}
         variant="error"
         title={i18n._(t`Error!`)}
