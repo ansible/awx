@@ -1,0 +1,37 @@
+- name: Set the collection version in the tower_api.py file
+  replace:
+    path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
+    regexp: '^    _COLLECTION_VERSION =.*'
+    replace: '    _COLLECTION_VERSION = "{{ collection_version }}"'
+
+- name: Set the collection type in the tower_api.py file
+  replace:
+    path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
+    regexp: '^    _COLLECTION_TYPE =.*'
+    replace: '    _COLLECTION_TYPE = "{{ collection_namespace }}"'
+
+- name: Do file content replacements for non-default namespace or package name
+  block:
+
+    - name: Change module doc_fragments to support desired namespace and package names
+      replace:
+        path: "{{ item }}"
+        regexp: '^extends_documentation_fragment: awx.awx.auth$'
+        replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
+      with_fileglob: "{{ collection_path }}/plugins/modules/tower_*.py"
+      loop_control:
+        label: "{{ item | basename }}"
+
+    - name: Change inventory file to support desired namespace and package names
+      replace:
+        path: "{{ collection_path }}/plugins/inventory/tower.py"
+        regexp: "^    NAME = 'awx.awx.tower'  # REPLACE$"
+        replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.tower'  # REPLACE"
+  when:
+    - (collection_package != 'awx') or (collection_namespace != 'awx')
+
+- name: Template the galaxy.yml file
+  template:
+    src: "{{ collection_path }}/tools/roles/template_galaxy/templates/galaxy.yml.j2"
+    dest: "{{ collection_path }}/galaxy.yml"
+    force: true

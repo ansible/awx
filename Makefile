@@ -393,7 +393,7 @@ symlink_collection:
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
 build_collection:
-	ansible-playbook -i localhost, awx_collection/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
+	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION)
 	ansible-galaxy collection build awx_collection --force --output-path=awx_collection
 
 install_collection: build_collection

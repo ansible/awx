@@ -1,0 +1,12 @@
+---
+- name: Template the collection galaxy.yml
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    collection_package: awx
+    collection_namespace: awx
+    collection_version: 0.0.1  # not for updating, pass in extra_vars
+    collection_path: "{{ playbook_dir }}/../"
+  roles:
+    - template_galaxy
