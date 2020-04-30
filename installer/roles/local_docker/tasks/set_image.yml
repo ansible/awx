@@ -63,8 +63,14 @@
       when: docker_registry is not defined
   when: dockerhub_base is not defined
 
+- name: Set Local Image Paths
+  set_fact:
+    awx_web_docker_actual_image: "{{ web_image|default('awx_web') }}:latest"
+    awx_task_docker_actual_image: "{{ task_image|default('awx_task') }}:latest"
+  when: dockerhub_base is defined and dockerhub_base == "local"
+
 - name: Set DockerHub Image Paths
   set_fact:
     awx_web_docker_actual_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
     awx_task_docker_actual_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
-  when: dockerhub_base is defined
+  when: dockerhub_base is defined and dockerhub_base == "ansible"
