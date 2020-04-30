@@ -11,6 +11,7 @@ class Projects extends SchedulesMixin(
     this.baseUrl = '/api/v2/projects/';
 
     this.readAccessList = this.readAccessList.bind(this);
+    this.readInventories = this.readInventories.bind(this);
     this.readPlaybooks = this.readPlaybooks.bind(this);
     this.readSync = this.readSync.bind(this);
     this.sync = this.sync.bind(this);
@@ -18,6 +19,10 @@ class Projects extends SchedulesMixin(
 
   readAccessList(id, params) {
     return this.http.get(`${this.baseUrl}${id}/access_list/`, { params });
+  }
+
+  readInventories(id) {
+    return this.http.get(`${this.baseUrl}${id}/inventories/`);
   }
 
   readPlaybooks(id) {

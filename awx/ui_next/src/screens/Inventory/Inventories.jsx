@@ -37,8 +37,9 @@ class Inventories extends Component {
       inventory.kind === 'smart' ? 'smart_inventory' : 'inventory';
 
     const inventoryPath = `/inventories/${inventoryKind}/${inventory.id}`;
-    const inventoryHostsPath = `/inventories/${inventoryKind}/${inventory.id}/hosts`;
-    const inventoryGroupsPath = `/inventories/${inventoryKind}/${inventory.id}/groups`;
+    const inventoryHostsPath = `${inventoryPath}/hosts`;
+    const inventoryGroupsPath = `${inventoryPath}/groups`;
+    const inventorySourcesPath = `${inventoryPath}/sources`;
 
     const breadcrumbConfig = {
       '/inventories': i18n._(t`Inventories`),
@@ -50,7 +51,6 @@ class Inventories extends Component {
       [`${inventoryPath}/completed_jobs`]: i18n._(t`Completed Jobs`),
       [`${inventoryPath}/details`]: i18n._(t`Details`),
       [`${inventoryPath}/edit`]: i18n._(t`Edit Details`),
-      [`${inventoryPath}/sources`]: i18n._(t`Sources`),
 
       [inventoryHostsPath]: i18n._(t`Hosts`),
       [`${inventoryHostsPath}/add`]: i18n._(t`Create New Host`),
@@ -74,6 +74,9 @@ class Inventories extends Component {
       [`${inventoryGroupsPath}/${nested?.id}/nested_hosts/add`]: i18n._(
         t`Create New Host`
       ),
+
+      [`${inventorySourcesPath}`]: i18n._(t`Sources`),
+      [`${inventorySourcesPath}/add`]: i18n._(t`Create New Source`),
     };
     this.setState({ breadcrumbConfig });
   };
