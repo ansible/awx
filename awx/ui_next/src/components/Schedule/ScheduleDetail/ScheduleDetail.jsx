@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Schedule } from '@types';
-import { Chip, ChipGroup, Title } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { Chip, ChipGroup, Title, Button } from '@patternfly/react-core';
+import AlertModal from '@components/AlertModal';
+import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import CredentialChip from '@components/CredentialChip';
@@ -15,6 +16,8 @@ import { ScheduleOccurrences, ScheduleToggle } from '@components/Schedule';
 import { formatDateString } from '@util/dates';
 import useRequest from '@util/useRequest';
 import { SchedulesAPI } from '@api';
+import DeleteButton from '@components/DeleteButton';
+import ErrorDetail from '@components/ErrorDetail';
 
 const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
@@ -41,6 +44,23 @@ function ScheduleDetail({ schedule, i18n }) {
     summary_fields,
     timezone,
   } = schedule;
+
+  const [deletionError, setDeletionError] = useState(null);
+  const [hasContentLoading, setHasContentLoading] = useState(false);
+  const history = useHistory();
+  const { pathname } = useLocation();
+  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+
+  const handleDelete = async () => {
+    setHasContentLoading(true);
+    try {
+      await SchedulesAPI.destroy(id);
+      history.push(`${pathRoot}schedules`);
+    } catch (error) {
+      setDeletionError(error);
+    }
+    setHasContentLoading(false);
+  };
 
   const {
     result: [credentials, preview],
@@ -79,7 +99,7 @@ function ScheduleDetail({ schedule, i18n }) {
     (job_tags && job_tags.length > 0) ||
     (skip_tags && skip_tags.length > 0);
 
-  if (isLoading) {
+  if (isLoading || hasContentLoading) {
     return <ContentLoading />;
   }
 
@@ -194,6 +214,37 @@ function ScheduleDetail({ schedule, i18n }) {
           </>
         )}
       </DetailList>
+      <CardActionsRow>
+        {summary_fields?.user_capabilities?.edit && (
+          <Button
+            aria-label={i18n._(t`Edit`)}
+            component={Link}
+            to={pathname.replace('details', 'edit')}
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        )}
+        {summary_fields?.user_capabilities?.delete && (
+          <DeleteButton
+            name={name}
+            modalTitle={i18n._(t`Delete Schedule`)}
+            onConfirm={handleDelete}
+          >
+            {i18n._(t`Delete`)}
+          </DeleteButton>
+        )}
+      </CardActionsRow>
+      {deletionError && (
+        <AlertModal
+          isOpen={deletionError}
+          variant="danger"
+          title={i18n._(t`Error!`)}
+          onClose={() => setDeletionError(null)}
+        >
+          {i18n._(t`Failed to delete schedule.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }

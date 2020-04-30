@@ -66,7 +66,9 @@ describe('<ScheduleDetail />', () => {
   });
   afterEach(() => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
+
   test('details should render with the proper values without prompts', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
       data: {
@@ -259,5 +261,90 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('should show edit button for users with edit permission', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={schedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    const editButton = await waitForElement(
+      wrapper,
+      'ScheduleDetail Button[aria-label="Edit"]'
+    );
+    expect(editButton.text()).toEqual('Edit');
+    expect(editButton.prop('to')).toBe(
+      '/templates/job_template/1/schedules/1/edit'
+    );
+  });
+
+  test('Error dialog shown for failed deletion', async () => {
+    SchedulesAPI.destroy.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={schedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
+    expect(SchedulesAPI.destroy).toHaveBeenCalledTimes(1);
   });
 });
