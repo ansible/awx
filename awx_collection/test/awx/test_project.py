@@ -19,7 +19,10 @@ def test_create_project(run_module, admin_user, organization):
             wait=False,
             scm_update_cache_timeout=5
         ), admin_user)
-    mock_warn.assert_called_once_with('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
+    mock_warn.assert_has_calls(
+        [mock.call('scm_update_cache_timeout will be ignored since scm_update_on_launch '
+                   'was not set to true')])
+
     assert result.pop('changed', None), result
 
     proj = Project.objects.get(name='foo')

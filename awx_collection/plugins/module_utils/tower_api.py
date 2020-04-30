@@ -33,7 +33,7 @@ class ItemNotDefined(Exception):
 
 class TowerModule(AnsibleModule):
     # This gets set by the make process so whatever is in here is irrelevant
-    _COLLECTION_VERSION = "11.1.0"
+    _COLLECTION_VERSION = "11.0.0"
     _COLLECTION_TYPE = "awx"
     # This maps the collections type (awx/tower) to the values returned by the API
     # Those values can be found in awx/api/generics.py line 204
@@ -339,7 +339,7 @@ class TowerModule(AnsibleModule):
             data = dumps(kwargs.get('data', {}))
 
         with open('/tmp/john', 'w') as f:
-            f.write("{}".format(self.url.geturl()))
+            f.write("{0}".format(self.url.geturl()))
 
         try:
             response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)

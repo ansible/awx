@@ -41,7 +41,6 @@ def test_password_no_op_warning(run_module, admin_user, mock_auth_stuff, silence
 
     assert result.get('changed')  # not actually desired, but assert for sanity
 
-    silence_warning.assert_called_once_with(
-        "The field password of user {0} has encrypted data and "
-        "may inaccurately report task is changed.".format(result['id'])
-    )
+    silence_warning.assert_has_calls(
+        [mock.call("The field password of user {0} has encrypted data and "
+                   "may inaccurately report task is changed.".format(result['id']))])
