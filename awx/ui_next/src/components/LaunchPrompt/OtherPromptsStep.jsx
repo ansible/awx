@@ -8,6 +8,7 @@ import { TagMultiSelect } from '@components/MultiSelect';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { VariablesField } from '@components/CodeMirrorInput';
 import styled from 'styled-components';
+import { required } from '@util/validators';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -32,6 +33,9 @@ function OtherPromptsStep({ config, i18n }) {
           of hosts that will be managed or affected by the playbook. Multiple
           patterns are allowed. Refer to Ansible documentation for more
           information and examples on patterns.`)}
+          // TODO: remove this validator (for testing only)
+          isRequired
+          validate={required(null, i18n)}
         />
       )}
       {config.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}

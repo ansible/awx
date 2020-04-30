@@ -46,5 +46,17 @@ describe('mergeExtraVars', () => {
         three: '········',
       });
     });
+
+    test('should mask empty strings', () => {
+      const vars = {
+        one: '',
+        two: 'bravo',
+      };
+
+      expect(maskPasswords(vars, ['one', 'three'])).toEqual({
+        one: '········',
+        two: 'bravo',
+      });
+    });
   });
 });

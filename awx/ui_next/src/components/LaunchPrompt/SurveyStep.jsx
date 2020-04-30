@@ -10,7 +10,6 @@ import {
 } from '@patternfly/react-core';
 import FormField, { FieldTooltip } from '@components/FormField';
 import AnsibleSelect from '@components/AnsibleSelect';
-import ContentLoading from '@components/ContentLoading';
 import {
   required,
   minMaxValue,
@@ -19,12 +18,9 @@ import {
   integer,
   combine,
 } from '@util/validators';
+import { Survey } from '@types';
 
 function SurveyStep({ survey, i18n }) {
-  if (!survey) {
-    return <ContentLoading />;
-  }
-
   const initialValues = {};
   survey.spec.forEach(question => {
     if (question.type === 'multiselect') {
@@ -38,6 +34,9 @@ function SurveyStep({ survey, i18n }) {
     <SurveySubForm survey={survey} initialValues={initialValues} i18n={i18n} />
   );
 }
+SurveyStep.propTypes = {
+  survey: Survey.isRequired,
+};
 
 // This is a nested Formik form to perform validation on individual
 // survey questions. When changes to the inner form occur (onBlur), the

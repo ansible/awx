@@ -306,3 +306,21 @@ export const Schedule = shape({
   timezone: string,
   until: string,
 });
+
+export const SurveyQuestion = shape({
+  question_name: string,
+  question_description: string,
+  required: bool,
+  type: string,
+  variable: string,
+  min: number,
+  max: number,
+  default: string,
+  choices: string,
+});
+
+export const Survey = shape({
+  name: string,
+  description: string,
+  spec: arrayOf(SurveyQuestion),
+});
