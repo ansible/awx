@@ -9,12 +9,7 @@ import AlertModal from '@components/AlertModal/AlertModal';
 import ErrorDetail from '@components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '@api';
 
-function InventorySourceSyncButton({
-  onCancelSyncLoading,
-  onStartSyncLoading,
-  source,
-  i18n,
-}) {
+function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
   const [updateStatus, setUpdateStatus] = useState(source.status);
 
   const {
@@ -23,25 +18,14 @@ function InventorySourceSyncButton({
     request: startSyncProcess,
   } = useRequest(
     useCallback(async () => {
-      let syncStatus;
-
       const {
-        data: { can_update },
-      } = await InventorySourcesAPI.allowSyncStart(source.id);
-      if (can_update) {
-        syncStatus = await InventorySourcesAPI.startSyncSource(source.id);
-      } else {
-        throw new Error(
-          i18n._(
-            t`You do not have permission to start this inventory source sync`
-          )
-        );
-      }
+        data: { status },
+      } = await InventorySourcesAPI.createSyncStart(source.id);
 
-      setUpdateStatus(syncStatus.data.status);
+      setUpdateStatus(status);
 
-      return syncStatus.data.status;
-    }, [source.id, i18n]),
+      return status;
+    }, [source.id]),
     {}
   );
 
@@ -58,29 +42,15 @@ function InventorySourceSyncButton({
           },
         },
       } = await InventorySourcesAPI.readDetail(source.id);
-      const {
-        data: { can_cancel },
-      } = await InventoryUpdatesAPI.allowSyncCancel(id);
-      if (can_cancel) {
-        await InventoryUpdatesAPI.cancelSyncSource(id);
-        setUpdateStatus(null);
-      } else {
-        throw new Error(
-          i18n._(
-            t`You do not have permission to cancel this inventory source sync`
-          )
-        );
-      }
-    }, [source.id, i18n])
+
+      await InventoryUpdatesAPI.createSyncCancel(id);
+      setUpdateStatus(null);
+    }, [source.id])
   );
 
-  useEffect(() => onStartSyncLoading(startSyncLoading), [
-    onStartSyncLoading,
+  useEffect(() => onSyncLoading(startSyncLoading || cancelSyncLoading), [
+    onSyncLoading,
     startSyncLoading,
-  ]);
-
-  useEffect(() => onCancelSyncLoading(cancelSyncLoading), [
-    onCancelSyncLoading,
     cancelSyncLoading,
   ]);
 
@@ -131,8 +101,7 @@ function InventorySourceSyncButton({
 }
 
 InventorySourceSyncButton.propTypes = {
-  onCancelSyncLoading: PropTypes.func.isRequired,
-  onStartSyncLoading: PropTypes.func.isRequired,
+  onSyncLoading: PropTypes.func.isRequired,
   source: PropTypes.shape({}),
 };
 

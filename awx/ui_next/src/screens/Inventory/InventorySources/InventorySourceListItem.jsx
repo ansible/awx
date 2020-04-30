@@ -25,10 +25,7 @@ function InventorySourceListItem({
   detailUrl,
   label,
 }) {
-  const [isCancelSyncLoading, setIsCancelSyncLoading] = useState(false);
-  const [isStartSyncLoading, setIsStartSyncLoading] = useState(false);
-
-  const isDisabled = isCancelSyncLoading || isStartSyncLoading;
+  const [isSyncLoading, setIsSyncLoading] = useState(false);
 
   const generateLastJobTooltip = job => {
     return (
@@ -53,7 +50,7 @@ function InventorySourceListItem({
       <DataListItem aria-labelledby={`check-action-${source.id}`}>
         <DataListItemRow>
           <DataListCheck
-            isDisabled={isDisabled}
+            isDisabled={isSyncLoading}
             id={`select-source-${source.id}`}
             checked={isSelected}
             onChange={onSelect}
@@ -99,12 +96,9 @@ function InventorySourceListItem({
           >
             {source.summary_fields.user_capabilities.start && (
               <InventorySourceSyncButton
-                onCancelSyncLoading={isLoading =>
-                  setIsCancelSyncLoading(isLoading)
-                }
-                onStartSyncLoading={isLoading =>
-                  setIsStartSyncLoading(isLoading)
-                }
+                onSyncLoading={isLoading => {
+                  setIsSyncLoading(isLoading);
+                }}
                 source={source}
               />
             )}
@@ -113,7 +107,7 @@ function InventorySourceListItem({
                 aria-label={i18n._(t`Edit Source`)}
                 variant="plain"
                 component={Link}
-                isDisabled={isDisabled}
+                isDisabled={isSyncLoading}
                 to={`${detailUrl}/edit`}
               >
                 <PencilAltIcon />

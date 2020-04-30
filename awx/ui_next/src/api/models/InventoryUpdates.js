@@ -5,15 +5,10 @@ class InventoryUpdates extends LaunchUpdateMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = '/api/v2/inventory_updates/';
-    this.allowSyncCancel = this.allowSyncCancel.bind(this);
-    this.cancelSyncSource = this.cancelSyncSource.bind(this);
+    this.createSyncCancel = this.createSyncCancel.bind(this);
   }
 
-  allowSyncCancel(sourceId) {
-    return this.http.get(`${this.baseUrl}${sourceId}/cancel/`);
-  }
-
-  cancelSyncSource(sourceId) {
+  createSyncCancel(sourceId) {
     return this.http.post(`${this.baseUrl}${sourceId}/cancel/`);
   }
 }

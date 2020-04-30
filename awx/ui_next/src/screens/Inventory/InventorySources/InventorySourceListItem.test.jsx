@@ -106,6 +106,7 @@ describe('<InventorySourceListItem />', () => {
     );
     expect(wrapper.find('StatusIcon').length).toBe(0);
   });
+
   test('should not render sync buttons', async () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
