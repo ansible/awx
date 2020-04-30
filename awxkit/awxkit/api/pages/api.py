@@ -175,7 +175,7 @@ class ApiV2(base.Base):
     def _dependent_resources(self, data):
         page_resource = {getattr(self, resource)._create().__item_class__: resource
                          for resource in self.json}
-        data_pages = [getattr(self, resource)._create().__item_class__ for resource in data]
+        data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
             yield page_resource[page_cls]
