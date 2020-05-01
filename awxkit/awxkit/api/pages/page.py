@@ -562,11 +562,13 @@ class PageCache(object):
         return self.options.setdefault(url, options)
 
     def set_page(self, page):
-        log.debug("set_page: %s", page.endpoint)
+        log.debug("set_page: %s %s", type(page), page.endpoint)
         self.pages_by_url[page.endpoint] = page
         if getattr(page, 'NATURAL_KEY', None):
+            log.debug("set_page has natural key fields.")
             natural_key = page.get_natural_key(cache=self)
             if natural_key is not None:
+                log.debug("set_page natural_key: %s", repr(natural_key))
                 self.pages_by_natural_key[utils.freeze(natural_key)] = page.endpoint
         if 'results' in page:
             for p in page.results:

@@ -225,7 +225,6 @@ class ApiV2(base.Base):
                 else:
                     self._related.put((_page, name, S))
 
-
     def _assign_roles(self):
         while True:
             try:

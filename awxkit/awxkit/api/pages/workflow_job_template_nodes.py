@@ -123,8 +123,8 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
 
 
 page.register_page([resources.workflow_job_template_node,
-                    (resources.workflow_job_template_nodes,
-                     'post')],
+                    (resources.workflow_job_template_nodes, 'post'),
+                    (resources.workflow_job_template_workflow_nodes, 'post')],
                    WorkflowJobTemplateNode)
 
 
