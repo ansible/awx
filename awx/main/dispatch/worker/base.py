@@ -127,7 +127,7 @@ class AWXConsumerRedis(AWXConsumerBase):
                     res = json.loads(res[1])
                     self.process_task(res)
                 except redis.exceptions.RedisError:
-                    time_to_sleep = min(time_to_sleep*2, 30)
+                    time_to_sleep = min(time_to_sleep * 2, 30)
                     logger.exception(f"encountered an error communicating with redis. Reconnect attempt in {time_to_sleep} seconds")
                     time.sleep(time_to_sleep)
                 except (json.JSONDecodeError, KeyError):
