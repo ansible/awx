@@ -2460,11 +2460,8 @@ class RunInventoryUpdate(BaseTask):
 
         if injector is not None:
             env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
-            # All CLOUD_PROVIDERS sources implement as either script or auto plugin
-            if injector.should_use_plugin():
-                env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
-            else:
-                env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
+            # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
+            env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
@@ -2580,16 +2577,12 @@ class RunInventoryUpdate(BaseTask):
             injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
 
         if injector is not None:
-            if injector.should_use_plugin():
-                content = injector.inventory_contents(inventory_update, private_data_dir)
-                # must be a statically named file
-                inventory_path = os.path.join(private_data_dir, injector.filename)
-                with open(inventory_path, 'w') as f:
-                    f.write(content)
-                os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-            else:
-                # Use the vendored script path
-                inventory_path = self.get_path_to('..', 'plugins', 'inventory', injector.script_name)
+            content = injector.inventory_contents(inventory_update, private_data_dir)
+            # must be a statically named file
+            inventory_path = os.path.join(private_data_dir, injector.filename)
+            with open(inventory_path, 'w') as f:
+                f.write(content)
+            os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         elif src == 'scm':
             inventory_path = os.path.join(private_data_dir, 'project', inventory_update.source_path)
         elif src == 'custom':
@@ -2617,8 +2610,6 @@ class RunInventoryUpdate(BaseTask):
             injector = None
             if src in InventorySource.injectors:
                 injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
-            if (not injector) or (not injector.should_use_plugin()):
-                return self.get_path_to('..', 'plugins', 'inventory')
         return private_data_dir
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
