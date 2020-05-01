@@ -1232,10 +1232,12 @@ class BaseTask(object):
             # this is a _little_ expensive to filter
             # with regex, but project updates don't have many events,
             # so it *should* have a negligible performance impact
+            task = event_data.get('event_data', {}).get('task_action')
             try:
-                event_data_json = json.dumps(event_data)
-                event_data_json = UriCleaner.remove_sensitive(event_data_json)
-                event_data = json.loads(event_data_json)
+                if task in ('git', 'hg', 'svn'):
+                    event_data_json = json.dumps(event_data)
+                    event_data_json = UriCleaner.remove_sensitive(event_data_json)
+                    event_data = json.loads(event_data_json)
             except json.JSONDecodeError:
                 pass
 
