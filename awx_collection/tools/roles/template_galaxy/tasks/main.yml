@@ -1,3 +1,4 @@
+---
 - name: Set the collection version in the tower_api.py file
   replace:
     path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
