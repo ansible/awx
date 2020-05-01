@@ -1,3 +1,4 @@
+---
 - name: update project using hg
   hg:
     dest: "{{project_path|quote}}"
