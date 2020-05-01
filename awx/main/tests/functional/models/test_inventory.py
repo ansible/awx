@@ -17,7 +17,6 @@ from awx.main.models import (
     Job
 )
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.models.inventory import PluginFileInjector
 from awx.main.utils.filters import SmartFilter
 
 

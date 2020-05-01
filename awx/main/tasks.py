@@ -50,7 +50,7 @@ import ansible_runner
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, GALAXY_SERVER_FIELDS
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, GALAXY_SERVER_FIELDS
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
@@ -2606,10 +2606,6 @@ class RunInventoryUpdate(BaseTask):
         src = inventory_update.source
         if src == 'scm' and inventory_update.source_project_update:
             return os.path.join(private_data_dir, 'project')
-        if src in CLOUD_PROVIDERS:
-            injector = None
-            if src in InventorySource.injectors:
-                injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
         return private_data_dir
 
     def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
