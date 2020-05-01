@@ -1,0 +1,16 @@
+- name: update project using hg
+  hg:
+    dest: "{{project_path|quote}}"
+    repo: "{{scm_url|quote}}"
+    revision: "{{scm_branch|quote}}"
+    force: "{{scm_clean}}"
+  register: hg_result
+
+- name: Set the hg repository version
+  set_fact:
+    scm_version: "{{ hg_result['after'] }}"
+  when: "'after' in hg_result"
+
+- name: parse hg version string properly
+  set_fact:
+    scm_version: "{{scm_version|regex_replace('^([A-Za-z0-9]+).*$', '\\1')}}"
