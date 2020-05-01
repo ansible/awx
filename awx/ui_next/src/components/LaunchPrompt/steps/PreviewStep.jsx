@@ -2,7 +2,7 @@ import React from 'react';
 import { useFormikContext } from 'formik';
 import yaml from 'js-yaml';
 import PromptDetail from '@components/PromptDetail';
-import mergeExtraVars, { maskPasswords } from './mergeExtraVars';
+import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
 
 function PreviewStep({ resource, config, survey, formErrors }) {
   const { values } = useFormikContext();
