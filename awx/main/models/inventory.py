@@ -11,10 +11,6 @@ import copy
 import os.path
 from urllib.parse import urljoin
 import yaml
-import configparser
-import tempfile
-from io import StringIO
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -829,7 +825,6 @@ class InventorySourceOptions(BaseModel):
         ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
         ('satellite6', _('Red Hat Satellite 6')),
-        ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
         ('tower', _('Ansible Tower')),
@@ -1067,11 +1062,6 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_satellite6_region_choices(self):
         """Red Hat Satellite 6 region choices (not implemented)"""
-        return [('all', 'All')]
-
-    @classmethod
-    def get_cloudforms_region_choices(self):
-        """Red Hat CloudForms region choices (not implemented)"""
         return [('all', 'All')]
 
     @classmethod

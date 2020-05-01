@@ -866,16 +866,6 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ---------------------
-# ----- CloudForms -----
-# ---------------------
-CLOUDFORMS_ENABLED_VAR = 'cloudforms.power_state'
-CLOUDFORMS_ENABLED_VALUE = 'on'
-CLOUDFORMS_GROUP_FILTER = r'^.+$'
-CLOUDFORMS_HOST_FILTER = r'^.+$'
-CLOUDFORMS_EXCLUDE_EMPTY_GROUPS = True
-CLOUDFORMS_INSTANCE_ID_VAR = 'cloudforms.id'
-
-# ---------------------
 # ----- Custom -----
 # ---------------------
 #CUSTOM_ENABLED_VAR =

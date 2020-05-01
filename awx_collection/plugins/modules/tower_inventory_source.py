@@ -43,7 +43,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom" ]
       type: str
     source_path:
       description:
@@ -162,7 +162,7 @@ def main():
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
-                             "azure_rm", "vmware", "satellite6", "cloudforms",
+                             "azure_rm", "vmware", "satellite6",
                              "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
         source_script=dict(),
