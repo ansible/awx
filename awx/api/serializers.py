@@ -3899,15 +3899,23 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         return UriCleaner.remove_sensitive(obj.stdout)
 
     def get_event_data(self, obj):
-        try:
-            return json.loads(
-                UriCleaner.remove_sensitive(
-                    json.dumps(obj.event_data)
+        # the project update playbook uses the git, hg, or svn modules
+        # to clone repositories, and those modules are prone to printing
+        # raw SCM URLs in their stdout (which *could* contain passwords)
+        # attempt to detect and filter HTTP basic auth passwords in the stdout
+        # of these types of events
+        if obj.event_data.get('task_action') in ('git', 'hg', 'svn'):
+            try:
+                return json.loads(
+                    UriCleaner.remove_sensitive(
+                        json.dumps(obj.event_data)
+                    )
                 )
-            )
-        except Exception:
-            logger.exception("Failed to sanitize event_data")
-            return {}
+            except Exception:
+                logger.exception("Failed to sanitize event_data")
+                return {}
+        else:
+            return obj.event_data
 
 
 class AdHocCommandEventSerializer(BaseSerializer):
