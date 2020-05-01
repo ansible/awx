@@ -2277,6 +2277,13 @@ class openstack(PluginFileInjector):
             ret['inventory_hostname'] = use_host_name_for_name(source_vars['use_hostnames'])
         return ret
 
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        credential = inventory_update.get_cloud_credential()
+        cred_data = private_data_files['credentials']
+        env['OS_CLIENT_CONFIG_FILE'] = cred_data[credential]
+        return env
+
 
 class rhv(PluginFileInjector):
     """ovirt uses the custom credential templating, and that is all
