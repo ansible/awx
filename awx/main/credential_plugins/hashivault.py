@@ -48,17 +48,13 @@ base_inputs = {
     }
     ],
     'metadata': [{
-        'id': 'secret_path',
-        'label': _('Path to Secret'),
-        'type': 'string',
-        'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
-    },{
         'id': 'auth_path',
         'label': _('Path to Auth'),
         'type': 'string',
         'help_text': _('The path where the Authentication method is mounted e.g, approle')
     }],
-    'required': ['url', 'secret_path'],
+    'required': ['url'],
+
 }
 
 hashi_kv_inputs = copy.deepcopy(base_inputs)
@@ -74,6 +70,11 @@ hashi_kv_inputs['metadata'] = [{
     'label': _('Name of Secret Backend'),
     'type': 'string',
     'help_text': _('The name of the kv secret backend (if left empty, the first segment of the secret path will be used).')
+}, {
+    'id': 'secret_path',
+    'label': _('Path to Secret'),
+    'type': 'string',
+    'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
 }] + hashi_kv_inputs['metadata'] + [{
     'id': 'secret_key',
     'label': _('Key Name'),
@@ -85,7 +86,7 @@ hashi_kv_inputs['metadata'] = [{
     'type': 'string',
     'help_text': _('Used to specify a specific secret version (if left empty, the latest version will be used).'),
 }]
-hashi_kv_inputs['required'].extend(['api_version', 'secret_key'])
+hashi_kv_inputs['required'].extend(['api_version', 'secret_path', 'secret_key'])
 
 hashi_ssh_inputs = copy.deepcopy(base_inputs)
 hashi_ssh_inputs['metadata'] = [{
@@ -93,6 +94,11 @@ hashi_ssh_inputs['metadata'] = [{
     'label': _('Unsigned Public Key'),
     'type': 'string',
     'multiline': True,
+}, {
+    'id': 'secret_path',
+    'label': _('Path to Secret'),
+    'type': 'string',
+    'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
 }] + hashi_ssh_inputs['metadata'] + [{
     'id': 'role',
     'label': _('Role Name'),
@@ -104,7 +110,22 @@ hashi_ssh_inputs['metadata'] = [{
     'type': 'string',
     'help_text': _('Valid principals (either usernames or hostnames) that the certificate should be signed for.'),
 }]
-hashi_ssh_inputs['required'].extend(['public_key', 'role'])
+hashi_ssh_inputs['required'].extend(['public_key', 'secret_path', 'role'])
+
+hashi_token_inputs = copy.deepcopy(base_inputs)
+hashi_token_inputs['metadata'] = hashi_token_inputs['metadata'] + [{
+    'id': 'policies',
+    'label': _('Policies'),
+    'type': 'string',
+    'multiline': True,
+    'help_text': _('''A list of policies for the token, one per line. This must be a subset of the policies belonging 
+    to the token making the request, unless root. If not specified, defaults to all the policies of the calling token''')
+}, {
+    'id': 'ttl',
+    'label': _('Time To Live'),
+    'type': 'string',
+    'help_text': _('The TTL period of the token, provided as "1h", where hour is the largest suffix.'),
+}]
 
 
 def handle_auth(**kwargs):
@@ -224,6 +245,32 @@ def ssh_backend(**kwargs):
     return resp.json()['data']['signed_key']
 
 
+def token_backend(**kwargs):
+    token = handle_auth(**kwargs)
+    url = urljoin(kwargs['url'], 'v1')
+    cacert = kwargs.get('cacert', None)
+
+    request_kwargs = {'timeout': 30}
+    if cacert:
+        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
+
+    request_kwargs['json'] = {}
+    if kwargs.get('policies'):
+        request_kwargs['json']['policies'] = kwargs['policies'].splitlines()
+
+    if kwargs.get('ttl'):
+        request_kwargs['json']['ttl'] = kwargs['ttl']
+    sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
+    # Compatability header for older installs of Hashicorp Vault
+    sess.headers['X-Vault-Token'] = token
+    # https://www.vaultproject.io/api/auth/token/index.html#create-token
+    request_url = '/'.join([url, 'auth/token/create'])
+    resp = sess.post(request_url, **request_kwargs)
+    resp.raise_for_status()
+    return resp.json()['auth']['client_token']
+
+
 hashivault_kv_plugin = CredentialPlugin(
     'HashiCorp Vault Secret Lookup',
     inputs=hashi_kv_inputs,
@@ -234,4 +281,10 @@ hashivault_ssh_plugin = CredentialPlugin(
     'HashiCorp Vault Signed SSH',
     inputs=hashi_ssh_inputs,
     backend=ssh_backend
+)
+
+hashivault_token_plugin = CredentialPlugin(
+    'HashiCorp Vault Token',
+    inputs=hashi_token_inputs,
+    backend=token_backend
 )

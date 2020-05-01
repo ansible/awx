@@ -86,6 +86,7 @@ def test_default_cred_types():
         'gitlab_token',
         'hashivault_kv',
         'hashivault_ssh',
+        'hashivault_token',
         'insights',
         'kubernetes_bearer_token',
         'net',
