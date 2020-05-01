@@ -2337,7 +2337,6 @@ class JobTemplateLaunch(RetrieveAPIView):
         old field structure to launch endpoint
         TODO: delete this method with future API version changes
         '''
-        ignored_fields = {}
         modern_data = data.copy()
 
         id_fd = '{}_id'.format('inventory')
@@ -2348,14 +2347,14 @@ class JobTemplateLaunch(RetrieveAPIView):
         if 'credential_passwords' not in modern_data:
             modern_data['credential_passwords'] = data.copy()
 
-        return (modern_data, ignored_fields)
+        return modern_data
 
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
         try:
-            modern_data, ignored_fields = self.modernize_launch_payload(
+            modern_data = self.modernize_launch_payload(
                 data=request.data, obj=obj
             )
         except ParseError as exc:
@@ -2364,8 +2363,6 @@ class JobTemplateLaunch(RetrieveAPIView):
         serializer = self.serializer_class(data=modern_data, context={'template': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        ignored_fields.update(serializer._ignored_fields)
 
         if not request.user.can_access(models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
             raise PermissionDenied()
@@ -2382,11 +2379,11 @@ class JobTemplateLaunch(RetrieveAPIView):
             data = OrderedDict()
             if isinstance(new_job, models.WorkflowJob):
                 data['workflow_job'] = new_job.id
-                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
+                data['ignored_fields'] = self.sanitize_for_response(serializer._ignored_fields)
                 data.update(serializers.WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             else:
                 data['job'] = new_job.id
-                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
+                data['ignored_fields'] = self.sanitize_for_response(serializer._ignored_fields)
                 data.update(serializers.JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             headers = {'Location': new_job.get_absolute_url(request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
