@@ -113,7 +113,7 @@ ADD rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
 # Fix up permissions
 RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root && \
-    find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+w && \
+    find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+rw && \
     chgrp root /var/lib/awx/rsyslog/rsyslog.conf && \
     chmod +rx /usr/bin/launch_awx.sh && \
     chmod +rx /usr/bin/launch_awx_task.sh && \
