@@ -6,7 +6,19 @@ const source = {
   id: 1,
   name: 'Foo',
   source: 'Source Bar',
-  summary_fields: { user_capabilities: { start: true, edit: true } },
+  summary_fields: {
+    user_capabilities: { start: true, edit: true },
+    last_job: {
+      canceled_on: '2020-04-30T18:56:46.054087Z',
+      description: '',
+      failed: true,
+      finished: '2020-04-30T18:56:46.054031Z',
+      id: 664,
+      license_error: false,
+      name: ' Inventory 1 Org 0 - source 4',
+      status: 'canceled',
+    },
+  },
 };
 describe('<InventorySourceListItem />', () => {
   let wrapper;
@@ -37,19 +49,28 @@ describe('<InventorySourceListItem />', () => {
         label="Source Bar"
       />
     );
-    expect(wrapper.find('DataListCheck').length).toBe(1);
+    expect(wrapper.find('StatusIcon').length).toBe(1);
     expect(
       wrapper
-        .find('DataListCell')
+        .find('Link')
         .at(0)
-        .text()
-    ).toBe('Foo');
+        .prop('to')
+    ).toBe('/jobs/inventory/664');
+    expect(wrapper.find('DataListCheck').length).toBe(1);
+    expect();
     expect(
       wrapper
         .find('DataListCell')
         .at(1)
         .text()
+    ).toBe('Foo');
+    expect(
+      wrapper
+        .find('DataListCell')
+        .at(2)
+        .text()
     ).toBe('Source Bar');
+    expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
     expect(wrapper.find('PencilAltIcon').length).toBe(1);
   });
 
@@ -67,13 +88,48 @@ describe('<InventorySourceListItem />', () => {
     expect(wrapper.find('DataListCheck').prop('checked')).toBe(true);
   });
 
-  test(' should render edit buttons', () => {
+  test('should not render status icon', () => {
     const onSelect = jest.fn();
     wrapper = mountWithContexts(
       <InventorySourceListItem
         source={{
           ...source,
-          summary_fields: { user_capabilities: { edit: false, start: true } },
+          summary_fields: {
+            user_capabilities: { start: true, edit: true },
+            last_job: null,
+          },
+        }}
+        isSelected={false}
+        onSelect={onSelect}
+        label="Source Bar"
+      />
+    );
+    expect(wrapper.find('StatusIcon').length).toBe(0);
+  });
+
+  test('should not render sync buttons', async () => {
+    const onSelect = jest.fn();
+    wrapper = mountWithContexts(
+      <InventorySourceListItem
+        source={{
+          ...source,
+          summary_fields: { user_capabilities: { start: false, edit: true } },
+        }}
+        isSelected={false}
+        onSelect={onSelect}
+      />
+    );
+    expect(wrapper.find('InventorySourceSyncButton').length).toBe(0);
+    expect(wrapper.find('Button[aria-label="Edit Source"]').length).toBe(1);
+  });
+
+  test('should not render edit buttons', async () => {
+    const onSelect = jest.fn();
+    wrapper = mountWithContexts(
+      <InventorySourceListItem
+        source={{
+          ...source,
+          summary_fields: { user_capabilities: { start: true, edit: false } },
         }}
         isSelected={false}
         onSelect={onSelect}
@@ -81,5 +137,6 @@ describe('<InventorySourceListItem />', () => {
       />
     );
     expect(wrapper.find('Button[aria-label="Edit Source"]').length).toBe(0);
+    expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
   });
 });
