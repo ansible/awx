@@ -127,7 +127,7 @@ function SurveyQuestionForm({
             <CheckboxField
               id="question-required"
               name="required"
-              label="Required"
+              label={i18n._(t`Required`)}
             />
           </FormColumnLayout>
           <FormColumnLayout>
