@@ -104,7 +104,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         logger.info(f"client '{self.channel_name}' joined the broadcast group.")
 
     async def disconnect(self, code):
-        logger.info("client '{self.channel_name}' disconnected from the broadcast group.")
+        logger.info(f"client '{self.channel_name}' disconnected from the broadcast group.")
         await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
 
     async def internal_message(self, event):
