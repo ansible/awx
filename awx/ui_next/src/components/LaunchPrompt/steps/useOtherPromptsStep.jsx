@@ -5,9 +5,18 @@ import OtherPromptsStep from './OtherPromptsStep';
 const STEP_ID = 'other';
 
 export default function useOtherPrompt(config, resource, i18n) {
+  const validate = values => {
+    const errors = {};
+    if (config.ask_job_type_on_launch && !values.job_type) {
+      errors.job_type = i18n._(t`This field must not be blank`);
+    }
+    return errors;
+  };
+
   return {
     step: getStep(config, i18n),
     initialValues: getInitialValues(config, resource),
+    validate,
     isReady: true,
     error: null,
   };

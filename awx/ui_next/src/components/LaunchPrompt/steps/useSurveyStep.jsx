@@ -27,6 +27,7 @@ export default function useSurveyStep(config, resource, i18n) {
   return {
     step: getStep(config, survey, i18n),
     initialValues: getInitialValues(config, survey),
+    validate: getValidate(config, survey, i18n),
     survey,
     isReady: !isLoading && !!survey,
     error,
@@ -57,4 +58,23 @@ function getInitialValues(config, survey) {
     }
   });
   return values;
+}
+
+function getValidate(config, survey, i18n) {
+  return values => {
+    if (!config.survey_enabled || !survey || !survey.spec) {
+      return {};
+    }
+    const errors = {};
+    survey.spec.forEach(question => {
+      // TODO validate min/max
+      // TODO allow 0
+      if (question.required && !values[question.variable]) {
+        errors[`survey_${question.variable}`] = i18n._(
+          t`This field must not be blank`
+        );
+      }
+    });
+    return errors;
+  };
 }

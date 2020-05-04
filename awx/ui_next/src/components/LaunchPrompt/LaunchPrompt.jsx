@@ -18,11 +18,15 @@ import mergeExtraVars from './mergeExtraVars';
 import { useSteps, useVisitedSteps } from './hooks';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
-  const { steps, initialValues, isReady, contentError } = useSteps(
-    config,
-    resource,
-    i18n
-  );
+  // const [formErrors, setFormErrors] = useState({});
+  const {
+    steps,
+    initialValues,
+    isReady,
+    validate,
+    formErrors,
+    contentError,
+  } = useSteps(config, resource, i18n);
   const [visitedSteps, visitStep] = useVisitedSteps(config);
 
   if (contentError) {
@@ -33,10 +37,10 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   }
 
   // TODO move into hook?
-  const validate = values => {
-    // return {};
-    return { limit: ['required field'] };
-  };
+  // const validate = values => {
+  //   // return {};
+  //   return { limit: ['required field'] };
+  // };
 
   // TODO move into hook?
   const submit = values => {

@@ -5,16 +5,8 @@ import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
 
-// const INVENTORY = 'inventory';
-// const CREDENTIALS = 'credentials';
-// const PASSWORDS = 'passwords';
-// const OTHER_PROMPTS = 'other';
-// const SURVEY = 'survey';
-// const PREVIEW = 'preview';
-
 export function useSteps(config, resource, i18n) {
-  // TODO pass in form errors?
-  const formErrors = {};
+  const [formErrors, setFormErrors] = useState({});
   const inventory = useInventoryStep(config, resource, i18n);
   const credentials = useCredentialsStep(config, resource, i18n);
   const otherPrompts = useOtherPromptsStep(config, resource, i18n);
@@ -54,7 +46,21 @@ export function useSteps(config, resource, i18n) {
     survey.error ||
     preview.error;
 
-  return { steps, initialValues, isReady, contentError };
+  const validate = values => {
+    const errors = {
+      ...inventory.validate(values),
+      ...credentials.validate(values),
+      ...otherPrompts.validate(values),
+      ...survey.validate(values),
+    };
+    setFormErrors(errors);
+    if (Object.keys(errors).length) {
+      return errors;
+    }
+    return false;
+  };
+
+  return { steps, initialValues, isReady, validate, formErrors, contentError };
 }
 
 export function usePromptErrors(config) {

@@ -5,9 +5,18 @@ import InventoryStep from './InventoryStep';
 const STEP_ID = 'inventory';
 
 export default function useInventoryStep(config, resource, i18n) {
+  const validate = values => {
+    const errors = {};
+    if (!values.inventory) {
+      errors.inventory = i18n._(t`An inventory must be selected`);
+    }
+    return errors;
+  };
+
   return {
     step: getStep(config, i18n),
     initialValues: getInitialValues(config, resource),
+    validate,
     isReady: true,
     error: null,
   };
