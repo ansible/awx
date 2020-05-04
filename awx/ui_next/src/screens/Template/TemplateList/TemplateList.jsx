@@ -227,12 +227,14 @@ function TemplateList({ i18n }) {
               detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
+              fetchTemplates={fetchTemplates}
             />
           )}
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
         />
       </Card>
       <AlertModal
+        aria-label={i18n._(t`Deletion Error`)}
         isOpen={deletionError}
         variant="error"
         title={i18n._(t`Error!`)}

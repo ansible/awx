@@ -20,6 +20,8 @@ const mockTemplates = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        edit: true,
+        copy: true,
       },
     },
   },
@@ -300,10 +302,24 @@ describe('<TemplateList />', () => {
         .find('button[aria-label="confirm delete"]')
         .prop('onClick')();
     });
+
     await waitForElement(
       wrapper,
-      'Modal',
+      'Modal[aria-label="Deletion Error"]',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+  });
+  test('should properly copy template', async () => {
+    JobTemplatesAPI.copy.mockResolvedValue({});
+    const wrapper = mountWithContexts(<TemplateList />);
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    expect(JobTemplatesAPI.copy).toHaveBeenCalled();
+    expect(UnifiedJobTemplatesAPI.read).toHaveBeenCalled();
+    wrapper.update();
   });
 });

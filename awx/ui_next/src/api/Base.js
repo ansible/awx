@@ -45,6 +45,10 @@ class Base {
   update(id, data) {
     return this.http.patch(`${this.baseUrl}${id}/`, data);
   }
+
+  copy(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/copy/`, data);
+  }
 }
 
 export default Base;
