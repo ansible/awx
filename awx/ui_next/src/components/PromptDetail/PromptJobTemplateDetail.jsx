@@ -3,11 +3,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
-import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
+import { Chip, List, ListItem } from '@patternfly/react-core';
+import CredentialChip from '@components/CredentialChip';
+import ChipGroup from '@components/ChipGroup';
+import Sparkline from '@components/Sparkline';
 import { Detail, DeletedDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
-import CredentialChip from '@components/CredentialChip';
-import Sparkline from '@components/Sparkline';
 import { toTitleCase } from '@util/strings';
 
 function PromptJobTemplateDetail({ i18n, resource }) {
@@ -174,7 +175,10 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           fullWidth
           label={i18n._(t`Credentials`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup
+              numChips={5}
+              totalChips={summary_fields.credentials.length}
+            >
               {summary_fields.credentials.map(cred => (
                 <CredentialChip key={cred.id} credential={cred} isReadOnly />
               ))}
@@ -187,7 +191,10 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           fullWidth
           label={i18n._(t`Labels`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup
+              numChips={5}
+              totalChips={summary_fields.labels.results.length}
+            >
               {summary_fields.labels.results.map(label => (
                 <Chip key={label.id} isReadOnly>
                   {label.name}
@@ -202,7 +209,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           fullWidth
           label={i18n._(t`Instance Groups`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup numChips={5} totalChips={instance_groups.length}>
               {instance_groups.map(ig => (
                 <Chip key={ig.id} isReadOnly>
                   {ig.name}
@@ -217,7 +224,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           fullWidth
           label={i18n._(t`Job Tags`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
               {job_tags.split(',').map(jobTag => (
                 <Chip key={jobTag} isReadOnly>
                   {jobTag}
@@ -232,7 +239,7 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           fullWidth
           label={i18n._(t`Skip Tags`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
               {skip_tags.split(',').map(skipTag => (
                 <Chip key={skipTag} isReadOnly>
                   {skipTag}

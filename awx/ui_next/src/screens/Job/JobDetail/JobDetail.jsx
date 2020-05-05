@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, ChipGroup } from '@patternfly/react-core';
+import { Button, Chip } from '@patternfly/react-core';
 import styled from 'styled-components';
 
 import AlertModal from '@components/AlertModal';
 import { DetailList, Detail } from '@components/DetailList';
 import { CardBody, CardActionsRow } from '@components/Card';
+import ChipGroup from '@components/ChipGroup';
 import CredentialChip from '@components/CredentialChip';
 import { VariablesInput as _VariablesInput } from '@components/CodeMirrorInput';
 import DeleteButton from '@components/DeleteButton';
@@ -215,7 +216,7 @@ function JobDetail({ job, i18n }) {
             fullWidth
             label={i18n._(t`Credentials`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={credentials.length}>
                 {credentials.map(c => (
                   <CredentialChip key={c.id} credential={c} isReadOnly />
                 ))}
@@ -228,7 +229,7 @@ function JobDetail({ job, i18n }) {
             fullWidth
             label={i18n._(t`Labels`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={labels.results.length}>
                 {labels.results.map(l => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}

@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Chip,
-  ChipGroup,
   DataListItem,
   DataListItemRow,
   DataListItemCells as PFDataListItemCells,
@@ -16,6 +15,7 @@ import DataListCell from '@components/DataListCell';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+import ChipGroup from '@components/ChipGroup';
 import { DetailList, Detail } from '@components/DetailList';
 import { AccessRecord } from '@types';
 
@@ -115,7 +115,7 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`User Roles`)}
                       value={
-                        <ChipGroup numChips={5}>
+                        <ChipGroup numChips={5} totalChips={userRoles.length}>
                           {userRoles.map(this.renderChip)}
                         </ChipGroup>
                       }
@@ -125,7 +125,7 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`Team Roles`)}
                       value={
-                        <ChipGroup numChips={5}>
+                        <ChipGroup numChips={5} totalChips={teamRoles.length}>
                           {teamRoles.map(this.renderChip)}
                         </ChipGroup>
                       }

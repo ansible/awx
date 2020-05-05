@@ -2,13 +2,14 @@ import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Chip, ChipGroup } from '@patternfly/react-core';
+import { Button, Chip } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '@components/Card';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import DeleteButton from '@components/DeleteButton';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
+import ChipGroup from '@components/ChipGroup';
 import { InventoriesAPI } from '@api';
 import useRequest from '@util/useRequest';
 import { Inventory } from '../../../types';
@@ -74,7 +75,7 @@ function InventoryDetail({ inventory, i18n }) {
           fullWidth
           label={i18n._(t`Instance Groups`)}
           value={
-            <ChipGroup numChips={5}>
+            <ChipGroup numChips={5} totalChips={instanceGroups.length}>
               {instanceGroups.map(ig => (
                 <Chip key={ig.id} isReadOnly>
                   {ig.name}

@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Chip,
-  ChipGroup,
-  Split as PFSplit,
-  SplitItem,
-} from '@patternfly/react-core';
+import { Chip, Split as PFSplit, SplitItem } from '@patternfly/react-core';
+
+import ChipGroup from '@components/ChipGroup';
 import styled from 'styled-components';
 
 const Split = styled(PFSplit)`
@@ -42,7 +39,7 @@ class SelectedList extends Component {
       <Split>
         <SplitLabelItem>{label}</SplitLabelItem>
         <SplitItem>
-          <ChipGroup numChips={5}>
+          <ChipGroup numChips={5} totalChips={selected.length}>
             {selected.map(item =>
               renderChip({
                 item,
