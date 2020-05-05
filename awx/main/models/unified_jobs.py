@@ -150,7 +150,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default=None,
         editable=False,
         related_name='%(class)s_as_next_schedule+',
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
     )
     status = models.CharField(
         max_length=32,
@@ -587,7 +587,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         null=True,
         default=None,
         editable=False,
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
     )
     dependent_jobs = models.ManyToManyField(
         'self',
