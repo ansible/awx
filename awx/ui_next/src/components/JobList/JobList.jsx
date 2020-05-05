@@ -23,17 +23,19 @@ import {
   WorkflowJobsAPI,
 } from '@api';
 
-const QS_CONFIG = getQSConfig(
-  'job',
-  {
-    page: 1,
-    page_size: 20,
-    order_by: '-finished',
-  },
-  ['page', 'page_size']
-);
-
 function JobList({ i18n, defaultParams, showTypeColumn = false }) {
+  const QS_CONFIG = getQSConfig(
+    'job',
+    {
+      page: 1,
+      page_size: 20,
+      order_by: '-finished',
+      not__launch_type: 'sync',
+      ...defaultParams,
+    },
+    ['page', 'page_size']
+  );
+
   const [selected, setSelected] = useState([]);
   const location = useLocation();
 
@@ -48,7 +50,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
 
       const {
         data: { count, results },
-      } = await UnifiedJobsAPI.read({ ...params, ...defaultParams });
+      } = await UnifiedJobsAPI.read({ ...params });
 
       return {
         itemCount: count,
