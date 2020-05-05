@@ -24,6 +24,7 @@ function InventorySourceListItem({
   i18n,
   detailUrl,
   label,
+  onFetchSources,
 }) {
   const [isSyncLoading, setIsSyncLoading] = useState(false);
 
@@ -99,6 +100,7 @@ function InventorySourceListItem({
                 onSyncLoading={isLoading => {
                   setIsSyncLoading(isLoading);
                 }}
+                onFetchSources={onFetchSources}
                 source={source}
               />
             )}

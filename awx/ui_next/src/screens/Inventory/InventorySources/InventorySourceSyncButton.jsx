@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
@@ -9,9 +9,12 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
-function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
-  const [updateStatus, setUpdateStatus] = useState(source.status);
-
+function InventorySourceSyncButton({
+  onSyncLoading,
+  source,
+  i18n,
+  onFetchSources,
+}) {
   const {
     isLoading: startSyncLoading,
     error: startSyncError,
@@ -21,11 +24,10 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
       const {
         data: { status },
       } = await InventorySourcesAPI.createSyncStart(source.id);
-
-      setUpdateStatus(status);
+      onFetchSources();
 
       return status;
-    }, [source.id]),
+    }, [source.id, onFetchSources]),
     {}
   );
 
@@ -44,8 +46,8 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
       } = await InventorySourcesAPI.readDetail(source.id);
 
       await InventoryUpdatesAPI.createSyncCancel(id);
-      setUpdateStatus(null);
-    }, [source.id])
+      onFetchSources();
+    }, [source.id, onFetchSources])
   );
 
   useEffect(() => onSyncLoading(startSyncLoading || cancelSyncLoading), [
@@ -60,7 +62,7 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
 
   return (
     <>
-      {updateStatus === 'pending' ? (
+      {source.status === 'pending' ? (
         <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
           <Button
             isDisabled={cancelSyncLoading || startSyncLoading}
@@ -107,6 +109,7 @@ InventorySourceSyncButton.defaultProps = {
 InventorySourceSyncButton.propTypes = {
   onSyncLoading: PropTypes.func.isRequired,
   source: PropTypes.shape({}),
+  onFetchSources: PropTypes.func.isRequired,
 };
 
 export default withI18n()(InventorySourceSyncButton);

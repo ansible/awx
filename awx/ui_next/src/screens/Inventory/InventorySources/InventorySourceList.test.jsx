@@ -225,6 +225,47 @@ describe('<InventorySourceList />', () => {
 
     expect(wrapper.find('ContentError').length).toBe(1);
   });
+  test('should render sync all button and make api call to start sync for all', async () => {
+    const readSourcesResponse = {
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Source Foo',
+            status: '',
+            source: 'ec2',
+            url: '/api/v2/inventory_sources/56/',
+            summary_fields: {
+              user_capabilities: {
+                edit: true,
+                delete: true,
+                start: true,
+                schedule: true,
+              },
+            },
+          },
+        ],
+        count: 1,
+      },
+    };
+    InventoriesAPI.readSources
+      .mockResolvedValue({ ...readSourcesResponse, status: 'pending' })
+      .mockResolvedValueOnce(readSourcesResponse);
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { source: { choices: [['scm', 'SCM'], ['ec2', 'EC2']] } },
+          POST: {},
+        },
+      },
+    });
+    await waitForElement(wrapper, 'InventorySourceList', el => el.length > 0);
+    const syncAllButton = wrapper.find('Button[aria-label="Sync All"]');
+    expect(syncAllButton.length).toBe(1);
+    await act(async () => syncAllButton.prop('onClick')());
+    expect(InventoriesAPI.syncAllSources).toBeCalled();
+    expect(InventoriesAPI.readSources).toBeCalled();
+  });
 });
 
 describe('<InventorySourceList /> RBAC testing', () => {
@@ -293,6 +334,82 @@ describe('<InventorySourceList /> RBAC testing', () => {
       el => el.length > 0
     );
     expect(newWrapper.find('ToolbarAddButton').length).toBe(0);
+    newWrapper.unmount();
+    jest.clearAllMocks();
+  });
+  test('should not render Sync All button', async () => {
+    InventoriesAPI.readSources.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Source Foo',
+            status: '',
+            source: 'ec2',
+            url: '/api/v2/inventory_sources/56/',
+            summary_fields: {
+              user_capabilities: {
+                edit: true,
+                delete: true,
+                start: false,
+                schedule: true,
+              },
+            },
+          },
+          {
+            id: 2,
+            name: 'Source Bar',
+            status: '',
+            source: 'scm',
+            url: '/api/v2/inventory_sources/57/',
+            summary_fields: {
+              user_capabilities: {
+                edit: true,
+                delete: true,
+                start: true,
+                schedule: true,
+              },
+            },
+          },
+        ],
+        count: 1,
+      },
+    });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: { source: { choices: [['scm', 'SCM'], ['ec2', 'EC2']] } },
+        },
+      },
+    });
+    let newWrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/inventory/2/sources'],
+    });
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <Route path="/inventories/:inventoryType/:id/sources">
+          <InventorySourceList />
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: { search: '' },
+                match: { params: { id: 2 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(
+      newWrapper,
+      'InventorySourceList',
+      el => el.length > 0
+    );
+    expect(newWrapper.find('Button[aria-label="Sync All"]').length).toBe(0);
     newWrapper.unmount();
     jest.clearAllMocks();
   });

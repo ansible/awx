@@ -2,6 +2,8 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Button, Tooltip } from '@patternfly/react-core';
+
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
@@ -38,7 +40,6 @@ function InventorySourceList({ i18n }) {
         InventoriesAPI.readSources(id, params),
         InventorySourcesAPI.readOptions(),
       ]);
-
       return {
         sources: results[0].data.results,
         sourceCount: results[0].data.count,
@@ -49,7 +50,23 @@ function InventorySourceList({ i18n }) {
     {
       sources: [],
       sourceCount: 0,
+      sourceChoices: [],
     }
+  );
+  const canSyncSources =
+    sources.length > 0 &&
+    sources.every(source => source.summary_fields.user_capabilities.start);
+  const {
+    isLoading: isSyncAllLoading,
+    error: syncAllError,
+    request: syncAll,
+  } = useRequest(
+    useCallback(async () => {
+      if (canSyncSources) {
+        await InventoriesAPI.syncAllSources(id);
+        fetchSources();
+      }
+    }, [id, fetchSources, canSyncSources])
   );
 
   useEffect(() => {
@@ -92,8 +109,8 @@ function InventorySourceList({ i18n }) {
   return (
     <>
       <PaginatedDataList
-        contentError={error || deletionError}
-        hasContentLoading={isLoading || isDeleteLoading}
+        contentError={error || deletionError || syncAllError}
+        hasContentLoading={isLoading || isDeleteLoading || isSyncAllLoading}
         items={sources}
         itemCount={sourceCount}
         pluralizedItemName={i18n._(t`Inventory Sources`)}
@@ -117,6 +134,23 @@ function InventorySourceList({ i18n }) {
                 itemsToDelete={selected}
                 pluralizedItemName={i18n._(t`Inventory Sources`)}
               />,
+              ...(canSyncSources
+                ? [
+                    <Tooltip
+                      key="update"
+                      content={i18n._(t`Sync All Sources`)}
+                      position="top"
+                    >
+                      <Button
+                        onClick={syncAll}
+                        aria-label={i18n._(t`Sync All`)}
+                        variant="secondary"
+                      >
+                        {i18n._(t`Sync All`)}
+                      </Button>
+                    </Tooltip>,
+                  ]
+                : []),
             ]}
           />
         )}
