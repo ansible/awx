@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { ProjectsAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { ProjectsAPI } from '../../../api';
 import ProjectDetail from './ProjectDetail';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<ProjectDetail />', () => {
   const mockProject = {

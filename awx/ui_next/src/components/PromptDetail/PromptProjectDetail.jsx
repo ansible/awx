@@ -1,13 +1,13 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Config } from '@contexts/Config';
 import { List, ListItem } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
+import { Config } from '../../contexts/Config';
 
-import { Detail, DeletedDetail } from '@components/DetailList';
-import CredentialChip from '@components/CredentialChip';
-import { toTitleCase } from '@util/strings';
+import { Detail, DeletedDetail } from '../DetailList';
+import CredentialChip from '../CredentialChip';
+import { toTitleCase } from '../../util/strings';
 
 function PromptProjectDetail({ i18n, resource }) {
   const {

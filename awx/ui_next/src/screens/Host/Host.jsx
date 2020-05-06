@@ -11,17 +11,17 @@ import {
 } from 'react-router-dom';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
 
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import JobList from '@components/JobList';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
-import { HostsAPI } from '@api';
+import { HostsAPI } from '../../api';
 
 function Host({ i18n, setBreadcrumb }) {
   const [host, setHost] = useState(null);

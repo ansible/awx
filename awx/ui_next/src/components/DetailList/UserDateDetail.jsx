@@ -3,7 +3,7 @@ import { node, string } from 'prop-types';
 import { Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { formatDateString } from '@util/dates';
+import { formatDateString } from '../../util/dates';
 import _Detail from './Detail';
 import { SummaryFieldUser } from '../../types';
 

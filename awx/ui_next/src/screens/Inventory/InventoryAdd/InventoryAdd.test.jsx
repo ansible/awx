@@ -1,13 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 
-import { InventoriesAPI, CredentialTypesAPI } from '@api';
+import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import InventoryAdd from './InventoryAdd';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 CredentialTypesAPI.read.mockResolvedValue({
   data: {

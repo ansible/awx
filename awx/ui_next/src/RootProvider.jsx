@@ -3,7 +3,7 @@ import { I18nProvider } from '@lingui/react';
 
 import { HashRouter } from 'react-router-dom';
 
-import { getLanguageWithoutRegionCode } from '@util/language';
+import { getLanguageWithoutRegionCode } from './util/language';
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
 

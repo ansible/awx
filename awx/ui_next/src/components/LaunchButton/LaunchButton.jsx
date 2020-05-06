@@ -4,8 +4,8 @@ import { number, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '../AlertModal';
+import ErrorDetail from '../ErrorDetail';
 import {
   AdHocCommandsAPI,
   InventorySourcesAPI,
@@ -14,8 +14,8 @@ import {
   ProjectsAPI,
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
-import LaunchPrompt from '@components/LaunchPrompt';
+} from '../../api';
+import LaunchPrompt from '../LaunchPrompt';
 
 function canLaunchWithoutPrompt(launchData) {
   return (

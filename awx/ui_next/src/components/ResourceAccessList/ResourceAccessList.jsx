@@ -3,14 +3,16 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { TeamsAPI, UsersAPI } from '@api';
-import AddResourceRole from '@components/AddRole/AddResourceRole';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, encodeQueryString, parseQueryString } from '@util/qs';
+import { TeamsAPI, UsersAPI } from '../../api';
+import AddResourceRole from '../AddRole/AddResourceRole';
+import AlertModal from '../AlertModal';
+import DataListToolbar from '../DataListToolbar';
+import PaginatedDataList, { ToolbarAddButton } from '../PaginatedDataList';
+import {
+  getQSConfig,
+  encodeQueryString,
+  parseQueryString,
+} from '../../util/qs';
 
 import DeleteRoleConfirmationModal from './DeleteRoleConfirmationModal';
 import ResourceAccessListItem from './ResourceAccessListItem';

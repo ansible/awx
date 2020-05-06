@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
-import { WorkflowStateContext } from '@contexts/Workflow';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { func, shape } from 'prop-types';
-import StatusIcon from '@components/StatusIcon';
-import { WorkflowNodeTypeLetter } from '@components/Workflow';
-import { secondsToHHMMSS } from '@util/dates';
-import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
+import { WorkflowStateContext } from '../../../contexts/Workflow';
+import StatusIcon from '../../../components/StatusIcon';
+import { WorkflowNodeTypeLetter } from '../../../components/Workflow';
+import { secondsToHHMMSS } from '../../../util/dates';
+import { constants as wfConstants } from '../../../components/Workflow/WorkflowUtils';
 
 const NodeG = styled.g`
   cursor: ${props =>

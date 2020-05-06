@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import ProjectsListItem from './ProjectListItem';
-import { ProjectsAPI } from '@api';
+import { ProjectsAPI } from '../../../api';
 
-jest.mock('@api/models/Projects');
+jest.mock('../../../api/models/Projects');
 
 describe('<ProjectsListItem />', () => {
   test('launch button shown to users with start capabilities', () => {

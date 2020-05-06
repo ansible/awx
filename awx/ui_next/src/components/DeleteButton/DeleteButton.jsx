@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
+import AlertModal from '../AlertModal';
 
 function DeleteButton({
   onConfirm,

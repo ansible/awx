@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
-import { ProjectsAPI } from '@api';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
+import { ProjectsAPI } from '../../api';
 import ProjectLookup from './ProjectLookup';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<ProjectLookup />', () => {
   test('should auto-select project when only one available', async () => {

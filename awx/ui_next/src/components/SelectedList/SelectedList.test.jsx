@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import ChipGroup from '@components/ChipGroup';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import ChipGroup from '../../components/ChipGroup';
 
 import SelectedList from './SelectedList';
 

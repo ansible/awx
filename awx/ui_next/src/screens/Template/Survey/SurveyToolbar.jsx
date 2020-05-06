@@ -11,7 +11,7 @@ import {
   DataToolbarItem,
 } from '@patternfly/react-core/dist/umd/experimental';
 import { Switch, Checkbox, Button } from '@patternfly/react-core';
-import { ToolbarAddButton } from '@components/PaginatedDataList';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
 const DataToolbar = styled(_DataToolbar)`
   margin-left: 52px;

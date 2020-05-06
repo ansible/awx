@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import JobTemplateAdd from './JobTemplateAdd';
-import { JobTemplatesAPI, LabelsAPI } from '@api';
+import { JobTemplatesAPI, LabelsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const jobTemplateData = {
   allow_callbacks: false,

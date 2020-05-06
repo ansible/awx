@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import StatusIcon from '@components/StatusIcon';
+import StatusIcon from '../../../components/StatusIcon';
 
 import InventorySourceSyncButton from './InventorySourceSyncButton';
 

@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { UsersAPI } from '@api';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import { UsersAPI } from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import UserListItem from './UserListItem';
 

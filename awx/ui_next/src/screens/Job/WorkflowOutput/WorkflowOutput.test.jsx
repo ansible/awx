@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { WorkflowJobsAPI } from '@api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { WorkflowJobsAPI } from '../../../api';
 import WorkflowOutput from './WorkflowOutput';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const job = {
   id: 1,

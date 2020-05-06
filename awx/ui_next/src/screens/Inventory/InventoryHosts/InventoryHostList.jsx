@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { InventoriesAPI, HostsAPI } from '@api';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { InventoriesAPI, HostsAPI } from '../../../api';
 
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
+} from '../../../components/PaginatedDataList';
 import InventoryHostItem from './InventoryHostItem';
 
 const QS_CONFIG = getQSConfig('host', {

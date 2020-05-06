@@ -3,11 +3,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '@components/FormField';
-import { TagMultiSelect } from '@components/MultiSelect';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { VariablesField } from '@components/CodeMirrorInput';
 import styled from 'styled-components';
+import FormField, { FieldTooltip } from '../FormField';
+import { TagMultiSelect } from '../MultiSelect';
+import AnsibleSelect from '../AnsibleSelect';
+import { VariablesField } from '../CodeMirrorInput';
 
 const FieldHeader = styled.div`
   display: flex;

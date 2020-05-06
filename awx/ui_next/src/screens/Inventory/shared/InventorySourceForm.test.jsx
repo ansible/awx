@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventorySourceForm from './InventorySourceForm';
-import { InventorySourcesAPI, ProjectsAPI, CredentialsAPI } from '@api';
+import { InventorySourcesAPI, ProjectsAPI, CredentialsAPI } from '../../../api';
 
-jest.mock('@api/models/Credentials');
-jest.mock('@api/models/InventorySources');
-jest.mock('@api/models/Projects');
+jest.mock('../../../api/models/Credentials');
+jest.mock('../../../api/models/InventorySources');
+jest.mock('../../../api/models/Projects');
 
 describe('<InventorySourceForm />', () => {
   let wrapper;

@@ -3,11 +3,11 @@ import { func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { InventoriesAPI } from '@api';
-import { Inventory } from '@types';
-import Lookup from '@components/Lookup';
-import OptionsList from '@components/OptionsList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import { InventoriesAPI } from '../../api';
+import { Inventory } from '../../types';
+import Lookup from '.';
+import OptionsList from '../OptionsList';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('inventory', {

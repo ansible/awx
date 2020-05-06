@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
 
-import { NotificationTemplatesAPI } from '@api';
+import { NotificationTemplatesAPI } from '../../api';
 
 import NotificationList from './NotificationList';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<NotificationList />', () => {
   const data = {

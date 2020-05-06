@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -16,6 +15,7 @@ import {
   PlusIcon,
   TimesIcon,
 } from '@patternfly/react-icons';
+import { WorkflowDispatchContext } from '../../contexts/Workflow';
 
 const Wrapper = styled.div`
   background-color: white;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 import JobDetail from './JobDetail';
-import { JobsAPI, ProjectUpdatesAPI } from '@api';
+import { JobsAPI, ProjectUpdatesAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<JobDetail />', () => {
   let wrapper;

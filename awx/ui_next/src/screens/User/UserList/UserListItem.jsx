@@ -11,12 +11,12 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
+import DataListCell from '../../../components/DataListCell';
 
-import { User } from '@types';
+import { User } from '../../../types';
 
 class UserListItem extends React.Component {
   static propTypes = {

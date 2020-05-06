@@ -3,15 +3,15 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
-import { CardBody, CardActionsRow } from '@components/Card';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import DeleteButton from '@components/DeleteButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import ChipGroup from '@components/ChipGroup';
-import { InventoriesAPI } from '@api';
-import useRequest from '@util/useRequest';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import { DetailList, Detail, UserDateDetail } from '../../../components/DetailList';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import DeleteButton from '../../../components/DeleteButton';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import ChipGroup from '../../../components/ChipGroup';
+import { InventoriesAPI } from '../../../api';
+import useRequest from '../../../util/useRequest';
 import { Inventory } from '../../../types';
 
 function InventoryDetail({ inventory, i18n }) {

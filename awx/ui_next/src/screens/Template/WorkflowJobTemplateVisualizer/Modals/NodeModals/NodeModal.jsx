@@ -1,9 +1,5 @@
 import React, { useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { bool, node, func } from 'prop-types';
@@ -12,7 +8,11 @@ import {
   WizardContextConsumer,
   WizardFooter,
 } from '@patternfly/react-core';
-import Wizard from '@components/Wizard';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../../../contexts/Workflow';
+import Wizard from '../../../../../components/Wizard';
 import { NodeTypeStep } from './NodeTypeStep';
 import { RunStep, NodeNextButton } from '.';
 

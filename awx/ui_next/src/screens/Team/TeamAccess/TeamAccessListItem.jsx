@@ -6,7 +6,7 @@ import {
   DataListItemCells,
   DataListItemRow,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { Link } from 'react-router-dom';
 

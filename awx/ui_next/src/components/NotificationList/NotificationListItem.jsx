@@ -10,9 +10,8 @@ import {
   DataListItemRow,
   Switch,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

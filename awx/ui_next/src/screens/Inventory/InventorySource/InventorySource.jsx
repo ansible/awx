@@ -9,16 +9,16 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
+import useRequest from '../../../util/useRequest';
 
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI } from '../../../api';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { CardActions } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import RoutedTabs from '@components/RoutedTabs';
+import { TabbedCardHeader } from '../../../components/Card';
+import CardCloseButton from '../../../components/CardCloseButton';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import RoutedTabs from '../../../components/RoutedTabs';
 import InventorySourceDetail from '../InventorySourceDetail';
 
 function InventorySource({ i18n, inventory, setBreadcrumb }) {

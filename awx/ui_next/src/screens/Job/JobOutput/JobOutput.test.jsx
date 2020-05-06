@@ -1,11 +1,14 @@
 import React from 'react';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import JobOutput, { _JobOutput } from './JobOutput';
-import { JobsAPI } from '@api';
+import { JobsAPI } from '../../../api';
 import mockJobData from '../shared/data.job.json';
 import mockJobEventsData from './data.job_events.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 async function checkOutput(wrapper, expectedLines) {
   await waitForElement(wrapper, 'div[type="job_event"]', el => el.length > 1);

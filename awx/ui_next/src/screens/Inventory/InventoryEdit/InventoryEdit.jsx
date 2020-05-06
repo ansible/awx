@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
-import { CardBody } from '@components/Card';
-import { InventoriesAPI, CredentialTypesAPI } from '@api';
-import ContentLoading from '@components/ContentLoading';
+import { CardBody } from '../../../components/Card';
+import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
+import ContentLoading from '../../../components/ContentLoading';
 import InventoryForm from '../shared/InventoryForm';
 import { getAddedAndRemoved } from '../../../util/lists';
 

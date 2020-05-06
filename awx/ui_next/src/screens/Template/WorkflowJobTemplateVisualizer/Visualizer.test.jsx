@@ -1,10 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { WorkflowJobTemplateNodesAPI, WorkflowJobTemplatesAPI } from '@api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  WorkflowJobTemplateNodesAPI,
+  WorkflowJobTemplatesAPI,
+} from '../../../api';
 import Visualizer from './Visualizer';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const template = {
   id: 1,

@@ -4,15 +4,15 @@ import { useLocation, useRouteMatch, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { TeamsAPI } from '@api';
+import { TeamsAPI } from '../../../api';
 import { Card } from '@patternfly/react-core';
 
-import useRequest from '@util/useRequest';
-import DataListToolbar from '@components/DataListToolbar';
+import useRequest from '../../../util/useRequest';
+import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 import TeamAccessListItem from './TeamAccessListItem';
 
 const QS_CONFIG = getQSConfig('team', {

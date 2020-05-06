@@ -1,18 +1,18 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../../../../api';
 import NodeTypeStep from './NodeTypeStep';
 
-jest.mock('@api/models/InventorySources');
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/Projects');
-jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('../../../../../../api/models/InventorySources');
+jest.mock('../../../../../../api/models/JobTemplates');
+jest.mock('../../../../../../api/models/Projects');
+jest.mock('../../../../../../api/models/WorkflowJobTemplates');
 
 const onUpdateDescription = jest.fn();
 const onUpdateName = jest.fn();

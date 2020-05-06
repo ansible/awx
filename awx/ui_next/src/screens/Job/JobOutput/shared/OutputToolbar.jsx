@@ -9,8 +9,8 @@ import {
   TrashAltIcon,
 } from '@patternfly/react-icons';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
-import DeleteButton from '@components/DeleteButton';
-import LaunchButton from '@components/LaunchButton';
+import DeleteButton from '../../../../components/DeleteButton';
+import LaunchButton from '../../../../components/LaunchButton';
 
 const BadgeGroup = styled.div`
   margin-left: 20px;

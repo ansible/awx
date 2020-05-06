@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { JobTemplatesAPI } from '@api';
+import { mountWithContexts } from '../../../../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI } from '../../../../../../api';
 import JobTemplatesList from './JobTemplatesList';
 
-jest.mock('@api/models/JobTemplates');
+jest.mock('../../../../../../api/models/JobTemplates');
 
 const nodeResource = {
   id: 1,

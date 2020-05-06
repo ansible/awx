@@ -1,6 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -9,10 +12,10 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
-} from '@api';
+} from '../../api';
 import JobList from './JobList';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 const mockResults = [
   {

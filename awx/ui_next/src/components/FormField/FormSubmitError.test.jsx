@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { Formik } from 'formik';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import FormSubmitError from './FormSubmitError';
 
 describe('<FormSubmitError>', () => {

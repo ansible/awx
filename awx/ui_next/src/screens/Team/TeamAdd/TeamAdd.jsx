@@ -2,9 +2,9 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 
-import { TeamsAPI } from '@api';
-import { Config } from '@contexts/Config';
-import { CardBody } from '@components/Card';
+import { TeamsAPI } from '../../../api';
+import { Config } from '../../../contexts/Config';
+import { CardBody } from '../../../components/Card';
 import TeamForm from '../shared/TeamForm';
 
 class TeamAdd extends React.Component {

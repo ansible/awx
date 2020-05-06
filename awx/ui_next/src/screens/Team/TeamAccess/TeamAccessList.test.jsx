@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { TeamsAPI } from '@api';
+import { TeamsAPI } from '../../../api';
 import { Route } from 'react-router-dom';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import TeamAccessList from './TeamAccessList';
 
-jest.mock('@api/models/Teams');
+jest.mock('../../../api/models/Teams');
 describe('<TeamAccessList />', () => {
   let wrapper;
   let history;

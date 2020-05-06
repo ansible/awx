@@ -3,20 +3,20 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+} from '../../../../../contexts/Workflow';
+import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../../../api';
 import NodeModal from './NodeModal';
 
-jest.mock('@api/models/InventorySources');
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/Projects');
-jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('../../../../../api/models/InventorySources');
+jest.mock('../../../../../api/models/JobTemplates');
+jest.mock('../../../../../api/models/Projects');
+jest.mock('../../../../../api/models/WorkflowJobTemplates');
 
 let wrapper;
 const dispatch = jest.fn();

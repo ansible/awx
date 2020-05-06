@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { string, func, bool, number } from 'prop-types';
 import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import MultiButtonToggle from '@components/MultiButtonToggle';
+import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
+import MultiButtonToggle from '../MultiButtonToggle';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 

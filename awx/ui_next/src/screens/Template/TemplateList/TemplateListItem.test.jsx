@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
-import { JobTemplatesAPI } from '@api';
 import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI } from '../../../api';
 import mockJobTemplateData from '../shared/data.job_template.json';
 import TemplateListItem from './TemplateListItem';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<TemplateListItem />', () => {
   test('launch button shown to users with start capabilities', () => {

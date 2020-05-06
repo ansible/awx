@@ -7,7 +7,7 @@ import {
   DataListItemRow,
   DataListItem,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 function UserOrganizationListItem({ organization, i18n }) {
   return (

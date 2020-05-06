@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI } from '../../../api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import mockInventorySource from '../shared/data.inventory_source.json';
 import InventorySource from './InventorySource';
 
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/Inventories');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({

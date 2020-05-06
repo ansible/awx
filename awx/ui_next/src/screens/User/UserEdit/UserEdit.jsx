@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 import UserForm from '../shared/UserForm';
-import { UsersAPI } from '@api';
+import { UsersAPI } from '../../../api';
 
 function UserEdit({ user }) {
   const [formSubmitError, setFormSubmitError] = useState(null);

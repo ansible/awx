@@ -3,7 +3,7 @@ import { Route, useRouteMatch, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 import UsersList from './UserList/UserList';
 import UserAdd from './UserAdd/UserAdd';

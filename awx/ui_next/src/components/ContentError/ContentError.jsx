@@ -10,8 +10,8 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-import { RootAPI } from '@api';
-import ErrorDetail from '@components/ErrorDetail';
+import { RootAPI } from '../../api';
+import ErrorDetail from '../ErrorDetail';
 
 async function logout() {
   await RootAPI.logout();

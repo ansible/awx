@@ -4,8 +4,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
-import { SchedulesAPI } from '@api';
+import { CardBody } from '../../Card';
+import { SchedulesAPI } from '../../../api';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
 

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { UsersAPI } from '@api';
+import { UsersAPI } from '../../../api';
 import { Route } from 'react-router-dom';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import UserAccessList from './UserAccessList';
 
-jest.mock('@api/models/Users');
+jest.mock('../../../api/models/Users');
 describe('<UserAccessList />', () => {
   let wrapper;
   let history;

@@ -11,19 +11,19 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
+import useRequest from '../../util/useRequest';
 
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import JobList from '@components/JobList';
-import NotificationList from '@components/NotificationList';
-import RoutedTabs from '@components/RoutedTabs';
-import { Schedules } from '@components/Schedule';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import ContentError from '../../components/ContentError';
+import JobList from '../../components/JobList';
+import NotificationList from '../../components/NotificationList';
+import RoutedTabs from '../../components/RoutedTabs';
+import { Schedules } from '../../components/Schedule';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 
 function Template({ i18n, me, setBreadcrumb }) {

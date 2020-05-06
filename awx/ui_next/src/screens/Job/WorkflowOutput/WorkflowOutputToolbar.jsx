@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import { Badge as PFBadge, Button, Tooltip } from '@patternfly/react-core';
 import { CompassIcon, WrenchIcon } from '@patternfly/react-icons';
-import StatusIcon from '@components/StatusIcon';
 import styled from 'styled-components';
+import StatusIcon from '../../../components/StatusIcon';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../contexts/Workflow';
 
 const Toolbar = styled.div`
   align-items: center;

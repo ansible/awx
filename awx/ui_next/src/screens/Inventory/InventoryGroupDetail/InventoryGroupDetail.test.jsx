@@ -1,12 +1,15 @@
 import React from 'react';
-import { GroupsAPI } from '@api';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { GroupsAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventoryGroupDetail from './InventoryGroupDetail';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const inventoryGroup = {
   name: 'Foo',

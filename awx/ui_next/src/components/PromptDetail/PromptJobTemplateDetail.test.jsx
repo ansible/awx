@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import PromptJobTemplateDetail from './PromptJobTemplateDetail';
 import mockData from './data.job_template.json';
 

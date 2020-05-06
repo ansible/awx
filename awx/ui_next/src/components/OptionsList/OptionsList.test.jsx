@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { getQSConfig } from '@util/qs';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { getQSConfig } from '../../util/qs';
 import OptionsList from './OptionsList';
 
 const qsConfig = getQSConfig('test', { order_by: 'foo' });

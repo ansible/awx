@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import OrganizationAdd from './OrganizationAdd';
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<OrganizationAdd />', () => {
   test('onSubmit should post to api', async () => {

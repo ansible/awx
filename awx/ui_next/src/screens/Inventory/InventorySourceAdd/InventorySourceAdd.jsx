@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { InventorySourcesAPI } from '@api';
-import useRequest from '@util/useRequest';
 import { Card } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { InventorySourcesAPI } from '../../../api';
+import useRequest from '../../../util/useRequest';
+import { CardBody } from '../../../components/Card';
 import InventorySourceForm from '../shared/InventorySourceForm';
 
 function InventorySourceAdd() {

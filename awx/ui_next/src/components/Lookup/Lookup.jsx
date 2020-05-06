@@ -17,13 +17,13 @@ import {
   InputGroup as PFInputGroup,
   Modal,
 } from '@patternfly/react-core';
-import ChipGroup from '@components/ChipGroup';
+import ChipGroup from '../../components/ChipGroup';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 import reducer, { initReducer } from './shared/reducer';
-import { QSConfig } from '@types';
+import { QSConfig } from '../../types';
 
 const SearchButton = styled(Button)`
   ::after {

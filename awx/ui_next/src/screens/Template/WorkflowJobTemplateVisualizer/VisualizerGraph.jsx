@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { bool } from 'prop-types';
 import * as d3 from 'd3';
 import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../contexts/Workflow';
+import {
   getScaleAndOffsetToFit,
   constants as wfConstants,
   getTranslatePointsForZoom,
-} from '@components/Workflow/WorkflowUtils';
+} from '../../../components/Workflow/WorkflowUtils';
 import {
   WorkflowHelp,
   WorkflowLegend,
@@ -20,11 +20,8 @@ import {
   WorkflowNodeHelp,
   WorkflowStartNode,
   WorkflowTools,
-} from '@components/Workflow';
-import {
-  VisualizerLink,
-  VisualizerNode,
-} from '@screens/Template/WorkflowJobTemplateVisualizer';
+} from '../../../components/Workflow';
+import { VisualizerLink, VisualizerNode } from '.';
 
 const PotentialLink = styled.polyline`
   pointer-events: none;

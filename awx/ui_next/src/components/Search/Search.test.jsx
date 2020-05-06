@@ -4,8 +4,8 @@ import {
   DataToolbarContent,
 } from '@patternfly/react-core/dist/umd/experimental';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Search from './Search';
 
 describe('<Search />', () => {

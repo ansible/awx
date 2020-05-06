@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import UserAccessListItem from './UserAccessListItem';
 
 describe('<UserAccessListItem/>', () => {

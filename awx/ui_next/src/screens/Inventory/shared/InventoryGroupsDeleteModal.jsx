@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { func, bool, arrayOf, object } from 'prop-types';
-import AlertModal from '@components/AlertModal';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Radio } from '@patternfly/react-core';
 import styled from 'styled-components';
+import AlertModal from '../../../components/AlertModal';
 
 const ListItem = styled.li`
   display: flex;

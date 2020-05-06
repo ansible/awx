@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import WorkflowLinkHelp from './WorkflowLinkHelp';
 
 describe('WorkflowLinkHelp', () => {

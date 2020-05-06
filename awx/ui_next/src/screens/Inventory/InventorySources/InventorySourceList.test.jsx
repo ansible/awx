@@ -1,14 +1,17 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI, InventorySourcesAPI } from '@api';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventorySourceList from './InventorySourceList';
 
-jest.mock('@api/models/InventorySources');
-jest.mock('@api/models/Inventories');
-jest.mock('@api/models/InventoryUpdates');
+jest.mock('../../../api/models/InventorySources');
+jest.mock('../../../api/models/Inventories');
+jest.mock('../../../api/models/InventoryUpdates');
 
 describe('<InventorySourceList />', () => {
   let wrapper;

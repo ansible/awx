@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { sleep } from '@testUtils/testUtils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
+import { sleep } from '../../../../testUtils/testUtils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockJobTemplate = {
   allow_callbacks: false,

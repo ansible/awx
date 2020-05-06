@@ -4,7 +4,7 @@ import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import { shape } from 'prop-types';
-import { secondsToHHMMSS } from '@util/dates';
+import { secondsToHHMMSS } from '../../util/dates';
 
 const GridDL = styled.dl`
   column-gap: 15px;

@@ -1,10 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ProjectForm from './ProjectForm';
-import { CredentialTypesAPI, ProjectsAPI } from '@api';
+import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<ProjectForm />', () => {
   let wrapper;

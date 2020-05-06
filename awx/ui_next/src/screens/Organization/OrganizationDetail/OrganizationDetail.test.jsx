@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { OrganizationsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { OrganizationsAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 
 import OrganizationDetail from './OrganizationDetail';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<OrganizationDetail />', () => {
   const mockOrganization = {

@@ -3,7 +3,7 @@ import { bool, string } from 'prop-types';
 import styled from 'styled-components';
 import { Button } from '@patternfly/react-core';
 import { AngleRightIcon } from '@patternfly/react-icons';
-import omitProps from '@util/omitProps';
+import omitProps from '../../util/omitProps';
 import ExpandingContainer from './ExpandingContainer';
 
 // Make button findable by tests
