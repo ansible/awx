@@ -5,17 +5,17 @@ import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
 
-export function useSteps(config, resource, i18n) {
-  const [formErrors, setFormErrors] = useState({});
-  const inventory = useInventoryStep(config, resource, i18n);
-  const credentials = useCredentialsStep(config, resource, i18n);
-  const otherPrompts = useOtherPromptsStep(config, resource, i18n);
-  const survey = useSurveyStep(config, resource, i18n);
+export default function useSteps(config, resource, i18n) {
+  const [visited, setVisited] = useState({});
+  const inventory = useInventoryStep(config, resource, visited, i18n);
+  const credentials = useCredentialsStep(config, resource, visited, i18n);
+  const otherPrompts = useOtherPromptsStep(config, resource, visited, i18n);
+  const survey = useSurveyStep(config, resource, visited, i18n);
   const preview = usePreviewStep(
     config,
     resource,
     survey.survey,
-    formErrors,
+    {}, // TODO: formErrors ?
     i18n
   );
 
@@ -46,6 +46,9 @@ export function useSteps(config, resource, i18n) {
     survey.error ||
     preview.error;
 
+  // TODO: store error state in each step's hook.
+  // but continue to return values here (async?) so form errors can be returned
+  // out and set into Formik
   const validate = values => {
     const errors = {
       ...inventory.validate(values),
@@ -53,24 +56,29 @@ export function useSteps(config, resource, i18n) {
       ...otherPrompts.validate(values),
       ...survey.validate(values),
     };
-    setFormErrors(errors);
+    // setFormErrors(errors);
     if (Object.keys(errors).length) {
       return errors;
     }
     return false;
   };
 
-  return { steps, initialValues, isReady, validate, formErrors, contentError };
-}
-
-export function usePromptErrors(config) {
-  const [promptErrors, setPromptErrors] = useState({});
-  const updatePromptErrors = () => {};
-  return [promptErrors, updatePromptErrors];
-}
-
-// TODO this interrelates with usePromptErrors
-// merge? or pass result from one into the other?
-export function useVisitedSteps(config) {
-  return [[], () => {}];
+  // TODO move visited flags into each step hook
+  return {
+    steps,
+    initialValues,
+    isReady,
+    validate,
+    visitStep: stepId => setVisited({ ...visited, [stepId]: true }),
+    visitAllSteps: () => {
+      setVisited({
+        inventory: true,
+        credentials: true,
+        other: true,
+        survey: true,
+        preview: true,
+      });
+    },
+    contentError,
+  };
 }

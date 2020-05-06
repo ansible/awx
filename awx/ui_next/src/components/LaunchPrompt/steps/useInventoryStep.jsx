@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { t } from '@lingui/macro';
 import InventoryStep from './InventoryStep';
+import StepName from './StepName';
 
 const STEP_ID = 'inventory';
 
-export default function useInventoryStep(config, resource, i18n) {
+export default function useInventoryStep(config, resource, visitedSteps, i18n) {
+  const [stepErrors, setStepErrors] = useState({});
+
   const validate = values => {
     const errors = {};
     if (!values.inventory) {
       errors.inventory = i18n._(t`An inventory must be selected`);
     }
+    setStepErrors(errors);
     return errors;
   };
 
+  const hasErrors = visitedSteps[STEP_ID] && Object.keys(stepErrors).length > 0;
+
   return {
-    step: getStep(config, i18n),
+    step: getStep(config, hasErrors, i18n),
     initialValues: getInitialValues(config, resource),
     validate,
     isReady: true,
@@ -22,13 +28,13 @@ export default function useInventoryStep(config, resource, i18n) {
   };
 }
 
-function getStep(config, i18n) {
+function getStep(config, hasErrors, i18n) {
   if (!config.ask_inventory_on_launch) {
     return null;
   }
   return {
     id: STEP_ID,
-    name: i18n._(t`Inventory`),
+    name: <StepName hasErrors={hasErrors}>{i18n._(t`Inventory`)}</StepName>,
     component: <InventoryStep i18n={i18n} />,
   };
 }

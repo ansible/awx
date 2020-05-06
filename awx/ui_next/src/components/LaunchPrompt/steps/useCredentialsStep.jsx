@@ -4,13 +4,14 @@ import CredentialsStep from './CredentialsStep';
 
 const STEP_ID = 'credentials';
 
-export default function useCredentialsStep(config, resource, i18n) {
-  const validate = values => {
-    const errors = {};
-    if (!values.credentials || !values.credentials.length) {
-      errors.credentials = i18n._(t`Credentials must be selected`);
-    }
-    return errors;
+export default function useCredentialsStep(
+  config,
+  resource,
+  visitedSteps,
+  i18n
+) {
+  const validate = () => {
+    return {};
   };
 
   return {
