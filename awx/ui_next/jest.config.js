@@ -9,14 +9,6 @@ module.exports = {
   ],
   moduleNameMapper: {
     '\\.(css|scss|less)$': '<rootDir>/__mocks__/styleMock.js',
-    '^@api(.*)$': '<rootDir>/src/api$1',
-    '^@components(.*)$': '<rootDir>/src/components$1',
-    '^@constants$': '<rootDir>/src/constants.js',
-    '^@contexts(.*)$': '<rootDir>/src/contexts$1',
-    '^@screens(.*)$': '<rootDir>/src/screens$1',
-    '^@util(.*)$': '<rootDir>/src/util$1',
-    '^@types(.*)$': '<rootDir>/src/types$1',
-    '^@testUtils(.*)$': '<rootDir>/testUtils$1',
   },
   setupFiles: [
     '@nteract/mockument'

@@ -57,16 +57,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['*', '.js', '.jsx', '.css'],
-    alias: {
-      '@api': path.join(SRC_PATH, 'api'),
-      '@components': path.join(SRC_PATH, 'components'),
-      '@constants': path.join(SRC_PATH, 'constants.js'),
-      '@contexts': path.join(SRC_PATH, 'contexts'),
-      '@screens': path.join(SRC_PATH, 'screens'),
-      '@types': path.join(SRC_PATH, 'types'),
-      '@util': path.join(SRC_PATH, 'util'),
-      '@testUtils': path.join(ROOT_PATH, 'testUtils'),
-    }
   },
   output: {
     path: path.resolve(__dirname, '/dist'),
