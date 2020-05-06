@@ -148,6 +148,9 @@ for setting in dir(this_module):
 include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
+# Installed differently in Dockerfile compared to production versions
+INVENTORY_COLLECTIONS_ROOT = '/vendor/inventory_collections'
+
 BASE_VENV_PATH = "/venv/"
 ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")

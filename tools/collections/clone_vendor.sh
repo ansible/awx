@@ -50,10 +50,10 @@ else
   echo "VMWare collection already exists"
 fi
 
-if [ ! -d "$base_dir/ovirt/ovirt_collection" ]
+if [ ! -d "$base_dir/ovirt/ovirt" ]
 then
 	mkdir -p $base_dir/ovirt
-	git clone  $base_dir/ovirt/ovirt_collection
+	git clone https://github.com/oVirt/ovirt-ansible-collection.git $base_dir/ovirt/ovirt
 else
   echo "Ovirt collection already exists"
 fi
@@ -62,7 +62,6 @@ if [ ! -d "$base_dir/awx/awx" ]
 then
 	mkdir -p $base_dir/awx
   ln -s $(shell pwd)/awx_collection $base_dir/awx/awx
-	git clone  $base_dir/awx/awx
 else
   echo "awx collection already exists"
 fi
