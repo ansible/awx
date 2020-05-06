@@ -4,6 +4,7 @@
 # Python
 import datetime
 import time
+import json
 import logging
 import re
 import copy
@@ -2625,12 +2626,56 @@ class satellite6(PluginFileInjector):
         ret['want_params'] = True
         ret['group_prefix'] = group_prefix
         ret['want_hostcollections'] = want_hostcollections
-        ret['group_patterns'] = group_patterns  # not currently supported by the plugin (https://github.com/ansible/awx/issues/6821)
         ret['want_facts'] = want_facts
 
         if want_ansible_ssh_host:
             ret['compose'] = {'ansible_ssh_host': "foreman['ip6'] | default(foreman['ip'], true)"}
         ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
+
+        def form_keyed_group(group_pattern):
+            """
+            Converts foreman group_pattern to
+            inventory plugin keyed_group
+
+            e.g. {app_param}-{tier_param}-{dc_param}
+                 becomes
+                 "%s-%s-%s" | format(app_param, tier_param, dc_param)
+            """
+            if type(group_pattern) is not str:
+                return None
+            params = re.findall('{[^}]*}', group_pattern)
+            if len(params) == 0:
+                return None
+
+            param_names = []
+            for p in params:
+                param_names.append(p[1:-1].strip())  # strip braces and space
+
+            # form keyed_group key by
+            # replacing curly braces with '%s'
+            # (for use with jinja's format filter)
+            key = group_pattern
+            for p in params:
+                key = key.replace(p, '%s', 1)
+
+            # apply jinja filter to key
+            key = '"{}" | format({})'.format(key, ', '.join(param_names))
+
+            keyed_group = {'key': key,
+                           'separator': ''}
+            return keyed_group
+
+        try:
+            group_patterns = json.loads(group_patterns)
+
+            if type(group_patterns) is list:
+                for group_pattern in group_patterns:
+                    keyed_group = form_keyed_group(group_pattern)
+                    if keyed_group:
+                        ret['keyed_groups'].append(keyed_group)
+        except json.JSONDecodeError:
+            logger.warning('Could not parse group_patterns. Expected JSON-formatted string, found: {}'
+                           .format(group_patterns))
 
         return ret
 
