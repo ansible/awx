@@ -4,12 +4,12 @@ import { Formik } from 'formik';
 import { Form, Card } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 
-import { CardBody } from '@components/Card';
-import FormField from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { required } from '@util/validators';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
+import { CardBody } from '../../../components/Card';
+import FormField from '../../../components/FormField';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import { VariablesField } from '../../../components/CodeMirrorInput';
+import { required } from '../../../util/validators';
+import { FormColumnLayout, FormFullWidthLayout } from '../../../components/FormLayout';
 
 function InventoryGroupForm({
   i18n,

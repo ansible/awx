@@ -1,9 +1,9 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import SurveyToolbar from './SurveyToolbar';
 
-jest.mock('@api/models/JobTemplates');
+jest.mock('../../../api/models/JobTemplates');
 
 describe('<SurveyToolbar />', () => {
   test('delete Button is disabled', () => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import JobTemplateDetail from './JobTemplateDetail';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI } from '../../../api';
 import mockTemplate from '../shared/data.job_template.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInstanceGroups = {
   count: 5,

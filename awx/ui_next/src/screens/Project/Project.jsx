@@ -3,17 +3,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import NotificationList from '@components/NotificationList';
-import { ResourceAccessList } from '@components/ResourceAccessList';
-import { Schedules } from '@components/Schedule';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import NotificationList from '../../components/NotificationList';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
+import { Schedules } from '../../components/Schedule';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
-import { OrganizationsAPI, ProjectsAPI } from '@api';
+import { OrganizationsAPI, ProjectsAPI } from '../../api';
 
 class Project extends Component {
   constructor(props) {

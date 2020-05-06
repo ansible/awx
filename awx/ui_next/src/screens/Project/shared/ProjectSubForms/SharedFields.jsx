@@ -2,14 +2,14 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import FormField, { CheckboxField } from '@components/FormField';
-import { required } from '@util/validators';
+import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import FormField, { CheckboxField } from '../../../../components/FormField';
+import { required } from '../../../../util/validators';
 import { FormGroup, Title } from '@patternfly/react-core';
 import {
   FormCheckboxLayout,
   FormFullWidthLayout,
-} from '@components/FormLayout';
+} from '../../../../components/FormLayout';
 
 export const UrlFormField = withI18n()(({ i18n, tooltip }) => (
   <FormField

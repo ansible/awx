@@ -4,16 +4,16 @@ import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { FormColumnLayout } from '@components/FormLayout';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import { FormColumnLayout } from '../../../components/FormLayout';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
   FieldTooltip,
-} from '@components/FormField';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { required, noWhiteSpace, combine, maxLength } from '@util/validators';
+} from '../../../components/FormField';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { required, noWhiteSpace, combine, maxLength } from '../../../util/validators';
 
 function AnswerTypeField({ i18n }) {
   const [field] = useField({

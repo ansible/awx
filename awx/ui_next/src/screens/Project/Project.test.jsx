@@ -1,12 +1,12 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { OrganizationsAPI, ProjectsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockOrganization from '@util/data.organization.json';
+import { OrganizationsAPI, ProjectsAPI } from '../../api';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
+import mockOrganization from '../../util/data.organization.json';
 import mockDetails from './data.project.json';
 import Project from './Project';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 const mockMe = {
   is_super_user: true,

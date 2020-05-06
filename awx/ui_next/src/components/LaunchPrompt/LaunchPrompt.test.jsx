@@ -1,16 +1,16 @@
 import React from 'react';
 import { act, isElementOfType } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import LaunchPrompt from './LaunchPrompt';
 import InventoryStep from './InventoryStep';
 import CredentialsStep from './CredentialsStep';
 import OtherPromptsStep from './OtherPromptsStep';
 import PreviewStep from './PreviewStep';
-import { InventoriesAPI, CredentialsAPI, CredentialTypesAPI } from '@api';
+import { InventoriesAPI, CredentialsAPI, CredentialTypesAPI } from '../../api';
 
-jest.mock('@api/models/Inventories');
-jest.mock('@api/models/CredentialTypes');
-jest.mock('@api/models/Credentials');
+jest.mock('../../api/models/Inventories');
+jest.mock('../../api/models/CredentialTypes');
+jest.mock('../../api/models/Credentials');
 
 let config;
 const resource = {

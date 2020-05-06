@@ -1,6 +1,6 @@
 import React from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { WorkflowDispatchContext } from '../../../contexts/Workflow';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import VisualizerStartScreen from './VisualizerStartScreen';
 
 const dispatch = jest.fn();

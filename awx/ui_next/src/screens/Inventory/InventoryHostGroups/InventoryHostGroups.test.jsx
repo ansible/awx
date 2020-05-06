@@ -1,11 +1,11 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { HostsAPI } from '@api';
+import { HostsAPI } from '../../../api';
 import InventoryHostGroups from './InventoryHostGroups';
 
-jest.mock('@api');
+jest.mock('../../../api');
 HostsAPI.readAllGroups.mockResolvedValue({
   data: {
     count: 1,

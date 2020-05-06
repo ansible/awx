@@ -4,12 +4,12 @@ import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { toTitleCase } from '@util/strings';
+import { toTitleCase } from '../../util/strings';
 
 import { Chip, ChipGroup, Divider } from '@patternfly/react-core';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import CredentialChip from '@components/CredentialChip';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import { VariablesDetail } from '../../components/CodeMirrorInput';
+import CredentialChip from '../../components/CredentialChip';
+import { DetailList, Detail, UserDateDetail } from '../../components/DetailList';
 
 import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';

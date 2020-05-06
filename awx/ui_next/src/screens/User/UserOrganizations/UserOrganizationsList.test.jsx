@@ -1,13 +1,13 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
 
 import UserOrganizationsList from './UserOrganizationsList';
-import { UsersAPI } from '@api';
+import { UsersAPI } from '../../../api';
 
-jest.mock('@api/models/Users');
+jest.mock('../../../api/models/Users');
 
 describe('<UserOrganizationlist />', () => {
   let history;

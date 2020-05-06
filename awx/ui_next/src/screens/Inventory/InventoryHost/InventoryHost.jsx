@@ -9,17 +9,17 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
+import useRequest from '../../../util/useRequest';
 
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI } from '../../../api';
 import { Card, CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import RoutedTabs from '@components/RoutedTabs';
-import JobList from '@components/JobList';
+import { TabbedCardHeader } from '../../../components/Card';
+import CardCloseButton from '../../../components/CardCloseButton';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import RoutedTabs from '../../../components/RoutedTabs';
+import JobList from '../../../components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
 import InventoryHostFacts from '../InventoryHostFacts';

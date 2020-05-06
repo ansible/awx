@@ -3,13 +3,13 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+} from '../../../../../contexts/Workflow';
+import { mountWithContexts, waitForElement } from '../../../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
 import NodeViewModal from './NodeViewModal';
 
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('../../../../../api/models/JobTemplates');
+jest.mock('../../../../../api/models/WorkflowJobTemplates');
 WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
 WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
   data: {

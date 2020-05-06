@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import ContentLoading from '@components/ContentLoading';
-import { CardBody } from '@components/Card';
+import ContentLoading from '../../../components/ContentLoading';
+import { CardBody } from '../../../components/Card';
 import SurveyQuestionForm from './SurveyQuestionForm';
 
 export default function SurveyQuestionEdit({ survey, updateSurvey }) {

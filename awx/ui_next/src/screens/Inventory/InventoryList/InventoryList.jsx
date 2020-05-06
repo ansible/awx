@@ -5,17 +5,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { InventoriesAPI } from '@api';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import { InventoriesAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
+import DatalistToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
+} from '../../../components/PaginatedDataList';
 
-import { getQSConfig, parseQueryString } from '@util/qs';
-import AddDropDownButton from '@components/AddDropDownButton';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
 const QS_CONFIG = getQSConfig('inventory', {

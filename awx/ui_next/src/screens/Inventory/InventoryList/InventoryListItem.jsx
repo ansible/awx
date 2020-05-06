@@ -10,14 +10,14 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import { Inventory } from '@types';
+import { Inventory } from '../../../types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

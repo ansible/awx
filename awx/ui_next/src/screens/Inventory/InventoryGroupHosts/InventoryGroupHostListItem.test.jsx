@@ -1,9 +1,9 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import mockHosts from '../shared/data.hosts.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<InventoryGroupHostListItem />', () => {
   let wrapper;

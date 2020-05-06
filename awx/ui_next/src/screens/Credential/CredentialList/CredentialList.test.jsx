@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { CredentialsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { CredentialsAPI } from '../../../api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import { CredentialList } from '.';
 import { mockCredentials } from '../shared';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<CredentialList />', () => {
   let wrapper;

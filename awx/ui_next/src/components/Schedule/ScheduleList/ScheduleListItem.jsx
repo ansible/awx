@@ -12,13 +12,13 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { DetailList, Detail } from '@components/DetailList';
-import { ScheduleToggle } from '@components/Schedule';
+import { DetailList, Detail } from '../../../components/DetailList';
+import { ScheduleToggle } from '../../../components/Schedule';
 import styled from 'styled-components';
-import { Schedule } from '@types';
-import { formatDateString } from '@util/dates';
+import { Schedule } from '../../../types';
+import { formatDateString } from '../../../util/dates';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

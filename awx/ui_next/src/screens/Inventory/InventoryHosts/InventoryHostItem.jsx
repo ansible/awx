@@ -11,13 +11,13 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import HostToggle from '@components/HostToggle';
-import Sparkline from '@components/Sparkline';
-import { Host } from '@types';
+import HostToggle from '../../../components/HostToggle';
+import Sparkline from '../../../components/Sparkline';
+import { Host } from '../../../types';
 import styled from 'styled-components';
 
 const DataListAction = styled(_DataListAction)`

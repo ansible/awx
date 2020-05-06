@@ -2,17 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CredentialsAPI } from '@api';
+import { CredentialsAPI } from '../../../api';
 import { Card, PageSection } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import DataListToolbar from '@components/DataListToolbar';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { CredentialListItem } from '.';
 
 const QS_CONFIG = getQSConfig('credential', {

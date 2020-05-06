@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import AssociateModal from './AssociateModal';
 import mockHosts from './data.hosts.json';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<AssociateModal />', () => {
   let wrapper;

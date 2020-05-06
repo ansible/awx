@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
 
-import { CardBody } from '@components/Card';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
+import { CardBody } from '../../../components/Card';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 import CredentialForm from '../shared/CredentialForm';
 
 function CredentialEdit({ credential, me }) {

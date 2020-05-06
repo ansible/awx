@@ -1,4 +1,4 @@
-import { describeNotificationMixin } from '@testUtils/apiReusable';
+import { describeNotificationMixin } from '../../../testUtils/apiReusable';
 import Organizations from './Organizations';
 
 describe('OrganizationsAPI', () => {

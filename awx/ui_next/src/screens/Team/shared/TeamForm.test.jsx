@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 
 import TeamForm from './TeamForm';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<TeamForm />', () => {
   let wrapper;

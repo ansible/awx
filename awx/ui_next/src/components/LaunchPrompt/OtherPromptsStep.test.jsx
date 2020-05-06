@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import OtherPromptsStep from './OtherPromptsStep';
 
 describe('OtherPromptsStep', () => {

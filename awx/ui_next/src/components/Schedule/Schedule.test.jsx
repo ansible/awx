@@ -1,12 +1,12 @@
 import React from 'react';
-import { SchedulesAPI } from '@api';
+import { SchedulesAPI } from '../../api';
 import { Route } from 'react-router-dom';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import Schedule from './Schedule';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../api/models/Schedules');
 
 SchedulesAPI.readDetail.mockResolvedValue({
   data: {

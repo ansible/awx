@@ -2,15 +2,15 @@ import React, { useEffect, useReducer } from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../contexts/Workflow';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 import { shape } from 'prop-types';
-import { layoutGraph } from '@components/Workflow/WorkflowUtils';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import workflowReducer from '@components/Workflow/workflowReducer';
+import { layoutGraph } from '../../../components/Workflow/WorkflowUtils';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import workflowReducer from '../../../components/Workflow/workflowReducer';
 import { DeleteAllNodesModal, UnsavedChangesModal } from './Modals';
 import {
   LinkAddModal,
@@ -30,7 +30,7 @@ import {
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../api';
 
 const CenteredContent = styled.div`
   align-items: center;

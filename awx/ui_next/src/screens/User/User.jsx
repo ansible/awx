@@ -9,14 +9,14 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
-import { UsersAPI } from '@api';
+import useRequest from '../../util/useRequest';
+import { UsersAPI } from '../../api';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import RoutedTabs from '@components/RoutedTabs';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
+import RoutedTabs from '../../components/RoutedTabs';
 import UserDetail from './UserDetail';
 import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';

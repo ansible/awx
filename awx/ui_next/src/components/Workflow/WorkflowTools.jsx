@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
+import { WorkflowDispatchContext } from '../../contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';

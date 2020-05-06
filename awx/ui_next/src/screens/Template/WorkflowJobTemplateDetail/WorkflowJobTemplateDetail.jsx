@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { WorkflowJobTemplatesAPI } from '@api';
+import { WorkflowJobTemplatesAPI } from '../../../api';
 import {
   Chip,
   ChipGroup,
@@ -14,16 +14,16 @@ import {
   Label,
 } from '@patternfly/react-core';
 
-import AlertModal from '@components/AlertModal';
-import { CardBody, CardActionsRow } from '@components/Card';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import ContentLoading from '@components/ContentLoading';
-import DeleteButton from '@components/DeleteButton';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import ErrorDetail from '@components/ErrorDetail';
-import LaunchButton from '@components/LaunchButton';
-import Sparkline from '@components/Sparkline';
-import { toTitleCase } from '@util/strings';
+import AlertModal from '../../../components/AlertModal';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import ContentLoading from '../../../components/ContentLoading';
+import DeleteButton from '../../../components/DeleteButton';
+import { DetailList, Detail, UserDateDetail } from '../../../components/DetailList';
+import ErrorDetail from '../../../components/ErrorDetail';
+import LaunchButton from '../../../components/LaunchButton';
+import Sparkline from '../../../components/Sparkline';
+import { toTitleCase } from '../../../util/strings';
 
 function WorkflowJobTemplateDetail({ template, i18n }) {
   const {

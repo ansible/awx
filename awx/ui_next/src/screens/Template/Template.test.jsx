@@ -1,14 +1,14 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import Template from './Template';
 import mockJobTemplateData from './shared/data.job_template.json';
 
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/Organizations');
+jest.mock('../../api/models/JobTemplates');
+jest.mock('../../api/models/Organizations');
 
 const mockMe = {
   is_super_user: true,

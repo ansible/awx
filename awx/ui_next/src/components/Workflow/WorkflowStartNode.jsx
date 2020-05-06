@@ -2,17 +2,17 @@ import React, { useContext, useRef, useState } from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { bool, func } from 'prop-types';
 import { PlusIcon } from '@patternfly/react-icons';
-import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
+import { constants as wfConstants } from '../../components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
-} from '@components/Workflow';
+} from '../../components/Workflow';
 
 const StartG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};

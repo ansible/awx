@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
 import VariablesDetail from './VariablesDetail';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<VariablesDetail>', () => {
   test('should render readonly CodeMirrorInput', () => {

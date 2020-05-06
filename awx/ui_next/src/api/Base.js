@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { encodeQueryString } from '@util/qs';
+import { encodeQueryString } from '../util/qs';
 
 const defaultHttp = axios.create({
   xsrfCookieName: 'csrftoken',

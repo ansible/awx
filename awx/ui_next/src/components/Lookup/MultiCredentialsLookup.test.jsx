@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import MultiCredentialsLookup from './MultiCredentialsLookup';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import { CredentialsAPI, CredentialTypesAPI } from '../../api';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<MultiCredentialsLookup />', () => {
   let wrapper;

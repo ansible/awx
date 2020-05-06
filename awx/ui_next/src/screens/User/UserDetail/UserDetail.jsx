@@ -3,15 +3,15 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
+import AlertModal from '../../../components/AlertModal';
 import { Button } from '@patternfly/react-core';
-import { CardBody, CardActionsRow } from '@components/Card';
-import ContentLoading from '@components/ContentLoading';
-import DeleteButton from '@components/DeleteButton';
-import { DetailList, Detail } from '@components/DetailList';
-import ErrorDetail from '@components/ErrorDetail';
-import { formatDateString } from '@util/dates';
-import { UsersAPI } from '@api';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import ContentLoading from '../../../components/ContentLoading';
+import DeleteButton from '../../../components/DeleteButton';
+import { DetailList, Detail } from '../../../components/DetailList';
+import ErrorDetail from '../../../components/ErrorDetail';
+import { formatDateString } from '../../../util/dates';
+import { UsersAPI } from '../../../api';
 
 function UserDetail({ user, i18n }) {
   const {

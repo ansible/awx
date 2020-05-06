@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { RootAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { RootAPI } from '../../api';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 
 import AWXLogin from './Login';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<Login />', () => {
   async function findChildren(wrapper) {

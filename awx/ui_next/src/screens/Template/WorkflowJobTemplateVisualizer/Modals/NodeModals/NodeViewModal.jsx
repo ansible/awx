@@ -4,19 +4,19 @@ import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../../../contexts/Workflow';
 
 import { Button, Modal } from '@patternfly/react-core';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import PromptDetail from '@components/PromptDetail';
-import useRequest from '@util/useRequest';
+import ContentError from '../../../../../components/ContentError';
+import ContentLoading from '../../../../../components/ContentLoading';
+import PromptDetail from '../../../../../components/PromptDetail';
+import useRequest from '../../../../../util/useRequest';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../../../api';
 
 function getNodeType(node) {
   const ujtType = node.type || node.unified_job_type;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI } from '../../api';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import mockSmartInventory from './shared/data.smart_inventory.json';
 import SmartInventory from './SmartInventory';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 InventoriesAPI.readDetail.mockResolvedValue({
   data: mockSmartInventory,

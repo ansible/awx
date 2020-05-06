@@ -3,10 +3,10 @@ import { shape } from 'prop-types';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { formatDateString, formatDateStringUTC } from '@util/dates';
+import { formatDateString, formatDateStringUTC } from '../../../util/dates';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
-import { DetailName, DetailValue } from '@components/DetailList';
-import MultiButtonToggle from '@components/MultiButtonToggle';
+import { DetailName, DetailValue } from '../../../components/DetailList';
+import MultiButtonToggle from '../../../components/MultiButtonToggle';
 
 const OccurrencesLabel = styled.div`
   display: inline-block;

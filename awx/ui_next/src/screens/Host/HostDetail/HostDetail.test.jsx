@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import HostDetail from './HostDetail';
-import { HostsAPI } from '@api';
+import { HostsAPI } from '../../../api';
 
 import mockHost from '../data.host.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<HostDetail />', () => {
   let wrapper;

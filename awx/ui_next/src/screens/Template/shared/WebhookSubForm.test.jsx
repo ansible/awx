@@ -3,13 +3,13 @@ import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { CredentialsAPI } from '@api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import { CredentialsAPI } from '../../../api';
 import { Formik } from 'formik';
 
 import WebhookSubForm from './WebhookSubForm';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<WebhooksSubForm />', () => {
   let wrapper;

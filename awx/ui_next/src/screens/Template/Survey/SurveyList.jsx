@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { DataList, Button as _Button } from '@patternfly/react-core';
-import ContentLoading from '@components/ContentLoading';
-import ContentEmpty from '@components/ContentEmpty';
-import AlertModal from '@components/AlertModal';
+import ContentLoading from '../../../components/ContentLoading';
+import ContentEmpty from '../../../components/ContentEmpty';
+import AlertModal from '../../../components/AlertModal';
 import styled from 'styled-components';
 
 import SurveyListItem from './SurveyListItem';

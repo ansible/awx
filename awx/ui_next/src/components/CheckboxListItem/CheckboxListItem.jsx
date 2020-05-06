@@ -7,7 +7,7 @@ import {
   DataListCheck,
   Radio,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../components/DataListCell';
 
 const CheckboxListItem = ({
   isDisabled = false,

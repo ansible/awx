@@ -3,8 +3,8 @@ import { Route, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Config } from '@contexts/Config';
-import Breadcrumbs from '@components/Breadcrumbs';
+import { Config } from '../../contexts/Config';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import TeamList from './TeamList';
 import TeamAdd from './TeamAdd';
 import Team from './Team';

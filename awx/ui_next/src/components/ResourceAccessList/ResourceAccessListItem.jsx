@@ -12,12 +12,12 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../components/DataListCell';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { DetailList, Detail } from '@components/DetailList';
-import { AccessRecord } from '@types';
+import { DetailList, Detail } from '../../components/DetailList';
+import { AccessRecord } from '../../types';
 
 const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;

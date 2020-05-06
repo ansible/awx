@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import { RRule } from 'rrule';
-import { SchedulesAPI } from '@api';
+import { SchedulesAPI } from '../../../api';
 import ScheduleAdd from './ScheduleAdd';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../../api/models/Schedules');
 
 SchedulesAPI.readZoneInfo.mockResolvedValue({
   data: [

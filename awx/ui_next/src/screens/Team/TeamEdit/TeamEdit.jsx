@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 
-import { TeamsAPI } from '@api';
-import { Config } from '@contexts/Config';
+import { TeamsAPI } from '../../../api';
+import { Config } from '../../../contexts/Config';
 
 import TeamForm from '../shared/TeamForm';
 

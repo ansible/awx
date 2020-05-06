@@ -1,6 +1,6 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
+import { FormColumnLayout, FormFullWidthLayout } from '../../../../components/FormLayout';
 import {
   UsernameFormField,
   PasswordFormField,

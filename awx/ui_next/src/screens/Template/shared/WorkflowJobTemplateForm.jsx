@@ -14,30 +14,30 @@ import {
   TextInput,
   Checkbox,
 } from '@patternfly/react-core';
-import { required } from '@util/validators';
+import { required } from '../../../util/validators';
 import { SyncAltIcon } from '@patternfly/react-icons';
 
-import AnsibleSelect from '@components/AnsibleSelect';
-import { WorkflowJobTemplatesAPI, CredentialTypesAPI } from '@api';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { WorkflowJobTemplatesAPI, CredentialTypesAPI } from '../../../api';
 
-import useRequest from '@util/useRequest';
+import useRequest from '../../../util/useRequest';
 import FormField, {
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
+} from '../../../components/FormField';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
-} from '@components/FormLayout';
-import ContentLoading from '@components/ContentLoading';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import { InventoryLookup } from '@components/Lookup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import FormActionGroup from '@components/FormActionGroup';
-import ContentError from '@components/ContentError';
-import CheckboxField from '@components/FormField/CheckboxField';
+} from '../../../components/FormLayout';
+import ContentLoading from '../../../components/ContentLoading';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import CredentialLookup from '../../../components/Lookup/CredentialLookup';
+import { InventoryLookup } from '../../../components/Lookup';
+import { VariablesField } from '../../../components/CodeMirrorInput';
+import FormActionGroup from '../../../components/FormActionGroup';
+import ContentError from '../../../components/ContentError';
+import CheckboxField from '../../../components/FormField/CheckboxField';
 import LabelSelect from './LabelSelect';
 
 const urlOrigin = window.location.origin;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { HostsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { HostsAPI } from '../../api';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import mockHost from './data.host.json';
 import Host from './Host';
 
-jest.mock('@api');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({

@@ -11,19 +11,19 @@ import {
 } from 'react-router-dom';
 
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import JobList from '@components/JobList';
-import RoutedTabs from '@components/RoutedTabs';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
+import RoutedTabs from '../../components/RoutedTabs';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import InventoryDetail from './InventoryDetail';
 import InventoryEdit from './InventoryEdit';
 import InventoryGroups from './InventoryGroups';
 import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI } from '../../api';
 
 function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);

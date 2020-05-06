@@ -8,15 +8,15 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+} from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import DatalistToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and

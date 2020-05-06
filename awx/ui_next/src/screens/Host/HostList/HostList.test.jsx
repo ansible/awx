@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { HostsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { HostsAPI } from '../../../api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 
 import HostList from './HostList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockHosts = [
   {

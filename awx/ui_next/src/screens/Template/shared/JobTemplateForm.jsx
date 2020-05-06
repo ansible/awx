@@ -10,34 +10,34 @@ import {
   Checkbox,
   TextInput,
 } from '@patternfly/react-core';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { TagMultiSelect } from '@components/MultiSelect';
-import useRequest from '@util/useRequest';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { TagMultiSelect } from '../../../components/MultiSelect';
+import useRequest from '../../../util/useRequest';
 
-import FormActionGroup from '@components/FormActionGroup';
+import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, {
   CheckboxField,
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
-import FieldWithPrompt from '@components/FieldWithPrompt';
+} from '../../../components/FormField';
+import FieldWithPrompt from '../../../components/FieldWithPrompt';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
-} from '@components/FormLayout';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { required } from '@util/validators';
-import { JobTemplate } from '@types';
+} from '../../../components/FormLayout';
+import { VariablesField } from '../../../components/CodeMirrorInput';
+import { required } from '../../../util/validators';
+import { JobTemplate } from '../../../types';
 import {
   InventoryLookup,
   InstanceGroupsLookup,
   ProjectLookup,
   MultiCredentialsLookup,
-} from '@components/Lookup';
-import { JobTemplatesAPI, ProjectsAPI } from '@api';
+} from '../../../components/Lookup';
+import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';

@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ProjectsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { ProjectsAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ProjectList from './ProjectList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockProjects = [
   {

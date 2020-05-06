@@ -4,10 +4,10 @@ import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { SyncIcon, MinusCircleIcon } from '@patternfly/react-icons';
-import useRequest, { useDismissableError } from '@util/useRequest';
-import AlertModal from '@components/AlertModal/AlertModal';
-import ErrorDetail from '@components/ErrorDetail/ErrorDetail';
-import { InventoryUpdatesAPI, InventorySourcesAPI } from '@api';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
+import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
 function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
   const [updateStatus, setUpdateStatus] = useState(source.status);

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { string, node, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
-import { DetailName, DetailValue } from '@components/DetailList';
-import MultiButtonToggle from '@components/MultiButtonToggle';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
+import { DetailName, DetailValue } from '../../components/DetailList';
+import MultiButtonToggle from '../../components/MultiButtonToggle';
+import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 

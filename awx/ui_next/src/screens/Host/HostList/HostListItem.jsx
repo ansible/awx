@@ -11,15 +11,15 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-import Sparkline from '@components/Sparkline';
-import { Host } from '@types';
+import Sparkline from '../../../components/Sparkline';
+import { Host } from '../../../types';
 import styled from 'styled-components';
-import HostToggle from '@components/HostToggle';
+import HostToggle from '../../../components/HostToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

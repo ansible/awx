@@ -8,12 +8,12 @@ import { Form, FormGroup } from '@patternfly/react-core';
 import FormField, {
   FormSubmitError,
   FieldTooltip,
-} from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { InventoryLookup } from '@components/Lookup';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
-import { required } from '@util/validators';
+} from '../../components/FormField';
+import FormActionGroup from '../../components/FormActionGroup/FormActionGroup';
+import { VariablesField } from '../../components/CodeMirrorInput';
+import { InventoryLookup } from '../../components/Lookup';
+import { FormColumnLayout, FormFullWidthLayout } from '../../components/FormLayout';
+import { required } from '../../util/validators';
 
 const InventoryLookupField = withI18n()(({ i18n, host }) => {
   const [inventory, setInventory] = useState(

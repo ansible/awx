@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import JobTemplateForm from './JobTemplateForm';
-import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '@api';
+import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<JobTemplateForm />', () => {
   const mockData = {

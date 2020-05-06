@@ -1,12 +1,12 @@
 /* eslint react/no-unused-state: 0 */
 import React, { Component } from 'react';
 import { withRouter, Redirect } from 'react-router-dom';
-import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import { JobTemplatesAPI, ProjectsAPI } from '@api';
-import { JobTemplate } from '@types';
-import { getAddedAndRemoved } from '@util/lists';
+import { CardBody } from '../../../components/Card';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplate } from '../../../types';
+import { getAddedAndRemoved } from '../../../util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
 const loadRelatedProjectPlaybooks = async project =>

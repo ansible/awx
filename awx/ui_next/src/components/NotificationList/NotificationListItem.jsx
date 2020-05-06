@@ -10,7 +10,7 @@ import {
   DataListItemRow,
   Switch,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../components/DataListCell';
 
 import styled from 'styled-components';
 

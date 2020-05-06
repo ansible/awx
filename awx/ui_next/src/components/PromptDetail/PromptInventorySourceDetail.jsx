@@ -4,9 +4,9 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, ChipGroup, List, ListItem } from '@patternfly/react-core';
-import { Detail, DeletedDetail } from '@components/DetailList';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import CredentialChip from '@components/CredentialChip';
+import { Detail, DeletedDetail } from '../../components/DetailList';
+import { VariablesDetail } from '../../components/CodeMirrorInput';
+import CredentialChip from '../../components/CredentialChip';
 
 function PromptInventorySourceDetail({ i18n, resource }) {
   const {

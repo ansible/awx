@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 
-import { InventoriesAPI, CredentialTypesAPI } from '@api';
+import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import InventoryEdit from './InventoryEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInventory = {
   id: 1,

@@ -3,7 +3,7 @@ import { arrayOf, func, object, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
+import AlertModal from '../../components/AlertModal';
 import styled from 'styled-components';
 
 const ModalNote = styled.div`

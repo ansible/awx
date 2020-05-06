@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 
 describe('<WorkflowJobTemplateDetail/>', () => {

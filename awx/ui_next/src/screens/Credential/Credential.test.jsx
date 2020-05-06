@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { CredentialsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { CredentialsAPI } from '../../api';
+import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
 import mockCredential from './shared/data.credential.json';
 import mockOrgCredential from './shared/data.orgCredential.json';
 import Credential from './Credential';
 
-jest.mock('@api');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({

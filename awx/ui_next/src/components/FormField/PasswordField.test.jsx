@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
 import { Formik } from 'formik';
 import PasswordField from './PasswordField';
 

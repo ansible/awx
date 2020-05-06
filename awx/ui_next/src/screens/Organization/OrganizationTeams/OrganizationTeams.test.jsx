@@ -1,13 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { OrganizationsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { OrganizationsAPI } from '../../../api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 
 import OrganizationTeams from './OrganizationTeams';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const listData = {
   data: {

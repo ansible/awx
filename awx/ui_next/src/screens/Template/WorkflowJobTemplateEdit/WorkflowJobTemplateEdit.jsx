@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CardBody } from '@components/Card';
-import { getAddedAndRemoved } from '@util/lists';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
+import { CardBody } from '../../../components/Card';
+import { getAddedAndRemoved } from '../../../util/lists';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../../api';
 import { WorkflowJobTemplateForm } from '../shared';
 
 function WorkflowJobTemplateEdit({ template }) {

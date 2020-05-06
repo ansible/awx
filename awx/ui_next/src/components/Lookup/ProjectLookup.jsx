@@ -4,11 +4,11 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { ProjectsAPI } from '@api';
-import { Project } from '@types';
-import { FieldTooltip } from '@components/FormField';
-import OptionsList from '@components/OptionsList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import { ProjectsAPI } from '../../api';
+import { Project } from '../../types';
+import { FieldTooltip } from '../../components/FormField';
+import OptionsList from '../../components/OptionsList';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 

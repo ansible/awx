@@ -19,8 +19,8 @@ import {
   SortNumericDownAltIcon,
 } from '@patternfly/react-icons';
 
-import { parseQueryString } from '@util/qs';
-import { SortColumns, QSConfig } from '@types';
+import { parseQueryString } from '../../util/qs';
+import { SortColumns, QSConfig } from '../../types';
 import styled from 'styled-components';
 
 const NoOptionDropdown = styled.div`

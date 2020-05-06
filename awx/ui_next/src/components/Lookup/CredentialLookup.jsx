@@ -3,13 +3,13 @@ import { bool, func, node, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CredentialsAPI } from '@api';
-import { Credential } from '@types';
-import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
-import { FieldTooltip } from '@components/FormField';
+import { CredentialsAPI } from '../../api';
+import { Credential } from '../../types';
+import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
+import { FieldTooltip } from '../../components/FormField';
 import { FormGroup } from '@patternfly/react-core';
-import Lookup from '@components/Lookup';
-import OptionsList from '@components/OptionsList';
+import Lookup from '../../components/Lookup';
+import OptionsList from '../../components/OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('credentials', {

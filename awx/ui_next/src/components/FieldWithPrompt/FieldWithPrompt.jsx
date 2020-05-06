@@ -2,7 +2,7 @@ import React from 'react';
 import { bool, node, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CheckboxField, FieldTooltip } from '@components/FormField';
+import { CheckboxField, FieldTooltip } from '../../components/FormField';
 import styled from 'styled-components';
 
 const FieldHeader = styled.div`

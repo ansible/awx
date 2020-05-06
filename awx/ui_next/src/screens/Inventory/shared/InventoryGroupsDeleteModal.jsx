@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { func, bool, arrayOf, object } from 'prop-types';
-import AlertModal from '@components/AlertModal';
+import AlertModal from '../../../components/AlertModal';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Radio } from '@patternfly/react-core';

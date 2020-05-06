@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { GroupsAPI } from '@api';
+import { GroupsAPI } from '../../../api';
 import { Card } from '@patternfly/react-core';
 
 import InventoryGroupForm from '../shared/InventoryGroupForm';

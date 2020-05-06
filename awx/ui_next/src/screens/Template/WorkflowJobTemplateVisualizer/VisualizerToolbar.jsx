@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
@@ -20,7 +20,7 @@ import {
   TrashAltIcon,
   WrenchIcon,
 } from '@patternfly/react-icons';
-import LaunchButton from '@components/LaunchButton';
+import LaunchButton from '../../../components/LaunchButton';
 import styled from 'styled-components';
 
 const Badge = styled(PFBadge)`

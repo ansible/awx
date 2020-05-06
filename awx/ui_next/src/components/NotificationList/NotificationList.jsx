@@ -4,13 +4,13 @@ import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import NotificationListItem from '@components/NotificationList/NotificationListItem';
-import PaginatedDataList from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import AlertModal from '../../components/AlertModal';
+import ErrorDetail from '../../components/ErrorDetail';
+import NotificationListItem from '../../components/NotificationList/NotificationListItem';
+import PaginatedDataList from '../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 
-import { NotificationTemplatesAPI } from '@api';
+import { NotificationTemplatesAPI } from '../../api';
 
 const QS_CONFIG = getQSConfig('notification', {
   page: 1,

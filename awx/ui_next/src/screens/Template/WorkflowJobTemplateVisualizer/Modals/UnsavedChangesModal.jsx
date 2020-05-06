@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
+import { WorkflowDispatchContext } from '../../../../contexts/Workflow';
 import { Button, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';

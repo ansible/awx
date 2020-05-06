@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import SurveyQuestionForm from './SurveyQuestionForm';
 

@@ -4,14 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
 
-import AlertModal from '@components/AlertModal';
-import { CardBody, CardActionsRow } from '@components/Card';
-import ContentLoading from '@components/ContentLoading';
-import DeleteButton from '@components/DeleteButton';
-import { DetailList, Detail } from '@components/DetailList';
-import ErrorDetail from '@components/ErrorDetail';
-import { formatDateString } from '@util/dates';
-import { TeamsAPI } from '@api';
+import AlertModal from '../../../components/AlertModal';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import ContentLoading from '../../../components/ContentLoading';
+import DeleteButton from '../../../components/DeleteButton';
+import { DetailList, Detail } from '../../../components/DetailList';
+import ErrorDetail from '../../../components/ErrorDetail';
+import { formatDateString } from '../../../util/dates';
+import { TeamsAPI } from '../../../api';
 
 function TeamDetail({ team, i18n }) {
   const { name, description, created, modified, summary_fields } = team;

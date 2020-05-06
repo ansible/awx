@@ -9,7 +9,7 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
@@ -18,14 +18,14 @@ import {
   PencilAltIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
-import { timeOfDay } from '@util/dates';
+import { timeOfDay } from '../../../util/dates';
 
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
-import LaunchButton from '@components/LaunchButton';
-import Sparkline from '@components/Sparkline';
-import { toTitleCase } from '@util/strings';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
+import LaunchButton from '../../../components/LaunchButton';
+import Sparkline from '../../../components/Sparkline';
+import { toTitleCase } from '../../../util/strings';
 import styled from 'styled-components';
-import CopyButton from '@components/CopyButton';
+import CopyButton from '../../../components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../../../contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import NodeModal from './NodeModal';

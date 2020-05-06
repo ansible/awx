@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -12,11 +12,11 @@ import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
-} from '@components/Workflow/WorkflowUtils';
+} from '../../../components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
-} from '@components/Workflow';
+} from '../../../components/Workflow';
 
 const LinkG = styled.g`
   pointer-events: ${props => (props.ignorePointerEvents ? 'none' : 'auto')};

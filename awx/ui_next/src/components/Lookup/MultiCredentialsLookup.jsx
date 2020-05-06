@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
-import AnsibleSelect from '@components/AnsibleSelect';
-import CredentialChip from '@components/CredentialChip';
-import OptionsList from '@components/OptionsList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import { CredentialsAPI, CredentialTypesAPI } from '../../api';
+import AnsibleSelect from '../../components/AnsibleSelect';
+import CredentialChip from '../../components/CredentialChip';
+import OptionsList from '../../components/OptionsList';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 
 const QS_CONFIG = getQSConfig('credentials', {

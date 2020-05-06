@@ -4,8 +4,8 @@ import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import { Role } from '@types';
+import AlertModal from '../../components/AlertModal';
+import { Role } from '../../types';
 
 class DeleteRoleConfirmationModal extends React.Component {
   static propTypes = {

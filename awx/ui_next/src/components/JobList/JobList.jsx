@@ -4,14 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '../../components/AlertModal';
+import DatalistToolbar from '../../components/DataListToolbar';
+import ErrorDetail from '../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
 import {
   AdHocCommandsAPI,
@@ -21,7 +21,7 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
-} from '@api';
+} from '../../api';
 
 const QS_CONFIG = getQSConfig(
   'job',

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { Formik, useField } from 'formik';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 import {
   Form,
   FormGroup,
@@ -9,11 +9,11 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '@components/FormField';
-import AnsibleSelect from '@components/AnsibleSelect';
-import ContentLoading from '@components/ContentLoading';
-import ContentError from '@components/ContentError';
-import useRequest from '@util/useRequest';
+import FormField, { FieldTooltip } from '../../components/FormField';
+import AnsibleSelect from '../../components/AnsibleSelect';
+import ContentLoading from '../../components/ContentLoading';
+import ContentError from '../../components/ContentError';
+import useRequest from '../../util/useRequest';
 import {
   required,
   minMaxValue,
@@ -21,7 +21,7 @@ import {
   minLength,
   integer,
   combine,
-} from '@util/validators';
+} from '../../util/validators';
 
 function SurveyStep({ template, i18n }) {
   const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(

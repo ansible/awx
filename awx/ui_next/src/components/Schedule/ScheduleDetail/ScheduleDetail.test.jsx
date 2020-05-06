@@ -1,12 +1,12 @@
 import React from 'react';
-import { SchedulesAPI } from '@api';
+import { SchedulesAPI } from '../../../api';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import ScheduleDetail from './ScheduleDetail';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../../api/models/Schedules');
 
 const schedule = {
   url: '/api/v2/schedules/1',

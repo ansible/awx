@@ -9,7 +9,7 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
@@ -19,9 +19,9 @@ import {
   RocketIcon,
 } from '@patternfly/react-icons';
 
-import LaunchButton from '@components/LaunchButton';
-import Sparkline from '@components/Sparkline';
-import { toTitleCase } from '@util/strings';
+import LaunchButton from '../../../components/LaunchButton';
+import Sparkline from '../../../components/Sparkline';
+import { toTitleCase } from '../../../util/strings';
 import styled from 'styled-components';
 
 const DataListAction = styled(_DataListAction)`

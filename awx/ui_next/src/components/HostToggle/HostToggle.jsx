@@ -2,10 +2,10 @@ import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Tooltip } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import useRequest from '@util/useRequest';
-import { HostsAPI } from '@api';
+import AlertModal from '../../components/AlertModal';
+import ErrorDetail from '../../components/ErrorDetail';
+import useRequest from '../../util/useRequest';
+import { HostsAPI } from '../../api';
 
 function HostToggle({ host, onToggle, className, i18n }) {
   const [isEnabled, setIsEnabled] = useState(host.enabled);

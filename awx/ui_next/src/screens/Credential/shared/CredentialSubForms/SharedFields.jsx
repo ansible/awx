@@ -1,7 +1,7 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import FormField, { PasswordField } from '@components/FormField';
+import FormField, { PasswordField } from '../../../../components/FormField';
 
 export const UsernameFormField = withI18n()(({ i18n }) => (
   <FormField

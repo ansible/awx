@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 
 class ProjectSchedules extends Component {
   render() {

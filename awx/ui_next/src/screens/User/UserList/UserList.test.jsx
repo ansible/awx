@@ -1,10 +1,10 @@
 import React from 'react';
-import { UsersAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { UsersAPI } from '../../../api';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 
 import UsersList, { _UsersList } from './UserList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 let wrapper;
 const loadUsers = jest.spyOn(_UsersList.prototype, 'loadUsers');

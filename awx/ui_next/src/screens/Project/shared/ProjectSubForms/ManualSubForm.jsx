@@ -2,9 +2,9 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { required } from '@util/validators';
-import AnsibleSelect from '@components/AnsibleSelect';
-import FormField, { FieldTooltip } from '@components/FormField';
+import { required } from '../../../../util/validators';
+import AnsibleSelect from '../../../../components/AnsibleSelect';
+import FormField, { FieldTooltip } from '../../../../components/FormField';
 import { FormGroup, Alert } from '@patternfly/react-core';
 import { BrandName } from '../../../../variables';
 

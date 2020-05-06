@@ -3,10 +3,10 @@ import { withI18n } from '@lingui/react';
 import { useLocation, useParams } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
-import PaginatedDataList from '@components/PaginatedDataList';
-import useRequest from '@util/useRequest';
-import { UsersAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import PaginatedDataList from '../../../components/PaginatedDataList';
+import useRequest from '../../../util/useRequest';
+import { UsersAPI } from '../../../api';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 import UserOrganizationListItem from './UserOrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organizations', {

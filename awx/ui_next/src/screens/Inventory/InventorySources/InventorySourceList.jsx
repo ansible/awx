@@ -2,17 +2,17 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { InventoriesAPI, InventorySourcesAPI } from '@api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useSelected from '@util/useSelected';
-import DatalistToolbar from '@components/DataListToolbar';
-import AlertModal from '@components/AlertModal/AlertModal';
-import ErrorDetail from '@components/ErrorDetail/ErrorDetail';
+} from '../../../components/PaginatedDataList';
+import useSelected from '../../../util/useSelected';
+import DatalistToolbar from '../../../components/DataListToolbar';
+import AlertModal from '../../../components/AlertModal/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import InventorySourceListItem from './InventorySourceListItem';
 
 const QS_CONFIG = getQSConfig('inventory', {

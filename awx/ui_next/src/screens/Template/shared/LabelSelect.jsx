@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
-import { LabelsAPI } from '@api';
-import { useSyncedSelectValue } from '@components/MultiSelect';
+import { LabelsAPI } from '../../../api';
+import { useSyncedSelectValue } from '../../../components/MultiSelect';
 
 async function loadLabelOptions(setLabels, onError) {
   let labels;

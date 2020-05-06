@@ -6,7 +6,7 @@ import {
   DataToolbar,
   DataToolbarContent,
 } from '@patternfly/react-core/dist/umd/experimental';
-import DataListToolbar from '@components/DataListToolbar';
+import DataListToolbar from '../../components/DataListToolbar';
 
 import {
   encodeNonDefaultQueryString,
@@ -14,8 +14,8 @@ import {
   mergeParams,
   replaceParams,
   removeParams,
-} from '@util/qs';
-import { QSConfig, SearchColumns, SortColumns } from '@types';
+} from '../../util/qs';
+import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const EmptyStateControlsWrapper = styled.div`
   display: flex;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { GroupsAPI } from '@api';
+import { GroupsAPI } from '../../../api';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryGroupAdd from './InventoryGroupAdd';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<InventoryGroupAdd />', () => {
   let wrapper;

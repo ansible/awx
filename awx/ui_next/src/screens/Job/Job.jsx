@@ -3,17 +3,17 @@ import { Route, withRouter, Switch, Redirect, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { JobsAPI } from '@api';
-import { TabbedCardHeader } from '@components/Card';
-import ContentError from '@components/ContentError';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
+import { JobsAPI } from '../../api';
+import { TabbedCardHeader } from '../../components/Card';
+import ContentError from '../../components/ContentError';
+import CardCloseButton from '../../components/CardCloseButton';
+import RoutedTabs from '../../components/RoutedTabs';
 
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import WorkflowDetail from './WorkflowDetail';
 import { WorkflowOutput } from './WorkflowOutput';
-import { JOB_TYPE_URL_SEGMENTS } from '@constants';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 class Job extends Component {
   constructor(props) {

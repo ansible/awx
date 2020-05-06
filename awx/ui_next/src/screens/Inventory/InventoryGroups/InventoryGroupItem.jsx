@@ -2,7 +2,7 @@ import React from 'react';
 import { bool, func, number, oneOfType, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Group } from '@types';
+import { Group } from '../../../types';
 
 import {
   Button,
@@ -13,7 +13,7 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
+import DataListCell from '../../../components/DataListCell';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';

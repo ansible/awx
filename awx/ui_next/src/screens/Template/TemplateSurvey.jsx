@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Switch, Route, useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
-import ContentError from '@components/ContentError';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import useRequest, { useDismissableError } from '@util/useRequest';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
+import ContentError from '../../components/ContentError';
+import AlertModal from '../../components/AlertModal';
+import ErrorDetail from '../../components/ErrorDetail';
+import useRequest, { useDismissableError } from '../../util/useRequest';
 import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
 function TemplateSurvey({ template, canEdit, i18n }) {

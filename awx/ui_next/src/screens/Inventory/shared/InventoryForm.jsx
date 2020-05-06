@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, number, shape } from 'prop-types';
 
-import { VariablesField } from '@components/CodeMirrorInput';
+import { VariablesField } from '../../../components/CodeMirrorInput';
 import { Form } from '@patternfly/react-core';
-import FormField, { FormSubmitError } from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup';
-import { required } from '@util/validators';
-import InstanceGroupsLookup from '@components/Lookup/InstanceGroupsLookup';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
+import FormField, { FormSubmitError } from '../../../components/FormField';
+import FormActionGroup from '../../../components/FormActionGroup';
+import { required } from '../../../util/validators';
+import InstanceGroupsLookup from '../../../components/Lookup/InstanceGroupsLookup';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import CredentialLookup from '../../../components/Lookup/CredentialLookup';
+import { FormColumnLayout, FormFullWidthLayout } from '../../../components/FormLayout';
 
 function InventoryFormFields({ i18n, credentialTypeId }) {
   const [organizationField, organizationMeta, organizationHelpers] = useField({

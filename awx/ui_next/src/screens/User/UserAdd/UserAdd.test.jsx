@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
 import UserAdd from './UserAdd';
-import { UsersAPI } from '@api';
+import { UsersAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 let wrapper;
 
 describe('<UserAdd />', () => {

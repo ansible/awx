@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Modal as PFModal, Tab, Tabs as PFTabs } from '@patternfly/react-core';
-import CodeMirrorInput from '@components/CodeMirrorInput';
-import ContentEmpty from '@components/ContentEmpty';
+import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import ContentEmpty from '../../../components/ContentEmpty';
 import PropTypes from 'prop-types';
-import { DetailList, Detail } from '@components/DetailList';
-import StatusIcon from '@components/StatusIcon';
+import { DetailList, Detail } from '../../../components/DetailList';
+import StatusIcon from '../../../components/StatusIcon';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';

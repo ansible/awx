@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '@components/Card';
-import HostForm from '@components/HostForm';
-import { HostsAPI } from '@api';
+import { CardBody } from '../../../components/Card';
+import HostForm from '../../../components/HostForm';
+import { HostsAPI } from '../../../api';
 
 function HostEdit({ host }) {
   const [formError, setFormError] = useState(null);
