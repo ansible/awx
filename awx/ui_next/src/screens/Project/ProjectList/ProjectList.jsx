@@ -170,6 +170,7 @@ function ProjectList({ i18n }) {
             )}
             renderItem={o => (
               <ProjectListItem
+                fetchProjects={fetchProjects}
                 key={o.id}
                 project={o}
                 detailUrl={`${match.url}/${o.id}`}
@@ -188,6 +189,7 @@ function ProjectList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
+        aria-label={i18n._(t`Deletion Error`)}
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >

@@ -167,6 +167,7 @@ function InventoryList({ i18n }) {
               key={inventory.id}
               value={inventory.name}
               inventory={inventory}
+              fetchInventories={fetchInventories}
               detailUrl={
                 inventory.kind === 'smart'
                   ? `${match.url}/smart_inventory/${inventory.id}/details`
@@ -182,6 +183,7 @@ function InventoryList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
+        aria-label={i18n._(t`Deletion Error`)}
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >
