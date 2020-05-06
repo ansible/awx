@@ -1,5 +1,7 @@
+base_source_var: value_of_var
 compose:
   ansible_ssh_host: foreman['ip6'] | default(foreman['ip'], true)
+group_prefix: foo_group_prefix
 keyed_groups:
 - key: foreman['environment_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')
   prefix: foreman_environment_
@@ -16,7 +18,12 @@ keyed_groups:
 - key: foreman['content_facet_attributes']['content_view_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')
   prefix: foreman_content_view_
   separator: ''
+- key: '"%s-%s-%s" | format(app, tier, color)'
+  separator: ''
+- key: '"%s-%s" | format(app, color)'
+  separator: ''
 legacy_hostvars: true
 plugin: theforeman.foreman.foreman
 want_facts: true
+want_hostcollections: true
 want_params: true
