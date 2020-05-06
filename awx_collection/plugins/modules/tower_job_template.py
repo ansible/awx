@@ -65,7 +65,6 @@ options:
       type: list
       elements: str
       version_added: 2.8
-      default: []
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
@@ -301,7 +300,7 @@ notes:
 
 
 EXAMPLES = '''
-- name: Create tower Ping job template
+- name: Create Tower Ping job template
   tower_job_template:
     name: "Ping"
     job_type: "run"
@@ -315,6 +314,20 @@ EXAMPLES = '''
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
     custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
+
+- name: Add start notification to Job Template
+  tower_job_template:
+    name: "Ping"
+    notification_templates_started:
+      - Notification1
+      - Notification2
+
+- name: Remove Notification1 start notification from Job Template
+  tower_job_template:
+    name: "Ping"
+    notification_templates_started:
+      - Notification2
+
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -348,7 +361,7 @@ def main():
         credential=dict(default=''),
         vault_credential=dict(default=''),
         custom_virtualenv=dict(),
-        credentials=dict(type='list', default=[], elements='str'),
+        credentials=dict(type='list', elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
@@ -398,11 +411,11 @@ def main():
     credential = module.params.get('credential')
     vault_credential = module.params.get('vault_credential')
     credentials = module.params.get('credentials')
-    if vault_credential:
+    if vault_credential != '':
         if credentials is None:
             credentials = []
         credentials.append(vault_credential)
-    if credential:
+    if credential != '':
         if credentials is None:
             credentials = []
         credentials.append(credential)
@@ -450,36 +463,36 @@ def main():
     if webhook_credential is not None:
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
 
-    credentials_ids = None
+    association_fields = {}
+
     if credentials is not None:
-        credentials_ids = []
+        association_fields['credentials'] = []
         for item in credentials:
-            credentials_ids.append(module.resolve_name_to_id('credentials', item))
+            association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
     labels = module.params.get('labels')
-    labels_ids = None
     if labels is not None:
-        labels_ids = []
+        association_fields['labels'] = []
         for item in labels:
-            labels_ids.append(module.resolve_name_to_id('labels', item))
+            association_fields['labels'].append(module.resolve_name_to_id('labels', item))
 
     notifications_start = module.params.get('notification_templates_started')
-    notification_start_ids = []
     if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
         for item in notifications_start:
-            notification_start_ids.append(module.resolve_name_to_id('notification_templates', item))
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
 
     notifications_success = module.params.get('notification_templates_success')
-    notification_success_ids = []
     if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
         for item in notifications_success:
-            notification_success_ids.append(module.resolve_name_to_id('notification_templates', item))
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
 
     notifications_error = module.params.get('notification_templates_error')
-    notification_error_ids = []
     if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
         for item in notifications_error:
-            notification_error_ids.append(module.resolve_name_to_id('notification_templates', item))
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     on_change = None
     new_spec = module.params.get('survey_spec')
@@ -498,13 +511,7 @@ def main():
     module.create_or_update_if_needed(
         existing_item, new_fields,
         endpoint='job_templates', item_type='job_template',
-        associations={
-            'credentials': credentials_ids,
-            'labels': labels_ids,
-            'notification_templates_success': notification_success_ids,
-            'notification_templates_started': notification_start_ids,
-            'notification_templates_error': notification_error_ids
-        },
+        associations=association_fields,
         on_create=on_change, on_update=on_change,
     )
 

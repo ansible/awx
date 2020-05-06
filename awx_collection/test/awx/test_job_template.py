@@ -3,7 +3,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import ActivityStream, JobTemplate, Job
+from awx.main.models import ActivityStream, JobTemplate, Job, NotificationTemplate
 
 
 @pytest.mark.django_db
@@ -165,3 +165,54 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
         "The field survey_spec of job_template {0} has encrypted data and "
         "may inaccurately report task is changed.".format(result['id'])
     )
+
+
+@pytest.mark.django_db
+def test_associate_only_on_success(run_module, admin_user, organization, project):
+    jt = JobTemplate.objects.create(
+        name='foo',
+        project=project,
+        playbook='helloworld.yml',
+        ask_inventory_on_launch=True,
+    )
+    create_kwargs = dict(
+        notification_configuration={
+            'url': 'http://www.example.com/hook',
+            'headers': {
+                'X-Custom-Header': 'value123'
+            },
+            'password': 'bar'
+        },
+        notification_type='webhook',
+        organization=organization
+    )
+    nt1 = NotificationTemplate.objects.create(name='nt1', **create_kwargs)
+    nt2 = NotificationTemplate.objects.create(name='nt2', **create_kwargs)
+
+    jt.notification_templates_error.add(nt1)
+
+    # test preservation of error NTs when success NTs are added
+    result = run_module('tower_job_template', dict(
+        name='foo',
+        playbook='helloworld.yml',
+        project=project.name,
+        notification_templates_success=['nt2']
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', True), result
+
+    assert list(jt.notification_templates_success.values_list('id', flat=True)) == [nt2.id]
+    assert list(jt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]
+
+    # test removal to empty list
+    result = run_module('tower_job_template', dict(
+        name='foo',
+        playbook='helloworld.yml',
+        project=project.name,
+        notification_templates_success=[]
+    ), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', True), result
+
+    assert list(jt.notification_templates_success.values_list('id', flat=True)) == []
+    assert list(jt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]

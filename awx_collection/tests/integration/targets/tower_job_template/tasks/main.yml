@@ -13,6 +13,7 @@
     jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -62,6 +63,21 @@
     use_tls: false
     use_ssl: false
     state: present
+
+- name: Add webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    url: http://www.example.com/hook
+    headers:
+      X-Custom-Header: value123
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
 
 - name: Create Job Template 1
   tower_job_template:
@@ -258,36 +274,53 @@
     that:
       - "result is changed"
 
-- name: Add started notification to Job Template 2
+- name: Add started notifications to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
     notification_templates_started:
       - "{{ email_not }}"
+      - "{{ webhook_not }}"
   register: result
 
 - assert:
     that:
       - "result is changed"
 
-- name: Re Add started notification to Job Template 2
+- name: Re Add started notifications to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
     notification_templates_started:
       - "{{ email_not }}"
+      - "{{ webhook_not }}"
   register: result
 
 - assert:
     that:
       - "result is not changed"
 
-- name: Remove started notification to Job Template 2
+- name: Add success notifications to Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
+    notification_templates_success:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
   register: result
 
 - assert:
     that:
       - "result is changed"
+
+- name: Remove "on start" webhook notification from Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 
 - name: Delete Job Template 2
   tower_job_template:
