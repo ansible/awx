@@ -2491,8 +2491,9 @@ class rhv(PluginFileInjector):
     """
     plugin_name = 'ovirt'
     base_injector = 'template'
+    initial_version = '2.9'
     namespace = 'ovirt'
-    collection = 'ovirt_collection'
+    collection = 'ovirt'
 
     @property
     def script_name(self):
