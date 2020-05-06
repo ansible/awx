@@ -2578,11 +2578,26 @@ class satellite6(PluginFileInjector):
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
 
+        group_patterns = '[]'
+        group_prefix = 'foreman_'
+        want_hostcollections = False
         want_ansible_ssh_host = False
+        want_facts = True
+
         foreman_opts = inventory_update.source_vars_dict.copy()
         for k, v in foreman_opts.items():
-            if k == 'satellite6_want_ansible_ssh_host' and isinstance(v, bool):
+            if k == 'satellite6_group_patterns' and isinstance(v, str):
+                group_patterns = v
+            elif k == 'satellite6_group_prefix' and isinstance(v, str):
+                group_prefix = v
+            elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
+                want_hostcollections = v
+            elif k == 'satellite6_want_ansible_ssh_host' and isinstance(v, bool):
                 want_ansible_ssh_host = v
+            elif k == 'satellite6_want_facts' and isinstance(v, bool):
+                want_facts = v
+            else:
+                ret[k] = str(v)
 
         # Compatibility content
         group_by_hostvar = {
@@ -2605,13 +2620,17 @@ class satellite6(PluginFileInjector):
                                       "key": "foreman['content_facet_attributes']['content_view_name'] | "
                                              "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"}
             }
-        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
-        ret['legacy_hostvars'] = True
-        ret['want_facts'] = True
+
+        ret['legacy_hostvars'] = True  # convert hostvar structure to the form used by the script
         ret['want_params'] = True
+        ret['group_prefix'] = group_prefix
+        ret['want_hostcollections'] = want_hostcollections
+        ret['group_patterns'] = group_patterns  # not currently supported by the plugin (https://github.com/ansible/awx/issues/6821)
+        ret['want_facts'] = want_facts
 
         if want_ansible_ssh_host:
             ret['compose'] = {'ansible_ssh_host': "foreman['ip6'] | default(foreman['ip'], true)"}
+        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
 
         return ret
 
