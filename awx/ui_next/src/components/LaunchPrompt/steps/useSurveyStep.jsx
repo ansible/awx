@@ -35,7 +35,7 @@ export default function useSurveyStep(config, resource, visitedSteps, i18n) {
     survey.spec.forEach(question => {
       const errMessage = validateField(
         question,
-        values[question.variable],
+        values[`survey_${question.variable}`],
         i18n
       );
       if (errMessage) {

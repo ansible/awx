@@ -32,7 +32,6 @@ function OtherPromptsStep({ config, i18n }) {
           of hosts that will be managed or affected by the playbook. Multiple
           patterns are allowed. Refer to Ansible documentation for more
           information and examples on patterns.`)}
-          isRequired
         />
       )}
       {config.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}

@@ -16,7 +16,6 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     validate,
     visitStep,
     visitAllSteps,
-    // formErrors,
     contentError,
   } = useSteps(config, resource, i18n);
 
