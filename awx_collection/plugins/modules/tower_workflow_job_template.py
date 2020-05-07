@@ -113,6 +113,21 @@ options:
         - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
       type: str
       version_added: "3.7"
+    notification_templates_started:
+      description:
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -155,6 +170,9 @@ def main():
         ask_limit_on_launch=dict(type='bool'),
         webhook_service=dict(choices=['github', 'gitlab']),
         webhook_credential=dict(),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -204,6 +222,26 @@ def main():
     if 'extra_vars' in new_fields:
         new_fields['extra_vars'] = json.dumps(new_fields['extra_vars'])
 
+    association_fields = {}
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+
     on_change = None
     new_spec = module.params.get('survey')
     if new_spec:
@@ -221,6 +259,7 @@ def main():
     module.create_or_update_if_needed(
         existing_item, new_fields,
         endpoint='workflow_job_templates', item_type='workflow_job_template',
+        associations=association_fields,
         on_create=on_change, on_update=on_change
     )
 
