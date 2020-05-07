@@ -155,7 +155,8 @@ class InventoryModule(BaseInventoryPlugin):
         if not token_auth:
             request_handler = Request(url_username=self.get_option('username'),
                                       url_password=self.get_option('password'),
-                                      force_basic_auth=True,                                                                                                                      validate_certs=self.get_option('validate_certs'))
+                                      force_basic_auth=True,
+                                      validate_certs=self.get_option('validate_certs'))
         else:
             token = self.get_option('password')
             token_header = 'Bearer ' + token
