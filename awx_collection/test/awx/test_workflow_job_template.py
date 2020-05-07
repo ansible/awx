@@ -3,7 +3,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import WorkflowJobTemplate
+from awx.main.models import WorkflowJobTemplate, NotificationTemplate
 
 
 @pytest.mark.django_db
@@ -79,6 +79,53 @@ def test_survey_spec_only_changed(run_module, admin_user, organization, survey_s
     assert result.get('changed', True), result
     wfjt.refresh_from_db()
     assert wfjt.survey_spec == survey_spec
+
+
+@pytest.mark.django_db
+def test_associate_only_on_success(run_module, admin_user, organization, project):
+    wfjt = WorkflowJobTemplate.objects.create(
+        organization=organization, name='foo-workflow',
+        # survey_enabled=True, survey_spec=survey_spec
+    )
+    create_kwargs = dict(
+        notification_configuration={
+            'url': 'http://www.example.com/hook',
+            'headers': {
+                'X-Custom-Header': 'value123'
+            },
+            'password': 'bar'
+        },
+        notification_type='webhook',
+        organization=organization
+    )
+    nt1 = NotificationTemplate.objects.create(name='nt1', **create_kwargs)
+    nt2 = NotificationTemplate.objects.create(name='nt2', **create_kwargs)
+
+    wfjt.notification_templates_error.add(nt1)
+
+    # test preservation of error NTs when success NTs are added
+    result = run_module('tower_workflow_job_template', {
+        'name': 'foo-workflow',
+        'organization': organization.name,
+        'notification_templates_success': ['nt2']
+    }, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', True), result
+
+    assert list(wfjt.notification_templates_success.values_list('id', flat=True)) == [nt2.id]
+    assert list(wfjt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]
+
+    # test removal to empty list
+    result = run_module('tower_workflow_job_template', {
+        'name': 'foo-workflow',
+        'organization': organization.name,
+        'notification_templates_success': []
+    }, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed', True), result
+
+    assert list(wfjt.notification_templates_success.values_list('id', flat=True)) == []
+    assert list(wfjt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]
 
 
 @pytest.mark.django_db
