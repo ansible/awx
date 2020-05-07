@@ -24,6 +24,16 @@ class Users extends Base {
       params,
     });
   }
+
+  readRoles(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/roles/`, {
+      params
+    });
+  }
+
+  roleOptions(userId) {
+    return this.http.options(`${this.baseUrl}${userId}/roles/`)
+  }
 }
 
 export default Users;
