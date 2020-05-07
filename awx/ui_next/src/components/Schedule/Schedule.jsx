@@ -17,7 +17,8 @@ import RoutedTabs from '../RoutedTabs';
 import ContentError from '../ContentError';
 import ContentLoading from '../ContentLoading';
 import { TabbedCardHeader } from '../Card';
-import { ScheduleDetail, ScheduleEdit } from '.';
+import ScheduleDetail from './ScheduleDetail';
+import ScheduleEdit from './ScheduleEdit';
 import { SchedulesAPI } from '../../api';
 
 function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {

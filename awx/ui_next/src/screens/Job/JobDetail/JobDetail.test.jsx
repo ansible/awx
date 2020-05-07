@@ -59,14 +59,14 @@ describe('<JobDetail />', () => {
 
   test('should display successful job status icon', () => {
     const statusDetail = wrapper.find('Detail[label="Status"]');
-    expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
-    expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
   });
 
   test('should display successful project status icon', () => {
     const statusDetail = wrapper.find('Detail[label="Project"]');
-    expect(statusDetail.find('StatusIcon__SuccessfulTop')).toHaveLength(1);
-    expect(statusDetail.find('StatusIcon__SuccessfulBottom')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon SuccessfulTop')).toHaveLength(1);
+    expect(statusDetail.find('StatusIcon SuccessfulBottom')).toHaveLength(1);
   });
 
   test('should properly delete job', async () => {

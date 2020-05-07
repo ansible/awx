@@ -21,7 +21,8 @@ import {
   WorkflowStartNode,
   WorkflowTools,
 } from '../../../components/Workflow';
-import { VisualizerLink, VisualizerNode } from '.';
+import VisualizerLink from './VisualizerLink';
+import VisualizerNode from './VisualizerNode';
 
 const PotentialLink = styled.polyline`
   pointer-events: none;

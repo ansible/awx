@@ -100,6 +100,10 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
   );
 }
 
+InventorySourceSyncButton.defaultProps = {
+  source: {},
+};
+
 InventorySourceSyncButton.propTypes = {
   onSyncLoading: PropTypes.func.isRequired,
   source: PropTypes.shape({}),

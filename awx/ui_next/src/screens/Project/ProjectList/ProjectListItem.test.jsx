@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ProjectsListItem from './ProjectListItem';
 import { ProjectsAPI } from '../../../api';
 

@@ -4,7 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import { CardBody, CardActionsRow } from '../../../components/Card';
-import { DetailList, Detail, UserDateDetail } from '../../../components/DetailList';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+} from '../../../components/DetailList';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import DeleteButton from '../../../components/DeleteButton';
 import ContentError from '../../../components/ContentError';

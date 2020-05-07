@@ -77,6 +77,20 @@ const SkippedBottom = styled.div`
   background-color: #2dbaba;
 `;
 
+RunningJob.displayName = 'RunningJob';
+WaitingJob.displayName = 'WaitingJob';
+FinishedJob.displayName = 'FinishedJob';
+SuccessfulTop.displayName = 'SuccessfulTop';
+SuccessfulBottom.displayName = 'SuccessfulBottom';
+FailedTop.displayName = 'FailedTop';
+FailedBottom.displayName = 'FailedBottom';
+UnreachableTop.displayName = 'UnreachableTop';
+UnreachableBottom.displayName = 'UnreachableBottom';
+ChangedTop.displayName = 'ChangedTop';
+ChangedBottom.displayName = 'ChangedBottom';
+SkippedTop.displayName = 'SkippedTop';
+SkippedBottom.displayName = 'SkippedBottom';
+
 const StatusIcon = ({ status, ...props }) => {
   return (
     <div {...props}>

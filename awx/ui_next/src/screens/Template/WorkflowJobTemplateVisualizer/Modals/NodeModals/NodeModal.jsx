@@ -14,7 +14,8 @@ import {
 } from '../../../../../contexts/Workflow';
 import Wizard from '../../../../../components/Wizard';
 import { NodeTypeStep } from './NodeTypeStep';
-import { RunStep, NodeNextButton } from '.';
+import RunStep from './RunStep';
+import NodeNextButton from './NodeNextButton';
 
 function NodeModal({ askLinkType, i18n, onSave, title }) {
   const history = useHistory();

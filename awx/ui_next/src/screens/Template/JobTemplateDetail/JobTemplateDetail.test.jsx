@@ -13,7 +13,10 @@ jest.mock('../../../api');
 const mockInstanceGroups = {
   count: 5,
   data: {
-    results: [{ id: 1, name: 'IG1' }, { id: 2, name: 'IG2' }],
+    results: [
+      { id: 1, name: 'IG1' },
+      { id: 2, name: 'IG2' },
+    ],
   },
 };
 

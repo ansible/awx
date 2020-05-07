@@ -4,10 +4,10 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch } from '@patternfly/react-core';
 import styled from 'styled-components';
-import FormField, { FieldTooltip } from '../FormField';
-import { TagMultiSelect } from '../MultiSelect';
-import AnsibleSelect from '../AnsibleSelect';
-import { VariablesField } from '../CodeMirrorInput';
+import FormField, { FieldTooltip } from '../../FormField';
+import { TagMultiSelect } from '../../MultiSelect';
+import AnsibleSelect from '../../AnsibleSelect';
+import { VariablesField } from '../../CodeMirrorInput';
 
 const FieldHeader = styled.div`
   display: flex;

@@ -4,7 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
 import { OrganizationsAPI } from '../../../api';
-import { DetailList, Detail, UserDateDetail } from '../../../components/DetailList';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+} from '../../../components/DetailList';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import AlertModal from '../../../components/AlertModal';
 import ChipGroup from '../../../components/ChipGroup';

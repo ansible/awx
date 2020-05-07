@@ -19,6 +19,7 @@ import { timeOfDay } from '../../../util/dates';
 import { ProjectsAPI } from '../../../api';
 import ClipboardCopyButton from '../../../components/ClipboardCopyButton';
 import StatusIcon from '../../../components/StatusIcon';
+import DataListCell from '../../../components/DataListCell';
 import { toTitleCase } from '../../../util/strings';
 import CopyButton from '../../../components/CopyButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';

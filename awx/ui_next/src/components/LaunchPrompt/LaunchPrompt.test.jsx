@@ -1,6 +1,9 @@
 import React from 'react';
 import { act, isElementOfType } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import LaunchPrompt from './LaunchPrompt';
 import InventoryStep from './steps/InventoryStep';
 import CredentialsStep from './steps/CredentialsStep';

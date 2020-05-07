@@ -38,7 +38,12 @@ describe('<JobTemplateForm />', () => {
         id: 3,
         name: 'qux',
       },
-      labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
+      labels: {
+        results: [
+          { name: 'Sushi', id: 1 },
+          { name: 'Major', id: 2 },
+        ],
+      },
       credentials: [
         { id: 1, kind: 'cloud', name: 'Foo' },
         { id: 2, kind: 'ssh', name: 'Bar' },

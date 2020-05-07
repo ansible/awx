@@ -100,11 +100,11 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-title"
                   >
                     <div
-                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                      class="sc-bdVaJa cjtBrl"
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa hIExGP"
+                        css="color: var(--pf-global--danger-color--100)"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -159,16 +159,20 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       ariaDescribedById=""
       className=""
       header={
-        <AlertModal__Header>
-          <Styled(ExclamationCircleIcon)
+        <ForwardRef(styled.div)>
+          <ExclamationCircleIcon
+            color="currentColor"
+            css="color: var(--pf-global--danger-color--100)"
+            noVerticalAlign={false}
             size="lg"
+            title={null}
           />
           <Title
             size="2xl"
           >
             Remove Team Access
           </Title>
-        </AlertModal__Header>
+        </ForwardRef(styled.div)>
       }
       hideTitle={false}
       isFooterLeftAligned={true}
@@ -219,11 +223,11 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-title"
                   >
                     <div
-                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                      class="sc-bdVaJa cjtBrl"
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa hIExGP"
+                        css="color: var(--pf-global--danger-color--100)"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -296,16 +300,20 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           ariaDescribedById=""
           className=""
           header={
-            <AlertModal__Header>
-              <Styled(ExclamationCircleIcon)
+            <ForwardRef(styled.div)>
+              <ExclamationCircleIcon
+                color="currentColor"
+                css="color: var(--pf-global--danger-color--100)"
+                noVerticalAlign={false}
                 size="lg"
+                title={null}
               />
               <Title
                 size="2xl"
               >
                 Remove Team Access
               </Title>
-            </AlertModal__Header>
+            </ForwardRef(styled.div)>
           }
           hideTitle={false}
           id="pf-modal-0"
@@ -432,24 +440,29 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                       <div
                         className="pf-c-title"
                       >
-                        <AlertModal__Header>
+                        <styled.div>
                           <StyledComponent
                             forwardedComponent={
                               Object {
                                 "$$typeof": Symbol(react.forward_ref),
                                 "attrs": Array [],
                                 "componentStyle": ComponentStyle {
-                                  "componentId": "AlertModal__Header-sc-9waqvl-0",
-                                  "isStatic": true,
-                                  "lastClassName": "dYqVFx",
+                                  "componentId": "sc-bdVaJa",
+                                  "isStatic": false,
+                                  "lastClassName": "cjtBrl",
                                   "rules": Array [
-                                    "display:flex;svg{margin-right:16px;}",
+                                    "
+  display: flex;
+  svg {
+    margin-right: 16px;
+  }
+",
                                   ],
                                 },
-                                "displayName": "AlertModal__Header",
+                                "displayName": "styled.div",
                                 "foldedComponentIds": Array [],
                                 "render": [Function],
-                                "styledComponentId": "AlertModal__Header-sc-9waqvl-0",
+                                "styledComponentId": "sc-bdVaJa",
                                 "target": "div",
                                 "toString": [Function],
                                 "warnTooManyClasses": [Function],
@@ -459,67 +472,36 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                             forwardedRef={null}
                           >
                             <div
-                              className="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                              className="sc-bdVaJa cjtBrl"
                             >
-                              <Styled(ExclamationCircleIcon)
+                              <ExclamationCircleIcon
+                                color="currentColor"
+                                css="color: var(--pf-global--danger-color--100)"
+                                noVerticalAlign={false}
                                 size="lg"
+                                title={null}
                               >
-                                <StyledComponent
-                                  forwardedComponent={
+                                <svg
+                                  aria-hidden={true}
+                                  aria-labelledby={null}
+                                  css="color: var(--pf-global--danger-color--100)"
+                                  fill="currentColor"
+                                  height="2em"
+                                  role="img"
+                                  style={
                                     Object {
-                                      "$$typeof": Symbol(react.forward_ref),
-                                      "attrs": Array [],
-                                      "componentStyle": ComponentStyle {
-                                        "componentId": "sc-bdVaJa",
-                                        "isStatic": true,
-                                        "lastClassName": "hIExGP",
-                                        "rules": Array [
-                                          "color: var(--pf-global--danger-color--100)",
-                                        ],
-                                      },
-                                      "displayName": "Styled(ExclamationCircleIcon)",
-                                      "foldedComponentIds": Array [],
-                                      "render": [Function],
-                                      "styledComponentId": "sc-bdVaJa",
-                                      "target": [Function],
-                                      "toString": [Function],
-                                      "warnTooManyClasses": [Function],
-                                      "withComponent": [Function],
+                                      "verticalAlign": "-0.25em",
                                     }
                                   }
-                                  forwardedRef={null}
-                                  size="lg"
+                                  viewBox="0 0 512 512"
+                                  width="2em"
                                 >
-                                  <ExclamationCircleIcon
-                                    className="sc-bdVaJa hIExGP"
-                                    color="currentColor"
-                                    noVerticalAlign={false}
-                                    size="lg"
-                                    title={null}
-                                  >
-                                    <svg
-                                      aria-hidden={true}
-                                      aria-labelledby={null}
-                                      className="sc-bdVaJa hIExGP"
-                                      fill="currentColor"
-                                      height="2em"
-                                      role="img"
-                                      style={
-                                        Object {
-                                          "verticalAlign": "-0.25em",
-                                        }
-                                      }
-                                      viewBox="0 0 512 512"
-                                      width="2em"
-                                    >
-                                      <path
-                                        d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                                        transform=""
-                                      />
-                                    </svg>
-                                  </ExclamationCircleIcon>
-                                </StyledComponent>
-                              </Styled(ExclamationCircleIcon)>
+                                  <path
+                                    d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
+                                    transform=""
+                                  />
+                                </svg>
+                              </ExclamationCircleIcon>
                               <Title
                                 size="2xl"
                               >
@@ -531,7 +513,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                               </Title>
                             </div>
                           </StyledComponent>
-                        </AlertModal__Header>
+                        </styled.div>
                       </div>
                       <ModalBoxBody
                         id="pf-modal-0"

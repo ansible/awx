@@ -9,11 +9,11 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { CardActions } from '@patternfly/react-core';
 import useRequest from '../../../util/useRequest';
 
 import { InventoriesAPI } from '../../../api';
-import { CaretLeftIcon } from '@patternfly/react-icons';
-import { CardActions } from '@patternfly/react-core';
 import { TabbedCardHeader } from '../../../components/Card';
 import CardCloseButton from '../../../components/CardCloseButton';
 import ContentError from '../../../components/ContentError';

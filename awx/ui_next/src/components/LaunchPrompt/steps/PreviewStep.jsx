@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
 import yaml from 'js-yaml';
-import PromptDetail from '../../../components/PromptDetail';
+import PromptDetail from '../../PromptDetail';
 import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
 import getSurveyValues from '../getSurveyValues';
 

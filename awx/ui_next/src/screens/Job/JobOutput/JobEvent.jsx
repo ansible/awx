@@ -1,6 +1,6 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
-import Entities from 'html-entities';
+import { AllHtmlEntities } from 'html-entities';
 import React from 'react';
 import {
   JobEventLine,
@@ -35,7 +35,7 @@ const ansi = new Ansi({
     15: '#FFF',
   },
 });
-const entities = new Entities.AllHtmlEntities();
+const entities = new AllHtmlEntities();
 
 function getTimestamp({ created }) {
   const date = new Date(created);

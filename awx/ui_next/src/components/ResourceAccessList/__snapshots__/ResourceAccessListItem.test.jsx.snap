@@ -49,15 +49,16 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
         <div
           className="pf-c-data-list__item-row"
         >
-          <ResourceAccessListItem__DataListItemCells
+          <Styled(DataListItemCells)
             dataListCells={
               Array [
-                <DataListCell>
+                <ForwardRef(Styled(PFDataListCell))>
                   <TextContent>
                     <Text
                       component="h6"
                     >
-                      <Styled(Link)
+                      <ForwardRef
+                        css="font-weight: bold"
                         to={
                           Object {
                             "pathname": "/users/2/details",
@@ -65,10 +66,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         }
                       >
                         jane
-                      </Styled(Link)>
+                      </ForwardRef>
                     </Text>
                   </TextContent>
-                  <DetailList
+                  <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
                     <Detail
@@ -77,10 +78,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       label="Name"
                       value="jane brown"
                     />
-                  </DetailList>
-                </DataListCell>,
-                <DataListCell>
-                  <DetailList
+                  </ForwardRef(Styled(DetailList))>
+                </ForwardRef(Styled(PFDataListCell))>,
+                <ForwardRef(Styled(PFDataListCell))>
+                  <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
                     <Detail
@@ -101,8 +102,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         </WithI18n>
                       }
                     />
-                  </DetailList>
-                </DataListCell>,
+                  </ForwardRef(Styled(DetailList))>
+                </ForwardRef(Styled(PFDataListCell))>,
               ]
             }
             key=".0"
@@ -111,12 +112,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
             <StyledComponent
               dataListCells={
                 Array [
-                  <DataListCell>
+                  <ForwardRef(Styled(PFDataListCell))>
                     <TextContent>
                       <Text
                         component="h6"
                       >
-                        <Styled(Link)
+                        <ForwardRef
+                          css="font-weight: bold"
                           to={
                             Object {
                               "pathname": "/users/2/details",
@@ -124,10 +126,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           }
                         >
                           jane
-                        </Styled(Link)>
+                        </ForwardRef>
                       </Text>
                     </TextContent>
-                    <DetailList
+                    <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
                       <Detail
@@ -136,10 +138,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         label="Name"
                         value="jane brown"
                       />
-                    </DetailList>
-                  </DataListCell>,
-                  <DataListCell>
-                    <DetailList
+                    </ForwardRef(Styled(DetailList))>
+                  </ForwardRef(Styled(PFDataListCell))>,
+                  <ForwardRef(Styled(PFDataListCell))>
+                    <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
                       <Detail
@@ -160,8 +162,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           </WithI18n>
                         }
                       />
-                    </DetailList>
-                  </DataListCell>,
+                    </ForwardRef(Styled(DetailList))>
+                  </ForwardRef(Styled(PFDataListCell))>,
                 ]
               }
               forwardedComponent={
@@ -169,17 +171,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
-                    "isStatic": true,
-                    "lastClassName": "WzRoT",
+                    "componentId": "sc-bZQynM",
+                    "isStatic": false,
+                    "lastClassName": "dLjtme",
                     "rules": Array [
-                      "align-items:start;",
+                      "
+  align-items: start;
+",
                     ],
                   },
-                  "displayName": "ResourceAccessListItem__DataListItemCells",
+                  "displayName": "Styled(DataListItemCells)",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
+                  "styledComponentId": "sc-bZQynM",
                   "target": [Function],
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
@@ -190,15 +194,16 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               rowid="access-list-item"
             >
               <DataListItemCells
-                className="ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
+                className="sc-bZQynM dLjtme"
                 dataListCells={
                   Array [
-                    <DataListCell>
+                    <ForwardRef(Styled(PFDataListCell))>
                       <TextContent>
                         <Text
                           component="h6"
                         >
-                          <Styled(Link)
+                          <ForwardRef
+                            css="font-weight: bold"
                             to={
                               Object {
                                 "pathname": "/users/2/details",
@@ -206,10 +211,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             }
                           >
                             jane
-                          </Styled(Link)>
+                          </ForwardRef>
                         </Text>
                       </TextContent>
-                      <DetailList
+                      <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
                         <Detail
@@ -218,10 +223,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           label="Name"
                           value="jane brown"
                         />
-                      </DetailList>
-                    </DataListCell>,
-                    <DataListCell>
-                      <DetailList
+                      </ForwardRef(Styled(DetailList))>
+                    </ForwardRef(Styled(PFDataListCell))>,
+                    <ForwardRef(Styled(PFDataListCell))>
+                      <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
                         <Detail
@@ -242,14 +247,14 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             </WithI18n>
                           }
                         />
-                      </DetailList>
-                    </DataListCell>,
+                      </ForwardRef(Styled(DetailList))>
+                    </ForwardRef(Styled(PFDataListCell))>,
                   ]
                 }
                 rowid="access-list-item"
               >
                 <div
-                  className="pf-c-data-list__item-content ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
+                  className="pf-c-data-list__item-content sc-bZQynM dLjtme"
                 >
                   <DataListCell
                     key="name"
@@ -260,17 +265,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           "$$typeof": Symbol(react.forward_ref),
                           "attrs": Array [],
                           "componentStyle": ComponentStyle {
-                            "componentId": "DataListCell-sc-18ntxrx-0",
-                            "isStatic": true,
-                            "lastClassName": "flJMIO",
+                            "componentId": "sc-bdVaJa",
+                            "isStatic": false,
+                            "lastClassName": "kruorc",
                             "rules": Array [
-                              "word-break:break-word;",
+                              "
+  word-break: break-word;
+",
                             ],
                           },
                           "displayName": "DataListCell",
                           "foldedComponentIds": Array [],
                           "render": [Function],
-                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "styledComponentId": "sc-bdVaJa",
                           "target": [Function],
                           "toString": [Function],
                           "warnTooManyClasses": [Function],
@@ -280,10 +287,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       forwardedRef={null}
                     >
                       <PFDataListCell
-                        className="DataListCell-sc-18ntxrx-0 flJMIO"
+                        className="sc-bdVaJa kruorc"
                       >
                         <div
-                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                          className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
                           <TextContent>
                             <div
@@ -296,90 +303,33 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   className=""
                                   data-pf-content={true}
                                 >
-                                  <Styled(Link)
+                                  <Link
+                                    css="font-weight: bold"
                                     to={
                                       Object {
                                         "pathname": "/users/2/details",
                                       }
                                     }
                                   >
-                                    <StyledComponent
-                                      forwardedComponent={
-                                        Object {
-                                          "$$typeof": Symbol(react.forward_ref),
-                                          "attrs": Array [],
-                                          "componentStyle": ComponentStyle {
-                                            "componentId": "sc-bdVaJa",
-                                            "isStatic": true,
-                                            "lastClassName": "fqQVUT",
-                                            "rules": Array [
-                                              "font-weight: bold",
-                                            ],
-                                          },
-                                          "displayName": "Styled(Link)",
-                                          "foldedComponentIds": Array [],
-                                          "propTypes": Object {
-                                            "innerRef": [Function],
-                                            "onClick": [Function],
-                                            "replace": [Function],
-                                            "target": [Function],
-                                            "to": [Function],
-                                          },
-                                          "render": [Function],
-                                          "styledComponentId": "sc-bdVaJa",
-                                          "target": Object {
-                                            "$$typeof": Symbol(react.forward_ref),
-                                            "displayName": "Link",
-                                            "propTypes": Object {
-                                              "innerRef": [Function],
-                                              "onClick": [Function],
-                                              "replace": [Function],
-                                              "target": [Function],
-                                              "to": [Function],
-                                            },
-                                            "render": [Function],
-                                          },
-                                          "toString": [Function],
-                                          "warnTooManyClasses": [Function],
-                                          "withComponent": [Function],
-                                        }
-                                      }
-                                      forwardedRef={null}
-                                      to={
-                                        Object {
-                                          "pathname": "/users/2/details",
-                                        }
-                                      }
+                                    <LinkAnchor
+                                      css="font-weight: bold"
+                                      href="/users/2/details"
+                                      navigate={[Function]}
                                     >
-                                      <Link
-                                        className="sc-bdVaJa fqQVUT"
-                                        to={
-                                          Object {
-                                            "pathname": "/users/2/details",
-                                          }
-                                        }
+                                      <a
+                                        css="font-weight: bold"
+                                        href="/users/2/details"
+                                        onClick={[Function]}
                                       >
-                                        <LinkAnchor
-                                          className="sc-bdVaJa fqQVUT"
-                                          href="/users/2/details"
-                                          navigate={[Function]}
-                                        >
-                                          <a
-                                            className="sc-bdVaJa fqQVUT"
-                                            href="/users/2/details"
-                                            onClick={[Function]}
-                                          >
-                                            jane
-                                          </a>
-                                        </LinkAnchor>
-                                      </Link>
-                                    </StyledComponent>
-                                  </Styled(Link)>
+                                        jane
+                                      </a>
+                                    </LinkAnchor>
+                                  </Link>
                                 </h6>
                               </Text>
                             </div>
                           </TextContent>
-                          <DetailList
+                          <Styled(DetailList)
                             stacked={true}
                           >
                             <StyledComponent
@@ -388,18 +338,24 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "iAtits",
+                                    "lastClassName": "kVCDmm",
                                     "rules": Array [
-                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      "
+  display: grid;
+  grid-gap: 20px;
+  align-items: center;
+  ",
                                       [Function],
+                                      "
+",
                                     ],
                                   },
-                                  "displayName": "DetailList",
+                                  "displayName": "Styled(DetailList)",
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
-                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "styledComponentId": "sc-bwzfXH",
                                   "target": [Function],
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -410,15 +366,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="DetailList-sc-12g7m4-0 iAtits"
+                                className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
                                   <dl
-                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    className="sc-bwzfXH kVCDmm"
                                     data-pf-content={true}
                                   >
                                     <Detail
@@ -427,7 +383,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       label="Name"
                                       value="jane brown"
                                     >
-                                      <Detail__DetailName
+                                      <Styled(Component)
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
@@ -440,18 +396,22 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "componentId": "sc-htpNat",
                                                 "isStatic": false,
-                                                "lastClassName": "erdIBg",
+                                                "lastClassName": "iYJcPm",
                                                 "rules": Array [
-                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  "
+  font-weight: var(--pf-global--FontWeight--bold);
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailName",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "styledComponentId": "sc-htpNat",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -462,18 +422,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            className="sc-htpNat iYJcPm"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                className="sc-htpNat iYJcPm"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -482,8 +442,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailName>
-                                      <Detail__DetailValue
+                                      </Styled(Component)>
+                                      <Styled(Component)
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
@@ -496,20 +456,25 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "kCDjmZ",
+                                                "lastClassName": "gxmPlV",
                                                 "rules": Array [
-                                                  "word-break:break-all;",
+                                                  "
+  word-break: break-all;
+  ",
                                                   [Function],
-                                                  " ",
+                                                  "
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailValue",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -520,18 +485,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            className="sc-bxivhb gxmPlV"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                className="sc-bxivhb gxmPlV"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -540,13 +505,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailValue>
+                                      </Styled(Component)>
                                     </Detail>
                                   </dl>
                                 </TextList>
                               </DetailList>
                             </StyledComponent>
-                          </DetailList>
+                          </Styled(DetailList)>
                         </div>
                       </PFDataListCell>
                     </StyledComponent>
@@ -560,17 +525,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           "$$typeof": Symbol(react.forward_ref),
                           "attrs": Array [],
                           "componentStyle": ComponentStyle {
-                            "componentId": "DataListCell-sc-18ntxrx-0",
-                            "isStatic": true,
-                            "lastClassName": "flJMIO",
+                            "componentId": "sc-bdVaJa",
+                            "isStatic": false,
+                            "lastClassName": "kruorc",
                             "rules": Array [
-                              "word-break:break-word;",
+                              "
+  word-break: break-word;
+",
                             ],
                           },
                           "displayName": "DataListCell",
                           "foldedComponentIds": Array [],
                           "render": [Function],
-                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "styledComponentId": "sc-bdVaJa",
                           "target": [Function],
                           "toString": [Function],
                           "warnTooManyClasses": [Function],
@@ -580,12 +547,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       forwardedRef={null}
                     >
                       <PFDataListCell
-                        className="DataListCell-sc-18ntxrx-0 flJMIO"
+                        className="sc-bdVaJa kruorc"
                       >
                         <div
-                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                          className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
-                          <DetailList
+                          <Styled(DetailList)
                             stacked={true}
                           >
                             <StyledComponent
@@ -594,18 +561,24 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "iAtits",
+                                    "lastClassName": "kVCDmm",
                                     "rules": Array [
-                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      "
+  display: grid;
+  grid-gap: 20px;
+  align-items: center;
+  ",
                                       [Function],
+                                      "
+",
                                     ],
                                   },
-                                  "displayName": "DetailList",
+                                  "displayName": "Styled(DetailList)",
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
-                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "styledComponentId": "sc-bwzfXH",
                                   "target": [Function],
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -616,15 +589,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="DetailList-sc-12g7m4-0 iAtits"
+                                className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
                                   <dl
-                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    className="sc-bwzfXH kVCDmm"
                                     data-pf-content={true}
                                   >
                                     <Detail
@@ -645,7 +618,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                         </WithI18n>
                                       }
                                     >
-                                      <Detail__DetailName
+                                      <Styled(Component)
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
@@ -658,18 +631,22 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "componentId": "sc-htpNat",
                                                 "isStatic": false,
-                                                "lastClassName": "erdIBg",
+                                                "lastClassName": "iYJcPm",
                                                 "rules": Array [
-                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  "
+  font-weight: var(--pf-global--FontWeight--bold);
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailName",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "styledComponentId": "sc-htpNat",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -680,18 +657,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            className="sc-htpNat iYJcPm"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                className="sc-htpNat iYJcPm"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -700,8 +677,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailName>
-                                      <Detail__DetailValue
+                                      </Styled(Component)>
+                                      <Styled(Component)
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
@@ -714,20 +691,25 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "kCDjmZ",
+                                                "lastClassName": "gxmPlV",
                                                 "rules": Array [
-                                                  "word-break:break-all;",
+                                                  "
+  word-break: break-all;
+  ",
                                                   [Function],
-                                                  " ",
+                                                  "
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailValue",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -738,18 +720,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            className="sc-bxivhb gxmPlV"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                className="sc-bxivhb gxmPlV"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -944,13 +926,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailValue>
+                                      </Styled(Component)>
                                     </Detail>
                                   </dl>
                                 </TextList>
                               </DetailList>
                             </StyledComponent>
-                          </DetailList>
+                          </Styled(DetailList)>
                         </div>
                       </PFDataListCell>
                     </StyledComponent>
@@ -958,7 +940,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                 </div>
               </DataListItemCells>
             </StyledComponent>
-          </ResourceAccessListItem__DataListItemCells>
+          </Styled(DataListItemCells)>
         </div>
       </DataListItemRow>
     </li>

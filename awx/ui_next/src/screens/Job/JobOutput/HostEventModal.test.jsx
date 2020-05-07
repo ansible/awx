@@ -130,8 +130,8 @@ describe('HostEventModal', () => {
     );
     const icon = wrapper.find('StatusIcon');
     expect(icon.prop('status')).toBe('ok');
-    expect(icon.find('StatusIcon__SuccessfulTop').length).toBe(1);
-    expect(icon.find('StatusIcon__SuccessfulBottom').length).toBe(1);
+    expect(icon.find('StatusIcon SuccessfulTop').length).toBe(1);
+    expect(icon.find('StatusIcon SuccessfulBottom').length).toBe(1);
   });
 
   test('should display skipped host status icon', () => {
@@ -142,8 +142,8 @@ describe('HostEventModal', () => {
 
     const icon = wrapper.find('StatusIcon');
     expect(icon.prop('status')).toBe('skipped');
-    expect(icon.find('StatusIcon__SkippedTop').length).toBe(1);
-    expect(icon.find('StatusIcon__SkippedBottom').length).toBe(1);
+    expect(icon.find('StatusIcon SkippedTop').length).toBe(1);
+    expect(icon.find('StatusIcon SkippedBottom').length).toBe(1);
   });
 
   test('should display unreachable host status icon', () => {
@@ -162,8 +162,8 @@ describe('HostEventModal', () => {
 
     const icon = wrapper.find('StatusIcon');
     expect(icon.prop('status')).toBe('unreachable');
-    expect(icon.find('StatusIcon__UnreachableTop').length).toBe(1);
-    expect(icon.find('StatusIcon__UnreachableBottom').length).toBe(1);
+    expect(icon.find('StatusIcon UnreachableTop').length).toBe(1);
+    expect(icon.find('StatusIcon UnreachableBottom').length).toBe(1);
   });
 
   test('should display failed host status icon', () => {
@@ -183,8 +183,8 @@ describe('HostEventModal', () => {
 
     const icon = wrapper.find('StatusIcon');
     expect(icon.prop('status')).toBe('failed');
-    expect(icon.find('StatusIcon__FailedTop').length).toBe(1);
-    expect(icon.find('StatusIcon__FailedBottom').length).toBe(1);
+    expect(icon.find('StatusIcon FailedTop').length).toBe(1);
+    expect(icon.find('StatusIcon FailedBottom').length).toBe(1);
   });
 
   test('should display JSON tab content on tab click', () => {

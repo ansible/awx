@@ -46,7 +46,10 @@ const mockJobTemplate = {
       edit: true,
     },
     labels: {
-      results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+      results: [
+        { name: 'Sushi', id: 1 },
+        { name: 'Major', id: 2 },
+      ],
     },
     inventory: {
       id: 2,
@@ -309,7 +312,10 @@ describe('<JobTemplateEdit />', () => {
           edit: true,
         },
         labels: {
-          results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+          results: [
+            { name: 'Sushi', id: 1 },
+            { name: 'Major', id: 2 },
+          ],
         },
         inventory: {
           id: 2,

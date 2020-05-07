@@ -5,7 +5,8 @@ import {
   getScaleAndOffsetToFit,
   getTranslatePointsForZoom,
 } from '../../../components/Workflow/WorkflowUtils';
-import { WorkflowOutputLink, WorkflowOutputNode } from '.';
+import WorkflowOutputLink from './WorkflowOutputLink';
+import WorkflowOutputNode from './WorkflowOutputNode';
 import {
   WorkflowHelp,
   WorkflowLegend,

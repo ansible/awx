@@ -64,7 +64,10 @@ describe('<OrganizationEdit />', () => {
   });
 
   test('should navigate to organization detail when cancel is clicked', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,

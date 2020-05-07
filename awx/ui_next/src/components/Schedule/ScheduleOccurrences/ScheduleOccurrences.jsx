@@ -44,7 +44,10 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
-              buttons={[['local', 'Local'], ['utc', 'UTC']]}
+              buttons={[
+                ['local', 'Local'],
+                ['utc', 'UTC'],
+              ]}
               value={mode}
               onChange={newMode => setMode(newMode)}
             />

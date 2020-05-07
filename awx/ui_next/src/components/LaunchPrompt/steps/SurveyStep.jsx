@@ -8,8 +8,8 @@ import {
   SelectOption,
   SelectVariant,
 } from '@patternfly/react-core';
-import FormField, { FieldTooltip } from '../../../components/FormField';
-import AnsibleSelect from '../../../components/AnsibleSelect';
+import FormField, { FieldTooltip } from '../../FormField';
+import AnsibleSelect from '../../AnsibleSelect';
 import {
   required,
   minMaxValue,

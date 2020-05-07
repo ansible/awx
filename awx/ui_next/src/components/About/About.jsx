@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 
 import { BrandName } from '../../variables';
-import brandLogoImg from '../../../images/brand-logo.svg';
+import brandLogoImg from './brand-logo.svg';
 
 class About extends React.Component {
   static createSpeechBubble(version) {

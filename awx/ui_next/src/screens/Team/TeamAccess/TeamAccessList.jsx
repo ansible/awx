@@ -4,8 +4,8 @@ import { useLocation, useRouteMatch, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { TeamsAPI } from '../../../api';
 import { Card } from '@patternfly/react-core';
+import { TeamsAPI } from '../../../api';
 
 import useRequest from '../../../util/useRequest';
 import DataListToolbar from '../../../components/DataListToolbar';

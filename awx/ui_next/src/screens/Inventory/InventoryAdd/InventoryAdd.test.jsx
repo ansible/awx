@@ -45,7 +45,10 @@ describe('<InventoryAdd />', () => {
     expect(wrapper.length).toBe(1);
   });
   test('handleSubmit should call the api and redirect to details page', async () => {
-    const instanceGroups = [{ name: 'Bizz', id: 1 }, { name: 'Buzz', id: 2 }];
+    const instanceGroups = [
+      { name: 'Bizz', id: 1 },
+      { name: 'Buzz', id: 2 },
+    ];
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
 
     wrapper.find('InventoryForm').prop('onSubmit')({

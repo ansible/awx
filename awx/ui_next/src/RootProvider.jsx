@@ -4,8 +4,8 @@ import { I18nProvider } from '@lingui/react';
 import { HashRouter } from 'react-router-dom';
 
 import { getLanguageWithoutRegionCode } from './util/language';
-import ja from '../build/locales/ja/messages';
-import en from '../build/locales/en/messages';
+import ja from './locales/ja/messages';
+import en from './locales/en/messages';
 
 class RootProvider extends Component {
   render() {

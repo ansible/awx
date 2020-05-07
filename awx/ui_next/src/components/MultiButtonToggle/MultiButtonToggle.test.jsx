@@ -8,7 +8,10 @@ describe('<MultiButtonToggle />', () => {
   beforeAll(() => {
     wrapper = mount(
       <MultiButtonToggle
-        buttons={[['yaml', 'YAML'], ['json', 'JSON']]}
+        buttons={[
+          ['yaml', 'YAML'],
+          ['json', 'JSON'],
+        ]}
         value="yaml"
         onChange={onChange}
       />

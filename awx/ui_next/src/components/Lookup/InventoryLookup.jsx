@@ -5,7 +5,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { InventoriesAPI } from '../../api';
 import { Inventory } from '../../types';
-import Lookup from '.';
+import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';

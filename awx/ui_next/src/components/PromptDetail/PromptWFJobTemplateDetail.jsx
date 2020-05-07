@@ -4,11 +4,11 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { Chip, List, ListItem } from '@patternfly/react-core';
-import CredentialChip from '../../components/CredentialChip';
-import ChipGroup from '../../components/ChipGroup';
-import { Detail } from '../../components/DetailList';
-import { VariablesDetail } from '../../components/CodeMirrorInput';
-import Sparkline from '../../components/Sparkline';
+import CredentialChip from '../CredentialChip';
+import ChipGroup from '../ChipGroup';
+import { Detail } from '../DetailList';
+import { VariablesDetail } from '../CodeMirrorInput';
+import Sparkline from '../Sparkline';
 import { toTitleCase } from '../../util/strings';
 
 function PromptWFJobTemplateDetail({ i18n, resource }) {

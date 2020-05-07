@@ -28,7 +28,10 @@ describe('<OrganizationDetail />', () => {
   };
   const mockInstanceGroups = {
     data: {
-      results: [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }],
+      results: [
+        { name: 'One', id: 1 },
+        { name: 'Two', id: 2 },
+      ],
     },
   };
 

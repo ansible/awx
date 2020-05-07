@@ -59,6 +59,8 @@ const NodeDefaultLabel = styled.p`
   white-space: nowrap;
 `;
 
+Elapsed.displayName = 'Elapsed';
+
 function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
   const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);

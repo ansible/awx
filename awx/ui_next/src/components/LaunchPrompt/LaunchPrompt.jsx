@@ -3,8 +3,8 @@ import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
-import ContentError from '../../components/ContentError';
-import ContentLoading from '../../components/ContentLoading';
+import ContentError from '../ContentError';
+import ContentLoading from '../ContentLoading';
 import mergeExtraVars from './mergeExtraVars';
 import useSteps from './useSteps';
 import getSurveyValues from './getSurveyValues';
@@ -36,7 +36,10 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     };
     const surveyValues = getSurveyValues(values);
     setValue('inventory_id', values.inventory?.id);
-    setValue('credentials', values.credentials?.map(c => c.id));
+    setValue(
+      'credentials',
+      values.credentials?.map(c => c.id)
+    );
     setValue('job_type', values.job_type);
     setValue('limit', values.limit);
     setValue('job_tags', values.job_tags);

@@ -11,7 +11,10 @@ describe('<_AddResourceRole />', () => {
   UsersAPI.read.mockResolvedValue({
     data: {
       count: 2,
-      results: [{ id: 1, username: 'foo' }, { id: 2, username: 'bar' }],
+      results: [
+        { id: 1, username: 'foo' },
+        { id: 2, username: 'bar' },
+      ],
     },
   });
   const roles = {

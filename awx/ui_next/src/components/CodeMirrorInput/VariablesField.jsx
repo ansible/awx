@@ -44,7 +44,10 @@ function VariablesField({
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
-              buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
+              buttons={[
+                [YAML_MODE, 'YAML'],
+                [JSON_MODE, 'JSON'],
+              ]}
               value={mode}
               onChange={newMode => {
                 try {

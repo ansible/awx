@@ -1,6 +1,9 @@
 import CredentialTypes from './CredentialTypes';
 
-const typesData = [{ id: 1, kind: 'machine' }, { id: 2, kind: 'cloud' }];
+const typesData = [
+  { id: 1, kind: 'machine' },
+  { id: 2, kind: 'cloud' },
+];
 
 describe('CredentialTypesAPI', () => {
   test('should load all types', async () => {

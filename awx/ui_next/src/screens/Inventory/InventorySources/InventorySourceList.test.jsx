@@ -43,7 +43,14 @@ describe('<InventorySourceList />', () => {
     InventorySourcesAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
-          GET: { source: { choices: [['scm', 'SCM'], ['ec2', 'EC2']] } },
+          GET: {
+            source: {
+              choices: [
+                ['scm', 'SCM'],
+                ['ec2', 'EC2'],
+              ],
+            },
+          },
           POST: {},
         },
       },
@@ -247,7 +254,14 @@ describe('<InventorySourceList /> RBAC testing', () => {
     InventorySourcesAPI.readOptions.mockResolvedValue({
       data: {
         actions: {
-          GET: { source: { choices: [['scm', 'SCM'], ['ec2', 'EC2']] } },
+          GET: {
+            source: {
+              choices: [
+                ['scm', 'SCM'],
+                ['ec2', 'EC2'],
+              ],
+            },
+          },
         },
       },
     });

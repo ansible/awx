@@ -2,7 +2,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { InventoriesAPI } from '../../../api';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import mockInventorySource from '../shared/data.inventory_source.json';
 import InventorySource from './InventorySource';
 

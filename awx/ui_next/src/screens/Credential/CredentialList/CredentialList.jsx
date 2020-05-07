@@ -13,7 +13,7 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { CredentialListItem } from '.';
+import CredentialListItem from './CredentialListItem';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,

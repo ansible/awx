@@ -1,6 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 
 import InventoryForm from './InventoryForm';
 
@@ -47,7 +50,10 @@ const inventory = {
   pending_deletion: false,
 };
 
-const instanceGroups = [{ name: 'Foo', id: 1 }, { name: 'Bar', id: 2 }];
+const instanceGroups = [
+  { name: 'Foo', id: 1 },
+  { name: 'Bar', id: 2 },
+];
 describe('<InventoryForm />', () => {
   let wrapper;
   let onCancel;

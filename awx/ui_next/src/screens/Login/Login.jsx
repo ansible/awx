@@ -7,7 +7,7 @@ import { LoginForm, LoginPage as PFLoginPage } from '@patternfly/react-core';
 import { RootAPI } from '../../api';
 import { BrandName } from '../../variables';
 
-import brandLogo from '../../../images/brand-logo.svg';
+import brandLogo from './brand-logo.svg';
 
 const LoginPage = styled(PFLoginPage)`
   & .pf-c-brand {

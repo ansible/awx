@@ -18,7 +18,8 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 import { timeOfDay } from '../../../util/dates';
 import { InventoriesAPI } from '../../../api';
 import { Inventory } from '../../../types';
-import CopyButton from '../../../components/CopyButton/CopyButton';
+import DataListCell from '../../../components/DataListCell';
+import CopyButton from '../../../components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

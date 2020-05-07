@@ -19,7 +19,11 @@ import ChipGroup from '../../../components/ChipGroup';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
-import { DetailList, Detail, UserDateDetail } from '../../../components/DetailList';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+} from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import LaunchButton from '../../../components/LaunchButton';
 import Sparkline from '../../../components/Sparkline';

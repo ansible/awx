@@ -90,11 +90,11 @@ describe('<InventoryDetail />', () => {
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
     const org = wrapper.find('Detail[label="Organization"]');
     expect(org.prop('value')).toMatchInlineSnapshot(`
-      <Link
+      <ForwardRef
         to="/organizations/1/details"
       >
         The Organization
-      </Link>
+      </ForwardRef>
     `);
     const vars = wrapper.find('VariablesDetail');
     expect(vars).toHaveLength(1);

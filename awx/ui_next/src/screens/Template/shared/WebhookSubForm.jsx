@@ -9,10 +9,10 @@ import {
   InputGroup,
   Button,
 } from '@patternfly/react-core';
+import { useField } from 'formik';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import useRequest from '../../../util/useRequest';
-import { useField } from 'formik';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import { CredentialLookup } from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';

@@ -112,6 +112,12 @@ function DisassociateButton({
   );
 }
 
+DisassociateButton.defaultProps = {
+  itemsToDisassociate: [],
+  modalNote: '',
+  modalTitle: '',
+};
+
 DisassociateButton.propTypes = {
   itemsToDisassociate: arrayOf(object),
   modalNote: string,

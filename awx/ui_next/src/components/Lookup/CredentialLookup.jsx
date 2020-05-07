@@ -8,7 +8,7 @@ import { CredentialsAPI } from '../../api';
 import { Credential } from '../../types';
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import { FieldTooltip } from '../FormField';
-import Lookup from '.';
+import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 

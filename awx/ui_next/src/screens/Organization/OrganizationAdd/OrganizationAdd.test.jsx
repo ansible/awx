@@ -92,7 +92,10 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component renders if there are virtual environments', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,
@@ -119,7 +122,10 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,

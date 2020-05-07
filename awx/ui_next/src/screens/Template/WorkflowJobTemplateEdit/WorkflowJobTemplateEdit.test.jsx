@@ -23,7 +23,10 @@ const mockTemplate = {
     inventory: { id: 1, name: 'Inventory 1' },
     organization: { id: 1, name: 'Organization 1' },
     labels: {
-      results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+      results: [
+        { name: 'Label 1', id: 1 },
+        { name: 'Label 2', id: 2 },
+      ],
     },
   },
   scm_branch: 'devel',
@@ -187,7 +190,10 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       summary_fields: {
         inventory: { id: 1, name: 'Inventory 1' },
         labels: {
-          results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+          results: [
+            { name: 'Label 1', id: 1 },
+            { name: 'Label 2', id: 2 },
+          ],
         },
       },
       scm_branch: 'devel',
