@@ -11,11 +11,6 @@
   "plugins": ["react-hooks"],
   "extends": ["airbnb", "prettier", "prettier/react"],
   "settings": {
-    "import/resolver": {
-      "webpack": {
-        "config": "webpack.config.js"
-      }
-    },
     "react": {
       "version": "16.5.2"
     }
