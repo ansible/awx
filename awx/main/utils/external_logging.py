@@ -114,9 +114,9 @@ def construct_rsyslog_conf_template(settings=settings):
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity
-    temp_dir = tempfile.TemporaryDirectory(prefix='rsyslog-conf-', dir='/tmp')
-    path = temp_dir.name + '/rsyslog.conf.temp'
-    with open(path, 'w') as f:
-        f.write(tmpl + '\n')
-    shutil.move(path, '/var/lib/awx/rsyslog/rsyslog.conf')
+    with tempfile.TemporaryDirectory(prefix='rsyslog-conf-') as temp_dir:
+        path = temp_dir + '/rsyslog.conf.temp'
+        with open(path, 'w') as f:
+            f.write(tmpl + '\n')
+        shutil.move(path, '/var/lib/awx/rsyslog/rsyslog.conf')
     supervisor_service_command(command='restart', service='awx-rsyslogd')
