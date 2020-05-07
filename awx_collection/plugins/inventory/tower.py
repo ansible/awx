@@ -35,17 +35,25 @@ DOCUMENTATION = '''
                 - name: TOWER_HOST
             required: True
         username:
-            description: The user that you plan to use to access inventories on Ansible Tower.
+            description:
+                - The user that you plan to use to access inventories on Ansible Tower.
+                - Not needed, if you want user token_auth
             type: string
             env:
                 - name: TOWER_USERNAME
-            required: True
         password:
-            description: The password for your Ansible Tower user.
+            description: The password for your Ansible Tower user or Token when use token auth
             type: string
             env:
                 - name: TOWER_PASSWORD
             required: True
+        token_auth:
+            description: True if you want use token auth
+            type: bool
+            default: False
+            env:
+                - name: TOWER_TOKEN_AUTH
+            required: False
         inventory_id:
             description:
                 - The ID of the Ansible Tower inventory that you wish to import.
@@ -81,6 +89,7 @@ plugin: awx.awx.tower
 host: your_ansible_tower_server_network_address
 username: your_ansible_tower_username
 password: your_ansible_tower_password
+token_auth: false
 inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # Then you can run the following command.
 # If some of the arguments are missing, Ansible will attempt to read them from environment variables.
@@ -92,6 +101,7 @@ inventory_id: the_ID_of_targeted_ansible_tower_inventory
 # export TOWER_HOST=YOUR_TOWER_HOST_ADDRESS
 # export TOWER_USERNAME=YOUR_TOWER_USERNAME
 # export TOWER_PASSWORD=YOUR_TOWER_PASSWORD
+# export TOWER_TOKEN_AUTH=FALSE
 # export TOWER_INVENTORY=THE_ID_OF_TARGETED_INVENTORY
 # Read the inventory specified in TOWER_INVENTORY from Ansible Tower, and list them.
 # The inventory path must always be @tower_inventory if you are reading all settings from environment variables.
@@ -138,13 +148,19 @@ class InventoryModule(BaseInventoryPlugin):
         # Read inventory from tower server.
         # Note the environment variables will be handled automatically by InventoryManager.
         tower_host = self.get_option('host')
+        token_auth = self.get_option('token_auth')
         if not re.match('(?:http|https)://', tower_host):
             tower_host = 'https://{tower_host}'.format(tower_host=tower_host)
 
-        request_handler = Request(url_username=self.get_option('username'),
-                                  url_password=self.get_option('password'),
-                                  force_basic_auth=True,
-                                  validate_certs=self.get_option('validate_certs'))
+        if not token_auth:
+            request_handler = Request(url_username=self.get_option('username'),
+                                      url_password=self.get_option('password'),
+                                      force_basic_auth=True,                                                                                                                      validate_certs=self.get_option('validate_certs'))
+        else:
+            token = self.get_option('password')
+            token_header = 'Bearer ' + token
+            request_handler = Request(headers=dict(Authorization=token_header),
+                                      validate_certs=self.get_option('validate_certs'))
 
         # validate type of inventory_id because we allow two types as special case
         inventory_id = self.get_option('inventory_id')
