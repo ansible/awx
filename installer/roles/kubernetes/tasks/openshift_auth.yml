@@ -1,4 +1,12 @@
 ---
+- name: Determine version of oc
+  shell: oc version | sed -n 's/oc v//p'
+  register: oc_version
+
+- name: Use correct cli option for kubeconfig
+  set_fact:
+    oc_kubeconfig_option: "{{ '--kubeconfig' if oc_version.stdout is version('3.11', '>=') else '--config' }}"
+
 - include_vars: openshift.yml
 
 - name: Set kubernetes_namespace
