@@ -108,11 +108,6 @@ def workflow_job_template_factory():
 
 
 @pytest.fixture
-def get_ssh_version(mocker):
-    return mocker.patch('awx.main.tasks.get_ssh_version', return_value='OpenSSH_6.9p1, LibreSSL 2.1.8')
-
-
-@pytest.fixture
 def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_factory):
     return job_template_with_survey_passwords_factory(persisted=False)
 
