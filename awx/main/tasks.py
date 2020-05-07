@@ -67,7 +67,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.isolated import manager as isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
-from awx.main.utils import (get_ssh_version, update_scm_url,
+from awx.main.utils import (update_scm_url,
                             ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
@@ -897,21 +897,14 @@ class BaseTask(object):
         private_data = self.build_private_data(instance, private_data_dir)
         private_data_files = {'credentials': {}}
         if private_data is not None:
-            ssh_ver = get_ssh_version()
-            ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
-            openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
             for credential, data in private_data.get('credentials', {}).items():
-                # Bail out now if a private key was provided in OpenSSH format
-                # and we're running an earlier version (<6.5).
-                if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
-                    raise RuntimeError(OPENSSH_KEY_ERROR)
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if credential and credential.credential_type.namespace in ('ssh', 'scm') and not ssh_too_old:
+                if credential and credential.credential_type.namespace in ('ssh', 'scm'):
                     try:
                         os.mkdir(os.path.join(private_data_dir, 'env'))
                     except OSError as e:
