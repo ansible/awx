@@ -26,12 +26,21 @@ function InventorySourceAdd() {
   }, [result, history]);
 
   const handleSubmit = async form => {
-    const { credential, source_project, ...remainingForm } = form;
+    const { credential, source_path, source_project, ...remainingForm } = form;
+
+    const sourcePath = {};
+    const sourceProject = {};
+    if (form.source === 'scm') {
+      sourcePath.source_path =
+        source_path === '/ (project root)' ? '' : source_path;
+      sourceProject.source_project = source_project.id;
+    }
 
     await request({
       credential: credential?.id || null,
-      source_project: source_project?.id || null,
       inventory: id,
+      ...sourcePath,
+      ...sourceProject,
       ...remainingForm,
     });
   };

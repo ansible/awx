@@ -1,5 +1,5 @@
 import React from 'react';
-import { string, func } from 'prop-types';
+import { string, func, node } from 'prop-types';
 import { useField } from 'formik';
 import { Checkbox, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
@@ -40,7 +40,7 @@ CheckboxField.propTypes = {
   name: string.isRequired,
   label: string.isRequired,
   validate: func,
-  tooltip: string,
+  tooltip: node,
 };
 CheckboxField.defaultProps = {
   validate: () => {},

@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useContext } from 'react';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
+import { func, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { InventorySourcesAPI } from '@api';
@@ -21,7 +22,8 @@ import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
 import SCMSubForm from './InventorySourceSubForms';
 
 const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
-  const [sourceField, sourceMeta, sourceHelpers] = useField({
+  const { values, initialValues, resetForm } = useFormikContext();
+  const [sourceField, sourceMeta] = useField({
     name: 'source',
     validate: required(i18n._(t`Set a value for this field`), i18n),
   });
@@ -31,6 +33,18 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
     label: i18n._(t`Use Default Ansible Environment`),
     value: '/venv/ansible/',
     key: 'default',
+  };
+
+  const resetSubFormFields = sourceType => {
+    resetForm({
+      values: {
+        ...initialValues,
+        name: values.name,
+        description: values.description,
+        custom_virtualenv: values.custom_virtualenv,
+        source: sourceType,
+      },
+    });
   };
 
   return (
@@ -69,7 +83,7 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
             ...sourceOptions,
           ]}
           onChange={(event, value) => {
-            sourceHelpers.setValue(value);
+            resetSubFormFields(value);
           }}
         />
       </FormGroup>
@@ -195,6 +209,16 @@ const InventorySourceForm = ({
       )}
     </Formik>
   );
+};
+
+InventorySourceForm.propTypes = {
+  onCancel: func.isRequired,
+  onSubmit: func.isRequired,
+  submitError: shape({}),
+};
+
+InventorySourceForm.defaultProps = {
+  submitError: null,
 };
 
 export default withI18n()(InventorySourceForm);

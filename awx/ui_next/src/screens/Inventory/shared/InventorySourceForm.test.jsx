@@ -14,7 +14,7 @@ describe('<InventorySourceForm />', () => {
     data: { count: 0, results: [] },
   });
   ProjectsAPI.readInventories.mockResolvedValue({
-    data: ['foo'],
+    data: ['foo', 'bar'],
   });
   InventorySourcesAPI.readOptions.mockResolvedValue({
     data: {

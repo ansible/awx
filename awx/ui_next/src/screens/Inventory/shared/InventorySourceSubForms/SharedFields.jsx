@@ -63,24 +63,39 @@ export const OptionsField = withI18n()(({ i18n }) => {
               id="overwrite"
               name="overwrite"
               label={i18n._(t`Overwrite`)}
-              tooltip={i18n._(t`If checked, any hosts and groups that were
-            previously present on the external source but are now removed
-            will be removed from the Tower inventory. Hosts and groups
-            that were not managed by the inventory source will be promoted
-            to the next manually created group or if there is no manually
-            created group to promote them into, they will be left in the "all"
-            default group for the inventory. When not checked, local child
-            hosts and groups not found on the external source will remain
-            untouched by the inventory update process.`)}
+              tooltip={
+                <>
+                  {i18n._(t`If checked, any hosts and groups that were
+                  previously present on the external source but are now removed
+                  will be removed from the Tower inventory. Hosts and groups
+                  that were not managed by the inventory source will be promoted
+                  to the next manually created group or if there is no manually
+                  created group to promote them into, they will be left in the "all"
+                  default group for the inventory.`)}
+                  <br />
+                  <br />
+                  {i18n._(t`When not checked, local child
+                  hosts and groups not found on the external source will remain
+                  untouched by the inventory update process.`)}
+                </>
+              }
             />
             <CheckboxField
               id="overwrite_vars"
               name="overwrite_vars"
               label={i18n._(t`Overwrite variables`)}
-              tooltip={i18n._(t`If checked, all variables for child groups and hosts
-            will be removed and replaced by those found on the external source.
-            When not checked, a merge will be performed, combining local
-            variables with those found on the external source.`)}
+              tooltip={
+                <>
+                  {i18n._(t`If checked, all variables for child groups
+                  and hosts will be removed and replaced by those found
+                  on the external source.`)}
+                  <br />
+                  <br />
+                  {i18n._(t`When not checked, a merge will be performed,
+                  combining local variables with those found on the
+                  external source.`)}
+                </>
+              }
             />
             <CheckboxField
               id="update_on_launch"

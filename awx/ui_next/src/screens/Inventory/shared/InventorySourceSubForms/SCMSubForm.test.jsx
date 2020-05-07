@@ -3,9 +3,10 @@ import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { Formik } from 'formik';
 import SCMSubForm from './SCMSubForm';
-import { ProjectsAPI } from '@api';
+import { ProjectsAPI, CredentialsAPI } from '@api';
 
 jest.mock('@api/models/Projects');
+jest.mock('@api/models/Credentials');
 
 const initialValues = {
   credential: null,
@@ -23,9 +24,26 @@ const initialValues = {
 
 describe('<SCMSubForm />', () => {
   let wrapper;
-
+  CredentialsAPI.read.mockResolvedValue({
+    data: { count: 0, results: [] },
+  });
   ProjectsAPI.readInventories.mockResolvedValue({
-    data: ['foo'],
+    data: ['foo', 'bar'],
+  });
+  ProjectsAPI.read.mockResolvedValue({
+    data: {
+      count: 2,
+      results: [
+        {
+          id: 1,
+          name: 'mock proj one',
+        },
+        {
+          id: 2,
+          name: 'mock proj two',
+        },
+      ],
+    },
   });
 
   beforeAll(async () => {
@@ -59,10 +77,34 @@ describe('<SCMSubForm />', () => {
     await act(async () => {
       wrapper.find('ProjectLookup').invoke('onChange')({
         id: 2,
-        name: 'mock proj',
+        name: 'mock proj two',
       });
       wrapper.find('ProjectLookup').invoke('onBlur')();
     });
     expect(ProjectsAPI.readInventories).toHaveBeenCalledWith(2);
+  });
+
+  test('changing source project should reset source path dropdown', async () => {
+    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
+
+    await act(async () => {
+      await wrapper.find('AnsibleSelect#source_path').prop('onChange')(
+        null,
+        'bar'
+      );
+    });
+    wrapper.update();
+    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual(
+      'bar'
+    );
+
+    await act(async () => {
+      wrapper.find('ProjectLookup').invoke('onChange')({
+        id: 1,
+        name: 'mock proj one',
+      });
+    });
+    wrapper.update();
+    expect(wrapper.find('AnsibleSelect#source_path').prop('value')).toEqual('');
   });
 });

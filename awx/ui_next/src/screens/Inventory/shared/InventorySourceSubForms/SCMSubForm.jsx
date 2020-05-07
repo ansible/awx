@@ -31,8 +31,7 @@ const SCMSubForm = ({ i18n }) => {
   } = useRequest(
     useCallback(async projectId => {
       const { data } = await ProjectsAPI.readInventories(projectId);
-      data.push('/ (project root)');
-      return data;
+      return [...data, '/ (project root)'];
     }, []),
     []
   );
