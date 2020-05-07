@@ -13,7 +13,7 @@
     jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
-    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ test_id }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -74,10 +74,6 @@
       X-Custom-Header: value123
     state: present
   register: result
-
-- assert:
-    that:
-      - result is changed
 
 - name: Create Job Template 1
   tower_job_template:
@@ -372,5 +368,11 @@
 - name: Delete email notification
   tower_notification:
     name: "{{ email_not }}"
+    organization: Default
+    state: absent
+
+- name: Delete webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
     organization: Default
     state: absent
