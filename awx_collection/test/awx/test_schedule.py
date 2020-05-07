@@ -8,6 +8,7 @@ from ansible.errors import AnsibleError
 from awx.main.models import Schedule
 from awx.api.serializers import SchedulePreviewSerializer
 
+
 @pytest.mark.django_db
 def test_create_schedule(run_module, job_template, admin_user):
     my_rrule = 'DTSTART;TZID=Zulu:20200416T034507 RRULE:FREQ=MONTHLY;INTERVAL=1'
