@@ -199,6 +199,7 @@ def get_ssh_version():
         proc = subprocess.Popen(['ssh', '-V'],
                                 stderr=subprocess.PIPE)
         result = smart_str(proc.communicate()[1])
+        result = [_ for _ in result.split('\n') if _.startswith('OpenSSH')][0]
         return result.split(" ")[0].split("_")[1]
     except Exception:
         return 'unknown'
