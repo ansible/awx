@@ -20,6 +20,11 @@ export default function useCredentialsStep(
     validate,
     isReady: true,
     error: null,
+    setTouched: setFieldsTouched => {
+      setFieldsTouched({
+        credentials: true,
+      });
+    },
   };
 }
 

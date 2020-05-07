@@ -25,6 +25,11 @@ export default function useInventoryStep(config, resource, visitedSteps, i18n) {
     validate,
     isReady: true,
     error: null,
+    setTouched: setFieldsTouched => {
+      setFieldsTouched({
+        inventory: true,
+      });
+    },
   };
 }
 

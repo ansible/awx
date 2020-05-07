@@ -25,6 +25,17 @@ export default function useOtherPrompt(config, resource, visitedSteps, i18n) {
     validate,
     isReady: true,
     error: null,
+    setTouched: setFieldsTouched => {
+      setFieldsTouched({
+        job_type: true,
+        limit: true,
+        verbosity: true,
+        diff_mode: true,
+        job_tags: true,
+        skip_tags: true,
+        extra_vars: true,
+      });
+    },
   };
 }
 

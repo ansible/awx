@@ -45,14 +45,14 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
 
   return (
     <Formik initialValues={initialValues} onSubmit={submit} validate={validate}>
-      {({ validateForm, handleSubmit }) => (
+      {({ validateForm, setTouched, handleSubmit }) => (
         <Wizard
           isOpen
           onClose={onCancel}
           onSave={handleSubmit}
           onNext={async (nextStep, prevStep) => {
             if (nextStep.id === 'preview') {
-              visitAllSteps();
+              visitAllSteps(setTouched);
             } else {
               visitStep(prevStep.prevId);
             }
@@ -60,7 +60,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
           }}
           onGoToStep={async (newStep, prevStep) => {
             if (newStep.id === 'preview') {
-              visitAllSteps();
+              visitAllSteps(setTouched);
             } else {
               visitStep(prevStep.prevId);
             }

@@ -27,7 +27,9 @@ export default function usePreviewStep(
       nextButtonText: i18n._(t`Launch`),
     },
     initialValues: {},
+    validate: () => ({}),
     isReady: true,
     error: null,
+    setTouched: () => {},
   };
 }
