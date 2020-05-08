@@ -93,7 +93,7 @@ function Inventory({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {['edit', 'add', 'groups/', 'hosts/'].some(name =>
+        {['edit', 'add', 'groups/', 'hosts/', 'sources/'].some(name =>
           location.pathname.includes(name)
         ) ? null : (
           <TabbedCardHeader>
@@ -138,7 +138,10 @@ function Inventory({ i18n, setBreadcrumb }) {
               />
             </Route>,
             <Route path="/inventories/inventory/:id/sources" key="sources">
-              <InventorySources inventory={inventory} />
+              <InventorySources
+                inventory={inventory}
+                setBreadcrumb={setBreadcrumb}
+              />
             </Route>,
             <Route
               path="/inventories/inventory/:id/completed_jobs"
