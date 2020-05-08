@@ -80,9 +80,11 @@ Before you can run a deployment, you'll need the following installed in your loc
     + We use this module instead of `docker-py` because it is what the `docker-compose` Python module requires.
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
-- [Node 10.x LTS version](https://nodejs.org/en/download/)
-- [NPM 6.x LTS](https://docs.npmjs.com/)
 - Python 3.6+
+- [Node 10.x LTS version](https://nodejs.org/en/download/)
+    + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
+- [NPM 6.x LTS](https://docs.npmjs.com/)
+    + This is only required if you're [building your own container images](#official-vs-building-images) with `use_container_for_build=false`
 
 ### System Requirements
 
@@ -125,6 +127,10 @@ If these variables are present then all deployments will use these hosted images
 *dockerhub_version*
 
 > Multiple versions are provided. `latest` always pulls the most recent. You may also select version numbers at different granularities: 1, 1.0, 1.0.1, 1.0.0.123
+
+*use_container_for_build*
+
+> Use a local distribution build container image for building the AWX package. This is helpful if you don't want to bother installing the build-time dependencies as it is taken care of already.
 
 
 ## Upgrading from previous versions
