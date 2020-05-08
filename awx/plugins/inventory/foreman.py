@@ -176,8 +176,6 @@ class ForemanInventory(object):
         except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
             self.want_facts = True
 
-        self.want_facts = self.want_facts and self.report_want_facts
-
         try:
             self.want_hostcollections = config.getboolean('ansible', 'want_hostcollections')
         except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
@@ -272,12 +270,11 @@ class ForemanInventory(object):
         return results
 
     def _use_inventory_report(self):
-        if not self.foreman_use_reports_api:
-            return False
-        status_url = "%s/api/v2/status" % self.foreman_url
-        result = self._get_json(status_url)
-        foreman_version = (LooseVersion(result.get('version')) >= LooseVersion('1.24.0'))
-        return foreman_version
+        # The options required to enable the reports feature have never been fully
+        # surfaced by awx. Disabling reports in the foreman script altogether.
+        # Given that this script is being deprecated in favor of the foreman _plugin_,
+        # reports should be enabled for the foreman plugin in future version of awx.
+        return False
 
     def _fetch_params(self):
         options, params = ("no", "yes"), dict()
