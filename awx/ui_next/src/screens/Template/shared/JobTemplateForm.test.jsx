@@ -36,7 +36,7 @@ describe('<JobTemplateForm />', () => {
         { id: 2, kind: 'ssh', name: 'Bar' },
       ],
     },
-    related: { webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/' },
+    related: { webhook_receiver: '/api/v2/job_templates/57/gitlab/' },
     webhook_key: 'webhook key',
     webhook_service: 'github',
     webhook_credential: 7,
@@ -273,7 +273,7 @@ describe('<JobTemplateForm />', () => {
     expect(JobTemplatesAPI.updateWebhookKey).toBeCalledWith('1');
     expect(
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
-    ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
+    ).toContain('/api/v2/job_templates/57/gitlab/');
 
     wrapper.update();
 

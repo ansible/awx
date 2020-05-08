@@ -32,6 +32,7 @@ describe('<WorkflowJobTemplate/>', () => {
         created: '2015-07-07T17:21:26.429745Z',
         modified: '2019-08-11T19:47:37.980466Z',
         extra_vars: '',
+        webhook_service: 'github',
         summary_fields: {
           webhook_credential: { id: 1234567, name: 'Foo Webhook Credential' },
           created_by: { id: 1, username: 'Athena' },

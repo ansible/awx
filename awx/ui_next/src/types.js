@@ -73,6 +73,12 @@ export const JobTemplate = shape({
   project: number,
 });
 
+export const WorkFlowJobTemplate = shape({
+  name: string.isRequired,
+  description: string,
+  inventory: number,
+});
+
 export const Inventory = shape({
   id: number.isRequired,
   name: string,

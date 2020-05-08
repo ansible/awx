@@ -512,9 +512,7 @@ function JobTemplateForm({
                         {i18n._(t`Enable Webhook`)}
                         &nbsp;
                         <FieldTooltip
-                          content={i18n._(
-                            t`Enable webhook for this workflow job template.`
-                          )}
+                          content={i18n._(t`Enable webhook for this template.`)}
                         />
                       </span>
                     }
@@ -542,7 +540,10 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
-            <WebhookSubForm enableWebhooks={enableWebhooks} />
+            <WebhookSubForm
+              enableWebhooks={enableWebhooks}
+              templateType={template.type}
+            />
             {allowCallbacks && (
               <>
                 {callbackUrl && (

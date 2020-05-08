@@ -11,7 +11,7 @@ import WebhookSubForm from './WebhookSubForm';
 
 jest.mock('@api');
 
-describe('<WebhooksSubForm />', () => {
+describe('<WebhookSubForm />', () => {
   let wrapper;
   let history;
   const initialValues = {
@@ -31,7 +31,7 @@ describe('<WebhooksSubForm />', () => {
       wrapper = mountWithContexts(
         <Route path="templates/:templateType/:id/edit">
           <Formik initialValues={initialValues}>
-            <WebhookSubForm enableWebhooks />
+            <WebhookSubForm enableWebhooks templateType="job_template" />
           </Formik>
         </Route>,
         {
@@ -50,6 +50,7 @@ describe('<WebhooksSubForm />', () => {
   });
   afterEach(() => {
     jest.clearAllMocks();
+    wrapper.unmount();
   });
   test('mounts properly', () => {
     expect(wrapper.length).toBe(1);
@@ -99,7 +100,7 @@ describe('<WebhooksSubForm />', () => {
               webhook_key: 'A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.',
             }}
           >
-            <WebhookSubForm enableWebhooks />
+            <WebhookSubForm enableWebhooks templateType="job_template" />
           </Formik>
         </Route>,
         {
@@ -120,5 +121,40 @@ describe('<WebhooksSubForm />', () => {
         .find("Button[aria-label='Update webhook key']")
         .prop('isDisabled')
     ).toBe(true);
+  });
+
+  test('test whether the workflow template type is part of the webhook url', async () => {
+    let newWrapper;
+    const webhook_url = '/api/v2/workflow_job_templates/42/github/';
+    await act(async () => {
+      newWrapper = mountWithContexts(
+        <Route path="templates/:templateType/:id/edit">
+          <Formik initialValues={{ ...initialValues, webhook_url }}>
+            <WebhookSubForm
+              enableWebhooks
+              templateType="workflow_job_template"
+            />
+          </Formik>
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: {
+                  pathname: 'templates/workflow_job_template/51/edit',
+                },
+                match: {
+                  params: { id: 51, templateType: 'workflow_job_template' },
+                },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(
+      newWrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
+    ).toContain(webhook_url);
   });
 });
