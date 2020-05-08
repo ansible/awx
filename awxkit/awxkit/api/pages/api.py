@@ -60,6 +60,7 @@ class ApiV2(base.Base):
     def _export(self, _page, post_fields):
         # Drop any (credential_type) assets that are being managed by the Tower instance.
         if _page.json.get('managed_by_tower'):
+            log.debug("%s is managed by Tower, skipping.", _page.endpoint)
             return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
             log.error("Object export failed: %s", _page.endpoint)
@@ -78,14 +79,16 @@ class ApiV2(base.Base):
             rel_endpoint = self._cache.get_page(_page.related[key])
             if rel_endpoint is None:  # This foreign key is unreadable
                 if post_fields[key].get('required'):
-                    log.error("Foreign key export failed: %s", _page.related[key])
+                    log.error("Foreign key %r export failed for object %s.", key, _page.endpoint)
                     return None
-                log.error("Foreign key export failed, setting to null: %s", _page.related[key])
+                log.warning("Foreign key %r export failed for object %s, setting to null", key, _page.endpoint)
                 continue
-            natural_key = rel_endpoint.get_natural_key(self._cache)
-            if natural_key is None:
+            rel_natural_key = rel_endpoint.get_natural_key(self._cache)
+            if rel_natural_key is None:
+                log.error("Unable to construct a natural key for foreign key %r of object %s.",
+                          key, _page.endpoint)
                 return None  # This foreign key has unresolvable dependencies
-            fields[key] = natural_key
+            fields[key] = rel_natural_key
 
         related = {}
         for key, rel_endpoint in _page.related.items():
@@ -99,7 +102,8 @@ class ApiV2(base.Base):
                 continue
 
             rel_post_fields = utils.get_post_fields(rel_endpoint, self._cache)
-            if rel_post_fields is None:  # This is a read-only endpoint.
+            if rel_post_fields is None:
+                log.debug("%s is a read-only endpoint.", rel_endpoint)
                 continue
             is_attach = 'id' in rel_post_fields  # This is not a create-only endpoint.
 
@@ -128,6 +132,7 @@ class ApiV2(base.Base):
 
         natural_key = _page.get_natural_key(self._cache)
         if natural_key is None:
+            log.error("Unable to construct a natural key for object %s.", _page.endpoint)
             return None
         fields['natural_key'] = natural_key
 

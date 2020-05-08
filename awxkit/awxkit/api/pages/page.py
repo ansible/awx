@@ -319,27 +319,23 @@ class Page(object):
         return page_cls(self.connection, endpoint=endpoint).get(**kw)
 
     def get_natural_key(self, cache=None):
-        warn = "This object does not have a natural key: %s"
-
         if cache is None:
             cache = PageCache()
 
         if not getattr(self, 'NATURAL_KEY', None):
-            log.warning(warn, getattr(self, 'endpoint', ''))
+            log.warning("This object does not have a natural key: %s", getattr(self, 'endpoint', ''))
             return None
 
         natural_key = {}
         for key in self.NATURAL_KEY:
             if key in self.related:
                 related_endpoint = cache.get_page(self.related[key])
-                if related_endpoint is None:
-                    return None
-                natural_key[key] = related_endpoint.get_natural_key(cache=cache)
+                if related_endpoint is not None:
+                    natural_key[key] = related_endpoint.get_natural_key(cache=cache)
+                else:
+                    natural_key[key] = None
             elif key in self:
                 natural_key[key] = self[key]
-        if not natural_key:
-            log.warning(warn, getattr(self, 'endpoint', ''))
-            return None
 
         natural_key['type'] = self['type']
         return natural_key

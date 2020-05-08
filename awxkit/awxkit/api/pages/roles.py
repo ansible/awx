@@ -1,7 +1,12 @@
+import logging
+
 from awxkit.api.resources import resources
 
 from . import base
 from . import page
+
+
+log = logging.getLogger(__name__)
 
 
 class Role(base.Base):
@@ -20,6 +25,8 @@ class Role(base.Base):
         if related_objs:
             related_endpoint = cache.get_page(related_objs[0])
             if related_endpoint is None:
+                log.error("Unable to obtain content_object %s for role %s",
+                          related_objs[0], self.endpoint)
                 return None
             natural_key['content_object'] = related_endpoint.get_natural_key(cache=cache)
 

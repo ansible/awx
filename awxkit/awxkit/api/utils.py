@@ -1,5 +1,8 @@
+import logging
 import re
 
+
+log = logging.getLogger(__name__)
 
 descRE = re.compile(r'^[*] `(\w+)`: [^(]*\((\w+), ([^)]+)\)')
 
@@ -42,4 +45,6 @@ def get_post_fields(page, cache):
     if 'POST' in options_page.json['actions']:
         return options_page.json['actions']['POST']
     else:
+        log.warning(
+            "Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
         return parse_description(options_page.json['description'])
