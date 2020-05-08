@@ -26,6 +26,7 @@ function CredentialLookup({
   onChange,
   required,
   credentialTypeId,
+  credentialTypeKind,
   value,
   history,
   i18n,
@@ -34,13 +35,19 @@ function CredentialLookup({
   const [credentials, setCredentials] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     (async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
+      const typeIdParams = credentialTypeId
+        ? { credential_type: credentialTypeId }
+        : {};
+      const typeKindParams = credentialTypeKind
+        ? { credential_type__kind: credentialTypeKind }
+        : {};
+
       try {
         const { data } = await CredentialsAPI.read(
-          mergeParams(params, { credential_type: credentialTypeId })
+          mergeParams(params, { ...typeIdParams, ...typeKindParams })
         );
         setCredentials(data.results);
         setCount(data.count);
@@ -50,7 +57,7 @@ function CredentialLookup({
         }
       }
     })();
-  }, [credentialTypeId, history.location.search]);
+  }, [credentialTypeId, credentialTypeKind, history.location.search]);
 
   // TODO: replace credential type search with REST-based grabbing of cred types
 
@@ -111,8 +118,29 @@ function CredentialLookup({
   );
 }
 
+function idOrKind(props, propName, componentName) {
+  let error;
+  if (
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeId') &&
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeKind')
+  )
+    error = new Error(
+      `Either "credentialTypeId" or "credentialTypeKind" is required`
+    );
+  if (
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeId') &&
+    typeof props[propName] !== 'string'
+  ) {
+    error = new Error(
+      `Invalid prop '${propName}' '${props[propName]}' supplied to '${componentName}'.`
+    );
+  }
+  return error;
+}
+
 CredentialLookup.propTypes = {
-  credentialTypeId: oneOfType([number, string]).isRequired,
+  credentialTypeId: oneOfType([number, string]),
+  credentialTypeKind: idOrKind,
   helperTextInvalid: node,
   isValid: bool,
   label: string.isRequired,
@@ -123,6 +151,8 @@ CredentialLookup.propTypes = {
 };
 
 CredentialLookup.defaultProps = {
+  credentialTypeId: '',
+  credentialTypeKind: '',
   helperTextInvalid: '',
   isValid: true,
   onBlur: () => {},

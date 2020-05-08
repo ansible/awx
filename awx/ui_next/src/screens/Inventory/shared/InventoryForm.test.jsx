@@ -1,8 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 
 import InventoryForm from './InventoryForm';
+
+jest.mock('@api');
 
 const inventory = {
   id: 1,
@@ -50,22 +52,27 @@ describe('<InventoryForm />', () => {
   let wrapper;
   let onCancel;
   let onSubmit;
-  beforeEach(() => {
+
+  beforeAll(async () => {
     onCancel = jest.fn();
     onSubmit = jest.fn();
-    wrapper = mountWithContexts(
-      <InventoryForm
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-        inventory={inventory}
-        instanceGroups={instanceGroups}
-        credentialTypeId={14}
-      />
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventoryForm
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          inventory={inventory}
+          instanceGroups={instanceGroups}
+          credentialTypeId={14}
+        />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
-  afterEach(() => {
+  afterAll(() => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
 
   test('Initially renders successfully', () => {
@@ -83,7 +90,7 @@ describe('<InventoryForm />', () => {
     expect(wrapper.find('VariablesField[label="Variables"]').length).toBe(1);
   });
 
-  test('should update form values', async () => {
+  test('should update form values', () => {
     act(() => {
       wrapper.find('OrganizationLookup').invoke('onBlur')();
       wrapper.find('OrganizationLookup').invoke('onChange')({

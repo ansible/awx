@@ -88,7 +88,7 @@ function InventorySourceList({ i18n }) {
   const canAdd =
     sourceChoicesOptions &&
     Object.prototype.hasOwnProperty.call(sourceChoicesOptions, 'POST');
-  const detailUrl = `/inventories/${inventoryType}/${id}/sources/`;
+  const listUrl = `/inventories/${inventoryType}/${id}/sources/`;
   return (
     <>
       <PaginatedDataList
@@ -109,7 +109,7 @@ function InventorySourceList({ i18n }) {
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
-                ? [<ToolbarAddButton key="add" linkTo={`${detailUrl}add`} />]
+                ? [<ToolbarAddButton key="add" linkTo={`${listUrl}add`} />]
                 : []),
               <ToolbarDeleteButton
                 key="delete"
@@ -133,7 +133,7 @@ function InventorySourceList({ i18n }) {
               source={inventorySource}
               onSelect={() => handleSelect(inventorySource)}
               label={label}
-              detailUrl={`${detailUrl}${inventorySource.id}`}
+              detailUrl={`${listUrl}${inventorySource.id}`}
               isSelected={selected.some(row => row.id === inventorySource.id)}
             />
           );

@@ -158,7 +158,7 @@ describe('<InventorySourceList />', () => {
       1
     );
   });
-  test('displays error after unseccessful read sources fetch', async () => {
+  test('displays error after unsuccessful read sources fetch', async () => {
     InventorySourcesAPI.readOptions.mockRejectedValue(
       new Error({
         response: {
@@ -193,7 +193,7 @@ describe('<InventorySourceList />', () => {
     expect(wrapper.find('ContentError').length).toBe(1);
   });
 
-  test('displays error after unseccessful read options fetch', async () => {
+  test('displays error after unsuccessful read options fetch', async () => {
     InventorySourcesAPI.readOptions.mockRejectedValue(
       new Error({
         response: {
