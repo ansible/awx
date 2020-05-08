@@ -1423,7 +1423,6 @@ class BaseTask(object):
                 'status_handler': self.status_handler,
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
-                    'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                     'suppress_ansible_output': True,
                     **process_isolation_params,
                     **resource_profiling_params,
