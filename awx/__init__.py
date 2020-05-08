@@ -30,6 +30,7 @@ except ImportError:
     HAS_DJANGO = False
 else:
     from django.db.backends.base import schema
+    from django.db.models import indexes
     from django.db.backends.utils import names_digest
 
 
@@ -50,6 +51,7 @@ if HAS_DJANGO is True:
             return h.hexdigest()[:length]
 
         schema.names_digest = names_digest
+        indexes.names_digest = names_digest
 
 
 def find_commands(management_dir):
