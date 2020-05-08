@@ -251,6 +251,7 @@ function WorkflowJobTemplateForm({
             value={labelsField.value}
             onChange={labels => labelsHelpers.setValue(labels)}
             onError={setContentError}
+            createText={i18n._(t`Create`)}
           />
         </FormGroup>
       </FormFullWidthLayout>

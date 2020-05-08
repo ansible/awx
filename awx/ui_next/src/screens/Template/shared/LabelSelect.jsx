@@ -29,7 +29,7 @@ async function loadLabelOptions(setLabels, onError) {
   }
 }
 
-function LabelSelect({ value, placeholder, onChange, onError }) {
+function LabelSelect({ value, placeholder, onChange, onError, createText }) {
   const { selections, onSelect, options, setOptions } = useSyncedSelectValue(
     value,
     onChange
@@ -81,6 +81,7 @@ function LabelSelect({ value, placeholder, onChange, onError }) {
       isExpanded={isExpanded}
       ariaLabelledBy="label-select"
       placeholderText={placeholder}
+      createText={createText}
     >
       {renderOptions(options)}
     </Select>
