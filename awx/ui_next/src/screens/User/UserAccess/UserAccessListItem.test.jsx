@@ -35,7 +35,6 @@ describe('<UserAccessListItem/>', () => {
     expect(
       wrapper.find('PFDataListCell[aria-label="resource name"]').text()
     ).toBe('template delete project');
-    console.log(wrapper.debug());
     expect(
       wrapper.find('PFDataListCell[aria-label="resource type"]').text()
     ).toContain('Job Template');

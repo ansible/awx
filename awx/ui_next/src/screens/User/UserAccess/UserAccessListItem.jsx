@@ -11,7 +11,7 @@ import DataListCell from '@components/DataListCell';
 import { Link } from 'react-router-dom';
 
 function UserAccessListItem({ role, i18n, detailUrl }) {
-  const labelId = `check-action-${role.id}`;
+  const labelId = `userRole-${role.id}`;
   return (
     <DataListItem key={role.id} aria-labelledby={labelId} id={`${role.id}`}>
       <DataListItemRow>

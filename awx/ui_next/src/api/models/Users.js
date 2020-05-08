@@ -27,12 +27,12 @@ class Users extends Base {
 
   readRoles(userId, params) {
     return this.http.get(`${this.baseUrl}${userId}/roles/`, {
-      params
+      params,
     });
   }
 
-  roleOptions(userId) {
-    return this.http.options(`${this.baseUrl}${userId}/roles/`)
+  readRoleOptions(userId) {
+    return this.http.options(`${this.baseUrl}${userId}/roles/`);
   }
 }
 

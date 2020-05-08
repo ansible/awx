@@ -31,12 +31,17 @@ function UserAccessList({ i18n }) {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
-      const {
-        data: { results, count },
-      } = await UsersAPI.readRoles(id, params);
-      const {
-        data: { actions },
-      } = await UsersAPI.roleOptions(id);
+      const [
+        {
+          data: { results, count },
+        },
+        {
+          data: { actions },
+        },
+      ] = await Promise.all([
+        UsersAPI.readRoles(id, params),
+        UsersAPI.readRoleOptions(id),
+      ]);
       return { roleCount: count, roles: results, options: actions };
     }, [id, search]),
     {
@@ -76,8 +81,8 @@ function UserAccessList({ i18n }) {
       qsConfig={QS_CONFIG}
       toolbarSearchColumns={[
         {
-          name: i18n._(t`Type`),
-          key: 'content_type__search',
+          name: i18n._(t`Role`),
+          key: 'role_field',
           isDefault: true,
         },
       ]}
