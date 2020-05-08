@@ -38,9 +38,9 @@ const SCMSubForm = ({ i18n }) => {
 
   const handleProjectUpdate = useCallback(
     value => {
+      sourcePathHelpers.setValue('');
       projectHelpers.setValue(value);
       fetchSourcePath(value.id);
-      sourcePathHelpers.setValue('');
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -67,9 +67,8 @@ const SCMSubForm = ({ i18n }) => {
         fieldId="source_path"
         helperTextInvalid={sourcePathError?.message || sourcePathMeta.error}
         isValid={
-          !sourcePathError?.message ||
-          !sourcePathMeta.error ||
-          !sourcePathMeta.touched
+          (!sourcePathMeta.error || !sourcePathMeta.touched) &&
+          !sourcePathError?.message
         }
         isRequired
         label={i18n._(t`Inventory file`)}
@@ -82,7 +81,10 @@ const SCMSubForm = ({ i18n }) => {
         <AnsibleSelect
           {...sourcePathField}
           id="source_path"
-          isValid={!sourcePathMeta.touched || !sourcePathMeta.error}
+          isValid={
+            (!sourcePathMeta.error || !sourcePathMeta.touched) &&
+            !sourcePathError?.message
+          }
           data={[
             {
               value: '',

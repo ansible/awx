@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
+import { minMaxValue } from '@util/validators';
 import { FormGroup } from '@patternfly/react-core';
 import AnsibleSelect from '@components/AnsibleSelect';
 import { VariablesField } from '@components/CodeMirrorInput';
@@ -36,7 +37,7 @@ export const VerbosityField = withI18n()(({ i18n }) => {
       label={i18n._(t`Verbosity`)}
     >
       <FieldTooltip
-        content={i18n._(t`Control the level of output ansible
+        content={i18n._(t`Control the level of output Ansible
         will produce for inventory source update jobs.`)}
       />
       <AnsibleSelect
@@ -51,6 +52,14 @@ export const VerbosityField = withI18n()(({ i18n }) => {
 
 export const OptionsField = withI18n()(({ i18n }) => {
   const [updateOnLaunchField] = useField('update_on_launch');
+  const [, , updateCacheTimeoutHelper] = useField('update_cache_timeout');
+
+  useEffect(() => {
+    if (!updateOnLaunchField.value) {
+      updateCacheTimeoutHelper.setValue(0);
+    }
+  }, [updateOnLaunchField.value]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <>
       <FormFullWidthLayout>
@@ -123,6 +132,8 @@ export const OptionsField = withI18n()(({ i18n }) => {
           name="update_cache_timeout"
           type="number"
           min="0"
+          max="2147483647"
+          validate={minMaxValue(0, 2147483647, i18n)}
           label={i18n._(t`Cache timeout (seconds)`)}
           tooltip={i18n._(t`Time in seconds to consider an inventory sync
               to be current. During job runs and callbacks the task system will
