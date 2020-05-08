@@ -43,7 +43,7 @@ logger = logging.getLogger('awx.main.utils')
 
 __all__ = [
     'get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize',
-    'memoize_delete', 'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_http_client_headers',
+    'memoize_delete', 'get_ansible_version', 'get_licenser', 'get_awx_http_client_headers',
     'get_awx_version', 'update_scm_url', 'get_type_for_model', 'get_model_for_type',
     'copy_model_by_class', 'region_sorting', 'copy_m2m_relationships',
     'prefetch_page_capabilities', 'to_python_boolean', 'ignore_inventory_computed_fields',
@@ -188,20 +188,6 @@ def _get_ansible_version(ansible_path):
 @memoize()
 def get_ansible_version():
     return _get_ansible_version('ansible')
-
-
-@memoize()
-def get_ssh_version():
-    '''
-    Return SSH version installed.
-    '''
-    try:
-        proc = subprocess.Popen(['ssh', '-V'],
-                                stderr=subprocess.PIPE)
-        result = smart_str(proc.communicate()[1])
-        return result.split(" ")[0].split("_")[1]
-    except Exception:
-        return 'unknown'
 
 
 def get_awx_version():

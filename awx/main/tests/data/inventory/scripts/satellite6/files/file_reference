@@ -6,12 +6,12 @@ user = fooo
 password = fooo
 
 [ansible]
-group_patterns = foo_group_patterns
+group_patterns = ["{app}-{tier}-{color}", "{app}-{color}"]
 want_facts = True
 want_hostcollections = True
 group_prefix = foo_group_prefix
 want_ansible_ssh_host = True
-rich_params = True
+rich_params = False
 
 [cache]
 path = /tmp

@@ -10,6 +10,7 @@ import socket
 from socket import SHUT_RDWR
 
 # Django
+from django.db import connection
 from django.conf import settings
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
@@ -130,7 +131,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
         if settings_change_list:
-            handle_setting_changes.delay(settings_change_list)
+            connection.on_commit(lambda: handle_setting_changes.delay(settings_change_list))
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -145,7 +147,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             setting.delete()
             settings_change_list.append(setting.key)
         if settings_change_list:
-            handle_setting_changes.delay(settings_change_list)
+            connection.on_commit(lambda: handle_setting_changes.delay(settings_change_list))
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
         # used to make the request as a default.
