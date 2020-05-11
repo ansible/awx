@@ -68,12 +68,17 @@ function SurveyQuestionForm({
 }) {
   const defaultIsNotAvailable = choices => {
     return defaultValue => {
-      if (!choices.includes(defaultValue)) {
-        return i18n._(
+      const answerChoices = new Set(choices);
+      const defaultAnswers = new Set(defaultValue);
+      let errorMessage;
+      const found = [...defaultAnswers].every(dA => answerChoices.has(dA));
+
+      if (!found) {
+        errorMessage = i18n._(
           t`Default choice must be answered from the choices listed.`
         );
       }
-      return undefined;
+      return errorMessage;
     };
   };
 
