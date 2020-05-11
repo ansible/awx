@@ -1010,14 +1010,17 @@ def get_custom_venv_choices(custom_paths=None):
     custom_venv_choices = []
 
     for custom_venv_path in all_venv_paths:
-        if os.path.exists(custom_venv_path):
-            custom_venv_choices.extend([
-                os.path.join(custom_venv_path, x, '')
-                for x in os.listdir(custom_venv_path)
-                if x != 'awx' and
-                os.path.isdir(os.path.join(custom_venv_path, x)) and
-                os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
-            ])
+        try:
+            if os.path.exists(custom_venv_path):
+                custom_venv_choices.extend([
+                    os.path.join(custom_venv_path, x, '')
+                    for x in os.listdir(custom_venv_path)
+                    if x != 'awx' and
+                    os.path.isdir(os.path.join(custom_venv_path, x)) and
+                    os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
+                ])
+        except Exception:
+            logger.exception("Encountered an error while discovering custom virtual environments.")
     return custom_venv_choices
 
 
