@@ -109,7 +109,6 @@ class IsolatedManager(object):
             'cancel_callback': self.canceled_callback,
             'settings': {
                 'job_timeout': settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
-                'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 'suppress_ansible_output': True,
             },
         }
