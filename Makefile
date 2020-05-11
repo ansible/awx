@@ -24,7 +24,7 @@ CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
-SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
+SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio,pycurl
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
 VENV_BOOTSTRAP ?= pip==19.3.1 setuptools==41.6.0
