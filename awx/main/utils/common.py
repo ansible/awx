@@ -1021,7 +1021,6 @@ def get_custom_venv_choices(custom_paths=None):
                 ])
         except Exception:
             logger.exception("Encountered an error while discovering custom virtual environments.")
-            pass
     return custom_venv_choices
 
 
