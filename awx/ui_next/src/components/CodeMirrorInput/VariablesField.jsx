@@ -64,7 +64,7 @@ function VariablesField({
         {promptId && (
           <StyledCheckboxField
             id="template-ask-variables-on-launch"
-            label={i18n._(t`Prompt On Launch`)}
+            label={i18n._(t`Prompt on launch`)}
             name="ask_variables_on_launch"
           />
         )}

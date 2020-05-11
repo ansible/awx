@@ -45,7 +45,7 @@ function FieldWithPrompt({
         </div>
         <StyledCheckboxField
           id={promptId}
-          label={i18n._(t`Prompt On Launch`)}
+          label={i18n._(t`Prompt on launch`)}
           name={promptName}
         />
       </FieldHeader>

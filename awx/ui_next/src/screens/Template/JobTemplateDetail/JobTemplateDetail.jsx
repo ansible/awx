@@ -143,7 +143,7 @@ function JobTemplateDetail({ i18n, template }) {
         <Link to={`/inventories/${inventorykind}/${id}/details`}>
           {summary_fields.inventory.name}
         </Link>
-        <span> {i18n._(t`(Prompt on Launch)`)}</span>
+        <span> {i18n._(t`(Prompt on launch)`)}</span>
       </Fragment>
     ) : (
       <Link to={`/inventories/${inventorykind}/${id}/details`}>
