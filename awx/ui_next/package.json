@@ -60,6 +60,7 @@
     "@lingui/cli": "^2.9.1",
     "@lingui/macro": "^2.9.1",
     "@nteract/mockument": "^1.0.4",
+    "babel-core": "^7.0.0-bridge.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
