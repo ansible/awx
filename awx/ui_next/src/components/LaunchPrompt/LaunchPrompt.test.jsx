@@ -1,16 +1,22 @@
 import React from 'react';
 import { act, isElementOfType } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import LaunchPrompt from './LaunchPrompt';
-import InventoryStep from './InventoryStep';
-import CredentialsStep from './CredentialsStep';
-import OtherPromptsStep from './OtherPromptsStep';
-import PreviewStep from './PreviewStep';
-import { InventoriesAPI, CredentialsAPI, CredentialTypesAPI } from '@api';
+import InventoryStep from './steps/InventoryStep';
+import CredentialsStep from './steps/CredentialsStep';
+import OtherPromptsStep from './steps/OtherPromptsStep';
+import PreviewStep from './steps/PreviewStep';
+import {
+  InventoriesAPI,
+  CredentialsAPI,
+  CredentialTypesAPI,
+  JobTemplatesAPI,
+} from '@api';
 
 jest.mock('@api/models/Inventories');
 jest.mock('@api/models/CredentialTypes');
 jest.mock('@api/models/Credentials');
+jest.mock('@api/models/JobTemplates');
 
 let config;
 const resource = {
@@ -31,6 +37,13 @@ describe('LaunchPrompt', () => {
       data: { results: [{ id: 1 }], count: 1 },
     });
     CredentialTypesAPI.loadAllTypes({ data: { results: [{ type: 'ssh' }] } });
+    JobTemplatesAPI.readSurvey.mockResolvedValue({
+      data: {
+        name: '',
+        description: '',
+        spec: [{ type: 'text', variable: 'foo' }],
+      },
+    });
 
     config = {
       can_start_without_user_input: false,
@@ -73,13 +86,14 @@ describe('LaunchPrompt', () => {
         />
       );
     });
-    const steps = wrapper.find('Wizard').prop('steps');
+    const wizard = await waitForElement(wrapper, 'Wizard');
+    const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(5);
-    expect(steps[0].name).toEqual('Inventory');
+    expect(steps[0].name.props.children).toEqual('Inventory');
     expect(steps[1].name).toEqual('Credentials');
-    expect(steps[2].name).toEqual('Other Prompts');
-    expect(steps[3].name).toEqual('Survey');
+    expect(steps[2].name.props.children).toEqual('Other Prompts');
+    expect(steps[3].name.props.children).toEqual('Survey');
     expect(steps[4].name).toEqual('Preview');
   });
 
@@ -98,10 +112,11 @@ describe('LaunchPrompt', () => {
         />
       );
     });
-    const steps = wrapper.find('Wizard').prop('steps');
+    const wizard = await waitForElement(wrapper, 'Wizard');
+    const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Inventory');
+    expect(steps[0].name.props.children).toEqual('Inventory');
     expect(isElementOfType(steps[0].component, InventoryStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
@@ -121,7 +136,8 @@ describe('LaunchPrompt', () => {
         />
       );
     });
-    const steps = wrapper.find('Wizard').prop('steps');
+    const wizard = await waitForElement(wrapper, 'Wizard');
+    const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
     expect(steps[0].name).toEqual('Credentials');
@@ -144,10 +160,11 @@ describe('LaunchPrompt', () => {
         />
       );
     });
-    const steps = wrapper.find('Wizard').prop('steps');
+    const wizard = await waitForElement(wrapper, 'Wizard');
+    const steps = wizard.prop('steps');
 
     expect(steps).toHaveLength(2);
-    expect(steps[0].name).toEqual('Other Prompts');
+    expect(steps[0].name.props.children).toEqual('Other Prompts');
     expect(isElementOfType(steps[0].component, OtherPromptsStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
