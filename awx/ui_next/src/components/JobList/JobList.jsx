@@ -33,7 +33,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       not__launch_type: 'sync',
       ...defaultParams,
     },
-    ['page', 'page_size']
+    ['id', 'page', 'page_size']
   );
 
   const [selected, setSelected] = useState([]);
