@@ -53,10 +53,7 @@ function Jobs({ i18n }) {
       <Switch>
         <Route exact path={match.path}>
           <PageSection>
-            <JobList
-              showTypeColumn
-              defaultParams={{ not__launch_type: 'sync' }}
-            />
+            <JobList showTypeColumn />
           </PageSection>
         </Route>
         <Route path={`${match.path}/:id/details`}>
