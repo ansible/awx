@@ -154,6 +154,10 @@ function TemplateList({ i18n }) {
               isDefault: true,
             },
             {
+              name: i18n._(t`Description`),
+              key: 'description',
+            },
+            {
               name: i18n._(t`Type`),
               key: 'type',
               options: [
