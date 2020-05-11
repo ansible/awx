@@ -957,6 +957,7 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,
+            "group_expiry": 157784760, # 5 years
         },
     },
 }
