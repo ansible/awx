@@ -7,7 +7,7 @@ from collections import defaultdict
 from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
-from django.utils.timezone import utc
+from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 
@@ -407,11 +407,14 @@ class BasePlaybookEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
+        host_map = kwargs.pop('host_map', {})
+
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
         workflow_job_id = kwargs.pop('workflow_job_id', None)
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
+        setattr(event, 'host_map', host_map)
         event._update_from_event_data()
         return event
 
@@ -484,8 +487,10 @@ class JobEvent(BasePlaybookEvent):
             if not self.job or not self.job.inventory:
                 logger.info('Event {} missing job or inventory, host summaries not updated'.format(self.pk))
                 return
-            qs = self.job.inventory.hosts.filter(name__in=hostnames)
             job = self.job
+
+            from awx.main.models.jobs import JobHostSummary  # circular import
+            summaries = dict()
             for host in hostnames:
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
@@ -493,20 +498,18 @@ class JobEvent(BasePlaybookEvent):
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                if qs.filter(name=host).exists():
-                    host_actual = qs.get(name=host)
-                    host_summary, created = job.job_host_summaries.get_or_create(host=host_actual, host_name=host_actual.name, defaults=host_stats)
-                else:
-                    host_summary, created = job.job_host_summaries.get_or_create(host_name=host, defaults=host_stats)
+                host_id = self.host_map.get(host, None)
+                summaries.setdefault(
+                    (host_id, host),
+                    JobHostSummary(created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host)
+                )
+                host_summary = summaries[(host_id, host)]
 
-                if not created:
-                    update_fields = []
-                    for stat, value in host_stats.items():
-                        if getattr(host_summary, stat) != value:
-                            setattr(host_summary, stat, value)
-                            update_fields.append(stat)
-                    if update_fields:
-                        host_summary.save(update_fields=update_fields)
+                for stat, value in host_stats.items():
+                    if getattr(host_summary, stat) != value:
+                        setattr(host_summary, stat, value)
+
+            JobHostSummary.objects.bulk_create(summaries.values())
 
     @property
     def job_verbosity(self):
