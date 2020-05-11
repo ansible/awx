@@ -68,10 +68,8 @@ function SurveyQuestionForm({
 }) {
   const defaultIsNotAvailable = choices => {
     return defaultValue => {
-      const answerChoices = new Set(choices);
-      const defaultAnswers = new Set(defaultValue);
       let errorMessage;
-      const found = [...defaultAnswers].every(dA => answerChoices.has(dA));
+      const found = [...defaultValue].every(dA => choices.indexOf(dA) > -1);
 
       if (!found) {
         errorMessage = i18n._(

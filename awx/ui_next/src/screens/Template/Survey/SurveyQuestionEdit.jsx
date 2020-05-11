@@ -39,6 +39,13 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');
       }
+      if (formData.type === 'multiselect') {
+        formData.default = formData.default
+          .split('\n')
+          .filter(v => v !== '' || '\n')
+          .map(v => v.trim())
+          .join('\n');
+      }
       await updateSurvey([
         ...survey.spec.slice(0, questionIndex),
         formData,
