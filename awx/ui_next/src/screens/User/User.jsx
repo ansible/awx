@@ -22,6 +22,7 @@ import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';
 import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
+import UserAccessList from './UserAccess/UserAccessList';
 
 function User({ i18n, setBreadcrumb }) {
   const location = useLocation();
@@ -111,10 +112,7 @@ function User({ i18n, setBreadcrumb }) {
             </Route>
             {user && (
               <Route path="/users/:id/access">
-                <span>
-                  this needs a different access list from regular resources like
-                  proj, inv, jt
-                </span>
+                <UserAccessList />
               </Route>
             )}
             <Route path="/users/:id/tokens">
