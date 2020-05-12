@@ -489,25 +489,23 @@ class JobEvent(BasePlaybookEvent):
                 return
             job = self.job
 
-            from awx.main.models.jobs import JobHostSummary  # circular import
+            from awx.main.models import Host, JobHostSummary  # circular import
+            existing = Host.objects.filter(id__in=self.host_map.values()).values_list('id', flat=True)
+
             summaries = dict()
             for host in hostnames:
+                host_id = self.host_map.get(host, None)
+                if host_id not in existing:
+                    host_id = None
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                host_id = self.host_map.get(host, None)
-                summaries.setdefault(
-                    (host_id, host),
-                    JobHostSummary(created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host)
+                summaries[(host_id, host)] = JobHostSummary(
+                    created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats
                 )
-                host_summary = summaries[(host_id, host)]
-
-                for stat, value in host_stats.items():
-                    if getattr(host_summary, stat) != value:
-                        setattr(host_summary, stat, value)
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
