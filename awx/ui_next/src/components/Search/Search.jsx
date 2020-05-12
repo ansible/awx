@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';

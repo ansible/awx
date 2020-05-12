@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment, useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';

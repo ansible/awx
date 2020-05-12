@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useContext } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';

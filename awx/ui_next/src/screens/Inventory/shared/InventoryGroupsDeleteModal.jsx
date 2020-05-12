@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { func, bool, arrayOf, object } from 'prop-types';

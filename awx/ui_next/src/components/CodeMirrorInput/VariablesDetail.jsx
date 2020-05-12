@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState, useEffect } from 'react';
 import { string, node, number } from 'prop-types';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';

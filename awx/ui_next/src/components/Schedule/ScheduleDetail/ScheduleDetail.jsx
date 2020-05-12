@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { RRule, rrulestr } from 'rrule';
@@ -12,7 +13,8 @@ import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
 import CredentialChip from '../../CredentialChip';
 import { DetailList, Detail, UserDateDetail } from '../../DetailList';
-import { ScheduleOccurrences, ScheduleToggle } from '..';
+import ScheduleOccurrences from '../ScheduleOccurrences';
+import ScheduleToggle from '../ScheduleToggle';
 import { formatDateString } from '../../../util/dates';
 import useRequest from '../../../util/useRequest';
 import { SchedulesAPI } from '../../../api';

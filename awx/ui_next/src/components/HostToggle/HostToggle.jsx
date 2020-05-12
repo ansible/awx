@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';

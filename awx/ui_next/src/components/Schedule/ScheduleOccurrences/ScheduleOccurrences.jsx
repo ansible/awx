@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState } from 'react';
 import { shape } from 'prop-types';
 import styled from 'styled-components';

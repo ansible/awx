@@ -49,7 +49,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
         <div
           className="pf-c-data-list__item-row"
         >
-          <Styled(DataListItemCells)
+          <ResourceAccessListItem__DataListItemCells
             dataListCells={
               Array [
                 <ForwardRef(Styled(PFDataListCell))>
@@ -57,8 +57,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     <Text
                       component="h6"
                     >
-                      <ForwardRef
-                        css="font-weight: bold"
+                      <ForwardRef(ResourceAccessListItem___StyledLink)
                         to={
                           Object {
                             "pathname": "/users/2/details",
@@ -66,7 +65,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         }
                       >
                         jane
-                      </ForwardRef>
+                      </ForwardRef(ResourceAccessListItem___StyledLink)>
                     </Text>
                   </TextContent>
                   <ForwardRef(Styled(DetailList))
@@ -117,8 +116,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       <Text
                         component="h6"
                       >
-                        <ForwardRef
-                          css="font-weight: bold"
+                        <ForwardRef(ResourceAccessListItem___StyledLink)
                           to={
                             Object {
                               "pathname": "/users/2/details",
@@ -126,7 +124,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           }
                         >
                           jane
-                        </ForwardRef>
+                        </ForwardRef(ResourceAccessListItem___StyledLink)>
                       </Text>
                     </TextContent>
                     <ForwardRef(Styled(DetailList))
@@ -171,19 +169,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "sc-bZQynM",
+                    "componentId": "ResourceAccessListItem__DataListItemCells-sc-658iqk-0",
                     "isStatic": false,
-                    "lastClassName": "dLjtme",
+                    "lastClassName": "jCdAGK",
                     "rules": Array [
-                      "
-  align-items: start;
-",
+                      "align-items:start;",
                     ],
                   },
-                  "displayName": "Styled(DataListItemCells)",
+                  "displayName": "ResourceAccessListItem__DataListItemCells",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "sc-bZQynM",
+                  "styledComponentId": "ResourceAccessListItem__DataListItemCells-sc-658iqk-0",
                   "target": [Function],
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
@@ -194,7 +190,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               rowid="access-list-item"
             >
               <DataListItemCells
-                className="sc-bZQynM dLjtme"
+                className="ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 dataListCells={
                   Array [
                     <ForwardRef(Styled(PFDataListCell))>
@@ -202,8 +198,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <Text
                           component="h6"
                         >
-                          <ForwardRef
-                            css="font-weight: bold"
+                          <ForwardRef(ResourceAccessListItem___StyledLink)
                             to={
                               Object {
                                 "pathname": "/users/2/details",
@@ -211,7 +206,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             }
                           >
                             jane
-                          </ForwardRef>
+                          </ForwardRef(ResourceAccessListItem___StyledLink)>
                         </Text>
                       </TextContent>
                       <ForwardRef(Styled(DetailList))
@@ -254,7 +249,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                 rowid="access-list-item"
               >
                 <div
-                  className="pf-c-data-list__item-content sc-bZQynM dLjtme"
+                  className="pf-c-data-list__item-content ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 >
                   <DataListCell
                     key="name"
@@ -303,28 +298,85 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   className=""
                                   data-pf-content={true}
                                 >
-                                  <Link
-                                    css="font-weight: bold"
+                                  <ResourceAccessListItem___StyledLink
                                     to={
                                       Object {
                                         "pathname": "/users/2/details",
                                       }
                                     }
                                   >
-                                    <LinkAnchor
-                                      css="font-weight: bold"
-                                      href="/users/2/details"
-                                      navigate={[Function]}
+                                    <StyledComponent
+                                      forwardedComponent={
+                                        Object {
+                                          "$$typeof": Symbol(react.forward_ref),
+                                          "attrs": Array [],
+                                          "componentStyle": ComponentStyle {
+                                            "componentId": "ResourceAccessListItem___StyledLink-sc-658iqk-1",
+                                            "isStatic": false,
+                                            "lastClassName": "ddHgXz",
+                                            "rules": Array [
+                                              "font-weight:bold",
+                                            ],
+                                          },
+                                          "displayName": "ResourceAccessListItem___StyledLink",
+                                          "foldedComponentIds": Array [],
+                                          "propTypes": Object {
+                                            "innerRef": [Function],
+                                            "onClick": [Function],
+                                            "replace": [Function],
+                                            "target": [Function],
+                                            "to": [Function],
+                                          },
+                                          "render": [Function],
+                                          "styledComponentId": "ResourceAccessListItem___StyledLink-sc-658iqk-1",
+                                          "target": Object {
+                                            "$$typeof": Symbol(react.forward_ref),
+                                            "displayName": "Link",
+                                            "propTypes": Object {
+                                              "innerRef": [Function],
+                                              "onClick": [Function],
+                                              "replace": [Function],
+                                              "target": [Function],
+                                              "to": [Function],
+                                            },
+                                            "render": [Function],
+                                          },
+                                          "toString": [Function],
+                                          "warnTooManyClasses": [Function],
+                                          "withComponent": [Function],
+                                        }
+                                      }
+                                      forwardedRef={null}
+                                      to={
+                                        Object {
+                                          "pathname": "/users/2/details",
+                                        }
+                                      }
                                     >
-                                      <a
-                                        css="font-weight: bold"
-                                        href="/users/2/details"
-                                        onClick={[Function]}
+                                      <Link
+                                        className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
+                                        to={
+                                          Object {
+                                            "pathname": "/users/2/details",
+                                          }
+                                        }
                                       >
-                                        jane
-                                      </a>
-                                    </LinkAnchor>
-                                  </Link>
+                                        <LinkAnchor
+                                          className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
+                                          href="/users/2/details"
+                                          navigate={[Function]}
+                                        >
+                                          <a
+                                            className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
+                                            href="/users/2/details"
+                                            onClick={[Function]}
+                                          >
+                                            jane
+                                          </a>
+                                        </LinkAnchor>
+                                      </Link>
+                                    </StyledComponent>
+                                  </ResourceAccessListItem___StyledLink>
                                 </h6>
                               </Text>
                             </div>
@@ -940,7 +992,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                 </div>
               </DataListItemCells>
             </StyledComponent>
-          </Styled(DataListItemCells)>
+          </ResourceAccessListItem__DataListItemCells>
         </div>
       </DataListItemRow>
     </li>

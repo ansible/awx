@@ -10,7 +10,7 @@ describe('<VariablesDetail>', () => {
     const wrapper = shallow(
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input).toHaveLength(1);
     expect(input.prop('mode')).toEqual('yaml');
     expect(input.prop('value')).toEqual('---foo: bar');
@@ -21,7 +21,7 @@ describe('<VariablesDetail>', () => {
     const wrapper = shallow(
       <VariablesDetail value='{"foo": "bar"}' label="Variables" />
     );
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input).toHaveLength(1);
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{"foo": "bar"}');
@@ -32,19 +32,21 @@ describe('<VariablesDetail>', () => {
       <VariablesDetail value="---foo: bar" label="Variables" />
     );
     wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "foo": "bar"\n}');
 
     wrapper.find('MultiButtonToggle').invoke('onChange')('yaml');
-    const input2 = wrapper.find('CodeMirrorInput');
+    const input2 = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input2.prop('mode')).toEqual('yaml');
     expect(input2.prop('value')).toEqual('foo: bar\n');
   });
 
   test('should render label and value= --- when there are no values', () => {
     const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
-    expect(wrapper.find('CodeMirrorInput').length).toBe(1);
+    expect(wrapper.find('VariablesDetail___StyledCodeMirrorInput').length).toBe(
+      1
+    );
     expect(wrapper.find('div.pf-c-form__label').text()).toBe('Variables');
   });
 
@@ -59,14 +61,14 @@ describe('<VariablesDetail>', () => {
       value: '---bar: baz',
     });
     wrapper.update();
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input.prop('mode')).toEqual('javascript');
     expect(input.prop('value')).toEqual('{\n  "bar": "baz"\n}');
   });
 
   test('should default yaml value to "---"', () => {
     const wrapper = shallow(<VariablesDetail value="" label="Variables" />);
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input.prop('value')).toEqual('---');
   });
 
@@ -76,7 +78,7 @@ describe('<VariablesDetail>', () => {
       wrapper.find('MultiButtonToggle').invoke('onChange')('javascript');
     });
     wrapper.setProps({ value: '' });
-    const input = wrapper.find('CodeMirrorInput');
+    const input = wrapper.find('VariablesDetail___StyledCodeMirrorInput');
     expect(input.prop('value')).toEqual('{}');
   });
 });

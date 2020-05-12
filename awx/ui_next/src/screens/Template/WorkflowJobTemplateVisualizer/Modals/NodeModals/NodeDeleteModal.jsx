@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment, useContext } from 'react';
 import { Button } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';

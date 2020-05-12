@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
