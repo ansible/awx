@@ -56,7 +56,7 @@ export default function useSurveyStep(config, resource, visitedSteps, i18n) {
     isReady: !isLoading && !!survey,
     error,
     setTouched: setFieldsTouched => {
-      if (!survey) {
+      if (!survey || !survey.spec) {
         return;
       }
       const fields = {};
