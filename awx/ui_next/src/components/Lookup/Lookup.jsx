@@ -14,10 +14,10 @@ import {
   Button,
   ButtonVariant,
   Chip,
-  ChipGroup,
   InputGroup as PFInputGroup,
   Modal,
 } from '@patternfly/react-core';
+import ChipGroup from '@components/ChipGroup';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -128,7 +128,7 @@ function Lookup(props) {
           <SearchIcon />
         </SearchButton>
         <ChipHolder className="pf-c-form-control">
-          <ChipGroup numChips={5}>
+          <ChipGroup numChips={5} totalChips={items.length}>
             {items.map(item =>
               renderItemChip({
                 item,

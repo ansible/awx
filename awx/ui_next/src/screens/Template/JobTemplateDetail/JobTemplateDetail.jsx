@@ -4,7 +4,6 @@ import { withI18n } from '@lingui/react';
 import {
   Button,
   Chip,
-  ChipGroup,
   TextList,
   TextListItem,
   TextListItemVariants,
@@ -15,6 +14,7 @@ import { t } from '@lingui/macro';
 
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
+import ChipGroup from '@components/ChipGroup';
 import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import CredentialChip from '@components/CredentialChip';
@@ -281,7 +281,10 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Credentials`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup
+                numChips={5}
+                totalChips={summary_fields.credentials.length}
+              >
                 {summary_fields.credentials.map(c => (
                   <CredentialChip key={c.id} credential={c} isReadOnly />
                 ))}
@@ -294,7 +297,10 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Labels`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup
+                numChips={5}
+                totalChips={summary_fields.labels.results.length}
+              >
                 {summary_fields.labels.results.map(l => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
@@ -309,7 +315,7 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Instance Groups`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
@@ -324,7 +330,7 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Job Tags`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
                 {job_tags.split(',').map(jobTag => (
                   <Chip key={jobTag} isReadOnly>
                     {jobTag}
@@ -339,7 +345,7 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Skip Tags`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
                 {skip_tags.split(',').map(skipTag => (
                   <Chip key={skipTag} isReadOnly>
                     {skipTag}

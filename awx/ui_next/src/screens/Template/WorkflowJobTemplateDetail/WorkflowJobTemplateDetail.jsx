@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import { WorkflowJobTemplatesAPI } from '@api';
 import {
   Chip,
-  ChipGroup,
   Button,
   TextList,
   TextListItem,
@@ -16,6 +15,7 @@ import {
 
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
+import ChipGroup from '@components/ChipGroup';
 import { VariablesDetail } from '@components/CodeMirrorInput';
 import ContentLoading from '@components/ContentLoading';
 import DeleteButton from '@components/DeleteButton';
@@ -168,7 +168,10 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
             fullWidth
             label={i18n._(t`Labels`)}
             value={
-              <ChipGroup>
+              <ChipGroup
+                numChips={3}
+                totalChips={summary_fields.labels.results.length}
+              >
                 {summary_fields.labels.results.map(l => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}

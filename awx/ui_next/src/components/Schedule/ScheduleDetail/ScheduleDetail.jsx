@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Schedule } from '@types';
-import { Chip, ChipGroup, Title, Button } from '@patternfly/react-core';
+import { Chip, Title, Button } from '@patternfly/react-core';
 import AlertModal from '@components/AlertModal';
 import { CardBody, CardActionsRow } from '@components/Card';
 import ContentError from '@components/ContentError';
@@ -18,6 +18,7 @@ import useRequest from '@util/useRequest';
 import { SchedulesAPI } from '@api';
 import DeleteButton from '@components/DeleteButton';
 import ErrorDetail from '@components/ErrorDetail';
+import ChipGroup from '@components/ChipGroup';
 
 const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
@@ -173,7 +174,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Credentials`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup numChips={5} totalChips={credentials.length}>
                     {credentials.map(c => (
                       <CredentialChip key={c.id} credential={c} isReadOnly />
                     ))}
@@ -186,7 +187,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Job Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={job_tags.split(',').length}
+                  >
                     {job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
@@ -201,7 +205,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={skip_tags.split(',').length}
+                  >
                     {skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}

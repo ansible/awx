@@ -114,7 +114,7 @@ function SurveyList({
           variant="primary"
           aria-label={i18n._(t`Preview`)}
         >
-          Preview
+          {i18n._(t`Preview`)}
         </Button>
       </DataList>
     );

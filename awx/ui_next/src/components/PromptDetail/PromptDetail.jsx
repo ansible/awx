@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { toTitleCase } from '@util/strings';
 
-import { Chip, ChipGroup, Divider } from '@patternfly/react-core';
-import { VariablesDetail } from '@components/CodeMirrorInput';
+import { Chip, Divider } from '@patternfly/react-core';
 import CredentialChip from '@components/CredentialChip';
+import ChipGroup from '@components/ChipGroup';
 import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
+import { VariablesDetail } from '@components/CodeMirrorInput';
 
 import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
@@ -220,7 +221,10 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
                 label={i18n._(t`Credentials`)}
                 rows={4}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={overrides.credentials.length}
+                  >
                     {overrides.credentials.map(cred => (
                       <CredentialChip
                         key={cred.id}
@@ -258,7 +262,10 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
                 fullWidth
                 label={i18n._(t`Job Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={overrides.job_tags.split(',').length}
+                  >
                     {overrides.job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
@@ -273,7 +280,10 @@ function PromptDetail({ i18n, resource, launchConfig = {} }) {
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={overrides.skip_tags.split(',').length}
+                  >
                     {overrides.skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}
