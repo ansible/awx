@@ -50,7 +50,6 @@ INI_TEST_VARS = {
         'expand_hostvars': True,
         'fail_on_errors': True
     },
-    'rhv': {},  # there are none
     'tower': {},  # there are none
     'vmware': {
         'alias_pattern': "{{ config.foo }}",
@@ -78,6 +77,12 @@ INI_TEST_VARS = {
         'nest_tags': 'yes',
         'suffix': '.ppt',
         'prefer_ipv4': 'yes'
+    },
+    'rhv': {  # options specific to the plugin
+        'ovirt_insecure': False,
+        'groups': {
+            'dev': '"dev" in tags'
+        }
     }
 }
 
