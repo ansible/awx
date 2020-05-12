@@ -7,6 +7,7 @@ import ContentError from '@components/ContentError';
 import ContentLoading from '@components/ContentLoading';
 import mergeExtraVars from './mergeExtraVars';
 import useSteps from './useSteps';
+import getSurveyValues from './getSurveyValues';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
   const {
@@ -33,13 +34,14 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
         postValues[key] = value;
       }
     };
+    const surveyValues = getSurveyValues(values);
     setValue('inventory_id', values.inventory?.id);
     setValue('credentials', values.credentials?.map(c => c.id));
     setValue('job_type', values.job_type);
     setValue('limit', values.limit);
     setValue('job_tags', values.job_tags);
     setValue('skip_tags', values.skip_tags);
-    setValue('extra_vars', mergeExtraVars(values.extra_vars, values.survey));
+    setValue('extra_vars', mergeExtraVars(values.extra_vars, surveyValues));
     onLaunch(postValues);
   };
 
