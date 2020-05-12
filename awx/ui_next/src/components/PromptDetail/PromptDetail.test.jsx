@@ -157,7 +157,10 @@ describe('PromptDetail', () => {
       wrapper = mountWithContexts(
         <PromptDetail
           launchConfig={mockPromptLaunch}
-          resource={mockTemplate}
+          resource={{
+            ...mockTemplate,
+            ask_inventory_on_launch: true,
+          }}
           overrides={overrides}
         />
       );
