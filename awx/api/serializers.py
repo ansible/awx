@@ -2306,6 +2306,7 @@ class RoleSerializer(BaseSerializer):
             content_model = obj.content_type.model_class()
             ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
             ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
+            ret['summary_fields']['resource_id'] = obj.object_id
 
         return ret
 
