@@ -107,10 +107,6 @@ RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
-ADD tools/docker-compose/rsyslog.repo /etc/yum.repos.d/
-RUN yum install -y rsyslog-omhttp
-RUN mkdir -p /var/lib/awx/rsyslog/ && echo '$IncludeConfig /etc/rsyslog.conf' >> /var/lib/awx/rsyslog/rsyslog.conf
-
 RUN dnf -y clean all && rm -rf /root/.cache
 
 # https://github.com/ansible/awx/issues/5224
