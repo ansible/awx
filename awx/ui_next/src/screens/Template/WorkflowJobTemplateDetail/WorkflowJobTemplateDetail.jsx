@@ -88,7 +88,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
         <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
           <Label>{summary_fields.inventory.name}</Label>
         </Link>
-        <span> {i18n._(t`(Prompt on Launch)`)}</span>
+        <span> {i18n._(t`(Prompt on launch)`)}</span>
       </>
     ) : (
       <Link to={`/inventories/${inventorykind}/${inventoryId}/details`}>
