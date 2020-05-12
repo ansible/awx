@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
-import { Formik, useField } from 'formik';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import { useField } from 'formik';
 import {
   Form,
   FormGroup,
@@ -11,9 +10,6 @@ import {
 } from '@patternfly/react-core';
 import FormField, { FieldTooltip } from '@components/FormField';
 import AnsibleSelect from '@components/AnsibleSelect';
-import ContentLoading from '@components/ContentLoading';
-import ContentError from '@components/ContentError';
-import useRequest from '@util/useRequest';
 import {
   required,
   minMaxValue,
@@ -22,54 +18,9 @@ import {
   integer,
   combine,
 } from '@util/validators';
+import { Survey } from '@types';
 
-function SurveyStep({ template, i18n }) {
-  const { result: survey, request: fetchSurvey, isLoading, error } = useRequest(
-    useCallback(async () => {
-      const { data } =
-        template.type === 'workflow_job_template'
-          ? await WorkflowJobTemplatesAPI.readSurvey(template.id)
-          : await JobTemplatesAPI.readSurvey(template.id);
-      return data;
-    }, [template])
-  );
-  useEffect(() => {
-    fetchSurvey();
-  }, [fetchSurvey]);
-
-  if (error) {
-    return <ContentError error={error} />;
-  }
-  if (isLoading || !survey) {
-    return <ContentLoading />;
-  }
-
-  const initialValues = {};
-  survey.spec.forEach(question => {
-    if (question.type === 'multiselect') {
-      initialValues[question.variable] = question.default.split('\n');
-    } else {
-      initialValues[question.variable] = question.default;
-    }
-  });
-
-  return (
-    <SurveySubForm survey={survey} initialValues={initialValues} i18n={i18n} />
-  );
-}
-
-// This is a nested Formik form to perform validation on individual
-// survey questions. When changes to the inner form occur (onBlur), the
-// values for all questions are added to the outer form's `survey` field
-// as a single object.
-function SurveySubForm({ survey, initialValues, i18n }) {
-  const [, , surveyFieldHelpers] = useField('survey');
-  useEffect(() => {
-    // set survey initial values to parent form
-    surveyFieldHelpers.setValue(initialValues);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
-
+function SurveyStep({ survey, i18n }) {
   const fieldTypes = {
     text: TextField,
     textarea: TextField,
@@ -80,21 +31,19 @@ function SurveySubForm({ survey, initialValues, i18n }) {
     float: NumberField,
   };
   return (
-    <Formik initialValues={initialValues}>
-      {({ values }) => (
-        <Form onBlur={() => surveyFieldHelpers.setValue(values)}>
-          {' '}
-          {survey.spec.map(question => {
-            const Field = fieldTypes[question.type];
-            return (
-              <Field key={question.variable} question={question} i18n={i18n} />
-            );
-          })}
-        </Form>
-      )}
-    </Formik>
+    <Form>
+      {survey.spec.map(question => {
+        const Field = fieldTypes[question.type];
+        return (
+          <Field key={question.variable} question={question} i18n={i18n} />
+        );
+      })}
+    </Form>
   );
 }
+SurveyStep.propTypes = {
+  survey: Survey.isRequired,
+};
 
 function TextField({ question, i18n }) {
   const validators = [
@@ -105,7 +54,7 @@ function TextField({ question, i18n }) {
   return (
     <FormField
       id={`survey-question-${question.variable}`}
-      name={question.variable}
+      name={`survey_${question.variable}`}
       label={question.question_name}
       tooltip={question.question_description}
       isRequired={question.required}
@@ -126,7 +75,7 @@ function NumberField({ question, i18n }) {
   return (
     <FormField
       id={`survey-question-${question.variable}`}
-      name={question.variable}
+      name={`survey_${question.variable}`}
       label={question.question_name}
       tooltip={question.question_description}
       isRequired={question.required}
@@ -139,7 +88,7 @@ function NumberField({ question, i18n }) {
 }
 
 function MultipleChoiceField({ question }) {
-  const [field, meta] = useField(question.variable);
+  const [field, meta] = useField(`survey_${question.variable}`);
   const id = `survey-question-${question.variable}`;
   const isValid = !(meta.touched && meta.error);
   return (
@@ -167,7 +116,7 @@ function MultipleChoiceField({ question }) {
 
 function MultiSelectField({ question }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [field, meta, helpers] = useField(question.variable);
+  const [field, meta, helpers] = useField(`survey_${question.variable}`);
   const id = `survey-question-${question.variable}`;
   const isValid = !(meta.touched && meta.error);
   return (

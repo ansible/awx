@@ -8,4 +8,12 @@ export default function mergeExtraVars(extraVars, survey = {}) {
   };
 }
 
-// TODO: "safe" version that obscures passwords for preview step
+export function maskPasswords(vars, passwordKeys) {
+  const updated = { ...vars };
+  passwordKeys.forEach(key => {
+    if (typeof updated[key] !== 'undefined') {
+      updated[key] = '········';
+    }
+  });
+  return updated;
+}

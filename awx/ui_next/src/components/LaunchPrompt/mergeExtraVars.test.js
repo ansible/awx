@@ -1,4 +1,4 @@
-import mergeExtraVars from './mergeExtraVars';
+import mergeExtraVars, { maskPasswords } from './mergeExtraVars';
 
 describe('mergeExtraVars', () => {
   test('should handle yaml string', () => {
@@ -29,6 +29,34 @@ describe('mergeExtraVars', () => {
       two: 2,
       foo: 'bar',
       bar: 'baz',
+    });
+  });
+
+  describe('maskPasswords', () => {
+    test('should mask password fields', () => {
+      const vars = {
+        one: 'alpha',
+        two: 'bravo',
+        three: 'charlie',
+      };
+
+      expect(maskPasswords(vars, ['one', 'three'])).toEqual({
+        one: '········',
+        two: 'bravo',
+        three: '········',
+      });
+    });
+
+    test('should mask empty strings', () => {
+      const vars = {
+        one: '',
+        two: 'bravo',
+      };
+
+      expect(maskPasswords(vars, ['one', 'three'])).toEqual({
+        one: '········',
+        two: 'bravo',
+      });
     });
   });
 });

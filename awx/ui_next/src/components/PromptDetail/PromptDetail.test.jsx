@@ -67,7 +67,7 @@ describe('PromptDetail', () => {
         expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
       }
 
-      expect(wrapper.find('PromptDetail h2').text()).toBe('Prompted Values');
+      expect(wrapper.find('PromptDetail h2')).toHaveLength(0);
       assertDetail('Name', 'Mock JT');
       assertDetail('Description', 'Mock JT Description');
       assertDetail('Type', 'Job Template');
@@ -141,6 +141,76 @@ describe('PromptDetail', () => {
       ].forEach(label => assertNoDetail(label));
       expect(overrideDetails.find('PromptDetail h2').length).toBe(0);
       expect(overrideDetails.find('VariablesDetail').length).toBe(0);
+    });
+  });
+
+  describe('with overrides', () => {
+    let wrapper;
+    const overrides = {
+      extra_vars: '---one: two\nbar: baz',
+      inventory: {
+        name: 'Override inventory',
+      },
+    };
+
+    beforeAll(() => {
+      wrapper = mountWithContexts(
+        <PromptDetail
+          launchConfig={mockPromptLaunch}
+          resource={{
+            ...mockTemplate,
+            ask_inventory_on_launch: true,
+          }}
+          overrides={overrides}
+        />
+      );
+    });
+
+    afterAll(() => {
+      wrapper.unmount();
+    });
+
+    test('should render overridden details', () => {
+      function assertDetail(label, value) {
+        expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
+        expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
+      }
+
+      expect(wrapper.find('PromptDetail h2').text()).toBe('Prompted Values');
+      assertDetail('Name', 'Mock JT');
+      assertDetail('Description', 'Mock JT Description');
+      assertDetail('Type', 'Job Template');
+      assertDetail('Job Type', 'Run');
+      assertDetail('Inventory', 'Override inventory');
+      assertDetail('Source Control Branch', 'Foo branch');
+      assertDetail('Limit', 'alpha:beta');
+      assertDetail('Verbosity', '3 (Debug)');
+      assertDetail('Show Changes', 'Off');
+      expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
+        '---one: two\nbar: baz'
+      );
+      expect(
+        wrapper
+          .find('Detail[label="Credentials"]')
+          .containsAllMatchingElements([
+            <span>
+              <strong>SSH:</strong>Credential 1
+            </span>,
+            <span>
+              <strong>Awx:</strong>Credential 2
+            </span>,
+          ])
+      ).toEqual(true);
+      expect(
+        wrapper
+          .find('Detail[label="Job Tags"]')
+          .containsAnyMatchingElements([<span>T_100</span>, <span>T_200</span>])
+      ).toEqual(true);
+      expect(
+        wrapper
+          .find('Detail[label="Skip Tags"]')
+          .containsAllMatchingElements([<span>S_100</span>, <span>S_200</span>])
+      ).toEqual(true);
     });
   });
 });

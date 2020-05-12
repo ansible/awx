@@ -12,15 +12,19 @@ import CredentialChip from '@components/CredentialChip';
 import ContentError from '@components/ContentError';
 import { getQSConfig, parseQueryString } from '@util/qs';
 import useRequest from '@util/useRequest';
+import { required } from '@util/validators';
 
-const QS_CONFIG = getQSConfig('inventory', {
+const QS_CONFIG = getQSConfig('credential', {
   page: 1,
   page_size: 5,
   order_by: 'name',
 });
 
 function CredentialsStep({ i18n }) {
-  const [field, , helpers] = useField('credentials');
+  const [field, , helpers] = useField({
+    name: 'credentials',
+    validate: required(null, i18n),
+  });
   const [selectedType, setSelectedType] = useState(null);
   const history = useHistory();
 

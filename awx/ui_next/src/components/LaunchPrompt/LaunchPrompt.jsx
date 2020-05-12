@@ -3,84 +3,29 @@ import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
-import InventoryStep from './InventoryStep';
-import CredentialsStep from './CredentialsStep';
-import OtherPromptsStep from './OtherPromptsStep';
-import SurveyStep from './SurveyStep';
-import PreviewStep from './PreviewStep';
+import ContentError from '@components/ContentError';
+import ContentLoading from '@components/ContentLoading';
 import mergeExtraVars from './mergeExtraVars';
+import useSteps from './useSteps';
+import getSurveyValues from './getSurveyValues';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
-  const steps = [];
-  const initialValues = {};
-  if (config.ask_inventory_on_launch) {
-    initialValues.inventory = resource?.summary_fields?.inventory || null;
-    steps.push({
-      name: i18n._(t`Inventory`),
-      component: <InventoryStep />,
-    });
-  }
-  if (config.ask_credential_on_launch) {
-    initialValues.credentials = resource?.summary_fields?.credentials || [];
-    steps.push({
-      name: i18n._(t`Credentials`),
-      component: <CredentialsStep />,
-    });
-  }
+  const {
+    steps,
+    initialValues,
+    isReady,
+    validate,
+    visitStep,
+    visitAllSteps,
+    contentError,
+  } = useSteps(config, resource, i18n);
 
-  // TODO: Add Credential Passwords step
-
-  if (config.ask_job_type_on_launch) {
-    initialValues.job_type = resource.job_type || '';
+  if (contentError) {
+    return <ContentError error={contentError} />;
   }
-  if (config.ask_limit_on_launch) {
-    initialValues.limit = resource.limit || '';
+  if (!isReady) {
+    return <ContentLoading />;
   }
-  if (config.ask_verbosity_on_launch) {
-    initialValues.verbosity = resource.verbosity || 0;
-  }
-  if (config.ask_tags_on_launch) {
-    initialValues.job_tags = resource.job_tags || '';
-  }
-  if (config.ask_skip_tags_on_launch) {
-    initialValues.skip_tags = resource.skip_tags || '';
-  }
-  if (config.ask_variables_on_launch) {
-    initialValues.extra_vars = resource.extra_vars || '---';
-  }
-  if (config.ask_scm_branch_on_launch) {
-    initialValues.scm_branch = resource.scm_branch || '';
-  }
-  if (config.ask_diff_mode_on_launch) {
-    initialValues.diff_mode = resource.diff_mode || false;
-  }
-  if (
-    config.ask_job_type_on_launch ||
-    config.ask_limit_on_launch ||
-    config.ask_verbosity_on_launch ||
-    config.ask_tags_on_launch ||
-    config.ask_skip_tags_on_launch ||
-    config.ask_variables_on_launch ||
-    config.ask_scm_branch_on_launch ||
-    config.ask_diff_mode_on_launch
-  ) {
-    steps.push({
-      name: i18n._(t`Other Prompts`),
-      component: <OtherPromptsStep config={config} />,
-    });
-  }
-  if (config.survey_enabled) {
-    initialValues.survey = {};
-    steps.push({
-      name: i18n._(t`Survey`),
-      component: <SurveyStep template={resource} />,
-    });
-  }
-  steps.push({
-    name: i18n._(t`Preview`),
-    component: <PreviewStep />,
-    nextButtonText: i18n._(t`Launch`),
-  });
 
   const submit = values => {
     const postValues = {};
@@ -89,23 +34,40 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
         postValues[key] = value;
       }
     };
+    const surveyValues = getSurveyValues(values);
     setValue('inventory_id', values.inventory?.id);
     setValue('credentials', values.credentials?.map(c => c.id));
     setValue('job_type', values.job_type);
     setValue('limit', values.limit);
     setValue('job_tags', values.job_tags);
     setValue('skip_tags', values.skip_tags);
-    setValue('extra_vars', mergeExtraVars(values.extra_vars, values.survey));
+    setValue('extra_vars', mergeExtraVars(values.extra_vars, surveyValues));
     onLaunch(postValues);
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ handleSubmit }) => (
+    <Formik initialValues={initialValues} onSubmit={submit} validate={validate}>
+      {({ validateForm, setTouched, handleSubmit }) => (
         <Wizard
           isOpen
           onClose={onCancel}
           onSave={handleSubmit}
+          onNext={async (nextStep, prevStep) => {
+            if (nextStep.id === 'preview') {
+              visitAllSteps(setTouched);
+            } else {
+              visitStep(prevStep.prevId);
+            }
+            await validateForm();
+          }}
+          onGoToStep={async (newStep, prevStep) => {
+            if (newStep.id === 'preview') {
+              visitAllSteps(setTouched);
+            } else {
+              visitStep(prevStep.prevId);
+            }
+            await validateForm();
+          }}
           title={i18n._(t`Prompts`)}
           steps={steps}
         />
