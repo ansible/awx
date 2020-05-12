@@ -490,12 +490,15 @@ class JobEvent(BasePlaybookEvent):
             job = self.job
 
             from awx.main.models import Host, JobHostSummary  # circular import
-            existing = Host.objects.filter(id__in=self.host_map.values()).values_list('id', flat=True)
+            all_hosts = Host.objects.filter(
+                pk__in=self.host_map.values()
+            ).only('id')
+            existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
             for host in hostnames:
                 host_id = self.host_map.get(host, None)
-                if host_id not in existing:
+                if host_id not in existing_host_ids:
                     host_id = None
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
@@ -514,12 +517,9 @@ class JobEvent(BasePlaybookEvent):
             # update the last_job_id and last_job_host_summary_id
             # in single queries
             host_mapping = dict(
-                (summary['host'], summary['id'])
-                for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host')
+                (summary['host_id'], summary['id'])
+                for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
             )
-            all_hosts = Host.objects.filter(
-                pk__in=host_mapping.keys()
-            ).only('id')
             for h in all_hosts:
                 h.last_job_id = job.id
                 if h.id in host_mapping:
