@@ -2,21 +2,21 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from '../../../util/qs';
 import useRequest, {
   useDismissableError,
   useDeleteItems,
-} from '@util/useRequest';
-import useSelected from '@util/useSelected';
-import { HostsAPI, InventoriesAPI } from '@api';
-import DataListToolbar from '@components/DataListToolbar';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
+} from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
+import { HostsAPI, InventoriesAPI } from '../../../api';
+import DataListToolbar from '../../../components/DataListToolbar';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '@components/PaginatedDataList';
-import AssociateModal from '@components/AssociateModal';
-import DisassociateButton from '@components/DisassociateButton';
+} from '../../../components/PaginatedDataList';
+import AssociateModal from '../../../components/AssociateModal';
+import DisassociateButton from '../../../components/DisassociateButton';
 import InventoryHostGroupItem from './InventoryHostGroupItem';
 
 const QS_CONFIG = getQSConfig('group', {

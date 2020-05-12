@@ -3,13 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { InventoriesAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import useRequest from '@util/useRequest';
-import OptionsList from '@components/OptionsList';
-import ContentLoading from '@components/ContentLoading';
-import ContentError from '@components/ContentError';
-import { required } from '@util/validators';
+import { InventoriesAPI } from '../../../api';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useRequest from '../../../util/useRequest';
+import OptionsList from '../../OptionsList';
+import ContentLoading from '../../ContentLoading';
+import ContentError from '../../ContentError';
+import { required } from '../../../util/validators';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,

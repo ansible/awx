@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import styled from 'styled-components';
 import { useField } from 'formik';
@@ -10,9 +11,9 @@ import {
   Radio,
   TextInput,
 } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import FormField from '@components/FormField';
-import { required } from '@util/validators';
+import AnsibleSelect from '../../AnsibleSelect';
+import FormField from '../../FormField';
+import { required } from '../../../util/validators';
 
 const RunOnRadio = styled(Radio)`
   label {

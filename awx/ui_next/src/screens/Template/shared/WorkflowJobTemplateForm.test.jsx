@@ -2,22 +2,22 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { sleep } from '@testUtils/testUtils';
+import { sleep } from '../../../../testUtils/testUtils';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
 import {
   WorkflowJobTemplatesAPI,
   LabelsAPI,
   OrganizationsAPI,
   InventoriesAPI,
-} from '@api';
+} from '../../../api';
 
-jest.mock('@api/models/CredentialTypes');
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Labels');
-jest.mock('@api/models/Organizations');
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -32,7 +32,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
       inventory: { id: 1, name: 'Inventory 1' },
       organization: { id: 1, name: 'Organization 1' },
       labels: {
-        results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+        results: [
+          { name: 'Label 1', id: 1 },
+          { name: 'Label 2', id: 2 },
+        ],
       },
     },
     scm_branch: 'devel',
@@ -61,7 +64,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
       results: [{ id: 1 }, { id: 2 }],
     });
     InventoriesAPI.read.mockResolvedValue({
-      results: [{ id: 1, name: 'Foo' }, { id: 2, name: 'Bar' }],
+      results: [
+        { id: 1, name: 'Foo' },
+        { id: 2, name: 'Bar' },
+      ],
     });
 
     history = createMemoryHistory({

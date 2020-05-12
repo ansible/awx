@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import PlaybookSelect from './PlaybookSelect';
-import { ProjectsAPI } from '@api';
+import { ProjectsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<PlaybookSelect />', () => {
   beforeEach(() => {

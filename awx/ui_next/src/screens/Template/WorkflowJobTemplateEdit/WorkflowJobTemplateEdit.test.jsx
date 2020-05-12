@@ -1,15 +1,19 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI, LabelsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
+import {
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  LabelsAPI,
+} from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Labels');
-jest.mock('@api/models/Organizations');
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
 
 const mockTemplate = {
   id: 6,
@@ -19,7 +23,10 @@ const mockTemplate = {
     inventory: { id: 1, name: 'Inventory 1' },
     organization: { id: 1, name: 'Organization 1' },
     labels: {
-      results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+      results: [
+        { name: 'Label 1', id: 1 },
+        { name: 'Label 2', id: 2 },
+      ],
     },
   },
   scm_branch: 'devel',
@@ -183,7 +190,10 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       summary_fields: {
         inventory: { id: 1, name: 'Inventory 1' },
         labels: {
-          results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+          results: [
+            { name: 'Label 1', id: 1 },
+            { name: 'Label 2', id: 2 },
+          ],
         },
       },
       scm_branch: 'devel',

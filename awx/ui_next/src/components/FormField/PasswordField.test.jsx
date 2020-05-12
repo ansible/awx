@@ -1,7 +1,7 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 import { Formik } from 'formik';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
 import PasswordField from './PasswordField';
 
 describe('PasswordField', () => {

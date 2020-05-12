@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 
 describe('<WorkflowJobTemplateDetail/>', () => {
@@ -100,7 +100,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
       {
         element: 'Detail[label="Webhook URL"]',
         prop: 'value',
-        value: 'http://127.0.0.1:3001/api/v2/workflow_job_templates/45/github/',
+        value: 'http://localhost/api/v2/workflow_job_templates/45/github/',
       },
       {
         element: "Detail[label='Webhook Service']",
@@ -136,7 +136,7 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     const labels = wrapper
       .find('Detail[label="Labels"]')
       .find('Chip[component="li"]');
-    const sparkline = wrapper.find('Sparkline__Link');
+    const sparkline = wrapper.find('Sparkline Link');
 
     expect(organization.text()).toBe('Org');
     expect(inventory.text()).toEqual('Bar');

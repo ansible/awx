@@ -4,12 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import FormField, { FormSubmitError } from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { required } from '@util/validators';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
+import FormField, { FormSubmitError } from '../../../components/FormField';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { required } from '../../../util/validators';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import {
+  FormColumnLayout,
+  SubFormLayout,
+} from '../../../components/FormLayout';
 import { ManualSubForm, SourceControlSubForm } from './CredentialSubForms';
 
 function CredentialFormFields({

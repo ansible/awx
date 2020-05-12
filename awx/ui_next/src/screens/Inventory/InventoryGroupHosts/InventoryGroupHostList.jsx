@@ -2,20 +2,20 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, mergeParams, parseQueryString } from '@util/qs';
-import { GroupsAPI, InventoriesAPI } from '@api';
+import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
+import { GroupsAPI, InventoriesAPI } from '../../../api';
 
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '@util/useRequest';
-import useSelected from '@util/useSelected';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList from '@components/PaginatedDataList';
-import AssociateModal from '@components/AssociateModal';
-import DisassociateButton from '@components/DisassociateButton';
+} from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
+import PaginatedDataList from '../../../components/PaginatedDataList';
+import AssociateModal from '../../../components/AssociateModal';
+import DisassociateButton from '../../../components/DisassociateButton';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
 import AddHostDropdown from './AddHostDropdown';
 

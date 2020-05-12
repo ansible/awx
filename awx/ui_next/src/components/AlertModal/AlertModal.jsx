@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { Modal, Title } from '@patternfly/react-core';
 import {

@@ -2,13 +2,13 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { UsersAPI } from '@api';
-import useRequest from '@util/useRequest';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import { UsersAPI } from '../../../api';
+import useRequest from '../../../util/useRequest';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '@components/PaginatedDataList';
-import DatalistToolbar from '@components/DataListToolbar';
+} from '../../../components/PaginatedDataList';
+import DatalistToolbar from '../../../components/DataListToolbar';
 import UserAccessListItem from './UserAccessListItem';
 
 const QS_CONFIG = getQSConfig('roles', {

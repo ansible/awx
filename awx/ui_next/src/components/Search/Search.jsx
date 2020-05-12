@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -22,9 +23,9 @@ import {
   DataToolbarFilter,
 } from '@patternfly/react-core/dist/umd/experimental';
 import { SearchIcon } from '@patternfly/react-icons';
-import { parseQueryString } from '@util/qs';
-import { QSConfig, SearchColumns } from '@types';
 import styled from 'styled-components';
+import { parseQueryString } from '../../util/qs';
+import { QSConfig, SearchColumns } from '../../types';
 
 const NoOptionDropdown = styled.div`
   align-self: stretch;

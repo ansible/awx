@@ -1,16 +1,17 @@
+import 'styled-components/macro';
 import React from 'react';
 import { shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { toTitleCase } from '@util/strings';
-
 import { Chip, Divider } from '@patternfly/react-core';
-import CredentialChip from '@components/CredentialChip';
-import ChipGroup from '@components/ChipGroup';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import { VariablesDetail } from '@components/CodeMirrorInput';
+import { toTitleCase } from '../../util/strings';
+
+import CredentialChip from '../CredentialChip';
+import ChipGroup from '../ChipGroup';
+import { DetailList, Detail, UserDateDetail } from '../DetailList';
+import { VariablesDetail } from '../CodeMirrorInput';
 
 import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
@@ -43,7 +44,7 @@ function buildResourceLink(resource) {
     workflow_job_template: `/templates/workflow_job_template/${resource.id}/details`,
   };
 
-  return link[(resource?.type)] ? (
+  return link[resource?.type] ? (
     <Link to={link[resource.type]}>{resource.name}</Link>
   ) : (
     resource.name
@@ -240,6 +241,10 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
     </>
   );
 }
+
+PromptDetail.defaultProps = {
+  launchConfig: { defaults: {} },
+};
 
 PromptDetail.propTypes = {
   resource: shape({}).isRequired,

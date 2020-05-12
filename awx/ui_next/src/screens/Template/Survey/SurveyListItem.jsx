@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
@@ -13,10 +14,10 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-import ChipGroup from '@components/ChipGroup';
 import { CaretDownIcon, CaretUpIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import DataListCell from '../../../components/DataListCell';
+import ChipGroup from '../../../components/ChipGroup';
 
 const DataListAction = styled(_DataListAction)`
   margin-left: 0;

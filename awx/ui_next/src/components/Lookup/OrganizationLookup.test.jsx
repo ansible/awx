@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import OrganizationLookup, { _OrganizationLookup } from './OrganizationLookup';
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI } from '../../api';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('OrganizationLookup', () => {
   let wrapper;

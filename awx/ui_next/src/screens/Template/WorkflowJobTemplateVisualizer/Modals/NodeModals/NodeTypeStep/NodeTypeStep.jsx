@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
@@ -5,8 +6,8 @@ import { func, number, shape, string } from 'prop-types';
 import styled from 'styled-components';
 import { Formik, Field } from 'formik';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
-import { FormFullWidthLayout } from '@components/FormLayout';
-import AnsibleSelect from '@components/AnsibleSelect';
+import { FormFullWidthLayout } from '../../../../../../components/FormLayout';
+import AnsibleSelect from '../../../../../../components/AnsibleSelect';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';

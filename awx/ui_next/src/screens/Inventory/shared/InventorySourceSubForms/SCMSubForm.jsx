@@ -2,15 +2,15 @@ import React, { useCallback } from 'react';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { ProjectsAPI } from '@api';
-import useRequest from '@util/useRequest';
-import { required } from '@util/validators';
-
 import { FormGroup } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { FieldTooltip } from '@components/FormField';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import ProjectLookup from '@components/Lookup/ProjectLookup';
+import { ProjectsAPI } from '../../../../api';
+import useRequest from '../../../../util/useRequest';
+import { required } from '../../../../util/validators';
+
+import AnsibleSelect from '../../../../components/AnsibleSelect';
+import { FieldTooltip } from '../../../../components/FormField';
+import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
 import { VerbosityField, OptionsField, SourceVarsField } from './SharedFields';
 
 const SCMSubForm = ({ i18n }) => {

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { Formik } from 'formik';
+import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import SCMSubForm from './SCMSubForm';
-import { ProjectsAPI, CredentialsAPI } from '@api';
+import { ProjectsAPI, CredentialsAPI } from '../../../../api';
 
-jest.mock('@api/models/Projects');
-jest.mock('@api/models/Credentials');
+jest.mock('../../../../api/models/Projects');
+jest.mock('../../../../api/models/Credentials');
 
 const initialValues = {
   credential: null,

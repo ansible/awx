@@ -1,11 +1,11 @@
 import React from 'react';
-import { InventoryUpdatesAPI, InventorySourcesAPI } from '@api';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventorySourceSyncButton from './InventorySourceSyncButton';
 
-jest.mock('@api/models/InventoryUpdates');
-jest.mock('@api/models/InventorySources');
+jest.mock('../../../api/models/InventoryUpdates');
+jest.mock('../../../api/models/InventorySources');
 
 const source = { id: 1, name: 'Foo', source: 'Source Bar' };
 const onSyncLoading = jest.fn();

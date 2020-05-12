@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import { HostStatusBar } from '.';
 
 describe('<HostStatusBar />', () => {
@@ -22,7 +22,7 @@ describe('<HostStatusBar />', () => {
   });
 
   test('should render five bar segments', () => {
-    expect(wrapper.find('HostStatusBar__BarSegment').length).toBe(5);
+    expect(wrapper.find('BarSegment').length).toBe(5);
   });
 
   test('tooltips should display host status and count', () => {
@@ -44,7 +44,7 @@ describe('<HostStatusBar />', () => {
 
   test('empty host counts should display tooltip and one bar segment', () => {
     wrapper = mountWithContexts(<HostStatusBar />);
-    expect(wrapper.find('HostStatusBar__BarSegment').length).toBe(1);
+    expect(wrapper.find('BarSegment').length).toBe(1);
     expect(wrapper.find('TooltipContent').text()).toEqual(
       'Host status information for this job is unavailable.'
     );

@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import CredentialsStep from './CredentialsStep';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 
-jest.mock('@api/models/CredentialTypes');
-jest.mock('@api/models/Credentials');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/Credentials');
 
 const types = [
   { id: 1, kind: 'ssh', name: 'SSH' },

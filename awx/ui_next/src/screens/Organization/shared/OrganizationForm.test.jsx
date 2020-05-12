@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { OrganizationsAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { OrganizationsAPI } from '../../../api';
 
 import OrganizationForm from './OrganizationForm';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<OrganizationForm />', () => {
   const network = {};
@@ -24,7 +27,10 @@ describe('<OrganizationForm />', () => {
       instance_groups: '/api/v2/organizations/1/instance_groups',
     },
   };
-  const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+  const mockInstanceGroups = [
+    { name: 'One', id: 1 },
+    { name: 'Two', id: 2 },
+  ];
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -229,7 +235,10 @@ describe('<OrganizationForm />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     await act(async () => {
       wrapper.find('InstanceGroupsLookup').prop('onChange')(
-        [{ name: 'One', id: 1 }, { name: 'Three', id: 3 }],
+        [
+          { name: 'One', id: 1 },
+          { name: 'Three', id: 3 },
+        ],
         'instanceGroups'
       );
     });

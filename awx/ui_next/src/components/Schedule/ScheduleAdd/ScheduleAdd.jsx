@@ -4,7 +4,7 @@ import { withI18n } from '@lingui/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../Card';
 import buildRuleObj from '../shared/buildRuleObj';
 import ScheduleForm from '../shared/ScheduleForm';
 

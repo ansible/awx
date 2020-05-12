@@ -1,8 +1,8 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import CopyButton from './CopyButton';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<CopyButton/>', () => {
   test('shold mount properly', () => {

@@ -6,26 +6,26 @@ import PropTypes, { shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { useField, withFormik } from 'formik';
 import { Form, FormGroup, Checkbox } from '@patternfly/react-core';
-import { required } from '@util/validators';
+import { required } from '../../../util/validators';
 
 import FormField, {
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
+} from '../../../components/FormField';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
-} from '@components/FormLayout';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { InventoryLookup } from '@components/Lookup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import FormActionGroup from '@components/FormActionGroup';
-import ContentError from '@components/ContentError';
-import CheckboxField from '@components/FormField/CheckboxField';
+} from '../../../components/FormLayout';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import { InventoryLookup } from '../../../components/Lookup';
+import { VariablesField } from '../../../components/CodeMirrorInput';
+import FormActionGroup from '../../../components/FormActionGroup';
+import ContentError from '../../../components/ContentError';
+import CheckboxField from '../../../components/FormField/CheckboxField';
 import LabelSelect from './LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
-import { WorkFlowJobTemplate } from '@types';
+import { WorkFlowJobTemplate } from '../../../types';
 
 const urlOrigin = window.location.origin;
 

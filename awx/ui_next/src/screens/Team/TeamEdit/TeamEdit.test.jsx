@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { TeamsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { TeamsAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import TeamEdit from './TeamEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<TeamEdit />', () => {
   const mockData = {

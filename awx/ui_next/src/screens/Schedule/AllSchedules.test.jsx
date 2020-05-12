@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import AllSchedules from './AllSchedules';
 
 describe('<AllSchedules />', () => {

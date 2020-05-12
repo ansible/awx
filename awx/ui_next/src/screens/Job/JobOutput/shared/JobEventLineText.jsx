@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export default styled.div`
+const JobEventLineText = styled.div`
   padding: 0 15px;
   white-space: pre-wrap;
   word-break: break-all;
@@ -27,3 +27,7 @@ export default styled.div`
     border-radius: 5px;
   }
 `;
+
+JobEventLineText.displayName = 'JobEventLineText';
+
+export default JobEventLineText;

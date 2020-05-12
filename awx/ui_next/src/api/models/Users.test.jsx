@@ -16,10 +16,9 @@ describe('UsersAPI', () => {
     await UsersAPI.associateRole(userId, roleId);
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
-    expect(mockHttp.post.mock.calls[0]).toContainEqual(
-      `/api/v2/users/${userId}/roles/`,
-      { id: roleId }
-    );
+    expect(
+      mockHttp.post.mock.calls[0]
+    ).toContainEqual(`/api/v2/users/${userId}/roles/`, { id: roleId });
 
     done();
   });

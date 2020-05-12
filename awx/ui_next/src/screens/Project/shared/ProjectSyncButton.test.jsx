@@ -1,11 +1,11 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 
 import ProjectSyncButton from './ProjectSyncButton';
-import { ProjectsAPI } from '@api';
+import { ProjectsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('ProjectSyncButton', () => {
   ProjectsAPI.readSync.mockResolvedValue({

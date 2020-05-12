@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export default styled.div`
+const JobEventLineNumber = styled.div`
   color: #161b1f;
   background-color: #ebebeb;
   flex: 0 0 45px;
@@ -10,3 +10,7 @@ export default styled.div`
   border-right: 1px solid #d7d7d7;
   user-select: none;
 `;
+
+JobEventLineNumber.displayName = 'JobEventLineNumber';
+
+export default JobEventLineNumber;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { shape } from 'prop-types';
-import { toTitleCase } from '@util/strings';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Credential } from '@types';
 import { Chip } from '@patternfly/react-core';
+import { Credential } from '../../types';
+import { toTitleCase } from '../../util/strings';
 
 function CredentialChip({ credential, i18n, ...props }) {
   let type;

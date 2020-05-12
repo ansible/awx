@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 
 import { Button, Tooltip } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons';
-import useRequest, { useDismissableError } from '@util/useRequest';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
+import useRequest, { useDismissableError } from '../../util/useRequest';
+import AlertModal from '../AlertModal';
+import ErrorDetail from '../ErrorDetail';
 
 function CopyButton({ i18n, copyItem, onLoading, onDoneLoading, helperText }) {
   const { isLoading, error: copyError, request: copyItemToAPI } = useRequest(

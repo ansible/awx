@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment, useState, useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -10,20 +11,20 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { timeOfDay } from '@util/dates';
-import { ProjectsAPI } from '@api';
-import ClipboardCopyButton from '@components/ClipboardCopyButton';
-import StatusIcon from '@components/StatusIcon';
-import { toTitleCase } from '@util/strings';
-import CopyButton from '@components/CopyButton';
+import { timeOfDay } from '../../../util/dates';
+import { ProjectsAPI } from '../../../api';
+import ClipboardCopyButton from '../../../components/ClipboardCopyButton';
+import StatusIcon from '../../../components/StatusIcon';
+import DataListCell from '../../../components/DataListCell';
+import { toTitleCase } from '../../../util/strings';
+import CopyButton from '../../../components/CopyButton';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import { Project } from '@types';
+import { Project } from '../../../types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

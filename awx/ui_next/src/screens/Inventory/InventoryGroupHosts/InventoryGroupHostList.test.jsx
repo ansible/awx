@@ -1,13 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { GroupsAPI, InventoriesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { GroupsAPI, InventoriesAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventoryGroupHostList from './InventoryGroupHostList';
 import mockHosts from '../shared/data.hosts.json';
 
-jest.mock('@api/models/Groups');
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/Groups');
+jest.mock('../../../api/models/Inventories');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({

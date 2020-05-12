@@ -1,13 +1,21 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 import JobTemplateForm from './JobTemplateForm';
-import { LabelsAPI, JobTemplatesAPI, ProjectsAPI, CredentialsAPI } from '@api';
+import {
+  LabelsAPI,
+  JobTemplatesAPI,
+  ProjectsAPI,
+  CredentialsAPI,
+} from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<JobTemplateForm />', () => {
   const mockData = {
@@ -30,7 +38,12 @@ describe('<JobTemplateForm />', () => {
         id: 3,
         name: 'qux',
       },
-      labels: { results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }] },
+      labels: {
+        results: [
+          { name: 'Sushi', id: 1 },
+          { name: 'Major', id: 2 },
+        ],
+      },
       credentials: [
         { id: 1, kind: 'cloud', name: 'Foo' },
         { id: 2, kind: 'ssh', name: 'Bar' },

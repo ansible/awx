@@ -1,10 +1,10 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import InventoryGroups from './InventoryGroups';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<InventoryGroups />', () => {
   test('initially renders successfully', async () => {

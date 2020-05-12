@@ -3,8 +3,8 @@ import { arrayOf, func, object, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
 import styled from 'styled-components';
+import AlertModal from '../AlertModal';
 
 const ModalNote = styled.div`
   margin-bottom: var(--pf-global--spacer--xl);
@@ -111,6 +111,12 @@ function DisassociateButton({
     </>
   );
 }
+
+DisassociateButton.defaultProps = {
+  itemsToDisassociate: [],
+  modalNote: '',
+  modalTitle: '',
+};
 
 DisassociateButton.propTypes = {
   itemsToDisassociate: arrayOf(object),

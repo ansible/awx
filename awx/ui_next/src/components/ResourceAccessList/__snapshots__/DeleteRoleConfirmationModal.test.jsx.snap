@@ -100,11 +100,11 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-title"
                   >
                     <div
-                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                      class="AlertModal__Header-l9z1bu-0 hQFWHX"
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa hIExGP"
+                        class="AlertModal___StyledExclamationCircleIcon-l9z1bu-1 jOhcwt"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -159,8 +159,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       ariaDescribedById=""
       className=""
       header={
-        <AlertModal__Header>
-          <Styled(ExclamationCircleIcon)
+        <ForwardRef(AlertModal__Header)>
+          <ForwardRef(AlertModal___StyledExclamationCircleIcon)
             size="lg"
           />
           <Title
@@ -168,7 +168,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           >
             Remove Team Access
           </Title>
-        </AlertModal__Header>
+        </ForwardRef(AlertModal__Header)>
       }
       hideTitle={false}
       isFooterLeftAligned={true}
@@ -219,11 +219,11 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     class="pf-c-title"
                   >
                     <div
-                      class="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                      class="AlertModal__Header-l9z1bu-0 hQFWHX"
                     >
                       <svg
                         aria-hidden="true"
-                        class="sc-bdVaJa hIExGP"
+                        class="AlertModal___StyledExclamationCircleIcon-l9z1bu-1 jOhcwt"
                         fill="currentColor"
                         height="2em"
                         role="img"
@@ -296,8 +296,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
           ariaDescribedById=""
           className=""
           header={
-            <AlertModal__Header>
-              <Styled(ExclamationCircleIcon)
+            <ForwardRef(AlertModal__Header)>
+              <ForwardRef(AlertModal___StyledExclamationCircleIcon)
                 size="lg"
               />
               <Title
@@ -305,7 +305,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               >
                 Remove Team Access
               </Title>
-            </AlertModal__Header>
+            </ForwardRef(AlertModal__Header)>
           }
           hideTitle={false}
           id="pf-modal-0"
@@ -439,9 +439,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 "$$typeof": Symbol(react.forward_ref),
                                 "attrs": Array [],
                                 "componentStyle": ComponentStyle {
-                                  "componentId": "AlertModal__Header-sc-9waqvl-0",
-                                  "isStatic": true,
-                                  "lastClassName": "dYqVFx",
+                                  "componentId": "AlertModal__Header-l9z1bu-0",
+                                  "isStatic": false,
+                                  "lastClassName": "hQFWHX",
                                   "rules": Array [
                                     "display:flex;svg{margin-right:16px;}",
                                   ],
@@ -449,7 +449,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 "displayName": "AlertModal__Header",
                                 "foldedComponentIds": Array [],
                                 "render": [Function],
-                                "styledComponentId": "AlertModal__Header-sc-9waqvl-0",
+                                "styledComponentId": "AlertModal__Header-l9z1bu-0",
                                 "target": "div",
                                 "toString": [Function],
                                 "warnTooManyClasses": [Function],
@@ -459,9 +459,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                             forwardedRef={null}
                           >
                             <div
-                              className="AlertModal__Header-sc-9waqvl-0 dYqVFx"
+                              className="AlertModal__Header-l9z1bu-0 hQFWHX"
                             >
-                              <Styled(ExclamationCircleIcon)
+                              <AlertModal___StyledExclamationCircleIcon
                                 size="lg"
                               >
                                 <StyledComponent
@@ -470,17 +470,17 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                       "$$typeof": Symbol(react.forward_ref),
                                       "attrs": Array [],
                                       "componentStyle": ComponentStyle {
-                                        "componentId": "sc-bdVaJa",
-                                        "isStatic": true,
-                                        "lastClassName": "hIExGP",
+                                        "componentId": "AlertModal___StyledExclamationCircleIcon-l9z1bu-1",
+                                        "isStatic": false,
+                                        "lastClassName": "jOhcwt",
                                         "rules": Array [
-                                          "color: var(--pf-global--danger-color--100)",
+                                          "color:var(--pf-global--danger-color--100)",
                                         ],
                                       },
-                                      "displayName": "Styled(ExclamationCircleIcon)",
+                                      "displayName": "AlertModal___StyledExclamationCircleIcon",
                                       "foldedComponentIds": Array [],
                                       "render": [Function],
-                                      "styledComponentId": "sc-bdVaJa",
+                                      "styledComponentId": "AlertModal___StyledExclamationCircleIcon-l9z1bu-1",
                                       "target": [Function],
                                       "toString": [Function],
                                       "warnTooManyClasses": [Function],
@@ -491,7 +491,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   size="lg"
                                 >
                                   <ExclamationCircleIcon
-                                    className="sc-bdVaJa hIExGP"
+                                    className="AlertModal___StyledExclamationCircleIcon-l9z1bu-1 jOhcwt"
                                     color="currentColor"
                                     noVerticalAlign={false}
                                     size="lg"
@@ -500,7 +500,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                     <svg
                                       aria-hidden={true}
                                       aria-labelledby={null}
-                                      className="sc-bdVaJa hIExGP"
+                                      className="AlertModal___StyledExclamationCircleIcon-l9z1bu-1 jOhcwt"
                                       fill="currentColor"
                                       height="2em"
                                       role="img"
@@ -519,7 +519,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                     </svg>
                                   </ExclamationCircleIcon>
                                 </StyledComponent>
-                              </Styled(ExclamationCircleIcon)>
+                              </AlertModal___StyledExclamationCircleIcon>
                               <Title
                                 size="2xl"
                               >

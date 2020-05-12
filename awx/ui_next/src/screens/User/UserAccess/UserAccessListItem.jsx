@@ -6,9 +6,8 @@ import {
   DataListItemCells,
   DataListItemRow,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import { Link } from 'react-router-dom';
+import DataListCell from '../../../components/DataListCell';
 
 function UserAccessListItem({ role, i18n, detailUrl }) {
   const labelId = `userRole-${role.id}`;

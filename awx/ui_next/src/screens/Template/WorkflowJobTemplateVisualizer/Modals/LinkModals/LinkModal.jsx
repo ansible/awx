@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { Button, FormGroup, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func } from 'prop-types';
-import AnsibleSelect from '@components/AnsibleSelect';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../../../contexts/Workflow';
+import AnsibleSelect from '../../../../../components/AnsibleSelect';
 
 function LinkModal({ header, i18n, onConfirm }) {
   const dispatch = useContext(WorkflowDispatchContext);

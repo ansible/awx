@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -11,15 +12,14 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-
-import Sparkline from '@components/Sparkline';
-import { Host } from '@types';
 import styled from 'styled-components';
-import HostToggle from '@components/HostToggle';
+import DataListCell from '../../../components/DataListCell';
+
+import Sparkline from '../../../components/Sparkline';
+import { Host } from '../../../types';
+import HostToggle from '../../../components/HostToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

@@ -12,23 +12,23 @@ import {
 } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import { CardBody, CardActionsRow } from '@components/Card';
-import ChipGroup from '@components/ChipGroup';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import CredentialChip from '@components/CredentialChip';
+import AlertModal from '../../../components/AlertModal';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import ChipGroup from '../../../components/ChipGroup';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import CredentialChip from '../../../components/CredentialChip';
 import {
   Detail,
   DetailList,
   DeletedDetail,
   UserDateDetail,
-} from '@components/DetailList';
-import DeleteButton from '@components/DeleteButton';
-import ErrorDetail from '@components/ErrorDetail';
-import LaunchButton from '@components/LaunchButton';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import { JobTemplatesAPI } from '@api';
+} from '../../../components/DetailList';
+import DeleteButton from '../../../components/DeleteButton';
+import ErrorDetail from '../../../components/ErrorDetail';
+import LaunchButton from '../../../components/LaunchButton';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { JobTemplatesAPI } from '../../../api';
 
 function JobTemplateDetail({ i18n, template }) {
   const {

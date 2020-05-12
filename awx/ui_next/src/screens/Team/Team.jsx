@@ -10,13 +10,13 @@ import {
   useParams,
 } from 'react-router-dom';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '@components/CardCloseButton';
-import { TabbedCardHeader } from '@components/Card';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
+import CardCloseButton from '../../components/CardCloseButton';
+import { TabbedCardHeader } from '../../components/Card';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
-import { TeamsAPI } from '@api';
+import { TeamsAPI } from '../../api';
 import TeamAccessList from './TeamAccess';
 
 function Team({ i18n, setBreadcrumb }) {

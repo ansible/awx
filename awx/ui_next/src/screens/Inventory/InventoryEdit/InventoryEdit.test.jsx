@@ -1,13 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../../testUtils/testUtils';
 
-import { InventoriesAPI, CredentialTypesAPI } from '@api';
+import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import InventoryEdit from './InventoryEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInventory = {
   id: 1,
@@ -107,7 +110,10 @@ describe('<InventoryEdit />', () => {
 
   test('handleSubmit should post to the api', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-    const instanceGroups = [{ name: 'Bizz', id: 2 }, { name: 'Buzz', id: 3 }];
+    const instanceGroups = [
+      { name: 'Bizz', id: 2 },
+      { name: 'Buzz', id: 3 },
+    ];
     wrapper.find('InventoryForm').prop('onSubmit')({
       name: 'Foo',
       id: 13,

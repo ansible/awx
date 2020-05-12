@@ -10,14 +10,18 @@ import {
   List,
   ListItem,
 } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import { CardBody, CardActionsRow } from '@components/Card';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import CredentialChip from '@components/CredentialChip';
-import DeleteButton from '@components/DeleteButton';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import ErrorDetail from '@components/ErrorDetail';
-import { InventorySourcesAPI } from '@api';
+import AlertModal from '../../../components/AlertModal';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import CredentialChip from '../../../components/CredentialChip';
+import DeleteButton from '../../../components/DeleteButton';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+} from '../../../components/DetailList';
+import ErrorDetail from '../../../components/ErrorDetail';
+import { InventorySourcesAPI } from '../../../api';
 
 function InventorySourceDetail({ inventorySource, i18n }) {
   const {

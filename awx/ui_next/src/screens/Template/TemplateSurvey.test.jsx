@@ -1,12 +1,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import TemplateSurvey from './TemplateSurvey';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI } from '../../api';
 import mockJobTemplateData from './shared/data.job_template.json';
 
-jest.mock('@api/models/JobTemplates');
+jest.mock('../../api/models/JobTemplates');
 
 const surveyData = {
   name: 'Survey',

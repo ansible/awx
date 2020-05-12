@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -11,13 +12,13 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
 
-import ChipGroup from '@components/ChipGroup';
-import { DetailList, Detail } from '@components/DetailList';
-import { AccessRecord } from '@types';
+import ChipGroup from '../ChipGroup';
+import { DetailList, Detail } from '../DetailList';
+import { AccessRecord } from '../../types';
 
 const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;

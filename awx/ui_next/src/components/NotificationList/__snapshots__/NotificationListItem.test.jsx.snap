@@ -42,8 +42,8 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
           <DataListItemCells
             dataListCells={
               Array [
-                <DataListCell>
-                  <Link
+                <ForwardRef(Styled(PFDataListCell))>
+                  <ForwardRef
                     to={
                       Object {
                         "pathname": "/foo",
@@ -55,11 +55,11 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                     >
                       Foo
                     </b>
-                  </Link>
-                </DataListCell>,
-                <DataListCell>
+                  </ForwardRef>
+                </ForwardRef(Styled(PFDataListCell))>,
+                <ForwardRef(Styled(PFDataListCell))>
                   Slack
-                </DataListCell>,
+                </ForwardRef(Styled(PFDataListCell))>,
               ]
             }
             key=".0"
@@ -77,17 +77,19 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "$$typeof": Symbol(react.forward_ref),
                       "attrs": Array [],
                       "componentStyle": ComponentStyle {
-                        "componentId": "DataListCell-sc-18ntxrx-0",
-                        "isStatic": true,
-                        "lastClassName": "flJMIO",
+                        "componentId": "sc-bdVaJa",
+                        "isStatic": false,
+                        "lastClassName": "kruorc",
                         "rules": Array [
-                          "word-break:break-word;",
+                          "
+  word-break: break-word;
+",
                         ],
                       },
                       "displayName": "DataListCell",
                       "foldedComponentIds": Array [],
                       "render": [Function],
-                      "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                      "styledComponentId": "sc-bdVaJa",
                       "target": [Function],
                       "toString": [Function],
                       "warnTooManyClasses": [Function],
@@ -97,10 +99,10 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <PFDataListCell
-                    className="DataListCell-sc-18ntxrx-0 flJMIO"
+                    className="sc-bdVaJa kruorc"
                   >
                     <div
-                      className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                      className="pf-c-data-list__cell sc-bdVaJa kruorc"
                     >
                       <Link
                         to={
@@ -138,17 +140,19 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                       "$$typeof": Symbol(react.forward_ref),
                       "attrs": Array [],
                       "componentStyle": ComponentStyle {
-                        "componentId": "DataListCell-sc-18ntxrx-0",
-                        "isStatic": true,
-                        "lastClassName": "flJMIO",
+                        "componentId": "sc-bdVaJa",
+                        "isStatic": false,
+                        "lastClassName": "kruorc",
                         "rules": Array [
-                          "word-break:break-word;",
+                          "
+  word-break: break-word;
+",
                         ],
                       },
                       "displayName": "DataListCell",
                       "foldedComponentIds": Array [],
                       "render": [Function],
-                      "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                      "styledComponentId": "sc-bdVaJa",
                       "target": [Function],
                       "toString": [Function],
                       "warnTooManyClasses": [Function],
@@ -158,10 +162,10 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   forwardedRef={null}
                 >
                   <PFDataListCell
-                    className="DataListCell-sc-18ntxrx-0 flJMIO"
+                    className="sc-bdVaJa kruorc"
                   >
                     <div
-                      className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                      className="pf-c-data-list__cell sc-bdVaJa kruorc"
                     >
                       Slack
                     </div>
@@ -170,7 +174,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
               </DataListCell>
             </div>
           </DataListItemCells>
-          <NotificationListItem__DataListAction
+          <Styled(DataListAction)
             aria-label="actions"
             aria-labelledby="items-list-item-9000"
             id="items-list-item-9000"
@@ -185,17 +189,22 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "NotificationListItem__DataListAction-w674ng-0",
-                    "isStatic": true,
-                    "lastClassName": "hhZchj",
+                    "componentId": "sc-bwzfXH",
+                    "isStatic": false,
+                    "lastClassName": "llKtln",
                     "rules": Array [
-                      "align-items:center;display:grid;grid-gap:16px;grid-template-columns:repeat(3,max-content);",
+                      "
+  align-items: center;
+  display: grid;
+  grid-gap: 16px;
+  grid-template-columns: repeat(3, max-content);
+",
                     ],
                   },
-                  "displayName": "NotificationListItem__DataListAction",
+                  "displayName": "Styled(DataListAction)",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "NotificationListItem__DataListAction-w674ng-0",
+                  "styledComponentId": "sc-bwzfXH",
                   "target": [Function],
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
@@ -209,12 +218,12 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
               <DataListAction
                 aria-label="actions"
                 aria-labelledby="items-list-item-9000"
-                className="NotificationListItem__DataListAction-w674ng-0 hhZchj"
+                className="sc-bwzfXH llKtln"
                 id="items-list-item-9000"
                 rowid="items-list-item-9000"
               >
                 <div
-                  className="pf-c-data-list__item-action NotificationListItem__DataListAction-w674ng-0 hhZchj"
+                  className="pf-c-data-list__item-action sc-bwzfXH llKtln"
                   rowid="items-list-item-9000"
                 >
                   <Component
@@ -445,7 +454,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                 </div>
               </DataListAction>
             </StyledComponent>
-          </NotificationListItem__DataListAction>
+          </Styled(DataListAction)>
         </div>
       </DataListItemRow>
     </li>

@@ -12,14 +12,14 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 
-import { ConfigAPI, MeAPI, RootAPI } from '@api';
-import About from '@components/About';
-import AlertModal from '@components/AlertModal';
-import NavExpandableGroup from '@components/NavExpandableGroup';
-import BrandLogo from '@components/BrandLogo';
-import PageHeaderToolbar from '@components/PageHeaderToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import { ConfigProvider } from '@contexts/Config';
+import { ConfigAPI, MeAPI, RootAPI } from './api';
+import About from './components/About';
+import AlertModal from './components/AlertModal';
+import NavExpandableGroup from './components/NavExpandableGroup';
+import BrandLogo from './components/BrandLogo';
+import PageHeaderToolbar from './components/PageHeaderToolbar';
+import ErrorDetail from './components/ErrorDetail';
+import { ConfigProvider } from './contexts/Config';
 
 const PageHeader = styled(PFPageHeader)`
   & .pf-c-page__header-brand-link {

@@ -1,14 +1,13 @@
+import 'styled-components/macro';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { WorkflowStateContext } from '@contexts/Workflow';
 import * as d3 from 'd3';
+import { WorkflowStateContext } from '../../../contexts/Workflow';
 import {
   getScaleAndOffsetToFit,
   getTranslatePointsForZoom,
-} from '@components/Workflow/WorkflowUtils';
-import {
-  WorkflowOutputLink,
-  WorkflowOutputNode,
-} from '@screens/Job/WorkflowOutput';
+} from '../../../components/Workflow/WorkflowUtils';
+import WorkflowOutputLink from './WorkflowOutputLink';
+import WorkflowOutputNode from './WorkflowOutputNode';
 import {
   WorkflowHelp,
   WorkflowLegend,
@@ -16,7 +15,7 @@ import {
   WorkflowNodeHelp,
   WorkflowStartNode,
   WorkflowTools,
-} from '@components/Workflow';
+} from '../../../components/Workflow';
 
 function WorkflowOutputGraph() {
   const [linkHelp, setLinkHelp] = useState();

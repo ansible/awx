@@ -2,11 +2,11 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { InventoriesAPI } from '@api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { InventoriesAPI } from '../../../api';
 import InventoryListItem from './InventoryListItem';
 
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/Inventories');
 
 describe('<InventoryListItem />', () => {
   test('initially renders succesfully', () => {

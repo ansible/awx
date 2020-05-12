@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
-import useRequest from '@util/useRequest';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import useRequest from '../../../util/useRequest';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../api';
 import SurveyStep from './SurveyStep';
 import StepName from './StepName';
 

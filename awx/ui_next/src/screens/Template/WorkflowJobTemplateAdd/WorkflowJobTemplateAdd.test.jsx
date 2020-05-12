@@ -1,16 +1,20 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI, LabelsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
+import {
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  LabelsAPI,
+} from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import WorkflowJobTemplateAdd from './WorkflowJobTemplateAdd';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Organizations');
-jest.mock('@api/models/Labels');
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Inventories');
 
 describe('<WorkflowJobTemplateAdd/>', () => {
   let wrapper;

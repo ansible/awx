@@ -2,10 +2,13 @@ import React from 'react';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import FormField, { PasswordField } from '@components/FormField';
 import { FormGroup } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
+import FormField, { PasswordField } from '../../../../components/FormField';
+import AnsibleSelect from '../../../../components/AnsibleSelect';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+} from '../../../../components/FormLayout';
 import {
   UsernameFormField,
   PasswordFormField,

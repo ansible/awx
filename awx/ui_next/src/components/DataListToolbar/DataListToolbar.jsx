@@ -16,7 +16,7 @@ import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 
-import { SearchColumns, SortColumns, QSConfig } from '@types';
+import { SearchColumns, SortColumns, QSConfig } from '../../types';
 
 const DataToolbarContent = styled(_DataToolbarContent)`
   --pf-c-data-toolbar__content--PaddingLeft: 24px;

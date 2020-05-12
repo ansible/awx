@@ -2,11 +2,14 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { HostsAPI, InventoriesAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { HostsAPI, InventoriesAPI } from '../../../api';
 import HostGroupsList from './HostGroupsList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const host = {
   summary_fields: {

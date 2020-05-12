@@ -3,16 +3,16 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '@components/CardCloseButton';
-import { TabbedCardHeader } from '@components/Card';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import NotificationList from '@components/NotificationList/NotificationList';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import CardCloseButton from '../../components/CardCloseButton';
+import { TabbedCardHeader } from '../../components/Card';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import NotificationList from '../../components/NotificationList/NotificationList';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI } from '../../api';
 
 class Organization extends Component {
   constructor(props) {

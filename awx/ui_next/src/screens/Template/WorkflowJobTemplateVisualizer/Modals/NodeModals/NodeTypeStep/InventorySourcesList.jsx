@@ -3,11 +3,11 @@ import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { InventorySourcesAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import PaginatedDataList from '@components/PaginatedDataList';
-import DataListToolbar from '@components/DataListToolbar';
-import CheckboxListItem from '@components/CheckboxListItem';
+import { InventorySourcesAPI } from '../../../../../../api';
+import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import PaginatedDataList from '../../../../../../components/PaginatedDataList';
+import DataListToolbar from '../../../../../../components/DataListToolbar';
+import CheckboxListItem from '../../../../../../components/CheckboxListItem';
 
 const QS_CONFIG = getQSConfig('inventory_sources', {
   page: 1,

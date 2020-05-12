@@ -1,8 +1,8 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { Switch, Route } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import SurveyQuestionEdit from './SurveyQuestionEdit';
 
 const survey = {

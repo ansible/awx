@@ -11,13 +11,13 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 import { RocketIcon } from '@patternfly/react-icons';
-import LaunchButton from '@components/LaunchButton';
-import StatusIcon from '@components/StatusIcon';
-import { formatDateString } from '@util/dates';
-import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
+import LaunchButton from '../LaunchButton';
+import StatusIcon from '../StatusIcon';
+import { formatDateString } from '../../util/dates';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

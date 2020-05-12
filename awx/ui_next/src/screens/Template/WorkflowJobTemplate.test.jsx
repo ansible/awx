@@ -3,18 +3,21 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
-import { sleep } from '@testUtils/testUtils';
+import { sleep } from '../../../testUtils/testUtils';
 import {
   WorkflowJobTemplatesAPI,
   CredentialsAPI,
   OrganizationsAPI,
-} from '@api';
+} from '../../api';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Credentials');
-jest.mock('@api/models/Organizations');
+jest.mock('../../api/models/WorkflowJobTemplates');
+jest.mock('../../api/models/Credentials');
+jest.mock('../../api/models/Organizations');
 
 describe('<WorkflowJobTemplate/>', () => {
   const mockMe = {

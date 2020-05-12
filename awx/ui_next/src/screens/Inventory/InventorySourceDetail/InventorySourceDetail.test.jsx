@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventorySourceDetail from './InventorySourceDetail';
 import mockInvSource from '../shared/data.inventory_source.json';
-import { InventorySourcesAPI } from '@api';
+import { InventorySourcesAPI } from '../../../api';
 
-jest.mock('@api/models/InventorySources');
+jest.mock('../../../api/models/InventorySources');
 
 function assertDetail(wrapper, label, value) {
   expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);

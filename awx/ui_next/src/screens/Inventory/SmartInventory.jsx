@@ -3,15 +3,15 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, CardActions, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import JobList from '@components/JobList';
-import RoutedTabs from '@components/RoutedTabs';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import { TabbedCardHeader } from '../../components/Card';
+import CardCloseButton from '../../components/CardCloseButton';
+import ContentError from '../../components/ContentError';
+import JobList from '../../components/JobList';
+import RoutedTabs from '../../components/RoutedTabs';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryHosts from './SmartInventoryHosts';
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI } from '../../api';
 import SmartInventoryEdit from './SmartInventoryEdit';
 
 class SmartInventory extends Component {

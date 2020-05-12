@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
-import { getRRuleDayConstants } from '@util/dates';
+import { getRRuleDayConstants } from '../../../util/dates';
 
 export default function buildRuleObj(values, i18n) {
   const [startDate, startTime] = values.startDateTime.split('T');

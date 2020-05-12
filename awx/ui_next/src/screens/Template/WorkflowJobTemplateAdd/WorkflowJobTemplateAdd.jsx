@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { Card, PageSection } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 
-import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '@api';
+import { WorkflowJobTemplatesAPI, OrganizationsAPI } from '../../../api';
 import WorkflowJobTemplateForm from '../shared/WorkflowJobTemplateForm';
 
 function WorkflowJobTemplateAdd() {

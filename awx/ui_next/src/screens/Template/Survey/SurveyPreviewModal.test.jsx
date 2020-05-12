@@ -1,6 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { waitForElement, mountWithContexts } from '@testUtils/enzymeHelpers';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../testUtils/enzymeHelpers';
 
 import SurveyPreviewModal from './SurveyPreviewModal';
 

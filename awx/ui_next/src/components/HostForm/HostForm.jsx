@@ -5,15 +5,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Form, FormGroup } from '@patternfly/react-core';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { InventoryLookup } from '@components/Lookup';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
-import { required } from '@util/validators';
+import FormField, { FormSubmitError, FieldTooltip } from '../FormField';
+import FormActionGroup from '../FormActionGroup/FormActionGroup';
+import { VariablesField } from '../CodeMirrorInput';
+import { InventoryLookup } from '../Lookup';
+import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
+import { required } from '../../util/validators';
 
 const InventoryLookupField = withI18n()(({ i18n, host }) => {
   const [inventory, setInventory] = useState(

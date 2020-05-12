@@ -10,16 +10,16 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
-import { timeOfDay } from '@util/dates';
-import { InventoriesAPI } from '@api';
-import { Inventory } from '@types';
-import CopyButton from '../../../components/CopyButton/CopyButton';
+import { timeOfDay } from '../../../util/dates';
+import { InventoriesAPI } from '../../../api';
+import { Inventory } from '../../../types';
+import DataListCell from '../../../components/DataListCell';
+import CopyButton from '../../../components/CopyButton';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { ConfigAPI, MeAPI, RootAPI } from '@api';
-import { asyncFlush } from '../jest.setup';
+import { mountWithContexts, waitForElement } from '../testUtils/enzymeHelpers';
+import { ConfigAPI, MeAPI, RootAPI } from './api';
+import { asyncFlush } from './setupTests';
 
 import App from './App';
 

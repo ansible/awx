@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Chip, Split as PFSplit, SplitItem } from '@patternfly/react-core';
 
-import ChipGroup from '@components/ChipGroup';
 import styled from 'styled-components';
+import ChipGroup from '../ChipGroup';
 
 const Split = styled(PFSplit)`
   margin: 20px 0px;

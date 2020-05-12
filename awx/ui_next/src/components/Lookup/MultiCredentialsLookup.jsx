@@ -1,14 +1,15 @@
+import 'styled-components/macro';
 import React, { Fragment, useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { ToolbarItem, Alert } from '@patternfly/react-core';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
-import AnsibleSelect from '@components/AnsibleSelect';
-import CredentialChip from '@components/CredentialChip';
-import OptionsList from '@components/OptionsList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import { CredentialsAPI, CredentialTypesAPI } from '../../api';
+import AnsibleSelect from '../AnsibleSelect';
+import CredentialChip from '../CredentialChip';
+import OptionsList from '../OptionsList';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 
 const QS_CONFIG = getQSConfig('credentials', {

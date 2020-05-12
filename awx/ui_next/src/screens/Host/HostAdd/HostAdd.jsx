@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '@components/Card';
-import HostForm from '@components/HostForm';
-import { HostsAPI } from '@api';
 import { PageSection, Card } from '@patternfly/react-core';
+import { CardBody } from '../../../components/Card';
+import HostForm from '../../../components/HostForm';
+import { HostsAPI } from '../../../api';
 
 function HostAdd() {
   const [formError, setFormError] = useState(null);

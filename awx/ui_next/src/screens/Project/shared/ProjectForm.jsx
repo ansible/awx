@@ -4,20 +4,23 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
-import { Config } from '@contexts/Config';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import { Config } from '../../../contexts/Config';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { CredentialTypesAPI, ProjectsAPI } from '@api';
-import { required } from '@util/validators';
-import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
+} from '../../../components/FormField';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
+import { required } from '../../../util/validators';
+import {
+  FormColumnLayout,
+  SubFormLayout,
+} from '../../../components/FormLayout';
 import {
   GitSubForm,
   HgSubForm,

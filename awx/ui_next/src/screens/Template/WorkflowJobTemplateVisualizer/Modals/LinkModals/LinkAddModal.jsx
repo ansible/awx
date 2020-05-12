@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
 import { BaseSizes, Title, TitleLevel } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { WorkflowDispatchContext } from '../../../../../contexts/Workflow';
 import LinkModal from './LinkModal';
 
 function LinkAddModal({ i18n }) {
