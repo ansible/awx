@@ -279,7 +279,7 @@ describe('<InventoryList />', () => {
     });
     wrapper.update();
 
-    const modal = wrapper.find('Modal');
+    const modal = wrapper.find('Modal[aria-label="Deletion Error"]');
     expect(modal).toHaveLength(1);
     expect(modal.prop('title')).toEqual('Error!');
   });
