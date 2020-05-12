@@ -17,6 +17,7 @@ import ContentError from '@components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '@api';
+import TeamAccessList from './TeamAccess';
 
 function Team({ i18n, setBreadcrumb }) {
   const [team, setTeam] = useState(null);
@@ -98,7 +99,7 @@ function Team({ i18n, setBreadcrumb }) {
           )}
           {team && (
             <Route path="/teams/:id/access">
-              <span>Coming soon :)</span>
+              <TeamAccessList />
             </Route>
           )}
           <Route key="not-found" path="*">
