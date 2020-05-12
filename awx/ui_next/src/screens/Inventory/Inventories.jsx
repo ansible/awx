@@ -77,6 +77,8 @@ class Inventories extends Component {
 
       [`${inventorySourcesPath}`]: i18n._(t`Sources`),
       [`${inventorySourcesPath}/add`]: i18n._(t`Create New Source`),
+      [`${inventorySourcesPath}/${nested?.id}`]: `${nested?.name}`,
+      [`${inventorySourcesPath}/${nested?.id}/details`]: i18n._(t`Details`),
     };
     this.setState({ breadcrumbConfig });
   };
