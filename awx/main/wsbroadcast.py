@@ -37,7 +37,7 @@ def get_broadcast_hosts():
                                 .order_by('hostname') \
                                 .values('hostname', 'ip_address') \
                                 .distinct()
-    return [i['ip_address'] or i['hostname'] for i in instances]
+    return {i['hostname']: i['ip_address'] or i['hostname'] for i in instances}
 
 
 def get_local_host():
@@ -149,15 +149,22 @@ class BroadcastWebsocketTask(WebsocketTask):
 class BroadcastWebsocketManager(object):
     def __init__(self):
         self.event_loop = asyncio.get_event_loop()
+        '''
+        {
+            'hostname1': BroadcastWebsocketTask(),
+            'hostname2': BroadcastWebsocketTask(),
+            'hostname3': BroadcastWebsocketTask(),
+        }
+        '''
         self.broadcast_tasks = dict()
-        # parallel dict to broadcast_tasks that tracks stats
         self.local_hostname = get_local_host()
         self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
 
     async def run_per_host_websocket(self):
 
         while True:
-            future_remote_hosts = get_broadcast_hosts()
+            known_hosts = get_broadcast_hosts()
+            future_remote_hosts = known_hosts.keys()
             current_remote_hosts = self.broadcast_tasks.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
             new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
@@ -184,7 +191,7 @@ class BroadcastWebsocketManager(object):
                 broadcast_task = BroadcastWebsocketTask(name=self.local_hostname,
                                                         event_loop=self.event_loop,
                                                         stats=stats,
-                                                        remote_host=h)
+                                                        remote_host=known_hosts[h])
                 broadcast_task.start()
                 self.broadcast_tasks[h] = broadcast_task
 
