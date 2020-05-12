@@ -67,7 +67,7 @@ def test_parent_failed(emit, event):
 
 @pytest.mark.django_db
 def test_host_summary_generation():
-    hostnames = [f'Host {i}' for i in range(500)]
+    hostnames = [f'Host {i}' for i in range(100)]
     inv = Inventory()
     inv.save()
     Host.objects.bulk_create([
@@ -107,6 +107,10 @@ def test_host_summary_generation():
         assert s.processed == 0
         assert s.rescued == 0
         assert s.skipped == 0
+
+    for host in Host.objects.all():
+        assert host.last_job_id == j.id
+        assert host.last_job_host_summary.host == host
 
 
 @pytest.mark.django_db

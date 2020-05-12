@@ -503,11 +503,29 @@ class JobEvent(BasePlaybookEvent):
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                summaries[(host_id, host)] = JobHostSummary(
+                summary = JobHostSummary(
                     created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats
                 )
+                summary.failed = bool(summary.dark or summary.failures)
+                summaries[(host_id, host)] = summary
 
             JobHostSummary.objects.bulk_create(summaries.values())
+
+            # update the last_job_id and last_job_host_summary_id
+            # in single queries
+            host_mapping = dict(
+                (summary['host'], summary['id'])
+                for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host')
+            )
+            all_hosts = Host.objects.filter(
+                pk__in=host_mapping.keys()
+            ).only('id')
+            for h in all_hosts:
+                h.last_job_id = job.id
+                if h.id in host_mapping:
+                    h.last_job_host_summary_id = host_mapping[h.id]
+            Host.objects.bulk_update(all_hosts, ['last_job_id', 'last_job_host_summary_id'])
+
 
     @property
     def job_verbosity(self):
