@@ -1,2 +1,3 @@
 ---
 create_preload_data: true
+build_dev: false
