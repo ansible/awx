@@ -179,6 +179,7 @@
   copy:
     src: ../tools/scripts/config-watcher
     dest: "{{ docker_base_path }}/config-watcher"
+    mode: 0755
   delegate_to: localhost
 
 - name: Stage Makefile
