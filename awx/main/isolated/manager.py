@@ -58,7 +58,7 @@ class IsolatedManager(object):
                 os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             for host in hosts:
                 inventory['all']['hosts'][host] = {
-                    "ansible_connection": "kubectl",
+                    "ansible_connection": "community.kubernetes.kubectl",
                     "ansible_kubectl_config": path,
                 }
         else:
@@ -74,6 +74,7 @@ class IsolatedManager(object):
         env['ANSIBLE_RETRY_FILES_ENABLED'] = 'False'
         env['ANSIBLE_HOST_KEY_CHECKING'] = str(settings.AWX_ISOLATED_HOST_KEY_CHECKING)
         env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'plugins', 'isolated')
+        env['ANSIBLE_COLLECTIONS_PATHS'] = settings.AWX_ANSIBLE_COLLECTIONS_PATHS
         set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
 
         def finished_callback(runner_obj):

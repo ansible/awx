@@ -141,7 +141,7 @@ def dispatch_startup():
     # and Tower fall out of use/support, we can probably just _assume_ that
     # everybody has moved to bigint, and remove this code entirely
     enforce_bigint_pk_migration()
-    
+
     # Update Tower's rsyslog.conf file based on loggins settings in the db
     reconfigure_rsyslog()
 
@@ -2408,7 +2408,7 @@ class RunInventoryUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [self.get_path_to('..', 'plugins', 'inventory'), settings.INVENTORY_COLLECTIONS_ROOT]
+        return [self.get_path_to('..', 'plugins', 'inventory'), settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
 
     def build_private_data(self, inventory_update, private_data_dir):
         """

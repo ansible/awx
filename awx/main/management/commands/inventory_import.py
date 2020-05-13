@@ -169,7 +169,7 @@ class AnsibleInventoryLoader(object):
             self.tmp_private_dir = build_proot_temp_dir()
             logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
             kwargs['proot_temp_dir'] = self.tmp_private_dir
-            kwargs['proot_show_paths'] = [functioning_dir(self.source), settings.INVENTORY_COLLECTIONS_ROOT]
+            kwargs['proot_show_paths'] = [functioning_dir(self.source), settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
         logger.debug("Running from `{}` working directory.".format(cwd))
 
         if self.venv_path != settings.ANSIBLE_VENV_PATH:
@@ -1078,7 +1078,7 @@ class Command(BaseCommand):
                             if settings.SQL_DEBUG:
                                 logger.warning('update computed fields took %d queries',
                                                len(connection.queries) - queries_before2)
-                        # Check if the license is valid. 
+                        # Check if the license is valid.
                         # If the license is not valid, a CommandError will be thrown,
                         # and inventory update will be marked as invalid.
                         # with transaction.atomic() will roll back the changes.

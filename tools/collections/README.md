@@ -17,7 +17,7 @@ for the vendored inventory collections.
 Add this line to your local settings:
 
 ```
-INVENTORY_COLLECTIONS_ROOT = '/awx_devel/awx/plugins/collections'
+AWX_ANSIBLE_COLLECTIONS_PATHS = '/awx_devel/awx/plugins/collections'
 ```
 
 Then when you run an inventory update of a particular type, it should
