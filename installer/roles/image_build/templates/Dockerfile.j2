@@ -160,7 +160,7 @@ RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 {% endif %}
 
 # Create default awx rsyslog config
-ADD {% if build_dev|bool %}tools/docker-compose/{% endif %}rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
+ADD {% if build_dev|bool %}installer/roles/image_build/files/{% endif %}rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
 ## File mappings
 {% if build_dev|bool %}
