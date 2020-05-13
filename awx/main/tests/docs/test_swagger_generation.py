@@ -174,7 +174,7 @@ class TestSwaggerGeneration():
                 data
             )
             data = re.sub(
-                r'"action_node": "awx-[^"]+"',
+                r'"action_node": "[^"]+"',
                 '"action_node": "awx"',
                 data
             )
