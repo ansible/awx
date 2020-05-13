@@ -162,6 +162,13 @@ class BroadcastWebsocketManager(object):
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
             new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
 
+            remote_addresses = {k: v.remote_host for k, v in self.broadcast_tasks.items()}
+            for hostname, address in known_hosts.items():
+                if hostname in self.broadcast_tasks and \
+                        address != remote_addresses[hostname]:
+                    deleted_remote_hosts.add(hostname)
+                    new_remote_hosts.add(hostname)
+
             if deleted_remote_hosts:
                 logger.warn(f"Removing {deleted_remote_hosts} from websocket broadcast list")
             if new_remote_hosts:
