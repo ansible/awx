@@ -9,6 +9,9 @@ export default function useInventoryStep(config, resource, visitedSteps, i18n) {
   const [stepErrors, setStepErrors] = useState({});
 
   const validate = values => {
+    if (!config.ask_inventory_on_launch) {
+      return {};
+    }
     const errors = {};
     if (!values.inventory) {
       errors.inventory = i18n._(t`An inventory must be selected`);
