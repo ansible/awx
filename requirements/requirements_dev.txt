@@ -4,7 +4,7 @@ pprofile
 ipython==5.2.1
 unittest2
 pep8
-flake8
+flake8==3.7.9
 pluggy==0.6.0
 pyflakes
 pytest==3.6.0
