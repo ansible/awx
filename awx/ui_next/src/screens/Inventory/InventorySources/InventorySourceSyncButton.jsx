@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
@@ -9,12 +9,7 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
-function InventorySourceSyncButton({
-  onSyncLoading,
-  source,
-  i18n,
-  onFetchSources,
-}) {
+function InventorySourceSyncButton({ source, i18n }) {
   const {
     isLoading: startSyncLoading,
     error: startSyncError,
@@ -24,10 +19,9 @@ function InventorySourceSyncButton({
       const {
         data: { status },
       } = await InventorySourcesAPI.createSyncStart(source.id);
-      onFetchSources();
 
       return status;
-    }, [source.id, onFetchSources]),
+    }, [source.id]),
     {}
   );
 
@@ -46,15 +40,8 @@ function InventorySourceSyncButton({
       } = await InventorySourcesAPI.readDetail(source.id);
 
       await InventoryUpdatesAPI.createSyncCancel(id);
-      onFetchSources();
-    }, [source.id, onFetchSources])
+    }, [source.id])
   );
-
-  useEffect(() => onSyncLoading(startSyncLoading || cancelSyncLoading), [
-    onSyncLoading,
-    startSyncLoading,
-    cancelSyncLoading,
-  ]);
 
   const { error, dismissError } = useDismissableError(
     cancelSyncError || startSyncError
@@ -107,9 +94,7 @@ InventorySourceSyncButton.defaultProps = {
 };
 
 InventorySourceSyncButton.propTypes = {
-  onSyncLoading: PropTypes.func.isRequired,
   source: PropTypes.shape({}),
-  onFetchSources: PropTypes.func.isRequired,
 };
 
 export default withI18n()(InventorySourceSyncButton);

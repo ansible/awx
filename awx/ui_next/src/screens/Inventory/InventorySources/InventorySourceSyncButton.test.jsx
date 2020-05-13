@@ -83,4 +83,24 @@ describe('<InventorySourceSyncButton />', () => {
     expect(InventorySourcesAPI.readDetail).toBeCalledWith(1);
     expect(InventoryUpdatesAPI.createSyncCancel).toBeCalledWith(120);
   });
+  test('should throw error on sync start properly', async () => {
+    InventorySourcesAPI.createSyncStart.mockRejectedValueOnce(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/inventory_sources/update',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+
+    await act(async () =>
+      wrapper.find('Button[aria-label="Start sync source"]').simulate('click')
+    );
+    wrapper.update();
+    expect(wrapper.find('AlertModal').length).toBe(1);
+  });
 });

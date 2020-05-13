@@ -4,7 +4,10 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
 
-import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { InventoriesAPI, InventorySourcesAPI } from '../../../api';
 import PaginatedDataList, {
@@ -30,7 +33,7 @@ function InventorySourceList({ i18n }) {
 
   const {
     isLoading,
-    error,
+    error: fetchError,
     result: { sources, sourceCount, sourceChoices, sourceChoicesOptions },
     request: fetchSources,
   } = useRequest(
@@ -64,9 +67,8 @@ function InventorySourceList({ i18n }) {
     useCallback(async () => {
       if (canSyncSources) {
         await InventoriesAPI.syncAllSources(id);
-        fetchSources();
       }
-    }, [id, fetchSources, canSyncSources])
+    }, [id, canSyncSources])
   );
 
   useEffect(() => {
@@ -97,6 +99,7 @@ function InventorySourceList({ i18n }) {
       qsConfig: QS_CONFIG,
     }
   );
+  const { error: syncError, dismissError } = useDismissableError(syncAllError);
 
   const handleDelete = async () => {
     await handleDeleteSources();
@@ -109,7 +112,7 @@ function InventorySourceList({ i18n }) {
   return (
     <>
       <PaginatedDataList
-        contentError={error || deletionError || syncAllError}
+        contentError={fetchError}
         hasContentLoading={isLoading || isDeleteLoading || isSyncAllLoading}
         items={sources}
         itemCount={sourceCount}
@@ -138,15 +141,15 @@ function InventorySourceList({ i18n }) {
                 ? [
                     <Tooltip
                       key="update"
-                      content={i18n._(t`Sync All Sources`)}
+                      content={i18n._(t`Sync all sources`)}
                       position="top"
                     >
                       <Button
                         onClick={syncAll}
-                        aria-label={i18n._(t`Sync All`)}
+                        aria-label={i18n._(t`Sync all`)}
                         variant="secondary"
                       >
-                        {i18n._(t`Sync All`)}
+                        {i18n._(t`Sync all`)}
                       </Button>
                     </Tooltip>,
                   ]
@@ -173,15 +176,28 @@ function InventorySourceList({ i18n }) {
           );
         }}
       />
+      {syncError && (
+        <AlertModal
+          aria-label={i18n._(t`Sync error`)}
+          isOpen={syncError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {i18n._(t`Failed to sync some or all inventory sources.`)}
+          <ErrorDetail error={syncError} />
+        </AlertModal>
+      )}
+
       {deletionError && (
         <AlertModal
-          aria-label={i18n._(t`Delete Error`)}
+          aria-label={i18n._(t`Delete error`)}
           isOpen={deletionError}
           variant="error"
           title={i18n._(t`Error!`)}
           onClose={clearDeletionError}
         >
-          {i18n._(t`Failed to delete one or more Inventory Sources.`)}
+          {i18n._(t`Failed to delete one or more inventory sources.`)}
           <ErrorDetail error={deletionError} />
         </AlertModal>
       )}
