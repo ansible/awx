@@ -14,9 +14,11 @@ function PreviewStep({ resource, config, survey, formErrors }) {
       .filter(q => q.type === 'password')
       .map(q => q.variable);
     const masked = maskPasswords(surveyValues, passwordFields);
-    extraVars = yaml.safeDump(mergeExtraVars(values.extra_vars, masked));
+    extraVars = yaml.safeDump(
+      mergeExtraVars(values.extra_vars || '---', masked)
+    );
   } else {
-    extraVars = values.extra_vars;
+    extraVars = values.extra_vars || '---';
   }
   return (
     <>
