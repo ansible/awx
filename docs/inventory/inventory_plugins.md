@@ -41,12 +41,12 @@ At some point, scripts will be removed and the script-related (for credentials a
 Collections are used for inventory imports starting in Ansible 2.9, and each collection has its own versioning independently from Ansible.
 Versions for those collections are set in the requirements file `requirements/collections_requirements.yml`.
 
-The location of vendored collections is set by the file-only setting `INVENTORY_COLLECTIONS_ROOT`.
+The location of vendored collections is set by the file-only setting `AWX_ANSIBLE_COLLECTIONS_PATHS`.
 For development purposes, this can be changed so that you can test against development versions of those collections.
 Instructions for doing this are in `tools/collections`.
 
 If, for some reason, you need to change the version of a particular collection used in inventory imports,
-you can use the `ansible-galaxy` tool to update the collection inside of the `INVENTORY_COLLECTIONS_ROOT`.
+you can use the `ansible-galaxy` tool to update the collection inside of the `AWX_ANSIBLE_COLLECTIONS_PATHS`.
 Note that the logic for building the inventory file is written and tested only for the version pinned in the requirements file.
 
 

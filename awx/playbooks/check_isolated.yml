@@ -5,6 +5,8 @@
 - name: Poll for status of active job.
   hosts: all
   gather_facts: false
+  collections:
+    - ansible.posix
 
   tasks:
 

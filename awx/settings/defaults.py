@@ -121,8 +121,8 @@ LOGIN_URL = '/api/login/'
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
 # Absolute filesystem path to the directory to host collections for
-# running inventory imports
-INVENTORY_COLLECTIONS_ROOT = os.path.join(BASE_DIR, 'vendor', 'inventory_collections')
+# running inventory imports, isolated playbooks
+AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_collections')
 
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This

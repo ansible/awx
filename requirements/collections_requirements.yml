@@ -16,3 +16,7 @@ collections:
     version: 0.4.0  # first to contain necessary grouping and filtering features
   - name: ovirt.ovirt
     version: 1.0.0  # contains naming fix, was originally named ovirt.ovirt_collection
+  - name: community.kubernetes  # required for isolated management playbooks
+    version: 0.11.0
+  - name: ansible.posix  # required for isolated management playbooks
+    version: 0.1.1
