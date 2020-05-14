@@ -198,6 +198,7 @@ RUN for dir in \
 RUN chmod u+s /usr/bin/bwrap
 {% if build_dev|bool %}
 RUN for dir in \
+      /venv \
       /var/lib/awx \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
