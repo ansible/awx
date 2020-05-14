@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
@@ -29,6 +29,7 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import LaunchButton from '../../../components/LaunchButton';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import { JobTemplatesAPI } from '../../../api';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -59,7 +60,6 @@ function JobTemplateDetail({ i18n, template }) {
     webhook_key,
   } = template;
   const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const { id: templateId } = useParams();
@@ -82,16 +82,18 @@ function JobTemplateDetail({ i18n, template }) {
     })();
   }, [templateId]);
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-    try {
+  const {
+    request: deleteJobTemplate,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       await JobTemplatesAPI.destroy(templateId);
       history.push(`/templates`);
-    } catch (error) {
-      setDeletionError(error);
-    }
-    setHasContentLoading(false);
-  };
+    }, [templateId, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
@@ -386,22 +388,23 @@ function JobTemplateDetail({ i18n, template }) {
             <DeleteButton
               name={name}
               modalTitle={i18n._(t`Delete Job Template`)}
-              onConfirm={handleDelete}
+              onConfirm={deleteJobTemplate}
+              isDisabled={isLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
           )}
       </CardActionsRow>
       {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete job template.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>
