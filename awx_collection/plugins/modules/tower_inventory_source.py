@@ -125,6 +125,21 @@ options:
         - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
       type: str
       version_added: "3.7"
+    notification_templates_started:
+      description:
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -174,6 +189,9 @@ def main():
         update_cache_timeout=dict(type='int'),
         source_project=dict(),
         update_on_project_update=dict(type='bool'),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -201,6 +219,27 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory_source)
+
+    # Attempt to look up associated field items the user specified.
+    association_fields = {}
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     # Create the data that gets sent for create and update
     inventory_source_fields = {
@@ -239,7 +278,11 @@ def main():
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
     # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
-    module.create_or_update_if_needed(inventory_source, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source')
+    module.create_or_update_if_needed(
+        inventory_source, inventory_source_fields,
+        endpoint='inventory_sources', item_type='inventory source',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':
