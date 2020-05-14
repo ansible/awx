@@ -3,6 +3,7 @@ import logging
 from uuid import uuid4
 
 from django.utils.encoding import smart_text
+from django.utils.timezone import now
 
 from awx.main.utils.common import parse_yaml_or_json
 
@@ -99,20 +100,25 @@ def create_scm_script_substitute(apps, source):
     # it can still be updated manually later (but staying within 2.9 branch), if desired
     ansible_rev = '6f83b9aff42331e15c55a171de0a8b001208c18c'
     InventorySource = apps.get_model('main', 'InventorySource')
+    ContentType = apps.get_model('contenttypes', 'ContentType')
     Project = apps.get_model('main', 'Project')
     if not InventorySource.objects.filter(source=source).exists():
         logger.debug('No sources of type {} to migrate'.format(source))
         return
     proj_name = 'Replacement project for {} type sources - {}'.format(source, uuid4())
-    project = Project(
+    right_now = now()
+    project = Project.objects.create(
         name=proj_name,
+        created=right_now,
+        modified=right_now,
         description='Created by migration',
+        polymorphic_ctype=ContentType.objects.get(model='project'),
+        # project-specific fields
         scm_type='git',
         scm_url='https://github.com/ansible/ansible.git',
         scm_branch='stable-2.9',
         scm_revision=ansible_rev
     )
-    project.save(skip_update=True)
     ct = 0
     for inv_src in InventorySource.objects.filter(source=source).iterator():
         inv_src.source = 'scm'

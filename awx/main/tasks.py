@@ -2281,7 +2281,11 @@ class RunProjectUpdate(BaseTask):
     def acquire_lock(self, instance, blocking=True):
         lock_path = instance.get_lock_file()
         if lock_path is None:
-            raise RuntimeError(u'Invalid lock file path')
+            # If from migration or someone blanked local_path for any other reason, recoverable by save
+            instance.save()
+            lock_path = instance.get_lock_file()
+            if lock_path is None:
+                raise RuntimeError(u'Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
