@@ -2167,7 +2167,10 @@ class RunProjectUpdate(BaseTask):
         scm_branch = project_update.scm_branch
         branch_override = bool(scm_branch and project_update.scm_branch != project_update.project.scm_branch)
         if project_update.job_type == 'run' and (not branch_override):
-            scm_branch = project_update.project.scm_revision
+            if project_update.project.scm_revision:
+                scm_branch = project_update.project.scm_revision
+            elif not scm_branch:
+                raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
