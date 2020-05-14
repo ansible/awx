@@ -139,7 +139,7 @@ options:
       description:
         - list of notifications to send on error
       type: list
-      elements: str            
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -191,7 +191,7 @@ def main():
         update_on_project_update=dict(type='bool'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
-        notification_templates_error=dict(type="list", elements='str'),        
+        notification_templates_error=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -279,7 +279,7 @@ def main():
 
     # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
     module.create_or_update_if_needed(
-        inventory_source, inventory_source_fields, 
+        inventory_source, inventory_source_fields,
         endpoint='inventory_sources', item_type='inventory source',
         associations=association_fields
     )

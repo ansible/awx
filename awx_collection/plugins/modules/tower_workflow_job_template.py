@@ -132,7 +132,7 @@ options:
       description:
         - list of notifications to send on start
       type: list
-      elements: str          
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -253,7 +253,7 @@ def main():
         association_fields['notification_templates_approvals'] = []
         for item in notifications_approval:
             association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
-            
+
     on_change = None
     new_spec = module.params.get('survey')
     if new_spec:

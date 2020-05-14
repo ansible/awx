@@ -173,7 +173,7 @@ def main():
 
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(
-        organization, org_fields, 
+        organization, org_fields,
         endpoint='organizations', item_type='organization',
         associations=association_fields,
     )
