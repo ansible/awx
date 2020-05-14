@@ -7171,6 +7171,10 @@ msgstr ""
 msgid "Update Revision on Launch"
 msgstr ""
 
+#: client/src/projects/projects.form.js:207
+msgid "Sync Assets"
+msgstr ""
+
 #: client/features/projects/projects.strings.js:44
 #: client/src/projects/factories/get-project-tool-tip.factory.js:30
 msgid "Update canceled. Click for details"

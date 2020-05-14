@@ -159,3 +159,39 @@
         - collections_enabled|bool
       tags:
         - install_collections
+
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  name: Create assets
+  vars:
+    job_template_vars: '{{ project_path }}/assets/job_templates.yml'
+    # These three we want to pass into the job from main/tasks.py
+    awx_project: "Demo Project"
+    awx_oauthtoken: "JaEXtZWjnZRSpxdP7cszOfbrpyOqC9"
+    awx_host: "https://10.0.1.107:8043"
+  tasks:
+    - block:
+        # It would be nice if we can pre-install this collection
+        - name: Install awx.awx collection
+          command: "ansible-galaxy collection install awx.awx {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}"
+          register: galaxy_collection_result
+          changed_when: "'Installing ' in galaxy_collection_result.stdout"
+          environment:
+            ANSIBLE_FORCE_COLOR: false
+
+        # Burrying the call to awx.awx will prevent playbook complication errors is ansible does not support collections
+        - include_role:
+            name: sync_assets
+            tasks_from: job_templates
+      when:
+        - assets_enabled|bool
+        - "ansible_version.full is version_compare('2.8', '>=')"
+      tags:
+        # maybe someday we add update_assets tag in tasks/main.py if the asset folder exists
+        - update_assets
+        - update_git
+        - update_hg
+        - update_svn
+        - update_insights
+

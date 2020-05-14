@@ -258,6 +258,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
     )
+    sync_assets = models.BooleanField(
+        default=False,
+        help_text=_('When syncing the assets, load Tower assets from the projects assets folder.'),
+    )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,

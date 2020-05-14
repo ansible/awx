@@ -1,0 +1,22 @@
+---
+- name: See if the job templates file exists
+  stat:
+    path: "{{ job_template_vars }}"
+  register: doesJobTemplateAssetsExist
+
+- name: Load vars
+  include_vars:
+    file: "{{ job_template_vars }}"
+  when: doesJobTemplateAssetsExist.stat.exists
+
+- name: Import job templates
+  awx.awx.tower_job_template:
+    name: "{{ item.name | default(OMIT) }}"
+    project: "{{ awx_project }}"
+    playbook: "{{ item.playbook | default(OMIT) }}"
+    inventory: "{{ item.inventory | default(OMIT) }}"
+    tower_oauthtoken: "{{ awx_oauthtoken }}"
+    tower_host: "{{ awx_host }}"
+    validate_certs: False
+  loop: "{{ job_templates | default([]) }}"
+  when: job_templates | default([]) | length() > 0

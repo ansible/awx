@@ -202,6 +202,16 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                }, {
+                    name: 'sync_assets',
+                    label: i18n._('Sync Assets'),
+                    type: 'checkbox',
+                    awPopOver: '<p>' + i18n._('When syncing the assets, load Tower assets from the projects assets folder.') + '</p>',
+                    dataTitle: i18n._('SCM Update'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 {
                     name: 'allow_override',
