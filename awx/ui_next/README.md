@@ -20,6 +20,8 @@ you'll need to update your django settings and use the `TARGET_HOST` and `TARGET
 echo "CSRF_TRUSTED_ORIGINS = ['awx.local:8043']" >> /awx/settings/development.py
 TARGET_HOST='awx.local:8043' TARGET_PORT=8043 npm --prefix awx/ui_next start
 ```
+**Note:** When using an external server, you must also manually update the `proxy` field in `package.json`
+to point to the new websocket url.
 
 ## Testing
 ```shell

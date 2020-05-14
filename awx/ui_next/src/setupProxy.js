@@ -4,6 +4,9 @@ const TARGET_PORT = process.env.TARGET_PORT || 8043;
 const TARGET_HOST = process.env.TARGET_HOST || 'localhost';
 const TARGET = `https://${TARGET_HOST}:${TARGET_PORT}`;
 
+// Note: The websocket proxy is configured
+// manually using the 'proxy' field in package.json
+
 module.exports = app => {
   app.use(
     '/api/login/',
@@ -27,14 +30,6 @@ module.exports = app => {
       bypass: req =>
         req.originalUrl.includes('hot-update.json') ||
         req.originalUrl.includes('login'),
-    })
-  );
-  app.use(
-    '/websocket',
-    createProxyMiddleware({
-      target: TARGET,
-      secure: false,
-      ws: true,
     })
   );
 };
