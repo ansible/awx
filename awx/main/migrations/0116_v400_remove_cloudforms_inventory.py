@@ -11,7 +11,7 @@ def convert_cloudforms_to_scm(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0114_v370_remove_deprecated_manual_inventory_sources'),
+        ('main', '0115_v370_schedule_set_null'),
     ]
 
     operations = [
