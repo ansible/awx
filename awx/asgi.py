@@ -9,7 +9,7 @@ from awx import __version__ as tower_version
 from awx import prepare_env, MODE
 prepare_env() # NOQA
 
-from channels.routing import get_default_application
+from channels.routing import get_default_application  # noqa
 
 
 """

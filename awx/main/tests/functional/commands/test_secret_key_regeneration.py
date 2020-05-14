@@ -65,6 +65,7 @@ class TestKeyRegeneration:
         assert nc['token'].startswith(PREFIX)
 
         Slack = nt.CLASS_FOR_NOTIFICATION_TYPE[nt.notification_type]
+
         class TestBackend(Slack):
 
             def __init__(self, *args, **kw):
