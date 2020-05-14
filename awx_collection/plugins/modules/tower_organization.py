@@ -56,11 +56,6 @@ options:
         - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
       type: str
       version_added: "3.7"
-    notification_templates_approvals:
-      description:
-        - list of notifications to send on start
-      type: list
-      elements: str
     notification_templates_started:
       description:
         - list of notifications to send on start
@@ -75,12 +70,12 @@ options:
       description:
         - list of notifications to send on error
       type: list
-      elements: str  
+      elements: str
     notification_templates_approvals:
       description:
         - list of notifications to send on start
       type: list
-      elements: str                
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -179,7 +174,7 @@ def main():
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(
         organization, org_fields, 
-        endpoint='organizations', item_type='organization'
+        endpoint='organizations', item_type='organization',
         associations=association_fields,
     )
 
