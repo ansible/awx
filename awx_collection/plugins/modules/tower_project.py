@@ -141,7 +141,7 @@ options:
       description:
         - list of notifications to send on error
       type: list
-      elements: str      
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -314,8 +314,8 @@ def main():
 
     # If the state was present and we can let the module build or update the existing project, this will return on its own
     module.create_or_update_if_needed(
-        project, project_fields, 
-        endpoint='projects', item_type='project', 
+        project, project_fields,
+        endpoint='projects', item_type='project',
         associations=association_fields,
         on_create=on_change, on_update=on_change
     )
