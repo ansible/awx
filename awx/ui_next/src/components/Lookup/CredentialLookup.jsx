@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { bool, func, node, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -35,6 +35,15 @@ function CredentialLookup({
   const [credentials, setCredentials] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
+  const isMounted = useRef(null);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     (async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
@@ -49,10 +58,12 @@ function CredentialLookup({
         const { data } = await CredentialsAPI.read(
           mergeParams(params, { ...typeIdParams, ...typeKindParams })
         );
-        setCredentials(data.results);
-        setCount(data.count);
+        if (isMounted.current) {
+          setCredentials(data.results);
+          setCount(data.count);
+        }
       } catch (err) {
-        if (setError) {
+        if (isMounted.current) {
           setError(err);
         }
       }

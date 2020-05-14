@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -35,6 +35,12 @@ const SCMSubForm = ({ i18n }) => {
     }, []),
     []
   );
+
+  useEffect(() => {
+    if (projectField.value?.id) {
+      fetchSourcePath(projectField.value.id);
+    }
+  }, [fetchSourcePath, projectField.value]);
 
   const handleProjectUpdate = useCallback(
     value => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { node, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -32,19 +32,31 @@ function ProjectLookup({
   const [projects, setProjects] = useState([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState(null);
+  const isMounted = useRef(null);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       try {
         const { data } = await ProjectsAPI.read(params);
-        setProjects(data.results);
-        setCount(data.count);
-        if (data.count === 1) {
-          onChange(data.results[0]);
+        if (isMounted.current) {
+          setProjects(data.results);
+          setCount(data.count);
+          if (data.count === 1) {
+            onChange(data.results[0]);
+          }
         }
       } catch (err) {
-        setError(err);
+        if (isMounted.current) {
+          setError(err);
+        }
       }
     })();
   }, [onChange, history.location]);

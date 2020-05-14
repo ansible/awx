@@ -133,23 +133,24 @@ const InventorySourceForm = ({
   i18n,
   onCancel,
   onSubmit,
+  source,
   submitError = null,
 }) => {
   const initialValues = {
-    credential: null,
-    custom_virtualenv: '',
-    description: '',
-    name: '',
-    overwrite: false,
-    overwrite_vars: false,
-    source: '',
-    source_path: '',
-    source_project: null,
-    source_vars: '---\n',
-    update_cache_timeout: 0,
-    update_on_launch: false,
-    update_on_project_update: false,
-    verbosity: 1,
+    credential: source?.summary_fields?.credential || null,
+    custom_virtualenv: source?.custom_virtualenv || '',
+    description: source?.description || '',
+    name: source?.name || '',
+    overwrite: source?.overwrite || false,
+    overwrite_vars: source?.overwrite_vars || false,
+    source: source?.source || '',
+    source_path: source?.source_path || '',
+    source_project: source?.summary_fields?.source_project || null,
+    source_vars: source?.source_vars || '---\n',
+    update_cache_timeout: source?.update_cache_timeout || 0,
+    update_on_launch: source?.update_on_launch || false,
+    update_on_project_update: source?.update_on_project_update || false,
+    verbosity: source?.verbosity || 1,
   };
 
   const {
@@ -172,19 +173,19 @@ const InventorySourceForm = ({
         };
       });
     }, []),
-    []
+    null
   );
 
   useEffect(() => {
     fetchSourceOptions();
   }, [fetchSourceOptions]);
 
-  if (isSourceOptionsLoading) {
-    return <ContentLoading />;
-  }
-
   if (sourceOptionsError) {
     return <ContentError error={sourceOptionsError} />;
+  }
+
+  if (!sourceOptions || isSourceOptionsLoading) {
+    return <ContentLoading />;
   }
 
   return (
