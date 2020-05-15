@@ -68,15 +68,6 @@ INI_TEST_VARS = {
         'satellite6_want_hostcollections': True,
         'satellite6_want_ansible_ssh_host': True,
         'satellite6_want_facts': True
-
-    },
-    'cloudforms': {
-        'version': '2.4',
-        'purge_actions': 'maybe',
-        'clean_group_keys': 'this_key',
-        'nest_tags': 'yes',
-        'suffix': '.ppt',
-        'prefer_ipv4': 'yes'
     },
     'rhv': {  # options specific to the plugin
         'ovirt_insecure': False,
