@@ -2621,21 +2621,21 @@ class satellite6(PluginFileInjector):
 
         # Compatibility content
         group_by_hostvar = {
-            "environment":           {"prefix": "foreman_environment_",
+            "environment":           {"prefix": "{}environment_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
                                              "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')"},
-            "location":              {"prefix": "foreman_location_",
+            "location":              {"prefix": "{}location_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "organization":          {"prefix": "foreman_organization_",
+            "organization":          {"prefix": "{}organization_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "lifecycle_environment": {"prefix": "foreman_lifecycle_environment_",
+            "lifecycle_environment": {"prefix": "{}lifecycle_environment_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
                                              "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
-            "content_view":          {"prefix": "foreman_content_view_",
+            "content_view":          {"prefix": "{}content_view_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['content_view_name'] | "
                                              "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"}
