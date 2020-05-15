@@ -48,6 +48,26 @@ describe('OtherPromptsStep', () => {
     );
   });
 
+  test('should render source control branch field', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <OtherPromptsStep
+            config={{
+              ask_scm_branch_on_launch: true,
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    expect(wrapper.find('FormField#prompt-scm-branch')).toHaveLength(1);
+    expect(
+      wrapper.find('FormField#prompt-scm-branch input').prop('name')
+    ).toEqual('scm_branch');
+  });
+
   test('should render verbosity field', async () => {
     let wrapper;
     await act(async () => {

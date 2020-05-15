@@ -34,6 +34,16 @@ function OtherPromptsStep({ config, i18n }) {
           information and examples on patterns.`)}
         />
       )}
+      {config.ask_scm_branch_on_launch && (
+        <FormField
+          id="prompt-scm-branch"
+          name="scm_branch"
+          label={i18n._(t`Source Control Branch`)}
+          tooltip={i18n._(
+            t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch`
+          )}
+        />
+      )}
       {config.ask_verbosity_on_launch && <VerbosityField i18n={i18n} />}
       {config.ask_diff_mode_on_launch && <ShowChangesToggle i18n={i18n} />}
       {config.ask_tags_on_launch && (
