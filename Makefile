@@ -353,8 +353,7 @@ swagger: reports
 check: flake8 pep8 # pyflakes pylint
 
 awx-link:
-	cp -R /tmp/awx.egg-info /awx_devel/ || true
-	sed -i "s/placeholder/$(shell cat VERSION)/" /awx_devel/awx.egg-info/PKG-INFO
+	python3 /awx_devel/setup.py egg_info
 	cp -f /tmp/awx.egg-link /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
