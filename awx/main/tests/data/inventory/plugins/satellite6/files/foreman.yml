@@ -4,19 +4,19 @@ compose:
 group_prefix: foo_group_prefix
 keyed_groups:
 - key: foreman['environment_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')
-  prefix: foreman_environment_
+  prefix: foo_group_prefixenvironment_
   separator: ''
 - key: foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')
-  prefix: foreman_location_
+  prefix: foo_group_prefixlocation_
   separator: ''
 - key: foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')
-  prefix: foreman_organization_
+  prefix: foo_group_prefixorganization_
   separator: ''
 - key: foreman['content_facet_attributes']['lifecycle_environment_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')
-  prefix: foreman_lifecycle_environment_
+  prefix: foo_group_prefixlifecycle_environment_
   separator: ''
 - key: foreman['content_facet_attributes']['content_view_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')
-  prefix: foreman_content_view_
+  prefix: foo_group_prefixcontent_view_
   separator: ''
 - key: '"%s-%s-%s" | format(app, tier, color)'
   separator: ''
