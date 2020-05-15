@@ -646,6 +646,9 @@ INSIGHTS_TRACKING_STATE = False
 AUTOMATION_ANALYTICS_LAST_GATHER = None
 AUTOMATION_ANALYTICS_INTERVAL = 14400
 
+# Define a staging directory to be used for gather_analytics
+ANALYTICS_GATHER_DIR = None
+
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.
 AD_HOC_COMMANDS = [

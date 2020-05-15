@@ -97,8 +97,11 @@ def gather(dest=None, module=None, collection_type='scheduled'):
         from awx.main.analytics import collectors
         module = collectors
 
+    tgz_tempdir = settings.ANALYTICS_GATHER_DIR
+    if tgz_tempdir and not os.path.isdir(tgz_tempdir):
+        os.makedirs(tgz_tempdir, 755)
 
-    dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
+    dest = dest or tempfile.mkdtemp(prefix='awx_analytics', dir=tgz_tempdir)
     for name, func in inspect.getmembers(module):
         if inspect.isfunction(func) and hasattr(func, '__awx_analytics_key__'):
             key = func.__awx_analytics_key__
