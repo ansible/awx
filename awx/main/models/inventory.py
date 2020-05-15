@@ -2500,6 +2500,25 @@ class rhv(PluginFileInjector):
     def script_name(self):
         return 'ovirt4.py'  # exception
 
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(rhv, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['ovirt_insecure'] = False  # Default changed from script
+        # TODO: process strict option upstream
+        ret['compose'] = {
+            'ansible_host': '(devices.values() | list)[0][0] if devices else None'
+        }
+        ret['keyed_groups'] = []
+        for key in ('cluster', 'status'):
+            ret['keyed_groups'].append({'prefix': key, 'separator': '_', 'key': key})
+        ret['keyed_groups'].append({'prefix': 'tag', 'separator': '_', 'key': 'tags'})
+        ret['ovirt_hostname_preference'] = ['name', 'fqdn']
+        source_vars = inventory_update.source_vars_dict
+        for key, value in source_vars.items():
+            if key == 'plugin':
+                continue
+            ret[key] = value
+        return ret
+
 
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'

@@ -67,7 +67,7 @@ msgid ""
 "                    </div>"
 msgstr "<i class=\"LoginModal-alertIcon fa fa-exclamation-triangle\"></i>\n"
 "                    <div class=\"LoginModal-alertText\" translate=\"\">\n"
-"                        ログアウトしています。サインインしてください。\n"
+"                        ログアウトされました。サインインしてください。\n"
 "                    </div>"
 
 #: client/lib/components/code-mirror/code-mirror.strings.js:19
@@ -478,7 +478,7 @@ msgstr "すべてのジョブ"
 #: client/src/projects/projects.form.js:208
 #: client/src/projects/projects.form.js:211
 msgid "Allow branch override"
-msgstr "ブランチの上書きを許可する"
+msgstr "ブランチの上書き許可"
 
 #: client/src/projects/projects.form.js:210
 msgid "Allow changing the SCM branch or revision in a job template that uses this project."
@@ -916,7 +916,7 @@ msgstr "キャッシュタイムアウト"
 
 #: client/src/projects/projects.form.js:220
 msgid "Cache Timeout%s (seconds)%s"
-msgstr "キャッシュタイムアウト%s (seconds)%s"
+msgstr "キャッシュタイムアウト%s (秒)%s"
 
 #: client/src/users/list/users-list.controller.js:85
 msgid "Call to %s failed. DELETE returned status:"
@@ -1191,11 +1191,11 @@ msgstr "CloudForms URL"
 #: client/features/output/output.strings.js:19
 #: client/src/workflow-results/workflow-results.controller.js:201
 msgid "Collapse Output"
-msgstr "出力の縮小"
+msgstr "出力の折りたたみ"
 
 #: client/lib/components/components.strings.js:120
 msgid "Compact"
-msgstr "縮小"
+msgstr "簡略表示"
 
 #: client/src/inventories-hosts/hosts/host.form.js:125
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:135
@@ -1307,8 +1307,7 @@ msgstr "{{resourceType}} のコピー"
 msgid ""
 "Copyright &copy; 2019 Red Hat, Inc. <br>\n"
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
-msgstr "Copyright &copy; 2019 Red Hat, Inc. <br>\n"
-"                          詳細は、 <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> をご覧ください。<br>"
+msgstr "Copyright &copy; 2019 Red Hat, Inc. <br>                          詳細は、 <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> をご覧ください。<br>"
 
 #: client/lib/components/components.strings.js:90
 msgid "Copyright © 2019 Red Hat, Inc."
@@ -2128,7 +2127,7 @@ msgstr "このワークフローのジョブテンプレートの Webhook を有
 
 #: client/src/templates/job_templates/job-template.form.js:335
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
-msgstr "プロビジョニングコールバック URL の作成を有効にします。この URL を使用してホストは {{BRAND_NAME}} に接続でき、このジョブテンプレートを使用して設定の更新を要求できます。"
+msgstr "プロビジョニングコールバック URL の作成を有効にします。ホストは、この URL を使用して {{BRAND_NAME}} に接続でき、このジョブテンプレートを使用して設定の更新を要求できます。"
 
 #: client/src/credentials/factories/credential-form-save.factory.js:73
 msgid "Encrypted credentials are not supported."
@@ -2368,7 +2367,7 @@ msgstr "出力の展開"
 
 #: client/lib/components/components.strings.js:121
 msgid "Expanded"
-msgstr "展開"
+msgstr "詳細表示"
 
 #: client/src/license/license.partial.html:246
 msgid "Expires"
@@ -5372,7 +5371,7 @@ msgstr "Insights の更新"
 
 #: client/src/configuration/settings.service.js:44
 msgid "Refresh Token Expiration"
-msgstr "トークンの有効期限を更新します。"
+msgstr "トークンの有効期限を更新する"
 
 #: client/src/activity-stream/streams.list.js:51
 #: client/src/bread-crumb/bread-crumb.partial.html:6
@@ -7281,7 +7280,7 @@ msgstr "TLS の使用"
 
 #: client/src/notifications/notificationTemplates.form.js:586
 msgid "Use custom messages to change the content of notifications sent when a job starts, succeeds, or fails. Use curly braces to access information about the job: <code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>, or attributes of the job such as <code ng-non-bindable>{{ job.status }}</code>. You may apply a number of possible variables in the message. Refer to the <a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower documentation</a> for more details."
-msgstr "カスタムメッセージを使用して、ジョブの開始時、成功時、または湿板時に送信する通知内容を変更します。中括弧を使用して、ジョブの情報 (<code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>) またはジョブの属性 (<code ng-non-bindable>{{ job.status }}</code>) にアクセスします。メッセージには、使用可能な変数を複数適用できます。詳細は、<a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower ドキュメント</a> を参照してください。"
+msgstr "カスタムメッセージを使用して、ジョブの開始時、成功時、または失敗時に送信する通知内容を変更します。中括弧を使用して、ジョブの情報 (<code ng-non-bindable>{{ job_friendly_name }}</code>, <code ng-non-bindable>{{ url }}</code>) またはジョブの属性 (<code ng-non-bindable>{{ job.status }}</code>) にアクセスします。メッセージには、使用可能な変数を複数適用できます。詳細は、<a href=\"https://docs.ansible.com/ansible-tower/latest/html/userguide/notifications.html#create-custom-notifications\" target=\"_blank\">Ansible Tower ドキュメント</a> を参照してください。"
 
 #: client/src/instance-groups/instance-groups.strings.js:24
 #: client/src/instance-groups/instance-groups.strings.js:50
@@ -7509,7 +7508,7 @@ msgstr "YAML サンプルを %s に表示"
 
 #: client/src/configuration/settings.partial.html:15
 msgid "View and edit your license information"
-msgstr "ライセンス情報を表示し、編集します。"
+msgstr "ライセンス情報の表示、編集"
 
 #: client/src/credentials/credentials.list.js:84
 msgid "View credential"
@@ -7876,7 +7875,7 @@ msgstr "ホストフィルターの編集に必要なパーミッションがあ
 
 #: client/src/login/loginModal/loginModal.partial.html:34
 msgid "You have been logged out. Please sign in."
-msgstr "ログアウトしています。サインインしてください。"
+msgstr "ログアウトされました。サインインしてください。"
 
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:51
 #: client/src/configuration/forms/settings-form.controller.js:443
