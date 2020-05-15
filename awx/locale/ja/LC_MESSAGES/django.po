@@ -777,13 +777,13 @@ msgstr "このグループ内でインスタンスをコンテナー化するか
 
 #: awx/api/serializers.py:4683
 msgid "Policy Instance Percentage"
-msgstr "ポリシーインスタンスのパーセンテージ"
+msgstr "ポリシーインスタンスの割合"
 
 #: awx/api/serializers.py:4684
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
-msgstr "新規インスタンスがオンライン状態になるとこのグループに自動的に割り当てられるすべてのインスタンスの最小パーセンテージです。"
+msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンスの割合を選択します。"
 
 #: awx/api/serializers.py:4689
 msgid "Policy Instance Minimum"
@@ -793,7 +793,7 @@ msgstr "ポリシーインスタンスの最小値"
 msgid ""
 "Static minimum number of Instances that will be automatically assign to this "
 "group when new instances come online."
-msgstr "新規インスタンスがオンライン状態になるとこのグループに自動的に割り当てられるインスタンスの静的な最小数です。"
+msgstr "新規インスタンスがオンラインになると、このグループに自動的に最小限割り当てられるインスタンス数を入力します。"
 
 #: awx/api/serializers.py:4695
 msgid "Policy Instance List"
@@ -1886,7 +1886,7 @@ msgstr "組織管理者が、それぞれの組織に関連付けられていな
 
 #: awx/main/conf.py:50
 msgid "Organization Admins Can Manage Users and Teams"
-msgstr "組織管理者はユーザーおよびチームを管理できます"
+msgstr "組織管理者はユーザーおよびチームを管理できる"
 
 #: awx/main/conf.py:51
 msgid ""
@@ -2243,7 +2243,7 @@ msgid ""
 "downloaded from the primary if the specific role or collection is available "
 "there. If the content is not avilable in the primary, or if this field is "
 "left blank, it will default to galaxy.ansible.com."
-msgstr "これにより、Galaxy サービスを実行する組織では、プライマリーの Galaxy Server としてホストを指定するオプションが追加されます。特定のロールやコレクションが利用できる場合には、このプライマリーのサーバーから要件がダウンロードされます。または、フィールドが空白の場合は、galaxy.ansible.com のデフォルト設定を使用します。"
+msgstr "Galaxy サービスを実行する組織では、プライマリーの Galaxy Server としてホストを指定するオプションが追加されます。特定のロールやコレクションが利用できる場合には、このプライマリーのサーバーから要件がダウンロードされます。または、フィールドが空白の場合は、galaxy.ansible.com のデフォルト設定を使用します。"
 
 #: awx/main/conf.py:459
 msgid "Primary Galaxy Server Username"
@@ -3448,7 +3448,7 @@ msgstr "認証する OpenShift または Kubernetes API エンドポイント。
 
 #: awx/main/models/credential/__init__.py:1139
 msgid "API authentication bearer token"
-msgstr "API 認証ベアラートークン。"
+msgstr "API 認証ベアラートークン"
 
 #: awx/main/models/credential/__init__.py:1149
 msgid "Certificate Authority data"
@@ -3605,7 +3605,7 @@ msgstr "このグループをリモートで制御するためのインスタン
 
 #: awx/main/models/ha.py:200
 msgid "Percentage of Instances to automatically assign to this group"
-msgstr "このグループに自動的に割り当てるインスタンスのパーセンテージ"
+msgstr "このグループに自動的に割り当てるインスタンスの割合"
 
 #: awx/main/models/ha.py:204
 msgid ""
