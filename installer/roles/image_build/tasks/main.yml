@@ -130,20 +130,6 @@
     mode: '0700'
   delegate_to: localhost
 
-- name: Stage google-cloud-sdk.repo
-  copy:
-    src: google-cloud-sdk.repo
-    dest: "{{ docker_base_path }}/google-cloud-sdk.repo"
-    mode: '0700'
-  delegate_to: localhost
-
-- name: Stage rsyslog.repo
-  copy:
-    src: rsyslog.repo
-    dest: "{{ docker_base_path }}/rsyslog.repo"
-    mode: '0700'
-  delegate_to: localhost
-
 - name: Stage rsyslog.conf
   copy:
     src: rsyslog.conf
@@ -179,6 +165,7 @@
   copy:
     src: ../tools/scripts/config-watcher
     dest: "{{ docker_base_path }}/config-watcher"
+    mode: 0755
   delegate_to: localhost
 
 - name: Stage Makefile

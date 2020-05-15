@@ -35,6 +35,7 @@ rsyslog.pid
 /tower-license
 /tower-license/**
 tools/prometheus/data
+tools/docker-compose/Dockerfile
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
