@@ -10,7 +10,7 @@ import random
 
 # Django
 from django.db import transaction, connection
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 
 # AWX
@@ -114,7 +114,7 @@ class TaskManager():
                         logger.info('Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
                             job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
                         display_list = [spawn_node.unified_job_template] + workflow_ancestors
-                        job.job_explanation = _(
+                        job.job_explanation = gettext_noop(
                             "Workflow Job spawned from workflow could not start because it "
                             "would result in recursion (spawn order, most recent first: {})"
                         ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
@@ -123,8 +123,8 @@ class TaskManager():
                             job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
                 if not job._resources_sufficient_for_launch():
                     can_start = False
-                    job.job_explanation = _("Job spawned from workflow could not start because it "
-                                            "was missing a related resource such as project or inventory")
+                    job.job_explanation = gettext_noop("Job spawned from workflow could not start because it "
+                                                       "was missing a related resource such as project or inventory")
                 if can_start:
                     if workflow_job.start_args:
                         start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
@@ -132,8 +132,8 @@ class TaskManager():
                         start_args = {}
                     can_start = job.signal_start(**start_args)
                     if not can_start:
-                        job.job_explanation = _("Job spawned from workflow could not start because it "
-                                                "was not in the right state or required manual credentials")
+                        job.job_explanation = gettext_noop("Job spawned from workflow could not start because it "
+                                                           "was not in the right state or required manual credentials")
                 if not can_start:
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
@@ -173,7 +173,7 @@ class TaskManager():
                 workflow_job.status = new_status
                 if reason:
                     logger.info(reason)
-                    workflow_job.job_explanation = _("No error handling paths found, marking workflow as failed")
+                    workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
                     update_fields.append('job_explanation')
                 workflow_job.start_args = ''  # blank field to remove encrypted passwords
                 workflow_job.save(update_fields=update_fields)
