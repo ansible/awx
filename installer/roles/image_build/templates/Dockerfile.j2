@@ -6,19 +6,21 @@
 ###
 {% endif %}
 
+# Locations - set globally to be used across stages
+ARG VENV_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/venv"
+ARG COLLECTION_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/vendor/awx_ansible_collections"
 
 # Build container
 FROM centos:8 as builder
+
+ARG VENV_BASE
+ARG COLLECTION_BASE
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 USER root
-
-# Locations
-ARG VENV_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/venv"
-ARG COLLECTION_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/vendor/awx_ansible_collections"
 
 # Install build dependencies
 RUN dnf -y update && \
@@ -80,6 +82,9 @@ RUN mkdir -p -m 755 /var/lib/awx && echo "{{ awx_version }}" > /var/lib/awx/.tow
 
 # Final container(s)
 FROM centos:8
+
+ARG VENV_BASE
+ARG COLLECTION_BASE
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -184,30 +189,36 @@ ADD supervisor_task.conf /supervisor_task.conf
 ADD config-watcher /usr/bin/config-watcher
 {% endif %}
 
-# Pre-create directories
+# Pre-create things we need to access
 RUN for dir in \
+      /var/lib/awx \
       /var/lib/awx/rsyslog \
       /var/lib/awx/rsyslog/conf.d \
       /var/run/awx-rsyslog \
       /var/log/tower \
       /var/log/nginx \
       /var/lib/nginx ; \
-    do mkdir -m 0755 -p $dir ; done
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    for file in \
+      /supervisord.log \
+      /etc/passwd ; \
+    do touch $file ; chmod g+rw $file ; chgrp root $file ; done
 
 # Adjust any remaining permissions
-RUN chmod u+s /usr/bin/bwrap
+RUN chmod u+s /usr/bin/bwrap ; \
+    chgrp -R root ${COLLECTION_BASE} ; \
+    chmod -R g+rw ${COLLECTION_BASE}
+
 {% if build_dev|bool %}
 RUN for dir in \
       /venv \
-      /var/lib/awx \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
       /.ansible \
       /vendor ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rwX $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
-      /etc/passwd \
       /etc/supervisord.conf \
       /var/run/nginx.pid \
       /venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
