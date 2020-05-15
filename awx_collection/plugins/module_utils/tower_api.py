@@ -338,9 +338,6 @@ class TowerModule(AnsibleModule):
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
 
-        with open('/tmp/john', 'w') as f:
-            f.write("{0}".format(self.url.geturl()))
-
         try:
             response = self.session.open(method, self.url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
         except(SSLValidationError) as ssl_err:
