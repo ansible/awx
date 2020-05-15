@@ -133,7 +133,7 @@ export default
                         }
                         else {
                             var buttons = [{
-                                "label": "Continue",
+                                "label": i18n._("Continue"),
                                 "onClick": function() {
                                   // make a rest call here to force the API to
                                   // move the session time forward
