@@ -2605,22 +2605,22 @@ class satellite6(PluginFileInjector):
             "environment":           {"prefix": "foreman_environment_",
                                       "separator": "",
                                       "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
-                                             "regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')"},  # NOQA: W605
+                                             "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')"},
             "location":              {"prefix": "foreman_location_",
                                       "separator": "",
-                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
             "organization":          {"prefix": "foreman_organization_",
                                       "separator": "",
-                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
             "lifecycle_environment": {"prefix": "foreman_lifecycle_environment_",
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
             "content_view":          {"prefix": "foreman_content_view_",
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['content_view_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"}
-            }
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"}
+        }
 
         ret['legacy_hostvars'] = True  # convert hostvar structure to the form used by the script
         ret['want_params'] = True
