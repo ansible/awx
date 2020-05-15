@@ -145,6 +145,8 @@ secret_key=awxsecret
 # CA Trust directory. If you need to provide custom CA certificates, supplying
 # this variable causes this directory on the host to be bind mounted over
 # /etc/pki/ca-trust in the awx_task and awx_web containers.
+# If you are deploying on openshift or kubernetes, set the variable to /etc/pki/ca-trust instead,
+# as the awx_web and awx_task containers will not run the `update-ca-trust` command.
 #ca_trust_dir=/etc/pki/ca-trust/source/anchors
 
 # Include /etc/nginx/awx_extra.conf

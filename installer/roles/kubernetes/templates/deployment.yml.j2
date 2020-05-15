@@ -93,6 +93,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8052
+{% if ca_trust_dir is defined %}
+          env:
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+{% endif %}
           volumeMounts:
             - name: supervisor-socket
               mountPath: "/var/run/supervisor"
@@ -102,7 +107,7 @@ spec:
               mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
-              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              mountPath: "{{ ca_trust_dir }}"
               readOnly: true
 {% endif %}
 {% if project_data_dir is defined %}
@@ -188,7 +193,7 @@ spec:
               mountPath: "/var/lib/awx/rsyslog"
 {% if ca_trust_dir is defined %}
             - name: {{ kubernetes_deployment_name }}-ca-trust-dir
-              mountPath: "/etc/pki/ca-trust/source/anchors/"
+              mountPath: "{{ ca_trust_dir }}"
               readOnly: true
 {% endif %}
 {% if custom_venvs is defined %}
@@ -247,6 +252,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+{% if ca_trust_dir is defined %}
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+{% endif %}
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
