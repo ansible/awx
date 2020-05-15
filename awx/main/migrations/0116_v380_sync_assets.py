@@ -16,9 +16,4 @@ class Migration(migrations.Migration):
             name='sync_assets',
             field=models.BooleanField(default=False, editable=True, help_text='When syncing the assets, load Tower assets from the projects assets folder.'),
         ),
-        migrations.AddField(
-            model_name='projectupdate',
-            name='sync_assets',
-            field=models.BooleanField(default=False, editable=False, help_text='When syncing the assets, load Tower assets from the projects assets folder.'),
-        ),
     ]

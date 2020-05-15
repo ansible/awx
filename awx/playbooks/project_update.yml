@@ -168,7 +168,7 @@
     job_template_vars: '{{ project_path }}/assets/job_templates.yml'
     # These three we want to pass into the job from main/tasks.py
     awx_project: "Demo Project"
-    awx_oauthtoken: "JaEXtZWjnZRSpxdP7cszOfbrpyOqC9"
+    awx_oauthtoken: "qJnkfLft3BfIv2PpXhAo892d5z4Av8"
     awx_host: "https://10.0.1.107:8043"
   tasks:
     - block:
@@ -185,13 +185,7 @@
             name: sync_assets
             tasks_from: job_templates
       when:
-        - assets_enabled|bool
         - "ansible_version.full is version_compare('2.8', '>=')"
       tags:
         # maybe someday we add update_assets tag in tasks/main.py if the asset folder exists
         - update_assets
-        - update_git
-        - update_hg
-        - update_svn
-        - update_insights
-

@@ -602,6 +602,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         added_update_fields = []
         if not self.job_tags:
             job_tags = ['update_{}'.format(self.scm_type)]
+            if self.project.sync_assets:
+                job_tags.append('update_assets')
             if self.job_type == 'run':
                 job_tags.append('install_roles')
                 job_tags.append('install_collections')
