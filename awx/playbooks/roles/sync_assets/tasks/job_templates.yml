@@ -20,3 +20,5 @@
     validate_certs: False
   loop: "{{ job_templates | default([]) }}"
   when: job_templates | default([]) | length() > 0
+  loop_control:
+    label: "{{ item.name | default('No Job Name')  }}"
