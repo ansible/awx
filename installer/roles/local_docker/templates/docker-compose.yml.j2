@@ -4,7 +4,7 @@ services:
 
   web:
     image: {{ awx_web_docker_actual_image }}
-    container_name: awx_web
+    container_name: awxweb
     depends_on:
       - redis
       - memcached
@@ -69,7 +69,7 @@ services:
 
   task:
     image: {{ awx_task_docker_actual_image }}
-    container_name: awx_task
+    container_name: awx
     depends_on:
       - redis
       - memcached
