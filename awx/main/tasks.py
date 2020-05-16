@@ -2182,6 +2182,8 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'roles_enabled': settings.AWX_ROLES_ENABLED,
             'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
+            'awx_host': settings.TOWER_URL_BASE,
+            'awx_project': project_update.project.name,
         })
         if project_update.job_type != 'check' and self.job_private_data_dir:
             extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')

@@ -15,6 +15,9 @@
 # collections_destination: Path to save collections from galaxy to
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
+# awx_host: The host to talk with from the API, should be settings.TOWER_URL_BASE
+# awx_oauthtoken: "qJnkfLft3BfIv2PpXhAo892d5z4Av8"
+# awx_project: The name of the project we are syncing
 
 - hosts: localhost
   gather_facts: false
@@ -167,9 +170,7 @@
   vars:
     job_template_vars: '{{ project_path }}/assets/job_templates.yml'
     # These three we want to pass into the job from main/tasks.py
-    awx_project: "Demo Project"
     awx_oauthtoken: "qJnkfLft3BfIv2PpXhAo892d5z4Av8"
-    awx_host: "https://10.0.1.107:8043"
   tasks:
     - block:
         # It would be nice if we can pre-install this collection
