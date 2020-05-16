@@ -49,10 +49,10 @@
       register: awx_compose_start
 
     - name: Update CA trust in awx_web container
-      command: docker exec awx_web '/usr/bin/update-ca-trust'
+      command: docker exec awxweb '/usr/bin/update-ca-trust'
       when: awx_compose_config.changed or awx_compose_start.changed
 
     - name: Update CA trust in awx_task container
-      command: docker exec awx_task '/usr/bin/update-ca-trust'
+      command: docker exec awx '/usr/bin/update-ca-trust'
       when: awx_compose_config.changed or awx_compose_start.changed
   when: compose_start_containers|bool
