@@ -2,13 +2,15 @@
 - name: Set the collection version in the tower_api.py file
   replace:
     path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
-    regexp: '^    _COLLECTION_VERSION =.*'
+    regexp: '^    _COLLECTION_VERSION = "devel"'
     replace: '    _COLLECTION_VERSION = "{{ collection_version }}"'
+  when:
+    - "awx_template_version | default(True)"
 
 - name: Set the collection type in the tower_api.py file
   replace:
     path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
-    regexp: '^    _COLLECTION_TYPE =.*'
+    regexp: '^    _COLLECTION_TYPE = "awx"'
     replace: '    _COLLECTION_TYPE = "{{ collection_namespace }}"'
 
 - name: Do file content replacements for non-default namespace or package name

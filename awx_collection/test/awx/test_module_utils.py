@@ -91,3 +91,21 @@ def test_duplicate_config(collection_import, silence_warning):
         'tower_config_file. Precedence may be unstable, '
         'we suggest either using config file or params.'
     )
+
+
+def test_no_templated_values(collection_import):
+    """This test corresponds to replacements done by
+    awx_collection/tools/roles/template_galaxy/tasks/main.yml
+    Those replacements should happen at build time, so they should not be
+    checked into source.
+    """
+    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+    assert TowerModule._COLLECTION_VERSION == "devel", (
+        'The collection version is templated when the collection is built '
+        'and the code should retain the placeholder of "devel".'
+    )
+    InventoryModule = collection_import('plugins.inventory.tower').InventoryModule
+    assert InventoryModule.NAME == 'awx.awx.tower', (
+        'The inventory plugin FQCN is templated when the collection is built '
+        'and the code should retain the default of awx.awx.'
+    )

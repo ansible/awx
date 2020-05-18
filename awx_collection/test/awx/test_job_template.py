@@ -4,7 +4,6 @@ __metaclass__ = type
 import pytest
 
 from awx.main.models import ActivityStream, JobTemplate, Job, NotificationTemplate
-from unittest import mock
 
 
 @pytest.mark.django_db
@@ -162,9 +161,9 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
 
     assert result.get('changed', False), result  # not actually desired, but assert for sanity
 
-    silence_warning.assert_has_calls(
-        [mock.call("The field survey_spec of job_template {0} has encrypted data and "
-                   "may inaccurately report task is changed.".format(result['id']))])
+    silence_warning.assert_called_once_with(
+        "The field survey_spec of job_template {0} has encrypted data and "
+        "may inaccurately report task is changed.".format(result['id']))
 
 
 @pytest.mark.django_db

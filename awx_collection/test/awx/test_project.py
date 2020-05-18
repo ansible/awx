@@ -3,8 +3,6 @@ __metaclass__ = type
 
 import pytest
 
-from unittest import mock
-
 from awx.main.models import Project
 
 
@@ -18,9 +16,9 @@ def test_create_project(run_module, admin_user, organization, silence_warning):
         wait=False,
         scm_update_cache_timeout=5
     ), admin_user)
-    silence_warning.assert_has_calls(
-        [mock.call('scm_update_cache_timeout will be ignored since scm_update_on_launch '
-                   'was not set to true')])
+    silence_warning.assert_called_once_with(
+        'scm_update_cache_timeout will be ignored since scm_update_on_launch '
+        'was not set to true')
 
     assert result.pop('changed', None), result
 

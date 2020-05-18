@@ -33,7 +33,7 @@ class ItemNotDefined(Exception):
 
 class TowerModule(AnsibleModule):
     # This gets set by the make process so whatever is in here is irrelevant
-    _COLLECTION_VERSION = "11.1.0"
+    _COLLECTION_VERSION = "devel"
     _COLLECTION_TYPE = "awx"
     # This maps the collections type (awx/tower) to the values returned by the API
     # Those values can be found in awx/api/generics.py line 204
@@ -114,14 +114,6 @@ class TowerModule(AnsibleModule):
             local_dir = split(local_dir)[0]
             config_files.insert(2, join(local_dir, ".{0}".format(self.config_name)))
 
-        for config_file in config_files:
-            if exists(config_file) and not isdir(config_file):
-                # Only throw a formatting error if the file exists and is not a directory
-                try:
-                    self.load_config(config_file)
-                except ConfigFileException:
-                    self.fail_json('The config file {0} is not properly formatted'.format(config_file))
-
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
             duplicated_params = []
@@ -139,6 +131,14 @@ class TowerModule(AnsibleModule):
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want it to fail if we have an error
                 self.fail_json(msg=cfe)
+        else:
+            for config_file in config_files:
+                if exists(config_file) and not isdir(config_file):
+                    # Only throw a formatting error if the file exists and is not a directory
+                    try:
+                        self.load_config(config_file)
+                    except ConfigFileException:
+                        self.fail_json('The config file {0} is not properly formatted'.format(config_file))
 
     def load_config(self, config_path):
         # Validate the config file is an actual file
