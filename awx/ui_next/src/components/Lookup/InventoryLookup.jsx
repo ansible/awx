@@ -19,22 +19,20 @@ const QS_CONFIG = getQSConfig('inventory', {
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
   const {
-    result: { count, inventories },
-    error,
+    result: { inventories, count },
     request: fetchInventories,
+    error,
+    isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const { data } = await InventoriesAPI.read(params);
       return {
-        count: data.count,
         inventories: data.results,
+        count: data.count,
       };
-    }, [history.location.search]),
-    {
-      count: 0,
-      inventories: [],
-    }
+    }, [history.location]),
+    { inventories: [], count: 0 }
   );
 
   useEffect(() => {
@@ -50,6 +48,7 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
         onChange={onChange}
         onBlur={onBlur}
         required={required}
+        isLoading={isLoading}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

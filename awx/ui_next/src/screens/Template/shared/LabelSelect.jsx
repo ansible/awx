@@ -30,6 +30,7 @@ async function loadLabelOptions(setLabels, onError) {
 }
 
 function LabelSelect({ value, placeholder, onChange, onError, createText }) {
+  const [isLoading, setIsLoading] = useState(true);
   const { selections, onSelect, options, setOptions } = useSyncedSelectValue(
     value,
     onChange
@@ -41,7 +42,10 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
   };
 
   useEffect(() => {
-    loadLabelOptions(setOptions, onError);
+    (async () => {
+      await loadLabelOptions(setOptions, onError);
+      setIsLoading(false);
+    })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
@@ -77,6 +81,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
         }
         return label;
       }}
+      isDisabled={isLoading}
       selections={selections}
       isExpanded={isExpanded}
       ariaLabelledBy="label-select"

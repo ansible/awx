@@ -56,6 +56,7 @@ function Lookup(props) {
     header,
     onChange,
     onBlur,
+    isLoading,
     value,
     multiple,
     required,
@@ -124,6 +125,7 @@ function Lookup(props) {
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.tertiary}
+          isDisabled={isLoading}
         >
           <SearchIcon />
         </SearchButton>
