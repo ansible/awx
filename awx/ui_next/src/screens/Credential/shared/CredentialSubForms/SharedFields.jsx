@@ -26,6 +26,7 @@ export const SSHKeyDataField = withI18n()(({ i18n }) => (
     label={i18n._(t`SSH Private Key`)}
     name="inputs.ssh_key_data"
     type="textarea"
+    rows={6}
   />
 ));
 

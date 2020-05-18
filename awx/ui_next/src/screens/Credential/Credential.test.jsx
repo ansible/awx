@@ -6,7 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import mockCredential from './shared/data.credential.json';
+import mockCredential from './shared/data.scmCredential.json';
 import mockOrgCredential from './shared/data.orgCredential.json';
 import Credential from './Credential';
 

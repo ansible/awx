@@ -20,7 +20,9 @@ function CredentialAdd({ me }) {
       try {
         const {
           data: { results: loadedCredentialTypes },
-        } = await CredentialTypesAPI.read({ or__kind: ['scm', 'ssh'] });
+        } = await CredentialTypesAPI.read({
+          or__namespace: ['gce', 'scm', 'ssh'],
+        });
         setCredentialTypes(loadedCredentialTypes);
       } catch (err) {
         setError(err);
@@ -65,7 +67,15 @@ function CredentialAdd({ me }) {
     );
   }
   if (isLoading) {
-    return <ContentLoading />;
+    return (
+      <PageSection>
+        <Card>
+          <CardBody>
+            <ContentLoading />
+          </CardBody>
+        </Card>
+      </PageSection>
+    );
   }
   return (
     <PageSection>
