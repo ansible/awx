@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -7,6 +7,7 @@ import { InventoriesAPI } from '../../api';
 import { Inventory } from '../../types';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
@@ -17,22 +18,28 @@ const QS_CONFIG = getQSConfig('inventory', {
 });
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
-  const [inventories, setInventories] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
+  const {
+    result: { count, inventories },
+    error,
+    request: fetchInventories,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const { data } = await InventoriesAPI.read(params);
+      return {
+        count: data.count,
+        inventories: data.results,
+      };
+    }, [history.location.search]),
+    {
+      count: 0,
+      inventories: [],
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await InventoriesAPI.read(params);
-        setInventories(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      }
-    })();
-  }, [history.location]);
+    fetchInventories();
+  }, [fetchInventories]);
 
   return (
     <>

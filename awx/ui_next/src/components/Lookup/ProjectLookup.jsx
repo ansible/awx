@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { node, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -8,6 +8,7 @@ import { ProjectsAPI } from '../../api';
 import { Project } from '../../types';
 import { FieldTooltip } from '../FormField';
 import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
@@ -29,37 +30,31 @@ function ProjectLookup({
   onBlur,
   history,
 }) {
-  const [projects, setProjects] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const isMounted = useRef(null);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    (async () => {
+  const {
+    result: { count, projects },
+    error,
+    request: fetchProjects,
+  } = useRequest(
+    useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await ProjectsAPI.read(params);
-        if (isMounted.current) {
-          setProjects(data.results);
-          setCount(data.count);
-          if (data.count === 1) {
-            onChange(data.results[0]);
-          }
-        }
-      } catch (err) {
-        if (isMounted.current) {
-          setError(err);
-        }
+      const { data } = await ProjectsAPI.read(params);
+      if (data.count === 1) {
+        onChange(data.results[0]);
       }
-    })();
-  }, [onChange, history.location]);
+      return {
+        count: data.count,
+        projects: data.results,
+      };
+    }, [onChange, history.location.search]),
+    {
+      count: 0,
+      projects: [],
+    }
+  );
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <FormGroup
