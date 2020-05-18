@@ -43,5 +43,4 @@ def test_password_no_op_warning(run_module, admin_user, mock_auth_stuff, silence
 
     silence_warning.assert_called_once_with(
         "The field password of user {0} has encrypted data and "
-        "may inaccurately report task is changed.".format(result['id'])
-    )
+        "may inaccurately report task is changed.".format(result['id']))

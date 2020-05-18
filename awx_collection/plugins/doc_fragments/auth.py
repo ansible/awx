@@ -39,6 +39,7 @@ options:
   tower_config_file:
     description:
     - Path to the Tower or AWX config file.
+    - If provided, the other locations for config files will not be considered.
     type: path
 
 notes:

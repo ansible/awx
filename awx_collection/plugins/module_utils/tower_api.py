@@ -32,6 +32,15 @@ class ItemNotDefined(Exception):
 
 
 class TowerModule(AnsibleModule):
+    # This gets set by the make process so whatever is in here is irrelevant
+    _COLLECTION_VERSION = "devel"
+    _COLLECTION_TYPE = "awx"
+    # This maps the collections type (awx/tower) to the values returned by the API
+    # Those values can be found in awx/api/generics.py line 204
+    collection_to_version = {
+        'awx': 'AWX',
+        'tower': 'Red Hat Ansible Tower',
+    }
     url = None
     honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
     host = '127.0.0.1'
@@ -45,6 +54,7 @@ class TowerModule(AnsibleModule):
     authenticated = False
     config_name = 'tower_cli.cfg'
     ENCRYPTED_STRING = "$encrypted$"
+    version_checked = False
 
     def __init__(self, argument_spec, **kwargs):
         args = dict(
@@ -104,14 +114,6 @@ class TowerModule(AnsibleModule):
             local_dir = split(local_dir)[0]
             config_files.insert(2, join(local_dir, ".{0}".format(self.config_name)))
 
-        for config_file in config_files:
-            if exists(config_file) and not isdir(config_file):
-                # Only throw a formatting error if the file exists and is not a directory
-                try:
-                    self.load_config(config_file)
-                except ConfigFileException:
-                    self.fail_json('The config file {0} is not properly formatted'.format(config_file))
-
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
             duplicated_params = []
@@ -129,6 +131,14 @@ class TowerModule(AnsibleModule):
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want it to fail if we have an error
                 self.fail_json(msg=cfe)
+        else:
+            for config_file in config_files:
+                if exists(config_file) and not isdir(config_file):
+                    # Only throw a formatting error if the file exists and is not a directory
+                    try:
+                        self.load_config(config_file)
+                    except ConfigFileException:
+                        self.fail_json('The config file {0} is not properly formatted'.format(config_file))
 
     def load_config(self, config_path):
         # Validate the config file is an actual file
@@ -374,6 +384,26 @@ class TowerModule(AnsibleModule):
         finally:
             self.url = self.url._replace(query=None)
 
+        if not self.version_checked:
+            # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
+            # First try to get the headers in PY3 format and then drop down to PY2.
+            try:
+                tower_type = response.getheader('X-API-Product-Name', None)
+                tower_version = response.getheader('X-API-Product-Version', None)
+            except Exception:
+                tower_type = response.info().getheader('X-API-Product-Name', None)
+                tower_version = response.info().getheader('X-API-Product-Version', None)
+
+            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(
+                    self._COLLECTION_TYPE, tower_type
+                ))
+            elif self._COLLECTION_VERSION != tower_version:
+                self.warn("You are running collection version {0} but connecting to tower version {1}".format(
+                    self._COLLECTION_VERSION, tower_version
+                ))
+            self.version_checked = True
+
         response_body = ''
         try:
             response_body = response.read()
@@ -433,15 +463,6 @@ class TowerModule(AnsibleModule):
 
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
-
-    def default_check_mode(self):
-        '''Execute check mode logic for Ansible Tower modules'''
-        if self.check_mode:
-            try:
-                result = self.get_endpoint('ping')
-                self.exit_json(**{'changed': True, 'tower_version': '{0}'.format(result['json']['version'])})
-            except(Exception) as excinfo:
-                self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
     def delete_if_needed(self, existing_item, on_delete=None):
         # This will exit from the module on its own.

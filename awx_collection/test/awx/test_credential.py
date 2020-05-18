@@ -152,7 +152,7 @@ def test_make_use_of_custom_credential_type(run_module, organization, admin_user
 
 
 @pytest.mark.django_db
-def test_secret_field_write_twice(run_module, organization, admin_user, cred_type, silence_warning):
+def test_secret_field_write_twice(run_module, organization, admin_user, cred_type):
     val1 = '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'
     result = run_module('tower_credential', dict(
         name='Galaxy Token for Steve',
