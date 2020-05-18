@@ -3,9 +3,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FileUpload, FormGroup } from '@patternfly/react-core';
-import FormField from '@components/FormField';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
-import { required } from '@util/validators';
+import FormField from '../../../../components/FormField';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+} from '../../../../components/FormLayout';
+import { required } from '../../../../util/validators';
 
 const GoogleComputeEngineSubForm = ({ i18n }) => {
   const [fileError, setFileError] = useState(null);

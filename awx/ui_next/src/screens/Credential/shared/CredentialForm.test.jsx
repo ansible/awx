@@ -7,7 +7,7 @@ import scmCredential from './data.scmCredential.json';
 import credentialTypes from './data.credentialTypes.json';
 import CredentialForm from './CredentialForm';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<CredentialForm />', () => {
   let wrapper;
