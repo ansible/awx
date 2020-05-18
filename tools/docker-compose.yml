@@ -7,7 +7,7 @@ services:
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     container_name: tools_awx_1
     hostname: awx
-    command: launch_awx.sh
+    command: /awx_devel/tools/docker-compose/launch_awx.sh
     environment:
       CURRENT_UID:
       OS:

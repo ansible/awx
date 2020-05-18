@@ -170,13 +170,11 @@ ADD {% if build_dev|bool %}installer/roles/image_build/files/{% endif %}rsyslog.
 
 ## File mappings
 {% if build_dev|bool %}
-ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
 ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
-ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
 ADD tools/scripts/awx-python /usr/bin/awx-python
 {% else %}

@@ -1,7 +1,7 @@
 #!/bin/bash
 set +x
 
-bootstrap_development.sh
+/awx_devel/tools/docker-compose/bootstrap_development.sh
 
 cd /awx_devel
 # Start the services
