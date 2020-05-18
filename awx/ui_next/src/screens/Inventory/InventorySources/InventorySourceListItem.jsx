@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { withI18n } from '@lingui/react';
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
@@ -25,8 +25,6 @@ function InventorySourceListItem({
   detailUrl,
   label,
 }) {
-  const [isSyncLoading, setIsSyncLoading] = useState(false);
-
   const generateLastJobTooltip = job => {
     return (
       <>
@@ -50,7 +48,6 @@ function InventorySourceListItem({
       <DataListItem aria-labelledby={`check-action-${source.id}`}>
         <DataListItemRow>
           <DataListCheck
-            isDisabled={isSyncLoading}
             id={`select-source-${source.id}`}
             checked={isSelected}
             onChange={onSelect}
@@ -95,19 +92,13 @@ function InventorySourceListItem({
             aria-label="actions"
           >
             {source.summary_fields.user_capabilities.start && (
-              <InventorySourceSyncButton
-                onSyncLoading={isLoading => {
-                  setIsSyncLoading(isLoading);
-                }}
-                source={source}
-              />
+              <InventorySourceSyncButton source={source} />
             )}
             {source.summary_fields.user_capabilities.edit && (
               <Button
                 aria-label={i18n._(t`Edit Source`)}
                 variant="plain"
                 component={Link}
-                isDisabled={isSyncLoading}
                 to={`${detailUrl}/edit`}
               >
                 <PencilAltIcon />

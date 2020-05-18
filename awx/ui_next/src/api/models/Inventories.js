@@ -88,6 +88,12 @@ class Inventories extends InstanceGroupsMixin(Base) {
       `How did you get here? Source not found for Inventory ID: ${inventoryId}`
     );
   }
+
+  syncAllSources(inventoryId) {
+    return this.http.post(
+      `${this.baseUrl}${inventoryId}/update_inventory_sources/`
+    );
+  }
 }
 
 export default Inventories;
