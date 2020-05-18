@@ -30,9 +30,6 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# Production should only use minified JS for UI.
-USE_MINIFIED_JS = True
-
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'

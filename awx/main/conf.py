@@ -247,18 +247,6 @@ register(
 )
 
 register(
-    'AWX_ISOLATED_VERBOSITY',
-    field_class=fields.IntegerField,
-    min_value=0,
-    max_value=5,
-    label=_('Verbosity level for isolated node management tasks'),
-    help_text=_('This can be raised to aid in debugging connection issues for isolated task execution'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    default=0
-)
-
-register(
     'AWX_ISOLATED_CHECK_INTERVAL',
     field_class=fields.IntegerField,
     min_value=0,
@@ -778,16 +766,6 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_AGGREGATOR_AUDIT',
-    field_class=fields.BooleanField,
-    allow_null=True,
-    default=False,
-    label=_('Enabled external log aggregation auditing'),
-    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log.  This is an experimental setting intended to be used for debugging external log aggregation issues (and may be subject to change in the future).'),  # noqa
-    category=_('Logging'),
-    category_slug='logging',
-)
-register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
     field_class=fields.IntegerField,
     default=1,
@@ -821,15 +799,6 @@ register(
     category_slug='logging',
 )
 
-
-register(
-    'BROKER_DURABILITY',
-    field_class=fields.BooleanField,
-    label=_('Message Durability'),
-    help_text=_('When set (the default), underlying queues will be persisted to disk.  Disable this to enable higher message bus throughput.'),
-    category=_('System'),
-    category_slug='system',
-)
 
 
 register(
