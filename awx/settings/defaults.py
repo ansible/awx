@@ -644,7 +644,6 @@ INSIGHTS_TRACKING_STATE = False
 
 # Last gather date for Analytics
 AUTOMATION_ANALYTICS_LAST_GATHER = None
-AUTOMATION_ANALYTICS_INTERVAL = 14400
 
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.
