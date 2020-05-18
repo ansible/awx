@@ -15,7 +15,6 @@
     project: "{{ awx_project }}"
     playbook: "{{ item.playbook | default(OMIT) }}"
     inventory: "{{ item.inventory | default(OMIT) }}"
-    tower_oauthtoken: "{{ awx_oauthtoken }}"
     tower_host: "{{ awx_host }}"
     validate_certs: False
   loop: "{{ job_templates | default([]) }}"

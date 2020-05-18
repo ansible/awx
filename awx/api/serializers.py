@@ -1241,6 +1241,19 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         return ret
 
 
+class DirectTokenSerializer():
+    def create_token(self, data):
+        if 'token' not in data:
+            data['token'] = generate_token()
+        if 'expires' not in data:
+            data['expires'] = now() + timedelta(
+                seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
+            )
+        new_token = OAuth2AccessToken(**data)
+        new_token.save()
+        return new_token
+
+
 class OrganizationSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
 

@@ -55,7 +55,7 @@ from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
     Schedule, TowerScheduleState, Instance, InstanceGroup,
-    UnifiedJob, Notification,
+    UnifiedJob, Notification, OAuth2AccessToken,
     Inventory, InventorySource, SmartInventoryMembership,
     Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
     JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
@@ -81,6 +81,7 @@ from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.conf.license import get_license
+from awx.api.serializers import DirectTokenSerializer
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -2073,6 +2074,18 @@ class RunProjectUpdate(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
+        # Set up the oauth token if we are project syncing
+        if project_update.project.sync_assets: 
+            try:
+                user = User.objects.get(id=project_update.created_by_id)
+                config = { 'user': user, 'description': 'project sync {}'.format(project_update.id) }
+                serializer_obj = DirectTokenSerializer()
+                new_token = serializer_obj.create_token(config)
+                env['TOWER_OAUTH_TOKEN'] = new_token.token
+            except Exception as e:
+                # Setting this to '' will trigger a when condition in the playbook to not run the import
+                env['TOWER_OAUTH_TOKEN'] = ''
+
         # Set up the public Galaxy server, if enabled
         galaxy_configured = False
         if settings.PUBLIC_GALAXY_ENABLED:
@@ -2165,6 +2178,7 @@ class RunProjectUpdate(BaseTask):
         extra_vars = {}
         scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update)
         extra_vars.update(extra_vars_new)
+
 
         scm_branch = project_update.scm_branch
         branch_override = bool(scm_branch and project_update.scm_branch != project_update.project.scm_branch)
@@ -2397,6 +2411,14 @@ class RunProjectUpdate(BaseTask):
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
+
+        # Clean up the oauth token if we are project syncing
+        if instance.project.sync_assets:
+            try:
+                OAuth2AccessToken.objects.filter(user=instance.created_by_id, description='project sync {}'.format(instance.id)).delete()
+            except Exception as e:
+                pass
+
 
     def should_use_proot(self, project_update):
         '''

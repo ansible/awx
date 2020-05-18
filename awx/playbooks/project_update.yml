@@ -16,7 +16,7 @@
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 # awx_host: The host to talk with from the API, should be settings.TOWER_URL_BASE
-# awx_oauthtoken: "qJnkfLft3BfIv2PpXhAo892d5z4Av8"
+# awx_oauthtoken: A token to get back into tower for the project sync
 # awx_project: The name of the project we are syncing
 
 - hosts: localhost
@@ -169,8 +169,6 @@
   name: Create assets
   vars:
     job_template_vars: '{{ project_path }}/assets/job_templates.yml'
-    # These three we want to pass into the job from main/tasks.py
-    awx_oauthtoken: "qJnkfLft3BfIv2PpXhAo892d5z4Av8"
   tasks:
     - block:
         # It would be nice if we can pre-install this collection
@@ -187,6 +185,7 @@
             tasks_from: job_templates
       when:
         - "ansible_version.full is version_compare('2.8', '>=')"
+        - "lookup('env', 'TOWER_OAUTH_TOKEN') != ''"
       tags:
         # maybe someday we add update_assets tag in tasks/main.py if the asset folder exists
         - update_assets
