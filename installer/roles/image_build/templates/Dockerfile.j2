@@ -105,7 +105,9 @@ RUN dnf -y install \
     nodejs \
     nss \
     make \
-    patch && \
+    patch \
+    wget \
+    unzip && \
     npm install -g n && n 10.15.0 && dnf remove -y nodejs
 {% endif %}
 

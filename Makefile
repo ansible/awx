@@ -6,6 +6,7 @@ PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 NODE ?= node
 NPM_BIN ?= npm
+CHROMIUM_BIN=/tmp/chrome-linux/chrome
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
@@ -547,11 +548,13 @@ jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 	$(NPM_BIN) run --prefix awx/ui lint
 
-ui-zuul-lint-and-test: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) run --prefix awx/ui jshint
-	$(NPM_BIN) run --prefix awx/ui lint
-	$(NPM_BIN) --prefix awx/ui run test:ci
-	$(NPM_BIN) --prefix awx/ui run unit
+ui-zuul-lint-and-test:
+	CHROMIUM_BIN=$(CHROMIUM_BIN) ./awx/ui/build/zuul_download_chromium.sh
+	CHROMIUM_BIN=$(CHROMIUM_BIN) PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
+	CHROMIUM_BIN=$(CHROMIUM_BIN) $(NPM_BIN) run --prefix awx/ui jshint
+	CHROMIUM_BIN=$(CHROMIUM_BIN) $(NPM_BIN) run --prefix awx/ui lint
+	CHROME_BIN=$(CHROMIUM_BIN) $(NPM_BIN) --prefix awx/ui run test:ci
+	CHROME_BIN=$(CHROMIUM_BIN) $(NPM_BIN) --prefix awx/ui run unit
 
 # END UI TASKS
 # --------------------------------------
