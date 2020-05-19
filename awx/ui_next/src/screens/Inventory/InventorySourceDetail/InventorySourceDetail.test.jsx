@@ -10,6 +10,30 @@ import mockInvSource from '../shared/data.inventory_source.json';
 import { InventorySourcesAPI } from '../../../api';
 
 jest.mock('../../../api/models/InventorySources');
+InventorySourcesAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: {
+      GET: {
+        source: {
+          choices: [
+            ['file', 'File, Directory or Script'],
+            ['scm', 'Sourced from a Project'],
+            ['ec2', 'Amazon EC2'],
+            ['gce', 'Google Compute Engine'],
+            ['azure_rm', 'Microsoft Azure Resource Manager'],
+            ['vmware', 'VMware vCenter'],
+            ['satellite6', 'Red Hat Satellite 6'],
+            ['cloudforms', 'Red Hat CloudForms'],
+            ['openstack', 'OpenStack'],
+            ['rhv', 'Red Hat Virtualization'],
+            ['tower', 'Ansible Tower'],
+            ['custom', 'Custom Script'],
+          ],
+        },
+      },
+    },
+  },
+});
 
 function assertDetail(wrapper, label, value) {
   expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
@@ -24,14 +48,17 @@ describe('InventorySourceDetail', () => {
     jest.clearAllMocks();
   });
 
-  test('should render expected details', () => {
-    wrapper = mountWithContexts(
-      <InventorySourceDetail inventorySource={mockInvSource} />
-    );
+  test('should render expected details', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={mockInvSource} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('InventorySourceDetail')).toHaveLength(1);
     assertDetail(wrapper, 'Name', 'mock inv source');
     assertDetail(wrapper, 'Description', 'mock description');
-    assertDetail(wrapper, 'Source', 'scm');
+    assertDetail(wrapper, 'Source', 'Sourced from a Project');
     assertDetail(wrapper, 'Organization', 'Mock Org');
     assertDetail(wrapper, 'Ansible environment', '/venv/custom');
     assertDetail(wrapper, 'Project', 'Mock Project');
@@ -69,44 +96,51 @@ describe('InventorySourceDetail', () => {
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---\nfoo: bar'
     );
-    expect(
-      wrapper
-        .find('Detail[label="Options"]')
-        .containsAllMatchingElements([
-          <li>Overwrite</li>,
-          <li>Overwrite variables</li>,
-          <li>Update on launch</li>,
-          <li>Update on project update</li>,
-        ])
-    ).toEqual(true);
+    wrapper.find('Detail[label="Options"] li').forEach(option => {
+      expect([
+        'Overwrite',
+        'Overwrite variables',
+        'Update on launch',
+        'Update on project update',
+      ]).toContain(option.text());
+    });
   });
 
-  test('should show edit and delete button for users with permissions', () => {
-    wrapper = mountWithContexts(
-      <InventorySourceDetail inventorySource={mockInvSource} />
-    );
+  test('should display expected action buttons for users with permissions', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={mockInvSource} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     const editButton = wrapper.find('Button[aria-label="edit"]');
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe(
       '/inventories/inventory/2/source/123/edit'
     );
     expect(wrapper.find('DeleteButton')).toHaveLength(1);
+    expect(wrapper.find('InventorySourceSyncButton')).toHaveLength(1);
   });
 
-  test('should hide edit and delete button for users without permissions', () => {
+  test('should hide expected action buttons for users without permissions', async () => {
     const userCapabilities = {
       edit: false,
       delete: false,
+      start: false,
     };
     const invSource = {
       ...mockInvSource,
       summary_fields: { ...userCapabilities },
     };
-    wrapper = mountWithContexts(
-      <InventorySourceDetail inventorySource={invSource} />
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={invSource} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('Button[aria-label="edit"]')).toHaveLength(0);
     expect(wrapper.find('DeleteButton')).toHaveLength(0);
+    expect(wrapper.find('InventorySourceSyncButton')).toHaveLength(0);
   });
 
   test('expected api call is made for delete', async () => {
@@ -135,13 +169,33 @@ describe('InventorySourceDetail', () => {
     );
   });
 
+  test('Content error shown for failed options request', async () => {
+    InventorySourcesAPI.readOptions.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    expect(InventorySourcesAPI.readOptions).toHaveBeenCalledTimes(0);
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={mockInvSource} />
+      );
+    });
+    expect(InventorySourcesAPI.readOptions).toHaveBeenCalledTimes(1);
+    await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+    expect(wrapper.find('ContentError Title').text()).toEqual(
+      'Something went wrong...'
+    );
+  });
+
   test('Error dialog shown for failed deletion', async () => {
     InventorySourcesAPI.destroy.mockImplementationOnce(() =>
       Promise.reject(new Error())
     );
-    wrapper = mountWithContexts(
-      <InventorySourceDetail inventorySource={mockInvSource} />
-    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail inventorySource={mockInvSource} />
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('Modal[title="Error!"]')).toHaveLength(0);
     await act(async () => {
       wrapper.find('DeleteButton').invoke('onConfirm')();

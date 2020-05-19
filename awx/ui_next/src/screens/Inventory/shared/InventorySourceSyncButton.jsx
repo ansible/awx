@@ -9,7 +9,7 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
-function InventorySourceSyncButton({ source, i18n }) {
+function InventorySourceSyncButton({ source, icon, i18n }) {
   const {
     isLoading: startSyncLoading,
     error: startSyncError,
@@ -43,21 +43,26 @@ function InventorySourceSyncButton({ source, i18n }) {
     }, [source.id])
   );
 
-  const { error, dismissError } = useDismissableError(
-    cancelSyncError || startSyncError
-  );
+  const {
+    error: startError,
+    dismissError: dismissStartError,
+  } = useDismissableError(startSyncError);
+  const {
+    error: cancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelSyncError);
 
   return (
     <>
-      {source.status === 'pending' ? (
+      {['running', 'pending', 'updating'].includes(source.status) ? (
         <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
           <Button
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Cancel sync source`)}
-            variant="plain"
+            variant={icon ? 'plain' : 'secondary'}
             onClick={cancelSyncProcess}
           >
-            <MinusCircleIcon />
+            {icon ? <MinusCircleIcon /> : i18n._(t`Cancel sync`)}
           </Button>
         </Tooltip>
       ) : (
@@ -65,24 +70,33 @@ function InventorySourceSyncButton({ source, i18n }) {
           <Button
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Start sync source`)}
-            variant="plain"
+            variant={icon ? 'plain' : 'secondary'}
             onClick={startSyncProcess}
           >
-            <SyncIcon />
+            {icon ? <SyncIcon /> : i18n._(t`Sync`)}
           </Button>
         </Tooltip>
       )}
-      {error && (
+      {startError && (
         <AlertModal
-          isOpen={error}
+          isOpen={startError}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={dismissError}
+          onClose={dismissStartError}
         >
-          {startSyncError
-            ? i18n._(t`Failed to sync inventory source.`)
-            : i18n._(t`Failed to cancel inventory source sync.`)}
-          <ErrorDetail error={error} />
+          {i18n._(t`Failed to sync inventory source.`)}
+          <ErrorDetail error={startError} />
+        </AlertModal>
+      )}
+      {cancelError && (
+        <AlertModal
+          isOpen={cancelError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissCancelError}
+        >
+          {i18n._(t`Failed to cancel inventory source sync.`)}
+          <ErrorDetail error={cancelError} />
         </AlertModal>
       )}
     </>
@@ -91,10 +105,12 @@ function InventorySourceSyncButton({ source, i18n }) {
 
 InventorySourceSyncButton.defaultProps = {
   source: {},
+  icon: true,
 };
 
 InventorySourceSyncButton.propTypes = {
   source: PropTypes.shape({}),
+  icon: PropTypes.bool,
 };
 
 export default withI18n()(InventorySourceSyncButton);
