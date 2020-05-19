@@ -46,7 +46,6 @@ options:
       choices:
         - 'email'
         - 'grafana'
-        - 'hipchat'
         - 'irc'
         - 'mattermost'
         - 'pagerduty'
@@ -159,7 +158,7 @@ options:
     api_url:
       description:
         - The HipChat API URL.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
+        - The HipChat notification type has been deprecated.
       type: str
     color:
       description:
@@ -170,7 +169,7 @@ options:
     rooms:
       description:
         - HipChat rooms to send the notification to.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
+        - The HipChat notification type has been deprecated.
       type: list
       elements: str
     notify:
@@ -293,21 +292,6 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add HipChat notification
-  tower_notification:
-    name: hipchat notification
-    notification_type: hipchat
-    notification_configuration:
-      token: a_token
-      message_from: user1
-      api_url: https://hipchat.example.com
-      color: red
-      rooms:
-        - room-A
-      notify: yes
-    state: present
-    tower_config_file: "~/tower_cli.cfg"
-
 - name: Add IRC notification
   tower_notification:
     name: irc notification
@@ -336,13 +320,17 @@ RETURN = ''' # '''
 
 from ..module_utils.tower_api import TowerModule
 
+HIPCHAT_PARAMS = (
+    'api_url', 'rooms',
+)
+
 OLD_INPUT_NAMES = (
     'username', 'sender', 'recipients', 'use_tls',
     'host', 'use_ssl', 'password', 'port',
     'channels', 'token', 'account_token', 'from_number',
     'to_numbers', 'account_sid', 'subdomain', 'service_key',
-    'client_name', 'message_from', 'api_url', 'color',
-    'rooms', 'notify', 'url', 'headers', 'server',
+    'client_name', 'message_from', 'color',
+    'notify', 'url', 'headers', 'server',
     'nickname', 'targets',
 )
 
@@ -355,7 +343,7 @@ def main():
         description=dict(),
         organization=dict(),
         notification_type=dict(choices=[
-            'email', 'grafana', 'hipchat', 'irc', 'mattermost',
+            'email', 'grafana', 'irc', 'mattermost',
             'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook'
         ]),
         notification_configuration=dict(type='dict'),
@@ -395,7 +383,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    new_name = module.params.get("new_name")
+    new_name = module.params.get('new_name')
     description = module.params.get('description')
     organization = module.params.get('organization')
     notification_type = module.params.get('notification_type')
@@ -403,10 +391,16 @@ def main():
     messages = module.params.get('messages')
     state = module.params.get('state')
 
-    # Deprecation warnings
+    # Deprecation/removal warnings for HipChat notification type
+    for hipchat_params in HIPCHAT_PARAMS:
+        if module.params.get(hipchat_params) is not None:
+            module.deprecate(msg='{0} parameter has been deprecated; the HipChat notification type can no longer be generated'.format(hipchat_params),
+                             version="4.0")
+
+    # Deprecation warnings for all other params
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
+            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input), version="3.6")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None

@@ -72,7 +72,6 @@ The currently-defined Notification Types are:
 
 * Email
 * Slack
-* HipChat
 * Mattermost
 * Rocket.Chat
 * Pagerduty
@@ -82,6 +81,8 @@ The currently-defined Notification Types are:
 * Grafana
 
 Each of these have their own configuration and behavioral semantics and testing them may need to be approached in different ways. The following sections will give as much detail as possible.
+
+> **Note:** The HipChat notification type will be unavailable as of Tower 4.0
 
 ## Email
 
