@@ -47,7 +47,7 @@ function OrganizationTeams({ id, i18n }) {
       hasContentLoading={hasContentLoading}
       items={teams}
       itemCount={itemCount}
-      pluralizedItemName="Teams"
+      pluralizedItemName={i18n._(t`Teams`)}
       qsConfig={QS_CONFIG}
       toolbarSearchColumns={[
         {

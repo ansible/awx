@@ -151,7 +151,7 @@ class UsersList extends Component {
               hasContentLoading={hasContentLoading}
               items={users}
               itemCount={itemCount}
-              pluralizedItemName="Users"
+              pluralizedItemName={i18n._(t`Users`)}
               qsConfig={QS_CONFIG}
               onRowClick={this.handleSelect}
               toolbarSearchColumns={[
