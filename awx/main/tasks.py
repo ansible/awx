@@ -2198,6 +2198,7 @@ class RunProjectUpdate(BaseTask):
             'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
             'awx_host': settings.TOWER_URL_BASE,
             'awx_project': project_update.project.name,
+            'awx_organization': project_update.project.organization.name,
         })
         if project_update.job_type != 'check' and self.job_private_data_dir:
             extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')

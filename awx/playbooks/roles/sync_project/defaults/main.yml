@@ -1,0 +1,5 @@
+---
+asset_files:
+  - '{{ project_path }}/assets/job_templates.yml'
+  - '{{ project_path }}/assets/workflow_job_templates.yml'
+  - '{{ project_path }}/assets/workflow_job_template_nodes.yml'
