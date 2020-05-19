@@ -11,7 +11,7 @@ from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction, connection
-from django.db.utils import Error as DBError
+from django.db.utils import Error as DBError, ProgrammingError
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -74,10 +74,19 @@ def _ctit_db_wrapper(trans_safe=False):
                     logger.debug('Obtaining database settings in spite of broken transaction.')
                     transaction.set_rollback(False)
         yield
-    except DBError:
+    except DBError as exc:
         if trans_safe:
             if 'migrate' not in sys.argv and 'check_migrations' not in sys.argv:
-                logger.exception('Database settings are not available, using defaults.')
+                level = logger.exception
+                if isinstance(exc, ProgrammingError):
+                    if 'relation' in str(exc) and 'does not exist' in str(exc):
+                        # this generally means we can't fetch Tower configuration
+                        # because the database hasn't actually finished migrating yet;
+                        # this is usually a sign that a service in a container (such as ws_broadcast)
+                        # has come up *before* the database has finished migrating, and
+                        # especially that the conf.settings table doesn't exist yet
+                        level = logger.debug
+                level('Database settings are not available, using defaults.')
         else:
             logger.exception('Error modifying something related to database settings.')
     finally:
