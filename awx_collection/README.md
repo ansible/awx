@@ -81,7 +81,7 @@ The following notes are changes that may require changes to playbooks:
  - `tower_job_template` no longer supports the deprecated `extra_vars_path` parameter, please use `extra_vars` with the lookup plugin to replace this functionality.
  - The `notification_configuration` parameter of `tower_notification` has changed from a string to a dict. Please use the `lookup` plugin to read an existing file into a dict.
  - `tower_credential` no longer supports passing a file name to ssh_key_data.
- - The HipChat notification type has been removed and can no longer be created using the `tower_notification` module.
+ - The HipChat `notification_type` has been removed and can no longer be created using the `tower_notification` module.
 
 ## Running Unit Tests
 

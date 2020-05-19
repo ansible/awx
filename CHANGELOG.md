@@ -2,6 +2,10 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 12.0.0 (TBD)
+- Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0))
+
+
 ## 11.2.0 (Apr 29, 2020)
 
 - Inventory updates now use collection-based plugins by default (in Ansible 2.9+):
@@ -103,7 +107,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Updated the bundled version of openstacksdk to address a known issue https://github.com/ansible/awx/issues/5821
 - Updated the bundled vmware_inventory plugin to the latest version to address a bug https://github.com/ansible/awx/pull/5668
 - Fixed a bug that can cause inventory updates to fail to properly save their output when run within a workflow https://github.com/ansible/awx/pull/5666
-- Removed a number of pre-computed fields from the Host and Group models to improve AWX performance.  As part of this change, inventory group UIs throughout the interface no longer display status icons https://github.com/ansible/awx/pull/5448 
+- Removed a number of pre-computed fields from the Host and Group models to improve AWX performance.  As part of this change, inventory group UIs throughout the interface no longer display status icons https://github.com/ansible/awx/pull/5448
 
 ## 9.1.1 (Jan 14, 2020)
 

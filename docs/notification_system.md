@@ -82,8 +82,6 @@ The currently-defined Notification Types are:
 
 Each of these have their own configuration and behavioral semantics and testing them may need to be approached in different ways. The following sections will give as much detail as possible.
 
-> **Note:** The HipChat notification type will be unavailable as of Tower 4.0
-
 ## Email
 
 The email notification type supports a wide variety of SMTP servers and has support for SSL/TLS connections and timeouts.
