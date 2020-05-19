@@ -5,17 +5,19 @@ import asyncio
 import datetime
 import re
 import redis
+import time
 from datetime import datetime as dt
 
 from django.core.management.base import BaseCommand
+from django.db import connection
 from django.db.models import Q
+from django.db.migrations.executor import MigrationExecutor
 
 from awx.main.analytics.broadcast_websocket import (
     BroadcastWebsocketStatsManager,
     safe_name,
 )
 from awx.main.wsbroadcast import BroadcastWebsocketManager
-from awx.main.models.ha import Instance
 
 
 logger = logging.getLogger('awx.main.wsbroadcast')
@@ -91,6 +93,36 @@ class Command(BaseCommand):
         return host_stats
 
     def handle(self, *arg, **options):
+        # it's necessary to delay this import in case
+        # database migrations are still running
+        from awx.main.models.ha import Instance
+
+        executor = MigrationExecutor(connection)
+        migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
+        registered = False
+
+        if not migrating:
+            try:
+                Instance.objects.me()
+                registered = True
+            except RuntimeError:
+                pass
+
+        if migrating or not registered:
+            # In containerized deployments, migrations happen in the task container,
+            # and the services running there don't start until migrations are
+            # finished.
+            # *This* service runs in the web container, and it's possible that it can
+            # start _before_ migrations are finished, thus causing issues with the ORM
+            # queries it makes (specifically, conf.settings queries).
+            # This block is meant to serve as a sort of bail-out for the situation
+            # where migrations aren't yet finished (similar to the migration
+            # detection middleware that the uwsgi processes have) or when instance
+            # registration isn't done yet
+            logger.error('AWX is currently installing/upgrading.  Trying again in 5s...')
+            time.sleep(5)
+            return
+
         if options.get('status'):
             try:
                 stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
@@ -107,6 +139,7 @@ class Command(BaseCommand):
                             break
                 else:
                     data[family.name] = family.samples[0].value
+
             me = Instance.objects.me()
             hostnames = [i.hostname for i in Instance.objects.exclude(Q(hostname=me.hostname) | Q(rampart_groups__controller__isnull=False))]
 
