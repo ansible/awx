@@ -11,11 +11,15 @@ services:
       {% if pg_hostname is not defined %}
       - postgres
       {% endif %}
+    {% if (host_port is defined) or (host_port_ssl is defined) %}
     ports:
-      {% if ssl_certificate is defined %}
+      {% if (host_port_ssl is defined) and (ssl_certificate is defined) %}
       - "{{ host_port_ssl }}:8053"
       {% endif %}
+      {% if host_port is defined %}
       - "{{ host_port }}:8052"
+      {% endif %}
+    {% endif %}
     hostname: {{ awx_web_hostname }}
     user: root
     restart: unless-stopped
