@@ -39,6 +39,19 @@ export default {
             let path = `${GetBasePath('system_job_templates')}${$stateParams.management_id}`;
             Rest.setUrl(path);
             return Rest.get(path).then((res) => res.data);
+        }],
+        isAdmin: ['Rest', 'GetBasePath', function(Rest, GetBasePath) {
+            Rest.setUrl(GetBasePath('me'));
+            return Rest.get()
+                .then((res) => {
+                    if (res.data && res.data.results && res.data.count && res.data.results[0] && res.data.results[0].is_superuser) {
+                        return true;
+                    }
+                    return false;
+                })
+                .catch(() => {
+                    return false;
+                });
         }]
     },
     ncyBreadcrumb: {
