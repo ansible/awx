@@ -73,12 +73,15 @@ function SurveyQuestionForm({
 }) {
   const defaultIsNotAvailable = choices => {
     return defaultValue => {
-      if (!choices.includes(defaultValue)) {
-        return i18n._(
+      let errorMessage;
+      const found = [...defaultValue].every(dA => choices.indexOf(dA) > -1);
+
+      if (!found) {
+        errorMessage = i18n._(
           t`Default choice must be answered from the choices listed.`
         );
       }
-      return undefined;
+      return errorMessage;
     };
   };
 
