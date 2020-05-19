@@ -14,6 +14,9 @@ function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
     error,
   } = useRequest(
     useCallback(async () => {
+      if (!projectId) {
+        return [];
+      }
       const { data } = await ProjectsAPI.readPlaybooks(projectId);
       const opts = (data || []).map(playbook => ({
         value: playbook,
