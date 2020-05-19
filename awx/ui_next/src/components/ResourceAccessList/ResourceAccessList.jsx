@@ -162,7 +162,7 @@ class ResourceAccessList extends React.Component {
           hasContentLoading={hasContentLoading}
           items={accessRecords}
           itemCount={itemCount}
-          pluralizedItemName="Roles"
+          pluralizedItemName={i18n._(t`Roles`)}
           qsConfig={QS_CONFIG}
           toolbarSearchColumns={[
             {
