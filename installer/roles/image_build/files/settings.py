@@ -22,8 +22,6 @@ SECRET_KEY = get_secret()
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_API_URL = 'http://awxweb:8052'
-
 # Container environments don't like chroots
 AWX_PROOT_ENABLED = False
 
