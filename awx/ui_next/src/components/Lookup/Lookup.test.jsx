@@ -159,4 +159,30 @@ describe('<Lookup />', () => {
     const list = wrapper.find('TestList');
     expect(list.prop('canDelete')).toEqual(false);
   });
+
+  test('should be disabled while isLoading is true', async () => {
+    const mockSelected = [{ name: 'foo', id: 1, url: '/api/v2/item/1' }];
+    wrapper = mountWithContexts(
+      <Lookup
+        id="test"
+        multiple
+        header="Foo Bar"
+        value={mockSelected}
+        onChange={onChange}
+        qsConfig={QS_CONFIG}
+        isLoading
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <TestList
+            id="options-list"
+            state={state}
+            dispatch={dispatch}
+            canDelete={canDelete}
+          />
+        )}
+      />
+    );
+    checkRootElementNotPresent('body div[role="dialog"]');
+    const button = wrapper.find('button[aria-label="Search"]');
+    expect(button.prop('disabled')).toEqual(true);
+  });
 });
