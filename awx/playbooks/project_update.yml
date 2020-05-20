@@ -122,7 +122,7 @@
           register: doesRequirementsExist
 
         - name: fetch galaxy roles from requirements.yml
-          command: ansible-galaxy install -r roles/requirements.yml -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
+          command: ansible-galaxy role install -r roles/requirements.yml -p {{roles_destination|quote}}{{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
           register: galaxy_result
