@@ -67,6 +67,15 @@ register(
 )
 
 register(
+    'PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS',
+    field_class=fields.IntegerField,
+    label=_('Project Sync Token Expiration'),
+    help_text=_('The duration (in seconds) access tokens create for project syncs remain valid since thie creation'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'REMOTE_HOST_HEADERS',
     field_class=fields.StringListField,
     label=_('Remote Host Headers'),

@@ -2080,9 +2080,7 @@ class RunProjectUpdate(BaseTask):
                 self.sync_token = OAuth2AccessToken.create_token({
                     'user': User.objects.get(id=project_update.created_by_id),
                     'scope': 'write',
-                    'expires': now() + timedelta(
-                        seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
-                    ),
+                    'expires': now() + timedelta(seconds=settings.PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS),
                     'description': 'project sync {0}'.format(project_update.id),
                 })
                 env['TOWER_OAUTH_TOKEN'] = self.sync_token.token

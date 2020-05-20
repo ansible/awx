@@ -120,6 +120,10 @@ LOGIN_URL = '/api/login/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
+# The ammount of seconds to pull a project sync access token for
+# Defaults to 4 hours
+PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS = 14400
+
 # Absolute filesystem path to the directory to host collections for
 # running inventory imports, isolated playbooks
 AWX_ANSIBLE_COLLECTIONS_PATHS = os.path.join(BASE_DIR, 'vendor', 'awx_ansible_collections')

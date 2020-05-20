@@ -56,6 +56,10 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'AUTHORIZATION_CODE_EXPIRE_SECONDS'
             },
+            PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS: {
+                type: 'text',
+                reset: 'PROJECT_SYNC_ACCESS_TOKEN_EXPIRE_SECONDS'
+            },
             REMOTE_HOST_HEADERS: {
                 type: 'textarea',
                 reset: 'REMOTE_HOST_HEADERS'
