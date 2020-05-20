@@ -29,6 +29,7 @@ describe('<UserAccessList />', () => {
               resource_type_display_name: 'Job Template',
               user_capabilities: { unattach: true },
             },
+            description: 'Can manage all aspects of the job template',
           },
           {
             id: 3,
@@ -42,6 +43,7 @@ describe('<UserAccessList />', () => {
               resource_type_display_name: 'Job Template',
               user_capabilities: { unattach: true },
             },
+            description: 'Can manage all aspects of the job template',
           },
           {
             id: 4,
@@ -55,10 +57,11 @@ describe('<UserAccessList />', () => {
               resource_type_display_name: 'Credential',
               user_capabilities: { unattach: true },
             },
+            description: 'May run the job template',
           },
           {
             id: 5,
-            name: 'Update',
+            name: 'Read',
             type: 'role',
             url: '/api/v2/roles/259/',
             summary_fields: {
@@ -68,6 +71,7 @@ describe('<UserAccessList />', () => {
               resource_type_display_name: 'Inventory',
               user_capabilities: { unattach: true },
             },
+            description: 'May view settings for the job template',
           },
           {
             id: 6,
@@ -75,15 +79,16 @@ describe('<UserAccessList />', () => {
             type: 'role',
             url: '/api/v2/roles/260/',
             summary_fields: {
-              resource_name: 'Smart Inventory Foo',
+              resource_name: 'Project Foo',
               resource_id: 77,
-              resource_type: 'smart_inventory',
-              resource_type_display_name: 'Inventory',
+              resource_type: 'project',
+              resource_type_display_name: 'Project',
               user_capabilities: { unattach: true },
             },
+            description: 'Can manage all aspects of the job template',
           },
         ],
-        count: 4,
+        count: 5,
       },
     });
 
@@ -138,7 +143,86 @@ describe('<UserAccessList />', () => {
       '/inventories/inventory/76/details'
     );
     expect(wrapper.find('Link#userRole-6').prop('to')).toBe(
-      '/inventories/smart_inventory/77/details'
+      '/projects/77/details'
     );
+  });
+  test('should not render add button', async () => {
+    UsersAPI.readRoleOptions.mockResolvedValueOnce({
+      data: {},
+    });
+
+    UsersAPI.readRoles.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 2,
+            name: 'Admin',
+            type: 'role',
+            url: '/api/v2/roles/257/',
+            summary_fields: {
+              resource_name: 'template delete project',
+              resource_id: 15,
+              resource_type: 'job_template',
+              resource_type_display_name: 'Job Template',
+              user_capabilities: { unattach: true },
+              object_roles: {
+                admin_role: {
+                  description: 'Can manage all aspects of the job template',
+                  name: 'Admin',
+                  id: 164,
+                },
+                execute_role: {
+                  description: 'May run the job template',
+                  name: 'Execute',
+                  id: 165,
+                },
+                read_role: {
+                  description: 'May view settings for the job template',
+                  name: 'Read',
+                  id: 166,
+                },
+              },
+            },
+          },
+        ],
+        count: 1,
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/users/:id/access">
+          <UserAccessList />
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 18 } },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    expect(wrapper.find('Button[aria-label="Add resource roles"]').length).toBe(
+      0
+    );
+  });
+  test('should open and close wizard', async () => {
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await act(async () =>
+      wrapper.find('Button[aria-label="Add resource roles"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('PFWizard').length).toBe(1);
+    await act(async () =>
+      wrapper.find("Button[aria-label='Close']").prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('PFWizard').length).toBe(0);
   });
 });
