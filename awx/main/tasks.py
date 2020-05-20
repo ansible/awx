@@ -358,6 +358,9 @@ def gather_analytics():
     from rest_framework.fields import DateTimeField
     if not settings.INSIGHTS_TRACKING_STATE:
         return
+    if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
+        logger.debug('Not gathering analytics, configuration is invalid')
+        return
     last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
     if last_gather:
         last_time = DateTimeField().to_internal_value(last_gather.value)
