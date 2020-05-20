@@ -64,7 +64,6 @@ def could_be_playbook(project_path, dir_path, filename):
                 matched = True
                 break
     except IOError:
-        logger.exception(f'failed to open {playbook_path}')
         return None
     if not matched:
         return None
