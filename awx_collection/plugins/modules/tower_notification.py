@@ -155,23 +155,12 @@ options:
         - The label to be shown with the notification.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
-    api_url:
-      description:
-        - The HipChat API URL.
-        - The HipChat notification type has been deprecated.
-      type: str
     color:
       description:
         - The notification color.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       choices: ["yellow", "green", "red", "purple", "gray", "random"]
       type: str
-    rooms:
-      description:
-        - HipChat rooms to send the notification to.
-        - The HipChat notification type has been deprecated.
-      type: list
-      elements: str
     notify:
       description:
         - The notify channel trigger.
@@ -320,10 +309,6 @@ RETURN = ''' # '''
 
 from ..module_utils.tower_api import TowerModule
 
-HIPCHAT_PARAMS = (
-    'api_url', 'rooms',
-)
-
 OLD_INPUT_NAMES = (
     'username', 'sender', 'recipients', 'use_tls',
     'host', 'use_ssl', 'password', 'port',
@@ -366,9 +351,7 @@ def main():
         service_key=dict(no_log=True),
         client_name=dict(),
         message_from=dict(),
-        api_url=dict(),
         color=dict(choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
-        rooms=dict(type='list', elements='str'),
         notify=dict(type='bool'),
         url=dict(),
         headers=dict(type='dict'),
@@ -390,12 +373,6 @@ def main():
     notification_configuration = module.params.get('notification_configuration')
     messages = module.params.get('messages')
     state = module.params.get('state')
-
-    # Deprecation/removal warnings for HipChat notification type
-    for hipchat_params in HIPCHAT_PARAMS:
-        if module.params.get(hipchat_params) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated; the HipChat notification type can no longer be generated'.format(hipchat_params),
-                             version="4.0")
 
     # Deprecation warnings for all other params
     for legacy_input in OLD_INPUT_NAMES:

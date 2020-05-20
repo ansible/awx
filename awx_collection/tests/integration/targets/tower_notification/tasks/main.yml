@@ -34,19 +34,7 @@
     service_key: skeleton
     client_name: Bill
     message_from: me
-    api_url: https://tower.example.com/api/v2
     color: green
-    rooms:
-      - The Study
-      - Kitchen
-      - Ballroom
-      - Conservatory
-      - Billiard Room
-      - Library
-      - Hall
-      - Lounge
-      - Dining Room
-      - Cellar
     notify: true
     url: ansible.com
     headers:
@@ -62,8 +50,8 @@
 - assert:
     that:
       - "'deprecations' in result"
-      # The 27 can be count from the size of the OLD_INPUT_NAMES list in the module
-      - result['deprecations'] | length() == 27
+      # The 25 can be count from the size of the OLD_INPUT_NAMES list in the module
+      - result['deprecations'] | length() == 25
 
 - name: Create Slack notification with custom messages
   tower_notification:
