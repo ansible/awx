@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -18,6 +18,7 @@ import {
 import ErrorDetail from '../../../components/ErrorDetail';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import { Credential } from '../../../types';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 
 function CredentialDetail({ i18n, credential }) {
   const {
@@ -39,7 +40,6 @@ function CredentialDetail({ i18n, credential }) {
   const [fields, setFields] = useState([]);
   const [managedByTower, setManagedByTower] = useState([]);
   const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const history = useHistory();
 
@@ -62,17 +62,18 @@ function CredentialDetail({ i18n, credential }) {
     })();
   }, [credential_type]);
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-
-    try {
+  const {
+    request: deleteCredential,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       await CredentialsAPI.destroy(credentialId);
       history.push('/credentials');
-    } catch (error) {
-      setDeletionError(error);
-    }
-    setHasContentLoading(false);
-  };
+    }, [credentialId, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   const renderDetail = ({ id, label, type }) => {
     let detail;
@@ -161,21 +162,22 @@ function CredentialDetail({ i18n, credential }) {
           <DeleteButton
             name={name}
             modalTitle={i18n._(t`Delete Credential`)}
-            onConfirm={handleDelete}
+            onConfirm={deleteCredential}
+            isLoading={isLoading}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>
         )}
       </CardActionsRow>
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete credential.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>
