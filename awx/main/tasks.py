@@ -81,7 +81,6 @@ from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.conf.license import get_license
-from awx.api.serializers import DirectTokenSerializer
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -1995,6 +1994,7 @@ class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
     event_data_key = 'project_update_id'
+    sync_token = None
 
     @property
     def proot_show_paths(self):
@@ -2077,12 +2077,17 @@ class RunProjectUpdate(BaseTask):
         # Set up the oauth token if we are project syncing
         if project_update.project.sync_assets: 
             try:
-                user = User.objects.get(id=project_update.created_by_id)
-                config = { 'user': user, 'description': 'project sync {}'.format(project_update.id) }
-                serializer_obj = DirectTokenSerializer()
-                new_token = serializer_obj.create_token(config)
-                env['TOWER_OAUTH_TOKEN'] = new_token.token
+                self.sync_token = OAuth2AccessToken.create_token({
+                    'user': User.objects.get(id=project_update.created_by_id),
+                    'scope': 'write',
+                    'expires': now() + timedelta(
+                        seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
+                    ),
+                    'description': 'project sync {}'.format(project_update.id),
+                })
+                env['TOWER_OAUTH_TOKEN'] = self.sync_token.token
             except Exception as e:
+                logger.exception("Failed to create oAuth token for prooject sync: {}".format(e))
                 # Setting this to '' will trigger a when condition in the playbook to not run the import
                 env['TOWER_OAUTH_TOKEN'] = ''
 
@@ -2414,9 +2419,9 @@ class RunProjectUpdate(BaseTask):
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
 
         # Clean up the oauth token if we are project syncing
-        if instance.project.sync_assets:
+        if instance.project.sync_assets and self.sync_token:
             try:
-                OAuth2AccessToken.objects.filter(user=instance.created_by_id, description='project sync {}'.format(instance.id)).delete()
+                self.sync_token.delete()
             except Exception as e:
                 pass
 
