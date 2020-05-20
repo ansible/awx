@@ -2083,11 +2083,11 @@ class RunProjectUpdate(BaseTask):
                     'expires': now() + timedelta(
                         seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
                     ),
-                    'description': 'project sync {}'.format(project_update.id),
+                    'description': 'project sync {0}'.format(project_update.id),
                 })
                 env['TOWER_OAUTH_TOKEN'] = self.sync_token.token
             except Exception as e:
-                logger.exception("Failed to create oAuth token for prooject sync: {}".format(e))
+                logger.exception("Failed to create oAuth token for prooject sync: {0}".format(e))
                 # Setting this to '' will trigger a when condition in the playbook to not run the import
                 env['TOWER_OAUTH_TOKEN'] = ''
 
@@ -2423,8 +2423,7 @@ class RunProjectUpdate(BaseTask):
             try:
                 self.sync_token.delete()
             except Exception as e:
-                pass
-
+                logger.exception("Failed to release oAuth token {0} for prooject sync: {1}".format(self.sync_token.token, e))
 
     def should_use_proot(self, project_update):
         '''
