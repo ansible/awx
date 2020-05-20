@@ -144,7 +144,7 @@ const InventorySourceForm = ({
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
-    source_path: source?.source_path || '',
+    source_path: source?.source_path === '' ? '/ (project root)' : '',
     source_project: source?.summary_fields?.source_project || null,
     source_vars: source?.source_vars || '---\n',
     update_cache_timeout: source?.update_cache_timeout || 0,

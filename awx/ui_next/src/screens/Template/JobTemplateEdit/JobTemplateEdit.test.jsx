@@ -6,7 +6,13 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '../../../api';
+import {
+  CredentialsAPI,
+  CredentialTypesAPI,
+  JobTemplatesAPI,
+  LabelsAPI,
+  ProjectsAPI,
+} from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 
 jest.mock('../../../api');
@@ -60,7 +66,7 @@ const mockJobTemplate = {
       { id: 2, kind: 'ssh', name: 'Bar' },
     ],
     project: {
-      id: 15,
+      id: 3,
       name: 'Boo',
     },
   },
@@ -176,6 +182,13 @@ ProjectsAPI.readPlaybooks.mockResolvedValue({
   data: mockRelatedProjectPlaybooks,
 });
 LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+CredentialsAPI.read.mockResolvedValue({
+  data: {
+    results: [],
+    count: 0,
+  },
+});
+CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
 
 describe('<JobTemplateEdit />', () => {
   beforeEach(() => {
@@ -251,7 +264,7 @@ describe('<JobTemplateEdit />', () => {
 
     const expected = {
       ...mockJobTemplate,
-      project: mockJobTemplate.project.id,
+      project: mockJobTemplate.project,
       ...updatedTemplateData,
     };
     delete expected.summary_fields;

@@ -21,6 +21,7 @@ const QS_CONFIG = getQSConfig('project', {
 
 function ProjectLookup({
   helperTextInvalid,
+  autocomplete,
   i18n,
   isValid,
   onChange,
@@ -38,14 +39,14 @@ function ProjectLookup({
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const { data } = await ProjectsAPI.read(params);
-      if (data.count === 1) {
-        onChange(data.results[0]);
+      if (data.count === 1 && autocomplete) {
+        autocomplete(data.results[0]);
       }
       return {
         count: data.count,
         projects: data.results,
       };
-    }, [onChange, history.location.search]),
+    }, [history.location.search, autocomplete]),
     {
       count: 0,
       projects: [],
@@ -131,22 +132,24 @@ function ProjectLookup({
 }
 
 ProjectLookup.propTypes = {
-  value: Project,
+  autocomplete: func,
   helperTextInvalid: node,
   isValid: bool,
   onBlur: func,
   onChange: func.isRequired,
   required: bool,
   tooltip: string,
+  value: Project,
 };
 
 ProjectLookup.defaultProps = {
+  autocomplete: () => {},
   helperTextInvalid: '',
   isValid: true,
+  onBlur: () => {},
   required: false,
   tooltip: '',
   value: null,
-  onBlur: () => {},
 };
 
 export { ProjectLookup as _ProjectLookup };

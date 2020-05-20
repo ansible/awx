@@ -37,16 +37,26 @@ const SCMSubForm = ({ i18n }) => {
   );
 
   useEffect(() => {
-    if (projectField.value?.id) {
-      fetchSourcePath(projectField.value.id);
+    if (projectMeta.initialValue) {
+      fetchSourcePath(projectMeta.initialValue.id);
     }
-  }, [fetchSourcePath, projectField.value]);
+  }, [fetchSourcePath, projectMeta.initialValue]);
 
   const handleProjectUpdate = useCallback(
     value => {
       sourcePathHelpers.setValue('');
       projectHelpers.setValue(value);
       fetchSourcePath(value.id);
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleProjectAutocomplete = useCallback(
+    val => {
+      projectHelpers.setValue(val);
+      if (!projectMeta.initialValue) {
+        fetchSourcePath(val.id);
+      }
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -62,6 +72,7 @@ const SCMSubForm = ({ i18n }) => {
         }}
       />
       <ProjectLookup
+        autocomplete={handleProjectAutocomplete}
         value={projectField.value}
         isValid={!projectMeta.touched || !projectMeta.error}
         helperTextInvalid={projectMeta.error}
