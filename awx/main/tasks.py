@@ -2001,6 +2001,9 @@ class RunProjectUpdate(BaseTask):
         show_paths = [settings.PROJECTS_ROOT]
         if self.job_private_data_dir:
             show_paths.append(self.job_private_data_dir)
+        # Add in the vendor collections for access to awx.awx
+        logger.exception("Appending {} to proot paths".format(settings.AWX_ANSIBLE_COLLECTIONS_PATHS))
+        show_paths.append(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
         return show_paths
 
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
@@ -2118,6 +2121,8 @@ class RunProjectUpdate(BaseTask):
             if galaxy_servers:
                 # now set the precedence of galaxy servers
                 env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
+        # Add the vendored collections path
+        env['ANSIBLE_COLLECTIONS_PATHS'] = '{0}:~/.ansible/collections:/usr/share/ansible/collections'.format(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
