@@ -5,7 +5,11 @@ import { CardBody } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 
-import { CredentialTypesAPI, CredentialsAPI } from '../../../api';
+import {
+  CredentialInputSourcesAPI,
+  CredentialTypesAPI,
+  CredentialsAPI,
+} from '../../../api';
 import CredentialForm from '../shared/CredentialForm';
 
 function CredentialAdd({ me }) {
@@ -38,16 +42,41 @@ function CredentialAdd({ me }) {
   };
 
   const handleSubmit = async values => {
-    const { organization, ...remainingValues } = values;
+    const { inputs, organization, ...remainingValues } = values;
+    let pluginInputs = [];
+    const inputEntries = Object.entries(inputs);
+    for (const [key, value] of inputEntries) {
+      if (value.credential && value.inputs) {
+        pluginInputs.push([key, value]);
+        delete inputs[key];
+      }
+    }
+
     setFormSubmitError(null);
+
     try {
       const {
         data: { id: credentialId },
       } = await CredentialsAPI.create({
         user: (me && me.id) || null,
         organization: (organization && organization.id) || null,
+        inputs: inputs || {},
         ...remainingValues,
       });
+      const inputSourceRequests = [];
+      for (const [key, value] of pluginInputs) {
+        if (value.credential && value.inputs) {
+          inputSourceRequests.push(
+            CredentialInputSourcesAPI.create({
+              input_field_name: key,
+              metadata: value.inputs,
+              source_credential: value.credential.id,
+              target_credential: credentialId,
+            })
+          );
+        }
+      }
+      await Promise.all(inputSourceRequests);
       const url = `/credentials/${credentialId}/details`;
       history.push(`${url}`);
     } catch (err) {

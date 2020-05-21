@@ -2,7 +2,7 @@ import React from 'react';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { func, shape } from 'prop-types';
+import { arrayOf, func, object, shape } from 'prop-types';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
@@ -124,6 +124,7 @@ function CredentialFormFields({
 function CredentialForm({
   credential = {},
   credentialTypes,
+  inputSources,
   onSubmit,
   onCancel,
   submitError,
@@ -146,6 +147,13 @@ function CredentialForm({
       username: credential?.inputs?.username || '',
     },
   };
+
+  Object.values(inputSources).forEach(inputSource => {
+    initialValues.inputs[inputSource.input_field_name] = {
+      credential: inputSource.summary_fields.source_credential,
+      inputs: inputSource.metadata,
+    };
+  });
 
   const scmCredentialTypeId = Object.keys(credentialTypes)
     .filter(key => credentialTypes[key].namespace === 'scm')
@@ -232,10 +240,12 @@ CredentialForm.proptype = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
   credential: shape({}),
+  inputSources: arrayOf(object),
 };
 
 CredentialForm.defaultProps = {
   credential: {},
+  inputSources: [],
 };
 
 export default withI18n()(CredentialForm);
