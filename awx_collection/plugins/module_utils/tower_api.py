@@ -96,6 +96,13 @@ class TowerModule(AnsibleModule):
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
 
+        # Perform magic depending on whether tower_oauthtoken is a string or a dict
+        if self.params.get('tower_oauthtoken'):
+            if type(self.params.get('tower_oauthtoken')) is dict:
+                setattr(self, 'oauth_token', self.params.get('tower_oauthtoken')['token'])
+            elif 'token' in self.params.get('tower_oauthtoken'):
+                setattr(self, 'oauth_token', self.params.get('tower_oauthtoken'))
+
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):
             self.host = "https://{0}".format(self.host)
@@ -504,6 +511,9 @@ class TowerModule(AnsibleModule):
                 item_name = existing_item['username']
             elif 'identifier' in existing_item:
                 item_name = existing_item['identifier']
+            elif item_type == 'o_auth2_access_token':
+                # An oauth2 token has no name, instead we will use its id for any of the messages
+                item_name = existing_item['id']
             else:
                 self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
