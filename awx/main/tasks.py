@@ -2002,7 +2002,6 @@ class RunProjectUpdate(BaseTask):
         if self.job_private_data_dir:
             show_paths.append(self.job_private_data_dir)
         # Add in the vendor collections for access to awx.awx
-        logger.exception("Appending {} to proot paths".format(settings.AWX_ANSIBLE_COLLECTIONS_PATHS))
         show_paths.append(settings.AWX_ANSIBLE_COLLECTIONS_PATHS)
         return show_paths
 
