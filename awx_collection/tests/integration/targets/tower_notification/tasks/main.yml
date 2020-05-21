@@ -6,7 +6,6 @@
     email_not: "AWX-Collection-tests-tower_notification-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     twillo_not: "AWX-Collection-tests-tower_notification-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     pd_not: "AWX-Collection-tests-tower_notification-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    hipchat_not: "AWX-Collection-tests-tower_notification-hipchat-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
     irc_not: "AWX-Collection-tests-tower_notification-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
 - name: Test deprecation warnings
@@ -35,19 +34,7 @@
     service_key: skeleton
     client_name: Bill
     message_from: me
-    api_url: https://tower.example.com/api/v2
     color: green
-    rooms:
-      - The Study
-      - Kitchen
-      - Ballroom
-      - Conservatory
-      - Billiard Room
-      - Library
-      - Hall
-      - Lounge
-      - Dining Room
-      - Cellar
     notify: true
     url: ansible.com
     headers:
@@ -63,8 +50,8 @@
 - assert:
     that:
       - "'deprecations' in result"
-      # The 27 can be count from the size of the OLD_INPUT_NAMES list in the module
-      - result['deprecations'] | length() == 27
+      # The 25 can be count from the size of the OLD_INPUT_NAMES list in the module
+      - result['deprecations'] | length() == 25
 
 - name: Create Slack notification with custom messages
   tower_notification:
@@ -204,36 +191,6 @@
 - name: Delete PagerDuty notification
   tower_notification:
     name: "{{ pd_not }}"
-    organization: Default
-    state: absent
-  register: result
-
-- assert:
-    that:
-      - result is changed
-
-- name: Add HipChat notification
-  tower_notification:
-    name: "{{ hipchat_not }}"
-    organization: Default
-    notification_type: hipchat
-    token: a_token
-    message_from: user1
-    api_url: https://hipchat.example.com
-    color: red
-    rooms:
-      - room-A
-    notify: true
-    state: present
-  register: result
-
-- assert:
-    that:
-      - result is changed
-
-- name: Delete HipChat notification
-  tower_notification:
-    name: "{{ hipchat_not }}"
     organization: Default
     state: absent
   register: result

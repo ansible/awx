@@ -23,7 +23,6 @@ from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
 from awx.main.notifications.pagerduty_backend import PagerDutyBackend
-from awx.main.notifications.hipchat_backend import HipChatBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
@@ -44,7 +43,6 @@ class NotificationTemplate(CommonModelNameNotUnique):
                           ('twilio', _('Twilio'), TwilioBackend),
                           ('pagerduty', _('Pagerduty'), PagerDutyBackend),
                           ('grafana', _('Grafana'), GrafanaBackend),
-                          ('hipchat', _('HipChat'), HipChatBackend),
                           ('webhook', _('Webhook'), WebhookBackend),
                           ('mattermost', _('Mattermost'), MattermostBackend),
                           ('rocketchat', _('Rocket.Chat'), RocketChatBackend),

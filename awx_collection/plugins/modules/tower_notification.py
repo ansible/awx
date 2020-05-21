@@ -46,7 +46,6 @@ options:
       choices:
         - 'email'
         - 'grafana'
-        - 'hipchat'
         - 'irc'
         - 'mattermost'
         - 'pagerduty'
@@ -156,23 +155,12 @@ options:
         - The label to be shown with the notification.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       type: str
-    api_url:
-      description:
-        - The HipChat API URL.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: str
     color:
       description:
         - The notification color.
         - This parameter has been deprecated, please use 'notification_configuration' instead.
       choices: ["yellow", "green", "red", "purple", "gray", "random"]
       type: str
-    rooms:
-      description:
-        - HipChat rooms to send the notification to.
-        - This parameter has been deprecated, please use 'notification_configuration' instead.
-      type: list
-      elements: str
     notify:
       description:
         - The notify channel trigger.
@@ -293,21 +281,6 @@ EXAMPLES = '''
     state: present
     tower_config_file: "~/tower_cli.cfg"
 
-- name: Add HipChat notification
-  tower_notification:
-    name: hipchat notification
-    notification_type: hipchat
-    notification_configuration:
-      token: a_token
-      message_from: user1
-      api_url: https://hipchat.example.com
-      color: red
-      rooms:
-        - room-A
-      notify: yes
-    state: present
-    tower_config_file: "~/tower_cli.cfg"
-
 - name: Add IRC notification
   tower_notification:
     name: irc notification
@@ -341,8 +314,8 @@ OLD_INPUT_NAMES = (
     'host', 'use_ssl', 'password', 'port',
     'channels', 'token', 'account_token', 'from_number',
     'to_numbers', 'account_sid', 'subdomain', 'service_key',
-    'client_name', 'message_from', 'api_url', 'color',
-    'rooms', 'notify', 'url', 'headers', 'server',
+    'client_name', 'message_from', 'color',
+    'notify', 'url', 'headers', 'server',
     'nickname', 'targets',
 )
 
@@ -355,7 +328,7 @@ def main():
         description=dict(),
         organization=dict(),
         notification_type=dict(choices=[
-            'email', 'grafana', 'hipchat', 'irc', 'mattermost',
+            'email', 'grafana', 'irc', 'mattermost',
             'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook'
         ]),
         notification_configuration=dict(type='dict'),
@@ -378,9 +351,7 @@ def main():
         service_key=dict(no_log=True),
         client_name=dict(),
         message_from=dict(),
-        api_url=dict(),
         color=dict(choices=['yellow', 'green', 'red', 'purple', 'gray', 'random']),
-        rooms=dict(type='list', elements='str'),
         notify=dict(type='bool'),
         url=dict(),
         headers=dict(type='dict'),
@@ -395,7 +366,7 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    new_name = module.params.get("new_name")
+    new_name = module.params.get('new_name')
     description = module.params.get('description')
     organization = module.params.get('organization')
     notification_type = module.params.get('notification_type')
@@ -403,10 +374,10 @@ def main():
     messages = module.params.get('messages')
     state = module.params.get('state')
 
-    # Deprecation warnings
+    # Deprecation warnings for all other params
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead.'.format(legacy_input), version="3.6")
+            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input), version="3.6")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
