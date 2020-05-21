@@ -1,10 +1,6 @@
-import React, { Component } from 'react';
-import { CardBody } from '../../../components/Card';
+import React from 'react';
+import UserTeamsList from './UserTeamsList';
 
-class UserAdd extends Component {
-  render() {
-    return <CardBody>Coming soon :)</CardBody>;
-  }
+export default function UserTeams() {
+  return <UserTeamsList />;
 }
-
-export default UserAdd;

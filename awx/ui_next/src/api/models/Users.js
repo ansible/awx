@@ -34,6 +34,12 @@ class Users extends Base {
   readRoleOptions(userId) {
     return this.http.options(`${this.baseUrl}${userId}/roles/`);
   }
+
+  readTeams(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/teams/`, {
+      params,
+    });
+  }
 }
 
 export default Users;
