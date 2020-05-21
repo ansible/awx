@@ -41,7 +41,7 @@ class NavExpandableGroup extends Component {
             groupId={groupId}
             isActive={this.isActivePath(path)}
             key={path}
-            to={`/#${path}`}
+            to={`/next/#${path}`}
           >
             {title}
           </NavItem>
