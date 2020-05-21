@@ -362,6 +362,7 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/ss
 
 # Run all API unit tests.
 test:
+	cmp VERSION awxkit/VERSION || "`cat VERSION` != `cat awxkit/VERSION`; these version files *must* match"
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
