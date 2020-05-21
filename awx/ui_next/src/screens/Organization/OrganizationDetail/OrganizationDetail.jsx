@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useHistory, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -16,6 +16,7 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 
 function OrganizationDetail({ i18n, organization }) {
   const {
@@ -31,7 +32,6 @@ function OrganizationDetail({ i18n, organization }) {
     summary_fields,
   } = organization;
   const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const history = useHistory();
@@ -53,16 +53,18 @@ function OrganizationDetail({ i18n, organization }) {
     })();
   }, [id]);
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-    try {
+  const {
+    request: deleteOrganization,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       await OrganizationsAPI.destroy(id);
       history.push(`/organizations`);
-    } catch (error) {
-      setDeletionError(error);
-    }
-    setHasContentLoading(false);
-  };
+    }, [id, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   if (hasContentLoading) {
     return <ContentLoading />;
@@ -127,22 +129,23 @@ function OrganizationDetail({ i18n, organization }) {
             <DeleteButton
               name={name}
               modalTitle={i18n._(t`Delete Organization`)}
-              onConfirm={handleDelete}
+              onConfirm={deleteOrganization}
+              isDisabled={isLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
           )}
       </CardActionsRow>
       {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete organization.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>
