@@ -11,7 +11,7 @@ def convert_cloudforms_to_scm(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0115_v370_schedule_set_null'),
+        ('main', '0116_v400_remove_hipchat_notifications'),
     ]
 
     operations = [
