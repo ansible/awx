@@ -133,7 +133,6 @@ EXAMPLES = '''
     unified_job_template: "Demo Job Template"
     rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
   register: result
-  ignore_errors: True
 
 - name: Build the same schedule using the rrule plugin
   tower_schedule:
@@ -142,7 +141,6 @@ EXAMPLES = '''
     unified_job_template: "Demo Job Template"
     rrule: "{{ query('awx.awx.tower_schedule_rrule', 'week', start_date='2019-12-19 13:05:51') }}"
   register: result
-  ignore_errors: True
 '''
 
 from ..module_utils.tower_api import TowerModule
