@@ -1218,6 +1218,8 @@ class BaseTask(object):
             else:
                 event_data['host_name'] = ''
                 event_data['host_id'] = ''
+            if event_data.get('event') == 'playbook_on_stats':
+                event_data['host_map'] = self.host_map
 
         if isinstance(self, RunProjectUpdate):
             # it's common for Ansible's SCM modules to print
