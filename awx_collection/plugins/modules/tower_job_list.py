@@ -41,12 +41,6 @@ options:
       description:
         - Query used to further filter the list of jobs. C({"foo":"bar"}) will be passed at C(?foo=bar)
       type: dict
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-        - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

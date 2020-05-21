@@ -60,7 +60,7 @@ requirements:
   - six.moves.StringIO
   - sys
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 EXAMPLES = '''

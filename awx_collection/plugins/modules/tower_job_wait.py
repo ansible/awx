@@ -49,13 +49,6 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish.
       type: int
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-        - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

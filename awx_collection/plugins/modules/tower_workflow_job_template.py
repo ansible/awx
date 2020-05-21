@@ -107,12 +107,6 @@ options:
         - absent
       default: "present"
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-        - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-      type: str
-      version_added: "3.7"
     notification_templates_started:
       description:
         - list of notifications to send on start
