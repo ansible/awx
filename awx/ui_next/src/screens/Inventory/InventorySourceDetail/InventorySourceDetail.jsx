@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -8,14 +8,19 @@ import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 import CredentialChip from '../../../components/CredentialChip';
 import DeleteButton from '../../../components/DeleteButton';
+import { FieldTooltip } from '../../../components/FormField';
+import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import {
   DetailList,
   Detail,
   UserDateDetail,
 } from '../../../components/DetailList';
 import ErrorDetail from '../../../components/ErrorDetail';
+import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
 
 function InventorySourceDetail({ inventorySource, i18n }) {
@@ -53,12 +58,28 @@ function InventorySourceDetail({ inventorySource, i18n }) {
   const history = useHistory();
   const isMounted = useRef(null);
 
+  const {
+    result: sourceChoices,
+    error,
+    isLoading,
+    request: fetchSourceChoices,
+  } = useRequest(
+    useCallback(async () => {
+      const { data } = await InventorySourcesAPI.readOptions();
+      return Object.assign(
+        ...data.actions.GET.source.choices.map(([key, val]) => ({ [key]: val }))
+      );
+    }, []),
+    {}
+  );
+
   useEffect(() => {
     isMounted.current = true;
+    fetchSourceChoices();
     return () => {
       isMounted.current = false;
     };
-  }, []);
+  }, [fetchSourceChoices]);
 
   const handleDelete = async () => {
     try {
@@ -68,9 +89,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         InventorySourcesAPI.destroy(id),
       ]);
       history.push(`/inventories/inventory/${inventory.id}/sources`);
-    } catch (error) {
+    } catch (err) {
       if (isMounted.current) {
-        setDeletionError(error);
+        setDeletionError(err);
       }
     }
   };
@@ -90,16 +111,79 @@ function InventorySourceDetail({ inventorySource, i18n }) {
   ) {
     optionsList = (
       <List>
-        {overwrite && <ListItem>{i18n._(t`Overwrite`)}</ListItem>}
-        {overwrite_vars && (
-          <ListItem>{i18n._(t`Overwrite variables`)}</ListItem>
+        {overwrite && (
+          <ListItem>
+            {i18n._(t`Overwrite`)}
+            <FieldTooltip
+              content={
+                <>
+                  {i18n._(t`If checked, any hosts and groups that were
+          previously present on the external source but are now removed
+          will be removed from the Tower inventory. Hosts and groups
+          that were not managed by the inventory source will be promoted
+          to the next manually created group or if there is no manually
+          created group to promote them into, they will be left in the "all"
+          default group for the inventory.`)}
+                  <br />
+                  <br />
+                  {i18n._(t`When not checked, local child
+          hosts and groups not found on the external source will remain
+          untouched by the inventory update process.`)}
+                </>
+              }
+            />
+          </ListItem>
         )}
-        {update_on_launch && <ListItem>{i18n._(t`Update on launch`)}</ListItem>}
+        {overwrite_vars && (
+          <ListItem>
+            {i18n._(t`Overwrite variables`)}
+            <FieldTooltip
+              content={
+                <>
+                  {i18n._(t`If checked, all variables for child groups
+                  and hosts will be removed and replaced by those found
+                  on the external source.`)}
+                  <br />
+                  <br />
+                  {i18n._(t`When not checked, a merge will be performed,
+                  combining local variables with those found on the
+                  external source.`)}
+                </>
+              }
+            />
+          </ListItem>
+        )}
+        {update_on_launch && (
+          <ListItem>
+            {i18n._(t`Update on launch`)}
+            <FieldTooltip
+              content={i18n._(t`Each time a job runs using this inventory,
+        refresh the inventory from the selected source before
+        executing job tasks.`)}
+            />
+          </ListItem>
+        )}
         {update_on_project_update && (
-          <ListItem>{i18n._(t`Update on project update`)}</ListItem>
+          <ListItem>
+            {i18n._(t`Update on project update`)}
+            <FieldTooltip
+              content={i18n._(t`After every project update where the SCM revision
+        changes, refresh the inventory from the selected source
+        before executing job tasks. This is intended for static content,
+        like the Ansible inventory .ini file format.`)}
+            />
+          </ListItem>
         )}
       </List>
     );
+  }
+
+  if (isLoading) {
+    return <ContentLoading />;
+  }
+
+  if (error) {
+    return <ContentError error={error} />;
   }
 
   return (
@@ -107,7 +191,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
       <DetailList>
         <Detail label={i18n._(t`Name`)} value={name} />
         <Detail label={i18n._(t`Description`)} value={description} />
-        <Detail label={i18n._(t`Source`)} value={source} />
+        <Detail label={i18n._(t`Source`)} value={sourceChoices[source]} />
         {organization && (
           <Detail
             label={i18n._(t`Organization`)}
@@ -132,7 +216,10 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             }
           />
         )}
-        <Detail label={i18n._(t`Inventory file`)} value={source_path} />
+        <Detail
+          label={i18n._(t`Inventory file`)}
+          value={source_path === '' ? i18n._(t`/ (project root)`) : source_path}
+        />
         <Detail
           label={i18n._(t`Custom inventory script`)}
           value={source_script?.name}
@@ -232,6 +319,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
           >
             {i18n._(t`Edit`)}
           </Button>
+        )}
+        {user_capabilities?.start && (
+          <InventorySourceSyncButton source={inventorySource} icon={false} />
         )}
         {user_capabilities?.delete && (
           <DeleteButton

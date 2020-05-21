@@ -25,18 +25,19 @@ describe('<InventorySourceSyncButton />', () => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
-  test('should mount properly', async () => {
+
+  test('should mount properly', () => {
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
   });
 
-  test('should render start sync button', async () => {
+  test('should render start sync button', () => {
     expect(wrapper.find('SyncIcon').length).toBe(1);
     expect(
       wrapper.find('Button[aria-label="Start sync source"]').prop('isDisabled')
     ).toBe(false);
   });
 
-  test('should render cancel sync button', async () => {
+  test('should render cancel sync button', () => {
     wrapper = mountWithContexts(
       <InventorySourceSyncButton
         source={{ status: 'pending', ...source }}
@@ -57,6 +58,7 @@ describe('<InventorySourceSyncButton />', () => {
     );
     expect(InventorySourcesAPI.createSyncStart).toBeCalledWith(1);
   });
+
   test('should cancel sync properly', async () => {
     InventorySourcesAPI.readDetail.mockResolvedValue({
       data: { summary_fields: { current_update: { id: 120 } } },
@@ -83,6 +85,7 @@ describe('<InventorySourceSyncButton />', () => {
     expect(InventorySourcesAPI.readDetail).toBeCalledWith(1);
     expect(InventoryUpdatesAPI.createSyncCancel).toBeCalledWith(120);
   });
+
   test('should throw error on sync start properly', async () => {
     InventorySourcesAPI.createSyncStart.mockRejectedValueOnce(
       new Error({
