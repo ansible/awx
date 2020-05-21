@@ -69,6 +69,19 @@ EXAMPLES = '''
         state: present
         tower_oauthtoken: "{{ ny_existing_token }}"
 
+    - name: Delete this token
+      tower_token:
+        existing_token: "{{ tower_token }}"
+        state: absent
+
+    - name: Create a new token using username/password
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+        tower_username: "{{ ny_username }}"
+        tower_password: "{{ ny_password }}"
+
     - name: Use our new token to make another call
       tower_job_list:
         tower_oauthtoken: "{{ tower_token }}"
@@ -123,12 +136,7 @@ def main():
     existing_token = module.params.get('existing_token')
     state = module.params.get('state')
 
-    with open('/tmp/john', 'w') as f:
-        f.write("State is {0}".format(state))
-
     if state == 'absent':
-        with open('/tmp/john', 'a') as f:
-            f.write("Starting delete")
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_token)
 
