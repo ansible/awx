@@ -1719,6 +1719,8 @@ class HostSerializer(BaseSerializerWithVariables):
         name = force_text(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
+        if Group.objects.filter(name=value).exists():
+            raise serializers.ValidationError(_('Invalid group name. Name already exists as a Group.'))
         return value
 
     def validate_inventory(self, value):
@@ -1808,6 +1810,8 @@ class GroupSerializer(BaseSerializerWithVariables):
     def validate_name(self, value):
         if value in ('all', '_meta'):
             raise serializers.ValidationError(_('Invalid group name.'))
+        elif Host.objects.filter(name=value).exists():
+            raise serializers.ValidationError(_('Invalid group name. Name already exists as a Host.'))
         return value
 
     def validate_inventory(self, value):
