@@ -278,6 +278,9 @@ function JobTemplateForm({
             label={i18n._(t`Source Control Branch`)}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
+            tooltip={i18n._(
+              t`Select a branch for the job template. This branch is applied to all job template nodes that prompt for a branch.`
+            )}
           >
             <TextInput
               id="template-scm-branch"
@@ -344,6 +347,9 @@ function JobTemplateForm({
             name="extra_vars"
             label={i18n._(t`Variables`)}
             promptId="template-ask-variables-on-launch"
+            tooltip={i18n._(
+              t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
+            )}
           />
           <FormColumnLayout>
             <FormField

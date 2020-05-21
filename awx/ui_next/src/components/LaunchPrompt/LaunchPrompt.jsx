@@ -45,6 +45,7 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
     setValue('job_tags', values.job_tags);
     setValue('skip_tags', values.skip_tags);
     setValue('extra_vars', mergeExtraVars(values.extra_vars, surveyValues));
+    setValue('scm_branch', values.scm_branch);
     onLaunch(postValues);
   };
 
