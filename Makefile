@@ -362,11 +362,11 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/ss
 
 # Run all API unit tests.
 test:
-	cmp VERSION awxkit/VERSION || "`cat VERSION` != `cat awxkit/VERSION`; these version files *must* match"
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	cmp VERSION awxkit/VERSION || "VERSION and awxkit/VERSION *must* match"
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py2,py3
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
