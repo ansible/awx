@@ -10,7 +10,7 @@ DOCUMENTATION = """
     short_description: Generate an rrule string which can be used for Tower Schedules
     requirements:
       - pytz
-      - python.dateutil >= 2.8.1
+      - python.dateutil >= 2.7.0
     description:
       - Returns a string based on criteria which represent an rule
     options:
@@ -89,6 +89,7 @@ from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from datetime import datetime
 import re
+from distutils.version import LooseVersion
 
 missing_modules = []
 try:
@@ -104,9 +105,10 @@ except ImportError:
 # Validate the version of python.dateutil
 try:
     import dateutil
-    dateutil.__version__
+    if LooseVersion(dateutil.__version__) < LooseVersion("2.7.0"):
+        raise Exception
 except Exception:
-    missing_modules.append('python.dateutil>=2.8.1')
+    missing_modules.append('python.dateutil>=2.7.0')
 
 if len(missing_modules) > 0:
     raise AnsibleError('You are missing the modules {0}'.format(', '.join(missing_modules)))
