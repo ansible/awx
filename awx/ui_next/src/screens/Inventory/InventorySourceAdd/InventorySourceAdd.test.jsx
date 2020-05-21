@@ -1,7 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventorySourceAdd from './InventorySourceAdd';
 import { InventorySourcesAPI, ProjectsAPI } from '../../../api';
 
@@ -75,6 +78,7 @@ describe('<InventorySourceAdd />', () => {
         context: { config },
       });
     });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     expect(wrapper.find('FormGroup[label="Name"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Description"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Source"]')).toHaveLength(1);

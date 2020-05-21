@@ -228,7 +228,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
           <Button
             component={Link}
             aria-label={i18n._(t`edit`)}
-            to={`/inventories/inventory/${inventory.id}/source/${id}/edit`}
+            to={`/inventories/inventory/${inventory.id}/sources/${id}/edit`}
           >
             {i18n._(t`Edit`)}
           </Button>

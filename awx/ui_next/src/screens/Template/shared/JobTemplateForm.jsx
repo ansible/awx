@@ -46,27 +46,25 @@ const { origin } = document.location;
 
 function JobTemplateForm({
   template,
-  validateField,
   handleCancel,
   handleSubmit,
   setFieldValue,
   submitError,
   i18n,
 }) {
+  const { values: formikValues } = useFormikContext();
+
   const [contentError, setContentError] = useState(false);
-  const [project, setProject] = useState(template?.summary_fields?.project);
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory
   );
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
   );
-
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)
   );
 
-  const { values: formikValues } = useFormikContext();
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
     name: 'job_type',
     validate: required(null, i18n),
@@ -74,16 +72,13 @@ function JobTemplateForm({
   const [, inventoryMeta, inventoryHelpers] = useField('inventory');
   const [projectField, projectMeta, projectHelpers] = useField({
     name: 'project',
-    validate: () => handleProjectValidation(),
+    validate: project => handleProjectValidation(project),
   });
-
   const [scmField, , scmHelpers] = useField('scm_branch');
-
   const [playbookField, playbookMeta, playbookHelpers] = useField({
     name: 'playbook',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
-
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta] = useField('limit');
@@ -101,13 +96,10 @@ function JobTemplateForm({
     contentLoading: hasProjectLoading,
   } = useRequest(
     useCallback(async () => {
-      let projectData;
       if (template?.project) {
-        projectData = await ProjectsAPI.readDetail(template?.project);
-        validateField('project');
-        setProject(projectData.data);
+        await ProjectsAPI.readDetail(template?.project);
       }
-    }, [template, validateField])
+    }, [template])
   );
 
   const {
@@ -133,26 +125,28 @@ function JobTemplateForm({
     loadRelatedInstanceGroups();
   }, [loadRelatedInstanceGroups]);
 
-  const handleProjectValidation = () => {
+  const handleProjectValidation = project => {
     if (!project && projectMeta.touched) {
       return i18n._(t`Select a value for this field`);
     }
-    if (project && project.status === 'never updated') {
+    if (project?.value?.status === 'never updated') {
       return i18n._(t`This project needs to be updated`);
     }
     return undefined;
   };
 
   const handleProjectUpdate = useCallback(
-    newProject => {
-      if (project?.id !== newProject?.id) {
-        // Clear the selected playbook value when a different project is selected or
-        // when the project is deselected.
-        playbookHelpers.setValue(0);
-      }
-      setProject(newProject);
-      projectHelpers.setValue(newProject);
+    value => {
+      playbookHelpers.setValue(0);
       scmHelpers.setValue('');
+      projectHelpers.setValue(value);
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleProjectAutocomplete = useCallback(
+    val => {
+      projectHelpers.setValue(val);
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -189,8 +183,12 @@ function JobTemplateForm({
     return <ContentLoading />;
   }
 
-  if (instanceGroupError || projectContentError) {
-    return <ContentError error={contentError} />;
+  if (contentError || instanceGroupError || projectContentError) {
+    return (
+      <ContentError
+        error={contentError || instanceGroupError || projectContentError}
+      />
+    );
   }
 
   return (
@@ -261,18 +259,18 @@ function JobTemplateForm({
               </div>
             )}
         </FieldWithPrompt>
-
         <ProjectLookup
-          value={project}
+          value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
           tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
           isValid={!projectMeta.touched || !projectMeta.error}
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
+          autocomplete={handleProjectAutocomplete}
           required
         />
-        {project?.allow_override && (
+        {projectField.value?.allow_override && (
           <FieldWithPrompt
             fieldId="template-scm-branch"
             label={i18n._(t`Source Control Branch`)}
@@ -302,7 +300,7 @@ function JobTemplateForm({
             content={i18n._(t`Select the playbook to be executed by this job.`)}
           />
           <PlaybookSelect
-            projectId={project?.id || projectField.value?.id}
+            projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
             field={playbookField}
             onBlur={() => playbookHelpers.setTouched()}
@@ -615,6 +613,8 @@ const FormikApp = withFormik({
     } = template;
 
     return {
+      allow_callbacks: template.allow_callbacks || false,
+      allow_simultaneous: template.allow_simultaneous || false,
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
@@ -625,31 +625,29 @@ const FormikApp = withFormik({
       ask_tags_on_launch: template.ask_tags_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
       ask_verbosity_on_launch: template.ask_verbosity_on_launch || false,
-      name: template.name || '',
-      description: template.description || '',
-      job_type: template.job_type || 'run',
-      inventory: template.inventory || null,
-      project: template.project || null,
-      scm_branch: template.scm_branch || '',
-      playbook: template.playbook || '',
-      labels: summary_fields.labels.results || [],
-      forks: template.forks || 0,
-      limit: template.limit || '',
-      verbosity: template.verbosity || '0',
-      job_slice_count: template.job_slice_count || 1,
-      timeout: template.timeout || 0,
-      diff_mode: template.diff_mode || false,
-      job_tags: template.job_tags || '',
-      skip_tags: template.skip_tags || '',
       become_enabled: template.become_enabled || false,
-      allow_callbacks: template.allow_callbacks || false,
-      allow_simultaneous: template.allow_simultaneous || false,
-      use_fact_cache: template.use_fact_cache || false,
+      credentials: summary_fields.credentials || [],
+      description: template.description || '',
+      diff_mode: template.diff_mode || false,
+      extra_vars: template.extra_vars || '---\n',
+      forks: template.forks || 0,
       host_config_key: template.host_config_key || '',
       initialInstanceGroups: [],
       instanceGroups: [],
-      credentials: summary_fields.credentials || [],
-      extra_vars: template.extra_vars || '---\n',
+      inventory: template.inventory || null,
+      job_slice_count: template.job_slice_count || 1,
+      job_tags: template.job_tags || '',
+      job_type: template.job_type || 'run',
+      labels: summary_fields.labels.results || [],
+      limit: template.limit || '',
+      name: template.name || '',
+      playbook: template.playbook || '',
+      project: summary_fields?.project || null,
+      scm_branch: template.scm_branch || '',
+      skip_tags: template.skip_tags || '',
+      timeout: template.timeout || 0,
+      use_fact_cache: template.use_fact_cache || false,
+      verbosity: template.verbosity || '0',
       webhook_service: template.webhook_service || '',
       webhook_url: template?.related?.webhook_receiver
         ? `${origin}${template.related.webhook_receiver}`

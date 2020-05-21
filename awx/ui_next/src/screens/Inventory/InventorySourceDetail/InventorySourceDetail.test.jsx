@@ -88,7 +88,7 @@ describe('InventorySourceDetail', () => {
     const editButton = wrapper.find('Button[aria-label="edit"]');
     expect(editButton.text()).toEqual('Edit');
     expect(editButton.prop('to')).toBe(
-      '/inventories/inventory/2/source/123/edit'
+      '/inventories/inventory/2/sources/123/edit'
     );
     expect(wrapper.find('DeleteButton')).toHaveLength(1);
   });

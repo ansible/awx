@@ -6,9 +6,25 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import JobTemplateAdd from './JobTemplateAdd';
-import { JobTemplatesAPI, LabelsAPI } from '../../../api';
+import {
+  CredentialsAPI,
+  CredentialTypesAPI,
+  JobTemplatesAPI,
+  LabelsAPI,
+  ProjectsAPI,
+} from '../../../api';
 
 jest.mock('../../../api');
+CredentialsAPI.read.mockResolvedValue({
+  data: {
+    results: [],
+    count: 0,
+  },
+});
+CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+ProjectsAPI.readPlaybooks.mockResolvedValue({
+  data: [],
+});
 
 const jobTemplateData = {
   allow_callbacks: false,

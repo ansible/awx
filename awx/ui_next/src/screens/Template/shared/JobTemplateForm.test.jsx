@@ -13,6 +13,7 @@ import {
   JobTemplatesAPI,
   ProjectsAPI,
   CredentialsAPI,
+  CredentialTypesAPI,
 } from '../../../api';
 
 jest.mock('../../../api');
@@ -99,6 +100,7 @@ describe('<JobTemplateForm />', () => {
     LabelsAPI.read.mockReturnValue({
       data: mockData.summary_fields.labels,
     });
+    CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
     CredentialsAPI.read.mockReturnValue({
       data: { results: mockCredentials },
     });

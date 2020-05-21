@@ -20,6 +20,7 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import RoutedTabs from '../../../components/RoutedTabs';
 import InventorySourceDetail from '../InventorySourceDetail';
+import InventorySourceEdit from '../InventorySourceEdit';
 
 function InventorySource({ i18n, inventory, setBreadcrumb }) {
   const location = useLocation();
@@ -38,7 +39,7 @@ function InventorySource({ i18n, inventory, setBreadcrumb }) {
 
   useEffect(() => {
     fetchSource();
-  }, [fetchSource, match.params.sourceId]);
+  }, [fetchSource, location.pathname]);
 
   useEffect(() => {
     if (inventory && source) {
@@ -103,6 +104,12 @@ function InventorySource({ i18n, inventory, setBreadcrumb }) {
             path="/inventories/inventory/:id/sources/:sourceId/details"
           >
             <InventorySourceDetail inventorySource={source} />
+          </Route>
+          <Route
+            key="edit"
+            path="/inventories/inventory/:id/sources/:sourceId/edit"
+          >
+            <InventorySourceEdit source={source} inventory={inventory} />
           </Route>
           <Route key="not-found" path="*">
             <ContentError isNotFound>

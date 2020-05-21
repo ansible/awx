@@ -19,9 +19,9 @@ class Inventories extends Component {
     this.state = {
       breadcrumbConfig: {
         '/inventories': i18n._(t`Inventories`),
-        '/inventories/inventory/add': i18n._(t`Create New Inventory`),
+        '/inventories/inventory/add': i18n._(t`Create new inventory`),
         '/inventories/smart_inventory/add': i18n._(
-          t`Create New Smart Inventory`
+          t`Create new smart inventory`
         ),
       },
     };
@@ -43,42 +43,43 @@ class Inventories extends Component {
 
     const breadcrumbConfig = {
       '/inventories': i18n._(t`Inventories`),
-      '/inventories/inventory/add': i18n._(t`Create New Inventory`),
-      '/inventories/smart_inventory/add': i18n._(t`Create New Smart Inventory`),
+      '/inventories/inventory/add': i18n._(t`Create new inventory`),
+      '/inventories/smart_inventory/add': i18n._(t`Create new smart inventory`),
 
       [inventoryPath]: `${inventory.name}`,
       [`${inventoryPath}/access`]: i18n._(t`Access`),
-      [`${inventoryPath}/completed_jobs`]: i18n._(t`Completed Jobs`),
+      [`${inventoryPath}/completed_jobs`]: i18n._(t`Completed jobs`),
       [`${inventoryPath}/details`]: i18n._(t`Details`),
-      [`${inventoryPath}/edit`]: i18n._(t`Edit Details`),
+      [`${inventoryPath}/edit`]: i18n._(t`Edit details`),
 
       [inventoryHostsPath]: i18n._(t`Hosts`),
-      [`${inventoryHostsPath}/add`]: i18n._(t`Create New Host`),
+      [`${inventoryHostsPath}/add`]: i18n._(t`Create new host`),
       [`${inventoryHostsPath}/${nested?.id}`]: `${nested?.name}`,
-      [`${inventoryHostsPath}/${nested?.id}/edit`]: i18n._(t`Edit Details`),
+      [`${inventoryHostsPath}/${nested?.id}/edit`]: i18n._(t`Edit details`),
       [`${inventoryHostsPath}/${nested?.id}/details`]: i18n._(t`Host Details`),
       [`${inventoryHostsPath}/${nested?.id}/completed_jobs`]: i18n._(
-        t`Completed Jobs`
+        t`Completed jobs`
       ),
       [`${inventoryHostsPath}/${nested?.id}/facts`]: i18n._(t`Facts`),
       [`${inventoryHostsPath}/${nested?.id}/groups`]: i18n._(t`Groups`),
 
       [inventoryGroupsPath]: i18n._(t`Groups`),
-      [`${inventoryGroupsPath}/add`]: i18n._(t`Create New Group`),
+      [`${inventoryGroupsPath}/add`]: i18n._(t`Create new group`),
       [`${inventoryGroupsPath}/${nested?.id}`]: `${nested?.name}`,
-      [`${inventoryGroupsPath}/${nested?.id}/edit`]: i18n._(t`Edit Details`),
+      [`${inventoryGroupsPath}/${nested?.id}/edit`]: i18n._(t`Edit details`),
       [`${inventoryGroupsPath}/${nested?.id}/details`]: i18n._(
-        t`Group Details`
+        t`Group details`
       ),
       [`${inventoryGroupsPath}/${nested?.id}/nested_hosts`]: i18n._(t`Hosts`),
       [`${inventoryGroupsPath}/${nested?.id}/nested_hosts/add`]: i18n._(
-        t`Create New Host`
+        t`Create new host`
       ),
 
       [`${inventorySourcesPath}`]: i18n._(t`Sources`),
-      [`${inventorySourcesPath}/add`]: i18n._(t`Create New Source`),
+      [`${inventorySourcesPath}/add`]: i18n._(t`Create new source`),
       [`${inventorySourcesPath}/${nested?.id}`]: `${nested?.name}`,
       [`${inventorySourcesPath}/${nested?.id}/details`]: i18n._(t`Details`),
+      [`${inventorySourcesPath}/${nested?.id}/edit`]: i18n._(t`Edit details`),
     };
     this.setState({ breadcrumbConfig });
   };

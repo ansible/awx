@@ -15,12 +15,14 @@ describe('<ProjectLookup />', () => {
         count: 1,
       },
     });
-    const onChange = jest.fn();
+    const autocomplete = jest.fn();
     await act(async () => {
-      mountWithContexts(<ProjectLookup onChange={onChange} />);
+      mountWithContexts(
+        <ProjectLookup autocomplete={autocomplete} onChange={() => {}} />
+      );
     });
     await sleep(0);
-    expect(onChange).toHaveBeenCalledWith({ id: 1 });
+    expect(autocomplete).toHaveBeenCalledWith({ id: 1 });
   });
 
   test('should not auto-select project when multiple available', async () => {
@@ -30,11 +32,13 @@ describe('<ProjectLookup />', () => {
         count: 2,
       },
     });
-    const onChange = jest.fn();
+    const autocomplete = jest.fn();
     await act(async () => {
-      mountWithContexts(<ProjectLookup onChange={onChange} />);
+      mountWithContexts(
+        <ProjectLookup autocomplete={autocomplete} onChange={() => {}} />
+      );
     });
     await sleep(0);
-    expect(onChange).not.toHaveBeenCalled();
+    expect(autocomplete).not.toHaveBeenCalled();
   });
 });
