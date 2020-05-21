@@ -2,10 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import styled from 'styled-components';
-import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
 
-import { Button, Chip, List, ListItem, Tooltip } from '@patternfly/react-core';
+import { Button, Chip, List, ListItem } from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import ChipGroup from '../../../components/ChipGroup';
@@ -14,6 +12,7 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import CredentialChip from '../../../components/CredentialChip';
 import DeleteButton from '../../../components/DeleteButton';
+import { FieldTooltip } from '../../../components/FormField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import {
   DetailList,
@@ -23,10 +22,6 @@ import {
 import ErrorDetail from '../../../components/ErrorDetail';
 import useRequest from '../../../util/useRequest';
 import { InventorySourcesAPI } from '../../../api';
-
-const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
-  margin-left: 10px;
-`;
 
 function InventorySourceDetail({ inventorySource, i18n }) {
   const {
@@ -119,7 +114,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         {overwrite && (
           <ListItem>
             {i18n._(t`Overwrite`)}
-            <Tooltip
+            <FieldTooltip
               content={
                 <>
                   {i18n._(t`If checked, any hosts and groups that were
@@ -136,16 +131,13 @@ function InventorySourceDetail({ inventorySource, i18n }) {
           untouched by the inventory update process.`)}
                 </>
               }
-              position="top"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
+            />
           </ListItem>
         )}
         {overwrite_vars && (
           <ListItem>
             {i18n._(t`Overwrite variables`)}
-            <Tooltip
+            <FieldTooltip
               content={
                 <>
                   {i18n._(t`If checked, all variables for child groups
@@ -158,37 +150,28 @@ function InventorySourceDetail({ inventorySource, i18n }) {
                   external source.`)}
                 </>
               }
-              position="top"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
+            />
           </ListItem>
         )}
         {update_on_launch && (
           <ListItem>
             {i18n._(t`Update on launch`)}
-            <Tooltip
+            <FieldTooltip
               content={i18n._(t`Each time a job runs using this inventory,
         refresh the inventory from the selected source before
         executing job tasks.`)}
-              position="top"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
+            />
           </ListItem>
         )}
         {update_on_project_update && (
           <ListItem>
             {i18n._(t`Update on project update`)}
-            <Tooltip
+            <FieldTooltip
               content={i18n._(t`After every project update where the SCM revision
         changes, refresh the inventory from the selected source
         before executing job tasks. This is intended for static content,
         like the Ansible inventory .ini file format.`)}
-              position="top"
-            >
-              <QuestionCircleIcon />
-            </Tooltip>
+            />
           </ListItem>
         )}
       </List>
