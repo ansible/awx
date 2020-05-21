@@ -20,8 +20,9 @@ author: "John Westcott IV (@john-westcott-iv)"
 version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower tokens.
 description:
-    - Create, update, or destroy Ansible Tower tokens. See
+    - Create or destroy Ansible Tower tokens. See
       U(https://www.ansible.com/tower) for an overview.
+    - If you create a token it is your responsibility to delete the token.
 options:
     description:
       description:
@@ -60,22 +61,24 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Create a new token using an existing token
-  tower_token:
-    description: '{{ token_description }}'
-    scope: "write"
-    state: present
-    tower_oauthtoken: "{{ ny_existing_token }}"
-  register: new_token
+- block:
+    - name: Create a new token using an existing token
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+        tower_oauthtoken: "{{ ny_existing_token }}"
 
-- name: Use our new token to make another call
-  tower_job_list:
-    tower_oauthtoken: "{{ tower_token }}"
+    - name: Use our new token to make another call
+      tower_job_list:
+        tower_oauthtoken: "{{ tower_token }}"
 
-- name: Delete our Token with the token we created
-  tower_token:
-    existing_token: "{{ tower_token }}"
-    state: absent
+  always:
+    - name: Delete our Token with the token we created
+      tower_token:
+        existing_token: "{{ tower_token }}"
+        state: absent
+      when: tower_token is defined
 '''
 
 RETURNS = '''

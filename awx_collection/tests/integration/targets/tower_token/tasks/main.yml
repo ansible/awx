@@ -3,23 +3,26 @@
   set_fact:
     token_description: "AWX-Collection-tests-tower_token-description-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
-- name: Create a Token
-  tower_token:
-    description: '{{ token_description }}'
-    scope: "write"
-    state: present
-  register: new_token
+- block:
+    - name: Create a Token
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+      register: new_token
 
-- name: Validate our token works by token
-  tower_job_list:
-    tower_oauthtoken: "{{ tower_token.token }}"
+    - name: Validate our token works by token
+      tower_job_list:
+        tower_oauthtoken: "{{ tower_token.token }}"
 
-- name: Validate out token works by object
-  tower_job_list:
-    tower_oauthtoken: "{{ tower_token }}"
+    - name: Validate out token works by object
+      tower_job_list:
+        tower_oauthtoken: "{{ tower_token }}"
 
-- name: Delete our Token with our own token
-  tower_token:
-    existing_token: "{{ tower_token }}"
-    tower_oauthtoken: "{{ tower_token }}"
-    state: absent
+  always:
+    - name: Delete our Token with our own token
+      tower_token:
+        existing_token: "{{ tower_token }}"
+        tower_oauthtoken: "{{ tower_token }}"
+        state: absent
+      when: tower_token is defined
