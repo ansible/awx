@@ -15,7 +15,7 @@ from requests.models import Response
 import pytest
 
 from awx.main.tests.functional.conftest import _request
-from awx.main.models import Organization, Project, Inventory, Credential, CredentialType
+from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType
 
 try:
     import tower_cli  # noqa
@@ -218,6 +218,16 @@ def inventory(organization):
     return Inventory.objects.create(
         name='test-inv',
         organization=organization
+    )
+
+
+@pytest.fixture
+def job_template(project, inventory):
+    return JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        inventory=inventory,
+        playbook='helloworld.yml'
     )
 
 

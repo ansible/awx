@@ -380,7 +380,11 @@ test_collection:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$PYTHONPATH:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
+	PYTHONPATH=$(PYTHONPATH):$(VENV_BASE)/awx/lib/python3.6/site-packages:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
+	# The python path needs to be modified so that the tests can find Ansible within the container
+	# First we will use anything expility set as PYTHONPATH
+	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)
+	# Finally we will add the system path so that the tests can find the ansible libraries
 
 flake8_collection:
 	flake8 awx_collection/  # Different settings, in main exclude list
