@@ -1,6 +1,6 @@
 import React from 'react';
-import UserTeamsList from './UserTeamsList';
+import UserTeamList from './UserTeamList';
 
 export default function UserTeams() {
-  return <UserTeamsList />;
+  return <UserTeamList />;
 }

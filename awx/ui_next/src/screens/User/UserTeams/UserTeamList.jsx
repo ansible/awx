@@ -7,7 +7,7 @@ import PaginatedDataList from '../../../components/PaginatedDataList';
 import useRequest from '../../../util/useRequest';
 import { UsersAPI } from '../../../api';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import UserTeamListItem from './UserTeamsListItem';
+import UserTeamListItem from './UserTeamListItem';
 
 const QS_CONFIG = getQSConfig('teams', {
   page: 1,
@@ -15,7 +15,7 @@ const QS_CONFIG = getQSConfig('teams', {
   order_by: 'name',
 });
 
-function UserTeamsList({ i18n }) {
+function UserTeamList({ i18n }) {
   const location = useLocation();
   const { id: userId } = useParams();
 
@@ -67,4 +67,4 @@ function UserTeamsList({ i18n }) {
   );
 }
 
-export default withI18n()(UserTeamsList);
+export default withI18n()(UserTeamList);

@@ -9,7 +9,7 @@ import {
 } from '@patternfly/react-core';
 import DataListCell from '../../../components/DataListCell';
 
-function UserTeamsListItem({ team, i18n }) {
+function UserTeamListItem({ team, i18n }) {
   return (
     <DataListItem aria-labelledby={`team-${team.id}`}>
       <DataListItemRow>
@@ -23,7 +23,7 @@ function UserTeamsListItem({ team, i18n }) {
             <DataListCell key="organization">
               {team.summary_fields.organization && (
                 <>
-                  <b css="margin-right: 24px">{i18n._(t`Organization`)}</b>
+                  <b>{i18n._(t`Organization`)}</b>{' '}
                   <Link
                     to={`/organizations/${team.summary_fields.organization.id}/details`}
                   >
@@ -40,4 +40,4 @@ function UserTeamsListItem({ team, i18n }) {
   );
 }
 
-export default withI18n()(UserTeamsListItem);
+export default withI18n()(UserTeamListItem);

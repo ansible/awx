@@ -40,6 +40,10 @@ class Users extends Base {
       params,
     });
   }
+
+  readTeamsOptions(userId) {
+    return this.http.options(`${this.baseUrl}${userId}/teams/`);
+  }
 }
 
 export default Users;
