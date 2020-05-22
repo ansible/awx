@@ -19,7 +19,7 @@
     - name: Change module doc_fragments to support desired namespace and package names
       replace:
         path: "{{ item }}"
-        regexp: '^extends_documentation_fragment: awx.awx.auth$'
+        regexp: '^extends_documentation_fragment: awx.awx.auth'
         replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
       with_fileglob: "{{ collection_path }}/plugins/modules/tower_*.py"
       loop_control:
