@@ -87,5 +87,6 @@
       "<rootDir>/src/locales",
       "index.js"
     ]
-  }
+  },
+  "proxy": "https://localhost:8043/websocket"
 }

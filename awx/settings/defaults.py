@@ -247,7 +247,7 @@ TEMPLATES = [
             'loaders': [(
                 'django.template.loaders.cached.Loader',
                 ('django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',),
+                 'django.template.loaders.app_directories.Loader',),
             )],
             'builtins': ['awx.main.templatetags.swagger'],
         },
@@ -386,9 +386,6 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
-# If set, serve only minified JS for UI.
-USE_MINIFIED_JS = False
-
 # Default to skipping isolated host key checking (the initial connection will
 # hang on an interactive "The authenticity of host example.org can't be
 # established" message)
@@ -406,19 +403,13 @@ AWX_ISOLATED_CONNECTION_TIMEOUT = 10
 # The time (in seconds) between the periodic isolated heartbeat status check
 AWX_ISOLATED_PERIODIC_CHECK = 600
 
-# Verbosity level for isolated node management tasks
-AWX_ISOLATED_VERBOSITY = 0
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
-BROKER_DURABILITY = True
-BROKER_POOL_LIMIT = None
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
-BROKER_TRANSPORT_OPTIONS = {}
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
@@ -644,7 +635,6 @@ INSIGHTS_TRACKING_STATE = False
 
 # Last gather date for Analytics
 AUTOMATION_ANALYTICS_LAST_GATHER = None
-AUTOMATION_ANALYTICS_INTERVAL = 14400
 
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.
@@ -909,19 +899,7 @@ SCM_EXCLUDE_EMPTY_GROUPS = False
 ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
-# Internal API URL for use by inventory scripts and callback plugin.
-INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
-
 CALLBACK_QUEUE = "callback_tasks"
-
-SCHEDULER_QUEUE = "scheduler"
-
-TASK_COMMAND_PORT = 6559
-
-SOCKETIO_NOTIFICATION_PORT = 6557
-SOCKETIO_LISTEN_PORT = 8080
-
-FACT_CACHE_PORT = 6564
 
 # Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
@@ -957,6 +935,7 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,
+            "group_expiry": 157784760, # 5 years
         },
     },
 }
@@ -1201,7 +1180,6 @@ LOGGING = {
         },
     }
 }
-LOG_AGGREGATOR_AUDIT = False
 
 # Apply coloring to messages logged to the console
 COLOR_LOGS = False

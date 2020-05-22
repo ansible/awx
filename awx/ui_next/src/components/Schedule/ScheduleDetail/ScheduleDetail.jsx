@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
@@ -16,7 +16,7 @@ import { DetailList, Detail, UserDateDetail } from '../../DetailList';
 import ScheduleOccurrences from '../ScheduleOccurrences';
 import ScheduleToggle from '../ScheduleToggle';
 import { formatDateString } from '../../../util/dates';
-import useRequest from '../../../util/useRequest';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { SchedulesAPI } from '../../../api';
 import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
@@ -48,27 +48,27 @@ function ScheduleDetail({ schedule, i18n }) {
     timezone,
   } = schedule;
 
-  const [deletionError, setDeletionError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(false);
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-    try {
+  const {
+    request: deleteSchedule,
+    isLoading: isDeleteLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       await SchedulesAPI.destroy(id);
       history.push(`${pathRoot}schedules`);
-    } catch (error) {
-      setDeletionError(error);
-    }
-    setHasContentLoading(false);
-  };
+    }, [id, history, pathRoot])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   const {
     result: [credentials, preview],
     isLoading,
-    error,
+    error: readContentError,
     request: fetchCredentialsAndPreview,
   } = useRequest(
     useCallback(async () => {
@@ -102,12 +102,12 @@ function ScheduleDetail({ schedule, i18n }) {
     (job_tags && job_tags.length > 0) ||
     (skip_tags && skip_tags.length > 0);
 
-  if (isLoading || hasContentLoading) {
+  if (isLoading) {
     return <ContentLoading />;
   }
 
-  if (error) {
-    return <ContentError error={error} />;
+  if (readContentError) {
+    return <ContentError error={readContentError} />;
   }
 
   return (
@@ -237,21 +237,22 @@ function ScheduleDetail({ schedule, i18n }) {
           <DeleteButton
             name={name}
             modalTitle={i18n._(t`Delete Schedule`)}
-            onConfirm={handleDelete}
+            onConfirm={deleteSchedule}
+            isDisabled={isDeleteLoading}
           >
             {i18n._(t`Delete`)}
           </DeleteButton>
         )}
       </CardActionsRow>
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
-          variant="danger"
+          isOpen={error}
+          variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete schedule.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>

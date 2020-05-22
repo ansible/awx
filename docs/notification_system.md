@@ -72,7 +72,6 @@ The currently-defined Notification Types are:
 
 * Email
 * Slack
-* HipChat
 * Mattermost
 * Rocket.Chat
 * Pagerduty

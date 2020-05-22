@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -36,11 +36,27 @@ const SCMSubForm = ({ i18n }) => {
     []
   );
 
+  useEffect(() => {
+    if (projectMeta.initialValue) {
+      fetchSourcePath(projectMeta.initialValue.id);
+    }
+  }, [fetchSourcePath, projectMeta.initialValue]);
+
   const handleProjectUpdate = useCallback(
     value => {
       sourcePathHelpers.setValue('');
       projectHelpers.setValue(value);
       fetchSourcePath(value.id);
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleProjectAutocomplete = useCallback(
+    val => {
+      projectHelpers.setValue(val);
+      if (!projectMeta.initialValue) {
+        fetchSourcePath(val.id);
+      }
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
@@ -56,6 +72,7 @@ const SCMSubForm = ({ i18n }) => {
         }}
       />
       <ProjectLookup
+        autocomplete={handleProjectAutocomplete}
         value={projectField.value}
         isValid={!projectMeta.touched || !projectMeta.error}
         helperTextInvalid={projectMeta.error}

@@ -7,6 +7,7 @@ import FieldTooltip from './FieldTooltip';
 function FormField(props) {
   const {
     id,
+    helperText,
     name,
     label,
     tooltip,
@@ -25,6 +26,7 @@ function FormField(props) {
       {(type === 'textarea' && (
         <FormGroup
           fieldId={id}
+          helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
           isValid={isValid}
@@ -46,6 +48,7 @@ function FormField(props) {
       )) || (
         <FormGroup
           fieldId={id}
+          helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
           isValid={isValid}
@@ -70,6 +73,7 @@ function FormField(props) {
 }
 
 FormField.propTypes = {
+  helperText: PropTypes.string,
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
@@ -81,6 +85,7 @@ FormField.propTypes = {
 };
 
 FormField.defaultProps = {
+  helperText: '',
   type: 'text',
   validate: () => {},
   isRequired: false,

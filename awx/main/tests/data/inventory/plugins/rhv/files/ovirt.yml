@@ -1,1 +1,20 @@
+base_source_var: value_of_var
+compose:
+  ansible_host: (devices.values() | list)[0][0] if devices else None
+groups:
+  dev: '"dev" in tags'
+keyed_groups:
+- key: cluster
+  prefix: cluster
+  separator: _
+- key: status
+  prefix: status
+  separator: _
+- key: tags
+  prefix: tag
+  separator: _
+ovirt_hostname_preference:
+- name
+- fqdn
+ovirt_insecure: false
 plugin: ovirt.ovirt.ovirt

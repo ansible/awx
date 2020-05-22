@@ -18,6 +18,13 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
         );
         return;
       }
+      if (question.type === 'multiselect') {
+        question.default = question.default
+          .split('\n')
+          .filter(v => v !== '' || '\n')
+          .map(v => v.trim())
+          .join('\n');
+      }
       const newSpec = survey.spec ? survey.spec.concat(question) : [question];
       await updateSurvey(newSpec);
       history.push(match.url.replace('/add', ''));

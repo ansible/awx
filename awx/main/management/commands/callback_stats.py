@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 if clear:
                     for i in range(12):
                         sys.stdout.write('\x1b[1A\x1b[2K')
-                for l in lines:
-                    print(l)
+                for line in lines:
+                    print(line)
                 clear = True
                 time.sleep(.25)

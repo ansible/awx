@@ -7,6 +7,7 @@ import os
 import glob
 import sys
 from setuptools import setup
+from setuptools.command.egg_info import egg_info as _egg_info
 
 
 # Paths we'll use later
@@ -77,6 +78,16 @@ def proc_data_files(data_files):
         result.append((dir, includes))
     return result
 
+
+class egg_info_dev(_egg_info):
+    def find_sources(self):
+        # when we generate a .egg-info for the development
+        # environment, it's not really critical that we
+        # parse the MANIFEST.in (which is actually quite expensive
+        # in Docker for Mac)
+        pass
+
+
 #####################################################################
 
 
@@ -143,4 +154,5 @@ setup(
             'executable': '/usr/bin/awx-python',
         },
     },
+    cmdclass={'egg_info_dev': egg_info_dev}
 )

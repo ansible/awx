@@ -8,10 +8,18 @@ import getSurveyValues from '../getSurveyValues';
 function PreviewStep({ resource, config, survey, formErrors }) {
   const { values } = useFormikContext();
   const surveyValues = getSurveyValues(values);
-  const passwordFields = survey.spec
-    .filter(q => q.type === 'password')
-    .map(q => q.variable);
-  const masked = maskPasswords(surveyValues, passwordFields);
+  let extraVars;
+  if (survey && survey.spec) {
+    const passwordFields = survey.spec
+      .filter(q => q.type === 'password')
+      .map(q => q.variable);
+    const masked = maskPasswords(surveyValues, passwordFields);
+    extraVars = yaml.safeDump(
+      mergeExtraVars(values.extra_vars || '---', masked)
+    );
+  } else {
+    extraVars = values.extra_vars || '---';
+  }
   return (
     <>
       <PromptDetail
@@ -19,7 +27,7 @@ function PreviewStep({ resource, config, survey, formErrors }) {
         launchConfig={config}
         overrides={{
           ...values,
-          extra_vars: yaml.safeDump(mergeExtraVars(values.extra_vars, masked)),
+          extra_vars: extraVars,
         }}
       />
       {formErrors && (

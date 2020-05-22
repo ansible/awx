@@ -108,7 +108,7 @@ function OrganizationsList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
-            pluralizedItemName="Organizations"
+            pluralizedItemName={i18n._(t`Organizations`)}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[

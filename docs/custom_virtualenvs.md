@@ -140,14 +140,16 @@ Assigning Custom Virtualenvs
 Once you've created a custom virtualenv, you can assign it at the Organization,
 Project, or Job Template level:
 
-    PATCH https://awx-host.example.org/api/v2/organizations/N/
-    PATCH https://awx-host.example.org/api/v2/projects/N/
-    PATCH https://awx-host.example.org/api/v2/job_templates/N/
+```http
+PATCH https://awx-host.example.org/api/v2/organizations/N/
+PATCH https://awx-host.example.org/api/v2/projects/N/
+PATCH https://awx-host.example.org/api/v2/job_templates/N/
 
-    Content-Type: application/json
-    {
-        'custom_virtualenv': '/opt/my-envs/custom-venv/'
-    }
+Content-Type: application/json
+{
+    "custom_virtualenv": "/opt/my-envs/custom-venv/"
+}
+```
 
 An HTTP `GET` request to `/api/v2/config/` will provide a list of
 detected installed virtualenvs:

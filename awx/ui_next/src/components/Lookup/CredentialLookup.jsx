@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { bool, func, node, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -10,6 +10,7 @@ import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import { FieldTooltip } from '../FormField';
 import Lookup from './Lookup';
 import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('credentials', {
@@ -32,11 +33,12 @@ function CredentialLookup({
   i18n,
   tooltip,
 }) {
-  const [credentials, setCredentials] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  useEffect(() => {
-    (async () => {
+  const {
+    result: { count, credentials },
+    error,
+    request: fetchCredentials,
+  } = useRequest(
+    useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const typeIdParams = credentialTypeId
         ? { credential_type: credentialTypeId }
@@ -45,19 +47,23 @@ function CredentialLookup({
         ? { credential_type__kind: credentialTypeKind }
         : {};
 
-      try {
-        const { data } = await CredentialsAPI.read(
-          mergeParams(params, { ...typeIdParams, ...typeKindParams })
-        );
-        setCredentials(data.results);
-        setCount(data.count);
-      } catch (err) {
-        if (setError) {
-          setError(err);
-        }
-      }
-    })();
-  }, [credentialTypeId, credentialTypeKind, history.location.search]);
+      const { data } = await CredentialsAPI.read(
+        mergeParams(params, { ...typeIdParams, ...typeKindParams })
+      );
+      return {
+        count: data.count,
+        credentials: data.results,
+      };
+    }, [credentialTypeId, credentialTypeKind, history.location.search]),
+    {
+      count: 0,
+      credentials: [],
+    }
+  );
+
+  useEffect(() => {
+    fetchCredentials();
+  }, [fetchCredentials]);
 
   // TODO: replace credential type search with REST-based grabbing of cred types
 

@@ -1,0 +1,64 @@
+---
+- name: Get date time data
+  setup:
+    gather_subset: min
+
+- name: Create module directory
+  file:
+    state: directory
+    name: "modules"
+
+- name: Load api/v2
+  uri:
+    method: GET
+    url: "{{ api_url }}/api/v2/"
+  register: endpoints
+
+- name: Load endpoint options
+  uri:
+    method: "OPTIONS"
+    url: "{{ api_url }}{{ item.value }}"
+  loop: "{{ endpoints['json'] | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: end_point_options
+  when: "generate_for is not defined or item.key in generate_for"
+
+- name: Scan POST options for different things
+  set_fact:
+    all_options: "{{ all_options | default({}) | combine(options[0]) }}"
+  loop: "{{ end_point_options.results }}"
+  vars:
+    options: "{{ item | json_query('json.actions.POST.[*]') }}"
+  loop_control:
+    label: "{{ item['item']['key'] }}"
+  when:
+    - item is not skipped
+    - options is defined
+
+- name: Process endpoint
+  template:
+    src: "templates/tower_module.j2"
+    dest: "{{ playbook_dir | dirname }}/plugins/modules/{{ file_name }}"
+  loop: "{{ end_point_options['results'] }}"
+  loop_control:
+    label: "{{ item['item']['key'] }}"
+  when: "'json' in item and 'actions' in item['json'] and 'POST' in item['json']['actions']"
+  vars:
+    item_type: "{{ item['item']['key'] }}"
+    human_readable: "{{ item_type | replace('_', ' ') }}"
+    singular_item_type: "{{ item['item']['key'] | regex_replace('ies$', 'y') | regex_replace('s$', '') }}"
+    file_name: "tower_{% if item['item']['key'] in ['settings'] %}{{ item['item']['key'] }}{% else %}{{ singular_item_type }}{% endif %}.py"
+    type_map:
+      bool: 'bool'
+      boolean: 'bool'
+      choice: 'str'
+      datetime: 'str'
+      id: 'str'
+      int: 'int'
+      integer: 'int'
+      json: 'dict'
+      list: 'list'
+      object: 'dict'
+      password: 'str'
+      string: 'str'

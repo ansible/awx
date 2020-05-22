@@ -31,7 +31,7 @@ from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -358,6 +358,9 @@ def gather_analytics():
     from rest_framework.fields import DateTimeField
     if not settings.INSIGHTS_TRACKING_STATE:
         return
+    if not (settings.AUTOMATION_ANALYTICS_URL and settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD):
+        logger.debug('Not gathering analytics, configuration is invalid')
+        return
     last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
     if last_gather:
         last_time = DateTimeField().to_internal_value(last_gather.value)
@@ -558,7 +561,8 @@ def awx_periodic_scheduler():
                 continue
             if not can_start:
                 new_unified_job.status = 'failed'
-                new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
+                new_unified_job.job_explanation = gettext_noop("Scheduled job could not start because it \
+                    was not in the right state or required manual credentials")
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))

@@ -806,7 +806,9 @@ class UnifiedJobSerializer(BaseSerializer):
                 td = now() - obj.started
                 ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
-
+        # Because this string is saved in the db in the source language,
+        # it must be marked for translation after it is pulled from the db, not when set
+        ret['job_explanation'] = _(obj.job_explanation)
         return ret
 
 

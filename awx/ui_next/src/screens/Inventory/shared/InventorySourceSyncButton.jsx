@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import PropTypes from 'prop-types';
@@ -9,9 +9,7 @@ import AlertModal from '../../../components/AlertModal/AlertModal';
 import ErrorDetail from '../../../components/ErrorDetail/ErrorDetail';
 import { InventoryUpdatesAPI, InventorySourcesAPI } from '../../../api';
 
-function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
-  const [updateStatus, setUpdateStatus] = useState(source.status);
-
+function InventorySourceSyncButton({ source, icon, i18n }) {
   const {
     isLoading: startSyncLoading,
     error: startSyncError,
@@ -21,8 +19,6 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
       const {
         data: { status },
       } = await InventorySourcesAPI.createSyncStart(source.id);
-
-      setUpdateStatus(status);
 
       return status;
     }, [source.id]),
@@ -44,31 +40,29 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
       } = await InventorySourcesAPI.readDetail(source.id);
 
       await InventoryUpdatesAPI.createSyncCancel(id);
-      setUpdateStatus(null);
     }, [source.id])
   );
 
-  useEffect(() => onSyncLoading(startSyncLoading || cancelSyncLoading), [
-    onSyncLoading,
-    startSyncLoading,
-    cancelSyncLoading,
-  ]);
-
-  const { error, dismissError } = useDismissableError(
-    cancelSyncError || startSyncError
-  );
+  const {
+    error: startError,
+    dismissError: dismissStartError,
+  } = useDismissableError(startSyncError);
+  const {
+    error: cancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelSyncError);
 
   return (
     <>
-      {updateStatus === 'pending' ? (
+      {['running', 'pending', 'updating'].includes(source.status) ? (
         <Tooltip content={i18n._(t`Cancel sync process`)} position="top">
           <Button
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Cancel sync source`)}
-            variant="plain"
+            variant={icon ? 'plain' : 'secondary'}
             onClick={cancelSyncProcess}
           >
-            <MinusCircleIcon />
+            {icon ? <MinusCircleIcon /> : i18n._(t`Cancel sync`)}
           </Button>
         </Tooltip>
       ) : (
@@ -76,24 +70,33 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
           <Button
             isDisabled={cancelSyncLoading || startSyncLoading}
             aria-label={i18n._(t`Start sync source`)}
-            variant="plain"
+            variant={icon ? 'plain' : 'secondary'}
             onClick={startSyncProcess}
           >
-            <SyncIcon />
+            {icon ? <SyncIcon /> : i18n._(t`Sync`)}
           </Button>
         </Tooltip>
       )}
-      {error && (
+      {startError && (
         <AlertModal
-          isOpen={error}
+          isOpen={startError}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={dismissError}
+          onClose={dismissStartError}
         >
-          {startSyncError
-            ? i18n._(t`Failed to sync inventory source.`)
-            : i18n._(t`Failed to cancel inventory source sync.`)}
-          <ErrorDetail error={error} />
+          {i18n._(t`Failed to sync inventory source.`)}
+          <ErrorDetail error={startError} />
+        </AlertModal>
+      )}
+      {cancelError && (
+        <AlertModal
+          isOpen={cancelError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissCancelError}
+        >
+          {i18n._(t`Failed to cancel inventory source sync.`)}
+          <ErrorDetail error={cancelError} />
         </AlertModal>
       )}
     </>
@@ -102,11 +105,12 @@ function InventorySourceSyncButton({ onSyncLoading, source, i18n }) {
 
 InventorySourceSyncButton.defaultProps = {
   source: {},
+  icon: true,
 };
 
 InventorySourceSyncButton.propTypes = {
-  onSyncLoading: PropTypes.func.isRequired,
   source: PropTypes.shape({}),
+  icon: PropTypes.bool,
 };
 
 export default withI18n()(InventorySourceSyncButton);

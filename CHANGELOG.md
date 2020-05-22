@@ -2,6 +2,17 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 12.0.0 (TBD)
+- Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
+- Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.
+- Fixed a bug which broke AWX installations with oc version 4.3 (https://github.com/ansible/awx/pull/6948/files)
+- Fixed a performance issue that caused notable delay of stdout processing for playbooks run against large numbers of hosts (https://github.com/ansible/awx/issues/6991)
+- Fixed a bug that caused ANY/ALL converage settings not to properly save when editing approval nodes in the UI (https://github.com/ansible/awx/issues/6998)
+- Fixed a bug that broke support for the satellite6_group_prefix source variable (https://github.com/ansible/awx/issues/7031)
+- Fixed a bug in awx-manage run_wsbroadcast --status in kubernetes (https://github.com/ansible/awx/pull/7009)
+- Fixed a bug that broke notification toggles for system jobs in the UI (https://github.com/ansible/awx/pull/7042)
+- Fixed a bug that broke local pip installs of awxkit (https://github.com/ansible/awx/issues/7107)
+
 ## 11.2.0 (Apr 29, 2020)
 
 - Inventory updates now use collection-based plugins by default (in Ansible 2.9+):
@@ -103,7 +114,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Updated the bundled version of openstacksdk to address a known issue https://github.com/ansible/awx/issues/5821
 - Updated the bundled vmware_inventory plugin to the latest version to address a bug https://github.com/ansible/awx/pull/5668
 - Fixed a bug that can cause inventory updates to fail to properly save their output when run within a workflow https://github.com/ansible/awx/pull/5666
-- Removed a number of pre-computed fields from the Host and Group models to improve AWX performance.  As part of this change, inventory group UIs throughout the interface no longer display status icons https://github.com/ansible/awx/pull/5448 
+- Removed a number of pre-computed fields from the Host and Group models to improve AWX performance.  As part of this change, inventory group UIs throughout the interface no longer display status icons https://github.com/ansible/awx/pull/5448
 
 ## 9.1.1 (Jan 14, 2020)
 

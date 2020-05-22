@@ -88,7 +88,7 @@ def test_copy_tables_unified_job_query(
     with tempfile.TemporaryDirectory() as tmpdir:
         collectors.copy_tables(time_start, tmpdir, subset="unified_jobs")
         with open(os.path.join(tmpdir, "unified_jobs_table.csv")) as f:
-            lines = "".join([l for l in f])
+            lines = "".join([line for line in f])
 
             assert project_update_name in lines
             assert inventory_update_name in lines
@@ -139,9 +139,9 @@ def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
             reader = csv.reader(f)
             # Pop the headers
             next(reader)
-            lines = [l for l in reader]
+            lines = [line for line in reader]
 
-            ids = [int(l[0]) for l in lines]
+            ids = [int(line[0]) for line in lines]
 
             assert ids == list(
                 workflow_job.workflow_nodes.all().values_list("id", flat=True)

@@ -168,22 +168,6 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            rooms: {
-                label: i18n._('Destination Channels'),
-                type: 'textarea',
-                rows: 3,
-                awPopOver: i18n._('Enter one HipChat channel per line. The pound symbol (#) is not required.'),
-                dataTitle: i18n._('Destination Channels'),
-                dataPlacement: 'right',
-                dataContainer: "body",
-                awRequiredWhen: {
-                    reqExpression: "room_required",
-                    init: "false"
-                },
-                ngShow: "notification_type.value == 'hipchat'",
-                subForm: 'typeSubForm',
-                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
-            },
             token: {
                 labelBind: 'tokenLabel',
                 type: 'sensitive',
@@ -341,18 +325,6 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Disable SSL Verification'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'grafana' ",
-                subForm: 'typeSubForm',
-                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
-            },
-            api_url: {
-                label: i18n._('API URL'),
-                type: 'text',
-                placeholder: 'https://mycompany.hipchat.com',
-                awRequiredWhen: {
-                    reqExpression: "hipchat_required",
-                    init: "false"
-                },
-                ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },

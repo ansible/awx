@@ -2500,6 +2500,25 @@ class rhv(PluginFileInjector):
     def script_name(self):
         return 'ovirt4.py'  # exception
 
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(rhv, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['ovirt_insecure'] = False  # Default changed from script
+        # TODO: process strict option upstream
+        ret['compose'] = {
+            'ansible_host': '(devices.values() | list)[0][0] if devices else None'
+        }
+        ret['keyed_groups'] = []
+        for key in ('cluster', 'status'):
+            ret['keyed_groups'].append({'prefix': key, 'separator': '_', 'key': key})
+        ret['keyed_groups'].append({'prefix': 'tag', 'separator': '_', 'key': 'tags'})
+        ret['ovirt_hostname_preference'] = ['name', 'fqdn']
+        source_vars = inventory_update.source_vars_dict
+        for key, value in source_vars.items():
+            if key == 'plugin':
+                continue
+            ret[key] = value
+        return ret
+
 
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
@@ -2602,25 +2621,25 @@ class satellite6(PluginFileInjector):
 
         # Compatibility content
         group_by_hostvar = {
-            "environment":           {"prefix": "foreman_environment_",
+            "environment":           {"prefix": "{}environment_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
-                                             "regex_replace('[^A-Za-z0-9\_]', '_') | regex_replace('none', '')"},  # NOQA: W605
-            "location":              {"prefix": "foreman_location_",
+                                             "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')"},
+            "location":              {"prefix": "{}location_".format(group_prefix),
                                       "separator": "",
-                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
-            "organization":          {"prefix": "foreman_organization_",
+                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "organization":          {"prefix": "{}organization_".format(group_prefix),
                                       "separator": "",
-                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
-            "lifecycle_environment": {"prefix": "foreman_lifecycle_environment_",
+                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "lifecycle_environment": {"prefix": "{}lifecycle_environment_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"},
-            "content_view":          {"prefix": "foreman_content_view_",
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "content_view":          {"prefix": "{}content_view_".format(group_prefix),
                                       "separator": "",
                                       "key": "foreman['content_facet_attributes']['content_view_name'] | "
-                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9\_]', '_')"}
-            }
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"}
+        }
 
         ret['legacy_hostvars'] = True  # convert hostvar structure to the form used by the script
         ret['want_params'] = True

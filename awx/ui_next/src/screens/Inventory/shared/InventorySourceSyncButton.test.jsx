@@ -17,6 +17,7 @@ describe('<InventorySourceSyncButton />', () => {
       <InventorySourceSyncButton
         source={source}
         onSyncLoading={onSyncLoading}
+        onFetchSources={() => {}}
       />
     );
   });
@@ -24,22 +25,24 @@ describe('<InventorySourceSyncButton />', () => {
     wrapper.unmount();
     jest.clearAllMocks();
   });
-  test('should mount properly', async () => {
+
+  test('should mount properly', () => {
     expect(wrapper.find('InventorySourceSyncButton').length).toBe(1);
   });
 
-  test('should render start sync button', async () => {
+  test('should render start sync button', () => {
     expect(wrapper.find('SyncIcon').length).toBe(1);
     expect(
       wrapper.find('Button[aria-label="Start sync source"]').prop('isDisabled')
     ).toBe(false);
   });
 
-  test('should render cancel sync button', async () => {
+  test('should render cancel sync button', () => {
     wrapper = mountWithContexts(
       <InventorySourceSyncButton
         source={{ status: 'pending', ...source }}
         onSyncLoading={onSyncLoading}
+        onFetchSources={() => {}}
       />
     );
     expect(wrapper.find('MinusCircleIcon').length).toBe(1);
@@ -54,11 +57,8 @@ describe('<InventorySourceSyncButton />', () => {
       wrapper.find('Button[aria-label="Start sync source"]').simulate('click')
     );
     expect(InventorySourcesAPI.createSyncStart).toBeCalledWith(1);
-    wrapper.update();
-    expect(wrapper.find('Button[aria-label="Cancel sync source"]').length).toBe(
-      1
-    );
   });
+
   test('should cancel sync properly', async () => {
     InventorySourcesAPI.readDetail.mockResolvedValue({
       data: { summary_fields: { current_update: { id: 120 } } },
@@ -71,6 +71,7 @@ describe('<InventorySourceSyncButton />', () => {
       <InventorySourceSyncButton
         source={{ status: 'pending', ...source }}
         onSyncLoading={onSyncLoading}
+        onFetchSources={() => {}}
       />
     );
     expect(wrapper.find('Button[aria-label="Cancel sync source"]').length).toBe(
@@ -83,11 +84,26 @@ describe('<InventorySourceSyncButton />', () => {
 
     expect(InventorySourcesAPI.readDetail).toBeCalledWith(1);
     expect(InventoryUpdatesAPI.createSyncCancel).toBeCalledWith(120);
+  });
 
-    wrapper.update();
-
-    expect(wrapper.find('Button[aria-label="Start sync source"]').length).toBe(
-      1
+  test('should throw error on sync start properly', async () => {
+    InventorySourcesAPI.createSyncStart.mockRejectedValueOnce(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/inventory_sources/update',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
     );
+
+    await act(async () =>
+      wrapper.find('Button[aria-label="Start sync source"]').simulate('click')
+    );
+    wrapper.update();
+    expect(wrapper.find('AlertModal').length).toBe(1);
   });
 });

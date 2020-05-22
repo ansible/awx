@@ -163,8 +163,7 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
 
     silence_warning.assert_called_once_with(
         "The field survey_spec of job_template {0} has encrypted data and "
-        "may inaccurately report task is changed.".format(result['id'])
-    )
+        "may inaccurately report task is changed.".format(result['id']))
 
 
 @pytest.mark.django_db
