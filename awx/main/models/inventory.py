@@ -2275,7 +2275,7 @@ class vmware(PluginFileInjector):
             "customValue",  # optional
             "datastore",
             "effectiveRole",
-            "guestHeartbeatStatus",  # optonal
+            "guestHeartbeatStatus",  # optional
             "layout",  # optional
             "layoutEx",  # optional
             "name",
@@ -2287,7 +2287,6 @@ class vmware(PluginFileInjector):
             "resourcePool",
             "rootSnapshot",
             "snapshot",  # optional
-            "tag",
             "triggeredAlarmState",
             "value"
         ]
@@ -2356,7 +2355,7 @@ class vmware(PluginFileInjector):
                 })
         else:
             # default groups from script
-            for entry in ('guest.guestId', '"templates" if config.template else "guests"'):
+            for entry in ('config.guestId', '"templates" if config.template else "guests"'):
                 ret['keyed_groups'].append({
                     'prefix': '', 'separator': '',
                     'key': entry
