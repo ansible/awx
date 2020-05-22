@@ -66,7 +66,8 @@ function CredentialEdit({ credential, me }) {
           source_credential: fieldValue.credential.id,
           target_credential: credential.id,
         });
-      } else if (fieldValue.touched) {
+      }
+      if (fieldValue.touched) {
         return CredentialInputSourcesAPI.update(inputSources[fieldName].id, {
           metadata: fieldValue.inputs,
           source_credential: fieldValue.credential.id,
@@ -89,14 +90,13 @@ function CredentialEdit({ credential, me }) {
 
   const handleSubmit = async values => {
     const { inputs, organization, ...remainingValues } = values;
-    let pluginInputs = {};
-    const inputEntries = Object.entries(inputs);
-    for (const [key, value] of inputEntries) {
+    const pluginInputs = {};
+    Object.entries(inputs).forEach(([key, value]) => {
       if (value.credential && value.inputs) {
         pluginInputs[key] = value;
         delete inputs[key];
       }
-    }
+    });
     setFormSubmitError(null);
     try {
       await Promise.all([
@@ -112,7 +112,6 @@ function CredentialEdit({ credential, me }) {
       const url = `/credentials/${credential.id}/details`;
       history.push(`${url}`);
     } catch (err) {
-      console.log(err);
       setFormSubmitError(err);
     }
   };

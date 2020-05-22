@@ -3,7 +3,8 @@ import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Wizard } from '@patternfly/react-core';
-import { CredentialsStep, MetadataStep } from './';
+import CredentialsStep from './CredentialsStep';
+import MetadataStep from './MetadataStep';
 
 function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
   const [selectedCredential] = useField('credential');
@@ -29,7 +30,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
       title={i18n._(t`External Secret Management System`)}
       steps={steps}
       onSave={handleSubmit}
-    ></Wizard>
+    />
   );
 }
 

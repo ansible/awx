@@ -36,7 +36,7 @@ function MetadataStep({ i18n }) {
     useCallback(async () => {
       const {
         data: {
-          inputs: { required, metadata },
+          inputs: { required: requiredFields, metadata },
         },
       } = await CredentialTypesAPI.readDetail(
         selectedCredential.value.credential_type ||
@@ -45,15 +45,13 @@ function MetadataStep({ i18n }) {
       metadata.forEach(field => {
         if (inputValues.value[field.id]) {
           form.initialValues.inputs[field.id] = inputValues.value[field.id];
+        } else if (field.type === 'string' && field.choices) {
+          form.initialValues.inputs[field.id] =
+            field.default || field.choices[0];
         } else {
-          if (field.type === 'string' && field.choices) {
-            form.initialValues.inputs[field.id] =
-              field.default || field.choices[0];
-          } else {
-            form.initialValues.inputs[field.id] = '';
-          }
+          form.initialValues.inputs[field.id] = '';
         }
-        if (required && required.includes(field.id)) {
+        if (requiredFields && requiredFields.includes(field.id)) {
           field.required = true;
         }
       });
@@ -68,7 +66,7 @@ function MetadataStep({ i18n }) {
   }, [fetchMetadataOptions]);
 
   const testMetadata = () => {
-    alert('not implemented');
+    // todo: implement
   };
 
   if (isLoading) {

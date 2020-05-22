@@ -43,14 +43,13 @@ function CredentialAdd({ me }) {
 
   const handleSubmit = async values => {
     const { inputs, organization, ...remainingValues } = values;
-    let pluginInputs = [];
-    const inputEntries = Object.entries(inputs);
-    for (const [key, value] of inputEntries) {
+    const pluginInputs = [];
+    Object.entries(inputs).forEach(([key, value]) => {
       if (value.credential && value.inputs) {
         pluginInputs.push([key, value]);
         delete inputs[key];
       }
-    }
+    });
 
     setFormSubmitError(null);
 
@@ -64,7 +63,7 @@ function CredentialAdd({ me }) {
         ...remainingValues,
       });
       const inputSourceRequests = [];
-      for (const [key, value] of pluginInputs) {
+      pluginInputs.forEach(([key, value]) => {
         if (value.credential && value.inputs) {
           inputSourceRequests.push(
             CredentialInputSourcesAPI.create({
@@ -75,7 +74,7 @@ function CredentialAdd({ me }) {
             })
           );
         }
-      }
+      });
       await Promise.all(inputSourceRequests);
       const url = `/credentials/${credentialId}/details`;
       history.push(`${url}`);

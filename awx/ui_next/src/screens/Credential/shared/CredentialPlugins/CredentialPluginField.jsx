@@ -12,7 +12,7 @@ import {
 } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
-import { CredentialPluginSelected } from '.';
+import CredentialPluginSelected from './CredentialPluginSelected';
 
 function CredentialPluginField(props) {
   const {

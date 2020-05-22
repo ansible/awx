@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { FormGroup, InputGroup } from '@patternfly/react-core';
-import { PasswordInput } from '.';
+import PasswordInput from './PasswordInput';
 
 function PasswordField(props) {
   const { id, name, label, validate, isRequired } = props;
