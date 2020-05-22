@@ -1719,8 +1719,6 @@ class HostSerializer(BaseSerializerWithVariables):
         name = force_text(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
-        if Group.objects.filter(name=value).exists():
-            raise serializers.ValidationError(_('Invalid group name. Name already exists as a Group.'))
         return value
 
     def validate_inventory(self, value):
@@ -1733,6 +1731,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
     def validate(self, attrs):
         name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         host, port = self._get_host_port_from_name(name)
 
         if port:
@@ -1741,7 +1740,9 @@ class HostSerializer(BaseSerializerWithVariables):
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
-
+        if Group.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Group with that name already exists.'))
+            
         return super(HostSerializer, self).validate(attrs)
 
     def to_representation(self, obj):
@@ -1807,11 +1808,16 @@ class GroupSerializer(BaseSerializerWithVariables):
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         return res
 
+    def validate(self, attrs):
+        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
+        if Host.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Host with that name already exists.'))
+        return super(GroupSerializer, self).validate(attrs)
+
     def validate_name(self, value):
         if value in ('all', '_meta'):
             raise serializers.ValidationError(_('Invalid group name.'))
-        elif Host.objects.filter(name=value).exists():
-            raise serializers.ValidationError(_('Invalid group name. Name already exists as a Host.'))
         return value
 
     def validate_inventory(self, value):

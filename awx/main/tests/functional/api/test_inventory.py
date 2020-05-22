@@ -59,21 +59,42 @@ def test_inventory_source_unique_together_with_inv(inventory_factory):
     is2 = InventorySource(name='foo', source='file', inventory=inv2)
     is2.validate_unique()
 
+
 @pytest.mark.django_db
 def test_inventory_host_name_unique(scm_inventory, post, admin_user):
     inv_src = scm_inventory.inventory_sources.first()
-    group = inv_src.groups.create(name='barfoo', inventory=scm_inventory)
-    group.save()
-    host1 = inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
-    post(reverse('api:inventory_hosts_list', kwargs={'pk': host1.id}), admin_user, expect=400)
-    
+    inv_src.groups.create(name='barfoo', inventory=scm_inventory)
+    resp = post(
+        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+        {
+            'name': 'barfoo',
+            'inventory_id': scm_inventory.id,
+        },
+        admin_user, 
+        expect=400
+    )
+
+    assert resp.status_code == 400
+    assert "A Group with that name already exists." in json.dumps(resp.data)
+
+
 @pytest.mark.django_db   
 def test_inventory_group_name_unique(scm_inventory, post, admin_user):
     inv_src = scm_inventory.inventory_sources.first()
-    host = inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
-    host.save()
-    group = inv_src.groups.create(name='barfoo', inventory=scm_inventory)
-    post(reverse('api:inventory_groups_list', kwargs={'pk': group.id}), admin_user, expect=400)
+    inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
+    resp = post(
+        reverse('api:inventory_groups_list', kwargs={'pk': scm_inventory.id}),
+        {
+            'name': 'barfoo',
+            'inventory_id': scm_inventory.id,
+        },
+        admin_user, 
+        expect=400
+    )
+
+    assert resp.status_code == 400
+    assert "A Host with that name already exists." in json.dumps(resp.data)
+
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
