@@ -1,10 +1,12 @@
-9#!/usr/bin/python
+#!/usr/bin/python
 # coding: utf-8 -*-
 
 # Copyright: (c) 2018, Sean Sullivan <ssulliva@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+from ..module_utils.tower_api import TowerModule
+from json import dumps
 __metaclass__ = type
 
 
@@ -64,14 +66,11 @@ extends_documentation_fragment: awx.awx.auth
 EXAMPLES = '''
 - name: Add an inventory script
   tower_inventory_script:
-    name: "source-inventory"
-    description: Source for inventory
-    organization: previously-created-inventory
-    script: previously-created-credential
+    name: "Inventory Script"
+    description: "Inventory Script"
+    organization: "Default"
+    script: "{{ lookup('file', 'file.py') }}",
 '''
-
-from ..module_utils.tower_api import TowerModule
-from json import dumps
 
 
 def main():
@@ -79,9 +78,9 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         new_name=dict(),
+        organization=dict(required=True),
         description=dict(),
         script=dict(required=True),
-        organization=dict(required=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -90,49 +89,41 @@ def main():
 
     # Extract our parameters
     name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    inventory = module.params.get('inventory')
-    script = module.params.get('source_script')
-    credential = module.params.get('credential')
-    source_project = module.params.get('source_project')
+    new_name = module.params.get("new_name")
+    organization = module.params.get('organization')
+    description = module.params.get('description')
+    script = module.params.get('script')
     state = module.params.get('state')
 
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = module.resolve_name_to_id('organizations', organization)
+
+    # Attempt to look up an existing item based on the provided data
+    inventory_script = module.get_one('inventory_scripts', **{
+        'data': {
+            'name': name,
+            'organization': organization_id,
+        }
+    })
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory_script)
 
-
     # Create the data that gets sent for create and update
-    inventory_script_fields = {
-        'name': new_name if new_name else name,
-        'inventory': inventory_id,
-    }
+    new_fields = {}
+    new_fields['name'] = new_name if new_name else name
+    new_fields['organization'] = organization_id
+    if description is not None:
+        new_fields['description'] = description
+    new_fields['script'] = script
 
-    OPTIONAL_VARS = (
-        'description'
-    )
-
-    # Layer in all remaining optional information
-    for field_name in OPTIONAL_VARS:
-        field_val = module.params.get(field_name)
-        if field_val:
-            inventory_script_fields[field_name] = field_val
-
-    # Attempt to JSON encode source vars
-    if inventory_script_fields.get('source_vars', None):
-        inventory_script_fields['source_vars'] = dumps(inventory_script_fields['source_vars'])
-
-    # Sanity check on arguments
-    if state == 'present' and not inventory_script and not inventory_script_fields['source']:
-        module.fail_json(msg="If creating a new inventory source, the source param must be present")
-
-    # If the state was present we can let the module build or update the existing inventory_script, this will return on its own
     module.create_or_update_if_needed(
-        inventory_script, inventory_script_fields,
-        endpoint='inventory_scripts', item_type='inventory script',
+        inventory_script, new_fields,
+        endpoint='inventory_scripts', item_type='inventory_script',
+        associations={
+        }
     )
-
 
 if __name__ == '__main__':
     main()
