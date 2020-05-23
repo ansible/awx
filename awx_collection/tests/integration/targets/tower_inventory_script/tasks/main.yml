@@ -1,0 +1,55 @@
+---
+- name: Generate names
+  set_fact:
+    inv_script_name1: "AWX-Collection-tests-tower_inventory-script-inv1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Create an Inventory Script
+  tower_inventory_script:
+    name: "{{ inv_script_name1 }}"
+    organization: Default
+    script: "#!/usr/bin/env python test"
+    state: present
+    register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg when organization not present
+  tower_inventory_script:
+    name: "Test Inventory Script"
+    organization: "Non existing org"
+    script: "#!/usr/bin/env python test"
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'Non existing org was not found on the Tower server' in result.msg"
+
+- name: Check module fails when provided invalid script
+  tower_inventory_script:
+    name: "{{ inv_script_name1 }}"
+    organization: Default
+    script: "#"
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python' in result.json.script"
+
+- name: Delete a inventory script
+  tower_inventory:
+    name: "{{ inv_script_name1 }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+# TODO: New Name filed doesn't seem to work currently
