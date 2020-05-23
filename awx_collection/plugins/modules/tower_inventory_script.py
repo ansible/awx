@@ -117,7 +117,7 @@ def main():
     if description is not None:
         new_fields['description'] = description
     if script is not None:
-        new_fields['script'] = script        
+        new_fields['script'] = script
     new_fields['script'] = script
 
     module.create_or_update_if_needed(
