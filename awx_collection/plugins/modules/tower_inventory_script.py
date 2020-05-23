@@ -80,7 +80,7 @@ def main():
         new_name=dict(),
         organization=dict(required=True),
         description=dict(),
-        script=dict(required=True),
+        script=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -116,6 +116,8 @@ def main():
     new_fields['organization'] = organization_id
     if description is not None:
         new_fields['description'] = description
+    if script is not None:
+        new_fields['script'] = script        
     new_fields['script'] = script
 
     module.create_or_update_if_needed(
