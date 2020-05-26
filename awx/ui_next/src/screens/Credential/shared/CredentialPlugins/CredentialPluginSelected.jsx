@@ -1,10 +1,12 @@
 import React from 'react';
+import { func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { Button, ButtonVariant, Tooltip } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
 import CredentialChip from '../../../../components/CredentialChip';
+import { Credential } from '../../../../types';
 
 const SelectedCredential = styled.div`
   display: flex;
@@ -50,5 +52,16 @@ function CredentialPluginSelected({
     </>
   );
 }
+
+CredentialPluginSelected.propTypes = {
+  credential: Credential.isRequired,
+  onEditPlugin: func,
+  onClearPlugin: func,
+};
+
+CredentialPluginSelected.defaultProps = {
+  onEditPlugin: () => {},
+  onClearPlugin: () => {},
+};
 
 export default withI18n()(CredentialPluginSelected);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { func } from 'prop-types';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -54,7 +55,10 @@ function CredentialPluginPrompt({ i18n, onClose, onSubmit, initialValues }) {
   );
 }
 
-CredentialPluginPrompt.propTypes = {};
+CredentialPluginPrompt.propTypes = {
+  onClose: func.isRequired,
+  onSubmit: func.isRequired,
+};
 
 CredentialPluginPrompt.defaultProps = {};
 
