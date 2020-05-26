@@ -231,7 +231,7 @@ function JobTemplateForm({
         </FieldWithPrompt>
         <FieldWithPrompt
           fieldId="template-inventory"
-          isRequired
+          isRequired={!formikValues.ask_inventory_on_launch}
           label={i18n._(t`Inventory`)}
           promptId="template-ask-inventory-on-launch"
           promptName="ask_inventory_on_launch"
@@ -242,10 +242,10 @@ function JobTemplateForm({
             value={inventory}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
-              inventoryHelpers.setValue(value.id);
+              inventoryHelpers.setValue(value ? value.id : null);
               setInventory(value);
             }}
-            required
+            required={!formikValues.ask_inventory_on_launch}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
