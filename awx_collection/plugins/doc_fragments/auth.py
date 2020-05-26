@@ -32,7 +32,8 @@ options:
     description:
     - The Tower OAuth token to use.
     - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-    type: str
+    type: raw
+    version_added: "3.7"
   validate_certs:
     description:
     - Whether to allow insecure connections to Tower or AWX.
