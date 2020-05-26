@@ -428,8 +428,9 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Follow symlinks'),
-    help_text=_('Follow symbolic links when scanning for playbooks. Be aware that setting this to True '
-        'can lead to infinite recursion if a link points to a parent directory of itself.'
+    help_text=_(
+        'Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead '
+        'to infinite recursion if a link points to a parent directory of itself.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
