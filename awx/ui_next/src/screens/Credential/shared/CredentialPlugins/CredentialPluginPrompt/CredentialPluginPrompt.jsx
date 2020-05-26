@@ -1,5 +1,5 @@
 import React from 'react';
-import { func } from 'prop-types';
+import { func, shape } from 'prop-types';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -14,6 +14,7 @@ function CredentialPluginWizard({ i18n, handleSubmit, onClose }) {
       id: 1,
       name: i18n._(t`Credential`),
       component: <CredentialsStep />,
+      enableNext: !!selectedCredential.value,
     },
     {
       id: 2,
@@ -58,8 +59,11 @@ function CredentialPluginPrompt({ i18n, onClose, onSubmit, initialValues }) {
 CredentialPluginPrompt.propTypes = {
   onClose: func.isRequired,
   onSubmit: func.isRequired,
+  initialValues: shape({}),
 };
 
-CredentialPluginPrompt.defaultProps = {};
+CredentialPluginPrompt.defaultProps = {
+  initialValues: {},
+};
 
 export default withI18n()(CredentialPluginPrompt);

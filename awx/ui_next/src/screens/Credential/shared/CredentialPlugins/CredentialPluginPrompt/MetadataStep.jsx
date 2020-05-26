@@ -66,7 +66,7 @@ function MetadataStep({ i18n }) {
   }, [fetchMetadataOptions]);
 
   const testMetadata = () => {
-    // todo: implement
+    // https://github.com/ansible/awx/issues/7126
   };
 
   if (isLoading) {

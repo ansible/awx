@@ -72,7 +72,7 @@ function CredentialPluginField(props) {
       )}
       {showPluginWizard && (
         <CredentialPluginPrompt
-          initialValues={field.value}
+          initialValues={typeof field.value === 'object' ? field.value : {}}
           onClose={() => setShowPluginWizard(false)}
           onSubmit={val => {
             val.touched = true;

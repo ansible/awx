@@ -11,13 +11,16 @@ import { Credential } from '../../../../types';
 const SelectedCredential = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
   background-color: white;
   border-bottom-color: var(--pf-global--BorderColor--200);
 `;
 
 const SpacedCredentialChip = styled(CredentialChip)`
   margin: 5px 8px;
+`;
+
+const PluginHelpText = styled.p`
+  margin-top: 5px;
 `;
 
 function CredentialPluginSelected({
@@ -28,12 +31,6 @@ function CredentialPluginSelected({
 }) {
   return (
     <>
-      <p>
-        <Trans>
-          This field will be retrieved from an external secret management system
-          using the following credential:
-        </Trans>
-      </p>
       <SelectedCredential>
         <SpacedCredentialChip onClick={onClearPlugin} credential={credential} />
         <Tooltip
@@ -49,6 +46,12 @@ function CredentialPluginSelected({
           </Button>
         </Tooltip>
       </SelectedCredential>
+      <PluginHelpText>
+        <Trans>
+          This field will be retrieved from an external secret management system
+          using the specified credential.
+        </Trans>
+      </PluginHelpText>
     </>
   );
 }
