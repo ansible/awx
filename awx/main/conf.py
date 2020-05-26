@@ -424,6 +424,19 @@ register(
 )
 
 register(
+    'AWX_SHOW_PLAYBOOK_LINKS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Follow symlinks'),
+    help_text=_(
+        'Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead '
+        'to infinite recursion if a link points to a parent directory of itself.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'PRIMARY_GALAXY_URL',
     field_class=fields.URLField,
     required=False,
