@@ -87,12 +87,6 @@ options:
         - Passwords for credentials which are set to prompt on launch
       type: dict
       version_added: "3.7"
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-        - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
