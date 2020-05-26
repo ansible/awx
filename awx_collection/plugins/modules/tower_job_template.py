@@ -391,7 +391,7 @@ def main():
         scm_branch=dict(),
         ask_scm_branch_on_launch=dict(type='bool'),
         job_slice_count=dict(type='int', default='1'),
-        webhook_service=dict(choices=['github', 'gitlab','']),
+        webhook_service=dict(choices=['github', 'gitlab', '']),
         webhook_credential=dict(),
         labels=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
