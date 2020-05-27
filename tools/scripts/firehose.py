@@ -63,8 +63,8 @@ class YieldedRows(StringIO):
 
     def __init__(self, job_id, rows, time_delta, *args, **kwargs):
         self.rows = rows
-        created_time = datetime.datetime.today() - datetime.timedelta(days=time_delta[0], hours=time_delta[1], seconds=5)
-        modified_time = datetime.datetime.today() - datetime.timedelta(days=time_delta[0], hours=time_delta[1], seconds=0)
+        created_time = datetime.datetime.today() - time_delta - datetime.timedelta(seconds=5)
+        modified_time = datetime.datetime.today() - time_delta
         created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
         modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
         self.row = "\t".join([
@@ -124,7 +124,7 @@ def cleanup(sql):
     conn.close()
 
 
-def generate_jobs(jobs, batch_size):
+def generate_jobs(jobs, batch_size, time_delta):
     print(f'inserting {jobs} job(s)')
     sys.path.insert(0, pkg_resources.get_distribution('awx').module_path)
     from awx import prepare_env
@@ -161,7 +161,7 @@ def generate_jobs(jobs, batch_size):
         jobs = [
             Job(
                 status=STATUS_OPTIONS[i % len(STATUS_OPTIONS)],
-                started=now(), created=now(), modified=now(), finished=now(),
+                started=now()-time_delta, created=now()-time_delta, modified=now()-time_delta, finished=now()-time_delta,
                 elapsed=0., **jt_defaults)
             for i in range(N)
         ]
@@ -300,8 +300,9 @@ if __name__ == '__main__':
     params = parser.parse_args()
     jobs = params.jobs
     time_delta = params.days_delta, params.hours_delta
+    time_delta = datetime.timedelta(days=time_delta[0], hours=time_delta[1], seconds=0)
     events = params.events
     batch_size = params.batch_size
     print(datetime.datetime.utcnow().isoformat())
-    created = generate_jobs(jobs, batch_size=batch_size)
+    created = generate_jobs(jobs, batch_size=batch_size, time_delta=time_delta)
     generate_events(events, str(created.pk), time_delta)
