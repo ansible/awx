@@ -11,9 +11,19 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
-DEFAULT_BODY = CustomNotificationBase.DEFAULT_BODY
 DEFAULT_MSG = CustomNotificationBase.DEFAULT_MSG
+
 DEFAULT_APPROVAL_RUNNING_MSG = CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_MSG
+DEFAULT_APPROVAL_RUNNING_BODY = CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_BODY
+
+DEFAULT_APPROVAL_APPROVED_MSG = CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_MSG
+DEFAULT_APPROVAL_APPROVED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_BODY
+
+DEFAULT_APPROVAL_TIMEOUT_MSG = CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_MSG
+DEFAULT_APPROVAL_TIMEOUT_BODY = CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_BODY
+
+DEFAULT_APPROVAL_DENIED_MSG = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_MSG
+DEFAULT_APPROVAL_DENIED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_BODY
 
 logger = logging.getLogger('awx.main.notifications.pagerduty_backend')
 
@@ -31,10 +41,10 @@ class PagerDutyBackend(AWXBaseEmailBackend, CustomNotificationBase):
     default_messages = {"started": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "success": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
                         "error": {"message": DEFAULT_MSG, "body": DEFAULT_BODY},
-                        "workflow_approval": {"running": {"message": DEFAULT_APPROVAL_RUNNING_MSG, "body": DEFAULT_BODY},
-                                              "approved": {"message": DEFAULT_APPROVAL_RUNNING_MSG,"body": DEFAULT_BODY},
-                                              "timed_out": {"message": DEFAULT_APPROVAL_RUNNING_MSG, "body": DEFAULT_BODY},
-                                              "denied": {"message": DEFAULT_APPROVAL_RUNNING_MSG, "body": DEFAULT_BODY}}}
+                        "workflow_approval": {"running": {"message": DEFAULT_APPROVAL_RUNNING_MSG, "body": DEFAULT_APPROVAL_RUNNING_BODY},
+                                              "approved": {"message": DEFAULT_APPROVAL_APPROVED_MSG,"body": DEFAULT_APPROVAL_APPROVED_BODY},
+                                              "timed_out": {"message": DEFAULT_APPROVAL_TIMEOUT_MSG, "body": DEFAULT_APPROVAL_TIMEOUT_BODY},
+                                              "denied": {"message": DEFAULT_APPROVAL_DENIED_MSG, "body": DEFAULT_APPROVAL_DENIED_BODY}}}
 
     def __init__(self, subdomain, token, fail_silently=False, **kwargs):
         super(PagerDutyBackend, self).__init__(fail_silently=fail_silently)
