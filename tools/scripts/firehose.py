@@ -61,11 +61,15 @@ STATUS_OPTIONS = ('successful', 'failed', 'error', 'canceled')
 
 class YieldedRows(StringIO):
 
-    def __init__(self, job_id, rows, *args, **kwargs):
+    def __init__(self, job_id, rows, time_delta, *args, **kwargs):
         self.rows = rows
+        created_time = datetime.datetime.today() - datetime.timedelta(days=time_delta, hours=1, seconds=5)
+        modified_time = datetime.datetime.today() - datetime.timedelta(days=time_delta, hours=1, seconds=0)
+        created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
+        modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
         self.row = "\t".join([
-            "2020-01-02 12:00:00",
-            "2020-01-02 12:00:01",
+            f"{created_stamp}",
+            f"{modified_stamp}",
             "playbook_on_start",
             "{}",
             'false',
@@ -94,9 +98,9 @@ class YieldedRows(StringIO):
         return self.row * 10000
 
 
-def firehose(job, count):
+def firehose(job, count, time_delta):
     conn = psycopg2.connect(dsn)
-    f = YieldedRows(job, count)
+    f = YieldedRows(job, count, time_delta)
     with conn.cursor() as cursor:
         cursor.copy_expert((
             'COPY '
@@ -182,7 +186,7 @@ def generate_jobs(jobs, batch_size):
     return created
 
 
-def generate_events(events, job):
+def generate_events(events, job, time_delta):
     conn = psycopg2.connect(dsn)
     cursor = conn.cursor()
     print('removing indexes and constraints')
@@ -218,7 +222,7 @@ def generate_events(events, job):
         workers = []
 
         for i in range(cores):
-            p = multiprocessing.Process(target=firehose, args=(job, events / cores))
+            p = multiprocessing.Process(target=firehose, args=(job, events / cores, time_delta))
             p.daemon = True
             workers.append(p)
 
@@ -287,10 +291,14 @@ if __name__ == '__main__':
     parser.add_argument(
         '--batch-size', type=int, help='Number of jobs to create in a single batch.',
         default=1000)
+    parser.add_argument(
+        '--time-delta', type=int, help='Number of days old to create the events. Defaults to 0.',
+        default=0)
     params = parser.parse_args()
     jobs = params.jobs
+    time_delta = params.time_delta
     events = params.events
     batch_size = params.batch_size
     print(datetime.datetime.utcnow().isoformat())
     created = generate_jobs(jobs, batch_size=batch_size)
-    generate_events(events, str(created.pk))
+    generate_events(events, str(created.pk), time_delta)
