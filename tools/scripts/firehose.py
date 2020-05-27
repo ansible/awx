@@ -63,8 +63,8 @@ class YieldedRows(StringIO):
 
     def __init__(self, job_id, rows, time_delta, *args, **kwargs):
         self.rows = rows
-        created_time = datetime.datetime.today() - datetime.timedelta(days=time_delta, hours=1, seconds=5)
-        modified_time = datetime.datetime.today() - datetime.timedelta(days=time_delta, hours=1, seconds=0)
+        created_time = datetime.datetime.today() - datetime.timedelta(days=time_delta[0], hours=time_delta[1], seconds=5)
+        modified_time = datetime.datetime.today() - datetime.timedelta(days=time_delta[0], hours=time_delta[1], seconds=0)
         created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
         modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
         self.row = "\t".join([
@@ -292,11 +292,14 @@ if __name__ == '__main__':
         '--batch-size', type=int, help='Number of jobs to create in a single batch.',
         default=1000)
     parser.add_argument(
-        '--time-delta', type=int, help='Number of days old to create the events. Defaults to 0.',
+        '--days-delta', type=int, help='Number of days old to create the events. Defaults to 0.',
         default=0)
+    parser.add_argument(
+        '--hours-delta', type=int, help='Number of hours old to create the events. Defaults to 1.',
+        default=1)
     params = parser.parse_args()
     jobs = params.jobs
-    time_delta = params.time_delta
+    time_delta = params.days_delta, params.hours_delta
     events = params.events
     batch_size = params.batch_size
     print(datetime.datetime.utcnow().isoformat())
