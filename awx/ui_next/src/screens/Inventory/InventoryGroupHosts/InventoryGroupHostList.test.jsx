@@ -148,6 +148,9 @@ describe('<InventoryGroupHostList />', () => {
     });
     wrapper.update();
     expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
+    expect(wrapper.find('AlertModal ModalBoxBody').text()).toEqual(
+      expect.stringContaining('Failed to disassociate one or more hosts.')
+    );
   });
 
   test('should show associate host modal when adding an existing host', () => {
@@ -193,6 +196,39 @@ describe('<InventoryGroupHostList />', () => {
     await waitForElement(wrapper, 'AssociateModal', el => el.length === 0);
     expect(InventoriesAPI.readHosts).toHaveBeenCalledTimes(1);
     expect(GroupsAPI.associateHost).toHaveBeenCalledTimes(1);
+  });
+
+  test('should show error modal for failed host association', async () => {
+    GroupsAPI.associateHost.mockRejectedValue(new Error());
+    InventoriesAPI.readHosts.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [{ id: 123, name: 'foo', url: '/api/v2/hosts/123/' }],
+      },
+    });
+    wrapper
+      .find('DropdownToggle button[aria-label="add host"]')
+      .simulate('click');
+    await act(async () => {
+      wrapper
+        .find('DropdownItem[aria-label="add existing host"]')
+        .simulate('click');
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    await act(async () => {
+      wrapper
+        .find('CheckboxListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
+    expect(wrapper.find('AlertModal ModalBoxBody').text()).toEqual(
+      expect.stringContaining('Failed to associate.')
+    );
   });
 
   test('should navigate to host add form when adding a new host', async () => {

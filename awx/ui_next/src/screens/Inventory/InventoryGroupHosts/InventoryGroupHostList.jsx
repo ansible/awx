@@ -67,7 +67,7 @@ function InventoryGroupHostList({ i18n }) {
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateHosts,
-    deletionError: disassociateError,
+    deletionError: disassociateErr,
   } = useDeleteItems(
     useCallback(async () => {
       return Promise.all(
@@ -96,7 +96,7 @@ function InventoryGroupHostList({ i18n }) {
     [groupId, inventoryId]
   );
 
-  const { request: handleAssociate, error: associateError } = useRequest(
+  const { request: handleAssociate, error: associateErr } = useRequest(
     useCallback(
       async hostsToAssociate => {
         await Promise.all(
@@ -110,9 +110,14 @@ function InventoryGroupHostList({ i18n }) {
     )
   );
 
-  const { error, dismissError } = useDismissableError(
-    associateError || disassociateError
-  );
+  const {
+    error: associateError,
+    dismissError: dismissAssociateError,
+  } = useDismissableError(associateErr);
+  const {
+    error: disassociateError,
+    dismissError: dismissDisassociateError,
+  } = useDismissableError(disassociateErr);
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -211,17 +216,26 @@ function InventoryGroupHostList({ i18n }) {
           title={i18n._(t`Select Hosts`)}
         />
       )}
-      {error && (
+      {associateError && (
         <AlertModal
-          isOpen={error}
-          onClose={dismissError}
+          isOpen={associateError}
+          onClose={dismissAssociateError}
           title={i18n._(t`Error!`)}
           variant="error"
         >
-          {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more hosts.`)}
-          <ErrorDetail error={error} />
+          {i18n._(t`Failed to associate.`)}
+          <ErrorDetail error={associateError} />
+        </AlertModal>
+      )}
+      {disassociateError && (
+        <AlertModal
+          isOpen={disassociateError}
+          onClose={dismissDisassociateError}
+          title={i18n._(t`Error!`)}
+          variant="error"
+        >
+          {i18n._(t`Failed to disassociate one or more hosts.`)}
+          <ErrorDetail error={disassociateError} />
         </AlertModal>
       )}
     </>
