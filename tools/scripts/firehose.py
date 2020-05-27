@@ -58,15 +58,10 @@ u = str(uuid4())
 
 STATUS_OPTIONS = ('successful', 'failed', 'error', 'canceled')
 
-
 class YieldedRows(StringIO):
 
-    def __init__(self, job_id, rows, time_delta, *args, **kwargs):
+    def __init__(self, job_id, rows, created_stamp, modified_stamp, *args, **kwargs):
         self.rows = rows
-        created_time = datetime.datetime.today() - time_delta - datetime.timedelta(seconds=5)
-        modified_time = datetime.datetime.today() - time_delta
-        created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
-        modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
         self.row = "\t".join([
             f"{created_stamp}",
             f"{modified_stamp}",
@@ -98,9 +93,9 @@ class YieldedRows(StringIO):
         return self.row * 10000
 
 
-def firehose(job, count, time_delta):
+def firehose(job, count, created_stamp, modified_stamp):
     conn = psycopg2.connect(dsn)
-    f = YieldedRows(job, count, time_delta)
+    f = YieldedRows(job, count, created_stamp, modified_stamp)
     with conn.cursor() as cursor:
         cursor.copy_expert((
             'COPY '
@@ -190,7 +185,10 @@ def generate_events(events, job, time_delta):
     conn = psycopg2.connect(dsn)
     cursor = conn.cursor()
     print('removing indexes and constraints')
-
+    created_time = datetime.datetime.today() - time_delta - datetime.timedelta(seconds=5)
+    modified_time = datetime.datetime.today() - time_delta
+    created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
+    modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
     # get all the indexes for main_jobevent
     try:
         # disable WAL to drastically increase write speed
@@ -222,7 +220,7 @@ def generate_events(events, job, time_delta):
         workers = []
 
         for i in range(cores):
-            p = multiprocessing.Process(target=firehose, args=(job, events / cores, time_delta))
+            p = multiprocessing.Process(target=firehose, args=(job, events / cores, created_stamp, modified_stamp))
             p.daemon = True
             workers.append(p)
 
