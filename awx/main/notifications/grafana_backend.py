@@ -13,6 +13,19 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
+DEFAULT_MSG = CustomNotificationBase.DEFAULT_MSG
+
+DEFAULT_APPROVAL_RUNNING_MSG = CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_MSG
+DEFAULT_APPROVAL_RUNNING_BODY = CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_BODY
+
+DEFAULT_APPROVAL_APPROVED_MSG = CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_MSG
+DEFAULT_APPROVAL_APPROVED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_BODY
+
+DEFAULT_APPROVAL_TIMEOUT_MSG = CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_MSG
+DEFAULT_APPROVAL_TIMEOUT_BODY = CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_BODY
+
+DEFAULT_APPROVAL_DENIED_MSG = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_MSG
+DEFAULT_APPROVAL_DENIED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_BODY
 
 logger = logging.getLogger('awx.main.notifications.grafana_backend')
 
@@ -25,31 +38,13 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     sender_parameter = None
 
     DEFAULT_BODY = "{{ job_metadata }}"
-    default_messages = {
-        "started": {
-            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
-        },
-        "success": {
-            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
-        },
-        "error": {
-            "body": DEFAULT_BODY, "message": CustomNotificationBase.DEFAULT_MSG
-        },
-        "workflow_approval": {
-            "running": {
-                "message": CustomNotificationBase.DEFAULT_APPROVAL_RUNNING_MSG, "body": None
-            },
-            "approved": {
-                "message": CustomNotificationBase.DEFAULT_APPROVAL_APPROVED_MSG, "body": None
-            },
-            "timed_out": {
-                "message": CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_MSG, "body": None
-            },
-            "denied": {
-                "message": CustomNotificationBase.DEFAULT_APPROVAL_DENIED_MSG, "body": None
-            }
-        }
-    }
+    default_messages = {"started": {"body": DEFAULT_BODY, "message": DEFAULT_MSG},
+                        "success": {"body": DEFAULT_BODY, "message": DEFAULT_MSG},
+                        "error": {"body": DEFAULT_BODY, "message": DEFAULT_MSG},
+                        "workflow_approval": {"running": {"message": DEFAULT_APPROVAL_RUNNING_MSG, "body": DEFAULT_APPROVAL_RUNNING_BODY},
+                                              "approved": {"message": DEFAULT_APPROVAL_APPROVED_MSG,"body": DEFAULT_APPROVAL_APPROVED_BODY},
+                                              "timed_out": {"message": DEFAULT_APPROVAL_TIMEOUT_MSG, "body": DEFAULT_APPROVAL_TIMEOUT_BODY},
+                                              "denied": {"message": DEFAULT_APPROVAL_DENIED_MSG, "body": DEFAULT_APPROVAL_DENIED_BODY}}}
 
     def __init__(self, grafana_key,dashboardId=None, panelId=None, annotation_tags=None, grafana_no_verify_ssl=False, isRegion=True,
                  fail_silently=False, **kwargs):
