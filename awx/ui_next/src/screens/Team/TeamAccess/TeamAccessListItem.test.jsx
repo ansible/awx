@@ -18,20 +18,25 @@ describe('<TeamAccessListItem/>', () => {
     },
   };
 
-  beforeEach(() => {
+  test('should mount properly', () => {
     wrapper = mountWithContexts(
       <TeamAccessListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
     );
-  });
 
-  test('should mount properly', () => {
     expect(wrapper.length).toBe(1);
   });
 
   test('should render proper list item data', () => {
+    wrapper = mountWithContexts(
+      <TeamAccessListItem
+        role={role}
+        detailUrl="/templates/job_template/15/details"
+      />
+    );
+
     expect(
       wrapper.find('PFDataListCell[aria-label="resource name"]').text()
     ).toBe('template delete project');
@@ -41,5 +46,24 @@ describe('<TeamAccessListItem/>', () => {
     expect(
       wrapper.find('PFDataListCell[aria-label="resource role"]').text()
     ).toContain('Admin');
+  });
+  test('should render deletable chip', () => {
+    wrapper = mountWithContexts(
+      <TeamAccessListItem
+        role={role}
+        detailUrl="/templates/job_template/15/details"
+      />
+    );
+    expect(wrapper.find('Chip').prop('isReadOnly')).toBe(false);
+  });
+  test('should render read only chip', () => {
+    role.summary_fields.user_capabilities.unattach = false;
+    wrapper = mountWithContexts(
+      <TeamAccessListItem
+        role={role}
+        detailUrl="/templates/job_template/15/details"
+      />
+    );
+    expect(wrapper.find('Chip').prop('isReadOnly')).toBe(true);
   });
 });

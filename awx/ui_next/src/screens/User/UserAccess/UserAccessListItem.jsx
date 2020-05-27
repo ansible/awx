@@ -5,11 +5,13 @@ import {
   DataListItem,
   DataListItemCells,
   DataListItemRow,
+  Chip,
 } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
+import { DetailList, Detail } from '../../../components/DetailList';
 import DataListCell from '../../../components/DataListCell';
 
-function UserAccessListItem({ role, i18n, detailUrl }) {
+function UserAccessListItem({ role, i18n, detailUrl, onSelect }) {
   const labelId = `userRole-${role.id}`;
   return (
     <DataListItem key={role.id} aria-labelledby={labelId} id={`${role.id}`}>
@@ -23,18 +25,33 @@ function UserAccessListItem({ role, i18n, detailUrl }) {
             </DataListCell>,
             <DataListCell key="type" aria-label={i18n._(t`resource type`)}>
               {role.summary_fields && (
-                <>
-                  <b css="margin-right: 24px">{i18n._(t`Type`)}</b>
-                  {role.summary_fields.resource_type_display_name}
-                </>
+                <DetailList stacked>
+                  <Detail
+                    label={i18n._(t`Type`)}
+                    value={role.summary_fields.resource_type_display_name}
+                  />
+                </DetailList>
               )}
             </DataListCell>,
             <DataListCell key="role" aria-label={i18n._(t`resource role`)}>
               {role.name && (
-                <>
-                  <b css="margin-right: 24px">{i18n._(t`Role`)}</b>
-                  {role.name}
-                </>
+                <DetailList stacked>
+                  <Detail
+                    label={i18n._(t`Role`)}
+                    value={
+                      <Chip
+                        isReadOnly={
+                          !role.summary_fields.user_capabilities.unattach
+                        }
+                        key={role.name}
+                        aria-label={role.name}
+                        onClick={() => onSelect(role)}
+                      >
+                        {role.name}
+                      </Chip>
+                    }
+                  />
+                </DetailList>
               )}
             </DataListCell>,
           ]}
