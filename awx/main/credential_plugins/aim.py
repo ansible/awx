@@ -1,14 +1,9 @@
-from .plugin import CredentialPlugin
+from .plugin import CredentialPlugin, CertFiles
 
 from urllib.parse import quote, urlencode, urljoin
 
 from django.utils.translation import ugettext_lazy as _
 import requests
-
-# AWX
-from awx.main.utils import (
-    create_temporary_fifo,
-)
 
 aim_inputs = {
     'fields': [{
@@ -81,21 +76,13 @@ def aim_backend(**kwargs):
     request_qs = '?' + urlencode(query_params, quote_via=quote)
     request_url = urljoin(url, '/'.join(['AIMWebService', 'api', 'Accounts']))
 
-    cert = None
-    if client_cert and client_key:
-        cert = (
-            create_temporary_fifo(client_cert.encode()),
-            create_temporary_fifo(client_key.encode())
+    with CertFiles(client_cert, client_key) as cert:
+        res = requests.get(
+            request_url + request_qs,
+            timeout=30,
+            cert=cert,
+            verify=verify,
         )
-    elif client_cert:
-        cert = create_temporary_fifo(client_cert.encode())
-
-    res = requests.get(
-        request_url + request_qs,
-        timeout=30,
-        cert=cert,
-        verify=verify,
-    )
     res.raise_for_status()
     return res.json()['Content']
 

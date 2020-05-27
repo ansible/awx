@@ -3,15 +3,10 @@ import os
 import pathlib
 from urllib.parse import urljoin
 
-from .plugin import CredentialPlugin
+from .plugin import CredentialPlugin, CertFiles
 
 import requests
 from django.utils.translation import ugettext_lazy as _
-
-# AWX
-from awx.main.utils import (
-    create_temporary_fifo,
-)
 
 base_inputs = {
     'fields': [{
@@ -129,14 +124,13 @@ def approle_auth(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     request_kwargs = {'timeout': 30}
-    if cacert:
-        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
-
     # AppRole Login
     request_kwargs['json'] = {'role_id': role_id, 'secret_id': secret_id}
     sess = requests.Session()
     request_url = '/'.join([url, 'auth', auth_path, 'login']).rstrip('/')
-    resp = sess.post(request_url, **request_kwargs)
+    with CertFiles(cacert) as cert:
+        request_kwargs['verify'] = cert
+        resp = sess.post(request_url, **request_kwargs)
     resp.raise_for_status()
     token = resp.json()['auth']['client_token']
     return token
@@ -152,8 +146,6 @@ def kv_backend(**kwargs):
     api_version = kwargs['api_version']
 
     request_kwargs = {'timeout': 30}
-    if cacert:
-        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
@@ -180,7 +172,9 @@ def kv_backend(**kwargs):
             path_segments = [secret_path]
 
     request_url = urljoin(url, '/'.join(['v1'] + path_segments)).rstrip('/')
-    response = sess.get(request_url, **request_kwargs)
+    with CertFiles(cacert) as cert:
+        request_kwargs['verify'] = cert
+        response = sess.get(request_url, **request_kwargs)
     response.raise_for_status()
 
     json = response.json()
@@ -205,8 +199,6 @@ def ssh_backend(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     request_kwargs = {'timeout': 30}
-    if cacert:
-        request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
     request_kwargs['json'] = {'public_key': kwargs['public_key']}
     if kwargs.get('valid_principals'):
@@ -218,7 +210,10 @@ def ssh_backend(**kwargs):
     sess.headers['X-Vault-Token'] = token
     # https://www.vaultproject.io/api/secret/ssh/index.html#sign-ssh-key
     request_url = '/'.join([url, secret_path, 'sign', role]).rstrip('/')
-    resp = sess.post(request_url, **request_kwargs)
+
+    with CertFiles(cacert) as cert:
+        request_kwargs['verify'] = cert
+        resp = sess.post(request_url, **request_kwargs)
 
     resp.raise_for_status()
     return resp.json()['data']['signed_key']
