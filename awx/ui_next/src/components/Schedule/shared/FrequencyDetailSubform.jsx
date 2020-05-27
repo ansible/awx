@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { RRule } from 'rrule';
 import {
   Checkbox as _Checkbox,
@@ -45,7 +45,7 @@ export function requiredPositiveInteger(i18n) {
   return value => {
     if (typeof value === 'number') {
       if (!Number.isInteger(value)) {
-        return i18n._(t`This field must an integer`);
+        return i18n._(t`This field must be an integer`);
       }
       if (value < 1) {
         return i18n._(t`This field must be greater than 0`);
@@ -141,7 +141,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
       value: 7,
       label: i18n._(t`July`),
     },
-    { key: 'august', value: 8, label: i18n._(t`August`) },
+    {
+      key: 'august',
+      value: 8,
+      label: i18n._(t`August`),
+    },
     {
       key: 'september',
       value: 9,
@@ -344,8 +348,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
               label={
                 <div css="display: flex;align-items: center;">
                   {frequency?.value === 'month' && (
-                    <span id="foobar" css="margin-right: 10px;">
-                      Day
+                    <span
+                      id="radio-schedule-run-on-day"
+                      css="margin-right: 10px;"
+                    >
+                      <Trans>Day</Trans>
                     </span>
                   )}
                   {frequency?.value === 'year' && (
@@ -383,8 +390,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
               name="runOn"
               label={
                 <div css="display: flex;align-items: center;">
-                  <span id="foobar" css="margin-right: 10px;">
-                    The
+                  <span
+                    id="radio-schedule-run-on-the"
+                    css="margin-right: 10px;"
+                  >
+                    <Trans>The</Trans>
                   </span>
                   <AnsibleSelect
                     id="schedule-run-on-the-occurrence"
@@ -461,12 +471,20 @@ const FrequencyDetailSubform = ({ i18n }) => {
                     {...runOnTheDay}
                   />
                   {frequency?.value === 'year' && (
-                    <AnsibleSelect
-                      id="schedule-run-on-the-month"
-                      isDisabled={runOn.value !== 'the'}
-                      data={monthOptions}
-                      {...runOnTheMonth}
-                    />
+                    <>
+                      <span
+                        id="of-schedule-run-on-the-month"
+                        css="margin-left: 10px;"
+                      >
+                        <Trans>of</Trans>
+                      </span>
+                      <AnsibleSelect
+                        id="schedule-run-on-the-month"
+                        isDisabled={runOn.value !== 'the'}
+                        data={monthOptions}
+                        {...runOnTheMonth}
+                      />
+                    </>
                   )}
                 </div>
               }
