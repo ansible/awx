@@ -219,8 +219,13 @@ def generate_events(events, job, time_delta):
         cores = multiprocessing.cpu_count()
         workers = []
 
-        for i in range(cores):
-            p = multiprocessing.Process(target=firehose, args=(job, events / cores, created_stamp, modified_stamp))
+        num_procs = min(cores, events)
+        num_events = events // num_procs
+        if num_events <= 1:
+            num_events = events
+
+        for i in range(num_procs):
+            p = multiprocessing.Process(target=firehose, args=(job, num_events, created_stamp, modified_stamp))
             p.daemon = True
             workers.append(p)
 
