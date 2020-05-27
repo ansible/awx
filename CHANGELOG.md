@@ -14,6 +14,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug that broke notification toggles for system jobs in the UI (https://github.com/ansible/awx/pull/7042)
 - Fixed a bug that broke local pip installs of awxkit (https://github.com/ansible/awx/issues/7107)
 - Fixed a bug that prevented PagerDuty notifications from sending for workflow job template approvals (https://github.com/ansible/awx/issues/7094)
+- Fixed a bug that broke external log aggregation support for URL paths that include the = character (such as the tokens for SumoLogic) (https://github.com/ansible/awx/issues/7139)
 
 ## 11.2.0 (Apr 29, 2020)
 
