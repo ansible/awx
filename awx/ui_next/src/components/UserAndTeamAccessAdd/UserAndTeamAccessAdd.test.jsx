@@ -65,9 +65,10 @@ describe('<UserAndTeamAccessAdd/>', () => {
     expect(wrapper.find('PFWizard').length).toBe(1);
   });
   test('should disable steps', async () => {
+    expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select ttems from list"]')
+        .find('WizardNavItem[text="Select items from list"]')
         .prop('isDisabled')
     ).toBe(true);
     expect(
@@ -93,7 +94,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     ).toBe(false);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select ttems from list"]')
+        .find('WizardNavItem[text="Select items from list"]')
         .prop('isDisabled')
     ).toBe(false);
     expect(
@@ -119,6 +120,12 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await act(async () =>
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
+    expect(JobTemplatesAPI.read).toHaveBeenCalledWith({
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
+
     await waitForElement(wrapper, 'SelectResourceStep', el => el.length > 0);
     expect(JobTemplatesAPI.read).toHaveBeenCalled();
     await act(async () =>

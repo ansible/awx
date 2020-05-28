@@ -12,7 +12,7 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import TeamAccessListItem from './TeamAccessListItem';
-import UserAndTeamAccessAdd from '../../../components/UserAccessAdd/UserAndTeamAccessAdd';
+import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('team', {
   page: 1,

@@ -11,7 +11,7 @@ import Wizard from '../Wizard/Wizard';
 import useSelected from '../../util/useSelected';
 import SelectResourceStep from '../AddRole/SelectResourceStep';
 import SelectRoleStep from '../AddRole/SelectRoleStep';
-import getResourceTypes from './resources.data';
+import getResourceAccessConfig from './getResourceAccessConfig';
 
 const Grid = styled.div`
   display: grid;
@@ -28,7 +28,7 @@ function UserAndTeamAccessAdd({
   apiModel,
   onClose,
 }) {
-  const [selectedResourceType, setSelectedResourceType] = useState();
+  const [selectedResourceType, setSelectedResourceType] = useState(null);
   const [stepIdReached, setStepIdReached] = useState(1);
   const { id: userId } = useParams();
   const {
@@ -70,7 +70,7 @@ function UserAndTeamAccessAdd({
       name: i18n._(t`Add resource type`),
       component: (
         <Grid>
-          {getResourceTypes(i18n).map(resource => (
+          {getResourceAccessConfig(i18n).map(resource => (
             <SelectableCard
               key={resource.selectedResource}
               isSelected={
@@ -84,6 +84,7 @@ function UserAndTeamAccessAdd({
           ))}
         </Grid>
       ),
+      enableNext: selectedResourceType !== null,
     },
     {
       id: 2,
@@ -94,7 +95,7 @@ function UserAndTeamAccessAdd({
           sortColumns={selectedResourceType.sortColumns}
           displayKey="name"
           onRowClick={handleResourceSelect}
-          onSearch={selectedResourceType.fetchItems}
+          fetchItems={selectedResourceType.fetchItems}
           selectedLabel={i18n._(t`Selected`)}
           selectedResourceRows={resourcesSelected}
           sortedColumnKey="username"

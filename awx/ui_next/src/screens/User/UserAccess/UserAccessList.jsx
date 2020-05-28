@@ -10,7 +10,7 @@ import useRequest from '../../../util/useRequest';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserAccessListItem from './UserAccessListItem';
-import UserAndTeamAccessAdd from '../../../components/UserAccessAdd/UserAndTeamAccessAdd';
+import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
   page: 1,

@@ -8,7 +8,7 @@ import {
   OrganizationsAPI,
 } from '../../api';
 
-export default function getResourceTypes(i18n) {
+export default function getResourceAccessConfig(i18n) {
   return [
     {
       selectedResource: 'jobTemplate',
@@ -38,7 +38,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => JobTemplatesAPI.read(),
+      fetchItems: queryParams => JobTemplatesAPI.read(queryParams),
     },
     {
       selectedResource: 'workflowJobTemplate',
@@ -68,7 +68,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => WorkflowJobTemplatesAPI.read(),
+      fetchItems: queryParams => WorkflowJobTemplatesAPI.read(queryParams),
     },
     {
       selectedResource: 'credential',
@@ -109,7 +109,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => CredentialsAPI.read(),
+      fetchItems: queryParams => CredentialsAPI.read(queryParams),
     },
     {
       selectedResource: 'inventory',
@@ -135,7 +135,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => InventoriesAPI.read(),
+      fetchItems: queryParams => InventoriesAPI.read(queryParams),
     },
     {
       selectedResource: 'project',
@@ -176,7 +176,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => ProjectsAPI.read(),
+      fetchItems: queryParams => ProjectsAPI.read(queryParams),
     },
     {
       selectedResource: 'organization',
@@ -202,7 +202,7 @@ export default function getResourceTypes(i18n) {
           key: 'name',
         },
       ],
-      fetchItems: () => OrganizationsAPI.read(),
+      fetchItems: queryParams => OrganizationsAPI.read(queryParams),
     },
   ];
 }

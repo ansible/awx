@@ -258,7 +258,7 @@ class AddResourceRole extends React.Component {
                 sortColumns={userSortColumns}
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={readUsers}
+                fetchItems={readUsers}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 sortedColumnKey="username"
@@ -269,7 +269,7 @@ class AddResourceRole extends React.Component {
                 searchColumns={teamSearchColumns}
                 sortColumns={teamSortColumns}
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={readTeams}
+                fetchItems={readTeams}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
               />
