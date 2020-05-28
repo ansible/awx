@@ -154,3 +154,6 @@ secret_key=awxsecret
 # which makes include "optional" - i.e. not fail
 # if file is absent
 #extra_nginx_include="/etc/nginx/awx_extra[.]conf"
+
+# Docker compose explicit subnet. Set to avoid overlapping your existing LAN networks.
+#docker_compose_subnet="172.17.0.1/16"

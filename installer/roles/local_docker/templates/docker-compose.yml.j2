@@ -171,6 +171,17 @@ services:
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
   {% endif %}
+
+{% if docker_compose_subnet is defined %}
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  {{ docker_compose_subnet }}
+{% endif %}
+
 volumes:
   supervisor-socket:
   rsyslog-socket:
