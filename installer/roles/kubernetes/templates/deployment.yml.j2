@@ -89,7 +89,7 @@ spec:
 {% endif %}
       containers:
         - name: {{ kubernetes_deployment_name }}-web
-          image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
+          image: "{{ kubernetes_awx_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
           ports:
             - containerPort: 8052

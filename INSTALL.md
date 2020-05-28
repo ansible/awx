@@ -109,7 +109,7 @@ In the sections below, you'll find deployment details and instructions for each 
 
 ### Official vs Building Images
 
-When installing AWX you have the option of building your own images or using the images provided on DockerHub (see [awx_web](https://hub.docker.com/r/ansible/awx_web/) and [awx_task](https://hub.docker.com/r/ansible/awx_task/))
+When installing AWX you have the option of building your own image or using the image provided on DockerHub (see [awx](https://hub.docker.com/r/ansible/awx/))
 
 This is controlled by the following variables in the `inventory` file
 
@@ -122,7 +122,7 @@ If these variables are present then all deployments will use these hosted images
 
 *dockerhub_base*
 
-> The base location on DockerHub where the images are hosted (by default this pulls container images named `ansible/awx_web:tag` and `ansible/awx_task:tag`)
+> The base location on DockerHub where the images are hosted (by default this pulls a container image named `ansible/awx:tag`)
 
 *dockerhub_version*
 
