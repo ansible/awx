@@ -189,6 +189,9 @@ class ApiV2(base.Base):
     def _import_list(self, endpoint, assets):
         log.debug("_import_list -- endpoint: %s, assets: %s", endpoint.endpoint, repr(assets))
         post_fields = utils.get_post_fields(endpoint, self._cache)
+
+        changed = False
+
         for asset in assets:
             post_data = {}
             for field, value in asset.items():
@@ -207,6 +210,7 @@ class ApiV2(base.Base):
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
                     _page = endpoint.post(post_data)
+                    changed = True
                     if asset['natural_key']['type'] == 'project':
                         # When creating a project, we need to wait for its
                         # first project update to finish so that associated
@@ -214,6 +218,7 @@ class ApiV2(base.Base):
                         _page.wait_until_completed()
                 else:
                     _page = _page.put(post_data)
+                    changed = True
             except (exc.Common, AssertionError) as e:
                 log.error("Object import failed: %s.", e)
                 log.debug("post_data: %r", post_data)
@@ -229,6 +234,8 @@ class ApiV2(base.Base):
                     self._roles.put((_page, S))
                 else:
                     self._related.put((_page, name, S))
+
+        return changed
 
     def _assign_roles(self):
         while True:
@@ -294,15 +301,20 @@ class ApiV2(base.Base):
         self._related = queue.Queue()
         self._roles = queue.Queue()
 
+        changed = False
+
         for resource in self._dependent_resources(data):
             endpoint = getattr(self, resource)
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)
-            self._import_list(endpoint, data.get(resource) or [])
+            imported = self._import_list(endpoint, data.get(resource) or [])
+            changed = changed or imported
             # FIXME: should we delete existing unpatched assets?
 
         self._assign_related()
         self._assign_roles()
+
+        return changed
 
 
 page.register_page(resources.v2, ApiV2)
