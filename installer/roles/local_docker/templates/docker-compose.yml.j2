@@ -127,7 +127,7 @@ services:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
-      SUPERVISOR_WEB_CONFIG_PATH: '/supervisor.conf'
+      SUPERVISOR_WEB_CONFIG_PATH: '/etc/supervisord.conf'
 
   redis:
     image: {{ redis_image }}

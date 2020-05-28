@@ -144,12 +144,12 @@ spec:
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
-              mountPath: "/supervisor.conf"
+              mountPath: "/etc/supervisord.conf"
               subPath: supervisor.conf
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-task-config
-              mountPath: "/supervisor_task.conf"
+              mountPath: "/etc/supervisord_task.conf"
               subPath: supervisor_task.conf
               readOnly: true
 
@@ -220,12 +220,12 @@ spec:
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-web-config
-              mountPath: "/supervisor.conf"
+              mountPath: "/etc/supervisord.conf"
               subPath: supervisor.conf
               readOnly: true
 
             - name: {{ kubernetes_deployment_name }}-supervisor-task-config
-              mountPath: "/supervisor_task.conf"
+              mountPath: "/etc/supervisord_task.conf"
               subPath: supervisor_task.conf
               readOnly: true
 
@@ -241,7 +241,7 @@ spec:
               mountPath: "/var/run/memcached"
           env:
             - name: SUPERVISOR_WEB_CONFIG_PATH
-              value: "/supervisor.conf"
+              value: "/etc/supervisord.conf"
             - name: AWX_SKIP_MIGRATIONS
               value: "1"
             - name: MY_POD_UID
