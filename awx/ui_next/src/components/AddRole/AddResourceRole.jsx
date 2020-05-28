@@ -312,6 +312,8 @@ class AddResourceRole extends React.Component {
         steps={steps}
         title={wizardTitle}
         nextButtonText={currentStep.nextButtonText || undefined}
+        backButtonText={i18n._(t`Back`)}
+        cancelButtonText={i18n._(t`Cancel`)}
       />
     );
   }
