@@ -31,6 +31,7 @@ services:
       - "../:/awx_devel"
       - "./redis/redis_socket_ha_1:/var/run/redis/"
       - "./memcached/:/var/run/memcached"
+      - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
       - "5899-5999:5899-5999"
   awx-2:
@@ -50,6 +51,7 @@ services:
       - "../:/awx_devel"
       - "./redis/redis_socket_ha_2:/var/run/redis/"
       - "./memcached/:/var/run/memcached"
+      - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
       - "7899-7999:7899-7999"
   awx-3:
@@ -69,6 +71,7 @@ services:
       - "../:/awx_devel"
       - "./redis/redis_socket_ha_3:/var/run/redis/"
       - "./memcached/:/var/run/memcached"
+      - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
       - "8899-8999:8899-8999"
   redis_1:
