@@ -74,6 +74,9 @@ function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
           }}
           title={i18n._(t`Prompts`)}
           steps={steps}
+          backButtonText={i18n._(t`Back`)}
+          cancelButtonText={i18n._(t`Cancel`)}
+          nextButtonText={i18n._(t`Next`)}
         />
       )}
     </Formik>
