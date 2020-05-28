@@ -19,7 +19,8 @@ export default function useCredentialsStep(
     initialValues: getInitialValues(config, resource),
     validate,
     isReady: true,
-    error: null,
+    contentError: null,
+    formError: null,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
         credentials: true,

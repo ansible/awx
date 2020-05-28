@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import styled from 'styled-components';
+import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
+import { Tooltip } from '@patternfly/react-core';
+import { t } from '@lingui/macro';
 import { useFormikContext } from 'formik';
+import { withI18n } from '@lingui/react';
 import yaml from 'js-yaml';
-import PromptDetail from '../../PromptDetail';
 import mergeExtraVars, { maskPasswords } from '../mergeExtraVars';
 import getSurveyValues from '../getSurveyValues';
+import PromptDetail from '../../PromptDetail';
 
-function PreviewStep({ resource, config, survey, formErrors }) {
+const ExclamationCircleIcon = styled(PFExclamationCircleIcon)`
+  margin-left: 10px;
+  margin-top: -2px;
+`;
+
+const ErrorMessageWrapper = styled.div`
+  align-items: center;
+  color: var(--pf-global--danger-color--200);
+  display: flex;
+  font-weight: var(--pf-global--FontWeight--bold);
+  margin-bottom: 10px;
+`;
+
+function PreviewStep({ resource, config, survey, formErrors, i18n }) {
   const { values } = useFormikContext();
   const surveyValues = getSurveyValues(values);
 
@@ -29,21 +47,26 @@ function PreviewStep({ resource, config, survey, formErrors }) {
   }
 
   return (
-    <>
+    <Fragment>
+      {formErrors.length > 0 && (
+        <ErrorMessageWrapper>
+          {i18n._(t`Some of the previous step(s) have errors`)}
+          <Tooltip
+            position="right"
+            content={i18n._(t`See errors on the left`)}
+            trigger="click mouseenter focus"
+          >
+            <ExclamationCircleIcon />
+          </Tooltip>
+        </ErrorMessageWrapper>
+      )}
       <PromptDetail
         resource={resource}
         launchConfig={config}
         overrides={overrides}
       />
-      {formErrors && (
-        <ul css="color: red">
-          {Object.keys(formErrors).map(
-            field => `${field}: ${formErrors[field]}`
-          )}
-        </ul>
-      )}
-    </>
+    </Fragment>
   );
 }
 
-export default PreviewStep;
+export default withI18n()(PreviewStep);
