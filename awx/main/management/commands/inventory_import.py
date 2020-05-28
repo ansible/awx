@@ -649,11 +649,12 @@ class Command(BaseCommand):
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
+            group_desc = mem_group.variables.pop('_awx_description', 'imported')
             group = self.inventory.groups.update_or_create(
                 name=group_name,
                 defaults={
                     'variables':json.dumps(mem_group.variables),
-                    'description':'imported'
+                    'description':group_desc
                 }
             )[0]
             logger.debug('Group "%s" added', group.name)
@@ -776,8 +777,9 @@ class Command(BaseCommand):
         # Create any new hosts.
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
-            host_attrs = dict(variables=json.dumps(mem_host.variables),
-                              description='imported')
+            import_vars = mem_host.variables
+            host_desc = import_vars.pop('_awx_description', 'imported')
+            host_attrs = dict(variables=json.dumps(import_vars), description=host_desc)
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
