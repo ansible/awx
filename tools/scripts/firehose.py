@@ -58,6 +58,7 @@ u = str(uuid4())
 
 STATUS_OPTIONS = ('successful', 'failed', 'error', 'canceled')
 
+
 class YieldedRows(StringIO):
 
     def __init__(self, job_id, rows, created_stamp, modified_stamp, *args, **kwargs):
@@ -156,7 +157,7 @@ def generate_jobs(jobs, batch_size, time_delta):
         jobs = [
             Job(
                 status=STATUS_OPTIONS[i % len(STATUS_OPTIONS)],
-                started=now()-time_delta, created=now()-time_delta, modified=now()-time_delta, finished=now()-time_delta,
+                started=now() - time_delta, created=now() - time_delta, modified=now() - time_delta, finished=now() - time_delta,
                 elapsed=0., **jt_defaults)
             for i in range(N)
         ]
