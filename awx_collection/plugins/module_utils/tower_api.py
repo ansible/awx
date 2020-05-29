@@ -485,6 +485,8 @@ class TowerModule(AnsibleModule):
                 item_name = existing_item['name']
             elif 'username' in existing_item:
                 item_name = existing_item['username']
+            elif 'identifier' in existing_item:
+                item_name = existing_item['identifier']
             else:
                 self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
