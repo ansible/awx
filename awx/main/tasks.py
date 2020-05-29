@@ -2333,6 +2333,20 @@ class RunProjectUpdate(BaseTask):
                 else:
                     self.original_branch = git_repo.active_branch
 
+    def clear_project_cache(self, instance, revision):
+        cache_dir = instance.get_cache_path()
+        if os.path.isdir(cache_dir):
+            for entry in os.listdir(cache_dir):
+                old_path = os.path.join(cache_dir, entry)
+                if entry != revision:
+                    # invalidate, then delete
+                    new_path = os.path.join(cache_dir,'.~~delete~~' + entry)
+                    try:
+                        os.rename(old_path, new_path)
+                        shutil.rmtree(new_path)
+                    except OSError:
+                        logger.warning(f"Could not remove cache directory {old_path}")
+
     @staticmethod
     def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
         if scm_type == 'git':
@@ -2366,6 +2380,7 @@ class RunProjectUpdate(BaseTask):
         # To avoid hangs, very important to release lock even if errors happen here
         try:
             if self.playbook_new_revision:
+                self.clear_project_cache(instance, self.playbook_new_revision)
                 instance.scm_revision = self.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
             if self.job_private_data_dir:
