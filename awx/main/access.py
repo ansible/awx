@@ -495,7 +495,7 @@ class NotificationAttachMixin(BaseAccess):
             # due to this special case, we use symmetrical logic with attach permission
             return self._can_attach(notification_template=sub_obj, resource_obj=obj)
         return super(NotificationAttachMixin, self).can_unattach(
-            obj, sub_obj, relationship, relationship, data=data
+            obj, sub_obj, relationship, data=data
         )
 
 
