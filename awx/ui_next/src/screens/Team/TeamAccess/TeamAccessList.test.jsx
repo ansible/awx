@@ -141,4 +141,67 @@ describe('<TeamAccessList />', () => {
       '/inventories/smart_inventory/77/details'
     );
   });
+  test('should not render add button', async () => {
+    TeamsAPI.readRoleOptions.mockResolvedValueOnce({
+      data: {},
+    });
+
+    TeamsAPI.readRoles.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 2,
+            name: 'Admin',
+            type: 'role',
+            url: '/api/v2/roles/257/',
+            summary_fields: {
+              resource_name: 'template delete project',
+              resource_id: 15,
+              resource_type: 'job_template',
+              resource_type_display_name: 'Job Template',
+              user_capabilities: { unattach: true },
+            },
+            description: 'Can manage all aspects of the job template',
+          },
+        ],
+        count: 1,
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/teams/:id/access">
+          <TeamAccessList />
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 18 } },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    expect(wrapper.find('Button[aria-label="Add resource roles"]').length).toBe(
+      0
+    );
+  });
+  test('should open and close wizard', async () => {
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    await act(async () =>
+      wrapper.find('Button[aria-label="Add resource roles"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('PFWizard').length).toBe(1);
+    await act(async () =>
+      wrapper.find("Button[aria-label='Close']").prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('PFWizard').length).toBe(0);
+  });
 });

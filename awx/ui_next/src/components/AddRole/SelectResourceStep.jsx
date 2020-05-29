@@ -1,8 +1,10 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { withRouter, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import useRequest from '../../util/useRequest';
+
 import { SearchColumns, SortColumns } from '../../types';
 import PaginatedDataList from '../PaginatedDataList';
 import DataListToolbar from '../DataListToolbar';
@@ -10,124 +12,94 @@ import CheckboxListItem from '../CheckboxListItem';
 import SelectedList from '../SelectedList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 
-class SelectResourceStep extends React.Component {
-  constructor(props) {
-    super(props);
+const QS_Config = sortColumns => {
+  return getQSConfig('resource', {
+    page: 1,
+    page_size: 5,
+    order_by: `${
+      sortColumns.filter(col => col.key === 'name').length ? 'name' : 'username'
+    }`,
+  });
+};
+function SelectResourceStep({
+  searchColumns,
+  sortColumns,
+  displayKey,
+  onRowClick,
+  selectedLabel,
+  selectedResourceRows,
+  fetchItems,
+  i18n,
+}) {
+  const location = useLocation();
 
-    this.state = {
-      isInitialized: false,
-      count: null,
-      error: false,
+  const {
+    isLoading,
+    error,
+    request: readResourceList,
+    result: { resources, itemCount },
+  } = useRequest(
+    useCallback(async () => {
+      const queryParams = parseQueryString(
+        QS_Config(sortColumns),
+        location.search
+      );
+
+      const {
+        data: { count, results },
+      } = await fetchItems(queryParams);
+      return { resources: results, itemCount: count };
+    }, [location, fetchItems, sortColumns]),
+    {
       resources: [],
-    };
-
-    this.qsConfig = getQSConfig('resource', {
-      page: 1,
-      page_size: 5,
-      order_by: `${
-        props.sortColumns.filter(col => col.key === 'name').length
-          ? 'name'
-          : 'username'
-      }`,
-    });
-  }
-
-  componentDidMount() {
-    this.readResourceList();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
-      this.readResourceList();
+      itemCount: 0,
     }
-  }
+  );
 
-  async readResourceList() {
-    const { onSearch, location } = this.props;
-    const queryParams = parseQueryString(this.qsConfig, location.search);
+  useEffect(() => {
+    readResourceList();
+  }, [readResourceList]);
 
-    this.setState({
-      isLoading: true,
-      error: false,
-    });
-    try {
-      const { data } = await onSearch(queryParams);
-      const { count, results } = data;
-
-      this.setState({
-        resources: results,
-        count,
-        isInitialized: true,
-        isLoading: false,
-        error: false,
-      });
-    } catch (err) {
-      this.setState({
-        isLoading: false,
-        error: true,
-      });
-    }
-  }
-
-  render() {
-    const { isInitialized, isLoading, count, error, resources } = this.state;
-
-    const {
-      searchColumns,
-      sortColumns,
-      displayKey,
-      onRowClick,
-      selectedLabel,
-      selectedResourceRows,
-      i18n,
-    } = this.props;
-
-    return (
-      <Fragment>
-        {isInitialized && (
-          <Fragment>
-            <div>
-              {i18n._(
-                t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`
-              )}
-            </div>
-            {selectedResourceRows.length > 0 && (
-              <SelectedList
-                displayKey={displayKey}
-                label={selectedLabel}
-                onRemove={onRowClick}
-                selected={selectedResourceRows}
-              />
-            )}
-            <PaginatedDataList
-              hasContentLoading={isLoading}
-              items={resources}
-              itemCount={count}
-              qsConfig={this.qsConfig}
-              onRowClick={onRowClick}
-              toolbarSearchColumns={searchColumns}
-              toolbarSortColumns={sortColumns}
-              renderItem={item => (
-                <CheckboxListItem
-                  isSelected={selectedResourceRows.some(i => i.id === item.id)}
-                  itemId={item.id}
-                  key={item.id}
-                  name={item[displayKey]}
-                  label={item[displayKey]}
-                  onSelect={() => onRowClick(item)}
-                  onDeselect={() => onRowClick(item)}
-                />
-              )}
-              renderToolbar={props => <DataListToolbar {...props} fillWidth />}
-              showPageSizeOptions={false}
-            />
-          </Fragment>
+  return (
+    <Fragment>
+      <div>
+        {i18n._(
+          t`Choose the resources that will be receiving new roles.  You'll be able to select the roles to apply in the next step.  Note that the resources chosen here will receive all roles chosen in the next step.`
         )}
-        {error ? <div>error</div> : ''}
-      </Fragment>
-    );
-  }
+      </div>
+      {selectedResourceRows.length > 0 && (
+        <SelectedList
+          displayKey={displayKey}
+          label={selectedLabel}
+          onRemove={onRowClick}
+          selected={selectedResourceRows}
+        />
+      )}
+      <PaginatedDataList
+        hasContentLoading={isLoading}
+        contentError={error}
+        items={resources}
+        itemCount={itemCount}
+        qsConfig={QS_Config(sortColumns)}
+        onRowClick={onRowClick}
+        toolbarSearchColumns={searchColumns}
+        toolbarSortColumns={sortColumns}
+        renderItem={item => (
+          <CheckboxListItem
+            isSelected={selectedResourceRows.some(i => i.id === item.id)}
+            itemId={item.id}
+            key={item.id}
+            name={item[displayKey]}
+            label={item[displayKey]}
+            onSelect={() => onRowClick(item)}
+            onDeselect={() => onRowClick(item)}
+          />
+        )}
+        renderToolbar={props => <DataListToolbar {...props} fillWidth />}
+        showPageSizeOptions={false}
+      />
+    </Fragment>
+  );
 }
 
 SelectResourceStep.propTypes = {
@@ -135,7 +107,7 @@ SelectResourceStep.propTypes = {
   sortColumns: SortColumns,
   displayKey: PropTypes.string,
   onRowClick: PropTypes.func,
-  onSearch: PropTypes.func.isRequired,
+  fetchItems: PropTypes.func.isRequired,
   selectedLabel: PropTypes.string,
   selectedResourceRows: PropTypes.arrayOf(PropTypes.object),
 };

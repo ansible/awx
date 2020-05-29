@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Button } from '@patternfly/react-core';
+
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import { UsersAPI } from '../../../api';
 import useRequest from '../../../util/useRequest';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedDataList from '../../../components/PaginatedDataList';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserAccessListItem from './UserAccessListItem';
+import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
   page: 1,
@@ -22,6 +23,7 @@ const QS_CONFIG = getQSConfig('roles', {
 function UserAccessList({ i18n }) {
   const { id } = useParams();
   const { search } = useLocation();
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const {
     isLoading,
@@ -55,6 +57,11 @@ function UserAccessList({ i18n }) {
   const canAdd =
     options && Object.prototype.hasOwnProperty.call(options, 'POST');
 
+  const saveRoles = () => {
+    setIsWizardOpen(false);
+    fetchRoles();
+  };
+
   const detailUrl = role => {
     const { resource_id, resource_type } = role.summary_fields;
 
@@ -72,48 +79,71 @@ function UserAccessList({ i18n }) {
   };
 
   return (
-    <PaginatedDataList
-      contentError={error}
-      hasContentLoading={isLoading}
-      items={roles}
-      itemCount={roleCount}
-      pluralizedItemName={i18n._(t`User Roles`)}
-      qsConfig={QS_CONFIG}
-      toolbarSearchColumns={[
-        {
-          name: i18n._(t`Role`),
-          key: 'role_field',
-          isDefault: true,
-        },
-      ]}
-      toolbarSortColumns={[
-        {
-          name: i18n._(t`Name`),
-          key: 'id',
-        },
-      ]}
-      renderItem={role => {
-        return (
-          <UserAccessListItem
-            key={role.id}
-            value={role.name}
-            role={role}
-            detailUrl={detailUrl(role)}
-            onSelect={() => {}}
-            isSelected={false}
+    <>
+      <PaginatedDataList
+        contentError={error}
+        hasContentLoading={isLoading}
+        items={roles}
+        itemCount={roleCount}
+        pluralizedItemName={i18n._(t`User Roles`)}
+        qsConfig={QS_CONFIG}
+        toolbarSearchColumns={[
+          {
+            name: i18n._(t`Role`),
+            key: 'role_field',
+            isDefault: true,
+          },
+        ]}
+        toolbarSortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'id',
+          },
+        ]}
+        renderItem={role => {
+          return (
+            <UserAccessListItem
+              key={role.id}
+              value={role.name}
+              role={role}
+              detailUrl={detailUrl(role)}
+              onSelect={() => {}}
+              isSelected={false}
+            />
+          );
+        }}
+        renderToolbar={props => (
+          <DatalistToolbar
+            {...props}
+            qsConfig={QS_CONFIG}
+            additionalControls={[
+              ...(canAdd
+                ? [
+                    <Button
+                      key="add"
+                      aria-label={i18n._(t`Add resource roles`)}
+                      onClick={() => {
+                        setIsWizardOpen(true);
+                      }}
+                    >
+                      Add
+                    </Button>,
+                  ]
+                : []),
+            ]}
           />
-        );
-      }}
-      renderToolbar={props => (
-        <DatalistToolbar
-          {...props}
-          qsConfig={QS_CONFIG}
-          additionalControls={[
-            ...(canAdd ? [<ToolbarAddButton key="add" linkTo="/" />] : []),
-          ]}
+        )}
+      />
+      {isWizardOpen && (
+        <UserAndTeamAccessAdd
+          apiModel={UsersAPI}
+          isOpen={isWizardOpen}
+          onSave={saveRoles}
+          onClose={() => setIsWizardOpen(false)}
+          title={i18n._(t`Add user permissions`)}
         />
       )}
-    />
+    </>
   );
 }
 export default withI18n()(UserAccessList);

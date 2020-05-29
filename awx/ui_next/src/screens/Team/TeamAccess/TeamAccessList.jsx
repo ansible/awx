@@ -1,19 +1,18 @@
-import React, { useCallback, useEffect } from 'react';
-import { useLocation, useRouteMatch, useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Card } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import { TeamsAPI } from '../../../api';
 
 import useRequest from '../../../util/useRequest';
 import DataListToolbar from '../../../components/DataListToolbar';
-import PaginatedDataList, {
-  ToolbarAddButton,
-} from '../../../components/PaginatedDataList';
+import PaginatedDataList from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import TeamAccessListItem from './TeamAccessListItem';
+import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('team', {
   page: 1,
@@ -22,8 +21,8 @@ const QS_CONFIG = getQSConfig('team', {
 });
 
 function TeamAccessList({ i18n }) {
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { search } = useLocation();
-  const match = useRouteMatch();
   const { id } = useParams();
 
   const {
@@ -57,6 +56,11 @@ function TeamAccessList({ i18n }) {
     fetchRoles();
   }, [fetchRoles]);
 
+  const saveRoles = () => {
+    setIsWizardOpen(false);
+    fetchRoles();
+  };
+
   const canAdd =
     options && Object.prototype.hasOwnProperty.call(options, 'POST');
 
@@ -77,7 +81,7 @@ function TeamAccessList({ i18n }) {
   };
 
   return (
-    <Card>
+    <>
       <PaginatedDataList
         contentError={contentError}
         hasContentLoading={isLoading}
@@ -104,7 +108,17 @@ function TeamAccessList({ i18n }) {
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
-                ? [<ToolbarAddButton key="add" linkTo={`${match.url}/add`} />]
+                ? [
+                    <Button
+                      key="add"
+                      aria-label={i18n._(t`Add resource roles`)}
+                      onClick={() => {
+                        setIsWizardOpen(true);
+                      }}
+                    >
+                      Add
+                    </Button>,
+                  ]
                 : []),
             ]}
           />
@@ -117,13 +131,17 @@ function TeamAccessList({ i18n }) {
             onSelect={() => {}}
           />
         )}
-        emptyStateControls={
-          canAdd ? (
-            <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-          ) : null
-        }
       />
-    </Card>
+      {isWizardOpen && (
+        <UserAndTeamAccessAdd
+          apiModel={TeamsAPI}
+          isOpen={isWizardOpen}
+          onSave={saveRoles}
+          onClose={() => setIsWizardOpen(false)}
+          title={i18n._(t`Add team permissions`)}
+        />
+      )}
+    </>
   );
 }
 export default withI18n()(TeamAccessList);
