@@ -170,7 +170,8 @@ class TestSCMUpdateFeatures:
         inventory_update = InventoryUpdate(
             inventory_source=scm_inventory_source,
             source_path=scm_inventory_source.source_path)
-        assert inventory_update.get_actual_source_path().endswith('_92__test_proj/inventory_file')
+        p = scm_inventory_source.source_project
+        assert inventory_update.get_actual_source_path().endswith(f'_{p.id}__test_proj/inventory_file')
 
     def test_no_unwanted_updates(self, scm_inventory_source):
         # Changing the non-sensitive fields should not trigger update

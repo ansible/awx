@@ -145,7 +145,6 @@ def project(instance, organization):
                                  description="test-proj-desc",
                                  organization=organization,
                                  playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
-                                 local_path='_92__test_proj',
                                  scm_revision='1234567890123456789012345678901234567890',
                                  scm_url='localhost',
                                  scm_type='git'
