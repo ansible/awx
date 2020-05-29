@@ -152,8 +152,8 @@ class SimpleDAG(object):
             return self._get_children_by_label(this_ord, label)
         else:
             nodes = []
-            for l in self.node_from_edges_by_label.keys():
-                nodes.extend(self._get_children_by_label(this_ord, l))
+            for label_obj in self.node_from_edges_by_label.keys():
+                nodes.extend(self._get_children_by_label(this_ord, label_obj))
             return nodes
 
     def _get_parents_by_label(self, node_index, label):
@@ -168,8 +168,8 @@ class SimpleDAG(object):
             return self._get_parents_by_label(this_ord, label)
         else:
             nodes = []
-            for l in self.node_to_edges_by_label.keys():
-                nodes.extend(self._get_parents_by_label(this_ord, l))
+            for label_obj in self.node_to_edges_by_label.keys():
+                nodes.extend(self._get_parents_by_label(this_ord, label_obj))
             return nodes
 
     def get_root_nodes(self):

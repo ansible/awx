@@ -319,11 +319,11 @@ def create_organization(name, roles=None, persisted=True, **kwargs):
     users = generate_users(org, teams, False, persisted, users=kwargs.get('users'))
 
     if 'labels' in kwargs:
-        for l in kwargs['labels']:
-            if type(l) is Label:
-                labels[l.name] = l
+        for label_obj in kwargs['labels']:
+            if type(label_obj) is Label:
+                labels[label_obj.name] = label_obj
             else:
-                labels[l] = mk_label(l, organization=org, persisted=persisted)
+                labels[label_obj] = mk_label(label_obj, organization=org, persisted=persisted)
 
     if 'notification_templates' in kwargs:
         for nt in kwargs['notification_templates']:
