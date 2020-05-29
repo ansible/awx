@@ -15,6 +15,70 @@ imagePullSecrets:
   - name: "{{ kubernetes_image_pull_secrets }}"
 {% endif %}
 
+{% if awx_psp_create is defined and awx_psp_create | bool %}
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ awx_psp_name }}-psp
+spec:
+{% if awx_psp_privileged is defined %}
+  privileged: {{ awx_psp_privileged }}
+  allowPrivilegeEscalation: {{ awx_psp_privileged }}
+{% endif %}
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ kubernetes_namespace }}
+  name: {{ awx_psp_name }}-role
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  resourceNames:
+  - {{ awx_psp_name }}-psp
+  verbs:
+  - use
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ awx_psp_name }}-role-binding
+  namespace: {{ kubernetes_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ awx_psp_name }}-role
+subjects:
+- kind: ServiceAccount
+  name: awx
+  namespace: {{ kubernetes_namespace }}
+{% endif %}
+
 ---
 apiVersion: {{ kubernetes_deployment_api_version }}
 kind: Deployment
