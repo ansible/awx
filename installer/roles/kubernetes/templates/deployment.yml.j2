@@ -89,6 +89,12 @@ spec:
 {% endif %}
       containers:
         - name: {{ kubernetes_deployment_name }}-web
+{% if web_security_context_enabled is defined and web_security_context_enabled | bool %}
+          securityContext:
+{% if web_security_context_privileged is defined %}
+            privileged: {{ web_security_context_privileged }}
+{% endif %}
+{% endif %}
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
           ports:
@@ -178,8 +184,12 @@ spec:
               cpu: "{{ web_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-task
+{% if task_security_context_enabled is defined and task_security_context_enabled | bool %}
           securityContext:
-            privileged: true
+{% if task_security_context_privileged is defined %}
+            privileged: {{ task_security_context_privileged }}
+{% endif %}
+{% endif %}
           image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
           command:
             - /usr/bin/launch_awx_task.sh
@@ -270,6 +280,15 @@ spec:
               cpu: "{{ task_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-redis
+{% if redis_security_context_enabled is defined and redis_security_context_enabled | bool %}
+          securityContext:
+{% if redis_security_context_privileged is defined %}
+            privileged: {{ redis_security_context_privileged }}
+{% endif %}
+{% if redis_security_context_user is defined %}
+            runAsUser: {{ redis_security_context_user }}
+{% endif %}
+{% endif %}
           image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
           args: ["redis-server", "{{ kubernetes_redis_config_mount_path }}"]
@@ -295,6 +314,15 @@ spec:
               cpu: "{{ redis_cpu_limit }}m"
 {% endif %}
         - name: {{ kubernetes_deployment_name }}-memcached
+{% if memcached_security_context_enabled is defined and memcached_security_context_enabled | bool %}
+          securityContext:
+{% if memcached_security_context_privileged is defined %}
+            privileged: {{ memcached_security_context_privileged }}
+{% endif %}
+{% if memcached_security_context_user is defined %}
+            runAsUser: {{ memcached_security_context_user }}
+{% endif %}
+{% endif %}
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
           command:
