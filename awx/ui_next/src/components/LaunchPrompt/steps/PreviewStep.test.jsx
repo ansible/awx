@@ -71,8 +71,30 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: '---',
       limit: '4',
+    });
+  });
+
+  test('should handle extra vars without survey', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ extra_vars: 'one: 1' }}>
+          <PreviewStep
+            resource={resource}
+            config={{
+              ask_variables_on_launch: true,
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    const detail = wrapper.find('PromptDetail');
+    expect(detail).toHaveLength(1);
+    expect(detail.prop('resource')).toEqual(resource);
+    expect(detail.prop('overrides')).toEqual({
+      extra_vars: 'one: 1',
     });
   });
 });
