@@ -194,6 +194,11 @@ class ProjectOptions(models.Model):
             if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
+    def get_cache_path(self):
+        local_path = os.path.basename(self.local_path)
+        if local_path:
+            return os.path.join(settings.PROJECTS_ROOT, '.__awx_cache', local_path)
+
     @property
     def playbooks(self):
         results = []
@@ -455,11 +460,12 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         )
 
     def delete(self, *args, **kwargs):
-        path_to_delete = self.get_project_path(check_if_exists=False)
+        paths_to_delete = (self.get_project_path(check_if_exists=False), self.get_cache_path())
         r = super(Project, self).delete(*args, **kwargs)
-        if self.scm_type and path_to_delete:  # non-manual, concrete path
-            from awx.main.tasks import delete_project_files
-            delete_project_files.delay(path_to_delete)
+        for path_to_delete in paths_to_delete:
+            if self.scm_type and path_to_delete:  # non-manual, concrete path
+                from awx.main.tasks import delete_project_files
+                delete_project_files.delay(path_to_delete)
         return r
 
 
