@@ -37,11 +37,12 @@ function CredentialEdit({ credential, me }) {
           CredentialsAPI.readInputSources(credential.id, { page_size: 200 }),
         ]);
         setCredentialTypes(loadedCredentialTypes);
-        const inputSourcesMap = {};
-        loadedInputSources.forEach(inputSource => {
-          inputSourcesMap[inputSource.input_field_name] = inputSource;
-        });
-        setInputSources(inputSourcesMap);
+        setInputSources(
+          loadedInputSources.reduce((inputSourcesMap, inputSource) => {
+            inputSourcesMap[inputSource.input_field_name] = inputSource;
+            return inputSourcesMap;
+          }, {})
+        );
       } catch (err) {
         setError(err);
       } finally {
