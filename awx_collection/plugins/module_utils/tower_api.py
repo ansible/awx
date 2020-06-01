@@ -3,7 +3,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
-from ansible.module_utils.six import PY2
+from ansible.module_utils.six import PY2, string_types
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
@@ -98,10 +98,16 @@ class TowerModule(AnsibleModule):
 
         # Perform magic depending on whether tower_oauthtoken is a string or a dict
         if self.params.get('tower_oauthtoken'):
-            if type(self.params.get('tower_oauthtoken')) is dict:
-                setattr(self, 'oauth_token', self.params.get('tower_oauthtoken')['token'])
-            elif 'token' in self.params.get('tower_oauthtoken'):
-                setattr(self, 'oauth_token', self.params.get('tower_oauthtoken'))
+            token_param = self.params.get('tower_oauthtoken')
+            if type(token_param) is dict:
+                if 'token' in token_param:
+                    self.oauth_token = self.params.get('tower_oauthtoken')['token']
+                else:
+                    self.fail_json(msg="The provided dict in tower_oauthtoken did not properly contain the token entry")
+            elif isinstance(token_param, string_types):
+                self.oauth_token = self.params.get('tower_oauthtoken')
+            else:
+                self.fail_json(msg="The provided tower_oauthtoken type was not valid ({0}), please refer to ansible-doc for valid options".format(type(token_param).__name__))
 
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):

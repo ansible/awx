@@ -3,6 +3,30 @@
   set_fact:
     token_description: "AWX-Collection-tests-tower_token-description-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
 
+- name: Try to use a token as a dict which is missing the token parameter
+  tower_job_list:
+    tower_oauthtoken:
+      not_token: "This has no token entry"
+  register: results
+  ignore_errors: True
+
+- assert:
+    that:
+      - results is failed
+      - '"The provided dict in tower_oauthtoken did not properly contain the token entry" == results.msg'
+
+- name: Try to use a token as a list
+  tower_job_list:
+    tower_oauthtoken:
+      - dummy_token
+  register: results
+  ignore_errors: True
+
+- assert:
+    that:
+      - results is failed
+      - '"The provided tower_oauthtoken type was not valid (list), please refer to ansible-doc for valid options" == results.msg'
+
 - block:
     - name: Create a Token
       tower_token:
@@ -14,10 +38,12 @@
     - name: Validate our token works by token
       tower_job_list:
         tower_oauthtoken: "{{ tower_token.token }}"
+      register: job_list
 
     - name: Validate out token works by object
       tower_job_list:
         tower_oauthtoken: "{{ tower_token }}"
+      register: job_list
 
   always:
     - name: Delete our Token with our own token
