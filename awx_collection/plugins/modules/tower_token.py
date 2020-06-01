@@ -61,7 +61,7 @@ EXAMPLES = '''
         description: '{{ token_description }}'
         scope: "write"
         state: present
-        tower_oauthtoken: "{{ ny_existing_token }}"
+        tower_oauthtoken: "{{ my_existing_token }}"
 
     - name: Delete this token
       tower_token:
@@ -73,8 +73,8 @@ EXAMPLES = '''
         description: '{{ token_description }}'
         scope: "write"
         state: present
-        tower_username: "{{ ny_username }}"
-        tower_password: "{{ ny_password }}"
+        tower_username: "{{ my_username }}"
+        tower_password: "{{ my_password }}"
 
     - name: Use our new token to make another call
       tower_job_list:
