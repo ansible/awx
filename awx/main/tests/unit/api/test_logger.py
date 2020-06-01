@@ -35,7 +35,7 @@ data_loggly = {
 # Test reconfigure logging settings function
 # name this whatever you want
 @pytest.mark.parametrize(
-    'enabled, type, host, port, protocol, expected_config', [
+    'enabled, log_type, host, port, protocol, expected_config', [
         (
             True,
             'loggly',
@@ -135,9 +135,20 @@ data_loggly = {
                 'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/rsyslog.err" action.resumeInterval="5" restpath="services/collector/event")',  # noqa
             ])
         ),
+        (
+            True,  # valid sumologic config
+            'sumologic',
+            'https://endpoint5.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==', # noqa
+            None,
+            'https',
+            '\n'.join([
+                'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
+                'action(type="omhttp" server="endpoint5.collection.us2.sumologic.com" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" errorfile="/var/log/tower/rsyslog.err" action.resumeInterval="5" restpath="receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==")',  # noqa
+            ])
+        ),
     ]
 )
-def test_rsyslog_conf_template(enabled, type, host, port, protocol, expected_config):
+def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, expected_config):
     
     mock_settings, _ = _mock_logging_defaults()
     
@@ -146,7 +157,7 @@ def test_rsyslog_conf_template(enabled, type, host, port, protocol, expected_con
     setattr(mock_settings, 'LOGGING', logging_defaults)
     setattr(mock_settings, 'LOGGING["handlers"]["external_logger"]["address"]', '/var/run/awx-rsyslog/rsyslog.sock')
     setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', enabled)
-    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', type)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', log_type)
     setattr(mock_settings, 'LOG_AGGREGATOR_HOST', host)
     if port:
         setattr(mock_settings, 'LOG_AGGREGATOR_PORT', port)

@@ -78,7 +78,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'action.resumeInterval="{timeout}"'
         ]
         if parsed.path:
-            path = urlparse.quote(parsed.path[1:])
+            path = urlparse.quote(parsed.path[1:], safe='/=')
             if parsed.query:
                 path = f'{path}?{urlparse.quote(parsed.query)}'
             params.append(f'restpath="{path}"')
