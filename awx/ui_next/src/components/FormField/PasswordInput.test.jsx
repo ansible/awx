@@ -1,7 +1,6 @@
 import React from 'react';
 import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../testUtils/testUtils';
 import PasswordInput from './PasswordInput';
 
 describe('PasswordInput', () => {
@@ -36,7 +35,6 @@ describe('PasswordInput', () => {
     expect(wrapper.find('EyeSlashIcon').length).toBe(1);
     expect(wrapper.find('EyeIcon').length).toBe(0);
     wrapper.find('button').simulate('click');
-    await sleep(1);
     expect(wrapper.find('input').prop('type')).toBe('text');
     expect(wrapper.find('EyeSlashIcon').length).toBe(0);
     expect(wrapper.find('EyeIcon').length).toBe(1);
