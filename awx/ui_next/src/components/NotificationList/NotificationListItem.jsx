@@ -19,6 +19,9 @@ const DataListAction = styled(_DataListAction)`
   grid-gap: 16px;
   grid-template-columns: repeat(3, max-content);
 `;
+const Label = styled.b`
+  margin-right: 20px;
+`;
 
 function NotificationListItem(props) {
   const {
@@ -54,6 +57,7 @@ function NotificationListItem(props) {
               </Link>
             </DataListCell>,
             <DataListCell key="type">
+              <Label>{i18n._(t`Type `)}</Label>
               {typeLabels[notification.notification_type]}
             </DataListCell>,
           ]}
