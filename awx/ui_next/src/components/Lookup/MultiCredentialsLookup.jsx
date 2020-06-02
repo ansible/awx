@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -9,6 +9,7 @@ import { CredentialsAPI, CredentialTypesAPI } from '../../api';
 import AnsibleSelect from '../AnsibleSelect';
 import CredentialChip from '../CredentialChip';
 import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import Lookup from './Lookup';
 
@@ -26,42 +27,62 @@ async function loadCredentials(params, selectedCredentialTypeId) {
 
 function MultiCredentialsLookup(props) {
   const { value, onChange, onError, history, i18n } = props;
-  const [credentialTypes, setCredentialTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
-  const [credentials, setCredentials] = useState([]);
-  const [credentialsCount, setCredentialsCount] = useState(0);
+
+  const {
+    result: credentialTypes,
+    request: fetchTypes,
+    error: typesError,
+    isLoading: isTypesLoading,
+  } = useRequest(
+    useCallback(async () => {
+      const types = await CredentialTypesAPI.loadAllTypes();
+      const match = types.find(type => type.kind === 'ssh') || types[0];
+      setSelectedType(match);
+      return types;
+    }, []),
+    []
+  );
 
   useEffect(() => {
-    (async () => {
-      try {
-        const types = await CredentialTypesAPI.loadAllTypes();
-        setCredentialTypes(types);
-        const match = types.find(type => type.kind === 'ssh') || types[0];
-        setSelectedType(match);
-      } catch (err) {
-        onError(err);
-      }
-    })();
-  }, [onError]);
+    fetchTypes();
+  }, [fetchTypes]);
 
-  useEffect(() => {
-    (async () => {
+  const {
+    result: { credentials, credentialsCount },
+    request: fetchCredentials,
+    error: credentialsError,
+    isLoading: isCredentialsLoading,
+  } = useRequest(
+    useCallback(async () => {
       if (!selectedType) {
-        return;
+        return {
+          credentials: [],
+          count: 0,
+        };
       }
-      try {
-        const params = parseQueryString(QS_CONFIG, history.location.search);
-        const { results, count } = await loadCredentials(
-          params,
-          selectedType.id
-        );
-        setCredentials(results);
-        setCredentialsCount(count);
-      } catch (err) {
-        onError(err);
-      }
-    })();
-  }, [selectedType, history.location.search, onError]);
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const { results, count } = await loadCredentials(params, selectedType.id);
+      return {
+        credentials: results,
+        credentialsCount: count,
+      };
+    }, [selectedType, history.location]),
+    {
+      credentials: [],
+      credentialsCount: 0,
+    }
+  );
+
+  useEffect(() => {
+    fetchCredentials();
+  }, [fetchCredentials]);
+
+  useEffect(() => {
+    if (typesError || credentialsError) {
+      onError(typesError || credentialsError);
+    }
+  }, [typesError, credentialsError, onError]);
 
   const renderChip = ({ item, removeItem, canDelete }) => (
     <CredentialChip
@@ -82,6 +103,7 @@ function MultiCredentialsLookup(props) {
       multiple
       onChange={onChange}
       qsConfig={QS_CONFIG}
+      isLoading={isTypesLoading || isCredentialsLoading}
       renderItemChip={renderChip}
       renderOptionsList={({ state, dispatch, canDelete }) => {
         return (

@@ -156,7 +156,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -201,7 +201,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -248,7 +248,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -301,7 +301,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
