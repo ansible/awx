@@ -138,7 +138,7 @@ class TowerModule(AnsibleModule):
                     try:
                         self.load_config(config_file)
                     except ConfigFileException:
-                        self.fail_json('The config file {0} is not properly formatted'.format(config_file))
+                        self.fail_json(msg='The config file {0} is not properly formatted'.format(config_file))
 
     def load_config(self, config_path):
         # Validate the config file is an actual file
