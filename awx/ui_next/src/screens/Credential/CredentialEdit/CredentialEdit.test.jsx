@@ -245,6 +245,7 @@ CredentialTypesAPI.read.mockResolvedValue({
 });
 
 CredentialsAPI.update.mockResolvedValue({ data: { id: 3 } });
+CredentialsAPI.readInputSources.mockResolvedValue({ data: { results: [] } });
 
 describe('<CredentialEdit />', () => {
   let wrapper;

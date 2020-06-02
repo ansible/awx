@@ -1,19 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 
-import { CredentialTypesAPI, CredentialsAPI } from '../../../api';
+import {
+  CredentialInputSourcesAPI,
+  CredentialTypesAPI,
+  CredentialsAPI,
+} from '../../../api';
 import CredentialForm from '../shared/CredentialForm';
+import useRequest from '../../../util/useRequest';
 
 function CredentialAdd({ me }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [credentialTypes, setCredentialTypes] = useState(null);
-  const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
+
+  const {
+    error: submitError,
+    request: submitRequest,
+    result: credentialId,
+  } = useRequest(
+    useCallback(
+      async values => {
+        const { inputs, organization, ...remainingValues } = values;
+        const nonPluginInputs = {};
+        const pluginInputs = {};
+        Object.entries(inputs).forEach(([key, value]) => {
+          if (value.credential && value.inputs) {
+            pluginInputs[key] = value;
+          } else {
+            nonPluginInputs[key] = value;
+          }
+        });
+        const {
+          data: { id: newCredentialId },
+        } = await CredentialsAPI.create({
+          user: (me && me.id) || null,
+          organization: (organization && organization.id) || null,
+          inputs: nonPluginInputs,
+          ...remainingValues,
+        });
+        const inputSourceRequests = [];
+        Object.entries(pluginInputs).forEach(([key, value]) => {
+          inputSourceRequests.push(
+            CredentialInputSourcesAPI.create({
+              input_field_name: key,
+              metadata: value.inputs,
+              source_credential: value.credential.id,
+              target_credential: newCredentialId,
+            })
+          );
+        });
+        await Promise.all(inputSourceRequests);
+
+        return newCredentialId;
+      },
+      [me]
+    )
+  );
+
+  useEffect(() => {
+    if (credentialId) {
+      history.push(`/credentials/${credentialId}/details`);
+    }
+  }, [credentialId, history]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,21 +92,7 @@ function CredentialAdd({ me }) {
   };
 
   const handleSubmit = async values => {
-    const { organization, ...remainingValues } = values;
-    setFormSubmitError(null);
-    try {
-      const {
-        data: { id: credentialId },
-      } = await CredentialsAPI.create({
-        user: (me && me.id) || null,
-        organization: (organization && organization.id) || null,
-        ...remainingValues,
-      });
-      const url = `/credentials/${credentialId}/details`;
-      history.push(`${url}`);
-    } catch (err) {
-      setFormSubmitError(err);
-    }
+    await submitRequest(values);
   };
 
   if (error) {
@@ -85,7 +125,7 @@ function CredentialAdd({ me }) {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             credentialTypes={credentialTypes}
-            submitError={formSubmitError}
+            submitError={submitError}
           />
         </CardBody>
       </Card>
