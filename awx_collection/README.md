@@ -33,13 +33,13 @@ The OAuth2 token is the preferred method. You can obtain a token via the
 AWX CLI [login](https://docs.ansible.com/ansible-tower/latest/html/towercli/reference.html#awx-login)
 command.
 
-These can be specified via:
+These can be specified via (from highest to lowest precedence):
 
- - environment variables (most useful when running against localhost)
  - direct module parameters
+ - environment variables (most useful when running against localhost)
  - a config file path specified by the `tower_config_file` parameter
- - a config file at `/etc/tower/tower_cli.cfg`
  - a config file at `~/.tower_cli.cfg`
+ - a config file at `/etc/tower/tower_cli.cfg`
 
 Config file syntax looks like this:
 
