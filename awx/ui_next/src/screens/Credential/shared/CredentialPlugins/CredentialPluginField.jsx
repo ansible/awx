@@ -37,9 +37,9 @@ function CredentialPluginField(props) {
       isValid={isValid}
       label={label}
     >
-      {field.value.credential ? (
+      {field?.value?.credential ? (
         <CredentialPluginSelected
-          credential={field.value.credential}
+          credential={field?.value?.credential}
           onClearPlugin={() => helpers.setValue('')}
           onEditPlugin={() => setShowPluginWizard(true)}
         />
