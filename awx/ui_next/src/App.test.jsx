@@ -30,27 +30,27 @@ describe('<App />', () => {
   });
 
   test('expected content is rendered', () => {
+    const routeConfig = [
+      {
+        groupTitle: 'Group One',
+        groupId: 'group_one',
+        routes: [
+          { title: 'Foo', path: '/foo' },
+          { title: 'Bar', path: '/bar' },
+        ],
+      },
+      {
+        groupTitle: 'Group Two',
+        groupId: 'group_two',
+        routes: [{ title: 'Fiz', path: '/fiz' }],
+      },
+    ];
     const appWrapper = mountWithContexts(
-      <App
-        routeGroups={[
-          {
-            groupTitle: 'Group One',
-            groupId: 'group_one',
-            routes: [
-              { title: 'Foo', path: '/foo' },
-              { title: 'Bar', path: '/bar' },
-            ],
-          },
-          {
-            groupTitle: 'Group Two',
-            groupId: 'group_two',
-            routes: [{ title: 'Fiz', path: '/fiz' }],
-          },
-        ]}
-        render={({ routeGroups }) =>
-          routeGroups.map(({ groupId }) => <div key={groupId} id={groupId} />)
-        }
-      />
+      <App routeConfig={routeConfig}>
+        {routeConfig.map(({ groupId }) => (
+          <div key={groupId} id={groupId} />
+        ))}
+      </App>
     );
 
     // page components
@@ -64,7 +64,6 @@ describe('<App />', () => {
     expect(appWrapper.find('a[href="/#/bar"]').length).toBe(1);
     expect(appWrapper.find('a[href="/#/fiz"]').length).toBe(1);
 
-    // inline render
     expect(appWrapper.find('#group_one').length).toBe(1);
     expect(appWrapper.find('#group_two').length).toBe(1);
   });

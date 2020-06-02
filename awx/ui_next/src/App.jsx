@@ -136,12 +136,7 @@ class App extends Component {
       version,
       configError,
     } = this.state;
-    const {
-      i18n,
-      render = () => {},
-      routeGroups = [],
-      navLabel = '',
-    } = this.props;
+    const { i18n, routeConfig = [], navLabel = '', children } = this.props;
 
     const header = (
       <PageHeader
@@ -167,7 +162,7 @@ class App extends Component {
         nav={
           <Nav aria-label={navLabel} theme="dark">
             <NavList>
-              {routeGroups.map(({ groupId, groupTitle, routes }) => (
+              {routeConfig.map(({ groupId, groupTitle, routes }) => (
                 <NavExpandableGroup
                   key={groupId}
                   groupId={groupId}
@@ -194,7 +189,7 @@ class App extends Component {
               version,
             }}
           >
-            {render({ routeGroups })}
+            {children}
           </ConfigProvider>
         </Page>
         <About
