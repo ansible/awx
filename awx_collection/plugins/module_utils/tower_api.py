@@ -169,7 +169,7 @@ class TowerModule(AnsibleModule):
             if try_config_parsing:
                 # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
                 if '[general]' not in config_string:
-                    config_string = '[general]{0}'.format(config_string)
+                    config_string = '[general]\n{0}'.format(config_string)
 
                 config = ConfigParser()
 
