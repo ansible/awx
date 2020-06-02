@@ -8,7 +8,7 @@
     tower_oauthtoken:
       not_token: "This has no token entry"
   register: results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -20,7 +20,7 @@
     tower_oauthtoken:
       - dummy_token
   register: results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
