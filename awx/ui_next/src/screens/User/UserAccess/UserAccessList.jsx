@@ -113,7 +113,9 @@ function UserAccessList({ i18n }) {
           {i18n._(t`System Administrator`)}
         </Title>
         <EmptyStateBody>
-          {i18n._(t`System administrators have access to all permissions.`)}
+          {i18n._(
+            t`System administrators have unrestricted access to all resources.`
+          )}
         </EmptyStateBody>
       </EmptyState>
     );
