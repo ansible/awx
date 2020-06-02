@@ -107,7 +107,8 @@ class TowerModule(AnsibleModule):
             elif isinstance(token_param, string_types):
                 self.oauth_token = self.params.get('tower_oauthtoken')
             else:
-                self.fail_json(msg="The provided tower_oauthtoken type was not valid ({0}), please refer to ansible-doc for valid options".format(type(token_param).__name__))
+                error_msg = "The provided tower_oauthtoken type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
+                self.fail_json(msg=error_msg)
 
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):

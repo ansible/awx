@@ -25,7 +25,7 @@
 - assert:
     that:
       - results is failed
-      - '"The provided tower_oauthtoken type was not valid (list), please refer to ansible-doc for valid options" == results.msg'
+      - '"The provided tower_oauthtoken type was not valid (list). Valid options are str or dict." == results.msg'
 
 - block:
     - name: Create a Token

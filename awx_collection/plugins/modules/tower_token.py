@@ -22,7 +22,10 @@ short_description: create, update, or destroy Ansible Tower tokens.
 description:
     - Create or destroy Ansible Tower tokens. See
       U(https://www.ansible.com/tower) for an overview.
-    - If you create a token it is your responsibility to delete the token.
+    - In addition, the module sets an Ansible fact which can be passed into other
+      tower_* modules as the parameter tower_oauthtoken. See examples for usage.
+    - Because of the sensitive nature of tokens, the created token value is only available once
+      through the Ansible fact. (See RETURN for details)
 options:
     description:
       description:
@@ -88,10 +91,14 @@ EXAMPLES = '''
       when: tower_token is defined
 '''
 
-RETURNS = '''
+RETURN = '''
 tower_token:
   type: dict
-  description: A Tower token object which can be used for auth or token deletion
+  description: An Ansible Fact variable representing a Tower token object which can be used for auth in subsequent modules. See examples for usage.
+  contains:
+    token:
+      description: The token that was generated. This token can never be accessed again, make sure this value is noted before it is lost.
+      type: str
   returned: on successful create
 '''
 
@@ -103,7 +110,6 @@ def return_token(module, last_response):
     # So the default module return would give you an ID but then the token would forever be masked on you.
     # This method will return the entire token object we got back so that a user has access to the token
 
-    module.json_output['token'] = last_response['token']
     module.json_output['ansible_facts'] = {
         'tower_token': last_response,
     }
