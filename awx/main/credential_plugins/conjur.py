@@ -1,7 +1,7 @@
 from .plugin import CredentialPlugin, CertFiles
 
 import base64
-from urllib.parse import urljoin, quote_plus
+from urllib.parse import urljoin, quote
 
 from django.utils.translation import ugettext_lazy as _
 import requests
@@ -50,9 +50,9 @@ conjur_inputs = {
 def conjur_backend(**kwargs):
     url = kwargs['url']
     api_key = kwargs['api_key']
-    account = quote_plus(kwargs['account'])
-    username = quote_plus(kwargs['username'])
-    secret_path = quote_plus(kwargs['secret_path'])
+    account = quote(kwargs['account'])
+    username = quote(kwargs['username'])
+    secret_path = quote(kwargs['secret_path'])
     version = kwargs.get('secret_version')
     cacert = kwargs.get('cacert', None)
 
