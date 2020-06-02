@@ -63,6 +63,17 @@ function UserTeamList({ i18n }) {
           isSelected={false}
         />
       )}
+      toolbarSearchColumns={[
+        {
+          name: i18n._(t`Name`),
+          key: 'name',
+          isDefault: true,
+        },
+        {
+          name: i18n._(t`Organization`),
+          key: 'organization__name',
+        },
+      ]}
     />
   );
 }
