@@ -154,37 +154,44 @@ class TowerModule(AnsibleModule):
 
         # First try to yaml load the content (which will also load json)
         try:
-            config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
-            # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-            if type(config_data) is not dict:
-                raise AssertionError("The yaml config file is not properly formatted as a dict.")
+            try_config_parsing = True
+            if HAS_YAML:
+                try:
+                    config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
+                    # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
+                    if type(config_data) is not dict:
+                        raise AssertionError("The yaml config file is not properly formatted as a dict.")
+                    try_config_parsing = False
 
-        except(AttributeError, yaml.YAMLError, AssertionError):
-            # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
-            if '[general]' not in config_string:
-                config_string = '[general]{0}'.format(config_string)
+                except(AttributeError, yaml.YAMLError, AssertionError):
+                    try_config_parsing = True
 
-            config = ConfigParser()
+            if try_config_parsing:
+                # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
+                if '[general]' not in config_string:
+                    config_string = '[general]{0}'.format(config_string)
 
-            try:
-                placeholder_file = StringIO(config_string)
-                # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
-                # This "if" removes the deprecation warning
-                if hasattr(config, 'read_file'):
-                    config.read_file(placeholder_file)
-                else:
-                    config.readfp(placeholder_file)
+                config = ConfigParser()
 
-                # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
-                config_data = {}
-                for honorred_setting in self.honorred_settings:
-                    try:
-                        config_data[honorred_setting] = config.get('general', honorred_setting)
-                    except (NoOptionError):
-                        pass
+                try:
+                    placeholder_file = StringIO(config_string)
+                    # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
+                    # This "if" removes the deprecation warning
+                    if hasattr(config, 'read_file'):
+                        config.read_file(placeholder_file)
+                    else:
+                        config.readfp(placeholder_file)
 
-            except Exception as e:
-                raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
+                    # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
+                    config_data = {}
+                    for honorred_setting in self.honorred_settings:
+                        try:
+                            config_data[honorred_setting] = config.get('general', honorred_setting)
+                        except NoOptionError:
+                            pass
+
+                except Exception as e:
+                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
 
         except Exception as e:
             raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e))
