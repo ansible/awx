@@ -110,17 +110,14 @@
         - update_svn
         - update_insights
 
-- hosts: localhost
-  gather_facts: false
-  connection: local
-  name: Install content with ansible-galaxy command if necessary
-  tasks:
+    - name: Set content cache location
+      set_fact:
+        cache_dir: "{{ project_cache }}/{{ scm_version|default(scm_branch) }}"
+      tags:
+        - install_collections
+        - install_roles
 
     - block:
-        - name: set content cache location
-          set_fact:
-            cache_dir: "{{ project_cache }}/{{ scm_branch }}"
-
         - name: detect requirements.yml
           stat:
             path: '{{project_path|quote}}/roles/requirements.yml'
@@ -141,16 +138,13 @@
           synchronize:
             src: "{{ cache_dir }}/requirements_roles"
             dest: "{{ roles_destination }}"
+          when: roles_destination is defined
 
       when: roles_enabled|bool
       tags:
         - install_roles
 
     - block:
-        - name: set content cache location
-          set_fact:
-            cache_dir: "{{ project_cache }}/{{ scm_branch }}"
-
         - name: detect collections/requirements.yml
           stat:
             path: '{{project_path|quote}}/collections/requirements.yml'
@@ -172,6 +166,7 @@
           synchronize:
             src: "{{ cache_dir }}/requirements_collections"
             dest: "{{ collections_destination }}"
+          when: collections_destination is defined
 
       when:
         - "ansible_version.full is version_compare('2.8', '>=')"
