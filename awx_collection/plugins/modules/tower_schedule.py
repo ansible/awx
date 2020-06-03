@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_schedule
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower schedules.
 description:
     - Create, update, or destroy Ansible Tower schedules. See

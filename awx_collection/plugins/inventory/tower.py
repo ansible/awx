@@ -12,7 +12,6 @@ DOCUMENTATION = '''
       - Matthew Jones (@matburt)
       - Yunfan Zhang (@YunfanZhang42)
     short_description: Ansible dynamic inventory plugin for Ansible Tower.
-    version_added: "2.7"
     description:
         - Reads inventories from Ansible Tower.
         - Supports reading configuration from both YAML config file and environment variables.
@@ -68,7 +67,6 @@ DOCUMENTATION = '''
             description: Make extra requests to provide all group vars with metadata about the source Ansible Tower host.
             type: bool
             default: False
-            version_added: "2.8"
 '''
 
 EXAMPLES = '''
