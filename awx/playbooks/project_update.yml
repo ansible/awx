@@ -138,7 +138,7 @@
           synchronize:
             src: "{{ cache_dir }}/requirements_roles"
             dest: "{{ roles_destination }}"
-          when: roles_destination is defined
+          when: roles_destination is defined and doesRequirementsExist.stat.exists
 
       when: roles_enabled|bool
       tags:
@@ -166,7 +166,7 @@
           synchronize:
             src: "{{ cache_dir }}/requirements_collections"
             dest: "{{ collections_destination }}"
-          when: collections_destination is defined
+          when: collections_destination is defined and doesCollectionRequirementsExist.stat.exists
 
       when:
         - "ansible_version.full is version_compare('2.8', '>=')"
