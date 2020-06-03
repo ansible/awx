@@ -15,7 +15,6 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
 
-
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
@@ -36,7 +35,7 @@ from awx.main.models.mixins import (
     RelatedJobsMixin
 )
 from awx.main.utils import update_scm_url
-from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
+from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook, could_be_non_yaml_playbook, could_be_invalid_playbook
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -48,7 +47,6 @@ __all__ = ['Project', 'ProjectUpdate']
 
 
 class ProjectOptions(models.Model):
-
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
         ('git', _('Git')),
@@ -214,6 +212,47 @@ class ProjectOptions(models.Model):
                         results.append(smart_text(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
+    @property
+    def invalid_playbooks(self):
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=True):
+                if skip_directory(dirpath):
+                    continue
+                for filename in filenames:
+                    playbook = could_be_invalid_playbook(project_path, dirpath, filename)
+                    if playbook is not None:
+                        results.append(smart_text(playbook))
+        return sorted(results, key=lambda x: smart_str(x).lower())
+
+    @property
+    def non_yaml_playbooks(self):
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=True):
+                if skip_directory(dirpath):
+                    continue
+                for filename in filenames:
+                    playbook = could_be_non_yaml_playbook(project_path, dirpath, filename)
+                    if playbook is not None:
+                        results.append(smart_text(playbook))
+        return sorted(results, key=lambda x: smart_str(x).lower())
+
+    @property
+    def all_playbooks(self):
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=True):
+                if skip_directory(dirpath):
+                    continue
+                for filename in filenames:
+                    playbook = os.path.relpath(os.path.join(dirpath, filename), smart_str(project_path))
+                    if playbook is None:
+                        results.append(smart_text(playbook))
+        return sorted(results, key=lambda x: smart_str(x).lower())
 
     @property
     def inventories(self):
@@ -291,6 +330,24 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
+    )
+
+
+    invalid_playbook_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Invalid Playbook Files'),
+        help_text=_('List of invalid playbooks found in the project'),
+    )
+
+
+    non_yaml_playbook_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Non Yaml Playbook Files'),
+        help_text=_('List of non yaml playbooks found in the project'),
     )
 
     inventory_files = JSONField(

@@ -1,0 +1,8 @@
+---
+- name: Fail test case \#3, tasks keyword misspelled
+  hosts: all
+
+  tazkz:
+    - name: display
+      debug:
+        var: {{ ansible_hostname }}

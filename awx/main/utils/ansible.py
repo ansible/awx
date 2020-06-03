@@ -15,8 +15,7 @@ from django.utils.encoding import smart_str
 logger = logging.getLogger('awx.main.utils.ansible')
 
 
-__all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory']
-
+__all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory', 'could_be_non_yaml_playbook', 'could_be_invalid_playbook']
 
 valid_playbook_re = re.compile(r'^\s*?-?\s*?(?:hosts|include|import_playbook):\s*?.*?$')
 valid_inventory_re = re.compile(r'^[a-zA-Z0-9_.=\[\]]')
@@ -66,6 +65,42 @@ def could_be_playbook(project_path, dir_path, filename):
     except IOError:
         return None
     if not matched:
+        return None
+    return os.path.relpath(playbook_path, smart_str(project_path))
+
+
+def could_be_non_yaml_playbook(project_path, dir_path, filename):
+    playbook_path = os.path.join(dir_path, filename)
+    if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
+        return os.path.relpath(playbook_path, smart_str(project_path))
+    return None
+
+
+def could_be_invalid_playbook(project_path, dir_path, filename):
+    playbook_path = os.path.join(dir_path, filename)
+    # Filter files that do not have either hosts or top-level
+    # includes. Use regex to allow files with invalid YAML to
+    # show up.
+    matched = False
+    try:
+        for n, line in enumerate(codecs.open(
+                playbook_path,
+                'r',
+                encoding='utf-8',
+                errors='ignore'
+        )):
+            if valid_playbook_re.match(line):
+                matched = True
+                break
+            # Any YAML file can also be encrypted with vault;
+            # allow these to be used as the main playbook.
+            elif n == 0 and line.startswith('$ANSIBLE_VAULT;'):
+                matched = True
+                break
+    except IOError:
+        logger.exception(f'failed to open {playbook_path}')
+        return None
+    if matched:
         return None
     return os.path.relpath(playbook_path, smart_str(project_path))
 

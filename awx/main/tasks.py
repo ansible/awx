@@ -2438,8 +2438,10 @@ class RunProjectUpdate(BaseTask):
                 if status == 'successful':
                     logger.error("{} Could not find scm revision in check".format(instance.log_format))
             p.playbook_files = p.playbooks
+            p.invalid_playbook_files = p.invalid_playbooks
+            p.non_yaml_playbook_files = p.non_yaml_playbooks
             p.inventory_files = p.inventories
-            p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
+            p.save(update_fields=['scm_revision', 'playbook_files','invalid_playbook_files', 'non_yaml_playbook_files', 'inventory_files'])
 
         # Update any inventories that depend on this project
         dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
