@@ -58,6 +58,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                   </ForwardRef>
                 </ForwardRef(Styled(PFDataListCell))>,
                 <ForwardRef(Styled(PFDataListCell))>
+                  <ForwardRef(styled.b)>
+                    Type
+                  </ForwardRef(styled.b)>
                   Slack
                 </ForwardRef(Styled(PFDataListCell))>,
               ]
@@ -167,6 +170,41 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                     <div
                       className="pf-c-data-list__cell sc-bdVaJa kruorc"
                     >
+                      <styled.b>
+                        <StyledComponent
+                          forwardedComponent={
+                            Object {
+                              "$$typeof": Symbol(react.forward_ref),
+                              "attrs": Array [],
+                              "componentStyle": ComponentStyle {
+                                "componentId": "sc-htpNat",
+                                "isStatic": false,
+                                "lastClassName": "jyYvCB",
+                                "rules": Array [
+                                  "
+  margin-right: 20px;
+",
+                                ],
+                              },
+                              "displayName": "styled.b",
+                              "foldedComponentIds": Array [],
+                              "render": [Function],
+                              "styledComponentId": "sc-htpNat",
+                              "target": "b",
+                              "toString": [Function],
+                              "warnTooManyClasses": [Function],
+                              "withComponent": [Function],
+                            }
+                          }
+                          forwardedRef={null}
+                        >
+                          <b
+                            className="sc-htpNat jyYvCB"
+                          >
+                            Type
+                          </b>
+                        </StyledComponent>
+                      </styled.b>
                       Slack
                     </div>
                   </PFDataListCell>
