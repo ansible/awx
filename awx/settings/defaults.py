@@ -441,8 +441,8 @@ CELERYBEAT_SCHEDULE = {
 # Django Caching Configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'unix:/var/run/memcached/memcached.sock'
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'unix:/var/run/redis/redis.sock'
     },
 }
 

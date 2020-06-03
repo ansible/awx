@@ -7,7 +7,7 @@ services:
     container_name: awx_web
     depends_on:
       - redis
-      - memcached
+      - django-redis
       {% if pg_hostname is not defined %}
       - postgres
       {% endif %}
@@ -32,7 +32,6 @@ services:
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
       - "{{ docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
-      - "{{ docker_compose_dir }}/memcached_socket:/var/run/memcached/:rw"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -76,7 +75,6 @@ services:
     container_name: awx_task
     depends_on:
       - redis
-      - memcached
       - web
       {% if pg_hostname is not defined %}
       - postgres
@@ -93,7 +91,6 @@ services:
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
       - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
-      - "{{ docker_compose_dir }}/memcached_socket:/var/run/memcached/:rw"
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
@@ -142,19 +139,6 @@ services:
     volumes:
       - "{{ docker_compose_dir }}/redis.conf:/usr/local/etc/redis/redis.conf:ro"
       - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
-      - "{{ docker_compose_dir }}/memcached_socket:/var/run/memcached/:rw"
-
-  memcached:
-    image: "{{ memcached_image }}:{{ memcached_version }}"
-    container_name: awx_memcached
-    command: ["-s", "/var/run/memcached/memcached.sock", "-a", "0666"]
-    restart: unless-stopped
-    environment:
-      http_proxy: {{ http_proxy | default('') }}
-      https_proxy: {{ https_proxy | default('') }}
-      no_proxy: {{ no_proxy | default('') }}
-    volumes:
-      - "{{ docker_compose_dir }}/memcached_socket:/var/run/memcached/:rw"
 
   {% if pg_hostname is not defined %}
   postgres:
