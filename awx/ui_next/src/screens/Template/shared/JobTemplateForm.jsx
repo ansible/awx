@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { withFormik, useField, useFormikContext } from 'formik';
+import { withFormik, useField } from 'formik';
 import {
   Form,
   FormGroup,
@@ -52,8 +52,6 @@ function JobTemplateForm({
   submitError,
   i18n,
 }) {
-  const { values: formikValues } = useFormikContext();
-
   const [contentError, setContentError] = useState(false);
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory
@@ -65,6 +63,7 @@ function JobTemplateForm({
     Boolean(template.webhook_service)
   );
 
+  const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
     name: 'job_type',
     validate: required(null, i18n),
@@ -81,7 +80,7 @@ function JobTemplateForm({
   });
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
-  const [limitField, limitMeta] = useField('limit');
+  const [limitField, limitMeta, limitHelpers] = useField('limit');
   const [verbosityField] = useField('verbosity');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] = useField(
@@ -231,7 +230,7 @@ function JobTemplateForm({
         </FieldWithPrompt>
         <FieldWithPrompt
           fieldId="template-inventory"
-          isRequired={!formikValues.ask_inventory_on_launch}
+          isRequired={!askInventoryOnLaunchField.value}
           label={i18n._(t`Inventory`)}
           promptId="template-ask-inventory-on-launch"
           promptName="ask_inventory_on_launch"
@@ -245,11 +244,11 @@ function JobTemplateForm({
               inventoryHelpers.setValue(value ? value.id : null);
               setInventory(value);
             }}
-            required={!formikValues.ask_inventory_on_launch}
+            required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
-          {(inventoryMeta.touched || formikValues.ask_inventory_on_launch) &&
+          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
             inventoryMeta.error && (
               <div
                 className="pf-c-form__helper-text pf-m-error"
@@ -283,8 +282,8 @@ function JobTemplateForm({
             <TextInput
               id="template-scm-branch"
               {...scmField}
-              onChange={(value, event) => {
-                scmField.onChange(event);
+              onChange={value => {
+                scmHelpers.setValue(value);
               }}
             />
           </FieldWithPrompt>
@@ -383,8 +382,8 @@ function JobTemplateForm({
                 id="template-limit"
                 {...limitField}
                 isValid={!limitMeta.touched || !limitMeta.error}
-                onChange={(value, event) => {
-                  limitField.onChange(event);
+                onChange={value => {
+                  limitHelpers.setValue(value);
                 }}
               />
             </FieldWithPrompt>
