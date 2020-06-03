@@ -2,12 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button } from '@patternfly/react-core';
-
+import {
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateIcon,
+  Title,
+} from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-import { UsersAPI } from '../../../api';
-import useRequest from '../../../util/useRequest';
+import { UsersAPI, RolesAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import PaginatedDataList from '../../../components/PaginatedDataList';
+import ErrorDetail from '../../../components/ErrorDetail';
+import AlertModal from '../../../components/AlertModal';
+
 import DatalistToolbar from '../../../components/DataListToolbar';
 import UserAccessListItem from './UserAccessListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
@@ -25,6 +34,7 @@ function UserAccessList({ i18n }) {
   const { search } = useLocation();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
+  const [roleToDisassociate, setRoleToDisassociate] = useState(null);
   const {
     isLoading,
     request: fetchRoles,
@@ -54,6 +64,23 @@ function UserAccessList({ i18n }) {
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
+
+  const {
+    isLoading: isDisassociateLoading,
+    deleteItems: disassociateRole,
+    deletionError: disassociationError,
+    clearDeletionError: clearDisassociationError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      setRoleToDisassociate(null);
+      await RolesAPI.disassociateUserRole(
+        roleToDisassociate.id,
+        parseInt(id, 10)
+      );
+    }, [roleToDisassociate, id]),
+    { qsConfig: QS_CONFIG, fetchItems: fetchRoles }
+  );
+
   const canAdd =
     options && Object.prototype.hasOwnProperty.call(options, 'POST');
 
@@ -77,12 +104,27 @@ function UserAccessList({ i18n }) {
     }
     return `/${resource_type}s/${resource_id}/details`;
   };
-
+  const isSysAdmin = roles.some(role => role.name === 'System Administrator');
+  if (isSysAdmin) {
+    return (
+      <EmptyState variant="full">
+        <EmptyStateIcon icon={CubesIcon} />
+        <Title headingLevel="h5" size="lg">
+          {i18n._(t`System Administrator`)}
+        </Title>
+        <EmptyStateBody>
+          {i18n._(
+            t`System administrators have unrestricted access to all resources.`
+          )}
+        </EmptyStateBody>
+      </EmptyState>
+    );
+  }
   return (
     <>
       <PaginatedDataList
         contentError={error}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isDisassociateLoading}
         items={roles}
         itemCount={roleCount}
         pluralizedItemName={i18n._(t`User Roles`)}
@@ -107,8 +149,10 @@ function UserAccessList({ i18n }) {
               value={role.name}
               role={role}
               detailUrl={detailUrl(role)}
-              onSelect={() => {}}
               isSelected={false}
+              onSelect={item => {
+                setRoleToDisassociate(item);
+              }}
             />
           );
         }}
@@ -142,6 +186,52 @@ function UserAccessList({ i18n }) {
           onClose={() => setIsWizardOpen(false)}
           title={i18n._(t`Add user permissions`)}
         />
+      )}
+      {roleToDisassociate && (
+        <AlertModal
+          aria-label={i18n._(t`Disassociate role`)}
+          isOpen={roleToDisassociate}
+          variant="error"
+          title={i18n._(t`Disassociate role!`)}
+          onClose={() => setRoleToDisassociate(null)}
+          actions={[
+            <Button
+              key="disassociate"
+              variant="danger"
+              aria-label={i18n._(t`confirm disassociate`)}
+              onClick={() => disassociateRole()}
+            >
+              {i18n._(t`Disassociate`)}
+            </Button>,
+            <Button
+              key="cancel"
+              variant="secondary"
+              aria-label={i18n._(t`Cancel`)}
+              onClick={() => setRoleToDisassociate(null)}
+            >
+              {i18n._(t`Cancel`)}
+            </Button>,
+          ]}
+        >
+          <div>
+            {i18n._(
+              t`This action will disassociate the following role from ${roleToDisassociate.summary_fields.resource_name}:`
+            )}
+            <br />
+            <strong>{roleToDisassociate.name}</strong>
+          </div>
+        </AlertModal>
+      )}
+      {disassociationError && (
+        <AlertModal
+          isOpen={disassociationError}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={clearDisassociationError}
+        >
+          {i18n._(t`Failed to delete role.`)}
+          <ErrorDetail error={disassociationError} />
+        </AlertModal>
       )}
     </>
   );

@@ -18,6 +18,7 @@ import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
 import Root from './models/Root';
+import Roles from './models/Roles';
 import Schedules from './models/Schedules';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
@@ -49,6 +50,7 @@ const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
 const RootAPI = new Root();
+const RolesAPI = new Roles();
 const SchedulesAPI = new Schedules();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
@@ -81,6 +83,7 @@ export {
   ProjectUpdatesAPI,
   ProjectsAPI,
   RootAPI,
+  RolesAPI,
   SchedulesAPI,
   SystemJobsAPI,
   TeamsAPI,
