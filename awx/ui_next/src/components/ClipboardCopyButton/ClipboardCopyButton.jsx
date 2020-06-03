@@ -40,7 +40,13 @@ class ClipboardCopyButton extends React.Component {
   };
 
   render() {
-    const { clickTip, entryDelay, exitDelay, hoverTip } = this.props;
+    const {
+      clickTip,
+      entryDelay,
+      exitDelay,
+      hoverTip,
+      isDisabled,
+    } = this.props;
     const { copied } = this.state;
 
     return (
@@ -51,6 +57,7 @@ class ClipboardCopyButton extends React.Component {
         content={copied ? clickTip : hoverTip}
       >
         <Button
+          isDisabled={isDisabled}
           variant="plain"
           onClick={this.handleCopyClick}
           aria-label={hoverTip}
@@ -69,6 +76,7 @@ ClipboardCopyButton.propTypes = {
   hoverTip: PropTypes.string.isRequired,
   stringToCopy: PropTypes.string.isRequired,
   switchDelay: PropTypes.number,
+  isDisabled: PropTypes.bool.isRequired,
 };
 
 ClipboardCopyButton.defaultProps = {
