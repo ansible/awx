@@ -1,6 +1,7 @@
 ---
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
+awx_image: "awx"
 redis_image: "redis"
 
 postgresql_version: "10"

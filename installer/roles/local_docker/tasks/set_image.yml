@@ -1,19 +1,11 @@
 ---
 - name: Manage AWX Container Images
   block:
-    - name: Export Docker web image if it isnt local and there isnt a registry defined
+    - name: Export Docker awx image if it isnt local and there isnt a registry defined
       docker_image:
-        name: "{{ web_image }}"
+        name: "{{ awx_image }}"
         tag: "{{ awx_version }}"
-        archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ web_image }}_{{ awx_version }}.tar"
-      when: inventory_hostname != "localhost" and docker_registry is not defined
-      delegate_to: localhost
-
-    - name: Export Docker task image if it isnt local and there isnt a registry defined
-      docker_image:
-        name: "{{ task_image }}"
-        tag: "{{ awx_version }}"
-        archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ task_image }}_{{ awx_version }}.tar"
+        archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_image }}_{{ awx_version }}.tar"
       when: inventory_hostname != "localhost" and docker_registry is not defined
       delegate_to: localhost
 
@@ -28,43 +20,27 @@
         state: directory
       when: ansible_connection != "local" and docker_registry is not defined
 
-    - name: Copy web image to docker execution
+    - name: Copy awx image to docker execution
       copy:
-        src: "{{ awx_local_base_config_path|default('/tmp') }}/{{ web_image }}_{{ awx_version }}.tar"
-        dest: "{{ docker_deploy_base_path }}/{{ web_image }}_{{ awx_version }}.tar"
+        src: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_image }}_{{ awx_version }}.tar"
+        dest: "{{ docker_deploy_base_path }}/{{ awx_image }}_{{ awx_version }}.tar"
       when: ansible_connection != "local" and docker_registry is not defined
 
-    - name: Copy task image to docker execution
-      copy:
-        src: "{{ awx_local_base_config_path|default('/tmp') }}/{{ task_image }}_{{ awx_version }}.tar"
-        dest: "{{ docker_deploy_base_path }}"
-      when: ansible_connection != "local" and docker_registry is not defined
-
-    - name: Load web image
+    - name: Load awx image
       docker_image:
-        name: "{{ web_image }}"
+        name: "{{ awx_image }}"
         tag: "{{ awx_version }}"
-        load_path: "{{ docker_deploy_base_path }}/{{ web_image }}_{{ awx_version }}.tar"
-        timeout: 300
-      when: ansible_connection != "local" and docker_registry is not defined
-
-    - name: Load task image
-      docker_image:
-        name: "{{ task_image }}"
-        tag: "{{ awx_version }}"
-        load_path: "{{ docker_deploy_base_path }}/{{ task_image }}_{{ awx_version }}.tar"
+        load_path: "{{ docker_deploy_base_path }}/{{ awx_image }}_{{ awx_version }}.tar"
         timeout: 300
       when: ansible_connection != "local" and docker_registry is not defined
 
     - name: Set full image path for local install
       set_fact:
-        awx_web_docker_actual_image: "{{ web_image }}:{{ awx_version }}"
-        awx_task_docker_actual_image: "{{ task_image }}:{{ awx_version }}"
+        awx_docker_actual_image: "{{ awx_image }}:{{ awx_version }}"
       when: docker_registry is not defined
   when: dockerhub_base is not defined
 
 - name: Set DockerHub Image Paths
   set_fact:
-    awx_web_docker_actual_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
-    awx_task_docker_actual_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
+    awx_docker_actual_image: "{{ dockerhub_base }}/awx:{{ dockerhub_version }}"
   when: dockerhub_base is defined

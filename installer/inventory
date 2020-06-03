@@ -5,7 +5,7 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # Remove these lines if you want to run a local image build
 # Otherwise the setup playbook will install the official Ansible images. Versions may
 # be selected based on: latest, 1, 1.0, 1.0.0, 1.0.0.123
-# by default the base will be used to search for ansible/awx_web and ansible/awx_task
+# by default the base will be used to search for ansible/awx
 dockerhub_base=ansible
 
 # Openshift Install

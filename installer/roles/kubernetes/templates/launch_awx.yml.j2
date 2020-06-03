@@ -35,7 +35,7 @@ data:
 
     unset $(cut -d = -f -1 /etc/tower/conf.d/environment.sh)
 
-    supervisord -c /supervisor_task.conf
+    supervisord -c /etc/supervisord_task.conf
 
   launch-awx-web: |
     #!/usr/bin/env bash
@@ -54,5 +54,5 @@ data:
 
     unset $(cut -d = -f -1 /etc/tower/conf.d/environment.sh)
 
-    supervisord -c /supervisor.conf
+    supervisord -c /etc/supervisord.conf
 

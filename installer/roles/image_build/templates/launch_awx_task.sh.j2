@@ -26,4 +26,4 @@ awx-manage register_queue --queuename=tower --instance_percent=100
 
 unset $(cut -d = -f -1 /etc/tower/conf.d/environment.sh)
 
-supervisord -c /supervisor_task.conf
+supervisord -c /etc/supervisord_task.conf
