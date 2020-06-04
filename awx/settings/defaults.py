@@ -439,10 +439,11 @@ CELERYBEAT_SCHEDULE = {
 }
 
 # Django Caching Configuration
+DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'unix:/var/run/redis/redis.sock'
+        'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'
     },
 }
 
