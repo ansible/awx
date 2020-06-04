@@ -104,7 +104,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -140,7 +143,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -180,7 +186,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -226,7 +235,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -279,7 +291,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
