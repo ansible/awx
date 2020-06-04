@@ -378,7 +378,7 @@ spec:
               - key: {{ kubernetes_deployment_name }}_nginx_conf
                 path: nginx.conf
 
-{% if redis_hostname is defined %}
+{% if redis_hostname is not defined %}
         - name: {{ kubernetes_deployment_name }}-redis-config
           configMap:
             name: {{ kubernetes_deployment_name }}-config
