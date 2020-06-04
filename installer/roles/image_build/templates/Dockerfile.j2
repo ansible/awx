@@ -220,7 +220,6 @@ RUN for dir in \
       /vendor ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
-      /etc/supervisord.conf \
       /var/run/nginx.pid \
       /venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done
