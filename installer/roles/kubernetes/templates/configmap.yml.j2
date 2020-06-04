@@ -200,15 +200,6 @@ data:
     BROADCAST_WEBSOCKET_PORT = 8052
     BROADCAST_WEBSOCKET_PROTOCOL = 'http'
 
-{% if memcached_host is defined or memcached_port is defined %}
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '{{ memcached_host }}:{{ memcached_port }}'
-        }
-    }
-{% endif %}
-
   {{ kubernetes_deployment_name }}_redis_conf: |
     unixsocket /var/run/redis/redis.sock
     unixsocketperm 777

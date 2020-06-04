@@ -100,11 +100,6 @@ pg_port=5432
 #redis_port=6379
 #redis_db=0
 
-# If we want to use an external memcached both memcached_host and memcached_port need to be set, 
-# this is only applicable to k8s deployment and will skip the creation of the memcached container.
-#memcached_host=example.com
-#memcached_port=11211
-
 # How many replicas to spin off the awx pod, it defaults to 1 replica
 # replicas=1
 

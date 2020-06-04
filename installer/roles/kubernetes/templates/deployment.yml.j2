@@ -162,10 +162,8 @@ spec:
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
 {% endif %}
-{% if memcached_host is not defined or memcached_port is not defined %}
             - name: {{ kubernetes_deployment_name }}-memcached-socket
               mountPath: "/var/run/memcached"
-{% endif %}
 
           resources:
             requests:
@@ -241,10 +239,8 @@ spec:
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
 {% endif %}
-{% if memcached_host is not defined or memcached_port is not defined %}
             - name: {{ kubernetes_deployment_name }}-memcached-socket
               mountPath: "/var/run/memcached"
-{% endif %}
           env:
             - name: SUPERVISOR_WEB_CONFIG_PATH
               value: "/etc/supervisord.conf"
@@ -302,7 +298,6 @@ spec:
               cpu: "{{ redis_cpu_limit }}m"
 {% endif %}
 {% endif %}
-{% if memcached_host is not defined or memcached_port is not defined %}
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
@@ -327,7 +322,6 @@ spec:
 {% endif %}
 {% if memcached_cpu_limit is defined %}
               cpu: "{{ memcached_cpu_limit }}m"
-{% endif %}
 {% endif %}
 {% if tolerations is defined %}
       tolerations:
@@ -437,10 +431,8 @@ spec:
         - name: {{ kubernetes_deployment_name }}-redis-socket
           emptyDir: {}
 {% endif %}
-{% if memcached_host is not defined or memcached_port is not defined %}
         - name: {{ kubernetes_deployment_name }}-memcached-socket
           emptyDir: {}
-{% endif %}
 
 ---
 apiVersion: v1
