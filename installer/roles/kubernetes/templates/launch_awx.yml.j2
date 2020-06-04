@@ -15,8 +15,16 @@ data:
     source /etc/tower/conf.d/environment.sh
 
     ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=$DATABASE_HOST port=$DATABASE_PORT" all
+{% if redis_hostname is defined %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host={{ redis_hostname }} port={{ redis_port }}" all
+{% else %}
     ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.sock" all
-
+{% endif %}
+{% if memcached_host is defined and memcached_port is defined %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host={{ memcached_host }} port={{ memcached_port }}" all
+{% else %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/memcached/memcached.sock" all
+{% endif %}
 
     if [ -z "$AWX_SKIP_MIGRATIONS" ]; then
         awx-manage migrate --noinput
@@ -48,7 +56,16 @@ data:
     source /etc/tower/conf.d/environment.sh
 
     ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=$DATABASE_HOST port=$DATABASE_PORT" all
+{% if redis_hostname is defined %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host={{ redis_hostname }} port={{ redis_port }}" all
+{% else %}
     ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.sock" all
+{% endif %}
+{% if memcached_host is defined and memcached_port is defined %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "host={{ memcached_host }} port={{ memcached_port }}" all
+{% else %}
+    ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/memcached/memcached.sock" all
+{% endif %}
 
     awx-manage collectstatic --noinput --clear
 

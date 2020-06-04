@@ -26,7 +26,7 @@ metadata:
     app: {{ kubernetes_deployment_name }}
 {% endif %}
 spec:
-  replicas: 1
+  replicas: '{{ replicas }}'
 {% if kubernetes_deployment_api_version == "apps/v1" %}
   selector:
     matchLabels:
@@ -158,11 +158,14 @@ spec:
               subPath: SECRET_KEY
               readOnly: true
 
+{% if redis_hostname is not defined %}
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
-
+{% endif %}
+{% if memcached_host is not defined or memcached_port is not defined %}
             - name: {{ kubernetes_deployment_name }}-memcached-socket
               mountPath: "/var/run/memcached"
+{% endif %}
 
           resources:
             requests:
@@ -234,11 +237,14 @@ spec:
               subPath: SECRET_KEY
               readOnly: true
 
+{% if redis_hostname is not defined %}
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
-
+{% endif %}
+{% if memcached_host is not defined or memcached_port is not defined %}
             - name: {{ kubernetes_deployment_name }}-memcached-socket
               mountPath: "/var/run/memcached"
+{% endif %}
           env:
             - name: SUPERVISOR_WEB_CONFIG_PATH
               value: "/etc/supervisord.conf"
@@ -269,6 +275,7 @@ spec:
 {% if task_cpu_limit is defined %}
               cpu: "{{ task_cpu_limit }}m"
 {% endif %}
+{% if redis_hostname is not defined %}
         - name: {{ kubernetes_deployment_name }}-redis
           image: {{ kubernetes_redis_image }}:{{ kubernetes_redis_image_tag }}
           imagePullPolicy: Always
@@ -294,6 +301,8 @@ spec:
 {% if redis_cpu_limit is defined %}
               cpu: "{{ redis_cpu_limit }}m"
 {% endif %}
+{% endif %}
+{% if memcached_host is not defined or memcached_port is not defined %}
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
@@ -318,6 +327,7 @@ spec:
 {% endif %}
 {% if memcached_cpu_limit is defined %}
               cpu: "{{ memcached_cpu_limit }}m"
+{% endif %}
 {% endif %}
 {% if tolerations is defined %}
       tolerations:
@@ -368,12 +378,14 @@ spec:
               - key: {{ kubernetes_deployment_name }}_nginx_conf
                 path: nginx.conf
 
+{% if redis_hostname is defined %}
         - name: {{ kubernetes_deployment_name }}-redis-config
           configMap:
             name: {{ kubernetes_deployment_name }}-config
             items:
               - key: {{ kubernetes_deployment_name }}_redis_conf
                 path: redis.conf
+{% endif %}
 
         - name: "{{ kubernetes_deployment_name }}-application-credentials"
           secret:
@@ -421,11 +433,14 @@ spec:
               - key: secret_key
                 path: SECRET_KEY
 
+{% if redis_hostname is not defined %}
         - name: {{ kubernetes_deployment_name }}-redis-socket
           emptyDir: {}
-
+{% endif %}
+{% if memcached_host is not defined or memcached_port is not defined %}
         - name: {{ kubernetes_deployment_name }}-memcached-socket
           emptyDir: {}
+{% endif %}
 
 ---
 apiVersion: v1
