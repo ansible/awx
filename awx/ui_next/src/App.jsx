@@ -55,12 +55,12 @@ function App() {
                     {getRouteConfig(i18n)
                       .flatMap(({ routes }) => routes)
                       .map(({ path, screen: Screen }) => (
-                        <ProtectedRoute auth key={path} path={path}>
+                        <ProtectedRoute key={path} path={path}>
                           <Screen match={match} />
                         </ProtectedRoute>
                       ))
                       .concat(
-                        <ProtectedRoute auth key="not-found" path="*">
+                        <ProtectedRoute key="not-found" path="*">
                           <NotFound />
                         </ProtectedRoute>
                       )}
