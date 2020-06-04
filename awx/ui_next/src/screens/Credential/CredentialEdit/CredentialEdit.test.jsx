@@ -5,7 +5,6 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { sleep } from '../../../../testUtils/testUtils';
 
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import CredentialEdit from './CredentialEdit';
@@ -279,23 +278,34 @@ describe('<CredentialEdit />', () => {
 
   test('handleSubmit should post to the api', async () => {
     await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-
-    wrapper.find('CredentialForm').prop('onSubmit')({
-      user: 1,
-      organization: null,
-      name: 'foo',
-      description: 'bar',
-      credential_type: '2',
-      inputs: {},
+    await act(async () => {
+      wrapper.find('CredentialForm').prop('onSubmit')({
+        user: 1,
+        organization: null,
+        name: 'foo',
+        description: 'bar',
+        credential_type: '2',
+        inputs: {
+          username: '',
+          password: '',
+          ssh_key_data: '',
+          ssh_key_unlock: '',
+        },
+        passwordPrompts: {},
+      });
     });
-    await sleep(1);
     expect(CredentialsAPI.update).toHaveBeenCalledWith(3, {
       user: 1,
       organization: null,
       name: 'foo',
       description: 'bar',
       credential_type: '2',
-      inputs: {},
+      inputs: {
+        username: '',
+        password: '',
+        ssh_key_data: '',
+        ssh_key_unlock: '',
+      },
     });
     expect(history.location.pathname).toBe('/credentials/3/details');
   });

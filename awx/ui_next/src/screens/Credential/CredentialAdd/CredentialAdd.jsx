@@ -25,17 +25,32 @@ function CredentialAdd({ me }) {
     result: credentialId,
   } = useRequest(
     useCallback(
-      async values => {
-        const { inputs, organization, ...remainingValues } = values;
+      async (values, credentialTypesMap) => {
+        const {
+          inputs: { fields: possibleFields },
+        } = credentialTypesMap[values.credential_type];
+
+        const {
+          inputs,
+          organization,
+          passwordPrompts,
+          ...remainingValues
+        } = values;
+
         const nonPluginInputs = {};
         const pluginInputs = {};
-        Object.entries(inputs).forEach(([key, value]) => {
-          if (value.credential && value.inputs) {
-            pluginInputs[key] = value;
+
+        possibleFields.forEach(field => {
+          const input = inputs[field.id];
+          if (input.credential && input.inputs) {
+            pluginInputs[field.id] = input;
+          } else if (passwordPrompts[field.id]) {
+            nonPluginInputs[field.id] = 'ASK';
           } else {
-            nonPluginInputs[key] = value;
+            nonPluginInputs[field.id] = input;
           }
         });
+
         const {
           data: { id: newCredentialId },
         } = await CredentialsAPI.create({
@@ -44,18 +59,17 @@ function CredentialAdd({ me }) {
           inputs: nonPluginInputs,
           ...remainingValues,
         });
-        const inputSourceRequests = [];
-        Object.entries(pluginInputs).forEach(([key, value]) => {
-          inputSourceRequests.push(
+
+        await Promise.all(
+          Object.entries(pluginInputs).map(([key, value]) =>
             CredentialInputSourcesAPI.create({
               input_field_name: key,
               metadata: value.inputs,
               source_credential: value.credential.id,
               target_credential: newCredentialId,
             })
-          );
-        });
-        await Promise.all(inputSourceRequests);
+          )
+        );
 
         return newCredentialId;
       },
@@ -74,10 +88,13 @@ function CredentialAdd({ me }) {
       try {
         const {
           data: { results: loadedCredentialTypes },
-        } = await CredentialTypesAPI.read({
-          or__namespace: ['gce', 'scm', 'ssh'],
-        });
-        setCredentialTypes(loadedCredentialTypes);
+        } = await CredentialTypesAPI.read();
+        setCredentialTypes(
+          loadedCredentialTypes.reduce((credentialTypesMap, credentialType) => {
+            credentialTypesMap[credentialType.id] = credentialType;
+            return credentialTypesMap;
+          }, {})
+        );
       } catch (err) {
         setError(err);
       } finally {
@@ -92,7 +109,7 @@ function CredentialAdd({ me }) {
   };
 
   const handleSubmit = async values => {
-    await submitRequest(values);
+    await submitRequest(values, credentialTypes);
   };
 
   if (error) {

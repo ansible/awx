@@ -3,30 +3,20 @@ import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
-import { Form, FormGroup, Title } from '@patternfly/react-core';
+import { Form, FormGroup } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import {
-  FormColumnLayout,
-  SubFormLayout,
-} from '../../../components/FormLayout';
-import {
-  GoogleComputeEngineSubForm,
-  ManualSubForm,
-  SourceControlSubForm,
-} from './CredentialSubForms';
+import { FormColumnLayout } from '../../../components/FormLayout';
+import CredentialSubForm from './CredentialSubForm';
 
 function CredentialFormFields({
   i18n,
   credentialTypes,
   formik,
-  gceCredentialTypeId,
   initialValues,
-  scmCredentialTypeId,
-  sshCredentialTypeId,
 }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
   const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
@@ -34,23 +24,52 @@ function CredentialFormFields({
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
 
-  const credentialTypeOptions = Object.keys(credentialTypes).map(key => {
-    return {
-      value: credentialTypes[key].id,
-      key: credentialTypes[key].kind,
-      label: credentialTypes[key].name,
-    };
-  });
+  const credentialTypeOptions = Object.keys(credentialTypes)
+    .map(key => {
+      return {
+        value: credentialTypes[key].id,
+        key: credentialTypes[key].id,
+        label: credentialTypes[key].name,
+      };
+    })
+    .sort((a, b) => (a.label > b.label ? 1 : -1));
 
-  const resetSubFormFields = (value, form) => {
-    Object.keys(form.initialValues.inputs).forEach(label => {
-      if (parseInt(value, 10) === form.initialValues.credential_type) {
-        form.setFieldValue(`inputs.${label}`, initialValues.inputs[label]);
-      } else {
-        form.setFieldValue(`inputs.${label}`, '');
+  const resetSubFormFields = (newCredentialType, form) => {
+    credentialTypes[newCredentialType].inputs.fields.forEach(
+      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+        if (
+          parseInt(newCredentialType, 10) === form.initialValues.credential_type
+        ) {
+          form.setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
+          if (ask_at_runtime) {
+            form.setFieldValue(
+              `passwordPrompts.${id}`,
+              initialValues.passwordPrompts[id]
+            );
+          }
+        } else {
+          switch (type) {
+            case 'string':
+              form.setFieldValue(`inputs.${id}`, defaultValue || '');
+              break;
+            case 'boolean':
+              form.setFieldValue(`inputs.${id}`, defaultValue || false);
+              break;
+            default:
+              break;
+          }
+
+          if (choices) {
+            form.setFieldValue(`inputs.${id}`, defaultValue);
+          }
+
+          if (ask_at_runtime) {
+            form.setFieldValue(`passwordPrompts.${id}`, false);
+          }
+        }
+        form.setFieldTouched(`inputs.${id}`, false);
       }
-      form.setFieldTouched(`inputs.${label}`, false);
-    });
+    );
   };
 
   return (
@@ -106,16 +125,9 @@ function CredentialFormFields({
         />
       </FormGroup>
       {credTypeField.value !== undefined && credTypeField.value !== '' && (
-        <SubFormLayout>
-          <Title size="md">{i18n._(t`Type Details`)}</Title>
-          {
-            {
-              [gceCredentialTypeId]: <GoogleComputeEngineSubForm />,
-              [sshCredentialTypeId]: <ManualSubForm />,
-              [scmCredentialTypeId]: <SourceControlSubForm />,
-            }[credTypeField.value]
-          }
-        </SubFormLayout>
+        <CredentialSubForm
+          credentialType={credentialTypes[credTypeField.value]}
+        />
       )}
     </>
   );
@@ -135,18 +147,42 @@ function CredentialForm({
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
     credential_type: credential.credential_type || '',
-    inputs: {
-      become_method: credential?.inputs?.become_method || '',
-      become_password: credential?.inputs?.become_password || '',
-      become_username: credential?.inputs?.become_username || '',
-      password: credential?.inputs?.password || '',
-      project: credential?.inputs?.project || '',
-      ssh_key_data: credential?.inputs?.ssh_key_data || '',
-      ssh_key_unlock: credential?.inputs?.ssh_key_unlock || '',
-      ssh_public_key_data: credential?.inputs?.ssh_public_key_data || '',
-      username: credential?.inputs?.username || '',
-    },
+    inputs: {},
+    passwordPrompts: {},
   };
+
+  Object.values(credentialTypes).forEach(credentialType => {
+    credentialType.inputs.fields.forEach(
+      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
+        if (credential?.inputs && credential.inputs[id]) {
+          if (ask_at_runtime) {
+            initialValues.passwordPrompts[id] =
+              credential.inputs[id] === 'ASK' || false;
+          }
+          initialValues.inputs[id] = credential.inputs[id];
+        } else {
+          switch (type) {
+            case 'string':
+              initialValues.inputs[id] = defaultValue || '';
+              break;
+            case 'boolean':
+              initialValues.inputs[id] = defaultValue || false;
+              break;
+            default:
+              break;
+          }
+
+          if (choices) {
+            initialValues.inputs[id] = defaultValue;
+          }
+
+          if (ask_at_runtime) {
+            initialValues.passwordPrompts[id] = false;
+          }
+        }
+      }
+    );
+  });
 
   Object.values(inputSources).forEach(inputSource => {
     initialValues.inputs[inputSource.input_field_name] = {
@@ -155,60 +191,10 @@ function CredentialForm({
     };
   });
 
-  const scmCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'scm')
-    .map(key => credentialTypes[key].id)[0];
-  const sshCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'ssh')
-    .map(key => credentialTypes[key].id)[0];
-  const gceCredentialTypeId = Object.keys(credentialTypes)
-    .filter(key => credentialTypes[key].namespace === 'gce')
-    .map(key => credentialTypes[key].id)[0];
-
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={values => {
-        const scmKeys = [
-          'username',
-          'password',
-          'ssh_key_data',
-          'ssh_key_unlock',
-        ];
-        const sshKeys = [
-          'username',
-          'password',
-          'ssh_key_data',
-          'ssh_public_key_data',
-          'ssh_key_unlock',
-          'become_method',
-          'become_username',
-          'become_password',
-        ];
-        const gceKeys = ['username', 'ssh_key_data', 'project'];
-        if (parseInt(values.credential_type, 10) === scmCredentialTypeId) {
-          Object.keys(values.inputs).forEach(key => {
-            if (scmKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        } else if (
-          parseInt(values.credential_type, 10) === sshCredentialTypeId
-        ) {
-          Object.keys(values.inputs).forEach(key => {
-            if (sshKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        } else if (
-          parseInt(values.credential_type, 10) === gceCredentialTypeId
-        ) {
-          Object.keys(values.inputs).forEach(key => {
-            if (gceKeys.indexOf(key) < 0) {
-              delete values.inputs[key];
-            }
-          });
-        }
         onSubmit(values);
       }}
     >
@@ -219,9 +205,6 @@ function CredentialForm({
               formik={formik}
               initialValues={initialValues}
               credentialTypes={credentialTypes}
-              gceCredentialTypeId={gceCredentialTypeId}
-              scmCredentialTypeId={scmCredentialTypeId}
-              sshCredentialTypeId={sshCredentialTypeId}
               {...rest}
             />
             <FormSubmitError error={submitError} />
@@ -239,13 +222,16 @@ function CredentialForm({
 CredentialForm.proptype = {
   handleSubmit: func.isRequired,
   handleCancel: func.isRequired,
+  credentialTypes: shape({}).isRequired,
   credential: shape({}),
   inputSources: arrayOf(object),
+  submitError: shape({}),
 };
 
 CredentialForm.defaultProps = {
   credential: {},
   inputSources: [],
+  submitError: null,
 };
 
 export default withI18n()(CredentialForm);
