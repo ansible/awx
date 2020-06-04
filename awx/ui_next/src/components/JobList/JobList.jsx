@@ -11,7 +11,7 @@ import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
-import useWebSocket from './useWebSocket';
+import useWsJobs from './useWsJobs';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -37,59 +37,24 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
 
   const [selected, setSelected] = useState([]);
   const location = useLocation();
-  const params = parseQueryString(QS_CONFIG, location.search);
   const {
-    jobs,
-    count: itemCount,
-    contentError,
+    result: { results, count },
+    error: contentError,
     isLoading,
-    fetchJobs,
-  } = useWebSocket(params);
-  // should this happen automatically inside the hook?
-  // useEffect(() => {
-  //   fetchJobs();
-  // }, [fetchJobs]);
-  //   useCallback(async () => {
-  //     const params = parseQueryString(QS_CONFIG, location.search);
-  //
-  //     const {
-  //       data: { count, results },
-  //     } = await UnifiedJobsAPI.read({ ...params });
-  //
-  //     return {
-  //       itemCount: count,
-  //       jobs: results,
-  //     };
-  //   }, [QS_CONFIG, location])
-  // ); // eslint-disable-line react-hooks/exhaustive-deps
+    request: fetchJobs,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const { data } = await UnifiedJobsAPI.read({ ...params });
+      return data;
+    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
+    { results: [], count: 0 }
+  );
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
-  // const {
-  //   result: { jobs, itemCount },
-  //   error: contentError,
-  //   isLoading,
-  //   request: fetchJobs,
-  // } = useRequest(
-  //   useCallback(async () => {
-  //     const params = parseQueryString(QS_CONFIG, location.search);
-  //
-  //     const {
-  //       data: { count, results },
-  //     } = await UnifiedJobsAPI.read({ ...params });
-  //
-  //     return {
-  //       itemCount: count,
-  //       jobs: results,
-  //     };
-  //   }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
-  //   {
-  //     jobs: [],
-  //     itemCount: 0,
-  //   }
-  // );
-  //
-  // useEffect(() => {
-  //   fetchJobs();
-  // }, [fetchJobs]);
+  const jobs = useWsJobs(results, fetchJobs);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {
@@ -151,7 +116,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={jobs}
-          itemCount={itemCount}
+          itemCount={count}
           pluralizedItemName={i18n._(t`Jobs`)}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
