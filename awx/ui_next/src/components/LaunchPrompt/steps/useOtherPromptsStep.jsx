@@ -24,7 +24,8 @@ export default function useOtherPrompt(config, resource, visitedSteps, i18n) {
     initialValues: getInitialValues(config, resource),
     validate,
     isReady: true,
-    error: null,
+    contentError: null,
+    formError: stepErrors,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
         job_type: true,

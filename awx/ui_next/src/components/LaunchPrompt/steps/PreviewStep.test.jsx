@@ -24,6 +24,10 @@ const survey = {
   ],
 };
 
+const formErrors = {
+  inventory: 'An inventory must be selected',
+};
+
 describe('PreviewStep', () => {
   test('should render PromptDetail', async () => {
     let wrapper;
@@ -37,6 +41,7 @@ describe('PreviewStep', () => {
               survey_enabled: true,
             }}
             survey={survey}
+            formErrors={formErrors}
           />
         </Formik>
       );
@@ -62,6 +67,7 @@ describe('PreviewStep', () => {
             config={{
               ask_limit_on_launch: true,
             }}
+            formErrors={formErrors}
           />
         </Formik>
       );
@@ -85,6 +91,7 @@ describe('PreviewStep', () => {
             config={{
               ask_variables_on_launch: true,
             }}
+            formErrors={formErrors}
           />
         </Formik>
       );
