@@ -75,7 +75,7 @@ function CredentialDetail({ i18n, credential }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const renderDetail = ({ id, label, type }) => {
+  const renderDetail = ({ id, label, type, ask_at_runtime }) => {
     let detail;
 
     if (type === 'boolean') {
@@ -95,6 +95,10 @@ function CredentialDetail({ i18n, credential }) {
           value={i18n._(t`Encrypted`)}
           isEncrypted={isEncrypted}
         />
+      );
+    } else if (ask_at_runtime && inputs[id] === 'ASK') {
+      detail = (
+        <Detail key={id} label={label} value={i18n._(t`Prompt on launch`)} />
       );
     } else {
       detail = <Detail key={id} label={label} value={inputs[id]} />;
