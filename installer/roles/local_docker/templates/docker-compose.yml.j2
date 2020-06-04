@@ -7,7 +7,6 @@ services:
     container_name: awx_web
     depends_on:
       - redis
-      - django-redis
       {% if pg_hostname is not defined %}
       - postgres
       {% endif %}
