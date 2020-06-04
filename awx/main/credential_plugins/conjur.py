@@ -50,9 +50,9 @@ conjur_inputs = {
 def conjur_backend(**kwargs):
     url = kwargs['url']
     api_key = kwargs['api_key']
-    account = quote(kwargs['account'])
-    username = quote(kwargs['username'])
-    secret_path = quote(kwargs['secret_path'])
+    account = quote(kwargs['account'], safe='') 
+    username = quote(kwargs['username'], safe='')
+    secret_path = quote(kwargs['secret_path'], safe='')
     version = kwargs.get('secret_version')
     cacert = kwargs.get('cacert', None)
 
