@@ -45,6 +45,14 @@ options:
       description:
         - Name of the inventory to use for the job template.
       type: str
+    organization:
+      description:
+        - Organization the job template exists in.
+        - Used to help lookup the object, cannot be modified using this module.
+        - The Organization is inferred from the associated project
+        - If not provided, will lookup by name only, which does not work with duplicates.
+      type: str
+      version_added: 2.10
     project:
       description:
         - Name of the project to use for the job template.
@@ -299,6 +307,7 @@ EXAMPLES = '''
   tower_job_template:
     name: "Ping"
     job_type: "run"
+    organization: "Default"
     inventory: "Local"
     project: "Demo"
     playbook: "ping.yml"
@@ -329,6 +338,10 @@ from ..module_utils.tower_api import TowerModule
 import json
 
 
+def versiontuple(v):
+    return tuple(map(int, (v.split("."))))
+
+
 def update_survey(module, last_request):
     spec_endpoint = last_request.get('related', {}).get('survey_spec')
     if module.params.get('survey_spec') == {}:
@@ -349,6 +362,7 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         description=dict(default=''),
+        organization=dict(),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(),
         project=dict(),
@@ -415,19 +429,26 @@ def main():
             credentials = []
         credentials.append(credential)
 
+    new_fields = {}
+    search_fields = {'name': name}
+
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = None
+    organization = module.params.get('organization')
+    if organization:
+        organization_id = module.resolve_name_to_id('organizations', organization)
+        tower_version = module.get_endpoint('ping')['json']['version']
+        if versiontuple(tower_version) >= versiontuple("3.7.0"):
+            search_fields['organization'] = new_fields['organization'] = organization_id
+
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('job_templates', **{
-        'data': {
-            'name': name,
-        }
-    })
+    existing_item = module.get_one('job_templates', **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     new_fields['name'] = new_name if new_name else name
     for field_name in (
         'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity',
@@ -454,7 +475,20 @@ def main():
     if inventory is not None:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
-        new_fields['project'] = module.resolve_name_to_id('projects', project)
+        if organization_id is not None:
+            project_data = module.get_one('projects', **{
+                'data': {
+                    'name': project,
+                    'organization': organization_id,
+                }
+            })
+            if project_data is None:
+                module.fail_json(msg="The project {0} in organization {1} was not found on the Tower server".format(
+                    project, organization
+                ))
+            new_fields['project'] = project_data['id']
+        else:
+            new_fields['project'] = module.resolve_name_to_id('projects', project)
     if webhook_credential is not None:
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
 
