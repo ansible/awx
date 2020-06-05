@@ -21,23 +21,27 @@ DOCUMENTATION = '''
           are missing, this plugin will try to fill in missing arguments by reading from environment variables.
         - If reading configurations from environment variables, the path in the command must be @tower_inventory.
     options:
-        host:
+        tower_host:
             description: The network address of your Ansible Tower host.
             env:
                 - name: TOWER_HOST
-        username:
+            aliases: [ host ]
+        tower_username:
             description: The user that you plan to use to access inventories on Ansible Tower.
             env:
                 - name: TOWER_USERNAME
-        password:
+            aliases: [ username ]
+        tower_password:
             description: The password for your Ansible Tower user.
             env:
                 - name: TOWER_PASSWORD
-        oauth_token:
+            aliases: [ password ]
+        tower_oauthtoken:
             description:
                 - The Tower OAuth token to use.
             env:
                 - name: TOWER_OAUTH_TOKEN
+            aliases: [ oauth_token ]
         inventory_id:
             description:
                 - The ID of the Ansible Tower inventory that you wish to import.
@@ -48,14 +52,14 @@ DOCUMENTATION = '''
             env:
                 - name: TOWER_INVENTORY
             required: True
-        verify_ssl:
+        validate_certs:
             description:
                 - Specify whether Ansible should verify the SSL certificate of Ansible Tower host.
                 - Defaults to True, but this is handled by the shared module_utils code
             type: bool
             env:
                 - name: TOWER_VERIFY_SSL
-            aliases: [ validate_certs ]
+            aliases: [ verify_ssl ]
         include_metadata:
             description: Make extra requests to provide all group vars with metadata about the source Ansible Tower host.
             type: bool
@@ -130,8 +134,8 @@ class InventoryModule(BaseInventoryPlugin):
 
         # Defer processing of params to logic shared with the modules
         module_params = {}
-        for plugin_param, module_param in TowerModule.short_params.items():
-            opt_val = self.get_option(plugin_param)
+        for module_param in TowerModule.AUTH_ARGSPEC.keys():
+            opt_val = self.get_option(module_param)
             if opt_val is not None:
                 module_params[module_param] = opt_val
 
