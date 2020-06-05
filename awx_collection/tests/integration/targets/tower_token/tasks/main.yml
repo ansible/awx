@@ -27,6 +27,17 @@
       - results is failed
       - '"The provided tower_oauthtoken type was not valid (list). Valid options are str or dict." == results.msg'
 
+- name: Try to delete a token with no existing_token or existing_token_id
+  tower_token:
+    state: absent
+  register: results
+  ignore_errors: True
+
+- assert:
+    that:
+      - results is failed
+      - '"When deleting a token you specify either the parameter existing_token or existing_token_id" == results.msg'
+
 - block:
     - name: Create a Token
       tower_token:
@@ -52,3 +63,33 @@
         tower_oauthtoken: "{{ tower_token }}"
         state: absent
       when: tower_token is defined
+      register: results
+
+    - assert:
+        that:
+          - results is changed or results is skipped
+
+- block:
+    - name: Create a second token
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+      register: results
+
+    - assert:
+        that:
+          - results is changed
+
+  always:
+    - name: Delete the second Token with our own token
+      tower_token:
+        existing_token_id: "{{ tower_token['id'] }}"
+        tower_oauthtoken: "{{ tower_token }}"
+        state: absent
+      when: tower_token is defined
+      register: results
+
+    - assert:
+        that:
+          - results is changed or resuslts is skipped

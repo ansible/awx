@@ -26,6 +26,10 @@ description:
       tower_* modules as the parameter tower_oauthtoken. See examples for usage.
     - Because of the sensitive nature of tokens, the created token value is only available once
       through the Ansible fact. (See RETURN for details)
+    - Due to the nature of tokens in Tower this module is not idempotent. A second will
+      with the same parameters will create a new token.
+    - If you are creating a temporary token for use with modules you should delete the token
+      when you are done with it. See the example for how to do it.
 options:
     description:
       description:
@@ -46,8 +50,11 @@ options:
       default: 'write'
       choices: ["read", "write"]
     existing_token:
-      description: An existing token (for use with state absent)
+      description: The data structure produced from tower_token in create mode to be used with state absent.
       type: dict
+    existing_token_id:
+      description: A token ID (number) which can be used to delete an arbitrary token with state absent.
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -89,6 +96,11 @@ EXAMPLES = '''
         existing_token: "{{ tower_token }}"
         state: absent
       when: tower_token is defined
+
+- name: Delete a token by its id
+  tower_toekn:
+    existing_token_id: 4
+    state: absent
 '''
 
 RETURN = '''
@@ -98,6 +110,9 @@ tower_token:
   contains:
     token:
       description: The token that was generated. This token can never be accessed again, make sure this value is noted before it is lost.
+      type: str
+    id:
+      description: The numeric ID of the token created
       type: str
   returned: on successful create
 '''
@@ -123,6 +138,7 @@ def main():
         application=dict(),
         scope=dict(choices=['read', 'write'], default='write'),
         existing_token=dict(type='dict'),
+        existing_token_id=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -134,9 +150,19 @@ def main():
     application = module.params.get('application')
     scope = module.params.get('scope')
     existing_token = module.params.get('existing_token')
+    existing_token_id = module.params.get('existing_token_id')
     state = module.params.get('state')
 
     if state == 'absent':
+        if not existing_token:
+            if not existing_token_id:
+                module.fail_json(msg='When deleting a token you specify either the parameter existing_token or existing_token_id')
+            existing_token = module.get_one('tokens', **{
+                'data': {
+                    'id': existing_token_id,
+                }
+            })
+
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_token)
 
