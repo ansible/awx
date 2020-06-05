@@ -47,7 +47,7 @@ class TowerModule(AnsibleModule):
         tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
         tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
         validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
-        tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
+        tower_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
         tower_config_file=dict(type='path', required=False, default=None),
     )
     short_params = {
