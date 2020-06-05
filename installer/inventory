@@ -100,8 +100,8 @@ pg_port=5432
 #redis_port=6379
 #redis_db=0
 
-# How many replicas to spin off the awx pod, it defaults to 1 replica
-# replicas=1
+# How many replicas to spin off the awx pod, it defaults to empty which spins up 1 replica
+# replicas=
 
 # The following variable is only required when using the provided
 # containerized postgres deployment on OpenShift

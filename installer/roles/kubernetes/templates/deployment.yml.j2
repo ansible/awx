@@ -26,7 +26,7 @@ metadata:
     app: {{ kubernetes_deployment_name }}
 {% endif %}
 spec:
-  replicas: {{ replicas }}
+  replicas: {{ replicas | default(kubernetes_deployment_replica_size) }}
 {% if kubernetes_deployment_api_version == "apps/v1" %}
   selector:
     matchLabels:

@@ -57,8 +57,6 @@ container_groups_image: "ansible/ansible-runner"
 
 uwsgi_bash: "bash -c"
 
-replicas: 1
-
 redis_ssl: false
 redis_port: 6379
 redis_db: 0
