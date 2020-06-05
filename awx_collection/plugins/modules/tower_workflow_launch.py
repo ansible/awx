@@ -14,7 +14,6 @@ DOCUMENTATION = '''
 ---
 module: tower_workflow_launch
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.8"
 short_description: Run a workflow in Ansible Tower
 description:
     - Launch an Ansible Tower workflows. See
@@ -32,7 +31,6 @@ options:
         - Organization the workflow job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
-      required: False
       type: str
     inventory:
       description:
@@ -47,7 +45,6 @@ options:
         - A specific branch of the SCM project to run the template on.
         - This is only applicable if your project allows for branch override.
       type: str
-      version_added: "3.7"
     extra_vars:
       description:
         - Any extra vars required to launch the job.

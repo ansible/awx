@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_template
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower job templates.
 description:
     - Create, update, or destroy Ansible Tower job templates. See
@@ -57,19 +56,16 @@ options:
       description:
         - Name of the credential to use for the job template.
         - Deprecated, use 'credentials'.
-      version_added: 2.7
       type: str
     credentials:
       description:
         - List of credentials to use for the job template.
       type: list
       elements: str
-      version_added: 2.8
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
-      version_added: 2.7
       type: str
     forks:
       description:
@@ -89,7 +85,6 @@ options:
       description:
         - Specify C(extra_vars) for the template.
       type: dict
-      version_added: 3.7
     job_tags:
       description:
         - Comma separated list of the tags to use for the job template.
@@ -97,7 +92,6 @@ options:
     force_handlers:
       description:
         - Enable forcing playbook handlers to run even if a task fails.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -109,12 +103,10 @@ options:
     start_at_task:
       description:
         - Start the playbook at the task matching this name.
-      version_added: 2.7
       type: str
     diff_mode:
       description:
         - Enable diff mode for the job template.
-      version_added: 2.7
       type: bool
       aliases:
         - diff_mode_enabled
@@ -122,7 +114,6 @@ options:
     use_fact_cache:
       description:
         - Enable use of fact caching for the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -139,7 +130,6 @@ options:
     ask_diff_mode_on_launch:
       description:
         - Prompt user to enable diff mode (show changes) to files when supported by modules.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -154,7 +144,6 @@ options:
     ask_limit_on_launch:
       description:
         - Prompt user for a limit on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -169,7 +158,6 @@ options:
     ask_skip_tags_on_launch:
       description:
         - Prompt user for job tags to skip on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -184,7 +172,6 @@ options:
     ask_verbosity_on_launch:
       description:
         - Prompt user to choose a verbosity level on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -206,13 +193,11 @@ options:
     survey_enabled:
       description:
         - Enable a survey on the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
     survey_spec:
       description:
         - JSON/YAML dict formatted survey definition.
-      version_added: 2.8
       type: dict
     become_enabled:
       description:
@@ -222,7 +207,6 @@ options:
     allow_simultaneous:
       description:
         - Allow simultaneous runs of the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -232,7 +216,6 @@ options:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
     custom_virtualenv:
-      version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_notification
 author: "Samuel Carpentier (@samcarpentier)"
-version_added: "2.8"
 short_description: create, update, or destroy Ansible Tower notification.
 description:
     - Create, update, or destroy Ansible Tower notifications. See
@@ -371,7 +370,9 @@ def main():
     # Deprecation warnings for all other params
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input), version="3.6")
+            module.deprecate(
+                msg='{0} parameter has been deprecated, please use notification_configuration instead'.format(legacy_input),
+                version="ansible.tower:4.0.0")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None

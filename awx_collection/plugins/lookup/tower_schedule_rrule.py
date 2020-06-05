@@ -6,7 +6,6 @@ __metaclass__ = type
 DOCUMENTATION = """
     lookup: tower_schedule_rrule
     author: John Westcott IV (@john-westcott-iv)
-    version_added: "3.7"
     short_description: Generate an rrule string which can be used for Tower Schedules
     requirements:
       - pytz

@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_organization
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: create, update, or destroy Ansible Tower organizations
 description:
@@ -33,7 +32,6 @@ options:
         - The description to use for the organization.
       type: str
     custom_virtualenv:
-      version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
@@ -43,7 +41,6 @@ options:
         - The max hosts allowed in this organizations
       default: "0"
       type: int
-      version_added: "3.7"
     state:
       description:
         - Desired state of the resource.

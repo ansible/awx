@@ -18,7 +18,6 @@ DOCUMENTATION = '''
 ---
 module: tower_credential_type
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: Create, update, or destroy custom Ansible Tower credential type.
 description:
     - Create, update, or destroy Ansible Tower credential type. See

@@ -17,11 +17,10 @@ DOCUMENTATION = '''
 ---
 module: tower_send
 deprecated:
-  removed_in: "3.7"
+  removed_in: "14.0.0"
   why: Deprecated in favor of upcoming C(_import) module.
   alternative: Once published, use M(tower_import) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.8"
 short_description: Send assets to Ansible Tower.
 description:
     - Send assets to Ansible Tower. See
@@ -106,7 +105,7 @@ def main():
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
 
-    module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI import command", version="3.7")
+    module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI import command", version="awx.awx:14.0.0")
 
     if not HAS_TOWER_CLI:
         module.fail_json(msg='ansible-tower-cli required for this module')

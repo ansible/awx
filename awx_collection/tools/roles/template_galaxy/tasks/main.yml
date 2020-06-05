@@ -30,6 +30,13 @@
         path: "{{ collection_path }}/plugins/inventory/tower.py"
         regexp: "^    NAME = 'awx.awx.tower'  # REPLACE$"
         replace: "    NAME = '{{ collection_namespace }}.{{ collection_package }}.tower'  # REPLACE"
+
+    - name: Get sanity tests to work with non-default name
+      lineinfile:
+        path: "{{ collection_path }}/tests/sanity/ignore-2.10.txt"
+        state: absent
+        regexp: ' pylint:wrong-collection-deprecated-version-tag$'
+
   when:
     - (collection_package != 'awx') or (collection_namespace != 'awx')
 
