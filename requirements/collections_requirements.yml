@@ -7,7 +7,7 @@ collections:
   - name: amazon.aws
     version: 0.1.1  # version 0.1.0 seems to have gone missing
   - name: theforeman.foreman
-    version: 0.8.0
+    version: 0.8.1
   - name: google.cloud
     version: 0.0.9  # contains PR 167, should be good to go
   - name: openstack.cloud
