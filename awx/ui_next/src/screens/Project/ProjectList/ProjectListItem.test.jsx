@@ -245,7 +245,7 @@ describe('<ProjectsListItem />', () => {
     );
     expect(
       wrapper.find('span[aria-label="copy to clipboard disabled"]').text()
-    ).toBe('Sync to activate');
+    ).toBe('Sync for revision');
     expect(wrapper.find('ClipboardCopyButton').prop('isDisabled')).toBe(true);
   });
 });

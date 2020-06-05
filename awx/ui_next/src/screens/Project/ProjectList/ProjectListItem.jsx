@@ -128,14 +128,14 @@ function ProjectListItem({
               {project.scm_revision.substring(0, 7)}
               {!project.scm_revision && (
                 <Label aria-label={i18n._(t`copy to clipboard disabled`)}>
-                  {i18n._(t`Sync to activate`)}
+                  {i18n._(t`Sync for revision`)}
                 </Label>
               )}
               <ClipboardCopyButton
                 isDisabled={!project.scm_revision}
                 stringToCopy={project.scm_revision}
-                hoverTip={i18n._(t`Copy full revision to clipboard.`)}
-                clickTip={i18n._(t`Successfully copied to clipboard!`)}
+                copyTip={i18n._(t`Copy full revision to clipboard.`)}
+                copiedSuccessTip={i18n._(t`Successfully copied to clipboard!`)}
               />
             </DataListCell>,
           ]}
