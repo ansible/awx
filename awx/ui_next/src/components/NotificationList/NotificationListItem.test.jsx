@@ -55,7 +55,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       .find('DataListCell')
       .at(1)
       .find('div');
-    expect(typeCell.text()).toBe('Slack');
+    expect(typeCell.text()).toContain('Slack');
   });
 
   test('handles start click when toggle is on', () => {

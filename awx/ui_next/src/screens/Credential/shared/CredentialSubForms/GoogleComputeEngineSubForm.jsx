@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { FileUpload, FormGroup } from '@patternfly/react-core';
-import FormField from '../../../../components/FormField';
+import {
+  FileUpload,
+  FormGroup,
+  TextArea,
+  TextInput,
+} from '@patternfly/react-core';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
 } from '../../../../components/FormLayout';
 import { required } from '../../../../util/validators';
+import { CredentialPluginField } from '../CredentialPlugins';
 
 const GoogleComputeEngineSubForm = ({ i18n }) => {
   const [fileError, setFileError] = useState(null);
@@ -91,30 +96,38 @@ const GoogleComputeEngineSubForm = ({ i18n }) => {
           }}
         />
       </FormGroup>
-      <FormField
+      <CredentialPluginField
         id="credential-username"
         label={i18n._(t`Service account email address`)}
         name="inputs.username"
         type="email"
         validate={required(null, i18n)}
         isRequired
-      />
-      <FormField
+      >
+        <TextInput id="credential-username" />
+      </CredentialPluginField>
+      <CredentialPluginField
         id="credential-project"
         label={i18n._(t`Project`)}
         name="inputs.project"
-        type="text"
-      />
+      >
+        <TextInput id="credential-project" />
+      </CredentialPluginField>
       <FormFullWidthLayout>
-        <FormField
+        <CredentialPluginField
           id="credential-sshKeyData"
           label={i18n._(t`RSA private key`)}
           name="inputs.ssh_key_data"
           type="textarea"
-          rows={6}
           validate={required(null, i18n)}
           isRequired
-        />
+        >
+          <TextArea
+            id="credential-sshKeyData"
+            rows={6}
+            resizeOrientation="vertical"
+          />
+        </CredentialPluginField>
       </FormFullWidthLayout>
     </FormColumnLayout>
   );

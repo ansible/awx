@@ -71,21 +71,14 @@ def test_duplicate_config(collection_import, silence_warning):
         'tower_config_file': 'my_config'
     }
 
-    class DuplicateTestTowerModule(TowerModule):
-        def load_config(self, config_path):
-            assert config_path == 'my_config'
-
-        def _load_params(self):
-            self.params = data
-
-    cli_data = {'ANSIBLE_MODULE_ARGS': data}
-    testargs = ['module_file.py', json.dumps(cli_data)]
-    with mock.patch.object(sys, 'argv', testargs):
+    with mock.patch.object(TowerModule, 'load_config') as mock_load:
         argument_spec = dict(
             name=dict(required=True),
             zig=dict(type='str'),
         )
-        DuplicateTestTowerModule(argument_spec=argument_spec)
+        TowerModule(argument_spec=argument_spec, direct_params=data)
+        assert mock_load.mock_calls[-1] == mock.call('my_config')
+
     silence_warning.assert_called_once_with(
         'The parameter(s) tower_username were provided at the same time as '
         'tower_config_file. Precedence may be unstable, '

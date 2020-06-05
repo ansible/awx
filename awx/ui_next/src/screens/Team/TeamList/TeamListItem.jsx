@@ -58,7 +58,7 @@ class TeamListItem extends React.Component {
               <DataListCell key="organization">
                 {team.summary_fields.organization && (
                   <Fragment>
-                    <b css="margin-right: 24px">{i18n._(t`Organization`)}</b>
+                    <b>{i18n._(t`Organization`)}</b>{' '}
                     <Link
                       to={`/organizations/${team.summary_fields.organization.id}/details`}
                     >

@@ -13,14 +13,13 @@ export default function useSteps(config, resource, i18n) {
     useOtherPromptsStep(config, resource, visited, i18n),
     useSurveyStep(config, resource, visited, i18n),
   ];
+
+  const formErrorsContent = steps
+    .filter(s => s?.formError && Object.keys(s.formError).length > 0)
+    .map(({ formError }) => formError);
+
   steps.push(
-    usePreviewStep(
-      config,
-      resource,
-      steps[3].survey,
-      {}, // TODO: formErrors ?
-      i18n
-    )
+    usePreviewStep(config, resource, steps[3].survey, formErrorsContent, i18n)
   );
 
   const pfSteps = steps.map(s => s.step).filter(s => s != null);
@@ -31,8 +30,9 @@ export default function useSteps(config, resource, i18n) {
     };
   }, {});
   const isReady = !steps.some(s => !s.isReady);
-  const stepWithError = steps.find(s => s.error);
-  const contentError = stepWithError ? stepWithError.error : null;
+
+  const stepWithError = steps.find(s => s.contentError);
+  const contentError = stepWithError ? stepWithError.contentError : null;
 
   const validate = values => {
     const errors = steps.reduce((acc, cur) => {

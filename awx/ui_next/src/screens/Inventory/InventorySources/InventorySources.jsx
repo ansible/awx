@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import InventorySource from '../InventorySource';
+import { Config } from '../../../contexts/Config';
 import InventorySourceAdd from '../InventorySourceAdd';
 import InventorySourceList from './InventorySourceList';
 
@@ -11,7 +12,15 @@ function InventorySources({ inventory, setBreadcrumb }) {
         <InventorySourceAdd />
       </Route>
       <Route path="/inventories/inventory/:id/sources/:sourceId">
-        <InventorySource inventory={inventory} setBreadcrumb={setBreadcrumb} />
+        <Config>
+          {({ me }) => (
+            <InventorySource
+              inventory={inventory}
+              setBreadcrumb={setBreadcrumb}
+              me={me || {}}
+            />
+          )}
+        </Config>
       </Route>
       <Route path="/inventories/:inventoryType/:id/sources">
         <InventorySourceList />

@@ -3,7 +3,7 @@ version: '2'
 services:
 
   web:
-    image: {{ awx_web_docker_actual_image }}
+    image: {{ awx_docker_actual_image }}
     container_name: awx_web
     depends_on:
       - redis
@@ -72,7 +72,7 @@ services:
       no_proxy: {{ no_proxy | default('') }}
 
   task:
-    image: {{ awx_task_docker_actual_image }}
+    image: {{ awx_docker_actual_image }}
     container_name: awx_task
     depends_on:
       - redis
@@ -81,6 +81,7 @@ services:
       {% if pg_hostname is not defined %}
       - postgres
       {% endif %}
+    command: /usr/bin/launch_awx_task.sh
     hostname: {{ awx_task_hostname }}
     user: root
     restart: unless-stopped
@@ -127,7 +128,7 @@ services:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
-      SUPERVISOR_WEB_CONFIG_PATH: '/supervisor.conf'
+      SUPERVISOR_WEB_CONFIG_PATH: '/etc/supervisord.conf'
 
   redis:
     image: {{ redis_image }}
@@ -171,6 +172,17 @@ services:
       https_proxy: {{ https_proxy | default('') }}
       no_proxy: {{ no_proxy | default('') }}
   {% endif %}
+
+{% if docker_compose_subnet is defined %}
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  {{ docker_compose_subnet }}
+{% endif %}
+
 volumes:
   supervisor-socket:
   rsyslog-socket:

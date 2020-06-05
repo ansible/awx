@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_role
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: grant or revoke an Ansible Tower role.
 description:

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_label
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower labels.
 description:
     - Create, update, or destroy Ansible Tower labels. See

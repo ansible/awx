@@ -54,7 +54,8 @@ export default function useSurveyStep(config, resource, visitedSteps, i18n) {
     validate,
     survey,
     isReady: !isLoading && !!survey,
-    error,
+    contentError: error,
+    formError: stepErrors,
     setTouched: setFieldsTouched => {
       if (!survey || !survey.spec) {
         return;

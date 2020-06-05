@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_workflow_job_template_node
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower workflow job template nodes.
 description:
     - Create, update, or destroy Ansible Tower workflow job template nodes.

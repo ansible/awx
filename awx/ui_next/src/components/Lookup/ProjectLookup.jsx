@@ -32,9 +32,10 @@ function ProjectLookup({
   history,
 }) {
   const {
-    result: { count, projects },
-    error,
+    result: { projects, count },
     request: fetchProjects,
+    error,
+    isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
@@ -74,6 +75,7 @@ function ProjectLookup({
         onBlur={onBlur}
         onChange={onChange}
         required={required}
+        isLoading={isLoading}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

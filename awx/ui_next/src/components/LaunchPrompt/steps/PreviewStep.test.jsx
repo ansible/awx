@@ -24,6 +24,10 @@ const survey = {
   ],
 };
 
+const formErrors = {
+  inventory: 'An inventory must be selected',
+};
+
 describe('PreviewStep', () => {
   test('should render PromptDetail', async () => {
     let wrapper;
@@ -37,6 +41,7 @@ describe('PreviewStep', () => {
               survey_enabled: true,
             }}
             survey={survey}
+            formErrors={formErrors}
           />
         </Formik>
       );
@@ -62,6 +67,7 @@ describe('PreviewStep', () => {
             config={{
               ask_limit_on_launch: true,
             }}
+            formErrors={formErrors}
           />
         </Formik>
       );
@@ -71,8 +77,31 @@ describe('PreviewStep', () => {
     expect(detail).toHaveLength(1);
     expect(detail.prop('resource')).toEqual(resource);
     expect(detail.prop('overrides')).toEqual({
-      extra_vars: '---',
       limit: '4',
+    });
+  });
+
+  test('should handle extra vars without survey', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik initialValues={{ extra_vars: 'one: 1' }}>
+          <PreviewStep
+            resource={resource}
+            config={{
+              ask_variables_on_launch: true,
+            }}
+            formErrors={formErrors}
+          />
+        </Formik>
+      );
+    });
+
+    const detail = wrapper.find('PromptDetail');
+    expect(detail).toHaveLength(1);
+    expect(detail.prop('resource')).toEqual(resource);
+    expect(detail.prop('overrides')).toEqual({
+      extra_vars: 'one: 1',
     });
   });
 });

@@ -42,7 +42,21 @@ class TowerModule(AnsibleModule):
         'tower': 'Red Hat Ansible Tower',
     }
     url = None
-    honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
+    AUTH_ARGSPEC = dict(
+        tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
+        tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
+        tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
+        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
+        tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
+        tower_config_file=dict(type='path', required=False, default=None),
+    )
+    short_params = {
+        'host': 'tower_host',
+        'username': 'tower_username',
+        'password': 'tower_password',
+        'verify_ssl': 'validate_certs',
+        'oauth_token': 'tower_oauthtoken',
+    }
     host = '127.0.0.1'
     username = None
     password = None
@@ -55,36 +69,32 @@ class TowerModule(AnsibleModule):
     config_name = 'tower_cli.cfg'
     ENCRYPTED_STRING = "$encrypted$"
     version_checked = False
+    error_callback = None
+    warn_callback = None
 
-    def __init__(self, argument_spec, **kwargs):
-        args = dict(
-            tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
-            tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
-            tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
-            validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
-            tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
-            tower_config_file=dict(type='path', required=False, default=None),
-        )
-        args.update(argument_spec)
+    def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
+        full_argspec = {}
+        full_argspec.update(TowerModule.AUTH_ARGSPEC)
+        full_argspec.update(argument_spec)
         kwargs['supports_check_mode'] = True
+
+        self.error_callback = error_callback
+        self.warn_callback = warn_callback
 
         self.json_output = {'changed': False}
 
-        super(TowerModule, self).__init__(argument_spec=args, **kwargs)
+        if direct_params is not None:
+            self.params = direct_params
+        else:
+            super(TowerModule, self).__init__(argument_spec=full_argspec, **kwargs)
 
         self.load_config_files()
 
         # Parameters specified on command line will override settings in any config
-        if self.params.get('tower_host'):
-            self.host = self.params.get('tower_host')
-        if self.params.get('tower_username'):
-            self.username = self.params.get('tower_username')
-        if self.params.get('tower_password'):
-            self.password = self.params.get('tower_password')
-        if self.params.get('validate_certs') is not None:
-            self.verify_ssl = self.params.get('validate_certs')
-        if self.params.get('tower_oauthtoken'):
-            self.oauth_token = self.params.get('tower_oauthtoken')
+        for short_param, long_param in self.short_params.items():
+            direct_value = self.params.get(long_param)
+            if direct_value is not None:
+                setattr(self, short_param, direct_value)
 
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):
@@ -116,10 +126,10 @@ class TowerModule(AnsibleModule):
 
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
-            duplicated_params = []
-            for direct_field in ('tower_host', 'tower_username', 'tower_password', 'validate_certs', 'tower_oauthtoken'):
-                if self.params.get(direct_field):
-                    duplicated_params.append(direct_field)
+            duplicated_params = [
+                fn for fn in self.AUTH_ARGSPEC
+                if fn != 'tower_config_file' and self.params.get(fn) is not None
+            ]
             if duplicated_params:
                 self.warn((
                     'The parameter(s) {0} were provided at the same time as tower_config_file. '
@@ -138,7 +148,7 @@ class TowerModule(AnsibleModule):
                     try:
                         self.load_config(config_file)
                     except ConfigFileException:
-                        self.fail_json('The config file {0} is not properly formatted'.format(config_file))
+                        self.fail_json(msg='The config file {0} is not properly formatted'.format(config_file))
 
     def load_config(self, config_path):
         # Validate the config file is an actual file
@@ -154,43 +164,50 @@ class TowerModule(AnsibleModule):
 
         # First try to yaml load the content (which will also load json)
         try:
-            config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
-            # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-            if type(config_data) is not dict:
-                raise AssertionError("The yaml config file is not properly formatted as a dict.")
+            try_config_parsing = True
+            if HAS_YAML:
+                try:
+                    config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
+                    # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
+                    if type(config_data) is not dict:
+                        raise AssertionError("The yaml config file is not properly formatted as a dict.")
+                    try_config_parsing = False
 
-        except(AttributeError, yaml.YAMLError, AssertionError):
-            # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
-            if '[general]' not in config_string:
-                config_string = '[general]{0}'.format(config_string)
+                except(AttributeError, yaml.YAMLError, AssertionError):
+                    try_config_parsing = True
 
-            config = ConfigParser()
+            if try_config_parsing:
+                # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
+                if '[general]' not in config_string:
+                    config_string = '[general]\n{0}'.format(config_string)
 
-            try:
-                placeholder_file = StringIO(config_string)
-                # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
-                # This "if" removes the deprecation warning
-                if hasattr(config, 'read_file'):
-                    config.read_file(placeholder_file)
-                else:
-                    config.readfp(placeholder_file)
+                config = ConfigParser()
 
-                # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
-                config_data = {}
-                for honorred_setting in self.honorred_settings:
-                    try:
-                        config_data[honorred_setting] = config.get('general', honorred_setting)
-                    except (NoOptionError):
-                        pass
+                try:
+                    placeholder_file = StringIO(config_string)
+                    # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
+                    # This "if" removes the deprecation warning
+                    if hasattr(config, 'read_file'):
+                        config.read_file(placeholder_file)
+                    else:
+                        config.readfp(placeholder_file)
 
-            except Exception as e:
-                raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
+                    # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
+                    config_data = {}
+                    for honorred_setting in self.short_params:
+                        try:
+                            config_data[honorred_setting] = config.get('general', honorred_setting)
+                        except NoOptionError:
+                            pass
+
+                except Exception as e:
+                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
 
         except Exception as e:
             raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e))
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
-        for honorred_setting in self.honorred_settings:
+        for honorred_setting in self.short_params:
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
@@ -741,12 +758,21 @@ class TowerModule(AnsibleModule):
     def fail_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
-        super(TowerModule, self).fail_json(**kwargs)
+        if self.error_callback:
+            self.error_callback(**kwargs)
+        else:
+            super(TowerModule, self).fail_json(**kwargs)
 
     def exit_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
         super(TowerModule, self).exit_json(**kwargs)
+
+    def warn(self, warning):
+        if self.warn_callback is not None:
+            self.warn_callback(warning)
+        else:
+            super(TowerModule, self).warn(warning)
 
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:

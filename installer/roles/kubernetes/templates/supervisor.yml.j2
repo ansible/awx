@@ -8,6 +8,9 @@ data:
     [supervisord]
     nodaemon = True
     umask = 022
+    logfile = /dev/stdout
+    logfile_maxbytes = 0
+    pidfile = /var/run/supervisor/supervisor.web.pid
 
     [program:nginx]
     command = nginx -g "daemon off;"
@@ -93,6 +96,9 @@ data:
     [supervisord]
     nodaemon = True
     umask = 022
+    logfile = /dev/stdout
+    logfile_maxbytes = 0
+    pidfile = /var/run/supervisor/supervisor.pid
 
     [program:dispatcher]
     command = awx-manage run_dispatcher
@@ -133,10 +139,10 @@ data:
     priority=0
 
     [unix_http_server]
-    file=/tmp/supervisor.sock
+    file=/var/run/supervisor/supervisor.sock
 
     [supervisorctl]
-    serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+    serverurl=unix:///var/run/supervisor/supervisor.sock ; use a unix:// URL  for a unix socket
 
     [rpcinterface:supervisor]
     supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface

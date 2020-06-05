@@ -32,6 +32,10 @@ describe('mergeExtraVars', () => {
     });
   });
 
+  test('should handle undefined', () => {
+    expect(mergeExtraVars(undefined, undefined)).toEqual({});
+  });
+
   describe('maskPasswords', () => {
     test('should mask password fields', () => {
       const vars = {

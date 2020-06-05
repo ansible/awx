@@ -3,6 +3,7 @@
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
 ## 12.0.0 (TBD)
+- Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
 - Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.
 - Fixed a bug which broke AWX installations with oc version 4.3 (https://github.com/ansible/awx/pull/6948/files)
@@ -10,11 +11,13 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Fixed a bug that caused CyberArk AIM credential plugin looks to hang forever in some environments (https://github.com/ansible/awx/issues/6986)
 - Fixed a bug that caused ANY/ALL converage settings not to properly save when editing approval nodes in the UI (https://github.com/ansible/awx/issues/6998)
 - Fixed a bug that broke support for the satellite6_group_prefix source variable (https://github.com/ansible/awx/issues/7031)
+- Fixed a bug that prevented the usage of the Conjur credential plugin with secrets that contain spaces (https://github.com/ansible/awx/issues/7191)
 - Fixed a bug in awx-manage run_wsbroadcast --status in kubernetes (https://github.com/ansible/awx/pull/7009)
 - Fixed a bug that broke notification toggles for system jobs in the UI (https://github.com/ansible/awx/pull/7042)
 - Fixed a bug that broke local pip installs of awxkit (https://github.com/ansible/awx/issues/7107)
 - Fixed a bug that prevented PagerDuty notifications from sending for workflow job template approvals (https://github.com/ansible/awx/issues/7094)
 - Fixed a bug that broke external log aggregation support for URL paths that include the = character (such as the tokens for SumoLogic) (https://github.com/ansible/awx/issues/7139)
+- Fixed a bug that prevented organization admins from removing labels from workflow job templates (https://github.com/ansible/awx/pull/7143)
 
 ## 11.2.0 (Apr 29, 2020)
 

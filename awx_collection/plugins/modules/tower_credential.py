@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_credential
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower credential.
 description:
     - Create, update, or destroy Ansible Tower credentials. See
@@ -45,7 +44,6 @@ options:
       description:
         - Name of credential type.
         - Will be preferred over kind
-      version_added: "2.10"
       type: str
     inputs:
       description:
@@ -53,7 +51,6 @@ options:
           Credential inputs where the keys are var names used in templating.
           Refer to the Ansible Tower documentation for example syntax.
         - Any fields in this dict will take prescedence over any fields mentioned below (i.e. host, username, etc)
-      version_added: "2.9"
       type: dict
     user:
       description:
@@ -124,7 +121,6 @@ options:
       description:
         - STS token for aws type.
         - Deprecated, please use inputs
-      version_added: "2.6"
       type: str
     secret:
       description:
@@ -177,7 +173,6 @@ options:
         - This parameter is only valid if C(kind) is specified as C(vault).
         - Deprecated, please use inputs
       type: str
-      version_added: "2.8"
     state:
       description:
         - Desired state of the resource.
@@ -360,9 +355,9 @@ def main():
     # Deprication warnings
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
-            module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="3.6")
+            module.deprecate(msg='{0} parameter has been deprecated, please use inputs instead'.format(legacy_input), version="ansible.tower:4.0.0")
     if kind:
-        module.deprecate(msg='The kind parameter has been deprecated, please use credential_type instead', version="3.6")
+        module.deprecate(msg='The kind parameter has been deprecated, please use credential_type instead', version="ansible.tower:4.0.0")
 
     cred_type_id = module.resolve_name_to_id('credential_types', credential_type if credential_type else KIND_CHOICES[kind])
     if organization:

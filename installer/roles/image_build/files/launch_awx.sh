@@ -14,4 +14,4 @@ awx-manage collectstatic --noinput --clear
 
 unset $(cut -d = -f -1 /etc/tower/conf.d/environment.sh)
 
-supervisord -c /supervisor.conf
+supervisord -c /etc/supervisord.conf

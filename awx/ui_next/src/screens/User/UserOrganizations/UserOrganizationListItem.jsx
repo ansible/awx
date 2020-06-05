@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
 import {
   DataListItemCells,
   DataListItemRow,
@@ -9,14 +7,18 @@ import {
 } from '@patternfly/react-core';
 import DataListCell from '../../../components/DataListCell';
 
-function UserOrganizationListItem({ organization, i18n }) {
+export default function UserOrganizationListItem({ organization }) {
+  const labelId = `organization-${organization.id}`;
   return (
-    <DataListItem aria-labelledby={i18n._(t`User Organization List Item`)}>
+    <DataListItem aria-labelledby={labelId}>
       <DataListItemRow>
         <DataListItemCells
           dataListCells={[
             <DataListCell key={organization.id}>
-              <Link to={`/organizations/${organization.id}/details`}>
+              <Link
+                to={`/organizations/${organization.id}/details`}
+                id={labelId}
+              >
                 {organization.name}
               </Link>
             </DataListCell>,
@@ -29,5 +31,3 @@ function UserOrganizationListItem({ organization, i18n }) {
     </DataListItem>
   );
 }
-
-export default withI18n()(UserOrganizationListItem);

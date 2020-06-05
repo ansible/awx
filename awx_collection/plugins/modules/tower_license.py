@@ -16,7 +16,6 @@ DOCUMENTATION = '''
 ---
 module: tower_license
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.9"
 short_description: Set the license for Ansible Tower
 description:
     - Get or Set Ansible Tower license. See
@@ -27,13 +26,11 @@ options:
         - The contents of the license file
       required: True
       type: dict
-      version_added: "3.7"
     eula_accepted:
       description:
         - Whether or not the EULA is accepted.
       required: True
       type: bool
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

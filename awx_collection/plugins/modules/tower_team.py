@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_team
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower team.
 description:
     - Create, update, or destroy Ansible Tower teams. See
@@ -32,7 +31,6 @@ options:
       description:
         - To use when changing a team's name.
       type: str
-      version_added: "3.7"
     description:
       description:
         - The description to use for the team.

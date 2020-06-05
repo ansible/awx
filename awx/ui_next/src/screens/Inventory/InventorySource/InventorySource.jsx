@@ -13,7 +13,11 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import { CardActions } from '@patternfly/react-core';
 import useRequest from '../../../util/useRequest';
 
-import { InventoriesAPI } from '../../../api';
+import {
+  InventoriesAPI,
+  InventorySourcesAPI,
+  OrganizationsAPI,
+} from '../../../api';
 import { TabbedCardHeader } from '../../../components/Card';
 import CardCloseButton from '../../../components/CardCloseButton';
 import ContentError from '../../../components/ContentError';
@@ -21,20 +25,33 @@ import ContentLoading from '../../../components/ContentLoading';
 import RoutedTabs from '../../../components/RoutedTabs';
 import InventorySourceDetail from '../InventorySourceDetail';
 import InventorySourceEdit from '../InventorySourceEdit';
+import NotificationList from '../../../components/NotificationList/NotificationList';
 
-function InventorySource({ i18n, inventory, setBreadcrumb }) {
+function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
   const location = useLocation();
   const match = useRouteMatch('/inventories/inventory/:id/sources/:sourceId');
   const sourceListUrl = `/inventories/inventory/${inventory.id}/sources`;
 
-  const { result: source, error, isLoading, request: fetchSource } = useRequest(
+  const {
+    result: { source, isNotifAdmin },
+    error,
+    isLoading,
+    request: fetchSource,
+  } = useRequest(
     useCallback(async () => {
-      return InventoriesAPI.readSourceDetail(
-        inventory.id,
-        match.params.sourceId
-      );
+      const [inventorySource, notifAdminRes] = await Promise.all([
+        InventoriesAPI.readSourceDetail(inventory.id, match.params.sourceId),
+        OrganizationsAPI.read({
+          page_size: 1,
+          role_level: 'notification_admin_role',
+        }),
+      ]);
+      return {
+        source: inventorySource,
+        isNotifAdmin: notifAdminRes.data.results.length > 0,
+      };
     }, [inventory.id, match.params.sourceId]),
-    null
+    { source: null, isNotifAdmin: false }
   );
 
   useEffect(() => {
@@ -64,16 +81,22 @@ function InventorySource({ i18n, inventory, setBreadcrumb }) {
       id: 1,
     },
     {
-      name: i18n._(t`Notifications`),
-      link: `${match.url}/notifications`,
-      id: 2,
-    },
-    {
       name: i18n._(t`Schedules`),
       link: `${match.url}/schedules`,
-      id: 3,
+      id: 2,
     },
   ];
+
+  const canToggleNotifications = isNotifAdmin;
+  const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+
+  if (canSeeNotificationsTab) {
+    tabsArray.push({
+      name: i18n._(t`Notifications`),
+      link: `${match.url}/notifications`,
+      id: 3,
+    });
+  }
 
   if (error) {
     return <ContentError error={error} />;
@@ -110,6 +133,16 @@ function InventorySource({ i18n, inventory, setBreadcrumb }) {
             path="/inventories/inventory/:id/sources/:sourceId/edit"
           >
             <InventorySourceEdit source={source} inventory={inventory} />
+          </Route>
+          <Route
+            key="notifications"
+            path="/inventories/inventory/:id/sources/:sourceId/notifications"
+          >
+            <NotificationList
+              id={Number(match.params.sourceId)}
+              canToggleNotifications={canToggleNotifications}
+              apiModel={InventorySourcesAPI}
+            />
           </Route>
           <Route key="not-found" path="*">
             <ContentError isNotFound>
