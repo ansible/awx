@@ -7,6 +7,17 @@ def get_secret():
     if os.path.exists("/etc/tower/SECRET_KEY"):
         return open('/etc/tower/SECRET_KEY', 'rb').read().strip()
 
+def get_uuid():
+    if os.path.exists("/etc/tower/UUID"):
+        return open('/etc/tower/UUID', 'r').read().strip()
+    else:
+        return '00000000-0000-0000-0000-000000000000'
+
+def get_cluster_host_id():
+    if os.path.exists("/etc/tower/CLUSTER_ID"):
+        return open('/etc/tower/CLUSTER_ID', 'r').read().strip()
+    else:
+        return 'awx'
 
 ADMINS = ()
 
@@ -26,8 +37,8 @@ ALLOWED_HOSTS = ['*']
 AWX_PROOT_ENABLED = False
 
 
-CLUSTER_HOST_ID = "awx"
-SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+CLUSTER_HOST_ID = get_cluster_host_id()
+SYSTEM_UUID = get_uuid()
 
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False

@@ -60,6 +60,9 @@ dockerhub_base=ansible
 # management_mem_limit=2
 
 # Common Docker parameters
+# If clustering with local_docker is used then set the task hostname
+# to the local hostname to distinguish between instances, e.g.
+# awx_task_hostname={{ ansible_hostname }}
 awx_task_hostname=awx
 awx_web_hostname=awxweb
 postgres_data_dir="~/.awx/pgdocker"

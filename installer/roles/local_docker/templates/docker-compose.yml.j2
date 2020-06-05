@@ -28,6 +28,10 @@ services:
       - rsyslog-socket:/var/run/awx-rsyslog/
       - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+    {% if ansible_play_hosts_all|length > 1 %}
+      - "{{ docker_compose_dir }}/CLUSTER_ID:/etc/tower/CLUSTER_ID"
+      - "{{ docker_compose_dir }}/UUID:/etc/tower/UUID"
+    {% endif %}
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
       - "{{ docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf:ro"
@@ -66,6 +70,12 @@ services:
     {% elif awx_alternate_dns_servers is defined %}
     dns: "{{ awx_alternate_dns_servers }}"
     {% endif %}
+    {% if ansible_play_hosts_all|length > 1 %}
+    extra_hosts:
+    {% for host in ansible_play_hosts_all %}
+      - "{{ host }}:{{ hostvars[host].ansible_default_ipv4.address }}"
+    {% endfor %}
+    {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
@@ -90,6 +100,10 @@ services:
       - rsyslog-socket:/var/run/awx-rsyslog/
       - rsyslog-config:/var/lib/awx/rsyslog/
       - "{{ docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+    {% if ansible_play_hosts_all|length > 1 %}
+      - "{{ docker_compose_dir }}/CLUSTER_ID:/etc/tower/CLUSTER_ID"
+      - "{{ docker_compose_dir }}/UUID:/etc/tower/UUID"
+    {% endif %}
       - "{{ docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
       - "{{ docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
       - "{{ docker_compose_dir }}/redis_socket:/var/run/redis/:rw"
