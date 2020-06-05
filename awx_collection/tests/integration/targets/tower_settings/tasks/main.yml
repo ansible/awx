@@ -74,3 +74,9 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Handle an omit value
+  tower_settings:
+    name: AWX_PROOT_BASE_PATH
+    value: '{{ junk_var | default(omit) }}'
+
