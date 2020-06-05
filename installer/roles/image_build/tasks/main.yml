@@ -56,6 +56,7 @@
     source: 'build'
     force_source: true
   delegate_to: localhost
+  run_once: true
   when: use_container_for_build|default(true)|bool
 
 - name: Build AWX distribution using container
@@ -71,6 +72,7 @@
     volumes:
       - ../:/awx:Z
   delegate_to: localhost
+  run_once: true
   when: use_container_for_build|default(true)|bool
 
 - name: Build AWX distribution locally

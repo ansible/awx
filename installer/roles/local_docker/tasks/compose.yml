@@ -43,14 +43,14 @@
 
 - name: Render UUID file
   copy:
-    content: "{{ ansible_hostname | to_uuid }}"
+    content: "{{ inventory_hostname | to_uuid }}"
     dest: "{{ docker_compose_dir }}/UUID"
     mode: '0600'
   when: ansible_play_hosts_all|length > 1
 
 - name: Render CLUSTER_ID file
   copy:
-    content: "{{ ansible_hostname }}"
+    content: "{{ inventory_hostname }}"
     dest: "{{ docker_compose_dir }}/CLUSTER_ID"
     mode: '0600'
   when: ansible_play_hosts_all|length > 1
