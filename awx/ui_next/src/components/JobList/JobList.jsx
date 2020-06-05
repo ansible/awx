@@ -54,7 +54,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     fetchJobs();
   }, [fetchJobs]);
 
-  const jobs = useWsJobs(results, fetchJobs);
+  const jobs = useWsJobs(results, fetchJobs, !!defaultParams);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function useWsJobs(initialJobs, refetchJobs) {
+export default function useWsJobs(initialJobs, refetchJobs, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
   useEffect(() => {
@@ -11,6 +11,12 @@ export default function useWsJobs(initialJobs, refetchJobs) {
 
   useEffect(() => {
     if (!lastMessage || !lastMessage.unified_job_id) {
+      return;
+    }
+    if (filtersApplied) {
+      if (['completed', 'failed', 'error'].includes(lastMessage.status)) {
+        refetchJobs();
+      }
       return;
     }
 
