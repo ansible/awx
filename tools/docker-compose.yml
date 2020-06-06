@@ -34,7 +34,6 @@ services:
       - "../awx/projects/:/var/lib/awx/projects/"
       - "./redis/redis_socket_standalone:/var/run/redis/"
       - "./memcached/:/var/run/memcached"
-      - "./rsyslog/:/var/lib/awx/rsyslog"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     privileged: true
     tty: true
