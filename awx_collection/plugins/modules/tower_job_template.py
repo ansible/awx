@@ -53,7 +53,6 @@ options:
         - If not provided, will lookup by name only, which does not work with duplicates.
         - Requires Tower Version 3.7.0 or AWX 10.0.0 IS NOT backwards compatible with earlier versions.
       type: str
-      version_added: 2.10
     project:
       description:
         - Name of the project to use for the job template.
