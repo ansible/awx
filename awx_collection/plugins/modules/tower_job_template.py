@@ -51,6 +51,7 @@ options:
         - Used to help lookup the object, cannot be modified using this module.
         - The Organization is inferred from the associated project
         - If not provided, will lookup by name only, which does not work with duplicates.
+        - Requires Tower Version 3.7.0 or AWX 10.0.0 IS NOT backwards compatible with earlier versions.
       type: str
       version_added: 2.10
     project:
@@ -338,10 +339,6 @@ from ..module_utils.tower_api import TowerModule
 import json
 
 
-def versiontuple(v):
-    return tuple(map(int, (v.split("."))))
-
-
 def update_survey(module, last_request):
     spec_endpoint = last_request.get('related', {}).get('survey_spec')
     if module.params.get('survey_spec') == {}:
@@ -437,9 +434,7 @@ def main():
     organization = module.params.get('organization')
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
-        tower_version = module.get_endpoint('ping')['json']['version']
-        if versiontuple(tower_version) >= versiontuple("3.7.0"):
-            search_fields['organization'] = new_fields['organization'] = organization_id
+        search_fields['organization'] = new_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('job_templates', **{'data': search_fields})
