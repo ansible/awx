@@ -31,7 +31,7 @@
   tower_token:
     state: absent
   register: results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
@@ -45,7 +45,7 @@
     existing_token_id: 1234
     state: absent
   register: results
-  ignore_errors: True
+  ignore_errors: true
 
 - assert:
     that:
