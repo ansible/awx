@@ -138,7 +138,7 @@ function getRouteConfig(i18n) {
           screen: InstanceGroups,
         },
         {
-          title: i18n._(t`Integrations`),
+          title: i18n._(t`Applications`),
           path: '/applications',
           screen: Applications,
         },
