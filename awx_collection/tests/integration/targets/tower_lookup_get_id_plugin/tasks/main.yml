@@ -1,0 +1,78 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate usernames
+  set_fact:
+    usernames:
+      -  "AWX-Collection-tests-tower_get_id-user1-{{ test_id }}"
+      -  "AWX-Collection-tests-tower_get_id-user2-{{ test_id }}"
+      -  "AWX-Collection-tests-tower_get_id-user3-{{ test_id }}"
+
+- name: Create all of our users
+  tower_user:
+     username: "{{ item }}"
+     is_superuser: true
+     password: "{{ test_id }}"
+  loop: "{{ usernames }}"
+  register: user_creation_results
+
+- block:
+    - name: Test too many params (failure from validation of terms)
+      debug:
+        msg: "{{ query('awx.awx.tower_get_id', 'users', 'teams', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+    
+    - assert:
+        that:
+          - result is failed
+          - "'ou must pass exactly one endpoint to query' in result.msg"
+    
+    - name: Try to load invalid endpoint
+      debug:
+        msg: "{{ query('awx.awx.tower_get_id', 'john', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+    
+    - assert:
+        that:
+          - result is failed
+          - "'The requested object could not be found at' in result.msg"
+    
+    - name: Get the ID of the admin user
+      set_fact:
+        user_id: "{{ query('awx.awx.tower_get_id', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
+    
+    - assert:
+        that: "{{ user_id }} == {{ user_creation_results['results'][0]['id'] }}"
+    
+    - name: Try to get an ID of someone who does not exist
+      set_fact:
+        failed_user_id: "{{ query('awx.awx.tower_get_id', 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }) }}"
+      register: results
+      ignore_errors: true
+    
+    - assert:
+        that:
+          - results is failed
+          - "'No objects matched that criteria' in results['msg']"
+
+    - name: Lookup too many users
+      set_fact:
+        too_many_user_ids: " {{ query('awx.awx.tower_get_id', 'users', query_params={ 'username__startswith': 'AWX-Collection-tests-tower_get_id-' }) }}"
+      register: results
+      ignore_errors: True
+
+    - assert:
+        that:
+          - results is failed
+          - "'An unexpected number of items was returned from the API (3)' in results['msg']"
+  always:
+    - name: Cleanup users
+      tower_user:
+        username: "{{ item }}"
+        state: absent
+      loop: "{{ usernames }}"

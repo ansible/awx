@@ -19,24 +19,9 @@ DOCUMENTATION = '''
           the path in the command would be /path/to/tower_inventory.(yml|yaml). If some arguments in the config file
           are missing, this plugin will try to fill in missing arguments by reading from environment variables.
         - If reading configurations from environment variables, the path in the command must be @tower_inventory.
+    extends_documentation_fragment:
+      - awx.awx.auth_plugin
     options:
-        host:
-            description: The network address of your Ansible Tower host.
-            env:
-                - name: TOWER_HOST
-        username:
-            description: The user that you plan to use to access inventories on Ansible Tower.
-            env:
-                - name: TOWER_USERNAME
-        password:
-            description: The password for your Ansible Tower user.
-            env:
-                - name: TOWER_PASSWORD
-        oauth_token:
-            description:
-                - The Tower OAuth token to use.
-            env:
-                - name: TOWER_OAUTH_TOKEN
         inventory_id:
             description:
                 - The ID of the Ansible Tower inventory that you wish to import.
@@ -47,14 +32,6 @@ DOCUMENTATION = '''
             env:
                 - name: TOWER_INVENTORY
             required: True
-        verify_ssl:
-            description:
-                - Specify whether Ansible should verify the SSL certificate of Ansible Tower host.
-                - Defaults to True, but this is handled by the shared module_utils code
-            type: bool
-            env:
-                - name: TOWER_VERIFY_SSL
-            aliases: [ validate_certs ]
         include_metadata:
             description: Make extra requests to provide all group vars with metadata about the source Ansible Tower host.
             type: bool

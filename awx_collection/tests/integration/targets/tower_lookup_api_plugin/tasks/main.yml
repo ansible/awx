@@ -1,0 +1,84 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate usernames
+  set_fact:
+    usernames:
+      -  "AWX-Collection-tests-tower_api_lookup-user1-{{ test_id }}"
+      -  "AWX-Collection-tests-tower_api_lookup-user2-{{ test_id }}"
+      -  "AWX-Collection-tests-tower_api_lookup-user3-{{ test_id }}"
+
+- name: Create all of our users
+  tower_user:
+     username: "{{ item }}"
+     is_superuser: true
+     password: "{{ test_id }}"
+  loop: "{{ usernames }}"
+  register: user_creation_results
+
+- block:
+    - name: Test too many params (failure from validation of terms)
+      set_fact:
+        junk: "{{ query('awx.awx.tower_api', 'users', 'teams', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'ou must pass exactly one endpoint to query' in result.msg"
+
+    - name: Try to load invalid endpoint
+      set_fact:
+        junk: "{{ query('awx.awx.tower_api', 'john', query_params={}, ) }}"
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is failed
+          - "'The requested object could not be found at' in result.msg"
+    
+    - name: Load user of a specific name
+      set_fact:
+        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
+
+    - assert:
+        that:
+          - users['results'] | length() == 1
+          - users['count'] == 1
+
+    - name: Get the id of the admin users
+      set_fact:
+        user_id: "{{ (query('awx.awx.tower_api', 'users', query_params=query_params) | json_query(jmes_query))[0] }}"
+      vars:
+        query_params:
+          username: "{{ user_creation_results['results'][0]['item'] }}"
+        jmes_query: 'results[*].id'
+
+    - assert:
+        that: "{{ user_id }} == {{ user_creation_results['results'][0]['id'] }}"
+    
+    - name: Get a page of users
+      set_fact:
+        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'page_size': 2 } ) }}"
+    
+    - assert:
+        that: users['results'] | length() == 2
+
+    - name: Get all users of a system through next attribute
+      set_fact:
+        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'page_size': 1, }, get_all=true ) }}"
+
+    - assert:
+        that: users['results'] | length() >= 3
+
+  always:
+    - name: Cleanup users
+      tower_user:
+        username: "{{ item }}"
+        state: absent
+      loop: "{{ usernames }}"
