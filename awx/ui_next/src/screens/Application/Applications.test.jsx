@@ -7,12 +7,10 @@ import Applications from './Applications';
 describe('<Applications />', () => {
   let pageWrapper;
   let pageSections;
-  let title;
 
   beforeEach(() => {
     pageWrapper = mountWithContexts(<Applications />);
     pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
   });
 
   afterEach(() => {
@@ -22,8 +20,6 @@ describe('<Applications />', () => {
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
     expect(pageSections.length).toBe(1);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
     expect(pageSections.first().props().variant).toBe('light');
   });
 });

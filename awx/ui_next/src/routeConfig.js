@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro';
 
-import Applications from './screens/Applications';
+import Applications from './screens/Application';
 import Credentials from './screens/Credential';
 import CredentialTypes from './screens/CredentialType';
 import Dashboard from './screens/Dashboard';
