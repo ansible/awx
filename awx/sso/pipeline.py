@@ -187,13 +187,22 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
     team_ids = []
     for team_name_map in team_map.get('team_org_map', []):
-        team_name = team_name_map.get('team', '')
+        team_name = team_name_map.get('team', None)
+        team_alias = team_name_map.get('team_alias', None)
+        organization_name = team_name_map.get('organization', None)
+        organization_alias = team_name_map.get('organization_alias', None)
         if team_name in saml_team_names:
-            if not team_name_map.get('organization', ''):
+            if not organization_name:
                 # Settings field validation should prevent this.
                 logger.error("organization name invalid for team {}".format(team_name))
                 continue
-            org = Organization.objects.get_or_create(name=team_name_map['organization'])[0]
+
+            if organization_alias:
+                organization_name = organization_alias
+            org = Organization.objects.get_or_create(name=organization_name)[0]
+
+            if team_alias:
+                team_name = team_alias
             team = Team.objects.get_or_create(name=team_name, organization=org)[0]
 
             team_ids.append(team.id)
