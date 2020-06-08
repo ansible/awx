@@ -83,7 +83,7 @@ except ImportError:
 
 def coerce_type(module, value):
     # If our value is already None we can just return directly
-    if value == None:
+    if value is None:
         return value
 
     yaml_ish = bool((
