@@ -76,19 +76,20 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
   const { values: formikValues } = useFormikContext();
   const requiredFields = credentialType?.inputs?.required || [];
   const isRequired = requiredFields.includes(fieldOptions.id);
+  const validateField = () => {
+    if (isRequired && !formikValues?.passwordPrompts[fieldOptions.id]) {
+      const validationMsg = fieldOptions.ask_at_runtime
+        ? i18n._(
+            t`Provide a value for this field or select the Prompt on launch option.`
+          )
+        : null;
+      return required(validationMsg, i18n);
+    }
+    return null;
+  };
   const [subFormField, meta, helpers] = useField({
     name: `inputs.${fieldOptions.id}`,
-    validate:
-      isRequired && !formikValues?.passwordPrompts[fieldOptions.id]
-        ? required(
-            fieldOptions.ask_at_runtime
-              ? i18n._(
-                  t`Provide a value for this field or select the Prompt on launch option.`
-                )
-              : null,
-            i18n
-          )
-        : null,
+    validate: validateField(),
   });
   const isValid = !(meta.touched && meta.error);
 
