@@ -35,7 +35,8 @@ function CredentialFormFields({
     .sort((a, b) => (a.label > b.label ? 1 : -1));
 
   const resetSubFormFields = (newCredentialType, form) => {
-    credentialTypes[newCredentialType].inputs.fields.forEach(
+    const fields = credentialTypes[newCredentialType].inputs.fields || [];
+    fields.forEach(
       ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
         if (
           parseInt(newCredentialType, 10) === form.initialValues.credential_type
@@ -124,11 +125,13 @@ function CredentialFormFields({
           }}
         />
       </FormGroup>
-      {credTypeField.value !== undefined && credTypeField.value !== '' && (
-        <TypeInputsSubForm
-          credentialType={credentialTypes[credTypeField.value]}
-        />
-      )}
+      {credTypeField.value !== undefined &&
+        credTypeField.value !== '' &&
+        credentialTypes[credTypeField.value]?.inputs?.fields && (
+          <TypeInputsSubForm
+            credentialType={credentialTypes[credTypeField.value]}
+          />
+        )}
     </>
   );
 }
@@ -152,7 +155,8 @@ function CredentialForm({
   };
 
   Object.values(credentialTypes).forEach(credentialType => {
-    credentialType.inputs.fields.forEach(
+    const fields = credentialType.inputs.fields || [];
+    fields.forEach(
       ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
         if (credential?.inputs && credential.inputs[id]) {
           if (ask_at_runtime) {

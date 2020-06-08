@@ -26,9 +26,9 @@ function CredentialAdd({ me }) {
   } = useRequest(
     useCallback(
       async (values, credentialTypesMap) => {
-        const {
-          inputs: { fields: possibleFields },
-        } = credentialTypesMap[values.credential_type];
+        const { inputs: credentialTypeInputs } = credentialTypesMap[
+          values.credential_type
+        ];
 
         const {
           inputs,
@@ -39,6 +39,7 @@ function CredentialAdd({ me }) {
 
         const nonPluginInputs = {};
         const pluginInputs = {};
+        const possibleFields = credentialTypeInputs.fields || [];
 
         possibleFields.forEach(field => {
           const input = inputs[field.id];

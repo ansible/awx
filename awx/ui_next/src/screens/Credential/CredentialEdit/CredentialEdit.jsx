@@ -22,9 +22,9 @@ function CredentialEdit({ credential, me }) {
   const { error: submitError, request: submitRequest, result } = useRequest(
     useCallback(
       async (values, credentialTypesMap, inputSourceMap) => {
-        const {
-          inputs: { fields: possibleFields },
-        } = credentialTypesMap[values.credential_type];
+        const { inputs: credentialTypeInputs } = credentialTypesMap[
+          values.credential_type
+        ];
 
         const {
           inputs,
@@ -35,6 +35,7 @@ function CredentialEdit({ credential, me }) {
 
         const nonPluginInputs = {};
         const pluginInputs = {};
+        const possibleFields = credentialTypeInputs.fields || [];
 
         possibleFields.forEach(field => {
           const input = inputs[field.id];
