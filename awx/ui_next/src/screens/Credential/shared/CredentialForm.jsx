@@ -12,14 +12,9 @@ import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
 
-function CredentialFormFields({
-  i18n,
-  credentialTypes,
-  formik,
-  initialValues,
-}) {
+function CredentialFormFields({ i18n, credentialTypes, formik }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
-  const [credTypeField, credTypeMeta, credTypeHelpers] = useField({
+  const [credTypeField, credTypeMeta] = useField({
     name: 'credential_type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
@@ -33,45 +28,6 @@ function CredentialFormFields({
       };
     })
     .sort((a, b) => (a.label > b.label ? 1 : -1));
-
-  const resetSubFormFields = (newCredentialType, form) => {
-    const fields = credentialTypes[newCredentialType].inputs.fields || [];
-    fields.forEach(
-      ({ ask_at_runtime, type, id, choices, default: defaultValue }) => {
-        if (
-          parseInt(newCredentialType, 10) === form.initialValues.credential_type
-        ) {
-          form.setFieldValue(`inputs.${id}`, initialValues.inputs[id]);
-          if (ask_at_runtime) {
-            form.setFieldValue(
-              `passwordPrompts.${id}`,
-              initialValues.passwordPrompts[id]
-            );
-          }
-        } else {
-          switch (type) {
-            case 'string':
-              form.setFieldValue(`inputs.${id}`, defaultValue || '');
-              break;
-            case 'boolean':
-              form.setFieldValue(`inputs.${id}`, defaultValue || false);
-              break;
-            default:
-              break;
-          }
-
-          if (choices) {
-            form.setFieldValue(`inputs.${id}`, defaultValue);
-          }
-
-          if (ask_at_runtime) {
-            form.setFieldValue(`passwordPrompts.${id}`, false);
-          }
-        }
-        form.setFieldTouched(`inputs.${id}`, false);
-      }
-    );
-  };
 
   return (
     <>
@@ -120,8 +76,16 @@ function CredentialFormFields({
             ...credentialTypeOptions,
           ]}
           onChange={(event, value) => {
-            credTypeHelpers.setValue(value);
-            resetSubFormFields(value, formik);
+            const { values, initialValues, resetForm } = formik;
+            resetForm({
+              values: {
+                ...initialValues,
+                name: values.name,
+                description: values.description,
+                organization: values.organization,
+                credential_type: value,
+              },
+            });
           }}
         />
       </FormGroup>
@@ -207,7 +171,6 @@ function CredentialForm({
           <FormColumnLayout>
             <CredentialFormFields
               formik={formik}
-              initialValues={initialValues}
               credentialTypes={credentialTypes}
               {...rest}
             />
