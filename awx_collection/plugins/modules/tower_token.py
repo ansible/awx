@@ -98,7 +98,7 @@ EXAMPLES = '''
       when: tower_token is defined
 
 - name: Delete a token by its id
-  tower_toekn:
+  tower_token:
     existing_token_id: 4
     state: absent
 '''
