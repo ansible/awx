@@ -136,7 +136,7 @@
 
         - name: populate job directory with needed roles
           synchronize:
-            src: "{{ cache_dir }}/requirements_roles"
+            src: "{{ cache_dir }}/requirements_roles/"
             dest: "{{ roles_destination }}"
           when: roles_destination is defined and doesRequirementsExist.stat.exists
 
@@ -164,7 +164,7 @@
 
         - name: populate job directory with needed collections
           synchronize:
-            src: "{{ cache_dir }}/requirements_collections"
+            src: "{{ cache_dir }}/requirements_collections/"
             dest: "{{ collections_destination }}"
           when: collections_destination is defined and doesCollectionRequirementsExist.stat.exists
 
