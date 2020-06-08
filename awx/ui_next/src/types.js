@@ -42,6 +42,18 @@ export const AccessRecord = shape({
   type: string,
 });
 
+export const Application = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  organization: number,
+  summary_fields: shape({
+    organization: shape({
+      id: number.isRequired,
+      name: string.isRequired,
+    }),
+  }),
+});
+
 export const Organization = shape({
   id: number.isRequired,
   name: string.isRequired,
