@@ -12,7 +12,7 @@ import { CheckboxField } from '../../../components/FormField';
 import { CredentialType } from '../../../types';
 import { CredentialField, GceFileUploadField } from './CredentialFormFields';
 
-function CredentialSubForm({ credentialType, i18n }) {
+function TypeInputsSubForm({ credentialType, i18n }) {
   const stringFields = credentialType.inputs.fields.filter(
     fieldOptions => fieldOptions.type === 'string' || fieldOptions.choices
   );
@@ -65,10 +65,10 @@ function CredentialSubForm({ credentialType, i18n }) {
   );
 }
 
-CredentialSubForm.propTypes = {
+TypeInputsSubForm.propTypes = {
   credentialType: CredentialType.isRequired,
 };
 
-CredentialSubForm.defaultProps = {};
+TypeInputsSubForm.defaultProps = {};
 
-export default withI18n()(CredentialSubForm);
+export default withI18n()(TypeInputsSubForm);

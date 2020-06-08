@@ -10,7 +10,7 @@ import AnsibleSelect from '../../../components/AnsibleSelect';
 import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { FormColumnLayout } from '../../../components/FormLayout';
-import CredentialSubForm from './CredentialSubForm';
+import TypeInputsSubForm from './TypeInputsSubForm';
 
 function CredentialFormFields({
   i18n,
@@ -125,7 +125,7 @@ function CredentialFormFields({
         />
       </FormGroup>
       {credTypeField.value !== undefined && credTypeField.value !== '' && (
-        <CredentialSubForm
+        <TypeInputsSubForm
           credentialType={credentialTypes[credTypeField.value]}
         />
       )}
