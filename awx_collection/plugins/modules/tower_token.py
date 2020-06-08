@@ -143,7 +143,16 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerModule(
+        argument_spec=argument_spec,
+        mutually_exclusive=[
+            ('existing_token', 'existing_token_id'),
+        ],
+        # If we are state absent make sure one of existing_token or existing_token_id are present
+        required_if=[
+            [ 'state', 'absent', ('existing_token', 'existing_token_id'), True,],
+        ],
+    )
 
     # Extract our parameters
     description = module.params.get('description')
@@ -155,8 +164,6 @@ def main():
 
     if state == 'absent':
         if not existing_token:
-            if not existing_token_id:
-                module.fail_json(msg='When deleting a token you specify either the parameter existing_token or existing_token_id')
             existing_token = module.get_one('tokens', **{
                 'data': {
                     'id': existing_token_id,

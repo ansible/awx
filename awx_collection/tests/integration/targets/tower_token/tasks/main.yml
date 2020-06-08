@@ -36,7 +36,22 @@
 - assert:
     that:
       - results is failed
-      - '"When deleting a token you specify either the parameter existing_token or existing_token_id" == results.msg'
+      # We don't assert a message here because it handled by ansible
+
+- name: Try to delete a token with both existing_token or existing_token_id
+  tower_token:
+    existing_token:
+      id: 1234
+    existing_token_id: 1234
+    state: absent
+  register: results
+  ignore_errors: True
+
+- assert:
+    that:
+      - results is failed
+      # We don't assert a message here because it handled by ansible
+
 
 - block:
     - name: Create a Token

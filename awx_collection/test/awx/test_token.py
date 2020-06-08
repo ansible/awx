@@ -22,7 +22,8 @@ def test_create_token(run_module, admin_user):
     }
 
     result = run_module('tower_token', module_args, admin_user)
-    assert result, result.get('changed')
+    assert result.get('changed'), result
 
     tokens = OAuth2AccessToken.objects.filter(description='barfoo')
-    assert len(tokens) == 1, tokens[0].description == 'barfoo'
+    assert len(tokens) == 1, 'Rokens with description of barfoo != 0: {0}'.format(len(tokens))
+    assert tokens[0].scope == 'read', 'Token was not given read access'
