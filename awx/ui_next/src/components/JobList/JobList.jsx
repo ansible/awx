@@ -42,19 +42,42 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     error: contentError,
     isLoading,
     request: fetchJobs,
+    setValue,
   } = useRequest(
-    useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
-      const { data } = await UnifiedJobsAPI.read({ ...params });
-      return data;
-    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
+    useCallback(
+      async () => {
+        const params = parseQueryString(QS_CONFIG, location.search);
+        const { data } = await UnifiedJobsAPI.read({ ...params });
+        return data;
+      },
+      [location] // eslint-disable-line react-hooks/exhaustive-deps
+    ),
     { results: [], count: 0 }
   );
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
 
-  const jobs = useWsJobs(results, fetchJobs, !!defaultParams);
+  const { request: addJobsById } = useRequest(
+    useCallback(
+      async ids => {
+        const params = parseQueryString(QS_CONFIG, location.search);
+        params.id__in = ids;
+        const { data } = await UnifiedJobsAPI.read({ ...params });
+        const mergedJobsList = [...data.results, ...results].slice(
+          0,
+          params.page_size
+        );
+        setValue({
+          results: mergedJobsList,
+          count: count + data.count,
+        });
+      },
+      [location, setValue, QS_CONFIG] // eslint-disable-line react-hooks/exhaustive-deps
+    )
+  );
+
+  const jobs = useWsJobs(results, addJobsById, !!defaultParams);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {

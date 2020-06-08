@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function useWsJobs(initialJobs, refetchJobs, filtersApplied) {
+export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function useWsJobs(initialJobs, refetchJobs, filtersApplied) {
     }
     if (filtersApplied) {
       if (['completed', 'failed', 'error'].includes(lastMessage.status)) {
-        refetchJobs();
+        fetchJobsById([lastMessage.unified_job_id]);
       }
       return;
     }
@@ -25,8 +25,7 @@ export default function useWsJobs(initialJobs, refetchJobs, filtersApplied) {
     if (index > -1) {
       setJobs(updateJob(jobs, index, lastMessage));
     } else {
-      setJobs(addJobStub(jobs, lastMessage));
-      refetchJobs();
+      fetchJobsById([lastMessage.unified_job_id]);
     }
   }, [lastMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -67,7 +66,7 @@ export default function useWsJobs(initialJobs, refetchJobs, filtersApplied) {
     ws.current.onerror = err => {
       // eslint-disable-next-line no-console
       console.debug('Socket error: ', err, 'Disconnecting...');
-      ws.close();
+      ws.current.close();
     };
 
     return () => {
@@ -86,59 +85,3 @@ function updateJob(jobs, index, message) {
   };
   return [...jobs.slice(0, index), job, ...jobs.slice(index + 1)];
 }
-
-function addJobStub(jobs, message) {
-  const job = {
-    id: message.unified_job_id,
-    status: message.status,
-    type: message.type,
-    url: `/api/v2/jobs/${message.unified_job_id}`,
-  };
-  return [job, ...jobs];
-}
-
-//
-// const initial = {
-//   groups_current: [
-//     'schedules-changed',
-//     'control-limit_reached_1',
-//     'jobs-status_changed',
-//   ],
-//   groups_left: [],
-//   groups_joined: [
-//     'schedules-changed',
-//     'control-limit_reached_1',
-//     'jobs-status_changed',
-//   ],
-// };
-//
-// const one = {
-//   unified_job_id: 292,
-//   status: 'pending',
-//   type: 'job',
-//   group_name: 'jobs',
-//   unified_job_template_id: 26,
-// };
-// const two = {
-//   unified_job_id: 292,
-//   status: 'waiting',
-//   instance_group_name: 'tower',
-//   type: 'job',
-//   group_name: 'jobs',
-//   unified_job_template_id: 26,
-// };
-// const three = {
-//   unified_job_id: 293,
-//   status: 'running',
-//   type: 'job',
-//   group_name: 'jobs',
-//   unified_job_template_id: 26,
-// };
-// const four = {
-//   unified_job_id: 293,
-//   status: 'successful',
-//   finished: '2020-06-01T21:49:28.704114Z',
-//   type: 'job',
-//   group_name: 'jobs',
-//   unified_job_template_id: 26,
-// };
