@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { shape } from 'prop-types';
-
+import styled from 'styled-components';
 import { Button, List, ListItem } from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -11,14 +11,25 @@ import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import DeleteButton from '../../../components/DeleteButton';
 import {
-  DetailList,
   Detail,
+  DetailList,
   UserDateDetail,
 } from '../../../components/DetailList';
+import ChipGroup from '../../../components/ChipGroup';
+import CodeMirrorInput from '../../../components/CodeMirrorInput';
+import CredentialChip from '../../../components/CredentialChip';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
 import { Credential } from '../../../types';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
+
+const PluginInputMetadata = styled(CodeMirrorInput)`
+  grid-column: 1 / -1;
+`;
+
+const PluginFieldText = styled.p`
+  margin-top: 10px;
+`;
 
 function CredentialDetail({ i18n, credential }) {
   const {
@@ -38,6 +49,7 @@ function CredentialDetail({ i18n, credential }) {
   } = credential;
 
   const [fields, setFields] = useState([]);
+  const [inputSources, setInputSources] = useState({});
   const [managedByTower, setManagedByTower] = useState([]);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -48,19 +60,33 @@ function CredentialDetail({ i18n, credential }) {
       setContentError(null);
       setHasContentLoading(true);
       try {
-        const {
-          data: { inputs: credentialTypeInputs, managed_by_tower },
-        } = await CredentialTypesAPI.readDetail(credential_type.id);
+        const [
+          {
+            data: { inputs: credentialTypeInputs, managed_by_tower },
+          },
+          {
+            data: { results: loadedInputSources },
+          },
+        ] = await Promise.all([
+          CredentialTypesAPI.readDetail(credential_type.id),
+          CredentialsAPI.readInputSources(credentialId, { page_size: 200 }),
+        ]);
 
         setFields(credentialTypeInputs.fields || []);
         setManagedByTower(managed_by_tower);
+        setInputSources(
+          loadedInputSources.reduce((inputSourcesMap, inputSource) => {
+            inputSourcesMap[inputSource.input_field_name] = inputSource;
+            return inputSourcesMap;
+          }, {})
+        );
       } catch (error) {
         setContentError(error);
       } finally {
         setHasContentLoading(false);
       }
     })();
-  }, [credential_type]);
+  }, [credential_type, credentialId]);
 
   const {
     request: deleteCredential,
@@ -76,35 +102,77 @@ function CredentialDetail({ i18n, credential }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const renderDetail = ({ id, label, type, ask_at_runtime }) => {
-    let detail;
+    if (inputSources[id]) {
+      return (
+        <Fragment key={id}>
+          <Detail
+            id={`credential-${id}-detail`}
+            fullWidth
+            label={<span>{label} *</span>}
+            value={
+              <ChipGroup numChips={1} totalChips={1}>
+                <CredentialChip
+                  credential={inputSources[id].summary_fields.source_credential}
+                  isReadOnly
+                />
+              </ChipGroup>
+            }
+          />
+          <PluginInputMetadata
+            id={`credential-${id}-metadata`}
+            mode="javascript"
+            readOnly
+            value={JSON.stringify(inputSources[id].metadata, null, 2)}
+            onChange={() => {}}
+            rows={5}
+            hasErrors={false}
+          />
+        </Fragment>
+      );
+    }
 
     if (type === 'boolean') {
-      detail = (
+      return (
         <Detail
+          id={`credential-${id}-detail`}
           key={id}
           label={i18n._(t`Options`)}
           value={<List>{inputs[id] && <ListItem>{label}</ListItem>}</List>}
         />
       );
-    } else if (inputs[id] === '$encrypted$') {
-      const isEncrypted = true;
-      detail = (
+    }
+
+    if (inputs[id] === '$encrypted$') {
+      return (
         <Detail
+          id={`credential-${id}-detail`}
           key={id}
           label={label}
           value={i18n._(t`Encrypted`)}
-          isEncrypted={isEncrypted}
+          isEncrypted
         />
       );
-    } else if (ask_at_runtime && inputs[id] === 'ASK') {
-      detail = (
-        <Detail key={id} label={label} value={i18n._(t`Prompt on launch`)} />
-      );
-    } else {
-      detail = <Detail key={id} label={label} value={inputs[id]} />;
     }
 
-    return detail;
+    if (ask_at_runtime && inputs[id] === 'ASK') {
+      return (
+        <Detail
+          id={`credential-${id}-detail`}
+          key={id}
+          label={label}
+          value={i18n._(t`Prompt on launch`)}
+        />
+      );
+    }
+
+    return (
+      <Detail
+        id={`credential-${id}-detail`}
+        key={id}
+        label={label}
+        value={inputs[id]}
+      />
+    );
   };
 
   if (hasContentLoading) {
@@ -118,10 +186,19 @@ function CredentialDetail({ i18n, credential }) {
   return (
     <CardBody>
       <DetailList>
-        <Detail label={i18n._(t`Name`)} value={name} />
-        <Detail label={i18n._(t`Description`)} value={description} />
+        <Detail
+          id="credential-name-detail"
+          label={i18n._(t`Name`)}
+          value={name}
+        />
+        <Detail
+          id="credential-description-detail"
+          label={i18n._(t`Description`)}
+          value={description}
+        />
         {organization && (
           <Detail
+            id="credential-organization-detail"
             label={i18n._(t`Organization`)}
             value={
               <Link to={`/organizations/${organization.id}/details`}>
@@ -131,6 +208,7 @@ function CredentialDetail({ i18n, credential }) {
           />
         )}
         <Detail
+          id="credential-credential_type-detail"
           label={i18n._(t`Credential Type`)}
           value={
             managedByTower ? (
@@ -146,16 +224,26 @@ function CredentialDetail({ i18n, credential }) {
         {fields.map(field => renderDetail(field))}
 
         <UserDateDetail
+          id="credential-created-detail"
           label={i18n._(t`Created`)}
           date={created}
           user={created_by}
         />
         <UserDateDetail
+          id="credential-last_modified-detail"
           label={i18n._(t`Last Modified`)}
           date={modified}
           user={modified_by}
         />
       </DetailList>
+      {Object.keys(inputSources).length > 0 && (
+        <PluginFieldText>
+          <Trans>
+            * This field will be retrieved from an external secret management
+            system using the specified credential.
+          </Trans>
+        </PluginFieldText>
+      )}
       <CardActionsRow>
         {user_capabilities.edit && (
           <Button component={Link} to={`/credentials/${credentialId}/edit`}>
