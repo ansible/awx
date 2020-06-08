@@ -28,6 +28,7 @@ function CredentialLookup({
   required,
   credentialTypeId,
   credentialTypeKind,
+  credentialTypeNamespace,
   value,
   history,
   i18n,
@@ -46,15 +47,27 @@ function CredentialLookup({
       const typeKindParams = credentialTypeKind
         ? { credential_type__kind: credentialTypeKind }
         : {};
+      const typeNamespaceParams = credentialTypeNamespace
+        ? { credential_type__namespace: credentialTypeNamespace }
+        : {};
 
       const { data } = await CredentialsAPI.read(
-        mergeParams(params, { ...typeIdParams, ...typeKindParams })
+        mergeParams(params, {
+          ...typeIdParams,
+          ...typeKindParams,
+          ...typeNamespaceParams,
+        })
       );
       return {
         count: data.count,
         credentials: data.results,
       };
-    }, [credentialTypeId, credentialTypeKind, history.location.search]),
+    }, [
+      credentialTypeId,
+      credentialTypeKind,
+      credentialTypeNamespace,
+      history.location.search,
+    ]),
     {
       count: 0,
       credentials: [],

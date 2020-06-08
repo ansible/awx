@@ -8,6 +8,7 @@ import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
 import Inventories from './models/Inventories';
+import InventoryScripts from './models/InventoryScripts';
 import InventorySources from './models/InventorySources';
 import InventoryUpdates from './models/InventoryUpdates';
 import JobTemplates from './models/JobTemplates';
@@ -41,6 +42,7 @@ const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
 const InventoriesAPI = new Inventories();
+const InventoryScriptsAPI = new InventoryScripts();
 const InventorySourcesAPI = new InventorySources();
 const InventoryUpdatesAPI = new InventoryUpdates();
 const JobTemplatesAPI = new JobTemplates();
@@ -75,6 +77,7 @@ export {
   HostsAPI,
   InstanceGroupsAPI,
   InventoriesAPI,
+  InventoryScriptsAPI,
   InventorySourcesAPI,
   InventoryUpdatesAPI,
   JobTemplatesAPI,

@@ -115,6 +115,7 @@ describe('<InventorySourceAdd />', () => {
       ...invSourceData,
       credential: 222,
       source_project: 999,
+      source_script: null,
     });
   });
 

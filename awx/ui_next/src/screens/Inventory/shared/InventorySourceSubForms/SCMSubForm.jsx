@@ -117,7 +117,7 @@ const SCMSubForm = ({ i18n }) => {
         />
       </FormGroup>
       <VerbosityField />
-      <OptionsField />
+      <OptionsField showProjectUpdate />
       <SourceVarsField />
     </>
   );

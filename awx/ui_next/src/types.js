@@ -107,6 +107,12 @@ export const Inventory = shape({
   total_inventory_sources: number,
 });
 
+export const InventoryScript = shape({
+  description: string,
+  id: number.isRequired,
+  name: string,
+});
+
 export const InstanceGroup = shape({
   id: number.isRequired,
   name: string.isRequired,
