@@ -104,4 +104,3 @@ services:
   postgres:
     image: postgres:10
     container_name: tools_postgres_1
-
