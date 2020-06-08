@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro';
 
-import Applications from './screens/Application';
+import Applications from './screens/Applications';
 import Credentials from './screens/Credential';
 import CredentialTypes from './screens/CredentialType';
 import Dashboard from './screens/Dashboard';
@@ -138,7 +138,7 @@ function getRouteConfig(i18n) {
           screen: InstanceGroups,
         },
         {
-          title: i18n._(t`Integrations`),
+          title: i18n._(t`Applications`),
           path: '/applications',
           screen: Applications,
         },

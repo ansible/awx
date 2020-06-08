@@ -21,7 +21,7 @@ describe('<Applications />', () => {
 
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
+    expect(pageSections.length).toBe(1);
     expect(title.length).toBe(1);
     expect(title.props().size).toBe('2xl');
     expect(pageSections.first().props().variant).toBe('light');
