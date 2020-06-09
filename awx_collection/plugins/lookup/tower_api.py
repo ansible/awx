@@ -8,16 +8,16 @@ lookup: tower_api
 author: John Westcott IV (@john-westcott-iv)
 short_description: Search the API for objects
 requirements:
-    - None
+  - None
 description:
-  - Returns GET requests to the Ansible Tower API. See
+  - Returns GET requests from the Ansible Tower API. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
 extends_documentation_fragment:
   - awx.awx.auth_plugin
 options:
   _terms:
     description:
-      - The endpoint to query. i.e. teams, users, tokens, job_templates, etc
+      - The endpoint to query, i.e. teams, users, tokens, job_templates, etc.
     required: True
   query_params:
     description:
@@ -26,8 +26,9 @@ options:
     required: True
   get_all:
     description:
-      - If the resulting query is pagenated, retriest all pages
-      - note: If the query is not filtered properly this can cause a performance impact
+      - If the resulting query is paginated, return all pages.
+      - note: If the query is not filtered properly this can cause a performance impact.
+      - note: In addition, the built in threshold is 10,000 items; if the query returns more an exception will be thrown.
     type: boolean
     default: False
 """
@@ -64,6 +65,7 @@ from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_native
 from ansible.utils.display import Display
 from ..module_utils.tower_api import TowerModule
+
 
 class LookupModule(LookupBase):
     display = Display()

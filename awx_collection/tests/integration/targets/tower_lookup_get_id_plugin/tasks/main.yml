@@ -29,7 +29,7 @@
     - assert:
         that:
           - result is failed
-          - "'ou must pass exactly one endpoint to query' in result.msg"
+          - "'You must pass exactly one endpoint to query' in result.msg"
 
     - name: Try to load invalid endpoint
       debug:

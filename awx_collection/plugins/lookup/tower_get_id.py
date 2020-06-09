@@ -46,6 +46,7 @@ from ansible.module_utils._text import to_native
 from ansible.utils.display import Display
 from ..module_utils.tower_api import TowerModule
 
+
 class LookupModule(LookupBase):
     display = Display()
 
