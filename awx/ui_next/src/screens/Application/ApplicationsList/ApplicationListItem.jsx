@@ -15,6 +15,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { PencilAltIcon } from '@patternfly/react-icons';
+import { formatDateString } from '../../../util/dates';
 import { Application } from '../../../types';
 import DataListCell from '../../../components/DataListCell';
 
@@ -25,6 +26,10 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: 40px;
 `;
 
+const Label = styled.b`
+  margin-right: 20px;
+`;
+
 function ApplicationListItem({
   application,
   isSelected,
@@ -32,13 +37,6 @@ function ApplicationListItem({
   detailUrl,
   i18n,
 }) {
-  ApplicationListItem.propTypes = {
-    application: Application.isRequired,
-    detailUrl: string.isRequired,
-    isSelected: bool.isRequired,
-    onSelect: func.isRequired,
-  };
-
   const labelId = `check-action-${application.id}`;
   return (
     <DataListItem
@@ -73,6 +71,10 @@ function ApplicationListItem({
                 <b>{application.summary_fields.organization.name}</b>
               </Link>
             </DataListCell>,
+            <DataListCell key="modified" aria-label={i18n._(t`last modified`)}>
+              <Label>{i18n._(t`Last Modified`)}</Label>
+              <span>{formatDateString(application.modified)}</span>
+            </DataListCell>,
           ]}
         />
         <DataListAction
@@ -99,4 +101,12 @@ function ApplicationListItem({
     </DataListItem>
   );
 }
+
+ApplicationListItem.propTypes = {
+  application: Application.isRequired,
+  detailUrl: string.isRequired,
+  isSelected: bool.isRequired,
+  onSelect: func.isRequired,
+};
+
 export default withI18n()(ApplicationListItem);

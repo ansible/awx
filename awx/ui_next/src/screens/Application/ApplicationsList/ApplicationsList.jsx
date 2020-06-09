@@ -19,7 +19,7 @@ import useSelected from '../../../util/useSelected';
 
 import ApplicationListItem from './ApplicationListItem';
 
-const QS_CONFIG = getQSConfig('inventory', {
+const QS_CONFIG = getQSConfig('applications', {
   page: 1,
   page_size: 20,
   order_by: 'name',
@@ -105,18 +105,26 @@ function ApplicationsList({ i18n }) {
                 isDefault: true,
               },
               {
-                name: i18n._(t`Created by (Username)`),
-                key: 'created_by__username',
-              },
-              {
-                name: i18n._(t`Modified by (Username)`),
-                key: 'modified_by__username',
+                name: i18n._(t`Description`),
+                key: 'description',
               },
             ]}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
+              },
+              {
+                name: i18n._(t`Created`),
+                key: 'created',
+              },
+              {
+                name: i18n._(t`Organization`),
+                key: 'organization',
+              },
+              {
+                name: i18n._(t`Description`),
+                key: 'description',
               },
             ]}
             renderToolbar={props => (
