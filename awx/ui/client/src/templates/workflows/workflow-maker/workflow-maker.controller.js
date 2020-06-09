@@ -148,11 +148,14 @@ export default ['$scope', 'TemplatesService',
 
                 Object.keys(nodeRef).map((workflowMakerNodeId) => {
                     const node = nodeRef[workflowMakerNodeId];
+                    const all_parents_must_converge = _.get(node, 'all_parents_must_converge', false);
                     if (node.isNew) {
                         if (node.unifiedJobTemplate && node.unifiedJobTemplate.unified_job_type === "workflow_approval") {
                             addPromises.push(TemplatesService.addWorkflowNode({
                                 url: $scope.workflowJobTemplateObj.related.workflow_nodes,
-                                data: {}
+                                data: {
+                                    all_parents_must_converge
+                                }
                             }).then(({data: newNodeData}) => {
                                 Rest.setUrl(newNodeData.related.create_approval_template);
                                 approvalTemplatePromises.push(Rest.post({
@@ -232,6 +235,14 @@ export default ['$scope', 'TemplatesService',
                                     ProcessErrors($scope, data, status, null, {
                                         hdr: $scope.strings.get('error.HEADER')
                                     });
+                                }));
+                            }
+                            if (node.originalNodeObject.all_parents_must_converge !== all_parents_must_converge) {
+                                editPromises.push(TemplatesService.editWorkflowNode({
+                                    id: node.originalNodeObject.id,
+                                    data: {
+                                        all_parents_must_converge
+                                    }
                                 }));
                             }
                         } else {
