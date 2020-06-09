@@ -27,10 +27,12 @@ options:
   get_all:
     description:
       - If the resulting query is paginated, return all pages.
-      - note: If the query is not filtered properly this can cause a performance impact.
-      - note: In addition, the built in threshold is 10,000 items; if the query returns more an exception will be thrown.
     type: boolean
     default: False
+
+notes:
+  - If the query is not filtered properly this can cause a performance impact.
+  - In addition, the built in threshold is 10,000 items; if the query returns more an exception will be thrown.
 """
 
 EXAMPLES = """
