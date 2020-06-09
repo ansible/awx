@@ -7,15 +7,15 @@
 - name: Generate usernames
   set_fact:
     usernames:
-      -  "AWX-Collection-tests-tower_api_lookup-user1-{{ test_id }}"
-      -  "AWX-Collection-tests-tower_api_lookup-user2-{{ test_id }}"
-      -  "AWX-Collection-tests-tower_api_lookup-user3-{{ test_id }}"
+      - "AWX-Collection-tests-tower_api_lookup-user1-{{ test_id }}"
+      - "AWX-Collection-tests-tower_api_lookup-user2-{{ test_id }}"
+      - "AWX-Collection-tests-tower_api_lookup-user3-{{ test_id }}"
 
 - name: Create all of our users
   tower_user:
-     username: "{{ item }}"
-     is_superuser: true
-     password: "{{ test_id }}"
+    username: "{{ item }}"
+    is_superuser: true
+    password: "{{ test_id }}"
   loop: "{{ usernames }}"
   register: user_creation_results
 
@@ -41,7 +41,7 @@
         that:
           - result is failed
           - "'The requested object could not be found at' in result.msg"
-    
+
     - name: Load user of a specific name
       set_fact:
         users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
@@ -61,11 +61,11 @@
 
     - assert:
         that: "{{ user_id }} == {{ user_creation_results['results'][0]['id'] }}"
-    
+
     - name: Get a page of users
       set_fact:
         users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'page_size': 2 } ) }}"
-    
+
     - assert:
         that: users['results'] | length() == 2
 
