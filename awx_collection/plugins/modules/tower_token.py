@@ -150,7 +150,7 @@ def main():
         ],
         # If we are state absent make sure one of existing_token or existing_token_id are present
         required_if=[
-            [ 'state', 'absent', ('existing_token', 'existing_token_id'), True,],
+            ['state', 'absent', ('existing_token', 'existing_token_id'), True, ],
         ],
     )
 
