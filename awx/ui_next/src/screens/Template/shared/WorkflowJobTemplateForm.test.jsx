@@ -114,9 +114,9 @@ describe('<WorkflowJobTemplateForm/>', () => {
       'FormField[name="name"]',
       'FormField[name="description"]',
       'FormGroup[label="Organization"]',
-      'FormGroup[label="Inventory"]',
-      'FormField[name="limit"]',
-      'FormField[name="scm_branch"]',
+      'FieldWithPrompt[label="Inventory"]',
+      'FieldWithPrompt[label="Limit"]',
+      'FieldWithPrompt[label="Source control branch"]',
       'FormGroup[label="Labels"]',
       'VariablesField',
     ];
@@ -136,11 +136,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
       {
         element: 'wfjt-description',
         value: { value: 'new bar', name: 'description' },
-      },
-      { element: 'wfjt-limit', value: { value: 1234567890, name: 'limit' } },
-      {
-        element: 'wfjt-scm_branch',
-        value: { value: 'new branch', name: 'scm_branch' },
       },
     ];
     const changeInputs = async ({ element, value }) => {
@@ -175,6 +170,26 @@ describe('<WorkflowJobTemplateForm/>', () => {
     };
 
     inputsToChange.map(input => assertChanges(input));
+  });
+
+  test('test changes in FieldWithPrompt', async () => {
+    await act(async () => {
+      wrapper.find('TextInputBase#text-wfjt-scm-branch').prop('onChange')(
+        'main'
+      );
+      wrapper.find('TextInputBase#text-wfjt-limit').prop('onChange')(
+        1234567890
+      );
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find('input#text-wfjt-scm-branch').prop('value')).toEqual(
+      'main'
+    );
+    expect(wrapper.find('input#text-wfjt-limit').prop('value')).toEqual(
+      1234567890
+    );
   });
 
   test('webhooks and enable concurrent jobs functions properly', async () => {
