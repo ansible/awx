@@ -55,8 +55,6 @@ services:
   redis:
     image: redis:latest
     container_name: tools_redis_1
-    ports:
-      - "6379:6379"
     user: ${CURRENT_UID}
     volumes:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"

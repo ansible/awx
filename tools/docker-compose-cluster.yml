@@ -79,8 +79,6 @@ services:
     volumes:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
       - "./redis/redis_socket_ha_1:/var/run/redis/"
-    ports:
-      - "63791:63791"
   redis_2:
     user: ${CURRENT_UID}
     image: redis:latest
@@ -89,8 +87,6 @@ services:
     volumes:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
       - "./redis/redis_socket_ha_2:/var/run/redis/"
-    ports:
-      - "63792:63792"
   redis_3:
     user: ${CURRENT_UID}
     image: redis:latest
@@ -99,8 +95,6 @@ services:
     volumes:
       - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
       - "./redis/redis_socket_ha_3:/var/run/redis/"
-    ports:
-      - "63793:63793"
   postgres:
     image: postgres:10
     container_name: tools_postgres_1
