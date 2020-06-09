@@ -64,12 +64,10 @@ function CredentialDetail({ i18n, credential }) {
           {
             data: { inputs: credentialTypeInputs, managed_by_tower },
           },
-          {
-            data: { results: loadedInputSources },
-          },
+          loadedInputSources,
         ] = await Promise.all([
           CredentialTypesAPI.readDetail(credential_type.id),
-          CredentialsAPI.readInputSources(credentialId, { page_size: 200 }),
+          CredentialsAPI.readInputSources(credentialId),
         ]);
 
         setFields(credentialTypeInputs.fields || []);
