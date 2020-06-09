@@ -6,10 +6,10 @@
 
 export default
     [   'NotificationsList', 'GetBasePath', 'ToggleNotification', 'NotificationsListInit',
-        '$stateParams', 'Dataset', '$scope',
+        '$stateParams', 'Dataset', '$scope', 'isAdmin',
         function(
             NotificationsList, GetBasePath, ToggleNotification, NotificationsListInit,
-            $stateParams, Dataset, $scope) {
+            $stateParams, Dataset, $scope, isAdmin) {
             var defaultUrl = GetBasePath('system_job_templates'),
                 list = NotificationsList,
                 id = $stateParams.management_id;
@@ -18,6 +18,8 @@ export default
                 $scope.list = list;
                 $scope[`${list.iterator}_dataset`] = Dataset.data;
                 $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+                $scope.sufficientRoleForNotifToggle = isAdmin;
 
                 NotificationsListInit({
                     scope: $scope,
