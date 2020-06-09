@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 12.0.0 (TBD)
+## 12.0.0 (Jun 9, 2020)
 - Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240) 
 - Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
