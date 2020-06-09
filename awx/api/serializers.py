@@ -3612,7 +3612,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ujt = self.instance.unified_job_template
         if ujt is None:
             ret = {}
-            for fd in ('workflow_job_template', 'identifier'):
+            for fd in ('workflow_job_template', 'identifier', 'all_parents_must_converge'):
                 if fd in attrs:
                     ret[fd] = attrs[fd]
             return ret
