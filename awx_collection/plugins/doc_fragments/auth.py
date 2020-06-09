@@ -31,8 +31,11 @@ options:
   tower_oauthtoken:
     description:
     - The Tower OAuth token to use.
+    - This value can be in one of two formats.
+    - A string which is the token itself. (i.e. bqV5txm97wqJqtkxlMkhQz0pKhRMMX)
+    - A dictionary structure as returned by the tower_token module.
     - If value not set, will try environment variable C(TOWER_OAUTH_TOKEN) and then config files
-    type: str
+    type: raw
     version_added: "3.7"
   validate_certs:
     description:

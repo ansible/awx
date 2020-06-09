@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_list
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: List Ansible Tower jobs.
 description:
     - List Ansible Tower jobs. See

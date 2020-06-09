@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_inventory_source
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower inventory source.
 description:
     - Create, update, or destroy Ansible Tower inventory source. See
@@ -32,7 +31,6 @@ options:
       description:
         - A new name for this assets (will rename the asset)
       type: str
-      version_added: "3.7"
     description:
       description:
         - The description to use for the inventory source.
@@ -85,7 +83,6 @@ options:
         - Override vars in child groups and hosts with those from external source.
       type: bool
     custom_virtualenv:
-      version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str

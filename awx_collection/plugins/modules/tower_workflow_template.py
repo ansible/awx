@@ -17,11 +17,10 @@ DOCUMENTATION = '''
 ---
 module: tower_workflow_template
 deprecated:
-  removed_in: "3.7"
+  removed_in: "14.0.0"
   why: Deprecated in favor of C(_workflow_job_template) and C(_workflow_job_template_node) modules.
   alternative: Use M(tower_workflow_job_template) and M(_workflow_job_template_node) instead.
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower workflow template.
 description:
     - A tower-cli based module for CRUD actions on workflow job templates.
@@ -37,12 +36,10 @@ options:
       description:
         - Prompt user for (extra_vars) on launch.
       type: bool
-      version_added: "2.9"
     ask_inventory:
       description:
         - Prompt user for inventory on launch.
       type: bool
-      version_added: "2.9"
     description:
       description:
         - The description to use for the workflow.
@@ -54,7 +51,6 @@ options:
     inventory:
       description:
         - Name of the inventory to use for the job template.
-      version_added: "2.9"
       type: str
     name:
       description:
@@ -153,7 +149,7 @@ def main():
         "This module is replaced by the combination of tower_workflow_job_template and "
         "tower_workflow_job_template_node. This uses the old tower-cli and wll be "
         "removed in 2022."
-    ), version='4.2.0')
+    ), version='awx.awx:14.0.0')
 
     name = module.params.get('name')
     state = module.params.get('state')

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_settings
 author: "Nikhil Jain (@jainnikhil30)"
-version_added: "2.7"
 short_description: Modify Ansible Tower settings.
 description:
     - Modify Ansible Tower settings. See
@@ -37,7 +36,6 @@ options:
       description:
         - A data structure to be sent into the settings endpoint
       type: dict
-      version_added: "3.7"
 requirements:
   - pyyaml
 extends_documentation_fragment: awx.awx.auth
@@ -82,6 +80,10 @@ except ImportError:
 
 
 def coerce_type(module, value):
+    # If our value is already None we can just return directly
+    if value is None:
+        return value
+
     yaml_ish = bool((
         value.startswith('{') and value.endswith('}')
     ) or (

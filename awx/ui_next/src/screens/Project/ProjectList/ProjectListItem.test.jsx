@@ -218,4 +218,34 @@ describe('<ProjectsListItem />', () => {
     );
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
+  test('should render disabled copy to clipboard button', () => {
+    const wrapper = mountWithContexts(
+      <ProjectsListItem
+        isSelected={false}
+        detailUrl="/project/1"
+        onSelect={() => {}}
+        project={{
+          id: 1,
+          name: 'Project 1',
+          url: '/api/v2/projects/1',
+          type: 'project',
+          scm_type: 'git',
+          scm_revision: '',
+          summary_fields: {
+            last_job: {
+              id: 9000,
+              status: 'successful',
+            },
+            user_capabilities: {
+              edit: true,
+            },
+          },
+        }}
+      />
+    );
+    expect(
+      wrapper.find('span[aria-label="copy to clipboard disabled"]').text()
+    ).toBe('Sync for revision');
+    expect(wrapper.find('ClipboardCopyButton').prop('isDisabled')).toBe(true);
+  });
 });

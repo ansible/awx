@@ -24,7 +24,7 @@ DOCUMENTATION = '''
 ---
 module: tower_{{ singular_item_type }}
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
+version_added: "4.0"
 short_description: create, update, or destroy Ansible Tower {{ human_readable }}.
 description:
     - Create, update, or destroy Ansible Tower {{ human_readable }}. See
@@ -87,7 +87,6 @@ options:
         - The Tower OAuth token to use.
       required: False
       type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

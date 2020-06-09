@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_cancel
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: Cancel an Ansible Tower Job.
 description:
     - Cancel Ansible Tower jobs. See

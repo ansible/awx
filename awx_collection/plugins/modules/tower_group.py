@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_group
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower group.
 description:
     - Create, update, or destroy Ansible Tower groups. See
@@ -63,7 +62,6 @@ options:
       description:
         - A new name for this group (for renaming)
       type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 

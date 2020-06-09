@@ -1,0 +1,110 @@
+---
+- name: Generate names
+  set_fact:
+    token_description: "AWX-Collection-tests-tower_token-description-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Try to use a token as a dict which is missing the token parameter
+  tower_job_list:
+    tower_oauthtoken:
+      not_token: "This has no token entry"
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+      - '"The provided dict in tower_oauthtoken did not properly contain the token entry" == results.msg'
+
+- name: Try to use a token as a list
+  tower_job_list:
+    tower_oauthtoken:
+      - dummy_token
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+      - '"The provided tower_oauthtoken type was not valid (list). Valid options are str or dict." == results.msg'
+
+- name: Try to delete a token with no existing_token or existing_token_id
+  tower_token:
+    state: absent
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+      # We don't assert a message here because it handled by ansible
+
+- name: Try to delete a token with both existing_token or existing_token_id
+  tower_token:
+    existing_token:
+      id: 1234
+    existing_token_id: 1234
+    state: absent
+  register: results
+  ignore_errors: true
+
+- assert:
+    that:
+      - results is failed
+      # We don't assert a message here because it handled by ansible
+
+
+- block:
+    - name: Create a Token
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+      register: new_token
+
+    - name: Validate our token works by token
+      tower_job_list:
+        tower_oauthtoken: "{{ tower_token.token }}"
+      register: job_list
+
+    - name: Validate out token works by object
+      tower_job_list:
+        tower_oauthtoken: "{{ tower_token }}"
+      register: job_list
+
+  always:
+    - name: Delete our Token with our own token
+      tower_token:
+        existing_token: "{{ tower_token }}"
+        tower_oauthtoken: "{{ tower_token }}"
+        state: absent
+      when: tower_token is defined
+      register: results
+
+    - assert:
+        that:
+          - results is changed or results is skipped
+
+- block:
+    - name: Create a second token
+      tower_token:
+        description: '{{ token_description }}'
+        scope: "write"
+        state: present
+      register: results
+
+    - assert:
+        that:
+          - results is changed
+
+  always:
+    - name: Delete the second Token with our own token
+      tower_token:
+        existing_token_id: "{{ tower_token['id'] }}"
+        tower_oauthtoken: "{{ tower_token }}"
+        state: absent
+      when: tower_token is defined
+      register: results
+
+    - assert:
+        that:
+          - results is changed or resuslts is skipped

@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_inventory
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: create, update, or destroy Ansible Tower inventory.
 description:
@@ -46,12 +45,10 @@ options:
         - The kind field. Cannot be modified after created.
       default: ""
       choices: ["", "smart"]
-      version_added: "2.7"
       type: str
     host_filter:
       description:
         -  The host_filter field. Only useful when C(kind=smart).
-      version_added: "2.7"
       type: str
     state:
       description:
