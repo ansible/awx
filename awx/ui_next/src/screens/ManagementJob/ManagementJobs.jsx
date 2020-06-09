@@ -15,7 +15,7 @@ class ManagementJobs extends Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`Management Jobs`)}</Title>
+          <Title size="2xl" headingLevel="h2">{i18n._(t`Management Jobs`)}</Title>
         </PageSection>
         <PageSection />
       </Fragment>

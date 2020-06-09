@@ -153,7 +153,7 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
       </FormGroup>
       {frequency.value !== 'none' && (
         <SubFormLayout>
-          <Title size="md">{i18n._(t`Frequency Details`)}</Title>
+          <Title size="md" headingLevel="h4">{i18n._(t`Frequency Details`)}</Title>
           <FormColumnLayout>
             <FrequencyDetailSubform />
           </FormColumnLayout>

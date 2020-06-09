@@ -15,7 +15,7 @@ class SystemSettings extends Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`System Settings`)}</Title>
+          <Title size="2xl" headingLevel="h2">{i18n._(t`System Settings`)}</Title>
         </PageSection>
         <PageSection />
       </Fragment>

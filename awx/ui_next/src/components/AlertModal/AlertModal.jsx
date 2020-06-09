@@ -60,7 +60,7 @@ export default function AlertModal({
   const customHeader = (
     <Header>
       {variant ? variantIcons[variant] : null}
-      <Title size="2xl">{title}</Title>
+      <Title size="2xl" headingLevel="h2">{title}</Title>
     </Header>
   );
 

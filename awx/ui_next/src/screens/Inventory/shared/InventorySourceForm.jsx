@@ -161,7 +161,7 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
       )}
       {sourceField.value !== '' && (
         <SubFormLayout>
-          <Title size="md">{i18n._(t`Source details`)}</Title>
+          <Title size="md" headingLevel="h4">{i18n._(t`Source details`)}</Title>
           <FormColumnLayout>
             {
               {

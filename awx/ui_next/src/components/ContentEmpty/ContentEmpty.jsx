@@ -12,7 +12,7 @@ import { CubesIcon } from '@patternfly/react-icons';
 const ContentEmpty = ({ i18n, title = '', message = '' }) => (
   <EmptyState variant="full">
     <EmptyStateIcon icon={CubesIcon} />
-    <Title size="lg">{title || i18n._(t`No items found.`)}</Title>
+    <Title size="lg" headingLevel="h3">{title || i18n._(t`No items found.`)}</Title>
     <EmptyStateBody>{message}</EmptyStateBody>
   </EmptyState>
 );
