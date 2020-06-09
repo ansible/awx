@@ -32,6 +32,7 @@ django-oauth-toolkit==1.1.3  # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==2.1.2  # via -r /awx_devel/requirements/requirements.in
 django-qsstats-magic==1.1.0  # via -r /awx_devel/requirements/requirements.in
+django-redis==4.5.0
 django-radius==1.3.3      # via -r /awx_devel/requirements/requirements.in
 django-solo==1.1.3        # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0  # via -r /awx_devel/requirements/requirements.in
@@ -93,7 +94,6 @@ pyrsistent==0.15.7        # via jsonschema
 python-daemon==2.2.4      # via ansible-runner
 python-dateutil==2.8.1    # via adal, kubernetes
 python-ldap==3.2.0        # via django-auth-ldap
-python-memcached==1.59    # via -r /awx_devel/requirements/requirements.in
 python-radius==1.0        # via -r /awx_devel/requirements/requirements.in
 python-string-utils==1.0.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core
