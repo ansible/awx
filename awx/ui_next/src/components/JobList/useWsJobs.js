@@ -3,9 +3,23 @@ import { useState, useEffect, useRef } from 'react';
 export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
+  const [jobsToFetch, setJobsToFetch] = useState([]);
+  const debouncedJobsToFetch = useDebounce(jobsToFetch, 5000);
   useEffect(() => {
     setJobs(initialJobs);
   }, [initialJobs]);
+
+  const enqueueJobId = id => {
+    if (!jobsToFetch.includes(id)) {
+      setJobsToFetch(ids => ids.concat(id));
+    }
+  };
+  useEffect(() => {
+    if (debouncedJobsToFetch.length) {
+      fetchJobsById(debouncedJobsToFetch);
+      setJobsToFetch([]);
+    }
+  }, [debouncedJobsToFetch, fetchJobsById]);
 
   const ws = useRef(null);
 
@@ -15,7 +29,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
     }
     if (filtersApplied) {
       if (['completed', 'failed', 'error'].includes(lastMessage.status)) {
-        fetchJobsById([lastMessage.unified_job_id]);
+        enqueueJobId(lastMessage.unified_job_id);
       }
       return;
     }
@@ -25,7 +39,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
     if (index > -1) {
       setJobs(updateJob(jobs, index, lastMessage));
     } else {
-      fetchJobsById([lastMessage.unified_job_id]);
+      enqueueJobId(lastMessage.unified_job_id);
     }
   }, [lastMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -84,4 +98,20 @@ function updateJob(jobs, index, message) {
     finished: message.finished,
   };
   return [...jobs.slice(0, index), job, ...jobs.slice(index + 1)];
+}
+
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }

@@ -61,19 +61,24 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const { request: addJobsById } = useRequest(
     useCallback(
       async ids => {
+        if (!ids.length) {
+          return;
+        }
         const params = parseQueryString(QS_CONFIG, location.search);
-        params.id__in = ids;
+        params.id__in = ids.join(',');
         const { data } = await UnifiedJobsAPI.read({ ...params });
-        const mergedJobsList = [...data.results, ...results].slice(
-          0,
-          params.page_size
-        );
-        setValue({
-          results: mergedJobsList,
-          count: count + data.count,
+        setValue(prev => {
+          const mergedJobsList = [...data.results, ...prev.results].slice(
+            0,
+            params.page_size
+          );
+          return {
+            results: mergedJobsList,
+            count: prev.count + data.count,
+          };
         });
       },
-      [location, setValue, QS_CONFIG] // eslint-disable-line react-hooks/exhaustive-deps
+      [location, setValue] // eslint-disable-line react-hooks/exhaustive-deps
     )
   );
 
