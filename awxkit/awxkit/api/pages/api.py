@@ -1,6 +1,5 @@
 import itertools
 import logging
-import queue
 
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
@@ -231,75 +230,75 @@ class ApiV2(base.Base):
                 if not S:
                     continue
                 if name == 'roles':
-                    self._roles.put((_page, S))
+                    self._roles.append((_page, S))
                 else:
-                    self._related.put((_page, name, S))
+                    self._related.append((_page, name, S))
 
         return changed
 
+    def _assign_role(self, endpoint, role):
+        if 'content_object' not in role:
+            return
+        obj_page = self._cache.get_by_natural_key(role['content_object'])
+        if obj_page is None:
+            return
+        role_page = obj_page.get_object_role(role['name'], by_name=True)
+        try:
+            endpoint.post({'id': role_page['id']})
+        except exc.NoContent:  # desired exception on successful (dis)association
+            pass
+
+    def _assign_membership(self):
+        for _page, roles in self._roles:
+            role_endpoint = _page.json['related']['roles']
+            for role in roles:
+                if role['name'] == 'Member':
+                    self._assign_role(role_endpoint, role)
+
     def _assign_roles(self):
-        while True:
-            try:
-                _page, roles = self._roles.get_nowait()
-                self._roles.task_done()
-                role_endpoint = _page.json['related']['roles']
-                for role in roles:
-                    if 'content_object' not in role:
-                        continue  # admin role
-                    obj_page = self._cache.get_by_natural_key(role['content_object'])
-                    if obj_page is not None:
-                        role_page = obj_page.get_object_role(role['name'], by_name=True)
-                        try:
-                            role_endpoint.post({'id': role_page['id']})
-                        except exc.NoContent:  # desired exception on successful (dis)association
-                            pass
-                    else:
-                        pass  # admin role
-            except queue.Empty:
-                break
+        for _page, roles in self._roles:
+            role_endpoint = _page.json['related']['roles']
+            for role in roles:
+                if role['name'] != 'Member':
+                    self._assign_role(role_endpoint, role)
 
     def _assign_related(self):
-        while True:
-            try:
-                _page, name, related_set = self._related.get_nowait()
-                self._related.task_done()
-                endpoint = _page.related[name]
-                if isinstance(related_set, dict):  # Relateds that are just json blobs, e.g. survey_spec
-                    endpoint.post(related_set)
-                    return
+        for _page, name, related_set in self._related:
+            endpoint = _page.related[name]
+            if isinstance(related_set, dict):  # Relateds that are just json blobs, e.g. survey_spec
+                endpoint.post(related_set)
+                return
 
-                if 'natural_key' not in related_set[0]:  # It is an attach set
-                    # Try to impedance match
-                    related = endpoint.get(all_pages=True)
-                    existing = {rel['id'] for rel in related.results}
-                    for item in related_set:
-                        rel_page = self._cache.get_by_natural_key(item)
-                        if rel_page is None:
-                            continue  # FIXME
-                        if rel_page['id'] in existing:
-                            continue
-                        try:
-                            post_data = {'id': rel_page['id']}
-                            endpoint.post(post_data)
-                            log.error("endpoint: %s, id: %s", endpoint.endpoint, rel_page['id'])
-                        except exc.NoContent:  # desired exception on successful (dis)association
-                            pass
-                        except exc.Common as e:
-                            log.error("Object association failed: %s.", e)
-                            log.debug("post_data: %r", post_data)
-                            raise
-                else:  # It is a create set
-                    self._cache.get_page(endpoint)
-                    self._import_list(endpoint, related_set)
+            if 'natural_key' not in related_set[0]:  # It is an attach set
+                # Try to impedance match
+                related = endpoint.get(all_pages=True)
+                existing = {rel['id'] for rel in related.results}
+                for item in related_set:
+                    rel_page = self._cache.get_by_natural_key(item)
+                    if rel_page is None:
+                        continue  # FIXME
+                    if rel_page['id'] in existing:
+                        continue
+                    try:
+                        post_data = {'id': rel_page['id']}
+                        endpoint.post(post_data)
+                        log.error("endpoint: %s, id: %s", endpoint.endpoint, rel_page['id'])
+                    except exc.NoContent:  # desired exception on successful (dis)association
+                        pass
+                    except exc.Common as e:
+                        log.error("Object association failed: %s.", e)
+                        log.debug("post_data: %r", post_data)
+                        raise
+            else:  # It is a create set
+                self._cache.get_page(endpoint)
+                self._import_list(endpoint, related_set)
 
-                # FIXME: deal with pruning existing relations that do not match the import set
-            except queue.Empty:
-                break
+            # FIXME: deal with pruning existing relations that do not match the import set
 
     def import_assets(self, data):
         self._cache = page.PageCache()
-        self._related = queue.Queue()
-        self._roles = queue.Queue()
+        self._related = []
+        self._roles = []
 
         changed = False
 
@@ -312,6 +311,7 @@ class ApiV2(base.Base):
             # FIXME: should we delete existing unpatched assets?
 
         self._assign_related()
+        self._assign_membership()
         self._assign_roles()
 
         return changed
