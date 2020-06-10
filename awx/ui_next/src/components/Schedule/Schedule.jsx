@@ -35,7 +35,6 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
       try {
         const { data } = await SchedulesAPI.readDetail(scheduleId);
         setSchedule(data);
-        setBreadcrumb(unifiedJobTemplate, data);
       } catch (err) {
         setContentError(err);
       } finally {
@@ -44,8 +43,14 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
     };
 
     loadData();
-  }, [location.pathname, scheduleId, unifiedJobTemplate, setBreadcrumb]);
+  }, [location.pathname, scheduleId]);
 
+  useEffect(() => {
+    if (schedule) {
+      setBreadcrumb(unifiedJobTemplate, schedule);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schedule, unifiedJobTemplate]);
   const tabsArray = [
     {
       name: (

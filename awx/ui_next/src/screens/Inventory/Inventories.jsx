@@ -27,7 +27,7 @@ class Inventories extends Component {
     };
   }
 
-  setBreadCrumbConfig = (inventory, nested) => {
+  setBreadCrumbConfig = (inventory, nested, schedule) => {
     const { i18n } = this.props;
     if (!inventory) {
       return;
@@ -80,6 +80,11 @@ class Inventories extends Component {
       [`${inventorySourcesPath}/${nested?.id}`]: `${nested?.name}`,
       [`${inventorySourcesPath}/${nested?.id}/details`]: i18n._(t`Details`),
       [`${inventorySourcesPath}/${nested?.id}/edit`]: i18n._(t`Edit details`),
+      [`${inventorySourcesPath}/${nested?.id}/schedules`]: i18n._(t`Schedules`),
+      [`${inventorySourcesPath}/${nested?.id}/schedules/${schedule?.id}`]: `${schedule?.name}`,
+      [`${inventorySourcesPath}/${nested?.id}/schedules/${schedule?.id}/details`]: i18n._(
+        t`Schedule Details`
+      ),
     };
     this.setState({ breadcrumbConfig });
   };

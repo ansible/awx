@@ -19,6 +19,7 @@ import {
   OrganizationsAPI,
 } from '../../../api';
 import { TabbedCardHeader } from '../../../components/Card';
+import { Schedules } from '../../../components/Schedule';
 import CardCloseButton from '../../../components/CardCloseButton';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -64,6 +65,15 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
     }
   }, [inventory, source, setBreadcrumb]);
 
+  const loadSchedules = params =>
+    InventorySourcesAPI.readSchedules(source?.id, params);
+
+  const createSchedule = data =>
+    InventorySourcesAPI.createSchedule(source?.id, data);
+
+  const loadScheduleOptions = () =>
+    InventorySourcesAPI.readScheduleOptions(source?.id);
+
   const tabsArray = [
     {
       name: (
@@ -104,7 +114,9 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
 
   return (
     <>
-      {['edit'].some(name => location.pathname.includes(name)) ? null : (
+      {['edit', 'schedules/'].some(name =>
+        location.pathname.includes(name)
+      ) ? null : (
         <TabbedCardHeader>
           <RoutedTabs tabsArray={tabsArray} />
           <CardActions>
@@ -142,6 +154,20 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
               id={Number(match.params.sourceId)}
               canToggleNotifications={canToggleNotifications}
               apiModel={InventorySourcesAPI}
+            />
+          </Route>
+          <Route
+            key="schedules"
+            path="/inventories/inventory/:id/sources/:sourceId/schedules"
+          >
+            <Schedules
+              createSchedule={createSchedule}
+              setBreadcrumb={(unifiedJobTemplate, schedule) =>
+                setBreadcrumb(inventory, source, schedule)
+              }
+              unifiedJobTemplate={source}
+              loadSchedules={loadSchedules}
+              loadScheduleOptions={loadScheduleOptions}
             />
           </Route>
           <Route key="not-found" path="*">
