@@ -82,7 +82,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
       onNavToggle={handleNavToggle}
       logo={<BrandLogo />}
       logoProps={{ href: '/' }}
-      toolbar={
+      headerTools={
         <PageHeaderToolbar
           loggedInUser={config?.me}
           isAboutDisabled={!config?.version}
