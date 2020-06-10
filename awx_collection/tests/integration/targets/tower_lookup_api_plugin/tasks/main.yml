@@ -50,31 +50,22 @@
         that:
           - users['results'] | length() == 1
           - users['count'] == 1
-
-    - name: Get the id of the admin users
-      set_fact:
-        user_id: "{{ (query('awx.awx.tower_api', 'users', query_params=query_params) | json_query(jmes_query))[0] }}"
-      vars:
-        query_params:
-          username: "{{ user_creation_results['results'][0]['item'] }}"
-        jmes_query: 'results[*].id'
-
-    - assert:
-        that: "{{ user_id }} == {{ user_creation_results['results'][0]['id'] }}"
+          - users['results'][0]['id'] == user_creation_results['results'][0]['id']
 
     - name: Get a page of users
       set_fact:
-        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'page_size': 2 } ) }}"
+        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 } ) }}"
 
     - assert:
         that: users['results'] | length() == 2
 
     - name: Get all users of a system through next attribute
       set_fact:
-        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'page_size': 1, }, get_all=true ) }}"
+        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, get_all=true ) }}"
 
     - assert:
-        that: users['results'] | length() >= 3
+        that:
+          - users['results'] | length() >= 3
 
   always:
     - name: Cleanup users

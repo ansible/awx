@@ -42,7 +42,7 @@
           - result is failed
           - "'The requested object could not be found at' in result.msg"
 
-    - name: Get the ID of the admin user
+    - name: Get the ID of the first user created
       set_fact:
         user_id: "{{ query('awx.awx.tower_get_id', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
 
@@ -62,7 +62,7 @@
 
     - name: Lookup too many users
       set_fact:
-        too_many_user_ids: " {{ query('awx.awx.tower_get_id', 'users', query_params={ 'username__startswith': 'AWX-Collection-tests-tower_get_id-' }) }}"
+        too_many_user_ids: " {{ query('awx.awx.tower_get_id', 'users', query_params={ 'username__endswith': test_id }) }}"
       register: results
       ignore_errors: true
 

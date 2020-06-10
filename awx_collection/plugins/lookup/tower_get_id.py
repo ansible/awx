@@ -30,13 +30,13 @@ options:
 EXAMPLES = """
 - name: Lookup a users ID
   debug:
-    msg: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }) }}"
+    msg: "{{ query('awx.awx.tower_get_id', 'users', query_params={ 'username': 'admin' }) }}"
 """
 
 RETURN = """
 _raw:
   description:
-    - The ID found for the filter criteria
+    - The ID found for the filter criteria returned as a string (i.e. "42" instead of 42).
   type: str
 """
 
