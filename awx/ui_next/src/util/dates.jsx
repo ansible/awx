@@ -24,8 +24,8 @@ export function timeOfDay() {
   const second = prependZeros(date.getSeconds());
   const time =
     hour > 12
-      ? `${hour - 12}:${minute} :${second} PM`
-      : `${hour}:${minute}:${second}`;
+      ? `${hour - 12}:${minute}:${second} PM`
+      : `${hour}:${minute}:${second} AM`;
   return time;
 }
 
