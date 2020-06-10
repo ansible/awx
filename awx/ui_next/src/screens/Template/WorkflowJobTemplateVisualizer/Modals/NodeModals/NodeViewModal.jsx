@@ -131,9 +131,9 @@ function NodeViewModal({ i18n }) {
 
   return (
     <Modal
-      isLarge
+      variant="large"
       isOpen
-      isFooterLeftAligned
+      
       title={unifiedJobTemplate.name}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
       actions={[

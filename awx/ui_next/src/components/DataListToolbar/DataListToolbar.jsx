@@ -67,7 +67,7 @@ class DataListToolbar extends React.Component {
               </ToolbarItem>
             </ToolbarGroup>
           )}
-          <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
+          <ToolbarToggleGroup toggleIcon={<SearchIcon />} show={{ lg: 'show' }}>
             <ToolbarItem>
               <Search
                 qsConfig={qsConfig}

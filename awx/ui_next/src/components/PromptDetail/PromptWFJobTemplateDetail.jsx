@@ -114,7 +114,7 @@ function PromptWFJobTemplateDetail({ i18n, resource }) {
               totalChips={summary_fields.labels.results.length}
             >
               {summary_fields.labels.results.map(label => (
-                <Chip key={label.id} isReadOnly>
+                <Chip key={label.id} >
                   {label.name}
                 </Chip>
               ))}

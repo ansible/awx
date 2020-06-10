@@ -59,7 +59,7 @@ class ResourceAccessListItem extends React.Component {
     return (
       <Chip
         key={role.id}
-        isReadOnly={!role.user_capabilities.unattach}
+        
         onClick={() => {
           onRoleDelete(role, accessRecord);
         }}

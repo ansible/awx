@@ -172,7 +172,7 @@ function ProjectFormFields({
         fieldId="project-scm-type"
         helperTextInvalid={scmTypeMeta.error}
         isRequired
-        isValid={!scmTypeMeta.touched || !scmTypeMeta.error}
+        validated={(!scmTypeMeta.touched || !scmTypeMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Source Control Credential Type`)}
       >
         <AnsibleSelect

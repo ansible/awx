@@ -117,7 +117,7 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
         fieldId="source"
         helperTextInvalid={sourceMeta.error}
         isRequired
-        isValid={!sourceMeta.touched || !sourceMeta.error}
+        validated={(!sourceMeta.touched || !sourceMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Source`)}
       >
         <AnsibleSelect

@@ -39,7 +39,7 @@ function VariablesDetail({ value, label, rows, fullHeight }) {
         fullWidth
         css="grid-column: 1 / -1"
       >
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <div className="pf-c-form__label">
               <span

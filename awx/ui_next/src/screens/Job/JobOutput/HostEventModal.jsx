@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal as PFModal, Tab, Tabs as PFTabs } from '@patternfly/react-core';
+import { Modal as PFModal, Tab, Tabs as PFTabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -147,7 +147,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         <Tab
           aria-label={i18n._(t`Details tab`)}
           eventKey={0}
-          title={i18n._(t`Details`)}
+          title={<TabTitleText>{i18n._(t`Details`)}</TabTitleText>}
         >
           <DetailList style={{ alignItems: 'center' }} gutter="sm">
             <Detail
@@ -175,7 +175,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={1}
-          title={i18n._(t`JSON`)}
+            title={<TabTitleText>{i18n._(t`JSON`)}</TabTitleText>}
           aria-label={i18n._(t`JSON tab`)}
         >
           {activeTabKey === 1 && jsonObj ? (
@@ -193,7 +193,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={2}
-          title={i18n._(t`Standard Out`)}
+          title={<TabTitleText>{i18n._(t`Standard Out`)}</TabTitleText>}
           aria-label={i18n._(t`Standard out tab`)}
         >
           {activeTabKey === 2 && stdOut ? (
@@ -211,7 +211,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={3}
-          title={i18n._(t`Standard Error`)}
+          title={<TabTitleText>{i18n._(t`Standard Error`)}</TabTitleText>}
           aria-label={i18n._(t`Standard error tab`)}
         >
           {activeTabKey === 3 && stdErr ? (

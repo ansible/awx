@@ -248,7 +248,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
                 totalChips={source_regions.split(',').length}
               >
                 {source_regions.split(',').map(region => (
-                  <Chip key={region} isReadOnly>
+                  <Chip key={region} >
                     {region}
                   </Chip>
                 ))}
@@ -266,7 +266,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
                 totalChips={instance_filters.split(',').length}
               >
                 {instance_filters.split(',').map(filter => (
-                  <Chip key={filter} isReadOnly>
+                  <Chip key={filter} >
                     {filter}
                   </Chip>
                 ))}
@@ -281,7 +281,7 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             value={
               <ChipGroup numChips={5} totalChips={group_by.split(',').length}>
                 {group_by.split(',').map(group => (
-                  <Chip key={group} isReadOnly>
+                  <Chip key={group} >
                     {group}
                   </Chip>
                 ))}

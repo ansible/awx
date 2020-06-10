@@ -35,7 +35,7 @@ function VariablesInput(props) {
 
   return (
     <div className={`pf-c-form__group ${className || ''}`}>
-      <Split gutter="sm">
+      <Split hasGutter>
         <SplitItem>
           <label htmlFor={id} className="pf-c-form__label">
             {label}

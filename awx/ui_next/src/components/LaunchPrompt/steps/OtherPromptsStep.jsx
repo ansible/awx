@@ -101,7 +101,7 @@ function JobTypeField({ i18n }) {
     <FormGroup
       fieldId="propmt-job-type"
       label={i18n._(t`Job Type`)}
-      isValid={isValid}
+      validated={(isValid) ? 'default' : 'error'}
     >
       <FieldTooltip
         content={i18n._(t`For job templates, select run to execute the playbook.
@@ -132,7 +132,7 @@ function VerbosityField({ i18n }) {
   return (
     <FormGroup
       fieldId="prompt-verbosity"
-      isValid={isValid}
+      validated={(isValid) ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
     >
       <FieldTooltip

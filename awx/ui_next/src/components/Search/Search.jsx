@@ -251,7 +251,7 @@ class Search extends React.Component {
                       const [, ...value] = chip.key.split(':');
                       return value.join(':');
                     })}
-                    isExpanded={isFilterDropdownOpen}
+                    isOpen={isFilterDropdownOpen}
                     placeholderText={`Filter By ${name}`}
                   >
                     {options.map(([optionKey, optionLabel]) => (
@@ -270,7 +270,7 @@ class Search extends React.Component {
                       this.handleFilterBooleanSelect(key, selection)
                     }
                     selections={chipsByKey[key].chips[0]}
-                    isExpanded={isFilterDropdownOpen}
+                    isOpen={isFilterDropdownOpen}
                     placeholderText={`Filter By ${name}`}
                   >
                     <SelectOption key="true" value="true">

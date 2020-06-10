@@ -67,9 +67,9 @@ export default function AlertModal({
   return (
     <Modal
       header={customHeader}
-      isFooterLeftAligned
+      
       isOpen={Boolean(isOpen)}
-      isSmall
+      variant="small"
       title={title}
       {...props}
     >

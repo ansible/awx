@@ -74,8 +74,8 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
-        isFooterLeftAligned
-        isLarge
+        
+        variant="large"
         title={title}
         isOpen={isModalOpen}
         onClose={handleClose}

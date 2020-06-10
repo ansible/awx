@@ -36,7 +36,7 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
         fullWidth
         css="grid-column: 1 / -1"
       >
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <OccurrencesLabel>
               <span>{i18n._(t`Occurrences`)}</span>

@@ -231,7 +231,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-run-every"
         helperTextInvalid={intervalMeta.error}
         isRequired
-        isValid={!intervalMeta.touched || !intervalMeta.error}
+        validated={(!intervalMeta.touched || !intervalMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Run every`)}
       >
         <div css="display: flex">
@@ -255,7 +255,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-days-of-week"
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
-          isValid={!daysOfWeekMeta.touched || !daysOfWeekMeta.error}
+          validated={(!daysOfWeekMeta.touched || !daysOfWeekMeta.error) ? 'default' : 'error'}
           label={i18n._(t`On days`)}
         >
           <div css="display: flex">
@@ -339,7 +339,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
             fieldId="schedule-run-on"
             helperTextInvalid={runOnMeta.error}
             isRequired
-            isValid={!runOnMeta.touched || !runOnMeta.error}
+            validated={(!runOnMeta.touched || !runOnMeta.error) ? 'default' : 'error'}
             label={i18n._(t`Run on`)}
           >
             <RunOnRadio
@@ -502,7 +502,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-end"
         helperTextInvalid={endMeta.error}
         isRequired
-        isValid={!endMeta.touched || !endMeta.error}
+        validated={(!endMeta.touched || !endMeta.error) ? 'default' : 'error'}
         label={i18n._(t`End`)}
       >
         <Radio
@@ -556,7 +556,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-end-datetime"
           helperTextInvalid={endDateTimeMeta.error}
           isRequired
-          isValid={!endDateTimeMeta.touched || !endDateTimeMeta.error}
+          validated={(!endDateTimeMeta.touched || !endDateTimeMeta.error) ? 'default' : 'error'}
           label={i18n._(t`End date/time`)}
         >
           <input

@@ -194,7 +194,7 @@ function ScheduleDetail({ schedule, i18n }) {
                     totalChips={job_tags.split(',').length}
                   >
                     {job_tags.split(',').map(jobTag => (
-                      <Chip key={jobTag} isReadOnly>
+                      <Chip key={jobTag} >
                         {jobTag}
                       </Chip>
                     ))}
@@ -212,7 +212,7 @@ function ScheduleDetail({ schedule, i18n }) {
                     totalChips={skip_tags.split(',').length}
                   >
                     {skip_tags.split(',').map(skipTag => (
-                      <Chip key={skipTag} isReadOnly>
+                      <Chip key={skipTag} >
                         {skipTag}
                       </Chip>
                     ))}

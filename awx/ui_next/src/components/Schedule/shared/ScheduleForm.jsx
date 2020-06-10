@@ -104,7 +104,7 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
         fieldId="schedule-start-datetime"
         helperTextInvalid={startDateTimeMeta.error}
         isRequired
-        isValid={!startDateTimeMeta.touched || !startDateTimeMeta.error}
+        validated={(!startDateTimeMeta.touched || !startDateTimeMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Start date/time`)}
       >
         <input
@@ -120,7 +120,7 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
         fieldId="schedule-timezone"
         helperTextInvalid={timezoneMeta.error}
         isRequired
-        isValid={!timezoneMeta.touched || !timezoneMeta.error}
+        validated={(!timezoneMeta.touched || !timezoneMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Local time zone`)}
       >
         <AnsibleSelect
@@ -134,7 +134,7 @@ function ScheduleFormFields({ i18n, zoneOptions }) {
         fieldId="schedule-requency"
         helperTextInvalid={frequencyMeta.error}
         isRequired
-        isValid={!frequencyMeta.touched || !frequencyMeta.error}
+        validated={(!frequencyMeta.touched || !frequencyMeta.error) ? 'default' : 'error'}
         label={i18n._(t`Run frequency`)}
       >
         <AnsibleSelect

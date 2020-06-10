@@ -304,7 +304,7 @@ function JobTemplateDetail({ i18n, template }) {
                 totalChips={summary_fields.labels.results.length}
               >
                 {summary_fields.labels.results.map(l => (
-                  <Chip key={l.id} isReadOnly>
+                  <Chip key={l.id} >
                     {l.name}
                   </Chip>
                 ))}
@@ -319,7 +319,7 @@ function JobTemplateDetail({ i18n, template }) {
             value={
               <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
-                  <Chip key={ig.id} isReadOnly>
+                  <Chip key={ig.id} >
                     {ig.name}
                   </Chip>
                 ))}
@@ -334,7 +334,7 @@ function JobTemplateDetail({ i18n, template }) {
             value={
               <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
                 {job_tags.split(',').map(jobTag => (
-                  <Chip key={jobTag} isReadOnly>
+                  <Chip key={jobTag} >
                     {jobTag}
                   </Chip>
                 ))}
@@ -349,7 +349,7 @@ function JobTemplateDetail({ i18n, template }) {
             value={
               <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
                 {skip_tags.split(',').map(skipTag => (
-                  <Chip key={skipTag} isReadOnly>
+                  <Chip key={skipTag} >
                     {skipTag}
                   </Chip>
                 ))}

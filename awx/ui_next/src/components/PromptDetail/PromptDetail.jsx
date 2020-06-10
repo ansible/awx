@@ -194,7 +194,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                     totalChips={overrides.job_tags.split(',').length}
                   >
                     {overrides.job_tags.split(',').map(jobTag => (
-                      <Chip key={jobTag} isReadOnly>
+                      <Chip key={jobTag} >
                         {jobTag}
                       </Chip>
                     ))}
@@ -212,7 +212,7 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
                     totalChips={overrides.skip_tags.split(',').length}
                   >
                     {overrides.skip_tags.split(',').map(skipTag => (
-                      <Chip key={skipTag} isReadOnly>
+                      <Chip key={skipTag} >
                         {skipTag}
                       </Chip>
                     ))}
