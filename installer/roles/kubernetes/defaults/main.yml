@@ -38,15 +38,6 @@ kubernetes_redis_image: "redis"
 kubernetes_redis_image_tag: "latest"
 kubernetes_redis_config_mount_path: "/usr/local/etc/redis/redis.conf"
 
-memcached_mem_request: 1
-memcached_cpu_request: 500
-memcached_security_context_enabled: true
-memcached_security_context_privileged: false
-memcached_security_context_user: 1001
-
-kubernetes_memcached_version: "latest"
-kubernetes_memcached_image: "memcached"
-
 openshift_pg_emptydir: false
 openshift_pg_pvc_name: postgresql
 

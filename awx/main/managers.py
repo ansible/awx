@@ -149,8 +149,11 @@ class InstanceManager(models.Manager):
 
     def get_or_register(self):
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            from awx.main.management.commands.register_queue import RegisterQueue
             pod_ip = os.environ.get('MY_POD_IP')
-            return self.register(ip_address=pod_ip)
+            registered = self.register(ip_address=pod_ip)
+            RegisterQueue('tower', None, 100, 0, []).register()
+            return registered
         else:
             return (False, self.me())
 

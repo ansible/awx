@@ -581,3 +581,4 @@ class TaskManager():
                 logger.debug("Starting Scheduler")
                 with task_manager_bulk_reschedule():
                     self._schedule()
+                logger.debug("Finishing Scheduler")

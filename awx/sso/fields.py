@@ -740,7 +740,9 @@ class SAMLOrgAttrField(HybridDictField):
 class SAMLTeamAttrTeamOrgMapField(HybridDictField):
 
     team = fields.CharField(required=True, allow_null=False)
+    team_alias = fields.CharField(required=False, allow_null=True)
     organization = fields.CharField(required=True, allow_null=False)
+    organization_alias = fields.CharField(required=False, allow_null=True)
 
     child = _Forbidden()
 

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { t } from '@lingui/macro';
-
 import PropTypes, { shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
 import { useField, withFormik } from 'formik';
-import { Form, FormGroup, Checkbox } from '@patternfly/react-core';
+import { Form, FormGroup, Checkbox, TextInput } from '@patternfly/react-core';
 import { required } from '../../../util/validators';
 
+import FieldWithPrompt from '../../../components/FieldWithPrompt';
 import FormField, {
   FieldTooltip,
   FormSubmitError,
@@ -36,19 +36,20 @@ function WorkflowJobTemplateForm({
   i18n,
   submitError,
 }) {
-  const [hasContentError, setContentError] = useState(null);
-
-  const [organizationField, organizationMeta, organizationHelpers] = useField(
-    'organization'
+  const [enableWebhooks, setEnableWebhooks] = useState(
+    Boolean(template.webhook_service)
   );
+  const [hasContentError, setContentError] = useState(null);
+  const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [inventoryField, inventoryMeta, inventoryHelpers] = useField(
     'inventory'
   );
   const [labelsField, , labelsHelpers] = useField('labels');
-
-  const [enableWebhooks, setEnableWebhooks] = useState(
-    Boolean(template.webhook_service)
+  const [limitField, limitMeta, limitHelpers] = useField('limit');
+  const [organizationField, organizationMeta, organizationHelpers] = useField(
+    'organization'
   );
+  const [scmField, , scmHelpers] = useField('scm_branch');
 
   if (hasContentError) {
     return <ContentError error={hasContentError} />;
@@ -79,39 +80,74 @@ function WorkflowJobTemplateForm({
           value={organizationField.value}
           isValid={!organizationMeta.error}
         />
-        <FormGroup label={i18n._(t`Inventory`)} fieldId="wfjt-inventory">
-          <FieldTooltip
-            content={i18n._(
-              t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
-            )}
-          />
+
+        <FieldWithPrompt
+          fieldId="wfjt-inventory"
+          label={i18n._(t`Inventory`)}
+          promptId="wfjt-ask-inventory-on-launch"
+          promptName="ask_inventory_on_launch"
+          tooltip={i18n._(
+            t`Select an inventory for the workflow. This inventory is applied to all job template nodes that prompt for an inventory.`
+          )}
+        >
           <InventoryLookup
             value={inventoryField.value}
-            isValid={!inventoryMeta.error}
-            helperTextInvalid={inventoryMeta.error}
+            onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
-              inventoryHelpers.setValue(value || null);
+              inventoryHelpers.setValue(value);
+            }}
+            required={askInventoryOnLaunchField.value}
+            touched={inventoryMeta.touched}
+            error={inventoryMeta.error}
+          />
+          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
+            inventoryMeta.error && (
+              <div
+                className="pf-c-form__helper-text pf-m-error"
+                aria-live="polite"
+              >
+                {inventoryMeta.error}
+              </div>
+            )}
+        </FieldWithPrompt>
+
+        <FieldWithPrompt
+          fieldId="wjft-limit"
+          label={i18n._(t`Limit`)}
+          promptId="template-ask-limit-on-launch"
+          promptName="ask_limit_on_launch"
+          tooltip={i18n._(t`Provide a host pattern to further constrain
+                  the list of hosts that will be managed or affected by the
+                  playbook. Multiple patterns are allowed. Refer to Ansible
+                  documentation for more information and examples on patterns.`)}
+        >
+          <TextInput
+            id="text-wfjt-limit"
+            {...limitField}
+            isValid={!limitMeta.touched || !limitMeta.error}
+            onChange={value => {
+              limitHelpers.setValue(value);
             }}
           />
-        </FormGroup>
-        <FormField
-          type="text"
-          name="limit"
-          id="wfjt-limit"
-          label={i18n._(t`Limit`)}
-          tooltip={i18n._(
-            t`Provide a host pattern to further constrain the list of hosts that will be managed or affected by the workflow. This limit is applied to all job template nodes that prompt for a limit. Refer to Ansible documentation for more information and examples on patterns.`
-          )}
-        />
-        <FormField
-          type="text"
-          label={i18n._(t`Source Control Branch`)}
+        </FieldWithPrompt>
+
+        <FieldWithPrompt
+          fieldId="wfjt-scm-branch"
+          label={i18n._(t`Source control branch`)}
+          promptId="wfjt-ask-scm-branch-on-launch"
+          promptName="ask_scm_branch_on_launch"
           tooltip={i18n._(
             t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`
           )}
-          id="wfjt-scm_branch"
-          name="scm_branch"
-        />
+        >
+          <TextInput
+            id="text-wfjt-scm-branch"
+            {...scmField}
+            onChange={value => {
+              scmHelpers.setValue(value);
+            }}
+          />
+        </FieldWithPrompt>
       </FormColumnLayout>
       <FormFullWidthLayout>
         <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
@@ -133,6 +169,7 @@ function WorkflowJobTemplateForm({
           id="wfjt-variables"
           name="extra_vars"
           label={i18n._(t`Variables`)}
+          promptId="template-ask-variables-on-launch"
           tooltip={i18n._(
             t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
           )}

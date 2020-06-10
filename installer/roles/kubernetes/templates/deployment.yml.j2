@@ -231,9 +231,6 @@ spec:
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
 
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
-
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -310,9 +307,6 @@ spec:
 
             - name: {{ kubernetes_deployment_name }}-redis-socket
               mountPath: "/var/run/redis"
-
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
           env:
             - name: SUPERVISOR_WEB_CONFIG_PATH
               value: "/etc/supervisord.conf"
@@ -376,40 +370,6 @@ spec:
 {% endif %}
 {% if redis_cpu_limit is defined %}
               cpu: "{{ redis_cpu_limit }}m"
-{% endif %}
-        - name: {{ kubernetes_deployment_name }}-memcached
-{% if memcached_security_context_enabled is defined and memcached_security_context_enabled | bool %}
-          securityContext:
-{% if memcached_security_context_privileged is defined %}
-            privileged: {{ memcached_security_context_privileged }}
-{% endif %}
-{% if memcached_security_context_user is defined %}
-            runAsUser: {{ memcached_security_context_user }}
-{% endif %}
-{% endif %}
-          image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
-          imagePullPolicy: Always
-          command:
-            - 'memcached'
-            - '-s'
-            - '/var/run/memcached/memcached.sock'
-            - '-a'
-            - '0666'
-          volumeMounts:
-            - name: {{ kubernetes_deployment_name }}-memcached-socket
-              mountPath: "/var/run/memcached"
-          resources:
-            requests:
-              memory: "{{ memcached_mem_request }}Gi"
-              cpu: "{{ memcached_cpu_request }}m"
-{% if memcached_mem_limit is defined or memcached_cpu_limit is defined %}
-            limits:
-{% endif %}
-{% if memcached_mem_limit is defined %}
-              memory: "{{ memcached_mem_limit }}Gi"
-{% endif %}
-{% if memcached_cpu_limit is defined %}
-              cpu: "{{ memcached_cpu_limit }}m"
 {% endif %}
 {% if tolerations is defined %}
       tolerations:
@@ -514,9 +474,6 @@ spec:
                 path: SECRET_KEY
 
         - name: {{ kubernetes_deployment_name }}-redis-socket
-          emptyDir: {}
-
-        - name: {{ kubernetes_deployment_name }}-memcached-socket
           emptyDir: {}
 
 ---

@@ -10,12 +10,6 @@
     state: directory
     mode: 0777
 
-- name: Create Memcached socket directory
-  file:
-    path: "{{ docker_compose_dir }}/memcached_socket"
-    state: directory
-    mode: 0777
-
 - name: Create Docker Compose Configuration
   template:
     src: "{{ item }}.j2"
