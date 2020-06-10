@@ -9,7 +9,7 @@ import {
   ToolbarGroup as _ToolbarGroup,
   ToolbarItem,
   ToolbarToggleGroup,
- } from '@patternfly/react-core';
+} from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';

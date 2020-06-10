@@ -63,7 +63,9 @@ function AlertModal({
   const customHeader = (
     <Header>
       {variant ? variantIcons[variant] : null}
-      <Title id="alert-modal-header-label" size="2xl" headingLevel="h2">{title}</Title>
+      <Title id="alert-modal-header-label" size="2xl" headingLevel="h2">
+        {title}
+      </Title>
     </Header>
   );
 

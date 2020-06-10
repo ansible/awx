@@ -142,7 +142,6 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
-        
         variant="large"
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
         isOpen={isModalOpen}
@@ -196,11 +195,7 @@ Lookup.defaultProps = {
   required: false,
   onBlur: () => {},
   renderItemChip: ({ item, removeItem, canDelete }) => (
-    <Chip
-      key={item.id}
-      onClick={() => removeItem(item)}
-      
-    >
+    <Chip key={item.id} onClick={() => removeItem(item)}>
       {item.name}
     </Chip>
   ),

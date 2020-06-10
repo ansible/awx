@@ -291,7 +291,9 @@ function JobTemplateForm({
         <FormGroup
           fieldId="template-playbook"
           helperTextInvalid={playbookMeta.error}
-          validated={(!playbookMeta.touched || !playbookMeta.error) ? 'default' : 'error'}
+          validated={
+            !playbookMeta.touched || !playbookMeta.error ? 'default' : 'error'
+          }
           isRequired
           label={i18n._(t`Playbook`)}
         >
@@ -381,7 +383,9 @@ function JobTemplateForm({
               <TextInput
                 id="template-limit"
                 {...limitField}
-                validated={(!limitMeta.touched || !limitMeta.error) ? 'default' : 'error'}
+                validated={
+                  !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
+                }
                 onChange={value => {
                   limitHelpers.setValue(value);
                 }}

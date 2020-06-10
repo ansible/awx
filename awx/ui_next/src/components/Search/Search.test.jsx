@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  Toolbar,
-  ToolbarContent,
-} from '@patternfly/react-core';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';

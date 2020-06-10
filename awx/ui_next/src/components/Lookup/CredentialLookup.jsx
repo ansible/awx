@@ -84,7 +84,7 @@ function CredentialLookup({
     <FormGroup
       fieldId="credential"
       isRequired={required}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={label}
       helperTextInvalid={helperTextInvalid}
     >

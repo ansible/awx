@@ -96,7 +96,7 @@ function MultipleChoiceField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
     >
       <FieldTooltip content={question.question_description} />
@@ -124,7 +124,7 @@ function MultiSelectField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
     >
       <FieldTooltip content={question.question_description} />

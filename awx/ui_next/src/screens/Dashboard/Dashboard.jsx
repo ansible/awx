@@ -15,7 +15,9 @@ class Dashboard extends Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl" headingLevel="h2">{i18n._(t`Dashboard`)}</Title>
+          <Title size="2xl" headingLevel="h2">
+            {i18n._(t`Dashboard`)}
+          </Title>
         </PageSection>
         <PageSection />
       </Fragment>

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Modal as PFModal, Tab, Tabs as PFTabs, TabTitleText } from '@patternfly/react-core';
+import {
+  Modal as PFModal,
+  Tab,
+  Tabs as PFTabs,
+  TabTitleText,
+} from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -175,7 +180,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
         </Tab>
         <Tab
           eventKey={1}
-            title={<TabTitleText>{i18n._(t`JSON`)}</TabTitleText>}
+          title={<TabTitleText>{i18n._(t`JSON`)}</TabTitleText>}
           aria-label={i18n._(t`JSON tab`)}
         >
           {activeTabKey === 1 && jsonObj ? (

@@ -63,7 +63,7 @@ function ProjectLookup({
       fieldId="project"
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Project`)}
     >
       {tooltip && <FieldTooltip content={tooltip} />}

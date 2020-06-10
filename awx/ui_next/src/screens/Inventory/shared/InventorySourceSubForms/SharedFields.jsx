@@ -229,7 +229,7 @@ export const VerbosityField = withI18n()(({ i18n }) => {
   return (
     <FormGroup
       fieldId="verbosity"
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
     >
       <FieldTooltip

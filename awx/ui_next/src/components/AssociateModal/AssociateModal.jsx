@@ -74,7 +74,6 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
-        
         variant="large"
         title={title}
         isOpen={isModalOpen}

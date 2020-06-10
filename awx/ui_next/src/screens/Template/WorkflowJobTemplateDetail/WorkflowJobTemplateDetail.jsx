@@ -172,9 +172,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
                 totalChips={summary_fields.labels.results.length}
               >
                 {summary_fields.labels.results.map(l => (
-                  <Chip key={l.id} >
-                    {l.name}
-                  </Chip>
+                  <Chip key={l.id}>{l.name}</Chip>
                 ))}
               </ChipGroup>
             }

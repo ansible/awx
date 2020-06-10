@@ -126,9 +126,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
               totalChips={source_regions.split(',').length}
             >
               {source_regions.split(',').map(region => (
-                <Chip key={region} >
-                  {region}
-                </Chip>
+                <Chip key={region}>{region}</Chip>
               ))}
             </ChipGroup>
           }
@@ -144,9 +142,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
               totalChips={instance_filters.split(',').length}
             >
               {instance_filters.split(',').map(filter => (
-                <Chip key={filter} >
-                  {filter}
-                </Chip>
+                <Chip key={filter}>{filter}</Chip>
               ))}
             </ChipGroup>
           }
@@ -159,9 +155,7 @@ function PromptInventorySourceDetail({ i18n, resource }) {
           value={
             <ChipGroup numChips={5} totalChips={group_by.split(',').length}>
               {group_by.split(',').map(group => (
-                <Chip key={group} >
-                  {group}
-                </Chip>
+                <Chip key={group}>{group}</Chip>
               ))}
             </ChipGroup>
           }

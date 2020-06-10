@@ -14,7 +14,7 @@ function PasswordField(props) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={isRequired}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={label}
     >
       <InputGroup>

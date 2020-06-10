@@ -117,7 +117,9 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
         fieldId="source"
         helperTextInvalid={sourceMeta.error}
         isRequired
-        validated={(!sourceMeta.touched || !sourceMeta.error) ? 'default' : 'error'}
+        validated={
+          !sourceMeta.touched || !sourceMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`Source`)}
       >
         <AnsibleSelect
@@ -161,7 +163,9 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
       )}
       {sourceField.value !== '' && (
         <SubFormLayout>
-          <Title size="md" headingLevel="h4">{i18n._(t`Source details`)}</Title>
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Source details`)}
+          </Title>
           <FormColumnLayout>
             {
               {

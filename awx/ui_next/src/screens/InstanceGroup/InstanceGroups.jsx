@@ -15,7 +15,9 @@ class InstanceGroups extends Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl" headingLevel="h2">{i18n._(t`Instance Groups`)}</Title>
+          <Title size="2xl" headingLevel="h2">
+            {i18n._(t`Instance Groups`)}
+          </Title>
         </PageSection>
         <PageSection />
       </Fragment>

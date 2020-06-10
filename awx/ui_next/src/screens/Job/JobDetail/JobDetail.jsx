@@ -232,9 +232,7 @@ function JobDetail({ job, i18n }) {
             value={
               <ChipGroup numChips={5} totalChips={labels.results.length}>
                 {labels.results.map(l => (
-                  <Chip key={l.id} >
-                    {l.name}
-                  </Chip>
+                  <Chip key={l.id}>{l.name}</Chip>
                 ))}
               </ChipGroup>
             }

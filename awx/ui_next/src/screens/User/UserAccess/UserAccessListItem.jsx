@@ -40,7 +40,6 @@ function UserAccessListItem({ role, i18n, detailUrl, onSelect }) {
                     label={i18n._(t`Role`)}
                     value={
                       <Chip
-                        
                         key={role.name}
                         aria-label={role.name}
                         onClick={() => onSelect(role)}

@@ -231,7 +231,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-run-every"
         helperTextInvalid={intervalMeta.error}
         isRequired
-        validated={(!intervalMeta.touched || !intervalMeta.error) ? 'default' : 'error'}
+        validated={
+          !intervalMeta.touched || !intervalMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`Run every`)}
       >
         <div css="display: flex">
@@ -255,7 +257,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-days-of-week"
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
-          validated={(!daysOfWeekMeta.touched || !daysOfWeekMeta.error) ? 'default' : 'error'}
+          validated={
+            !daysOfWeekMeta.touched || !daysOfWeekMeta.error
+              ? 'default'
+              : 'error'
+          }
           label={i18n._(t`On days`)}
         >
           <div css="display: flex">
@@ -339,7 +345,9 @@ const FrequencyDetailSubform = ({ i18n }) => {
             fieldId="schedule-run-on"
             helperTextInvalid={runOnMeta.error}
             isRequired
-            validated={(!runOnMeta.touched || !runOnMeta.error) ? 'default' : 'error'}
+            validated={
+              !runOnMeta.touched || !runOnMeta.error ? 'default' : 'error'
+            }
             label={i18n._(t`Run on`)}
           >
             <RunOnRadio
@@ -502,7 +510,7 @@ const FrequencyDetailSubform = ({ i18n }) => {
         fieldId="schedule-end"
         helperTextInvalid={endMeta.error}
         isRequired
-        validated={(!endMeta.touched || !endMeta.error) ? 'default' : 'error'}
+        validated={!endMeta.touched || !endMeta.error ? 'default' : 'error'}
         label={i18n._(t`End`)}
       >
         <Radio
@@ -556,7 +564,11 @@ const FrequencyDetailSubform = ({ i18n }) => {
           fieldId="schedule-end-datetime"
           helperTextInvalid={endDateTimeMeta.error}
           isRequired
-          validated={(!endDateTimeMeta.touched || !endDateTimeMeta.error) ? 'default' : 'error'}
+          validated={
+            !endDateTimeMeta.touched || !endDateTimeMeta.error
+              ? 'default'
+              : 'error'
+          }
           label={i18n._(t`End date/time`)}
         >
           <input

@@ -131,14 +131,14 @@ function NodeTypeStep({
                       <FormGroup
                         fieldId="approval-name"
                         isRequired
-                        validated={(isValid) ? 'default' : 'error'}
+                        validated={isValid ? 'default' : 'error'}
                         label={i18n._(t`Name`)}
                       >
                         <TextInput
                           autoFocus
                           id="approval-name"
                           isRequired
-                          validated={(isValid) ? 'default' : 'error'}
+                          validated={isValid ? 'default' : 'error'}
                           type="text"
                           {...field}
                           onChange={(value, evt) => {

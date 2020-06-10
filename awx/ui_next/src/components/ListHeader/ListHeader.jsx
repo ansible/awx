@@ -2,10 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Toolbar,
-  ToolbarContent,
-} from '@patternfly/react-core';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import DataListToolbar from '../DataListToolbar';
 
 import {

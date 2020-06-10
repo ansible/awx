@@ -49,7 +49,7 @@ function OrganizationLookup({
       fieldId="organization"
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
-      validated={(isValid) ? 'default' : 'error'}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Organization`)}
     >
       <Lookup

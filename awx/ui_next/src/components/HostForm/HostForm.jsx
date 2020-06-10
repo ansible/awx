@@ -27,7 +27,9 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
       label={i18n._(t`Inventory`)}
       isRequired
       fieldId="inventory-lookup"
-      validated={(!inventoryMeta.touched || !inventoryMeta.error) ? 'default' : 'error'}
+      validated={
+        !inventoryMeta.touched || !inventoryMeta.error ? 'default' : 'error'
+      }
       helperTextInvalid={inventoryMeta.error}
     >
       <FieldTooltip

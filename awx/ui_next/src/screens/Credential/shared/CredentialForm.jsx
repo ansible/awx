@@ -104,7 +104,9 @@ function CredentialFormFields({
         fieldId="credential-credentialType"
         helperTextInvalid={credTypeMeta.error}
         isRequired
-        validated={(!credTypeMeta.touched || !credTypeMeta.error) ? 'default' : 'error'}
+        validated={
+          !credTypeMeta.touched || !credTypeMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`Credential Type`)}
       >
         <AnsibleSelect

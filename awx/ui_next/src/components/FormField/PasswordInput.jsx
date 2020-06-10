@@ -44,7 +44,7 @@ function PasswordInput(props) {
         value={field.value === '$encrypted$' ? '' : field.value}
         isDisabled={isDisabled}
         isRequired={isRequired}
-        validated={(isValid) ? 'default' : 'error'}
+        validated={isValid ? 'default' : 'error'}
         type={inputType}
         onChange={(_, event) => {
           field.onChange(event);

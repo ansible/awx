@@ -59,7 +59,6 @@ class ResourceAccessListItem extends React.Component {
     return (
       <Chip
         key={role.id}
-        
         onClick={() => {
           onRoleDelete(role, accessRecord);
         }}
