@@ -10,21 +10,12 @@ import {
   ToolbarItem,
   ToolbarToggleGroup,
  } from '@patternfly/react-core';
-import styled from 'styled-components';
 import { SearchIcon } from '@patternfly/react-icons';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 
 import { SearchColumns, SortColumns, QSConfig } from '../../types';
-
-const ToolbarContent = styled(_ToolbarContent)`
-  --pf-c-data-toolbar__content--PaddingLeft: 24px;
-  --pf-c-data-toolbar__content--PaddingRight: 8px;
-`;
-const ToolbarGroup = styled(_ToolbarGroup)`
-  --pf-c-data-toolbar__group--spacer: 24px;
-`;
 
 class DataListToolbar extends React.Component {
   render() {
