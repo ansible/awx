@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t, Trans } from '@lingui/macro';
@@ -47,44 +47,42 @@ function CredentialDetail({ i18n, credential }) {
       user_capabilities,
     },
   } = credential;
-
-  const [fields, setFields] = useState([]);
-  const [inputSources, setInputSources] = useState({});
-  const [managedByTower, setManagedByTower] = useState([]);
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
   const history = useHistory();
 
-  useEffect(() => {
-    (async () => {
-      setContentError(null);
-      setHasContentLoading(true);
-      try {
-        const [
-          {
-            data: { inputs: credentialTypeInputs, managed_by_tower },
-          },
-          loadedInputSources,
-        ] = await Promise.all([
-          CredentialTypesAPI.readDetail(credential_type.id),
-          CredentialsAPI.readInputSources(credentialId),
-        ]);
-
-        setFields(credentialTypeInputs.fields || []);
-        setManagedByTower(managed_by_tower);
-        setInputSources(
-          loadedInputSources.reduce((inputSourcesMap, inputSource) => {
+  const {
+    result: { fields, managedByTower, inputSources },
+    request: fetchDetails,
+    isLoading: hasContentLoading,
+    error: contentError,
+  } = useRequest(
+    useCallback(async () => {
+      const [
+        {
+          data: { inputs: credentialTypeInputs, managed_by_tower },
+        },
+        loadedInputSources,
+      ] = await Promise.all([
+        CredentialTypesAPI.readDetail(credential_type.id),
+        CredentialsAPI.readInputSources(credentialId),
+      ]);
+      return {
+        fields: credentialTypeInputs.fields || [],
+        managedByTower: managed_by_tower,
+        inputSources: loadedInputSources.reduce(
+          (inputSourcesMap, inputSource) => {
             inputSourcesMap[inputSource.input_field_name] = inputSource;
             return inputSourcesMap;
-          }, {})
-        );
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setHasContentLoading(false);
-      }
-    })();
-  }, [credential_type, credentialId]);
+          },
+          {}
+        ),
+      };
+    }, [credentialId, credential_type]),
+    {
+      fields: [],
+      managedByTower: true,
+      inputSources: {},
+    }
+  );
 
   const {
     request: deleteCredential,
@@ -172,6 +170,10 @@ function CredentialDetail({ i18n, credential }) {
       />
     );
   };
+
+  useEffect(() => {
+    fetchDetails();
+  }, [fetchDetails]);
 
   if (hasContentLoading) {
     return <ContentLoading />;
