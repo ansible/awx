@@ -17,7 +17,7 @@ tags:
 - awx
 - ansible
 - automation
-version: {{ collection_version }}
+version: {{ collection_version_override | default(collection_version) }}
 build_ignore:
 - tools
 - setup.cfg

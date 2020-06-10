@@ -140,6 +140,7 @@ use_dev_supervisor.txt
 /awx_collection_test_venv/
 /awx_collection/*.tar.gz
 /sanity/
+/awx_collection_build/
 
 .idea/*
 *.unison.tmp
