@@ -108,7 +108,7 @@ ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via openshift
 schedule==0.6.0           # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0  # via twisted
-six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, txaio, websocket-client
+six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, txaio, websocket-client
 slackclient==1.1.2        # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1              # via gitdb
 social-auth-app-django==3.1.0  # via -r /awx_devel/requirements/requirements.in
