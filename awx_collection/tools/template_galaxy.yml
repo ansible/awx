@@ -25,7 +25,7 @@
   tasks:
     - name: Make substitutions in source to sync with templates
       set_fact:
-        collection_version_override: devel
+        collection_version_override: 0.0.1-devel
 
     - name: Template the galaxy.yml file
       template:

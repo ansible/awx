@@ -28,7 +28,7 @@ tags:
 - awx
 - ansible
 - automation
-version: devel
+version: 0.0.1-devel
 build_ignore:
 - tools
 - setup.cfg
