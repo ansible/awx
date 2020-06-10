@@ -21,8 +21,11 @@ class Credentials extends Base {
   }
 
   readInputSources(id) {
+    const maxRequests = 5;
+    let requestCounter = 0;
     const fetchInputSources = async (pageNo = 1, inputSources = []) => {
       try {
+        requestCounter++;
         const { data } = await this.http.get(
           `${this.baseUrl}${id}/input_sources/`,
           {
@@ -32,7 +35,7 @@ class Credentials extends Base {
             },
           }
         );
-        if (data.next) {
+        if (data.next && requestCounter <= maxRequests) {
           return fetchInputSources(
             pageNo + 1,
             inputSources.concat(data.results)
