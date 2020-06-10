@@ -49,11 +49,11 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           id=""
           role="tooltip"
         >
-          <TooltipContent
+          <Unknown
             isLeftAligned={false}
           >
             Select a row to delete
-          </TooltipContent>
+          </Unknown>
         </div>
       }
       delay={
@@ -103,44 +103,20 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           onClick={[Function]}
           variant="danger"
         >
-          <ComponentWithOuia
-            component={[Function]}
-            componentProps={
-              Object {
-                "aria-label": "Delete",
-                "children": "Delete",
-                "isDisabled": true,
-                "onClick": [Function],
-                "variant": "danger",
-              }
-            }
-            consumerContext={null}
+          <button
+            aria-disabled={null}
+            aria-label="Delete"
+            className="pf-c-button pf-m-danger"
+            data-ouia-component-id={null}
+            data-ouia-component-type="PF4/Button"
+            data-ouia-safe={true}
+            disabled={true}
+            onClick={[Function]}
+            tabIndex={null}
+            type="button"
           >
-            <Button
-              aria-label="Delete"
-              isDisabled={true}
-              onClick={[Function]}
-              ouiaContext={
-                Object {
-                  "isOuia": false,
-                  "ouiaId": null,
-                }
-              }
-              variant="danger"
-            >
-              <button
-                aria-disabled={null}
-                aria-label="Delete"
-                className="pf-c-button pf-m-danger"
-                disabled={true}
-                onClick={[Function]}
-                tabIndex={null}
-                type="button"
-              >
-                Delete
-              </button>
-            </Button>
-          </ComponentWithOuia>
+            Delete
+          </button>
         </Component>
       </div>
       <Portal
@@ -165,7 +141,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           id=""
           role="tooltip"
         >
-          <TooltipContent
+          <Component
             isLeftAligned={false}
           >
             <div
@@ -173,7 +149,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
             >
               Select a row to delete
             </div>
-          </TooltipContent>
+          </Component>
         </div>
       </Portal>
     </PopoverBase>

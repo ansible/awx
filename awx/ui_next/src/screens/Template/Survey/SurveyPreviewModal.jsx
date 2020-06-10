@@ -30,6 +30,7 @@ function SurveyPreviewModal({
   return (
     <Modal
       title={i18n._(t`Survey Preview`)}
+      aria-label={i18n._(t`Survey preview modal`)}
       isOpen={isPreviewModalOpen}
       onClose={() => onToggleModalOpen(false)}
       variant="small"

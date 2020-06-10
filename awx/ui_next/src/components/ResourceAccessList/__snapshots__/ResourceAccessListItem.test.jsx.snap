@@ -32,7 +32,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
   i18n={"/i18n/"}
   onRoleDelete={[Function]}
 >
-  <DataListItem
+  <Component
     aria-labelledby="access-list-item"
     id="2"
     key="2"
@@ -42,7 +42,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
       className="pf-c-data-list__item"
       id="2"
     >
-      <DataListItemRow
+      <Component
         key=".0"
         rowid="access-list-item"
       >
@@ -53,8 +53,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
             dataListCells={
               Array [
                 <ForwardRef(Styled(PFDataListCell))>
-                  <TextContent>
-                    <Text
+                  <Unknown>
+                    <Unknown
                       component="h6"
                     >
                       <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -66,8 +66,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       >
                         jane
                       </ForwardRef(ResourceAccessListItem___StyledLink)>
-                    </Text>
-                  </TextContent>
+                    </Unknown>
+                  </Unknown>
                   <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
@@ -92,12 +92,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           numChips={5}
                           totalChips={1}
                         >
-                          <Unknown
+                          <Chip
+                            className=""
+                            closeBtnAriaLabel="close"
+                            component="div"
+                            isOverflowChip={false}
                             isReadOnly={false}
                             onClick={[Function]}
+                            tooltipPosition="top"
                           >
                             Member
-                          </Unknown>
+                          </Chip>
                         </WithI18n>
                       }
                     />
@@ -112,8 +117,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               dataListCells={
                 Array [
                   <ForwardRef(Styled(PFDataListCell))>
-                    <TextContent>
-                      <Text
+                    <Unknown>
+                      <Unknown
                         component="h6"
                       >
                         <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -125,8 +130,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         >
                           jane
                         </ForwardRef(ResourceAccessListItem___StyledLink)>
-                      </Text>
-                    </TextContent>
+                      </Unknown>
+                    </Unknown>
                     <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
@@ -151,12 +156,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             numChips={5}
                             totalChips={1}
                           >
-                            <Unknown
+                            <Chip
+                              className=""
+                              closeBtnAriaLabel="close"
+                              component="div"
+                              isOverflowChip={false}
                               isReadOnly={false}
                               onClick={[Function]}
+                              tooltipPosition="top"
                             >
                               Member
-                            </Unknown>
+                            </Chip>
                           </WithI18n>
                         }
                       />
@@ -189,13 +199,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               forwardedRef={null}
               rowid="access-list-item"
             >
-              <DataListItemCells
+              <Component
                 className="ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 dataListCells={
                   Array [
                     <ForwardRef(Styled(PFDataListCell))>
-                      <TextContent>
-                        <Text
+                      <Unknown>
+                        <Unknown
                           component="h6"
                         >
                           <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -207,8 +217,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           >
                             jane
                           </ForwardRef(ResourceAccessListItem___StyledLink)>
-                        </Text>
-                      </TextContent>
+                        </Unknown>
+                      </Unknown>
                       <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
@@ -233,12 +243,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               numChips={5}
                               totalChips={1}
                             >
-                              <Unknown
+                              <Chip
+                                className=""
+                                closeBtnAriaLabel="close"
+                                component="div"
+                                isOverflowChip={false}
                                 isReadOnly={false}
                                 onClick={[Function]}
+                                tooltipPosition="top"
                               >
                                 Member
-                              </Unknown>
+                              </Chip>
                             </WithI18n>
                           }
                         />
@@ -287,11 +302,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <div
                           className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
-                          <TextContent>
+                          <Component>
                             <div
                               className="pf-c-content"
                             >
-                              <Text
+                              <Component
                                 component="h6"
                               >
                                 <h6
@@ -378,9 +393,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                     </StyledComponent>
                                   </ResourceAccessListItem___StyledLink>
                                 </h6>
-                              </Text>
+                              </Component>
                             </div>
-                          </TextContent>
+                          </Component>
                           <Styled(DetailList)
                             stacked={true}
                           >
@@ -421,7 +436,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
-                                <TextList
+                                <Component
                                   className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
@@ -479,7 +494,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <TextListItem
+                                            <Component
                                               className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
@@ -491,7 +506,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 Name
                                               </dt>
-                                            </TextListItem>
+                                            </Component>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
@@ -542,7 +557,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <TextListItem
+                                            <Component
                                               className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
@@ -554,13 +569,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 jane brown
                                               </dd>
-                                            </TextListItem>
+                                            </Component>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
                                     </Detail>
                                   </dl>
-                                </TextList>
+                                </Component>
                               </DetailList>
                             </StyledComponent>
                           </Styled(DetailList)>
@@ -644,7 +659,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
-                                <TextList
+                                <Component
                                   className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
@@ -661,12 +676,17 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           numChips={5}
                                           totalChips={1}
                                         >
-                                          <Unknown
+                                          <Chip
+                                            className=""
+                                            closeBtnAriaLabel="close"
+                                            component="div"
+                                            isOverflowChip={false}
                                             isReadOnly={false}
                                             onClick={[Function]}
+                                            tooltipPosition="top"
                                           >
                                             Member
-                                          </Unknown>
+                                          </Chip>
                                         </WithI18n>
                                       }
                                     >
@@ -714,7 +734,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <TextListItem
+                                            <Component
                                               className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
@@ -726,7 +746,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 Team Roles
                                               </dt>
-                                            </TextListItem>
+                                            </Component>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
@@ -777,7 +797,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <TextListItem
+                                            <Component
                                               className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
@@ -801,187 +821,125 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                       totalChips={1}
                                                     >
                                                       <ChipGroup
-                                                        className=""
+                                                        aria-label="Chip group category"
+                                                        categoryName=""
+                                                        closeBtnAriaLabel="Close chip group"
                                                         collapsedText="-4 more"
                                                         defaultIsOpen={false}
                                                         expandedText="Show less"
+                                                        isClosable={false}
                                                         numChips={5}
-                                                        withToolbar={false}
+                                                        onClick={[Function]}
+                                                        tooltipPosition="top"
                                                       >
-                                                        <ul
-                                                          className="pf-c-chip-group"
+                                                        <GenerateId
+                                                          prefix="pf-random-id-"
                                                         >
-                                                          <InnerChipGroup
-                                                            className=""
-                                                            collapsedText="-4 more"
-                                                            defaultIsOpen={false}
-                                                            expandedText="Show less"
-                                                            isOpen={false}
-                                                            numChips={5}
-                                                            onToggleCollapse={[Function]}
-                                                            withToolbar={false}
+                                                          <div
+                                                            className="pf-c-chip-group"
                                                           >
-                                                            <Component
-                                                              component="li"
-                                                              isReadOnly={false}
-                                                              key=".$3"
-                                                              onClick={[Function]}
+                                                            <ul
+                                                              aria-label="Chip group category"
+                                                              className="pf-c-chip-group__list"
+                                                              role="list"
                                                             >
-                                                              <ComponentWithOuia
-                                                                component={[Function]}
-                                                                componentProps={
-                                                                  Object {
-                                                                    "children": "Member",
-                                                                    "component": "li",
-                                                                    "isReadOnly": false,
-                                                                    "onClick": [Function],
-                                                                  }
-                                                                }
-                                                                consumerContext={null}
+                                                              <li
+                                                                className="pf-c-chip-group__list-item"
+                                                                key="0"
                                                               >
                                                                 <Chip
                                                                   className=""
                                                                   closeBtnAriaLabel="close"
-                                                                  component="li"
+                                                                  component="div"
                                                                   isOverflowChip={false}
                                                                   isReadOnly={false}
+                                                                  key=".$3"
                                                                   onClick={[Function]}
-                                                                  ouiaContext={
-                                                                    Object {
-                                                                      "isOuia": false,
-                                                                      "ouiaId": null,
-                                                                    }
-                                                                  }
                                                                   tooltipPosition="top"
                                                                 >
                                                                   <GenerateId
                                                                     prefix="pf-random-id-"
                                                                   >
-                                                                    <li
+                                                                    <div
                                                                       className="pf-c-chip"
+                                                                      data-ouia-component-id={1}
+                                                                      data-ouia-component-type="PF4/Chip"
+                                                                      data-ouia-safe={true}
                                                                     >
                                                                       <span
                                                                         className="pf-c-chip__text"
-                                                                        id="pf-random-id-0"
+                                                                        id="pf-random-id-1"
                                                                       >
                                                                         Member
                                                                       </span>
-                                                                      <ChipButton
-                                                                        aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                        ariaLabel="close"
-                                                                        id="remove_pf-random-id-0"
+                                                                      <Component
+                                                                        aria-label="close"
+                                                                        aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
+                                                                        id="remove_pf-random-id-1"
                                                                         onClick={[Function]}
+                                                                        variant="plain"
                                                                       >
-                                                                        <Component
+                                                                        <button
+                                                                          aria-disabled={null}
                                                                           aria-label="close"
-                                                                          aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                          className=""
-                                                                          id="remove_pf-random-id-0"
+                                                                          aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
+                                                                          className="pf-c-button pf-m-plain"
+                                                                          data-ouia-component-id={null}
+                                                                          data-ouia-component-type="PF4/Button"
+                                                                          data-ouia-safe={true}
+                                                                          disabled={false}
+                                                                          id="remove_pf-random-id-1"
                                                                           onClick={[Function]}
-                                                                          variant="plain"
+                                                                          tabIndex={null}
+                                                                          type="button"
                                                                         >
-                                                                          <ComponentWithOuia
-                                                                            component={[Function]}
-                                                                            componentProps={
-                                                                              Object {
-                                                                                "aria-label": "close",
-                                                                                "aria-labelledby": "remove_pf-random-id-0 pf-random-id-0",
-                                                                                "children": <TimesCircleIcon
-                                                                                  aria-hidden="true"
-                                                                                  color="currentColor"
-                                                                                  noVerticalAlign={false}
-                                                                                  size="sm"
-                                                                                  title={null}
-                                                                                />,
-                                                                                "className": "",
-                                                                                "id": "remove_pf-random-id-0",
-                                                                                "onClick": [Function],
-                                                                                "variant": "plain",
-                                                                              }
-                                                                            }
-                                                                            consumerContext={
-                                                                              Object {
-                                                                                "isOuia": false,
-                                                                                "ouiaId": null,
-                                                                              }
-                                                                            }
+                                                                          <TimesIcon
+                                                                            aria-hidden="true"
+                                                                            color="currentColor"
+                                                                            noVerticalAlign={false}
+                                                                            size="sm"
                                                                           >
-                                                                            <Button
-                                                                              aria-label="close"
-                                                                              aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                              className=""
-                                                                              id="remove_pf-random-id-0"
-                                                                              onClick={[Function]}
-                                                                              ouiaContext={
+                                                                            <svg
+                                                                              aria-hidden="true"
+                                                                              aria-labelledby={null}
+                                                                              fill="currentColor"
+                                                                              height="1em"
+                                                                              role="img"
+                                                                              style={
                                                                                 Object {
-                                                                                  "isOuia": false,
-                                                                                  "ouiaId": null,
+                                                                                  "verticalAlign": "-0.125em",
                                                                                 }
                                                                               }
-                                                                              variant="plain"
+                                                                              viewBox="0 0 352 512"
+                                                                              width="1em"
                                                                             >
-                                                                              <button
-                                                                                aria-disabled={null}
-                                                                                aria-label="close"
-                                                                                aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                                className="pf-c-button pf-m-plain"
-                                                                                disabled={false}
-                                                                                id="remove_pf-random-id-0"
-                                                                                onClick={[Function]}
-                                                                                tabIndex={null}
-                                                                                type="button"
-                                                                              >
-                                                                                <TimesCircleIcon
-                                                                                  aria-hidden="true"
-                                                                                  color="currentColor"
-                                                                                  noVerticalAlign={false}
-                                                                                  size="sm"
-                                                                                  title={null}
-                                                                                >
-                                                                                  <svg
-                                                                                    aria-hidden="true"
-                                                                                    aria-labelledby={null}
-                                                                                    fill="currentColor"
-                                                                                    height="1em"
-                                                                                    role="img"
-                                                                                    style={
-                                                                                      Object {
-                                                                                        "verticalAlign": "-0.125em",
-                                                                                      }
-                                                                                    }
-                                                                                    viewBox="0 0 512 512"
-                                                                                    width="1em"
-                                                                                  >
-                                                                                    <path
-                                                                                      d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
-                                                                                      transform=""
-                                                                                    />
-                                                                                  </svg>
-                                                                                </TimesCircleIcon>
-                                                                              </button>
-                                                                            </Button>
-                                                                          </ComponentWithOuia>
-                                                                        </Component>
-                                                                      </ChipButton>
-                                                                    </li>
+                                                                              <path
+                                                                                d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                                                                                transform=""
+                                                                              />
+                                                                            </svg>
+                                                                          </TimesIcon>
+                                                                        </button>
+                                                                      </Component>
+                                                                    </div>
                                                                   </GenerateId>
                                                                 </Chip>
-                                                              </ComponentWithOuia>
-                                                            </Component>
-                                                          </InnerChipGroup>
-                                                        </ul>
+                                                              </li>
+                                                            </ul>
+                                                          </div>
+                                                        </GenerateId>
                                                       </ChipGroup>
                                                     </ChipGroup>
                                                   </I18n>
                                                 </WithI18n>
                                               </dd>
-                                            </TextListItem>
+                                            </Component>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
                                     </Detail>
                                   </dl>
-                                </TextList>
+                                </Component>
                               </DetailList>
                             </StyledComponent>
                           </Styled(DetailList)>
@@ -990,12 +948,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     </StyledComponent>
                   </DataListCell>
                 </div>
-              </DataListItemCells>
+              </Component>
             </StyledComponent>
           </ResourceAccessListItem__DataListItemCells>
         </div>
-      </DataListItemRow>
+      </Component>
     </li>
-  </DataListItem>
+  </Component>
 </ResourceAccessListItem>
 `;

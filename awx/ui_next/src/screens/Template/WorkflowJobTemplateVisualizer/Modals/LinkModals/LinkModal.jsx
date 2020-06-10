@@ -21,6 +21,7 @@ function LinkModal({ header, i18n, onConfirm }) {
       header={header}
       isOpen
       title={i18n._(t`Workflow Link`)}
+      aria-label={i18n._(t`Workflow link modal`)}
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button

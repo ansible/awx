@@ -12,6 +12,7 @@ function UnsavedChangesModal({ i18n, onSaveAndExit, onExit }) {
       width={600}
       isOpen
       title={i18n._(t`Warning: Unsaved Changes`)}
+      aria-label={i18n._(t`Unsaved changes modal`)}
       onClose={() => dispatch({ type: 'TOGGLE_UNSAVED_CHANGES_MODAL' })}
       actions={[
         <Button

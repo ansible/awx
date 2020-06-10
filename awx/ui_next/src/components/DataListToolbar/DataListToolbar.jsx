@@ -5,8 +5,8 @@ import { t } from '@lingui/macro';
 import {
   Checkbox,
   Toolbar,
-  ToolbarContent as _ToolbarContent,
-  ToolbarGroup as _ToolbarGroup,
+  ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
   ToolbarToggleGroup,
 } from '@patternfly/react-core';
