@@ -1013,8 +1013,6 @@ class BaseTask(object):
                                               'resource_profiling_memory_poll_interval': mem_poll_interval,
                                               'resource_profiling_pid_poll_interval': pid_poll_interval,
                                               'resource_profiling_results_dir': results_dir})
-        else:
-            logger.debug('Resource profiling not enabled for task')
 
         return resource_profiling_params
 
