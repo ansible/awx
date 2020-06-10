@@ -44,20 +44,6 @@ class HostManager(models.Manager):
             inventory_sources__source='tower'
         ).filter(inventory__organization=org_id).values('name').distinct().count()
 
-    def active_counts_by_org(self):
-        """Return the counts of active, unique hosts for each organization.
-        Construction of query involves:
-         - remove any ordering specified in model's Meta
-         - Exclude hosts sourced from another Tower
-         - Consider only hosts where the canonical inventory is owned by each organization
-         - Restrict the query to only count distinct names
-         - Return the counts
-        """
-        return self.order_by().exclude(
-            inventory_sources__source='tower'
-        ).values('inventory__organization').annotate(
-            inventory__organization__count=models.Count('name', distinct=True))
-
     def get_queryset(self):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
