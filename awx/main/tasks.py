@@ -2552,7 +2552,7 @@ class RunInventoryUpdate(BaseTask):
             args.append('--exclude-empty-groups')
         if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
             args.extend(['--instance-id-var',
-                        getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),])
+                        "'{}'".format(getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper())),])
         # Add arguments for the source inventory script
         args.append('--source')
         args.append(self.pseudo_build_inventory(inventory_update, private_data_dir))
