@@ -68,12 +68,12 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
         params.id__in = ids.join(',');
         const { data } = await UnifiedJobsAPI.read({ ...params });
         setValue(prev => {
-          const mergedJobsList = [...data.results, ...prev.results].slice(
-            0,
-            params.page_size
+          const deDuplicated = data.results.filter(
+            job => !prev.results.find(j => j.id === job.id)
           );
+          const mergedJobsList = [...deDuplicated, ...prev.results];
           return {
-            results: mergedJobsList,
+            results: mergedJobsList.slice(0, params.page_size),
             count: prev.count + data.count,
           };
         });

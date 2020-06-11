@@ -4,7 +4,9 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
   const [jobsToFetch, setJobsToFetch] = useState([]);
-  const debouncedJobsToFetch = useDebounce(jobsToFetch, 5000);
+  // const debouncedJobsToFetch = useDebounce(jobsToFetch, 5000);
+  const throttleJobsToFetch = useThrottle(jobsToFetch, 5000);
+
   useEffect(() => {
     setJobs(initialJobs);
   }, [initialJobs]);
@@ -15,11 +17,11 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
     }
   };
   useEffect(() => {
-    if (debouncedJobsToFetch.length) {
-      fetchJobsById(debouncedJobsToFetch);
+    if (throttleJobsToFetch.length) {
+      fetchJobsById(throttleJobsToFetch);
       setJobsToFetch([]);
     }
-  }, [debouncedJobsToFetch, fetchJobsById]);
+  }, [throttleJobsToFetch, fetchJobsById]);
 
   const ws = useRef(null);
 
@@ -100,18 +102,22 @@ function updateJob(jobs, index, message) {
   return [...jobs.slice(0, index), job, ...jobs.slice(index + 1)];
 }
 
-function useDebounce(value, delay) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+function useThrottle(value, limit) {
+  const [throttledValue, setThrottledValue] = useState(value);
+  const lastRan = useRef(Date.now());
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+    const handler = setTimeout(() => {
+      if (Date.now() - lastRan.current >= limit) {
+        setThrottledValue(value);
+        lastRan.current = Date.now();
+      }
+    }, limit - (Date.now() - lastRan.current));
 
     return () => {
-      clearTimeout(timeout);
+      clearTimeout(handler);
     };
-  }, [value, delay]);
+  }, [value, limit]);
 
-  return debouncedValue;
+  return throttledValue;
 }
