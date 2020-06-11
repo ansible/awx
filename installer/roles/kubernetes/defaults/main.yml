@@ -14,14 +14,25 @@ kubernetes_awx_image: "{{ tower_package_name | default('ansible/awx') }}"
 kubernetes_web_image: "{{ kubernetes_awx_image }}"
 kubernetes_task_image: "{{ kubernetes_awx_image }}"
 
+awx_psp_create: false
+awx_psp_name: 'awx'
+awx_psp_privileged: true
+
 web_mem_request: 1
 web_cpu_request: 500
+web_security_context_enabled: true
+web_security_context_privileged: false
 
 task_mem_request: 2
 task_cpu_request: 1500
+task_security_context_enabled: true
+task_security_context_privileged: true
 
 redis_mem_request: 2
 redis_cpu_request: 500
+redis_security_context_enabled: true
+redis_security_context_privileged: false
+redis_security_context_user: 1001
 
 kubernetes_redis_image: "redis"
 kubernetes_redis_image_tag: "latest"
