@@ -13,6 +13,7 @@ import FormField from '../../../../../../components/FormField';
 import { FormFullWidthLayout } from '../../../../../../components/FormLayout';
 import useRequest from '../../../../../../util/useRequest';
 import { required } from '../../../../../../util/validators';
+import { CredentialPluginTestAlert } from '..';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
@@ -26,6 +27,21 @@ function MetadataStep({ i18n }) {
   const form = useFormikContext();
   const [selectedCredential] = useField('credential');
   const [inputValues] = useField('inputs');
+
+  const {
+    result: testPluginSuccess,
+    error: testPluginError,
+    request: testPluginMetadata,
+  } = useRequest(
+    useCallback(
+      async (credential, metadata) =>
+        CredentialsAPI.test(credential.id, {
+          metadata,
+        }),
+      []
+    ),
+    null
+  );
 
   const {
     result: fields,
@@ -64,10 +80,6 @@ function MetadataStep({ i18n }) {
   useEffect(() => {
     fetchMetadataOptions();
   }, [fetchMetadataOptions]);
-
-  const testMetadata = () => {
-    // https://github.com/ansible/awx/issues/7126
-  };
 
   if (isLoading) {
     return <ContentLoading />;
@@ -143,13 +155,21 @@ function MetadataStep({ i18n }) {
         position="right"
       >
         <TestButton
+          id="credential-plugin-test"
           variant="primary"
           type="submit"
-          onClick={() => testMetadata()}
+          onClick={() =>
+            testPluginMetadata(selectedCredential.value, inputValues.value)
+          }
         >
           {i18n._(t`Test`)}
         </TestButton>
       </Tooltip>
+      <CredentialPluginTestAlert
+        credentialName={selectedCredential.value.name}
+        successResponse={testPluginSuccess}
+        errorResponse={testPluginError}
+      />
     </>
   );
 }

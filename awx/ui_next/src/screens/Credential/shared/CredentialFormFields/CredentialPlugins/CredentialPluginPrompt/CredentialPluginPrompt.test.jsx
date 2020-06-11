@@ -13,6 +13,8 @@ import CredentialPluginPrompt from './CredentialPluginPrompt';
 jest.mock('../../../../../../api/models/Credentials');
 jest.mock('../../../../../../api/models/CredentialTypes');
 
+CredentialsAPI.test.mockResolvedValue({});
+
 CredentialsAPI.read.mockResolvedValue({
   data: {
     count: 3,
@@ -233,6 +235,14 @@ describe('<CredentialPluginPrompt />', () => {
       expect(
         wrapper.find('input#credential-secret_version').prop('value')
       ).toBe('9000');
+    });
+    test('clicking Test button makes correct call', async () => {
+      await act(async () => {
+        wrapper.find('Button#credential-plugin-test').simulate('click');
+      });
+      expect(CredentialsAPI.test).toHaveBeenCalledWith(1, {
+        metadata: { secret_path: '/foo/bar', secret_version: '9000' },
+      });
     });
   });
 });

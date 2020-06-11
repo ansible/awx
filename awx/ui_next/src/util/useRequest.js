@@ -39,6 +39,7 @@ export default function useRequest(makeRequest, initialValue) {
       async (...args) => {
         setIsLoading(true);
         if (isMounted.current) {
+          setResult(initialValue);
           setError(null);
         }
         try {
@@ -56,6 +57,7 @@ export default function useRequest(makeRequest, initialValue) {
           }
         }
       },
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
       [makeRequest]
     ),
     setValue: setResult,
