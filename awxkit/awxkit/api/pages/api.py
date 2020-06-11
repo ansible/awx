@@ -247,6 +247,9 @@ class ApiV2(base.Base):
             endpoint.post({'id': role_page['id']})
         except exc.NoContent:  # desired exception on successful (dis)association
             pass
+        except exc.Common as e:
+            log.error("Role assignment failed: %s.", e)
+            log.debug("post_data: %r", {'id': role_page['id']})
 
     def _assign_membership(self):
         for _page, roles in self._roles:
@@ -288,7 +291,6 @@ class ApiV2(base.Base):
                     except exc.Common as e:
                         log.error("Object association failed: %s.", e)
                         log.debug("post_data: %r", post_data)
-                        raise
             else:  # It is a create set
                 self._cache.get_page(endpoint)
                 self._import_list(endpoint, related_set)
