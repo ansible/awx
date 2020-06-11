@@ -30,6 +30,13 @@
       tags:
         - delete
 
+    - name: delete project cache directory before update
+      file:
+        path: "{{project_cache|quote}}"
+        state: absent
+      tags:
+        - delete
+
     - block:
         - name: update project using git
           git:
