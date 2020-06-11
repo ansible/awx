@@ -67,6 +67,26 @@
         that:
           - users['results'] | length() >= 3
 
+    - name: Get the settings page
+      set_fact:
+        settings: "{{ query('awx.awx.tower_api', 'settings/ui' ) }}"
+      register: results
+
+    - assert:
+        that:
+          - results is succeeded
+          - "'CUSTOM_LOGO' in settings"
+
+    - name: Get the ping page
+      set_fact:
+        ping_data: "{{ query('awx.awx.tower_api', 'ping' ) }}"
+      register: results
+
+    - assert:
+        that:
+          - results is succeeded
+          - "'active_node' in ping_data"
+
   always:
     - name: Cleanup users
       tower_user:

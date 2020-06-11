@@ -23,7 +23,7 @@ options:
     description:
       - The query parameters to search for in the form of key/value pairs.
     type: dict
-    required: True
+    required: False
   get_all:
     description:
       - If the resulting query is paginated, return all pages.
@@ -36,6 +36,10 @@ notes:
 """
 
 EXAMPLES = """
+- name: Load the UI settings
+  debug:
+    msg: "{{ query('awx.awx.tower_api', 'settings/ui') }}"
+
 - name: Lookup any users who are admins
   debug:
     msg: "{{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) }}"
@@ -44,22 +48,9 @@ EXAMPLES = """
 RETURN = """
 _raw:
   description:
-    - Response of objects from API
+    - Response from the API
   type: dict
-  contains:
-    count:
-      description: The number of objects your filter returned in total (not necessarally on this page)
-      type: str
-    next:
-      description: The URL path for the next page
-      type: str
-    previous:
-      description: The URL path for the previous page
-      type: str
-    results:
-      description: An array of results that were returned
-      type: list
-  returned: on successful create
+  returned: on successful request
 """
 
 from ansible.plugins.lookup import LookupBase
@@ -98,12 +89,9 @@ class LookupModule(LookupBase):
         self.set_options(direct=kwargs)
 
         if self.get_option('get_all'):
-            return_data = module.get_all_endpoint(terms[0], data=self.get_option('query_params'))
+            return_data = module.get_all_endpoint(terms[0], data=self.get_option('query_params', {} ), none_is_not_fatal=True)
         else:
-            return_data = module.get_endpoint(terms[0], data=self.get_option('query_params'))
-        with open('/tmp/john', 'w') as f:
-            import json
-            f.write(json.dumps(return_data, indent=4))
+            return_data = module.get_endpoint(terms[0], data=self.get_option('query_params', {} ))
 
         if return_data['status_code'] != 200:
             error = return_data

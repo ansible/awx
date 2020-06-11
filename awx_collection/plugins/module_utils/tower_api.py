@@ -274,7 +274,10 @@ class TowerModule(AnsibleModule):
     def get_all_endpoint(self, endpoint, *args, **kwargs):
         response = self.get_endpoint(endpoint, *args, **kwargs)
         if 'next' not in response['json']:
-            raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
+            if not 'none_is_not_fatal' in kwargs or not kwargs['none_is_not_fatal']:
+                raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
+            else:
+                return response
         next_page = response['json']['next']
 
         if response['json']['count'] > 10000:
