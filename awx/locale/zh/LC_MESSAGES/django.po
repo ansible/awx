@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 13:55+0000\n"
+"POT-Creation-Date: 2020-05-28 21:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -527,7 +527,7 @@ msgstr "作业模板清单缺失或未定义。"
 msgid "Unknown, job may have been ran before launch configurations were saved."
 msgstr "未知，在保存启动配置前作业可能已经运行。"
 
-#: awx/api/serializers.py:3252 awx/main/tasks.py:2795 awx/main/tasks.py:2813
+#: awx/api/serializers.py:3252 awx/main/tasks.py:2800 awx/main/tasks.py:2818
 msgid "{} are prohibited from use in ad hoc commands."
 msgstr "{} 被禁止在临时命令中使用。"
 
@@ -546,324 +546,324 @@ msgstr "提供的变量 {} 没有要替换的数据库值。"
 msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
 msgstr "\"$encrypted$ 是一个保留的关键字，可能不能用于 {}\""
 
-#: awx/api/serializers.py:4070
+#: awx/api/serializers.py:4078
 msgid "A project is required to run a job."
 msgstr "运行一个作业时需要一个项目。"
 
-#: awx/api/serializers.py:4072
+#: awx/api/serializers.py:4080
 msgid "Missing a revision to run due to failed project update."
 msgstr "由于项目更新失败，缺少运行的修订版本。"
 
-#: awx/api/serializers.py:4076
+#: awx/api/serializers.py:4084
 msgid "The inventory associated with this Job Template is being deleted."
 msgstr "与此作业模板关联的清单将被删除。"
 
-#: awx/api/serializers.py:4078 awx/api/serializers.py:4194
+#: awx/api/serializers.py:4086 awx/api/serializers.py:4202
 msgid "The provided inventory is being deleted."
 msgstr "提供的清单将被删除。"
 
-#: awx/api/serializers.py:4086
+#: awx/api/serializers.py:4094
 msgid "Cannot assign multiple {} credentials."
 msgstr "无法分配多个 {} 凭证。"
 
-#: awx/api/serializers.py:4090
+#: awx/api/serializers.py:4098
 msgid "Cannot assign a Credential of kind `{}`"
 msgstr "无法分配类型为 `{}` 的凭证"
 
-#: awx/api/serializers.py:4103
+#: awx/api/serializers.py:4111
 msgid ""
 "Removing {} credential at launch time without replacement is not supported. "
 "Provided list lacked credential(s): {}."
 msgstr "不支持在不替换的情况下在启动时删除 {} 凭证。提供的列表缺少凭证：{}。"
 
-#: awx/api/serializers.py:4192
+#: awx/api/serializers.py:4200
 msgid "The inventory associated with this Workflow is being deleted."
 msgstr "与此 Workflow 关联的清单将被删除。"
 
-#: awx/api/serializers.py:4263
+#: awx/api/serializers.py:4271
 msgid "Message type '{}' invalid, must be either 'message' or 'body'"
 msgstr "消息类型 '{}' 无效，必须是 'message' 或 'body'"
 
-#: awx/api/serializers.py:4269
+#: awx/api/serializers.py:4277
 msgid "Expected string for '{}', found {}, "
 msgstr "'{}' 的预期字符串，找到 {}，"
 
-#: awx/api/serializers.py:4273
+#: awx/api/serializers.py:4281
 msgid "Messages cannot contain newlines (found newline in {} event)"
 msgstr "消息不能包含新行（在 {} 事件中找到新行）"
 
-#: awx/api/serializers.py:4279
+#: awx/api/serializers.py:4287
 msgid "Expected dict for 'messages' field, found {}"
 msgstr "'messages' 字段的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4283
+#: awx/api/serializers.py:4291
 msgid ""
 "Event '{}' invalid, must be one of 'started', 'success', 'error', or "
 "'workflow_approval'"
 msgstr "事件 '{}' 无效，必须是 'started'、'success'、'error' 或 'workflow_approval' 之一"
 
-#: awx/api/serializers.py:4289
+#: awx/api/serializers.py:4297
 msgid "Expected dict for event '{}', found {}"
 msgstr "事件 '{}' 的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4294
+#: awx/api/serializers.py:4302
 msgid ""
 "Workflow Approval event '{}' invalid, must be one of 'running', 'approved', "
 "'timed_out', or 'denied'"
 msgstr "工作流批准事件 '{}' 无效，必须是 'running'、'approved'、'timed_out' 或 'denied' 之一。"
 
-#: awx/api/serializers.py:4301
+#: awx/api/serializers.py:4309
 msgid "Expected dict for workflow approval event '{}', found {}"
 msgstr "工作流批准事件 '{}' 的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4328
+#: awx/api/serializers.py:4336
 msgid "Unable to render message '{}': {}"
 msgstr "无法呈现消息 '{}'：{}"
 
-#: awx/api/serializers.py:4330
+#: awx/api/serializers.py:4338
 msgid "Field '{}' unavailable"
 msgstr "字段 '{}' 不可用"
 
-#: awx/api/serializers.py:4332
+#: awx/api/serializers.py:4340
 msgid "Security error due to field '{}'"
 msgstr "因为字段 '{}' 导致安全错误"
 
-#: awx/api/serializers.py:4352
+#: awx/api/serializers.py:4360
 msgid "Webhook body for '{}' should be a json dictionary. Found type '{}'."
 msgstr "'{}' 的 Webhook 正文应该是 json 字典。找到类型 '{}'。"
 
-#: awx/api/serializers.py:4355
+#: awx/api/serializers.py:4363
 msgid "Webhook body for '{}' is not a valid json dictionary ({})."
 msgstr "'{}' 的 Webhook 正文不是有效的 json 字典 ({})。"
 
-#: awx/api/serializers.py:4373
+#: awx/api/serializers.py:4381
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr "通知配置缺少所需字段：notification_type"
 
-#: awx/api/serializers.py:4400
+#: awx/api/serializers.py:4408
 msgid "No values specified for field '{}'"
 msgstr "没有为字段 '{}' 指定值"
 
-#: awx/api/serializers.py:4405
+#: awx/api/serializers.py:4413
 msgid "HTTP method must be either 'POST' or 'PUT'."
 msgstr "HTTP 方法必须是 'POST' 或 'PUT'。"
 
-#: awx/api/serializers.py:4407
+#: awx/api/serializers.py:4415
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "通知配置缺少所需字段：{}。"
 
-#: awx/api/serializers.py:4410
+#: awx/api/serializers.py:4418
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "配置字段 '{}' 类型错误，预期为 {}。"
 
-#: awx/api/serializers.py:4427
+#: awx/api/serializers.py:4435
 msgid "Notification body"
 msgstr "通知正文"
 
-#: awx/api/serializers.py:4507
+#: awx/api/serializers.py:4515
 msgid ""
 "Valid DTSTART required in rrule. Value should start with: DTSTART:"
 "YYYYMMDDTHHMMSSZ"
 msgstr "rrule 中需要有效的 DTSTART。值应该以 DTSTART:YYYMMDDTHHMMSSZ 开头"
 
-#: awx/api/serializers.py:4509
+#: awx/api/serializers.py:4517
 msgid ""
 "DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ."
 msgstr "DTSTART 不能是一个不带时区的日期时间。指定 ;TZINFO= 或 YYYMMDDTHHMMSSZ。"
 
-#: awx/api/serializers.py:4511
+#: awx/api/serializers.py:4519
 msgid "Multiple DTSTART is not supported."
 msgstr "不支持多个 DTSTART。"
 
-#: awx/api/serializers.py:4513
+#: awx/api/serializers.py:4521
 msgid "RRULE required in rrule."
 msgstr "rrule 中需要 RRULE。"
 
-#: awx/api/serializers.py:4515
+#: awx/api/serializers.py:4523
 msgid "Multiple RRULE is not supported."
 msgstr "不支持多个 RRULE。"
 
-#: awx/api/serializers.py:4517
+#: awx/api/serializers.py:4525
 msgid "INTERVAL required in rrule."
 msgstr "rrule 需要 INTERVAL。"
 
-#: awx/api/serializers.py:4519
+#: awx/api/serializers.py:4527
 msgid "SECONDLY is not supported."
 msgstr "不支持 SECONDLY。"
 
-#: awx/api/serializers.py:4521
+#: awx/api/serializers.py:4529
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "不支持多个 BYMONTHDAY。"
 
-#: awx/api/serializers.py:4523
+#: awx/api/serializers.py:4531
 msgid "Multiple BYMONTHs not supported."
 msgstr "不支持多个 BYMONTH。"
 
-#: awx/api/serializers.py:4525
+#: awx/api/serializers.py:4533
 msgid "BYDAY with numeric prefix not supported."
 msgstr "不支持带有数字前缀的 BYDAY。"
 
-#: awx/api/serializers.py:4527
+#: awx/api/serializers.py:4535
 msgid "BYYEARDAY not supported."
 msgstr "不支持 BYYEARDAY。"
 
-#: awx/api/serializers.py:4529
+#: awx/api/serializers.py:4537
 msgid "BYWEEKNO not supported."
 msgstr "不支持 BYWEEKNO。"
 
-#: awx/api/serializers.py:4531
+#: awx/api/serializers.py:4539
 msgid "RRULE may not contain both COUNT and UNTIL"
 msgstr "RRULE 可能不包含 COUNT 和 UNTIL"
 
-#: awx/api/serializers.py:4535
+#: awx/api/serializers.py:4543
 msgid "COUNT > 999 is unsupported."
 msgstr "不支持 COUNT > 999。"
 
-#: awx/api/serializers.py:4541
+#: awx/api/serializers.py:4549
 msgid "rrule parsing failed validation: {}"
 msgstr "rrule 解析失败验证：{}"
 
-#: awx/api/serializers.py:4603
+#: awx/api/serializers.py:4611
 msgid "Inventory Source must be a cloud resource."
 msgstr "清单源必须是云资源。"
 
-#: awx/api/serializers.py:4605
+#: awx/api/serializers.py:4613
 msgid "Manual Project cannot have a schedule set."
 msgstr "手动项目不能有计划集。"
 
-#: awx/api/serializers.py:4608
+#: awx/api/serializers.py:4616
 msgid ""
 "Inventory sources with `update_on_project_update` cannot be scheduled. "
 "Schedule its source project `{}` instead."
 msgstr "无法调度带有 `update_on_project_update` 的清单源。改为调度其源项目 `{}`。"
 
-#: awx/api/serializers.py:4618
+#: awx/api/serializers.py:4626
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance"
 msgstr "处于运行状态或等待状态的针对此实例的作业计数"
 
-#: awx/api/serializers.py:4623
+#: awx/api/serializers.py:4631
 msgid "Count of all jobs that target this instance"
 msgstr "所有针对此实例的作业计数"
 
-#: awx/api/serializers.py:4656
+#: awx/api/serializers.py:4664
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
 msgstr "处于运行状态或等待状态的针对此实例组的作业计数"
 
-#: awx/api/serializers.py:4661
+#: awx/api/serializers.py:4669
 msgid "Count of all jobs that target this instance group"
 msgstr "所有针对此实例组的作业计数"
 
-#: awx/api/serializers.py:4666
+#: awx/api/serializers.py:4674
 msgid "Indicates whether instance group controls any other group"
 msgstr "指明实例组是否控制任何其他组"
 
-#: awx/api/serializers.py:4670
+#: awx/api/serializers.py:4678
 msgid ""
 "Indicates whether instances in this group are isolated.Isolated groups have "
 "a designated controller group."
 msgstr "指明此组中的实例是否被隔离。隔离的组具有指定的控制器组。"
 
-#: awx/api/serializers.py:4675
+#: awx/api/serializers.py:4683
 msgid ""
 "Indicates whether instances in this group are containerized.Containerized "
 "groups have a designated Openshift or Kubernetes cluster."
 msgstr "指明此组中的实例是否容器化。容器化的组具有指定的 Openshift 或 Kubernetes 集群。"
 
-#: awx/api/serializers.py:4683
+#: awx/api/serializers.py:4691
 msgid "Policy Instance Percentage"
 msgstr "策略实例百分比"
 
-#: awx/api/serializers.py:4684
+#: awx/api/serializers.py:4692
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
 msgstr "新实例上线时将自动分配给此组的所有实例的最小百分比。"
 
-#: awx/api/serializers.py:4689
+#: awx/api/serializers.py:4697
 msgid "Policy Instance Minimum"
 msgstr "策略实例最小值"
 
-#: awx/api/serializers.py:4690
+#: awx/api/serializers.py:4698
 msgid ""
 "Static minimum number of Instances that will be automatically assign to this "
 "group when new instances come online."
 msgstr "新实例上线时自动分配给此组的静态最小实例数量。"
 
-#: awx/api/serializers.py:4695
+#: awx/api/serializers.py:4703
 msgid "Policy Instance List"
 msgstr "策略实例列表"
 
-#: awx/api/serializers.py:4696
+#: awx/api/serializers.py:4704
 msgid "List of exact-match Instances that will be assigned to this group"
 msgstr "将分配给此组的完全匹配实例的列表"
 
-#: awx/api/serializers.py:4722
+#: awx/api/serializers.py:4730
 msgid "Duplicate entry {}."
 msgstr "重复条目 {}。"
 
-#: awx/api/serializers.py:4724
+#: awx/api/serializers.py:4732
 msgid "{} is not a valid hostname of an existing instance."
 msgstr "{} 不是现有实例的有效主机名。"
 
-#: awx/api/serializers.py:4726 awx/api/views/mixin.py:98
+#: awx/api/serializers.py:4734 awx/api/views/mixin.py:98
 msgid ""
 "Isolated instances may not be added or removed from instances groups via the "
 "API."
 msgstr "可能无法通过 API 为实例组添加或删除隔离的实例。"
 
-#: awx/api/serializers.py:4728 awx/api/views/mixin.py:102
+#: awx/api/serializers.py:4736 awx/api/views/mixin.py:102
 msgid "Isolated instance group membership may not be managed via the API."
 msgstr "可能无法通过 API 管理隔离的实例组成员资格。"
 
-#: awx/api/serializers.py:4730 awx/api/serializers.py:4735
-#: awx/api/serializers.py:4740
+#: awx/api/serializers.py:4738 awx/api/serializers.py:4743
+#: awx/api/serializers.py:4748
 msgid "Containerized instances may not be managed via the API"
 msgstr "可能无法通过 API 管理容器化实例"
 
-#: awx/api/serializers.py:4745
+#: awx/api/serializers.py:4753
 msgid "tower instance group name may not be changed."
 msgstr "可能不会更改 tower 实例组名称。"
 
-#: awx/api/serializers.py:4750
+#: awx/api/serializers.py:4758
 msgid "Only Kubernetes credentials can be associated with an Instance Group"
 msgstr "只有 Kubernetes 凭证可以与实例组关联"
 
-#: awx/api/serializers.py:4789
+#: awx/api/serializers.py:4797
 msgid ""
 "When present, shows the field name of the role or relationship that changed."
 msgstr "存在时，显示更改的角色或关系的字段名称。"
 
-#: awx/api/serializers.py:4791
+#: awx/api/serializers.py:4799
 msgid ""
 "When present, shows the model on which the role or relationship was defined."
 msgstr "存在时，显示定义角色或关系的模型。"
 
-#: awx/api/serializers.py:4824
+#: awx/api/serializers.py:4832
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "创建、更新或删除对象时新值和更改值的概述"
 
-#: awx/api/serializers.py:4826
+#: awx/api/serializers.py:4834
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr "对于创建、更新和删除事件，这是受影响的对象类型。对于关联和解除关联事件，这是与对象 2 关联或解除关联的对象类型。"
 
-#: awx/api/serializers.py:4829
+#: awx/api/serializers.py:4837
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr "创建、更新和删除事件未填充。对于关联和解除关联事件，这是对象 1 要关联的对象类型。"
 
-#: awx/api/serializers.py:4832
+#: awx/api/serializers.py:4840
 msgid "The action taken with respect to the given object(s)."
 msgstr "对给定对象执行的操作。"
 
@@ -1637,7 +1637,7 @@ msgstr "设置示例"
 msgid "Example setting which can be different for each user."
 msgstr "每个用户之间可以各不相同的设置示例。"
 
-#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:55
+#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:56
 msgid "User"
 msgstr "用户"
 
@@ -1740,15 +1740,15 @@ msgstr "系统"
 msgid "OtherSystem"
 msgstr "OtherSystem"
 
-#: awx/conf/views.py:47
+#: awx/conf/views.py:48
 msgid "Setting Categories"
 msgstr "设置类别"
 
-#: awx/conf/views.py:69
+#: awx/conf/views.py:70
 msgid "Setting Detail"
 msgstr "设置详情"
 
-#: awx/conf/views.py:160
+#: awx/conf/views.py:162
 msgid "Logging Connectivity Test"
 msgstr "日志记录连接测试"
 
@@ -2793,7 +2793,7 @@ msgstr "Conjur URL"
 msgid "API Key"
 msgstr "API 密钥"
 
-#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1017
+#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1018
 msgid "Account"
 msgstr "帐户"
 
@@ -2880,7 +2880,7 @@ msgid ""
 msgstr "kv 机密后端的名称（如果留空，将使用机密路径的第一个分段）。"
 
 #: awx/main/credential_plugins/hashivault.py:60
-#: awx/main/models/inventory.py:1022
+#: awx/main/models/inventory.py:1023
 msgid "Key Name"
 msgstr "密钥名称"
 
@@ -3257,7 +3257,7 @@ msgid ""
 "Management (IAM) users."
 msgstr "安全令牌服务 (STS) 是一个 Web 服务，让您可以为 AWS 身份和访问管理 (IAM) 用户请求临时的有限权限凭证。"
 
-#: awx/main/models/credential/__init__.py:780 awx/main/models/inventory.py:832
+#: awx/main/models/credential/__init__.py:780 awx/main/models/inventory.py:833
 msgid "OpenStack"
 msgstr "OpenStack"
 
@@ -3297,7 +3297,7 @@ msgstr "OpenStack 域定义了管理边界。只有 Keystone v3 身份验证 URL
 msgid "Verify SSL"
 msgstr "验证 SSL"
 
-#: awx/main/models/credential/__init__.py:823 awx/main/models/inventory.py:829
+#: awx/main/models/credential/__init__.py:823 awx/main/models/inventory.py:830
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
@@ -3310,7 +3310,7 @@ msgid ""
 "Enter the hostname or IP address that corresponds to your VMware vCenter."
 msgstr "输入与 VMware vCenter 对应的主机名或 IP 地址。"
 
-#: awx/main/models/credential/__init__.py:849 awx/main/models/inventory.py:830
+#: awx/main/models/credential/__init__.py:849 awx/main/models/inventory.py:831
 msgid "Red Hat Satellite 6"
 msgstr "红帽卫星 6"
 
@@ -3324,7 +3324,7 @@ msgid ""
 "example, https://satellite.example.org"
 msgstr "输入与您的红帽卫星 6 服务器对应的 URL。例如：https://satellite.example.org"
 
-#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:831
+#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:832
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
@@ -3338,7 +3338,7 @@ msgid ""
 "instance. For example, https://cloudforms.example.org"
 msgstr "输入与您的 CloudForms 实例对应的虚拟机的 URL。例如：https://cloudforms.example.org"
 
-#: awx/main/models/credential/__init__.py:902 awx/main/models/inventory.py:827
+#: awx/main/models/credential/__init__.py:902 awx/main/models/inventory.py:828
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
@@ -3367,7 +3367,7 @@ msgid ""
 "Paste the contents of the PEM file associated with the service account email."
 msgstr "粘贴与服务账户电子邮件关联的 PEM 文件的内容。"
 
-#: awx/main/models/credential/__init__.py:936 awx/main/models/inventory.py:828
+#: awx/main/models/credential/__init__.py:936 awx/main/models/inventory.py:829
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
@@ -3405,7 +3405,7 @@ msgstr "GitLab 个人访问令牌"
 msgid "This token needs to come from your profile settings in GitLab"
 msgstr "此令牌需要来自您在 GitLab 中的配置文件设置"
 
-#: awx/main/models/credential/__init__.py:1041 awx/main/models/inventory.py:833
+#: awx/main/models/credential/__init__.py:1041 awx/main/models/inventory.py:834
 msgid "Red Hat Virtualization"
 msgstr "红帽虚拟化"
 
@@ -3421,7 +3421,7 @@ msgstr "CA 文件"
 msgid "Absolute file path to the CA file to use (optional)"
 msgstr "要使用的 CA 文件的绝对文件路径（可选）"
 
-#: awx/main/models/credential/__init__.py:1091 awx/main/models/inventory.py:834
+#: awx/main/models/credential/__init__.py:1091 awx/main/models/inventory.py:835
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
@@ -3465,7 +3465,7 @@ msgstr "源必须是外部凭证"
 msgid "Input field must be defined on target credential (options are {})."
 msgstr "输入字段必须在目标凭证上定义（选项为 {}）。"
 
-#: awx/main/models/events.py:152 awx/main/models/events.py:655
+#: awx/main/models/events.py:152 awx/main/models/events.py:674
 msgid "Host Failed"
 msgstr "主机故障"
 
@@ -3473,7 +3473,7 @@ msgstr "主机故障"
 msgid "Host Started"
 msgstr "主机已启动"
 
-#: awx/main/models/events.py:154 awx/main/models/events.py:656
+#: awx/main/models/events.py:154 awx/main/models/events.py:675
 msgid "Host OK"
 msgstr "主机正常"
 
@@ -3481,11 +3481,11 @@ msgstr "主机正常"
 msgid "Host Failure"
 msgstr "主机故障"
 
-#: awx/main/models/events.py:156 awx/main/models/events.py:662
+#: awx/main/models/events.py:156 awx/main/models/events.py:681
 msgid "Host Skipped"
 msgstr "主机已跳过"
 
-#: awx/main/models/events.py:157 awx/main/models/events.py:657
+#: awx/main/models/events.py:157 awx/main/models/events.py:676
 msgid "Host Unreachable"
 msgstr "主机无法访问"
 
@@ -3569,27 +3569,27 @@ msgstr "Play 已启动"
 msgid "Playbook Complete"
 msgstr "Playbook 完成"
 
-#: awx/main/models/events.py:184 awx/main/models/events.py:672
+#: awx/main/models/events.py:184 awx/main/models/events.py:691
 msgid "Debug"
 msgstr "调试"
 
-#: awx/main/models/events.py:185 awx/main/models/events.py:673
+#: awx/main/models/events.py:185 awx/main/models/events.py:692
 msgid "Verbose"
 msgstr "详细"
 
-#: awx/main/models/events.py:186 awx/main/models/events.py:674
+#: awx/main/models/events.py:186 awx/main/models/events.py:693
 msgid "Deprecated"
 msgstr "已弃用"
 
-#: awx/main/models/events.py:187 awx/main/models/events.py:675
+#: awx/main/models/events.py:187 awx/main/models/events.py:694
 msgid "Warning"
 msgstr "警告"
 
-#: awx/main/models/events.py:188 awx/main/models/events.py:676
+#: awx/main/models/events.py:188 awx/main/models/events.py:695
 msgid "System Warning"
 msgstr "系统警告"
 
-#: awx/main/models/events.py:189 awx/main/models/events.py:677
+#: awx/main/models/events.py:189 awx/main/models/events.py:696
 #: awx/main/models/unified_jobs.py:75
 msgid "Error"
 msgstr "错误"
@@ -3617,300 +3617,300 @@ msgid ""
 "this group"
 msgstr "将始终自动分配给此组的完全匹配实例的列表"
 
-#: awx/main/models/inventory.py:79
+#: awx/main/models/inventory.py:80
 msgid "Hosts have a direct link to this inventory."
 msgstr "主机具有指向此清单的直接链接。"
 
-#: awx/main/models/inventory.py:80
+#: awx/main/models/inventory.py:81
 msgid "Hosts for inventory generated using the host_filter property."
 msgstr "使用 host_filter 属性生成的清单的主机。"
 
-#: awx/main/models/inventory.py:85
+#: awx/main/models/inventory.py:86
 msgid "inventories"
 msgstr "清单"
 
-#: awx/main/models/inventory.py:92
+#: awx/main/models/inventory.py:93
 msgid "Organization containing this inventory."
 msgstr "包含此清单的机构。"
 
-#: awx/main/models/inventory.py:99
+#: awx/main/models/inventory.py:100
 msgid "Inventory variables in JSON or YAML format."
 msgstr "JSON 或 YAML 格式的清单变量。"
 
-#: awx/main/models/inventory.py:104
+#: awx/main/models/inventory.py:105
 msgid ""
 "This field is deprecated and will be removed in a future release. Flag "
 "indicating whether any hosts in this inventory have failed."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。指示此清单中是否有任何主机故障的标记。"
 
-#: awx/main/models/inventory.py:110
+#: awx/main/models/inventory.py:111
 msgid ""
 "This field is deprecated and will be removed in a future release. Total "
 "number of hosts in this inventory."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。此清单中的主机总数。"
 
-#: awx/main/models/inventory.py:116
+#: awx/main/models/inventory.py:117
 msgid ""
 "This field is deprecated and will be removed in a future release. Number of "
 "hosts in this inventory with active failures."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。此清单中有活跃故障的主机数量。"
 
-#: awx/main/models/inventory.py:122
+#: awx/main/models/inventory.py:123
 msgid ""
 "This field is deprecated and will be removed in a future release. Total "
 "number of groups in this inventory."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。此清单中的总组数。"
 
-#: awx/main/models/inventory.py:128
+#: awx/main/models/inventory.py:129
 msgid ""
 "This field is deprecated and will be removed in a future release. Flag "
 "indicating whether this inventory has any external inventory sources."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。表示此清单是否有任何外部清单源的标记。"
 
-#: awx/main/models/inventory.py:134
+#: awx/main/models/inventory.py:135
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr "在此清单中配置的外部清单源总数。"
 
-#: awx/main/models/inventory.py:139
+#: awx/main/models/inventory.py:140
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr "此清单中有故障的外部清单源数量。"
 
-#: awx/main/models/inventory.py:146
+#: awx/main/models/inventory.py:147
 msgid "Kind of inventory being represented."
 msgstr "所代表的清单种类。"
 
-#: awx/main/models/inventory.py:152
+#: awx/main/models/inventory.py:153
 msgid "Filter that will be applied to the hosts of this inventory."
 msgstr "将应用到此清单的主机的过滤器。"
 
-#: awx/main/models/inventory.py:180
+#: awx/main/models/inventory.py:181
 msgid ""
 "Credentials to be used by hosts belonging to this inventory when accessing "
 "Red Hat Insights API."
 msgstr "访问红帽 Insights API 时供属于此清单的主机使用的凭证。"
 
-#: awx/main/models/inventory.py:189
+#: awx/main/models/inventory.py:190
 msgid "Flag indicating the inventory is being deleted."
 msgstr "指示正在删除清单的标记。"
 
-#: awx/main/models/inventory.py:244
+#: awx/main/models/inventory.py:245
 msgid "Could not parse subset as slice specification."
 msgstr "无法将子集作为分片规格来解析。"
 
-#: awx/main/models/inventory.py:248
+#: awx/main/models/inventory.py:249
 msgid "Slice number must be less than total number of slices."
 msgstr "分片数量必须小于分片总数。"
 
-#: awx/main/models/inventory.py:250
+#: awx/main/models/inventory.py:251
 msgid "Slice number must be 1 or higher."
 msgstr "分片数量必须为 1 或更高。"
 
-#: awx/main/models/inventory.py:387
+#: awx/main/models/inventory.py:388
 msgid "Assignment not allowed for Smart Inventory"
 msgstr "智能清单不允许分配"
 
-#: awx/main/models/inventory.py:389 awx/main/models/projects.py:166
+#: awx/main/models/inventory.py:390 awx/main/models/projects.py:166
 msgid "Credential kind must be 'insights'."
 msgstr "凭证种类必须是 'inights'。"
 
-#: awx/main/models/inventory.py:474
+#: awx/main/models/inventory.py:475
 msgid "Is this host online and available for running jobs?"
 msgstr "此主机是否在线，并可用于运行作业？"
 
-#: awx/main/models/inventory.py:480
+#: awx/main/models/inventory.py:481
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr "远程清单源用来唯一标识主机的值"
 
-#: awx/main/models/inventory.py:485
+#: awx/main/models/inventory.py:486
 msgid "Host variables in JSON or YAML format."
 msgstr "JSON 或 YAML 格式的主机变量。"
 
-#: awx/main/models/inventory.py:508
+#: awx/main/models/inventory.py:509
 msgid "Inventory source(s) that created or modified this host."
 msgstr "创建或修改此主机的清单源。"
 
-#: awx/main/models/inventory.py:513
+#: awx/main/models/inventory.py:514
 msgid "Arbitrary JSON structure of most recent ansible_facts, per-host."
 msgstr "每个主机最近的 ansible_facts 的任意 JSON 结构。"
 
-#: awx/main/models/inventory.py:519
+#: awx/main/models/inventory.py:520
 msgid "The date and time ansible_facts was last modified."
 msgstr "最后修改 ansible_facts 的日期和时间。"
 
-#: awx/main/models/inventory.py:526
+#: awx/main/models/inventory.py:527
 msgid "Red Hat Insights host unique identifier."
 msgstr "红帽 Insights 主机唯一标识符。"
 
-#: awx/main/models/inventory.py:640
+#: awx/main/models/inventory.py:641
 msgid "Group variables in JSON or YAML format."
 msgstr "JSON 或 YAML 格式的组变量。"
 
-#: awx/main/models/inventory.py:646
+#: awx/main/models/inventory.py:647
 msgid "Hosts associated directly with this group."
 msgstr "与此组直接关联的主机。"
 
-#: awx/main/models/inventory.py:652
+#: awx/main/models/inventory.py:653
 msgid "Inventory source(s) that created or modified this group."
 msgstr "创建或修改此组的清单源。"
 
-#: awx/main/models/inventory.py:824
+#: awx/main/models/inventory.py:825
 msgid "File, Directory or Script"
 msgstr "文件、目录或脚本"
 
-#: awx/main/models/inventory.py:825
+#: awx/main/models/inventory.py:826
 msgid "Sourced from a Project"
 msgstr "源于项目"
 
-#: awx/main/models/inventory.py:826
+#: awx/main/models/inventory.py:827
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
-#: awx/main/models/inventory.py:835
+#: awx/main/models/inventory.py:836
 msgid "Custom Script"
 msgstr "自定义脚本"
 
-#: awx/main/models/inventory.py:952
+#: awx/main/models/inventory.py:953
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "YAML 或 JSON 格式的清单源变量。"
 
-#: awx/main/models/inventory.py:963
+#: awx/main/models/inventory.py:964
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
 msgstr "以逗号分隔的过滤器表达式列表（仅限 EC2）。当任何过滤器匹配时会导入主机。"
 
-#: awx/main/models/inventory.py:969
+#: awx/main/models/inventory.py:970
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr "限制从清单源自动创建的组（仅限 EC2）。"
 
-#: awx/main/models/inventory.py:973
+#: awx/main/models/inventory.py:974
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr "从远程清单源覆盖本地组和主机。"
 
-#: awx/main/models/inventory.py:977
+#: awx/main/models/inventory.py:978
 msgid "Overwrite local variables from remote inventory source."
 msgstr "从远程清单源覆盖本地变量。"
 
-#: awx/main/models/inventory.py:982 awx/main/models/jobs.py:154
+#: awx/main/models/inventory.py:983 awx/main/models/jobs.py:154
 #: awx/main/models/projects.py:135
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr "取消任务前运行的时间（以秒为单位）。"
 
-#: awx/main/models/inventory.py:1015
+#: awx/main/models/inventory.py:1016
 msgid "Image ID"
 msgstr "镜像 ID"
 
-#: awx/main/models/inventory.py:1016
+#: awx/main/models/inventory.py:1017
 msgid "Availability Zone"
 msgstr "可用性区域"
 
-#: awx/main/models/inventory.py:1018
+#: awx/main/models/inventory.py:1019
 msgid "Instance ID"
 msgstr "实例 ID"
 
-#: awx/main/models/inventory.py:1019
+#: awx/main/models/inventory.py:1020
 msgid "Instance State"
 msgstr "实例状态"
 
-#: awx/main/models/inventory.py:1020
+#: awx/main/models/inventory.py:1021
 msgid "Platform"
 msgstr "平台"
 
-#: awx/main/models/inventory.py:1021
+#: awx/main/models/inventory.py:1022
 msgid "Instance Type"
 msgstr "实例类型"
 
-#: awx/main/models/inventory.py:1023
+#: awx/main/models/inventory.py:1024
 msgid "Region"
 msgstr "区域"
 
-#: awx/main/models/inventory.py:1024
+#: awx/main/models/inventory.py:1025
 msgid "Security Group"
 msgstr "安全组"
 
-#: awx/main/models/inventory.py:1025
+#: awx/main/models/inventory.py:1026
 msgid "Tags"
 msgstr "标签"
 
-#: awx/main/models/inventory.py:1026
+#: awx/main/models/inventory.py:1027
 msgid "Tag None"
 msgstr "标签 None"
 
-#: awx/main/models/inventory.py:1027
+#: awx/main/models/inventory.py:1028
 msgid "VPC ID"
 msgstr "VPC ID"
 
-#: awx/main/models/inventory.py:1095
+#: awx/main/models/inventory.py:1096
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr "基于云的清单源（如 %s）需要匹配的云服务的凭证。"
 
-#: awx/main/models/inventory.py:1101
+#: awx/main/models/inventory.py:1102
 msgid "Credential is required for a cloud source."
 msgstr "云源需要凭证。"
 
-#: awx/main/models/inventory.py:1104
+#: awx/main/models/inventory.py:1105
 msgid ""
 "Credentials of type machine, source control, insights and vault are "
 "disallowed for custom inventory sources."
 msgstr "对于自定义清单源，不允许使用机器、源控制、insights 和 vault 类型的凭证。"
 
-#: awx/main/models/inventory.py:1109
+#: awx/main/models/inventory.py:1110
 msgid ""
 "Credentials of type insights and vault are disallowed for scm inventory "
 "sources."
 msgstr "对于 scm 清单源，不允许使用 insights 和 vault 类型的凭证。"
 
-#: awx/main/models/inventory.py:1169
+#: awx/main/models/inventory.py:1170
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr "无效的 %(source)s 区域：%(region)s"
 
-#: awx/main/models/inventory.py:1193
+#: awx/main/models/inventory.py:1194
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr "无效的过滤器表达式：%(filter)s"
 
-#: awx/main/models/inventory.py:1214
+#: awx/main/models/inventory.py:1215
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr "选择的组无效：%(choice)s"
 
-#: awx/main/models/inventory.py:1242
+#: awx/main/models/inventory.py:1243
 msgid "Project containing inventory file used as source."
 msgstr "包含用作源的清单文件的项目。"
 
-#: awx/main/models/inventory.py:1415
+#: awx/main/models/inventory.py:1416
 msgid ""
 "More than one SCM-based inventory source with update on project update per-"
 "inventory not allowed."
 msgstr "不允许多个基于 SCM 的清单源按清单在项目更新时更新。"
 
-#: awx/main/models/inventory.py:1422
+#: awx/main/models/inventory.py:1423
 msgid ""
 "Cannot update SCM-based inventory source on launch if set to update on "
 "project update. Instead, configure the corresponding source project to "
 "update on launch."
 msgstr "如果设置为在项目更新时更新，则无法在启动时更新基于 SCM 的清单源。应将对应的源项目配置为在启动时更新。"
 
-#: awx/main/models/inventory.py:1428
+#: awx/main/models/inventory.py:1429
 msgid "Cannot set source_path if not SCM type."
 msgstr "如果不是 SCM 类型，则无法设置 source_path。"
 
-#: awx/main/models/inventory.py:1471
+#: awx/main/models/inventory.py:1472
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr "此项目更新中的清单文件用于清单更新。"
 
-#: awx/main/models/inventory.py:1582
+#: awx/main/models/inventory.py:1583
 msgid "Inventory script contents"
 msgstr "清单脚本内容"
 
-#: awx/main/models/inventory.py:1587
+#: awx/main/models/inventory.py:1588
 msgid "Organization owning this inventory script"
 msgstr "拥有此清单脚本的机构"
 
@@ -4009,28 +4009,28 @@ msgstr "作为提示而应用的清单，假定作业模板提示提供清单"
 msgid "job host summaries"
 msgstr "作业主机摘要"
 
-#: awx/main/models/jobs.py:1158
+#: awx/main/models/jobs.py:1144
 msgid "Remove jobs older than a certain number of days"
 msgstr "删除超过特定天数的作业"
 
-#: awx/main/models/jobs.py:1159
+#: awx/main/models/jobs.py:1145
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "删除比特定天数旧的活动流条目"
 
-#: awx/main/models/jobs.py:1160
+#: awx/main/models/jobs.py:1146
 msgid "Removes expired browser sessions from the database"
 msgstr "从数据库中删除已过期的浏览器会话"
 
-#: awx/main/models/jobs.py:1161
+#: awx/main/models/jobs.py:1147
 msgid "Removes expired OAuth 2 access tokens and refresh tokens"
 msgstr "删除已过期的 OAuth 2 访问令牌并刷新令牌"
 
-#: awx/main/models/jobs.py:1231
+#: awx/main/models/jobs.py:1217
 #, python-brace-format
 msgid "Variables {list_of_keys} are not allowed for system jobs."
 msgstr "系统作业不允许使用变量 {list_of_keys}。"
 
-#: awx/main/models/jobs.py:1247
+#: awx/main/models/jobs.py:1233
 msgid "days must be a positive integer."
 msgstr "天必须为正整数。"
 
@@ -4774,7 +4774,7 @@ msgstr "未找到错误处理路径，将工作流标记为失败"
 msgid "The approval node {name} ({pk}) has expired after {timeout} seconds."
 msgstr "批准节点 {name} ({pk}) 已在 {timeout} 秒后过期。"
 
-#: awx/main/tasks.py:1053
+#: awx/main/tasks.py:1049
 msgid "Invalid virtual environment selected: {}"
 msgstr "选择了无效的虚拟环境：{}"
 
@@ -4811,53 +4811,53 @@ msgstr "工作流作业节点没有错误处理路径 []。工作流作业节点
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "无法将 \"%s\" 转换为布尔值"
 
-#: awx/main/utils/common.py:275
+#: awx/main/utils/common.py:261
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "不受支持的 SCM 类型 \"%s\""
 
-#: awx/main/utils/common.py:282 awx/main/utils/common.py:294
-#: awx/main/utils/common.py:313
+#: awx/main/utils/common.py:268 awx/main/utils/common.py:280
+#: awx/main/utils/common.py:299
 #, python-format
 msgid "Invalid %s URL"
 msgstr "无效的 %s URL"
 
-#: awx/main/utils/common.py:284 awx/main/utils/common.py:323
+#: awx/main/utils/common.py:270 awx/main/utils/common.py:309
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "不受支持的 %s URL"
 
-#: awx/main/utils/common.py:325
+#: awx/main/utils/common.py:311
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "用于 file:// URL的主机 \"%s\" 不受支持"
 
-#: awx/main/utils/common.py:327
+#: awx/main/utils/common.py:313
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "%s URL 需要主机"
 
-#: awx/main/utils/common.py:345
+#: awx/main/utils/common.py:331
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "用户名必须是 \"git\" 以供 SSH 访问 %s。"
 
-#: awx/main/utils/common.py:351
+#: awx/main/utils/common.py:337
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "用户名必须是 \"hg\" 以供 SSH 访问 %s。"
 
-#: awx/main/utils/common.py:682
+#: awx/main/utils/common.py:668
 #, python-brace-format
 msgid "Input type `{data_type}` is not a dictionary"
 msgstr "输入类型 `{data_type}` 不是字典"
 
-#: awx/main/utils/common.py:715
+#: awx/main/utils/common.py:701
 #, python-brace-format
 msgid "Variables not compatible with JSON standard (error: {json_error})"
 msgstr "与 JSON 标准不兼容的变量（错误：{json_error}）"
 
-#: awx/main/utils/common.py:721
+#: awx/main/utils/common.py:707
 #, python-brace-format
 msgid ""
 "Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error})."
