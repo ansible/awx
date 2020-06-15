@@ -1865,44 +1865,32 @@ class RunJob(BaseTask):
         project_path = job.project.get_project_path(check_if_exists=False)
         job_revision = job.project.scm_revision
         sync_needs = []
-        all_sync_needs = ['update_{}'.format(job.project.scm_type), 'install_roles', 'install_collections']
+        source_update_tag = 'update_{}'.format(job.project.scm_type)
+        branch_override = bool(job.scm_branch and job.scm_branch != job.project.scm_branch)
         if not job.project.scm_type:
             pass # manual projects are not synced, user has responsibility for that
         elif not os.path.exists(project_path):
             logger.debug('Performing fresh clone of {} on this instance.'.format(job.project))
-            sync_needs = all_sync_needs
-        elif not job.project.scm_revision:
-            logger.debug('Revision not known for {}, will sync with remote'.format(job.project))
-            sync_needs = all_sync_needs
-        elif job.project.scm_type == 'git':
+            sync_needs.append(source_update_tag)
+        elif job.project.scm_type == 'git' and job.project.scm_revision and (not branch_override):
             git_repo = git.Repo(project_path)
             try:
-                desired_revision = job.project.scm_revision
-                if job.scm_branch and job.scm_branch != job.project.scm_branch:
-                    desired_revision = job.scm_branch  # could be commit or not, but will try as commit
-                current_revision = git_repo.head.commit.hexsha
-                if desired_revision == current_revision:
-                    job_revision = desired_revision
+                if job_revision == git_repo.head.commit.hexsha:
                     logger.debug('Skipping project sync for {} because commit is locally available'.format(job.log_format))
                 else:
-                    sync_needs = all_sync_needs
+                    sync_needs.append(source_update_tag)
             except (ValueError, BadGitName):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
-                sync_needs = all_sync_needs
+                sync_needs.append(source_update_tag)
         else:
-            sync_needs = all_sync_needs
-        # Galaxy requirements are not supported for manual projects
-        if not sync_needs and job.project.scm_type:
-            # see if we need a sync because of presence of roles
-            galaxy_req_path = os.path.join(project_path, 'roles', 'requirements.yml')
-            if os.path.exists(galaxy_req_path):
-                logger.debug('Running project sync for {} because of galaxy role requirements.'.format(job.log_format))
-                sync_needs.append('install_roles')
+            logger.debug('Project not available locally {}, will sync with remote'.format(job.project))
+            sync_needs.append(source_update_tag)
 
-            galaxy_collections_req_path = os.path.join(project_path, 'collections', 'requirements.yml')
-            if os.path.exists(galaxy_collections_req_path):
-                logger.debug('Running project sync for {} because of galaxy collections requirements.'.format(job.log_format))
-                sync_needs.append('install_collections')
+        cache_id = str(job.project.last_job_id)  # content cache - for roles and collections
+        has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), cache_id))
+        # Galaxy requirements are not supported for manual projects
+        if job.project.scm_type and ((not has_cache) or branch_override):
+            sync_needs.extend(['install_roles', 'install_collections'])
 
         if sync_needs:
             pu_ig = job.instance_group
@@ -1920,7 +1908,7 @@ class RunJob(BaseTask):
                 execution_node=pu_en,
                 celery_task_id=job.celery_task_id
             )
-            if job.scm_branch and job.scm_branch != job.project.scm_branch:
+            if branch_override:
                 sync_metafields['scm_branch'] = job.scm_branch
             if 'update_' not in sync_metafields['job_tags']:
                 sync_metafields['scm_revision'] = job_revision
@@ -1952,10 +1940,7 @@ class RunJob(BaseTask):
             if job_revision:
                 job = self.update_model(job.pk, scm_revision=job_revision)
             # Project update does not copy the folder, so copy here
-            RunProjectUpdate.make_local_copy(
-                project_path, os.path.join(private_data_dir, 'project'),
-                job.project.scm_type, job_revision
-            )
+            RunProjectUpdate.make_local_copy(job.project, private_data_dir, scm_revision=job_revision)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
@@ -1995,10 +1980,7 @@ class RunProjectUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        show_paths = [settings.PROJECTS_ROOT]
-        if self.job_private_data_dir:
-            show_paths.append(self.job_private_data_dir)
-        return show_paths
+        return [settings.PROJECTS_ROOT]
 
     def __init__(self, *args, job_private_data_dir=None, **kwargs):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
@@ -2165,8 +2147,7 @@ class RunProjectUpdate(BaseTask):
         extra_vars.update(extra_vars_new)
 
         scm_branch = project_update.scm_branch
-        branch_override = bool(scm_branch and project_update.scm_branch != project_update.project.scm_branch)
-        if project_update.job_type == 'run' and (not branch_override):
+        if project_update.job_type == 'run' and (not project_update.branch_override):
             if project_update.project.scm_revision:
                 scm_branch = project_update.project.scm_revision
             elif not scm_branch:
@@ -2174,14 +2155,15 @@ class RunProjectUpdate(BaseTask):
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
-            'project_path': project_update.get_project_path(check_if_exists=False),
+            'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
+            'local_path': os.path.basename(project_update.project.local_path),
+            'project_path': project_update.get_project_path(check_if_exists=False),  # deprecated
             'insights_url': settings.INSIGHTS_URL_BASE,
             'awx_license_type': get_license(show_key=False).get('license_type', 'UNLICENSED'),
             'awx_version': get_awx_version(),
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'project_cache': project_update.get_cache_path(),
             'roles_enabled': settings.AWX_ROLES_ENABLED,
             'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
         })
@@ -2323,8 +2305,7 @@ class RunProjectUpdate(BaseTask):
             os.mkdir(settings.PROJECTS_ROOT)
         self.acquire_lock(instance)
         self.original_branch = None
-        if (instance.scm_type == 'git' and instance.job_type == 'run' and instance.project and
-                instance.scm_branch != instance.project.scm_branch):
+        if instance.scm_type == 'git' and instance.branch_override:
             project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
@@ -2332,13 +2313,20 @@ class RunProjectUpdate(BaseTask):
                     self.original_branch = git_repo.head.commit
                 else:
                     self.original_branch = git_repo.active_branch
+        stage_path = os.path.join(instance.get_cache_path(), 'stage')
+        if os.path.exists(stage_path):
+            logger.warning('{0} cache staging area unexpectedly existed before update.')
+            shutil.rmtree(stage_path)
+        # Important - the presence of an empty cache will indicate that a given
+        # project revision did not have any roles or collections
+        os.makedirs(stage_path)
 
-    def clear_project_cache(self, instance, revision):
-        cache_dir = instance.get_cache_path()
+    @staticmethod
+    def clear_project_cache(cache_dir, keep_value):
         if os.path.isdir(cache_dir):
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
-                if entry != revision:
+                if entry not in (keep_value, 'stage'):
                     # invalidate, then delete
                     new_path = os.path.join(cache_dir,'.~~delete~~' + entry)
                     try:
@@ -2348,16 +2336,27 @@ class RunProjectUpdate(BaseTask):
                         logger.warning(f"Could not remove cache directory {old_path}")
 
     @staticmethod
-    def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
-        if scm_type == 'git':
+    def make_local_copy(p, job_private_data_dir, scm_revision=None):
+        """Copy project content (roles and collections) to a job private_data_dir
+
+        :param object p: Either a project or a project update
+        :param str job_private_data_dir: The root of the target ansible-runner folder
+        :param str scm_revision: For branch_override cases, the git revision to copy
+        """
+        project_path = p.get_project_path(check_if_exists=False)
+        destination_folder = os.path.join(job_private_data_dir, 'project')
+        if not scm_revision:
+            scm_revision = p.scm_revision
+
+        if p.scm_type == 'git':
             git_repo = git.Repo(project_path)
             if not os.path.exists(destination_folder):
                 os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
             tmp_branch_name = 'awx_internal/{}'.format(uuid4())
             # always clone based on specific job revision
-            if not scm_revision:
+            if not p.scm_revision:
                 raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
-            source_branch = git_repo.create_head(tmp_branch_name, scm_revision)
+            source_branch = git_repo.create_head(tmp_branch_name, p.scm_revision)
             # git clone must take file:// syntax for source repo or else options like depth will be ignored
             source_as_uri = Path(project_path).as_uri()
             git.Repo.clone_from(
@@ -2376,20 +2375,48 @@ class RunProjectUpdate(BaseTask):
         else:
             copy_tree(project_path, destination_folder, preserve_symlinks=1)
 
+        # copy over the roles and collection cache to job folder
+        cache_path = os.path.join(p.get_cache_path(), p.cache_id)
+        subfolders = []
+        if settings.AWX_COLLECTIONS_ENABLED:
+            subfolders.append('requirements_collections')
+        if settings.AWX_ROLES_ENABLED:
+            subfolders.append('requirements_roles')
+        for subfolder in subfolders:
+            cache_subpath = os.path.join(cache_path, subfolder)
+            if os.path.exists(cache_subpath):
+                dest_subpath = os.path.join(job_private_data_dir, subfolder)
+                copy_tree(cache_subpath, dest_subpath, preserve_symlinks=1)
+                logger.debug('{0} {1} prepared {2} from cache'.format(type(p).__name__, p.pk, dest_subpath))
+
     def post_run_hook(self, instance, status):
         # To avoid hangs, very important to release lock even if errors happen here
         try:
             if self.playbook_new_revision:
-                self.clear_project_cache(instance, self.playbook_new_revision)
                 instance.scm_revision = self.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
+
+            # Roles and collection folders copy to durable cache
+            base_path = instance.get_cache_path()
+            stage_path = os.path.join(base_path, 'stage')
+            if status == 'successful' and 'install_' in instance.job_tags:
+                # Clear other caches before saving this one, and if branch is overridden
+                # do not clear cache for main branch, but do clear it for other branches
+                self.clear_project_cache(base_path, keep_value=str(instance.project.last_job_id))
+                cache_path = os.path.join(base_path, instance.cache_id)
+                if os.path.exists(stage_path):
+                    if os.path.exists(cache_path):
+                        logger.warning('Rewriting cache at {0}, performance may suffer'.format(cache_path))
+                        shutil.rmtree(cache_path)
+                    os.rename(stage_path, cache_path)
+                    logger.debug('{0} wrote to cache at {1}'.format(instance.log_format, cache_path))
+            elif os.path.exists(stage_path):
+                shutil.rmtree(stage_path)  # cannot trust content update produced
+
             if self.job_private_data_dir:
                 # copy project folder before resetting to default branch
                 # because some git-tree-specific resources (like submodules) might matter
-                self.make_local_copy(
-                    instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
-                    instance.scm_type, instance.scm_revision
-                )
+                self.make_local_copy(instance, self.job_private_data_dir)
                 if self.original_branch:
                     # for git project syncs, non-default branches can be problems
                     # restore to branch the repo was on before this run
@@ -2642,13 +2669,22 @@ class RunInventoryUpdate(BaseTask):
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
-        if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and source_project):
-            # In project sync, pulling galaxy roles is not needed
+        if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and
+                source_project and source_project.scm_type):  # never ever update manual projects
+
+            # Check if the content cache exists, so that we do not unnecessarily re-download roles
+            sync_needs = ['update_{}'.format(source_project.scm_type)]
+            cache_id = str(source_project.last_job_id)  # content cache id for roles and collections
+            has_cache = os.path.exists(os.path.join(source_project.get_cache_path(), cache_id))
+            # Galaxy requirements are not supported for manual projects
+            if not has_cache:
+                sync_needs.extend(['install_roles', 'install_collections'])
+
             local_project_sync = source_project.create_project_update(
                 _eager_fields=dict(
                     launch_type="sync",
                     job_type='run',
-                    job_tags='update_{},install_collections'.format(source_project.scm_type),  # roles are never valid for inventory
+                    job_tags=','.join(sync_needs),
                     status='running',
                     execution_node=inventory_update.execution_node,
                     instance_group = inventory_update.instance_group,
@@ -2672,11 +2708,7 @@ class RunInventoryUpdate(BaseTask):
                 raise
         elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
             # This follows update, not sync, so make copy here
-            project_path = source_project.get_project_path(check_if_exists=False)
-            RunProjectUpdate.make_local_copy(
-                project_path, os.path.join(private_data_dir, 'project'),
-                source_project.scm_type, source_project.scm_revision
-            )
+            RunProjectUpdate.make_local_copy(source_project, private_data_dir)
 
 
 @task(queue=get_local_queuename)

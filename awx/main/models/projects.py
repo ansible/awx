@@ -424,6 +424,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         return False
 
     @property
+    def cache_id(self):
+        return str(self.last_job_id)
+
+    @property
     def notification_templates(self):
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates
@@ -560,6 +564,19 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def result_stdout_raw(self):
         return self._result_stdout_raw(redact_sensitive=True)
 
+    @property
+    def branch_override(self):
+        """Whether a branch other than the project default is used."""
+        if not self.project:
+            return True
+        return bool(self.scm_branch and self.scm_branch != self.project.scm_branch)
+
+    @property
+    def cache_id(self):
+        if self.branch_override or self.job_type == 'check' or (not self.project):
+            return str(self.id)
+        return self.project.cache_id
+
     def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True):
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive)
 
@@ -603,9 +620,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def save(self, *args, **kwargs):
         added_update_fields = []
         if not self.job_tags:
-            job_tags = ['update_{}'.format(self.scm_type)]
-            job_tags.append('install_roles')
-            job_tags.append('install_collections')
+            job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':

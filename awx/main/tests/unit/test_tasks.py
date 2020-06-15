@@ -61,7 +61,10 @@ def patch_Job():
 
 @pytest.fixture
 def job():
-    return Job(pk=1, id=1, project=Project(), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
+    return Job(
+        pk=1, id=1,
+        project=Project(local_path='/projects/_23_foo'),
+        inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
 
 
 @pytest.fixture
@@ -406,7 +409,9 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun():
 
     def test_generic_failure(self, patch_Job):
-        job = Job(status='running', inventory=Inventory(), project=Project())
+        job = Job(
+            status='running', inventory=Inventory(),
+            project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
