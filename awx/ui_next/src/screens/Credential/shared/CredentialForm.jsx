@@ -27,7 +27,7 @@ function CredentialFormFields({ i18n, credentialTypes, formik }) {
         label: credentialTypes[key].name,
       };
     })
-    .sort((a, b) => (a.label > b.label ? 1 : -1));
+    .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
 
   return (
     <>
