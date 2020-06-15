@@ -99,7 +99,7 @@
     "@uirouter/angularjs": "1.0.18",
     "angular": "^1.7.9",
     "angular-breadcrumb": "git+https://git@github.com/ansible/angular-breadcrumb#0.4.1",
-    "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror#v1.1.2",
+    "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror.git#v1.2.1",
     "angular-cookies": "^1.7.9",
     "angular-drag-and-drop-lists": "git+https://git@github.com/ansible/angular-drag-and-drop-lists#v1.4.1",
     "angular-duration-format": "^1.0.1",
