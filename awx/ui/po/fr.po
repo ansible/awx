@@ -4429,11 +4429,12 @@ msgstr "Remplacer les variables qui se trouvent dans azure_rm.ini et qui sont ut
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
 msgid ""
 "Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
+"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
+"                    view cloudforms.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Remplacez les variables qui se trouvent dans cloudforms.ini et qui sont utilisées par le script de mise à jour de l'inventaire. Voici un exemple de configuration de variable\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
-"                    view cloudforms.ini in the Ansible github repo.</a> Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
+"                   <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/cloudforms.ini\\\" target=\\\"_blank\\\">\n"
+"                    voir cloudforms.ini dans Ansible Collections github repo.</a>\n"
+"                    Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:217
 msgid "Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables"
@@ -4442,20 +4443,20 @@ msgstr "Remplacer les variables qui se trouvent dans ec2.ini et qui sont utilis�
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:299
 msgid ""
 "Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
+"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
+"                    view foreman.ini in the Ansible Collections github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Remplacez les variables qui se trouvent dans foreman.ini et qui sont utilisées par le script de mise à jour de l'inventaire. Voici un exemple de configuration de variable\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
-"                    view foreman.ini in the Ansible github repo.</a> Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
+"                    <a href=\\\"https://github.com/ansible-collections/community.general/blob/master/scripts/inventory/foreman.ini\\\" target=\\\"_blank\\\">\n"
+"                    voir foreman.ini dans Ansible le référentiel github repo.</a> Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:265
 msgid ""
 "Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
+"                    <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
+"                    view openstack.yml in the Openstack github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."
 msgstr "Remplacez les variables qui se trouvent dans openstack.yml et qui sont utilisées par le script de mise à jour de l'inventaire. Voici un exemple de configuration de variable\n"
-"                    <a href=\\\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
-"                    view openstack.yml in the Ansible github repo.</a> Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
+"                   <a href=\\\"https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack.yml\\\" target=\\\"_blank\\\">\n"
+"                    voir openstack.yml dans le référentiel Ansible github repo.</a> Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le bouton radio pour basculer entre les deux. Consultez la documentation d’Ansible Tower pour avoir un exemple de syntaxe."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
 msgid "Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables"
