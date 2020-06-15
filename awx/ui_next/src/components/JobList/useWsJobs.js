@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import useThrottle from './useThrottle';
 
 export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
   const [jobsToFetch, setJobsToFetch] = useState([]);
-  // const debouncedJobsToFetch = useDebounce(jobsToFetch, 5000);
   const throttleJobsToFetch = useThrottle(jobsToFetch, 5000);
 
   useEffect(() => {
@@ -100,24 +100,4 @@ function updateJob(jobs, index, message) {
     finished: message.finished,
   };
   return [...jobs.slice(0, index), job, ...jobs.slice(index + 1)];
-}
-
-function useThrottle(value, limit) {
-  const [throttledValue, setThrottledValue] = useState(value);
-  const lastRan = useRef(Date.now());
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (Date.now() - lastRan.current >= limit) {
-        setThrottledValue(value);
-        lastRan.current = Date.now();
-      }
-    }, limit - (Date.now() - lastRan.current));
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, limit]);
-
-  return throttledValue;
 }
