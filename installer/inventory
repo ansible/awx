@@ -155,3 +155,10 @@ secret_key=awxsecret
 
 # Docker compose explicit subnet. Set to avoid overlapping your existing LAN networks.
 #docker_compose_subnet="172.17.0.1/16"
+#
+# Allow for different docker logging drivers
+# By Default; the logger will be json-file, however you can override
+# that by uncommenting the docker_logger below.
+# Be aware that journald may rate limit your log messages if you choose it.
+# See: https://docs.docker.com/config/containers/logging/configure/
+# docker_logger=journald
