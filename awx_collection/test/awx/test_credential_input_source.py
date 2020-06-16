@@ -5,9 +5,10 @@ import pytest
 
 from awx.main.models import CredentialInputSource, Credential, CredentialType, Organization
 
+
 @pytest.fixture
 def aim_cred_type():
-    ct=CredentialType.defaults['aim']()
+    ct = CredentialType.defaults['aim']()
     ct.save()
     return ct
 
@@ -19,16 +20,16 @@ def source_cred_aim(aim_cred_type):
         name='CyberArk AIM Cred',
         credential_type=aim_cred_type,
         inputs={
-                    "url": "https://cyberark.example.com",
-                    "app_id": "myAppID",
-                    "verify": "false"
-                }
+            "url": "https://cyberark.example.com",
+            "app_id": "myAppID",
+            "verify": "false"
+        }
     )
 
 
 @pytest.mark.django_db
 def test_aim_credential_source(run_module, admin_user, organization, source_cred_aim, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
@@ -62,23 +63,23 @@ def test_aim_credential_source(run_module, admin_user, organization, source_cred
 @pytest.fixture
 def source_cred_conjur(organization):
     # Make a credential type which will be used by the credential
-    ct=CredentialType.defaults['conjur']()
+    ct = CredentialType.defaults['conjur']()
     ct.save()
     return Credential.objects.create(
         name='CyberArk CONJUR Cred',
         credential_type=ct,
         inputs={
-                    "url": "https://cyberark.example.com",
-                    "api_key": "myApiKey",
-                    "account": "account",
-                    "username": "username"
-                }
+            "url": "https://cyberark.example.com",
+            "api_key": "myApiKey",
+            "account": "account",
+            "username": "username"
+        }
     )
 
 
 @pytest.mark.django_db
 def test_conjur_credential_source(run_module, admin_user, organization, source_cred_conjur, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
@@ -112,23 +113,23 @@ def test_conjur_credential_source(run_module, admin_user, organization, source_c
 @pytest.fixture
 def source_cred_hashi_secret(organization):
     # Make a credential type which will be used by the credential
-    ct=CredentialType.defaults['hashivault_kv']()
+    ct = CredentialType.defaults['hashivault_kv']()
     ct.save()
     return Credential.objects.create(
         name='HashiCorp secret Cred',
         credential_type=ct,
         inputs={
-                    "url": "https://secret.hash.example.com",
-                    "token": "myApiKey",
-                    "role_id": "role",
-                    "secret_id": "secret"
-                }
+            "url": "https://secret.hash.example.com",
+            "token": "myApiKey",
+            "role_id": "role",
+            "secret_id": "secret"
+        }
     )
 
 
 @pytest.mark.django_db
 def test_hashi_secret_credential_source(run_module, admin_user, organization, source_cred_hashi_secret, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
@@ -165,23 +166,23 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, so
 @pytest.fixture
 def source_cred_hashi_ssh(organization):
     # Make a credential type which will be used by the credential
-    ct=CredentialType.defaults['hashivault_ssh']()
+    ct = CredentialType.defaults['hashivault_ssh']()
     ct.save()
     return Credential.objects.create(
         name='HashiCorp ssh Cred',
         credential_type=ct,
         inputs={
-                    "url": "https://ssh.hash.example.com",
-                    "token": "myApiKey",
-                    "role_id": "role",
-                    "secret_id": "secret"
-                }
+            "url": "https://ssh.hash.example.com",
+            "token": "myApiKey",
+            "role_id": "role",
+            "secret_id": "secret"
+        }
     )
 
 
 @pytest.mark.django_db
 def test_hashi_ssh_credential_source(run_module, admin_user, organization, source_cred_hashi_ssh, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
@@ -219,24 +220,24 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, sourc
 @pytest.fixture
 def source_cred_azure_kv(organization):
     # Make a credential type which will be used by the credential
-    ct=CredentialType.defaults['azure_kv']()
+    ct = CredentialType.defaults['azure_kv']()
     ct.save()
     return Credential.objects.create(
         name='Azure KV Cred',
         credential_type=ct,
         inputs={
-                    "url": "https://key.azure.example.com",
-                    "client": "client",
-                    "secret": "secret",
-                    "tenant": "tenant",
-                    "cloud_name": "the_cloud",
-                }
+            "url": "https://key.azure.example.com",
+            "client": "client",
+            "secret": "secret",
+            "tenant": "tenant",
+            "cloud_name": "the_cloud",
+        }
     )
 
 
 @pytest.mark.django_db
 def test_azure_kv_credential_source(run_module, admin_user, organization, source_cred_azure_kv, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
@@ -273,15 +274,16 @@ def source_cred_aim_alt(aim_cred_type):
         name='Alternate CyberArk AIM Cred',
         credential_type=aim_cred_type,
         inputs={
-                    "url": "https://cyberark-alt.example.com",
-                    "app_id": "myAltID",
-                    "verify": "false"
-                }
+            "url": "https://cyberark-alt.example.com",
+            "app_id": "myAltID",
+            "verify": "false"
+        }
     )
+
 
 @pytest.mark.django_db
 def test_aim_credential_source(run_module, admin_user, organization, source_cred_aim, source_cred_aim_alt, silence_deprecation):
-    ct=CredentialType.defaults['ssh']()
+    ct = CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
         name='Test Machine Credential',
