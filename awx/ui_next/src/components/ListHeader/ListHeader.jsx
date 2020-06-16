@@ -107,7 +107,7 @@ class ListHeader extends React.Component {
           <Toolbar
             id={`${qsConfig.namespace}-list-toolbar`}
             clearAllFilters={this.handleRemoveAll}
-            collapseListedFiltersBreakpoint="md"
+            collapseListedFiltersBreakpoint="lg"
           >
             <ToolbarContent>
               <EmptyStateControlsWrapper>

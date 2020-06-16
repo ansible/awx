@@ -33,7 +33,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
@@ -56,7 +56,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
@@ -78,7 +78,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
@@ -101,7 +101,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
@@ -125,7 +125,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
@@ -156,7 +156,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} />
@@ -197,7 +197,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${qsConfigNew.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search
@@ -243,7 +243,7 @@ describe('<Search />', () => {
       <Toolbar
         id={`${qsConfigNew.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
           <Search
