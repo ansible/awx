@@ -41,13 +41,16 @@ def settings(request):
     cache = LocMemCache(str(uuid4()), {})  # make a new random cache each time
     settings = LazySettings()
     registry = SettingsRegistry(settings)
+    defaults = {}
 
     # @pytest.mark.defined_in_file can be used to mark specific setting values
     # as "defined in a settings file".  This is analogous to manually
     # specifying a setting on the filesystem (e.g., in a local_settings.py in
     # development, or in /etc/tower/conf.d/<something>.py)
-    in_file_marker = request.node.get_marker('defined_in_file')
-    defaults = in_file_marker.kwargs if in_file_marker else {}
+    for marker in request.node.own_markers:
+        if marker.name == 'defined_in_file':
+            defaults = marker.kwargs
+
     defaults['DEFAULTS_SNAPSHOT'] = {}
     settings.configure(**defaults)
     settings._wrapped = SettingsWrapper(settings._wrapped,

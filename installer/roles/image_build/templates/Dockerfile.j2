@@ -213,6 +213,7 @@ RUN chmod u+s /usr/bin/bwrap ; \
 {% if build_dev|bool %}
 RUN for dir in \
       /venv \
+      /venv/awx/lib/python3.6 \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \

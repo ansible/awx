@@ -362,7 +362,7 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/ss
 
 # Run all API unit tests.
 test:
-	@if [ "$(VENV_BASE)" ]; then \
+	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
@@ -377,10 +377,11 @@ COLLECTION_NAMESPACE ?= awx
 COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
 
 test_collection:
-	@if [ "$(VENV_BASE)" ]; then \
+	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
+	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONPATH=$(PYTHONPATH):$(VENV_BASE)/awx/lib/python3.6/site-packages:/usr/lib/python3.6/site-packages py.test $(COLLECTION_TEST_DIRS)
+	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
 	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)
