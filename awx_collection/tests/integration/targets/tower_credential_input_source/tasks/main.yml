@@ -47,11 +47,32 @@
     that:
       - "result is changed"
 
-- name: Remove a Tower credential type
+- name: Add Second Tower credential Lookup
+  tower_credential:
+    description: Credential for Testing Source Change
+    name: "{{ src_cred_name }}-2"
+    credential_type: CyberArk AIM Central Credential Provider Lookup
+    inputs:
+      url: "https://cyberark-prod.example.com"
+      app_id: "My-App-ID"
+    organization: Default
+  register: result
+
+- name: Change credential Input Source
   tower_credential_input_source:
     input_field_name: password
     target_credential: "{{ target_cred_name }}"
-    source_credential: "{{ src_cred_name }}"
+    source_credential: "{{ src_cred_name }}-2"
+    state: present
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove a Tower credential source
+  tower_credential_input_source:
+    input_field_name: password
+    target_credential: "{{ target_cred_name }}"
     state: absent
   register: result
 
@@ -63,12 +84,22 @@
   tower_credential:
     name: "{{ src_cred_name }}"
     organization: Default
+    credential_type: CyberArk AIM Central Credential Provider Lookup
     state: absent
   register: result
 
-- name: Remove Tower credential Lookup
+- name: Remove Alt Tower credential Lookup
+  tower_credential:
+    name: "{{ src_cred_name }}-2"
+    organization: Default
+    credential_type: CyberArk AIM Central Credential Provider Lookup
+    state: absent
+  register: result
+
+- name: Remove Tower credential
   tower_credential:
     name: "{{ target_cred_name }}"
     organization: Default
+    credential_type: Machine
     state: absent
   register: result

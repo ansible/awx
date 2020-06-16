@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8 -*-
 
-# Copyright: (c) 2017, Wayne Witzel III <wayne@riotousliving.com>
+# Copyright: (c) 2020, Tom Page <tpage@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
@@ -45,7 +45,6 @@ options:
     source_credential:
       description:
         - The credential which is the source of the credential lookup
-      required: true
       type: str
     state:
       description:
@@ -79,7 +78,7 @@ def main():
         description=dict(default=''),
         input_field_name=dict(required=True),
         target_credential=dict(required=True),
-        source_credential=dict(required=True),
+        source_credential=dict(default=''),
         metadata=dict(type=dict),
         state=dict(choices=['present', 'absent'], default='present'),
     )
@@ -96,29 +95,25 @@ def main():
     state = module.params.get('state')
 
     target_credential_id = module.resolve_name_to_id('credentials', target_credential)
-    source_credential_id = module.resolve_name_to_id('credentials', source_credential)
 
-    # Attempt to look up the object based on the provided name, credential type and optional organization
+    # Attempt to look up the object based on the target credential and input field
     lookup_data = {
         'target_credential': target_credential_id,
-        'source_credential': source_credential_id,
         'input_field_name': input_field_name,
     }
-
+    module.json_output['all'] = module.get_all_endpoint('credential_input_sources', **{'data': {}})
     credential_input_source = module.get_one('credential_input_sources', **{'data': lookup_data})
 
     if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        if credential_input_source:
-          credential_input_source['name'] = ''
         module.delete_if_needed(credential_input_source)
 
     # Create the data that gets sent for create and update
     credential_input_source_fields = {
         'target_credential': target_credential_id,
-        'source_credential': source_credential_id,
         'input_field_name': input_field_name,
     }
+    if source_credential:
+        credential_input_source_fields['source_credential'] = module.resolve_name_to_id('credentials', source_credential)
     if metadata:
         credential_input_source_fields['metadata'] = metadata
     if description:

@@ -5,13 +5,16 @@ import pytest
 
 from awx.main.models import CredentialInputSource, Credential, CredentialType, Organization
 
+@pytest.fixture
+def get_aim_cred_type():
+    ct=CredentialType.defaults['aim']()
+    ct.save()
+    return ct
+
 
 # Test CyberArk AIM credential source
 @pytest.fixture
-def source_cred_aim(organization):
-    # Make a credential type which will be used by the credential
-    ct=CredentialType.defaults['aim']()
-    ct.save()
+def source_cred_aim(ct):
     return Credential.objects.create(
         name='CyberArk AIM Cred',
         credential_type=ct,
@@ -25,7 +28,8 @@ def source_cred_aim(organization):
 
 @pytest.mark.django_db
 def test_aim_credential_source(run_module, admin_user, organization, silence_deprecation):
-    src_cred = source_cred_aim(organization)
+    cred_type = get_aim_cred_type()
+    src_cred = source_cred_aim(cred_type)
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -266,3 +270,72 @@ def test_azure_kv_credential_source(run_module, admin_user, organization, silenc
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
+
+
+# Test Changing Credential Source
+@pytest.fixture
+def source_cred_aim_alt(ct):
+    return Credential.objects.create(
+        name='Alternate CyberArk AIM Cred',
+        credential_type=ct,
+        inputs={
+                    "url": "https://cyberark-alt.example.com",
+                    "app_id": "myAltID",
+                    "verify": "false"
+                }
+    )
+
+@pytest.mark.django_db
+def test_aim_credential_source(run_module, admin_user, organization, silence_deprecation):
+    cred_type=get_aim_cred_type()
+    src_cred = source_cred_aim(cred_type)
+    ct=CredentialType.defaults['ssh']()
+    ct.save()
+    tgt_cred = Credential.objects.create(
+        name='Test Machine Credential',
+        organization=organization,
+        credential_type=ct,
+        inputs={'username': 'bob'}
+    )
+
+    result = run_module('tower_credential_input_source', dict(
+        source_credential=src_cred.name,
+        target_credential=tgt_cred.name,
+        input_field_name='password',
+        metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
+        state='present'
+    ), admin_user)
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
+
+    unchangedResult = run_module('tower_credential_input_source', dict(
+        source_credential=src_cred.name,
+        target_credential=tgt_cred.name,
+        input_field_name='password',
+        metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
+        state='present'
+    ), admin_user)
+
+    assert not unchangedResult.get('failed', False), result.get('msg', result)
+    assert not unchangedResult.get('changed'), result
+
+    src_cred_alt = source_cred_aim_alt(cred_type)
+
+    changedResult = run_module('tower_credential_input_source', dict(
+        source_credential=src_cred_alt.name,
+        target_credential=tgt_cred.name,
+        input_field_name='password',
+        state='present'
+    ), admin_user)
+
+    assert not changedResult.get('failed', False), changedResult.get('msg', result)
+    assert changedResult.get('changed'), result
+
+    assert CredentialInputSource.objects.count() == 1
+    cis = CredentialInputSource.objects.first()
+
+    assert cis.metadata['object_query'] == "Safe=SUPERSAFE;Object=MyAccount"
+    assert cis.source_credential.name == src_cred_alt.name
+    assert cis.target_credential.name == tgt_cred.name
+    assert cis.input_field_name == 'password'
