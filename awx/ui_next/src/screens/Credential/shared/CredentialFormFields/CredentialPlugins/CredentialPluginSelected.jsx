@@ -5,8 +5,8 @@ import { t, Trans } from '@lingui/macro';
 import styled from 'styled-components';
 import { Button, ButtonVariant, Tooltip } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
-import CredentialChip from '../../../../components/CredentialChip';
-import { Credential } from '../../../../types';
+import CredentialChip from '../../../../../components/CredentialChip';
+import { Credential } from '../../../../../types';
 
 const SelectedCredential = styled.div`
   display: flex;

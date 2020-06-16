@@ -336,3 +336,16 @@ export const Survey = shape({
   description: string,
   spec: arrayOf(SurveyQuestion),
 });
+
+export const CredentialType = shape({
+  id: number.isRequired,
+  type: string.isRequired,
+  url: string.isRequired,
+  related: shape({}),
+  summary_fields: shape({}),
+  name: string.isRequired,
+  description: string,
+  kind: string.isRequired,
+  namespace: string,
+  inputs: shape({}).isRequired,
+});

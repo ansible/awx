@@ -3,13 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { CredentialsAPI } from '../../../../../api';
-import CheckboxListItem from '../../../../../components/CheckboxListItem';
-import ContentError from '../../../../../components/ContentError';
-import DataListToolbar from '../../../../../components/DataListToolbar';
-import PaginatedDataList from '../../../../../components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '../../../../../util/qs';
-import useRequest from '../../../../../util/useRequest';
+import { CredentialsAPI } from '../../../../../../api';
+import CheckboxListItem from '../../../../../../components/CheckboxListItem';
+import ContentError from '../../../../../../components/ContentError';
+import DataListToolbar from '../../../../../../components/DataListToolbar';
+import PaginatedDataList from '../../../../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,

@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { object } from 'prop-types';
-
 import { CardBody } from '../../../components/Card';
 import {
   CredentialsAPI,
@@ -22,8 +21,34 @@ function CredentialEdit({ credential, me }) {
 
   const { error: submitError, request: submitRequest, result } = useRequest(
     useCallback(
-      async (values, inputSourceMap) => {
-        const createAndUpdateInputSources = pluginInputs =>
+      async (values, credentialTypesMap, inputSourceMap) => {
+        const { inputs: credentialTypeInputs } = credentialTypesMap[
+          values.credential_type
+        ];
+
+        const {
+          inputs,
+          organization,
+          passwordPrompts,
+          ...remainingValues
+        } = values;
+
+        const nonPluginInputs = {};
+        const pluginInputs = {};
+        const possibleFields = credentialTypeInputs.fields || [];
+
+        possibleFields.forEach(field => {
+          const input = inputs[field.id];
+          if (input.credential && input.inputs) {
+            pluginInputs[field.id] = input;
+          } else if (passwordPrompts[field.id]) {
+            nonPluginInputs[field.id] = 'ASK';
+          } else {
+            nonPluginInputs[field.id] = input;
+          }
+        });
+
+        const createAndUpdateInputSources = () =>
           Object.entries(pluginInputs).map(([fieldName, fieldValue]) => {
             if (!inputSourceMap[fieldName]) {
               return CredentialInputSourcesAPI.create({
@@ -46,27 +71,15 @@ function CredentialEdit({ credential, me }) {
             return null;
           });
 
-        const destroyInputSources = inputs => {
-          const destroyRequests = [];
-          Object.values(inputSourceMap).forEach(inputSource => {
+        const destroyInputSources = () =>
+          Object.values(inputSourceMap).map(inputSource => {
             const { id, input_field_name } = inputSource;
             if (!inputs[input_field_name]?.credential) {
-              destroyRequests.push(CredentialInputSourcesAPI.destroy(id));
+              return CredentialInputSourcesAPI.destroy(id);
             }
+            return null;
           });
-          return destroyRequests;
-        };
 
-        const { inputs, organization, ...remainingValues } = values;
-        const nonPluginInputs = {};
-        const pluginInputs = {};
-        Object.entries(inputs).forEach(([key, value]) => {
-          if (value.credential && value.inputs) {
-            pluginInputs[key] = value;
-          } else {
-            nonPluginInputs[key] = value;
-          }
-        });
         const [{ data }] = await Promise.all([
           CredentialsAPI.update(credential.id, {
             user: (me && me.id) || null,
@@ -74,12 +87,14 @@ function CredentialEdit({ credential, me }) {
             inputs: nonPluginInputs,
             ...remainingValues,
           }),
-          ...destroyInputSources(inputs),
+          ...destroyInputSources(),
         ]);
-        await Promise.all(createAndUpdateInputSources(pluginInputs));
+
+        await Promise.all(createAndUpdateInputSources());
+
         return data;
       },
-      [credential.id, me]
+      [me, credential.id]
     )
   );
 
@@ -100,12 +115,15 @@ function CredentialEdit({ credential, me }) {
             data: { results: loadedInputSources },
           },
         ] = await Promise.all([
-          CredentialTypesAPI.read({
-            or__namespace: ['gce', 'scm', 'ssh'],
-          }),
+          CredentialTypesAPI.read(),
           CredentialsAPI.readInputSources(credential.id, { page_size: 200 }),
         ]);
-        setCredentialTypes(loadedCredentialTypes);
+        setCredentialTypes(
+          loadedCredentialTypes.reduce((credentialTypesMap, credentialType) => {
+            credentialTypesMap[credentialType.id] = credentialType;
+            return credentialTypesMap;
+          }, {})
+        );
         setInputSources(
           loadedInputSources.reduce((inputSourcesMap, inputSource) => {
             inputSourcesMap[inputSource.input_field_name] = inputSource;
@@ -127,7 +145,7 @@ function CredentialEdit({ credential, me }) {
   };
 
   const handleSubmit = async values => {
-    await submitRequest(values, inputSources);
+    await submitRequest(values, credentialTypes, inputSources);
   };
 
   if (error) {

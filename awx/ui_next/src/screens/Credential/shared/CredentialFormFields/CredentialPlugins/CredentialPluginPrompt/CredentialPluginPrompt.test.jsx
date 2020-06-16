@@ -3,15 +3,15 @@ import { act } from 'react-dom/test-utils';
 import {
   mountWithContexts,
   waitForElement,
-} from '../../../../../../testUtils/enzymeHelpers';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../../../api';
-import selectedCredential from '../../data.cyberArkCredential.json';
-import azureVaultCredential from '../../data.azureVaultCredential.json';
-import hashiCorpCredential from '../../data.hashiCorpCredential.json';
+} from '../../../../../../../testUtils/enzymeHelpers';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../../../../api';
+import selectedCredential from '../../../data.cyberArkCredential.json';
+import azureVaultCredential from '../../../data.azureVaultCredential.json';
+import hashiCorpCredential from '../../../data.hashiCorpCredential.json';
 import CredentialPluginPrompt from './CredentialPluginPrompt';
 
-jest.mock('../../../../../api/models/Credentials');
-jest.mock('../../../../../api/models/CredentialTypes');
+jest.mock('../../../../../../api/models/Credentials');
+jest.mock('../../../../../../api/models/CredentialTypes');
 
 CredentialsAPI.read.mockResolvedValue({
   data: {
