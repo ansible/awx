@@ -130,7 +130,7 @@
     "lr-infinite-scroll": "git+https://git@github.com/lorenzofox3/lrInfiniteScroll",
     "mathjs": "^3.15.0",
     "moment": "^2.19.4",
-    "ng-toast": "git+https://git@github.com/ansible/ngToast#v2.1.1",
+    "ng-toast": "git+https://git@github.com/ansible/ngToast.git#v2.2.1",
     "nvd3": "^1.8.6",
     "popper.js": "~1.14.4",
     "reconnectingwebsocket": "^1.0.0",
