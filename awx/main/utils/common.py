@@ -178,7 +178,7 @@ def _get_ansible_version(ansible_path):
     '''
     try:
         proc = subprocess.Popen([ansible_path, '--version'],
-                                stdout=subprocess.PIPE)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         result = smart_str(proc.communicate()[0])
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
