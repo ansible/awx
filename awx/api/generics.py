@@ -980,7 +980,7 @@ class CopyAPIView(GenericAPIView):
         if hasattr(new_obj, 'admin_role') and request.user not in new_obj.admin_role.members.all():
             new_obj.admin_role.members.add(request.user)
         if sub_objs:
-            # store the copied object dict into memcached, because it's
+            # store the copied object dict into cache, because it's
             # often too large for postgres' notification bus
             # (which has a default maximum message size of 8k)
             key = 'deep-copy-{}'.format(str(uuid.uuid4()))
