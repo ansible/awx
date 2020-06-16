@@ -26,7 +26,8 @@ from awx.main.models import (
     UnifiedJob,
     WorkflowApproval,
     WorkflowJob,
-    WorkflowJobTemplate
+    WorkflowJobTemplate,
+    enforce_bigint_pk_migration
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
@@ -578,6 +579,13 @@ class TaskManager():
                 if acquired is False:
                     logger.debug("Not running scheduler, another task holds lock")
                     return
+
+                # every time the task manager runs, detect the need to migrate old event records from int
+                # to bigint; at *some point* in the future, once certain versions of AWX
+                # and Tower fall out of use/support, we can probably just _assume_ that
+                # everybody has moved to bigint, and remove this code entirely
+                enforce_bigint_pk_migration()
+
                 logger.debug("Starting Scheduler")
                 with task_manager_bulk_reschedule():
                     self._schedule()
