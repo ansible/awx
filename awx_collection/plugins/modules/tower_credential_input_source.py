@@ -36,7 +36,7 @@ options:
       description:
         - A JSON or YAML string
       required: False
-      type: str
+      type: dict
     target_credential:
       description:
         - The credential which will have its input defined by this source
@@ -80,7 +80,7 @@ def main():
         input_field_name=dict(required=True),
         target_credential=dict(required=True),
         source_credential=dict(default=''),
-        metadata=dict(type=dict),
+        metadata=dict(type="dict"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
