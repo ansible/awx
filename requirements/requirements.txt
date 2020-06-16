@@ -60,7 +60,7 @@ jaraco.functools==3.0.0   # via irc, jaraco.text, tempora
 jaraco.logging==3.0.0     # via irc
 jaraco.stream==3.0.0      # via irc
 jaraco.text==3.2.0        # via irc, jaraco.collections
-jinja2==2.11.1            # via -r /awx_devel/requirements/requirements.in, openshift
+jinja2==2.11.2            # via -r /awx_devel/requirements/requirements.in, openshift
 jsonschema==3.2.0         # via -r /awx_devel/requirements/requirements.in
 kubernetes==11.0.0        # via openshift
 lockfile==0.12.2          # via python-daemon

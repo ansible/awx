@@ -121,21 +121,24 @@ def credential_kind(source):
 
 
 @pytest.fixture
-def fake_credential_factory(source):
-    ct = CredentialType.defaults[credential_kind(source)]()
-    ct.save()
+def fake_credential_factory():
+    def wrap(source):
+        ct = CredentialType.defaults[credential_kind(source)]()
+        ct.save()
 
-    inputs = {}
-    var_specs = {}  # pivoted version of inputs
-    for element in ct.inputs.get('fields'):
-        var_specs[element['id']] = element
-    for var in var_specs.keys():
-        inputs[var] = generate_fake_var(var_specs[var])
+        inputs = {}
+        var_specs = {}  # pivoted version of inputs
+        for element in ct.inputs.get('fields'):
+            var_specs[element['id']] = element
+        for var in var_specs.keys():
+            inputs[var] = generate_fake_var(var_specs[var])
 
-    return Credential.objects.create(
-        credential_type=ct,
-        inputs=inputs
-    )
+        return Credential.objects.create(
+            credential_type=ct,
+            inputs=inputs
+        )
+    return wrap
+
 
 
 def read_content(private_data_dir, raw_env, inventory_update):
@@ -248,7 +251,7 @@ def create_reference_data(source_dir, env, content):
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
 @pytest.mark.parametrize('script_or_plugin', ['scripts', 'plugins'])
-def test_inventory_update_injected_content(this_kind, script_or_plugin, inventory):
+def test_inventory_update_injected_content(this_kind, script_or_plugin, inventory, fake_credential_factory):
     src_vars = dict(base_source_var='value_of_var')
     if this_kind in INI_TEST_VARS:
         src_vars.update(INI_TEST_VARS[this_kind])
