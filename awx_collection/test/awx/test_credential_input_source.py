@@ -6,7 +6,7 @@ import pytest
 from awx.main.models import CredentialInputSource, Credential, CredentialType, Organization
 
 @pytest.fixture
-def get_aim_cred_type():
+def aim_cred_type():
     ct=CredentialType.defaults['aim']()
     ct.save()
     return ct
@@ -14,10 +14,10 @@ def get_aim_cred_type():
 
 # Test CyberArk AIM credential source
 @pytest.fixture
-def source_cred_aim(ct):
+def source_cred_aim(aim_cred_type):
     return Credential.objects.create(
         name='CyberArk AIM Cred',
-        credential_type=ct,
+        credential_type=aim_cred_type,
         inputs={
                     "url": "https://cyberark.example.com",
                     "app_id": "myAppID",
@@ -27,9 +27,7 @@ def source_cred_aim(ct):
 
 
 @pytest.mark.django_db
-def test_aim_credential_source(run_module, admin_user, organization, silence_deprecation):
-    cred_type = get_aim_cred_type()
-    src_cred = source_cred_aim(cred_type)
+def test_aim_credential_source(run_module, admin_user, organization, source_cred_aim, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -40,7 +38,7 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_aim.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
@@ -54,7 +52,7 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['object_query'] == "Safe=SUPERSAFE;Object=MyAccount"
-    assert cis.source_credential.name == src_cred.name
+    assert cis.source_credential.name == source_cred_aim.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
@@ -79,8 +77,7 @@ def source_cred_conjur(organization):
 
 
 @pytest.mark.django_db
-def test_conjur_credential_source(run_module, admin_user, organization, silence_deprecation):
-    src_cred = source_cred_conjur(organization)
+def test_conjur_credential_source(run_module, admin_user, organization, source_cred_conjur, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -91,7 +88,7 @@ def test_conjur_credential_source(run_module, admin_user, organization, silence_
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_conjur.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"secret_path": "/path/to/secret"},
@@ -105,7 +102,7 @@ def test_conjur_credential_source(run_module, admin_user, organization, silence_
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['secret_path'] == "/path/to/secret"
-    assert cis.source_credential.name == src_cred.name
+    assert cis.source_credential.name == source_cred_conjur.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
@@ -130,8 +127,7 @@ def source_cred_hashi_secret(organization):
 
 
 @pytest.mark.django_db
-def test_hashi_secret_credential_source(run_module, admin_user, organization, silence_deprecation):
-    src_cred = source_cred_hashi_secret(organization)
+def test_hashi_secret_credential_source(run_module, admin_user, organization, source_cred_hashi_secret, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -142,7 +138,7 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, si
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_hashi_secret.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"secret_path": "/path/to/secret", "auth_path": "/path/to/auth", "secret_backend": "backend", "secret_key": "a_key"},
@@ -159,7 +155,7 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, si
     assert cis.metadata['auth_path'] == "/path/to/auth"
     assert cis.metadata['secret_backend'] == "backend"
     assert cis.metadata['secret_key'] == "a_key"
-    assert cis.source_credential.name == src_cred.name
+    assert cis.source_credential.name == source_cred_hashi_secret.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
@@ -184,8 +180,7 @@ def source_cred_hashi_ssh(organization):
 
 
 @pytest.mark.django_db
-def test_hashi_ssh_credential_source(run_module, admin_user, organization, silence_deprecation):
-    src_cred = source_cred_hashi_ssh(organization)
+def test_hashi_ssh_credential_source(run_module, admin_user, organization, source_cred_hashi_ssh, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -196,7 +191,7 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, silen
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_hashi_ssh.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"secret_path": "/path/to/secret", "auth_path": "/path/to/auth", "role": "role", "public_key": "a_key", "valid_principals": "some_value"},
@@ -214,7 +209,7 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, silen
     assert cis.metadata['role'] == "role"
     assert cis.metadata['public_key'] == "a_key"
     assert cis.metadata['valid_principals'] == "some_value"
-    assert cis.source_credential.name == src_cred.name
+    assert cis.source_credential.name == source_cred_hashi_ssh.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
@@ -240,8 +235,7 @@ def source_cred_azure_kv(organization):
 
 
 @pytest.mark.django_db
-def test_azure_kv_credential_source(run_module, admin_user, organization, silence_deprecation):
-    src_cred = source_cred_azure_kv(organization)
+def test_azure_kv_credential_source(run_module, admin_user, organization, source_cred_azure_kv, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -252,7 +246,7 @@ def test_azure_kv_credential_source(run_module, admin_user, organization, silenc
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_azure_kv.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"secret_field": "my_pass"},
@@ -266,7 +260,7 @@ def test_azure_kv_credential_source(run_module, admin_user, organization, silenc
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['secret_field'] == "my_pass"
-    assert cis.source_credential.name == src_cred.name
+    assert cis.source_credential.name == source_cred_azure_kv.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
@@ -274,10 +268,10 @@ def test_azure_kv_credential_source(run_module, admin_user, organization, silenc
 
 # Test Changing Credential Source
 @pytest.fixture
-def source_cred_aim_alt(ct):
+def source_cred_aim_alt(aim_cred_type):
     return Credential.objects.create(
         name='Alternate CyberArk AIM Cred',
-        credential_type=ct,
+        credential_type=aim_cred_type,
         inputs={
                     "url": "https://cyberark-alt.example.com",
                     "app_id": "myAltID",
@@ -286,9 +280,7 @@ def source_cred_aim_alt(ct):
     )
 
 @pytest.mark.django_db
-def test_aim_credential_source(run_module, admin_user, organization, silence_deprecation):
-    cred_type=get_aim_cred_type()
-    src_cred = source_cred_aim(cred_type)
+def test_aim_credential_source(run_module, admin_user, organization, source_cred_aim, source_cred_aim_alt, silence_deprecation):
     ct=CredentialType.defaults['ssh']()
     ct.save()
     tgt_cred = Credential.objects.create(
@@ -299,7 +291,7 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     )
 
     result = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_aim.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
@@ -310,7 +302,7 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     assert result.get('changed'), result
 
     unchangedResult = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred.name,
+        source_credential=source_cred_aim.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
@@ -320,10 +312,8 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     assert not unchangedResult.get('failed', False), result.get('msg', result)
     assert not unchangedResult.get('changed'), result
 
-    src_cred_alt = source_cred_aim_alt(cred_type)
-
     changedResult = run_module('tower_credential_input_source', dict(
-        source_credential=src_cred_alt.name,
+        source_credential=source_cred_aim_alt.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
         state='present'
@@ -336,6 +326,6 @@ def test_aim_credential_source(run_module, admin_user, organization, silence_dep
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['object_query'] == "Safe=SUPERSAFE;Object=MyAccount"
-    assert cis.source_credential.name == src_cred_alt.name
+    assert cis.source_credential.name == source_cred_aim_alt.name
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'

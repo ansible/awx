@@ -101,7 +101,6 @@ def main():
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
-    module.json_output['all'] = module.get_all_endpoint('credential_input_sources', **{'data': {}})
     credential_input_source = module.get_one('credential_input_sources', **{'data': lookup_data})
 
     if state == 'absent':
