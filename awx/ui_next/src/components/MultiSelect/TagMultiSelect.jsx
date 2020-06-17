@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { func, string } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
-
-function arrayToString(tags) {
-  return tags.join(',');
-}
-
-function stringToArray(value) {
-  return value.split(',').filter(val => !!val);
-}
+import { arrayToString, stringToArray } from '../../util/strings';
 
 function TagMultiSelect({ onChange, value }) {
   const selections = stringToArray(value);

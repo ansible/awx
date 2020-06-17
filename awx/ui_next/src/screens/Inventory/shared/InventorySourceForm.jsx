@@ -22,10 +22,34 @@ import {
   SubFormLayout,
 } from '../../../components/FormLayout';
 
-import SCMSubForm from './InventorySourceSubForms';
+import {
+  AzureSubForm,
+  CloudFormsSubForm,
+  CustomScriptSubForm,
+  EC2SubForm,
+  GCESubForm,
+  OpenStackSubForm,
+  SCMSubForm,
+  SatelliteSubForm,
+  TowerSubForm,
+  VMwareSubForm,
+  VirtualizationSubForm,
+} from './InventorySourceSubForms';
+
+const buildSourceChoiceOptions = options => {
+  const sourceChoices = options.actions.GET.source.choices.map(
+    ([choice, label]) => ({ label, key: choice, value: choice })
+  );
+  return sourceChoices.filter(({ key }) => key !== 'file');
+};
 
 const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
-  const { values, initialValues, resetForm } = useFormikContext();
+  const {
+    values,
+    initialValues,
+    resetForm,
+    setFieldValue,
+  } = useFormikContext();
   const [sourceField, sourceMeta] = useField({
     name: 'source',
     validate: required(i18n._(t`Set a value for this field`), i18n),
@@ -39,15 +63,38 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
   };
 
   const resetSubFormFields = sourceType => {
-    resetForm({
-      values: {
-        ...initialValues,
-        name: values.name,
-        description: values.description,
-        custom_virtualenv: values.custom_virtualenv,
+    if (sourceType === initialValues.source) {
+      resetForm({
+        values: {
+          ...initialValues,
+          name: values.name,
+          description: values.description,
+          custom_virtualenv: values.custom_virtualenv,
+          source: sourceType,
+        },
+      });
+    } else {
+      const defaults = {
+        credential: null,
+        group_by: '',
+        instance_filters: '',
+        overwrite: false,
+        overwrite_vars: false,
         source: sourceType,
-      },
-    });
+        source_path: '',
+        source_project: null,
+        source_regions: '',
+        source_script: null,
+        source_vars: '---\n',
+        update_cache_timeout: 0,
+        update_on_launch: false,
+        update_on_project_update: false,
+        verbosity: 1,
+      };
+      Object.keys(defaults).forEach(label => {
+        setFieldValue(label, defaults[label]);
+      });
+    }
   };
 
   return (
@@ -83,7 +130,7 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
               label: i18n._(t`Choose a source`),
               isDisabled: true,
             },
-            ...sourceOptions,
+            ...buildSourceChoiceOptions(sourceOptions),
           ]}
           onChange={(event, value) => {
             resetSubFormFields(value);
@@ -112,14 +159,23 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
           />
         </FormGroup>
       )}
-
       {sourceField.value !== '' && (
         <SubFormLayout>
           <Title size="md">{i18n._(t`Source details`)}</Title>
           <FormColumnLayout>
             {
               {
+                azure_rm: <AzureSubForm sourceOptions={sourceOptions} />,
+                cloudforms: <CloudFormsSubForm />,
+                custom: <CustomScriptSubForm />,
+                ec2: <EC2SubForm sourceOptions={sourceOptions} />,
+                gce: <GCESubForm sourceOptions={sourceOptions} />,
+                openstack: <OpenStackSubForm />,
+                rhv: <VirtualizationSubForm />,
+                satellite6: <SatelliteSubForm />,
                 scm: <SCMSubForm />,
+                tower: <TowerSubForm />,
+                vmware: <VMwareSubForm sourceOptions={sourceOptions} />,
               }[sourceField.value]
             }
           </FormColumnLayout>
@@ -140,12 +196,16 @@ const InventorySourceForm = ({
     credential: source?.summary_fields?.credential || null,
     custom_virtualenv: source?.custom_virtualenv || '',
     description: source?.description || '',
+    group_by: source?.group_by || '',
+    instance_filters: source?.instance_filters || '',
     name: source?.name || '',
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
     source_path: source?.source_path === '' ? '/ (project root)' : '',
     source_project: source?.summary_fields?.source_project || null,
+    source_regions: source?.source_regions || '',
+    source_script: source?.summary_fields?.source_script || null,
     source_vars: source?.source_vars || '---\n',
     update_cache_timeout: source?.update_cache_timeout || 0,
     update_on_launch: source?.update_on_launch || false,
@@ -161,17 +221,7 @@ const InventorySourceForm = ({
   } = useRequest(
     useCallback(async () => {
       const { data } = await InventorySourcesAPI.readOptions();
-      const sourceChoices = Object.assign(
-        ...data.actions.GET.source.choices.map(([key, val]) => ({ [key]: val }))
-      );
-      delete sourceChoices.file;
-      return Object.keys(sourceChoices).map(choice => {
-        return {
-          value: choice,
-          key: choice,
-          label: sourceChoices[choice],
-        };
-      });
+      return data;
     }, []),
     null
   );
