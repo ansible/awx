@@ -16,12 +16,10 @@ import stat
 import tempfile
 import time
 import traceback
-from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
 from pathlib import Path
-from uuid import uuid4
 import urllib.parse as urlparse
 
 # Django
@@ -873,11 +871,6 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)
-        runner_project_folder = os.path.join(path, 'project')
-        if not os.path.exists(runner_project_folder):
-            # Ansible Runner requires that this directory exists.
-            # Specifically, when using process isolation
-            os.mkdir(runner_project_folder)
         return path
 
     def build_private_data_files(self, instance, private_data_dir):
@@ -1952,9 +1945,8 @@ class RunJob(BaseTask):
             if job_revision:
                 job = self.update_model(job.pk, scm_revision=job_revision)
             # Project update does not copy the folder, so copy here
-            RunProjectUpdate.make_local_copy(
-                project_path, os.path.join(private_data_dir, 'project'),
-                job.project.scm_type, job_revision
+            RunProjectUpdate().safe_local_copy(
+                job.project, os.path.join(private_data_dir, 'project')
             )
 
         if job.inventory.kind == 'smart':
@@ -2296,10 +2288,6 @@ class RunProjectUpdate(BaseTask):
         start_time = time.time()
         while True:
             try:
-                instance.refresh_from_db(fields=['cancel_flag'])
-                if instance.cancel_flag:
-                    logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
-                    return
                 fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except IOError as e:
@@ -2314,12 +2302,16 @@ class RunProjectUpdate(BaseTask):
         if waiting_time > 1.0:
             logger.info(
                 '{} spent {} waiting to acquire lock for local source tree '
-                'for path {}.'.format(instance.log_format, waiting_time, lock_path))
+                'for path {}.'.format(getattr(instance, 'log_format', instance), waiting_time, lock_path))
 
     def pre_run_hook(self, instance, private_data_dir):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
+        instance.refresh_from_db(fields=['cancel_flag'])
+        if instance.cancel_flag:
+            logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
+            return
         self.acquire_lock(instance)
         self.original_branch = None
         if (instance.scm_type == 'git' and instance.job_type == 'run' and instance.project and
@@ -2332,34 +2324,17 @@ class RunProjectUpdate(BaseTask):
                 else:
                     self.original_branch = git_repo.active_branch
 
+    def safe_local_copy(self, project, destination_folder):
+        self.acquire_lock(project)
+        try:
+            project_path = project.get_project_path(check_if_exists=False)
+            self.make_local_copy(project_path, destination_folder)
+        finally:
+            self.release_lock(project)
+
     @staticmethod
-    def make_local_copy(project_path, destination_folder, scm_type, scm_revision):
-        if scm_type == 'git':
-            git_repo = git.Repo(project_path)
-            if not os.path.exists(destination_folder):
-                os.mkdir(destination_folder, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
-            tmp_branch_name = 'awx_internal/{}'.format(uuid4())
-            # always clone based on specific job revision
-            if not scm_revision:
-                raise RuntimeError('Unexpectedly could not determine a revision to run from project.')
-            source_branch = git_repo.create_head(tmp_branch_name, scm_revision)
-            # git clone must take file:// syntax for source repo or else options like depth will be ignored
-            source_as_uri = Path(project_path).as_uri()
-            git.Repo.clone_from(
-                source_as_uri, destination_folder, branch=source_branch,
-                depth=1, single_branch=True,  # shallow, do not copy full history
-            )
-            # submodules copied in loop because shallow copies from local HEADs are ideal
-            # and no git clone submodule options are compatible with minimum requirements
-            for submodule in git_repo.submodules:
-                subrepo_path = os.path.abspath(os.path.join(project_path, submodule.path))
-                subrepo_destination_folder = os.path.abspath(os.path.join(destination_folder, submodule.path))
-                subrepo_uri = Path(subrepo_path).as_uri()
-                git.Repo.clone_from(subrepo_uri, subrepo_destination_folder, depth=1, single_branch=True)
-            # force option is necessary because remote refs are not counted, although no information is lost
-            git_repo.delete_head(tmp_branch_name, force=True)
-        else:
-            copy_tree(project_path, destination_folder, preserve_symlinks=1)
+    def make_local_copy(project_path, destination_folder):
+        shutil.copytree(project_path, destination_folder, ignore=shutil.ignore_patterns('.git'), symlinks=True)
 
     def post_run_hook(self, instance, status):
         # To avoid hangs, very important to release lock even if errors happen here
@@ -2368,11 +2343,9 @@ class RunProjectUpdate(BaseTask):
                 instance.scm_revision = self.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
             if self.job_private_data_dir:
-                # copy project folder before resetting to default branch
-                # because some git-tree-specific resources (like submodules) might matter
+                # copy project folder before resetting to default branch to get current tree
                 self.make_local_copy(
-                    instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project'),
-                    instance.scm_type, instance.scm_revision
+                    instance.get_project_path(check_if_exists=False), os.path.join(self.job_private_data_dir, 'project')
                 )
                 if self.original_branch:
                     # for git project syncs, non-default branches can be problems
@@ -2656,10 +2629,8 @@ class RunInventoryUpdate(BaseTask):
                 raise
         elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
             # This follows update, not sync, so make copy here
-            project_path = source_project.get_project_path(check_if_exists=False)
-            RunProjectUpdate.make_local_copy(
-                project_path, os.path.join(private_data_dir, 'project'),
-                source_project.scm_type, source_project.scm_revision
+            RunProjectUpdate().safe_local_copy(
+                source_project, os.path.join(private_data_dir, 'project')
             )
 
 
