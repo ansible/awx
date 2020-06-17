@@ -24,6 +24,7 @@ keyed_groups:
   separator: ''
 legacy_hostvars: true
 plugin: theforeman.foreman.foreman
+validate_certs: false
 want_facts: true
 want_hostcollections: true
 want_params: true
