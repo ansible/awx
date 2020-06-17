@@ -2596,6 +2596,7 @@ class satellite6(PluginFileInjector):
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['validate_certs'] = False
 
         group_patterns = '[]'
         group_prefix = 'foreman_'
@@ -2615,6 +2616,10 @@ class satellite6(PluginFileInjector):
                 want_ansible_ssh_host = v
             elif k == 'satellite6_want_facts' and isinstance(v, bool):
                 want_facts = v
+            # add backwards support for ssl_verify
+            # plugin uses new option, validate_certs, instead
+            elif k == 'ssl_verify' and isinstance(v, bool):
+                ret['validate_certs'] = v
             else:
                 ret[k] = str(v)
 
