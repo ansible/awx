@@ -25,6 +25,7 @@ function AlertModal({
   title,
   variant,
   children,
+  i18nHash,
   ...props
 }) {
   const variantIcons = {

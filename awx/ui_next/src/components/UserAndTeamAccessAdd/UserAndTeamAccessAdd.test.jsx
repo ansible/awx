@@ -11,7 +11,7 @@ jest.mock('../../api/models/Teams');
 jest.mock('../../api/models/Users');
 jest.mock('../../api/models/JobTemplates');
 
-describe('<UserAndTeamAccessAdd/>', () => {
+describe.skip('<UserAndTeamAccessAdd/>', () => {
   const resources = {
     data: {
       results: [

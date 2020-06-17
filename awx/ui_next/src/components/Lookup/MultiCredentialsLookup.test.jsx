@@ -81,7 +81,7 @@ describe('<MultiCredentialsLookup />', () => {
     });
     const chip = wrapper.find('CredentialChip');
     expect(chip).toHaveLength(5);
-    const button = chip.at(1).find('ChipButton');
+    const button = chip.at(1).find('Chip Button');
     await act(async () => {
       button.invoke('onClick')();
     });

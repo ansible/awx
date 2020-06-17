@@ -81,7 +81,9 @@ function InventoryDetail({ inventory, i18n }) {
           value={
             <ChipGroup numChips={5} totalChips={instanceGroups.length}>
               {instanceGroups.map(ig => (
-                <Chip key={ig.id}>{ig.name}</Chip>
+                <Chip key={ig.id} isReadOnly>
+                  {ig.name}
+                </Chip>
               ))}
             </ChipGroup>
           }

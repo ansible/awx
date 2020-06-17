@@ -22,7 +22,7 @@ let wrapper;
 const dispatch = jest.fn();
 const onSave = jest.fn();
 
-describe('NodeModal', () => {
+describe.skip('NodeModal', () => {
   beforeAll(() => {
     JobTemplatesAPI.read.mockResolvedValue({
       data: {

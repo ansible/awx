@@ -32,7 +32,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
   i18n={"/i18n/"}
   onRoleDelete={[Function]}
 >
-  <Component
+  <DataListItem
     aria-labelledby="access-list-item"
     id="2"
     key="2"
@@ -42,7 +42,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
       className="pf-c-data-list__item"
       id="2"
     >
-      <Component
+      <DataListItemRow
         key=".0"
         rowid="access-list-item"
       >
@@ -53,8 +53,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
             dataListCells={
               Array [
                 <ForwardRef(Styled(PFDataListCell))>
-                  <Unknown>
-                    <Unknown
+                  <TextContent>
+                    <Text
                       component="h6"
                     >
                       <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -66,8 +66,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       >
                         jane
                       </ForwardRef(ResourceAccessListItem___StyledLink)>
-                    </Unknown>
-                  </Unknown>
+                    </Text>
+                  </TextContent>
                   <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
@@ -117,8 +117,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               dataListCells={
                 Array [
                   <ForwardRef(Styled(PFDataListCell))>
-                    <Unknown>
-                      <Unknown
+                    <TextContent>
+                      <Text
                         component="h6"
                       >
                         <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -130,8 +130,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         >
                           jane
                         </ForwardRef(ResourceAccessListItem___StyledLink)>
-                      </Unknown>
-                    </Unknown>
+                      </Text>
+                    </TextContent>
                     <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
@@ -199,13 +199,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               forwardedRef={null}
               rowid="access-list-item"
             >
-              <Component
+              <DataListItemCells
                 className="ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 dataListCells={
                   Array [
                     <ForwardRef(Styled(PFDataListCell))>
-                      <Unknown>
-                        <Unknown
+                      <TextContent>
+                        <Text
                           component="h6"
                         >
                           <ForwardRef(ResourceAccessListItem___StyledLink)
@@ -217,8 +217,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           >
                             jane
                           </ForwardRef(ResourceAccessListItem___StyledLink)>
-                        </Unknown>
-                      </Unknown>
+                        </Text>
+                      </TextContent>
                       <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
@@ -302,11 +302,11 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         <div
                           className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
-                          <Component>
+                          <TextContent>
                             <div
                               className="pf-c-content"
                             >
-                              <Component
+                              <Text
                                 component="h6"
                               >
                                 <h6
@@ -393,9 +393,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                     </StyledComponent>
                                   </ResourceAccessListItem___StyledLink>
                                 </h6>
-                              </Component>
+                              </Text>
                             </div>
-                          </Component>
+                          </TextContent>
                           <Styled(DetailList)
                             stacked={true}
                           >
@@ -436,7 +436,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
-                                <Component
+                                <TextList
                                   className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
@@ -494,7 +494,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <Component
+                                            <TextListItem
                                               className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
@@ -506,7 +506,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 Name
                                               </dt>
-                                            </Component>
+                                            </TextListItem>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
@@ -557,7 +557,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <Component
+                                            <TextListItem
                                               className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
@@ -569,13 +569,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 jane brown
                                               </dd>
-                                            </Component>
+                                            </TextListItem>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
                                     </Detail>
                                   </dl>
-                                </Component>
+                                </TextList>
                               </DetailList>
                             </StyledComponent>
                           </Styled(DetailList)>
@@ -659,7 +659,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                 className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
-                                <Component
+                                <TextList
                                   className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
@@ -734,7 +734,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <Component
+                                            <TextListItem
                                               className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
@@ -746,7 +746,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               >
                                                 Team Roles
                                               </dt>
-                                            </Component>
+                                            </TextListItem>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
@@ -797,7 +797,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             data-cy={null}
                                             fullWidth={false}
                                           >
-                                            <Component
+                                            <TextListItem
                                               className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
@@ -872,7 +872,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                       >
                                                                         Member
                                                                       </span>
-                                                                      <Component
+                                                                      <Button
                                                                         aria-label="close"
                                                                         aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
                                                                         id="remove_pf-random-id-1"
@@ -920,7 +920,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                             </svg>
                                                                           </TimesIcon>
                                                                         </button>
-                                                                      </Component>
+                                                                      </Button>
                                                                     </div>
                                                                   </GenerateId>
                                                                 </Chip>
@@ -933,13 +933,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                   </I18n>
                                                 </WithI18n>
                                               </dd>
-                                            </Component>
+                                            </TextListItem>
                                           </Component>
                                         </StyledComponent>
                                       </Styled(Component)>
                                     </Detail>
                                   </dl>
-                                </Component>
+                                </TextList>
                               </DetailList>
                             </StyledComponent>
                           </Styled(DetailList)>
@@ -948,12 +948,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                     </StyledComponent>
                   </DataListCell>
                 </div>
-              </Component>
+              </DataListItemCells>
             </StyledComponent>
           </ResourceAccessListItem__DataListItemCells>
         </div>
-      </Component>
+      </DataListItemRow>
     </li>
-  </Component>
+  </DataListItem>
 </ResourceAccessListItem>
 `;

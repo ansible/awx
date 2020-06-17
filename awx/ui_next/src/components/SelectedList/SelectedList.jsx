@@ -30,7 +30,7 @@ class SelectedList extends Component {
     const renderChip =
       renderItemChip ||
       (({ item, removeItem }) => (
-        <Chip key={item.id} onClick={removeItem}>
+        <Chip key={item.id} onClick={removeItem} isReadOnly={isReadOnly}>
           {item[displayKey]}
         </Chip>
       ));

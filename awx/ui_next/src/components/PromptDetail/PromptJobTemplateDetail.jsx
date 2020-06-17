@@ -196,7 +196,9 @@ function PromptJobTemplateDetail({ i18n, resource }) {
               totalChips={summary_fields.labels.results.length}
             >
               {summary_fields.labels.results.map(label => (
-                <Chip key={label.id}>{label.name}</Chip>
+                <Chip key={label.id} isReadOnly>
+                  {label.name}
+                </Chip>
               ))}
             </ChipGroup>
           }
@@ -209,7 +211,9 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           value={
             <ChipGroup numChips={5} totalChips={instance_groups.length}>
               {instance_groups.map(ig => (
-                <Chip key={ig.id}>{ig.name}</Chip>
+                <Chip key={ig.id} isReadOnly>
+                  {ig.name}
+                </Chip>
               ))}
             </ChipGroup>
           }
@@ -222,7 +226,9 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           value={
             <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
               {job_tags.split(',').map(jobTag => (
-                <Chip key={jobTag}>{jobTag}</Chip>
+                <Chip key={jobTag} isReadOnly>
+                  {jobTag}
+                </Chip>
               ))}
             </ChipGroup>
           }
@@ -235,7 +241,9 @@ function PromptJobTemplateDetail({ i18n, resource }) {
           value={
             <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
               {skip_tags.split(',').map(skipTag => (
-                <Chip key={skipTag}>{skipTag}</Chip>
+                <Chip key={skipTag} isReadOnly>
+                  {skipTag}
+                </Chip>
               ))}
             </ChipGroup>
           }

@@ -178,7 +178,7 @@ describe('<InventoryGroupsList />', () => {
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 
-  test('should show error modal when group is not successfully deleted from api', async () => {
+  test.skip('should show error modal when group is not successfully deleted from api', async () => {
     GroupsAPI.destroy.mockRejectedValue(
       new Error({
         response: {

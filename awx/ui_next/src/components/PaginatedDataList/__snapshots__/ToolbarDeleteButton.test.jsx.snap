@@ -49,11 +49,11 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           id=""
           role="tooltip"
         >
-          <Unknown
+          <TooltipContent
             isLeftAligned={false}
           >
             Select a row to delete
-          </Unknown>
+          </TooltipContent>
         </div>
       }
       delay={
@@ -97,7 +97,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
       zIndex={9999}
     >
       <div>
-        <Component
+        <Button
           aria-label="Delete"
           isDisabled={true}
           onClick={[Function]}
@@ -117,7 +117,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           >
             Delete
           </button>
-        </Component>
+        </Button>
       </div>
       <Portal
         containerInfo={
@@ -141,7 +141,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
           id=""
           role="tooltip"
         >
-          <Component
+          <TooltipContent
             isLeftAligned={false}
           >
             <div
@@ -149,7 +149,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
             >
               Select a row to delete
             </div>
-          </Component>
+          </TooltipContent>
         </div>
       </Portal>
     </PopoverBase>

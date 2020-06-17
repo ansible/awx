@@ -20,19 +20,19 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
   <WithI18n
     actions={
       Array [
-        <Unknown
+        <Button
           aria-label="Confirm delete"
           onClick={[Function]}
           variant="danger"
         >
           Delete
-        </Unknown>,
-        <Unknown
+        </Button>,
+        <Button
           onClick={[Function]}
           variant="secondary"
         >
           Cancel
-        </Unknown>,
+        </Button>,
       ]
     }
     isOpen={true}
@@ -47,19 +47,19 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
       <AlertModal
         actions={
           Array [
-            <Unknown
+            <Button
               aria-label="Confirm delete"
               onClick={[Function]}
               variant="danger"
             >
               Delete
-            </Unknown>,
-            <Unknown
+            </Button>,
+            <Button
               onClick={[Function]}
               variant="secondary"
             >
               Cancel
-            </Unknown>,
+            </Button>,
           ]
         }
         i18n={"/i18n/"}
@@ -71,19 +71,19 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
         <Modal
           actions={
             Array [
-              <Unknown
+              <Button
                 aria-label="Confirm delete"
                 onClick={[Function]}
                 variant="danger"
               >
                 Delete
-              </Unknown>,
-              <Unknown
+              </Button>,
+              <Button
                 onClick={[Function]}
                 variant="secondary"
               >
                 Cancel
-              </Unknown>,
+              </Button>,
             ]
           }
           appendTo={
@@ -203,13 +203,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               <ForwardRef(AlertModal___StyledExclamationCircleIcon)
                 size="lg"
               />
-              <Unknown
+              <Title
                 headingLevel="h2"
                 id="alert-modal-header-label"
                 size="2xl"
               >
                 Remove Team Access
-              </Unknown>
+              </Title>
             </ForwardRef(AlertModal__Header)>
           }
           isOpen={true}
@@ -323,22 +323,22 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               </div>
             }
           >
-            <Component
+            <ModalContent
               actions={
                 Array [
-                  <Unknown
+                  <Button
                     aria-label="Confirm delete"
                     onClick={[Function]}
                     variant="danger"
                   >
                     Delete
-                  </Unknown>,
-                  <Unknown
+                  </Button>,
+                  <Button
                     onClick={[Function]}
                     variant="secondary"
                   >
                     Cancel
-                  </Unknown>,
+                  </Button>,
                 ]
               }
               aria-describedby=""
@@ -353,13 +353,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                   <ForwardRef(AlertModal___StyledExclamationCircleIcon)
                     size="lg"
                   />
-                  <Unknown
+                  <Title
                     headingLevel="h2"
                     id="alert-modal-header-label"
                     size="2xl"
                   >
                     Remove Team Access
-                  </Unknown>
+                  </Title>
                 </ForwardRef(AlertModal__Header)>
               }
               isOpen={true}
@@ -369,7 +369,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
               title="Remove Team Access"
               variant="small"
             >
-              <Component>
+              <Backdrop>
                 <div
                   className="pf-c-backdrop"
                 >
@@ -386,7 +386,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                     <div
                       className="pf-l-bullseye"
                     >
-                      <Component
+                      <ModalBox
                         aria-describedby="pf-modal-part-2"
                         aria-label="Alert modal"
                         aria-labelledby="pf-modal-part-0 alert-modal-header-label pf-modal-part-1"
@@ -405,10 +405,10 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                           role="dialog"
                           style={Object {}}
                         >
-                          <Component
+                          <ModalBoxCloseButton
                             onClose={[Function]}
                           >
-                            <Component
+                            <Button
                               aria-label="Close"
                               className=""
                               onClick={[Function]}
@@ -452,9 +452,9 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                   </svg>
                                 </TimesIcon>
                               </button>
-                            </Component>
-                          </Component>
-                          <Component>
+                            </Button>
+                          </ModalBoxCloseButton>
+                          <ModalBoxHeader>
                             <header
                               className="pf-c-modal-box__header"
                             >
@@ -545,7 +545,7 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                         </ExclamationCircleIcon>
                                       </StyledComponent>
                                     </AlertModal___StyledExclamationCircleIcon>
-                                    <Component
+                                    <Title
                                       headingLevel="h2"
                                       id="alert-modal-header-label"
                                       size="2xl"
@@ -556,13 +556,13 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                       >
                                         Remove Team Access
                                       </h2>
-                                    </Component>
+                                    </Title>
                                   </div>
                                 </StyledComponent>
                               </AlertModal__Header>
                             </header>
-                          </Component>
-                          <Component
+                          </ModalBoxHeader>
+                          <ModalBoxBody
                             id="pf-modal-part-2"
                           >
                             <div
@@ -574,12 +574,12 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                               <br />
                               If you only want to remove access for this particular user, please remove them from the team.
                             </div>
-                          </Component>
-                          <Component>
+                          </ModalBoxBody>
+                          <ModalBoxFooter>
                             <footer
                               className="pf-c-modal-box__footer"
                             >
-                              <Component
+                              <Button
                                 aria-label="Confirm delete"
                                 key="delete"
                                 onClick={[Function]}
@@ -599,8 +599,8 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 >
                                   Delete
                                 </button>
-                              </Component>
-                              <Component
+                              </Button>
+                              <Button
                                 key="cancel"
                                 onClick={[Function]}
                                 variant="secondary"
@@ -619,16 +619,16 @@ exports[`<DeleteRoleConfirmationModal /> should render initially 1`] = `
                                 >
                                   Cancel
                                 </button>
-                              </Component>
+                              </Button>
                             </footer>
-                          </Component>
+                          </ModalBoxFooter>
                         </div>
-                      </Component>
+                      </ModalBox>
                     </div>
                   </FocusTrap>
                 </div>
-              </Component>
-            </Component>
+              </Backdrop>
+            </ModalContent>
           </Portal>
         </Modal>
       </AlertModal>

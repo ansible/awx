@@ -14,7 +14,7 @@ describe('<About />', () => {
 
   test('close button calls onClose handler', () => {
     aboutWrapper = mountWithContexts(<About isOpen onClose={onClose} />);
-    console.log(aboutWrapper.debug())
+    console.log(aboutWrapper.debug());
     closeButton = aboutWrapper.find('AboutModalBoxCloseButton Button');
     closeButton.simulate('click');
     expect(onClose).toBeCalled();

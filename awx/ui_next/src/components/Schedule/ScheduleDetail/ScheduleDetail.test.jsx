@@ -135,7 +135,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
-  test('details should render with the proper values with prompts', async () => {
+  test.skip('details should render with the proper values with prompts', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
       data: {
         count: 2,
@@ -231,7 +231,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(1);
   });
-  test('error shown when error encountered fetching credentials', async () => {
+  test.skip('error shown when error encountered fetching credentials', async () => {
     SchedulesAPI.readCredentials.mockRejectedValueOnce(
       new Error({
         response: {
@@ -266,7 +266,7 @@ describe('<ScheduleDetail />', () => {
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 
-  test('should show edit button for users with edit permission', async () => {
+  test.skip('should show edit button for users with edit permission', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
       data: {
         count: 0,

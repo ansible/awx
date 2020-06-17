@@ -22,7 +22,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
     }
   }
 >
-  <Component
+  <DataListItem
     aria-labelledby="items-list-item-9000"
     id="9000"
     key="9000"
@@ -32,14 +32,14 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
       className="pf-c-data-list__item"
       id="9000"
     >
-      <Component
+      <DataListItemRow
         key=".0"
         rowid="items-list-item-9000"
       >
         <div
           className="pf-c-data-list__item-row"
         >
-          <Component
+          <DataListItemCells
             dataListCells={
               Array [
                 <ForwardRef(Styled(PFDataListCell))>
@@ -211,7 +211,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                 </StyledComponent>
               </DataListCell>
             </div>
-          </Component>
+          </DataListItemCells>
           <Styled(DataListAction)
             aria-label="actions"
             aria-labelledby="items-list-item-9000"
@@ -404,8 +404,8 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
             </StyledComponent>
           </Styled(DataListAction)>
         </div>
-      </Component>
+      </DataListItemRow>
     </li>
-  </Component>
+  </DataListItem>
 </NotificationListItem>
 `;

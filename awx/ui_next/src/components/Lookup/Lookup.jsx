@@ -196,7 +196,11 @@ Lookup.defaultProps = {
   required: false,
   onBlur: () => {},
   renderItemChip: ({ item, removeItem, canDelete }) => (
-    <Chip key={item.id} onClick={() => removeItem(item)}>
+    <Chip
+      key={item.id}
+      onClick={() => removeItem(item)}
+      isReadOnly={!canDelete}
+    >
       {item.name}
     </Chip>
   ),

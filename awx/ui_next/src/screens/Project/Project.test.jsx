@@ -41,12 +41,13 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
+    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 5
+      el => el.length === 6
     );
-    expect(tabs.at(2).text()).toEqual('Notifications');
+    expect(tabs.at(3).text()).toEqual('Notifications');
     done();
   });
 
@@ -62,10 +63,11 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
+    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();
@@ -86,9 +88,9 @@ describe('<Project />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
-    expect(tabs.at(3).text()).toEqual('Schedules');
+    expect(tabs.at(4).text()).toEqual('Schedules');
     done();
   });
 
@@ -105,10 +107,11 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
+    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 3
+      el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Schedules'));
     done();

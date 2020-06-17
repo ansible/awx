@@ -43,6 +43,9 @@ function TeamAccessListItem({ role, i18n, detailUrl, onSelect }) {
                         key={role.name}
                         aria-label={role.name}
                         onClick={() => onSelect(role)}
+                        isReadOnly={
+                          !role.summary_fields.user_capabilities.unattach
+                        }
                       >
                         {role.name}
                       </Chip>

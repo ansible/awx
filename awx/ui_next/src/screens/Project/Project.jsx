@@ -159,7 +159,11 @@ class Project extends Component {
 
     let showCardHeader = true;
 
-    if (!isInitialized || location.pathname.endsWith('edit') || location.pathname.includes('schedules/')) {
+    if (
+      !isInitialized ||
+      location.pathname.endsWith('edit') ||
+      location.pathname.includes('schedules/')
+    ) {
       showCardHeader = false;
     }
 
