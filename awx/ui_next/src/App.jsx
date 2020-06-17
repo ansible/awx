@@ -2,7 +2,7 @@ import React from 'react';
 import {
   useRouteMatch,
   useLocation,
-  HashRouter,
+  BrowserRouter,
   Route,
   Switch,
   Redirect,
@@ -76,7 +76,7 @@ function App() {
 }
 
 export default () => (
-  <HashRouter>
+  <BrowserRouter basename="/next">
     <App />
-  </HashRouter>
+  </BrowserRouter>
 );
