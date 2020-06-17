@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
-import { global_breakpoint_md } from '@patternfly/react-tokens';
 import {
   Nav,
   NavList,
@@ -41,15 +40,10 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   const [config, setConfig] = useState({});
   const [configError, setConfigError] = useState(null);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-  const [isNavOpen, setIsNavOpen] = useState(
-    typeof window !== 'undefined' &&
-      window.innerWidth >= parseInt(global_breakpoint_md.value, 10)
-  );
 
   const handleAboutModalOpen = () => setIsAboutModalOpen(true);
   const handleAboutModalClose = () => setIsAboutModalOpen(false);
   const handleConfigErrorClose = () => setConfigError(null);
-  const handleNavToggle = () => setIsNavOpen(!isNavOpen);
 
   const handleLogout = async () => {
     await RootAPI.logout();
@@ -79,7 +73,6 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
   const header = (
     <PageHeader
       showNavToggle
-      onNavToggle={handleNavToggle}
       logo={<BrandLogo />}
       logoProps={{ href: '/' }}
       headerTools={
@@ -95,7 +88,6 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
 
   const sidebar = (
     <PageSidebar
-      isNavOpen={isNavOpen}
       theme="dark"
       nav={
         <Nav aria-label={i18n._(t`Navigation`)} theme="dark">
@@ -116,7 +108,7 @@ function AppContainer({ i18n, navRouteConfig = [], children }) {
 
   return (
     <>
-      <Page usecondensed="True" header={header} sidebar={sidebar}>
+      <Page isManagedSidebar header={header} sidebar={sidebar}>
         <ConfigProvider value={config}>{children}</ConfigProvider>
       </Page>
       <About
