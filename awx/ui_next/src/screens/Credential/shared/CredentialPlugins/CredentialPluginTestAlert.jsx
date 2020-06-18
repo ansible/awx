@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { string, shape } from 'prop-types';
 import {
   Alert,
   AlertActionCloseButton,
@@ -75,8 +76,15 @@ function CredentialPluginTestAlert({
   );
 }
 
-CredentialPluginTestAlert.propTypes = {};
+CredentialPluginTestAlert.propTypes = {
+  credentialName: string.isRequired,
+  successResponse: shape({}),
+  errorResponse: shape({}),
+};
 
-CredentialPluginTestAlert.defaultProps = {};
+CredentialPluginTestAlert.defaultProps = {
+  successResponse: null,
+  errorResponse: null,
+};
 
 export default withI18n()(CredentialPluginTestAlert);

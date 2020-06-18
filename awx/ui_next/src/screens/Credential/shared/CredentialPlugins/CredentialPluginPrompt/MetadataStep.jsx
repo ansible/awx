@@ -158,9 +158,7 @@ function MetadataStep({ i18n }) {
           id="credential-plugin-test"
           variant="primary"
           type="submit"
-          onClick={() =>
-            testPluginMetadata()
-          }
+          onClick={() => testPluginMetadata()}
         >
           {i18n._(t`Test`)}
         </TestButton>
