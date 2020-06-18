@@ -59,9 +59,37 @@ Importing an SSH Key
         --name 'My SSH Key' --user 'alice' \
         --inputs '{"username": "server-login", "ssh_key_data": "@~/.ssh/id_rsa"}'
 
-Backup/Restore
---------------
+Import/Export
+-------------
 
-The AWX CLI doesn't currently have official support for backing up and restoring resources (similar to `tower-cli send` and `tower-cli receive`).
+Intended to be similar to `tower-cli send` and `tower-cli receive`.
 
-If you rely on this functionality, you should continue to use `tower-cli` at this time.
+Exporting everything:
+
+.. code:: bash
+
+    awx export
+
+Exporting everything of some particular type or types:
+
+.. code:: bash
+
+    awx export --users
+
+Exporting a particular named resource:
+
+.. code:: bash
+
+    awx export --users admin
+
+Exporting a resource by id:
+
+.. code:: bash
+
+    awx export --users 42
+
+Importing a set of resources stored as a file:
+
+.. code:: bash
+
+    awx import < resources.json
