@@ -35,3 +35,16 @@ export function isJson(jsonString) {
 
   return typeof value === 'object' && value !== null;
 }
+
+export function parseVariableField(variableField) {
+  if (variableField === '---' || variableField === '{}') {
+    variableField = {};
+  } else {
+    if (!isJson(variableField)) {
+      variableField = yamlToJson(variableField);
+    }
+    variableField = JSON.parse(variableField);
+  }
+
+  return variableField;
+}
