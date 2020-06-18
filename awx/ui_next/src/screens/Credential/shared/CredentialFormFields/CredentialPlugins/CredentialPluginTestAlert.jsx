@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { string, shape } from 'prop-types';
 import {
   Alert,
   AlertActionCloseButton,
@@ -16,7 +15,6 @@ function CredentialPluginTestAlert({
 }) {
   const [testMessage, setTestMessage] = useState('');
   const [testVariant, setTestVariant] = useState(false);
-
   useEffect(() => {
     if (errorResponse) {
       if (errorResponse?.response?.data?.inputs) {
@@ -56,14 +54,6 @@ function CredentialPluginTestAlert({
     <AlertGroup isToast>
       {testMessage && testVariant && (
         <Alert
-          actionClose={
-            <AlertActionCloseButton
-              onClose={() => {
-                setTestMessage(null);
-                setTestVariant(null);
-              }}
-            />
-          }
           title={
             <>
               <b id="credential-plugin-test-name">{credentialName}</b>
@@ -71,21 +61,22 @@ function CredentialPluginTestAlert({
             </>
           }
           variant={testVariant}
+          action={
+            <AlertActionCloseButton
+              onClose={() => {
+                setTestMessage(null);
+                setTestVariant(null);
+              }}
+            />
+          }
         />
       )}
     </AlertGroup>
   );
 }
 
-CredentialPluginTestAlert.propTypes = {
-  credentialName: string.isRequired,
-  successResponse: shape({}),
-  errorResponse: shape({}),
-};
+CredentialPluginTestAlert.propTypes = {};
 
-CredentialPluginTestAlert.defaultProps = {
-  successResponse: null,
-  errorResponse: null,
-};
+CredentialPluginTestAlert.defaultProps = {};
 
 export default withI18n()(CredentialPluginTestAlert);
