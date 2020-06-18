@@ -24,11 +24,41 @@ options:
       - The query parameters to search for in the form of key/value pairs.
     type: dict
     required: False
-  get_all:
+    aliases: [query, data, filter, params]
+  expect_objects:
     description:
-      - If the resulting query is paginated, return all pages.
+      - Error if the response does not contain either a detail view or a list view.
     type: boolean
     default: False
+    aliases: [expect_object]
+  expect_one:
+    description:
+      - Error if the response contains more than one object.
+    type: boolean
+    default: False
+  return_objects:
+    description:
+      - If a list view is returned, promote the list of results to the top-level of list returned.
+      - Allows using this lookup plugin to loop over objects without additional work.
+    type: boolean
+    default: True
+  return_all:
+    description:
+      - If the response is paginated, return all pages.
+    type: boolean
+    default: False
+  return_ids:
+    description:
+      - If response contains objects, promote the id key to the top-level entries in the list.
+      - Allows looking up a related object and passing it as a parameter to another module.
+    type: boolean
+    aliases: [return_id]
+    default: False
+  max_objects:
+    description:
+      - if C(return_all) is true, this is the maximum of number of objects to return from the list.
+    type: integer
+    default: 1000
 
 notes:
   - If the query is not filtered properly this can cause a performance impact.
@@ -88,15 +118,51 @@ class LookupModule(LookupBase):
 
         self.set_options(direct=kwargs)
 
-        if self.get_option('get_all'):
-            return_data = module.get_all_endpoint(terms[0], data=self.get_option('query_params', {} ), none_is_not_fatal=True)
+        response = module.get_endpoint(terms[0], data=self.get_option('query_params', {}))
+
+        if 'status_code' not in response:
+            raise AnsibleError("Unclear response from API: {0}".format(response))
+
+        if response['status_code'] != 200:
+            raise AnsibleError("Failed to query the API: {0}".format(return_data.get('detail', return_data)))
+
+        return_data = response['json']
+
+        if self.get_option('expect_objects') or self.get_option('expect_one'):
+            if ('id' not in return_data) and ('results' not in return_data):
+                raise AnsibleError(
+                    'Did not obtain a list or detail view at {0}, and '
+                    'expect_objects or expect_one is set to True'.format(terms[0])
+                )
+
+        if self.get_option('expect_one'):
+            if 'results' in return_data and len(return_data['results']) != 1:
+                raise AnsibleError(
+                    'Expected one object from endpoint {0}, '
+                    'but obtained {1} from API'.format(terms[0], len(return_data['results']))
+                )
+
+        if self.get_option('return_all') and 'results' in return_data:
+            if return_data['count'] > self.get_option('max_objects'):
+                raise AnsibleError(
+                    'List view at {0} returned {1} objects, which is more than the maximum allowed '
+                    'by max_objects, {2}'.format(terms[0], return_data['count'], self.get_option('max_objects'))
+                )
+
+            next_page = return_data['next']
+            while next_page is not None:
+                next_response = module.get_endpoint(next_page)
+                return_data['results'] += next_response['json']['results']
+                next_page = next_response['json']['next']
+            return_data['next'] = None
+
+        if self.get_option('return_ids'):
+            if 'results' in return_data:
+                return_data['results'] = [item['id'] for item in return_data['results']]
+            elif 'id' in return_data:
+                return_data = return_data['id']
+
+        if self.get_option('return_objects') and 'results' in return_data:
+            return return_data['results']
         else:
-            return_data = module.get_endpoint(terms[0], data=self.get_option('query_params', {} ))
-
-        if return_data['status_code'] != 200:
-            error = return_data
-            if return_data.get('json', {}).get('detail', False):
-                error = return_data['json']['detail']
-            raise AnsibleError("Failed to query the API: {0}".format(error))
-
-        return return_data['json']
+            return [return_data]
