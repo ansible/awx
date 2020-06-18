@@ -34,11 +34,11 @@ function MetadataStep({ i18n }) {
     request: testPluginMetadata,
   } = useRequest(
     useCallback(
-      async (credential, metadata) =>
-        CredentialsAPI.test(credential.id, {
-          metadata,
+      async () =>
+        CredentialsAPI.test(selectedCredential.value.id, {
+          metadata: inputValues.value,
         }),
-      []
+      [selectedCredential.value.id, inputValues.value]
     ),
     null
   );
@@ -159,7 +159,7 @@ function MetadataStep({ i18n }) {
           variant="primary"
           type="submit"
           onClick={() =>
-            testPluginMetadata(selectedCredential.value, inputValues.value)
+            testPluginMetadata()
           }
         >
           {i18n._(t`Test`)}
