@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { KeyIcon } from '@patternfly/react-icons';
-import { FieldTooltip } from '../../../../../components/FormField';
-import FieldWithPrompt from '../../../../../components/FieldWithPrompt';
+import { FieldTooltip } from '../../../../components/FormField';
+import FieldWithPrompt from '../../../../components/FieldWithPrompt';
 import { CredentialPluginPrompt } from './CredentialPluginPrompt';
 import CredentialPluginSelected from './CredentialPluginSelected';
 

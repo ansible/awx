@@ -5,14 +5,14 @@ import { useField, useFormikContext } from 'formik';
 import styled from 'styled-components';
 import { Button, Form, FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../../../../api';
-import AnsibleSelect from '../../../../../../components/AnsibleSelect';
-import ContentError from '../../../../../../components/ContentError';
-import ContentLoading from '../../../../../../components/ContentLoading';
-import FormField from '../../../../../../components/FormField';
-import { FormFullWidthLayout } from '../../../../../../components/FormLayout';
-import useRequest from '../../../../../../util/useRequest';
-import { required } from '../../../../../../util/validators';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../../../api';
+import AnsibleSelect from '../../../../../components/AnsibleSelect';
+import ContentError from '../../../../../components/ContentError';
+import ContentLoading from '../../../../../components/ContentLoading';
+import FormField from '../../../../../components/FormField';
+import { FormFullWidthLayout } from '../../../../../components/FormLayout';
+import useRequest from '../../../../../util/useRequest';
+import { required } from '../../../../../util/validators';
 import { CredentialPluginTestAlert } from '..';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`

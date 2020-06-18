@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik } from 'formik';
 import { TextInput } from '@patternfly/react-core';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import CredentialPluginField from './CredentialPluginField';
 
 const fieldOptions = {
