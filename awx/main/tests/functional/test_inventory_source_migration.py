@@ -5,6 +5,8 @@ from awx.main.migrations import _inventory_source as invsrc
 
 from django.apps import apps
 
+from awx.main.models import InventorySource
+
 
 @pytest.mark.parametrize('vars,id_var,result', [
     ({'foo': {'bar': '1234'}}, 'foo.bar', '1234'),
@@ -37,3 +39,19 @@ def test_apply_new_instance_id(inventory_source):
     host2.refresh_from_db()
     assert host1.instance_id == ''
     assert host2.instance_id == 'bad_user'
+
+
+@pytest.mark.django_db
+def test_replacement_scm_sources(inventory):
+    inv_source = InventorySource.objects.create(
+        name='test',
+        inventory=inventory,
+        organization=inventory.organization,
+        source='ec2'
+    )
+    invsrc.create_scm_script_substitute(apps, 'ec2')
+    inv_source.refresh_from_db()
+    assert inv_source.source == 'scm'
+    assert inv_source.source_project
+    project = inv_source.source_project
+    assert 'Replacement project for' in project.name

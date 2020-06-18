@@ -79,7 +79,6 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
             [`azure_rm`, i18n._(t`Microsoft Azure Resource Manager`)],
             [`vmware`, i18n._(t`VMware vCenter`)],
             [`satellite6`, i18n._(t`Red Hat Satellite 6`)],
-            [`cloudforms`, i18n._(t`Red Hat CloudForms`)],
             [`openstack`, i18n._(t`OpenStack`)],
             [`rhv`, i18n._(t`Red Hat Virtualization`)],
             [`tower`, i18n._(t`Ansible Tower`)],
