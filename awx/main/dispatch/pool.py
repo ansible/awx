@@ -222,7 +222,7 @@ class WorkerPool(object):
         idx = len(self.workers)
         # It's important to close these because we're _about_ to fork, and we
         # don't want the forked processes to inherit the open sockets
-        # for the DB and memcached connections (that way lies race conditions)
+        # for the DB and cache connections (that way lies race conditions)
         django_connection.close()
         django_cache.close()
         worker = PoolWorker(self.queue_size, self.target, (idx,) + self.target_args)
