@@ -41,7 +41,6 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
-    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
@@ -63,7 +62,6 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
-    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
@@ -107,7 +105,6 @@ describe('<Project />', () => {
     const wrapper = mountWithContexts(
       <Project setBreadcrumb={() => {}} me={mockMe} />
     );
-    console.log(wrapper.find('.pf-c-tabs__item').length);
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',

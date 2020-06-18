@@ -21,7 +21,7 @@ function TypeInputsSubForm({ credentialType, i18n }) {
   );
   return (
     <SubFormLayout>
-      <Title size="md">{i18n._(t`Type Details`)}</Title>
+      <Title size="md" headingLevel="h4">{i18n._(t`Type Details`)}</Title>
       <FormColumnLayout>
         {credentialType.namespace === 'gce' && <GceFileUploadField />}
         {stringFields.map(fieldOptions =>
