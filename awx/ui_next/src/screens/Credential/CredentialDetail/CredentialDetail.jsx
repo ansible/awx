@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { t, Trans } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { shape } from 'prop-types';
 import styled from 'styled-components';
 import { Button, List, ListItem } from '@patternfly/react-core';
@@ -238,10 +238,7 @@ function CredentialDetail({ i18n, credential }) {
       </DetailList>
       {Object.keys(inputSources).length > 0 && (
         <PluginFieldText>
-          <Trans>
-            * This field will be retrieved from an external secret management
-            system using the specified credential.
-          </Trans>
+          {i18n._(t`* This field will be retrieved from an external secret management system using the specified credential.`)}
         </PluginFieldText>
       )}
       <CardActionsRow>
