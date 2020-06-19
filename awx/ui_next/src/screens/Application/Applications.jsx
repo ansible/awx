@@ -19,7 +19,6 @@ function Applications({ i18n }) {
       if (!application) {
         return;
       }
-
       setBreadcrumbConfig({
         '/applications': i18n._(t`Applications`),
         '/applications/add': i18n._(t`Create New Application`),
