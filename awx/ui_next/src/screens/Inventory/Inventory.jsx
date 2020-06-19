@@ -9,10 +9,8 @@ import {
   useLocation,
   useRouteMatch,
 } from 'react-router-dom';
-
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import JobList from '../../components/JobList';
@@ -51,6 +49,16 @@ function Inventory({ i18n, setBreadcrumb }) {
   }, [match.params.id, location.pathname, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Inventories`)}
+        </>
+      ),
+      link: `/inventories`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
     { name: i18n._(t`Groups`), link: `${match.url}/groups`, id: 2 },
@@ -90,19 +98,20 @@ function Inventory({ i18n, setBreadcrumb }) {
     );
   }
 
+  let showCardHeader = true;
+
+  if (
+    ['edit', 'add', 'groups/', 'hosts/', 'sources/'].some(name =>
+      location.pathname.includes(name)
+    )
+  ) {
+    showCardHeader = false;
+  }
+
   return (
     <PageSection>
       <Card>
-        {['edit', 'add', 'groups/', 'hosts/', 'sources/'].some(name =>
-          location.pathname.includes(name)
-        ) ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo="/inventories" />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/inventories/inventory/:id"

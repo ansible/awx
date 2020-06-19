@@ -29,7 +29,7 @@ describe('<SmartInventory />', () => {
       'SmartInventory',
       el => el.state('hasContentLoading') === false
     );
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 4);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 5);
     done();
   });
   test('should show content error when user attempts to navigate to erroneous route', async () => {

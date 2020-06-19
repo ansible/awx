@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
 import ContentError from '../../components/ContentError';
 import JobList from '../../components/JobList';
 import RoutedTabs from '../../components/RoutedTabs';
@@ -64,6 +63,16 @@ class SmartInventory extends Component {
     const { contentError, hasContentLoading, inventory } = this.state;
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Inventories`)}
+          </>
+        ),
+        link: `/inventories`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
       { name: i18n._(t`Hosts`), link: `${match.url}/hosts`, id: 2 },
@@ -74,17 +83,10 @@ class SmartInventory extends Component {
       },
     ];
 
-    let cardHeader = hasContentLoading ? null : (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/inventories" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    let showCardHeader = true;
 
     if (location.pathname.endsWith('edit')) {
-      cardHeader = null;
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -108,7 +110,7 @@ class SmartInventory extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect
               from="/inventories/smart_inventory/:id"

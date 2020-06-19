@@ -53,7 +53,7 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
     expect(tabs.last().text()).toEqual('Notifications');
     done();
@@ -74,7 +74,7 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 3
+      el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();

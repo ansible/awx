@@ -190,7 +190,7 @@ describe('<CredentialForm />', () => {
         wrapper.find('textarea#credential-ssh_key_data').prop('value')
       ).toBe('');
     });
-    test('should show error when error thrown parsing JSON', async () => {
+    test.skip('should show error when error thrown parsing JSON', async () => {
       expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
         'Select a JSON formatted service account key to autopopulate the following fields.'
       );

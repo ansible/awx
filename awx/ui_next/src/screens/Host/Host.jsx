@@ -9,10 +9,8 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
@@ -47,6 +45,16 @@ function Host({ i18n, setBreadcrumb }) {
   }, [match.params.id, location, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Hosts`)}
+        </>
+      ),
+      link: `/hosts`,
+      id: 99,
+    },
     {
       name: i18n._(t`Details`),
       link: `${match.url}/details`,
@@ -96,17 +104,16 @@ function Host({ i18n, setBreadcrumb }) {
     );
   }
 
+  let showCardHeader = true;
+
+  if (location.pathname.endsWith('edit')) {
+    showCardHeader = false;
+  }
+
   return (
     <PageSection>
       <Card>
-        {location.pathname.endsWith('edit') ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo="/hosts" />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
           {host && [
