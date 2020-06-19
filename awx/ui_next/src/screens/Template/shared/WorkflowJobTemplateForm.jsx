@@ -215,15 +215,13 @@ function WorkflowJobTemplateForm({
       </FormGroup>
 
       {enableWebhooks && (
-        <>
-          <SubFormLayout>
-            <Title size="md">{i18n._(t`Webhook details`)}</Title>
-            <WebhookSubForm
-              enableWebhooks={enableWebhooks}
-              templateType={template.type}
-            />
-          </SubFormLayout>
-        </>
+        <SubFormLayout>
+          <Title size="md" headingLevel="h4">{i18n._(t`Webhook details`)}</Title>
+          <WebhookSubForm
+            enableWebhooks={enableWebhooks}
+            templateType={template.type}
+          />
+        </SubFormLayout>
       )}
 
       {submitError && <FormSubmitError error={submitError} />}
