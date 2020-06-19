@@ -27,13 +27,13 @@
       set_fact:
         collection_version_override: 0.0.1-devel
 
-    - name: Template the galaxy.yml source file
+    - name: Template the galaxy.yml source file (should be commited with your changes)
       template:
         src: "{{ collection_source }}/tools/roles/template_galaxy/templates/galaxy.yml.j2"
         dest: "{{ collection_source }}/galaxy.yml"
         force: true
 
-    - name: Template the README.md source file
+    - name: Template the README.md source file (should be commited with your changes)
       template:
         src: "{{ collection_source }}/tools/roles/template_galaxy/templates/README.md.j2"
         dest: "{{ collection_source }}/README.md"

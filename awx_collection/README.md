@@ -4,12 +4,12 @@
 [comment]: # (*                                                     *)
 [comment]: # (*             WARNING                                 *)
 [comment]: # (*                                                     *)
-[comment]: # (*  This file is manageed by Ansible and not to be     *)
+[comment]: # (*  This file is templated and not to be               *)
 [comment]: # (*  edited directly! Instead modify:                   *)
 [comment]: # (*  tools/roles/template_galaxy/templates/README.md.j2 *)
 [comment]: # (*                                                     *)
-[comment]: # (*  Changed to the base README.md file are lost upon   *)
-[comment]: # (*  the build of the collection                        *)
+[comment]: # (*  Changes to the base README.md file are refreshed   *)
+[comment]: # (*  upon build of the collection                       *)
 [comment]: # (*******************************************************)
 
 This Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
@@ -67,6 +67,7 @@ Notable releases of the `awx.awx` collection:
 
  - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection.
  - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).
+ - 0.0.1-devel is the version you should see if installing from source, which is intended for development and expected to be unstable.
 
 The following notes are changes that may require changes to playbooks:
 
