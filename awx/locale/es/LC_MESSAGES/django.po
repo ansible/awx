@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 13:55+0000\n"
+"POT-Creation-Date: 2020-05-28 21:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -528,7 +528,7 @@ msgstr "Inventario en la plantilla de trabajo no encontrado o no definido."
 msgid "Unknown, job may have been ran before launch configurations were saved."
 msgstr "Desconocido; este trabajo pudo haberse ejecutado antes de guardar la configuración de lanzamiento."
 
-#: awx/api/serializers.py:3252 awx/main/tasks.py:2795 awx/main/tasks.py:2813
+#: awx/api/serializers.py:3252 awx/main/tasks.py:2800 awx/main/tasks.py:2818
 msgid "{} are prohibited from use in ad hoc commands."
 msgstr "{} tienen uso prohibido en comandos ad hoc."
 
@@ -547,324 +547,324 @@ msgstr "La variable {} provista no tiene un valor de base de datos con qué reem
 msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
 msgstr "\"$encrypted$ es una palabra clave reservada y no puede usarse para {}\"."
 
-#: awx/api/serializers.py:4070
+#: awx/api/serializers.py:4078
 msgid "A project is required to run a job."
 msgstr "Se requiere un proyecto para ejecutar una tarea."
 
-#: awx/api/serializers.py:4072
+#: awx/api/serializers.py:4080
 msgid "Missing a revision to run due to failed project update."
 msgstr "Falta una revisión para ejecutar debido a un error en la actualización del proyecto."
 
-#: awx/api/serializers.py:4076
+#: awx/api/serializers.py:4084
 msgid "The inventory associated with this Job Template is being deleted."
 msgstr "Se está eliminando el inventario asociado con esta plantilla de trabajo."
 
-#: awx/api/serializers.py:4078 awx/api/serializers.py:4194
+#: awx/api/serializers.py:4086 awx/api/serializers.py:4202
 msgid "The provided inventory is being deleted."
 msgstr "El inventario provisto se está eliminando."
 
-#: awx/api/serializers.py:4086
+#: awx/api/serializers.py:4094
 msgid "Cannot assign multiple {} credentials."
 msgstr "No se pueden asignar múltiples credenciales {}."
 
-#: awx/api/serializers.py:4090
+#: awx/api/serializers.py:4098
 msgid "Cannot assign a Credential of kind `{}`"
 msgstr "No puede asignar una credencial del tipo `{}`"
 
-#: awx/api/serializers.py:4103
+#: awx/api/serializers.py:4111
 msgid ""
 "Removing {} credential at launch time without replacement is not supported. "
 "Provided list lacked credential(s): {}."
 msgstr "No se admite quitar la credencial {} en el momento de lanzamiento sin reemplazo. La lista provista no contaba con credencial(es): {}."
 
-#: awx/api/serializers.py:4192
+#: awx/api/serializers.py:4200
 msgid "The inventory associated with this Workflow is being deleted."
 msgstr "Se está eliminando el inventario asociado con este flujo de trabajo."
 
-#: awx/api/serializers.py:4263
+#: awx/api/serializers.py:4271
 msgid "Message type '{}' invalid, must be either 'message' or 'body'"
 msgstr "El tipo de mensaje '{}' no es válido, debe ser 'mensaje' o 'cuerpo'."
 
-#: awx/api/serializers.py:4269
+#: awx/api/serializers.py:4277
 msgid "Expected string for '{}', found {}, "
 msgstr "Cadena esperada para '{}', se encontró {},"
 
-#: awx/api/serializers.py:4273
+#: awx/api/serializers.py:4281
 msgid "Messages cannot contain newlines (found newline in {} event)"
 msgstr "Los mensajes no pueden contener nuevas líneas (se encontró una nueva línea en el evento {})"
 
-#: awx/api/serializers.py:4279
+#: awx/api/serializers.py:4287
 msgid "Expected dict for 'messages' field, found {}"
 msgstr "Dict esperado para el campo 'mensajes', se encontró {}"
 
-#: awx/api/serializers.py:4283
+#: awx/api/serializers.py:4291
 msgid ""
 "Event '{}' invalid, must be one of 'started', 'success', 'error', or "
 "'workflow_approval'"
 msgstr "El evento '{}' no es válido, debe ser uno de 'iniciado', 'éxito', 'error' o 'aprobación_de_flujo de trabajo'"
 
-#: awx/api/serializers.py:4289
+#: awx/api/serializers.py:4297
 msgid "Expected dict for event '{}', found {}"
 msgstr "Dict esperado para el evento '{}', se encontró {}"
 
-#: awx/api/serializers.py:4294
+#: awx/api/serializers.py:4302
 msgid ""
 "Workflow Approval event '{}' invalid, must be one of 'running', 'approved', "
 "'timed_out', or 'denied'"
 msgstr "El evento de aprobación del flujo de trabajo '{}' no es válido, debe ser uno de 'en ejecución', 'aprobado', 'tiempo de espera agotado' o 'denegado'"
 
-#: awx/api/serializers.py:4301
+#: awx/api/serializers.py:4309
 msgid "Expected dict for workflow approval event '{}', found {}"
 msgstr "Dict esperado para el evento de aprobación del flujo de trabajo '{}', se encontró {}"
 
-#: awx/api/serializers.py:4328
+#: awx/api/serializers.py:4336
 msgid "Unable to render message '{}': {}"
 msgstr "No se puede procesar el mensaje '{}': {}"
 
-#: awx/api/serializers.py:4330
+#: awx/api/serializers.py:4338
 msgid "Field '{}' unavailable"
 msgstr "Campo '{}' no disponible"
 
-#: awx/api/serializers.py:4332
+#: awx/api/serializers.py:4340
 msgid "Security error due to field '{}'"
 msgstr "Error de seguridad debido al campo '{}'"
 
-#: awx/api/serializers.py:4352
+#: awx/api/serializers.py:4360
 msgid "Webhook body for '{}' should be a json dictionary. Found type '{}'."
 msgstr "El cuerpo de Webhook para '{}' debería ser un diccionario json. Se encontró el tipo '{}'."
 
-#: awx/api/serializers.py:4355
+#: awx/api/serializers.py:4363
 msgid "Webhook body for '{}' is not a valid json dictionary ({})."
 msgstr "El cuerpo de Webhook para '{}' no es un diccionario json válido ({})."
 
-#: awx/api/serializers.py:4373
+#: awx/api/serializers.py:4381
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr "Campos obligatorios no definidos para la configuración de notificación: notification_type"
 
-#: awx/api/serializers.py:4400
+#: awx/api/serializers.py:4408
 msgid "No values specified for field '{}'"
 msgstr "Ningún valor especificado para el campo '{}'"
 
-#: awx/api/serializers.py:4405
+#: awx/api/serializers.py:4413
 msgid "HTTP method must be either 'POST' or 'PUT'."
 msgstr "El método HTTP debe ser 'POST' o 'PUT'."
 
-#: awx/api/serializers.py:4407
+#: awx/api/serializers.py:4415
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "Campos no definidos para la configuración de notificación: {}."
 
-#: awx/api/serializers.py:4410
+#: awx/api/serializers.py:4418
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "Tipo incorrecto en la configuración del campo '{} ', esperado {}."
 
-#: awx/api/serializers.py:4427
+#: awx/api/serializers.py:4435
 msgid "Notification body"
 msgstr "Cuerpo de la notificación"
 
-#: awx/api/serializers.py:4507
+#: awx/api/serializers.py:4515
 msgid ""
 "Valid DTSTART required in rrule. Value should start with: DTSTART:"
 "YYYYMMDDTHHMMSSZ"
 msgstr "DTSTART válido necesario en rrule. El valor debe empezar con: DTSTART:YYYYMMDDTHHMMSSZ"
 
-#: awx/api/serializers.py:4509
+#: awx/api/serializers.py:4517
 msgid ""
 "DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ."
 msgstr "DTSTART no puede ser una fecha/hora ingenua. Especifique ;TZINFO= o YYYYMMDDTHHMMSSZZ."
 
-#: awx/api/serializers.py:4511
+#: awx/api/serializers.py:4519
 msgid "Multiple DTSTART is not supported."
 msgstr "Múltiple DTSTART no está soportado."
 
-#: awx/api/serializers.py:4513
+#: awx/api/serializers.py:4521
 msgid "RRULE required in rrule."
 msgstr "RRULE requerido en rrule."
 
-#: awx/api/serializers.py:4515
+#: awx/api/serializers.py:4523
 msgid "Multiple RRULE is not supported."
 msgstr "Múltiple RRULE no está soportado."
 
-#: awx/api/serializers.py:4517
+#: awx/api/serializers.py:4525
 msgid "INTERVAL required in rrule."
 msgstr "INTERVAL requerido en 'rrule'."
 
-#: awx/api/serializers.py:4519
+#: awx/api/serializers.py:4527
 msgid "SECONDLY is not supported."
 msgstr "SECONDLY no está soportado."
 
-#: awx/api/serializers.py:4521
+#: awx/api/serializers.py:4529
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "Multiple BYMONTHDAYs no soportado."
 
-#: awx/api/serializers.py:4523
+#: awx/api/serializers.py:4531
 msgid "Multiple BYMONTHs not supported."
 msgstr "Multiple BYMONTHs no soportado."
 
-#: awx/api/serializers.py:4525
+#: awx/api/serializers.py:4533
 msgid "BYDAY with numeric prefix not supported."
 msgstr "BYDAY con prefijo numérico no soportado."
 
-#: awx/api/serializers.py:4527
+#: awx/api/serializers.py:4535
 msgid "BYYEARDAY not supported."
 msgstr "BYYEARDAY no soportado."
 
-#: awx/api/serializers.py:4529
+#: awx/api/serializers.py:4537
 msgid "BYWEEKNO not supported."
 msgstr "BYWEEKNO no soportado."
 
-#: awx/api/serializers.py:4531
+#: awx/api/serializers.py:4539
 msgid "RRULE may not contain both COUNT and UNTIL"
 msgstr "RRULE no puede contener ambos COUNT y UNTIL"
 
-#: awx/api/serializers.py:4535
+#: awx/api/serializers.py:4543
 msgid "COUNT > 999 is unsupported."
 msgstr "COUNT > 999  no está soportada."
 
-#: awx/api/serializers.py:4541
+#: awx/api/serializers.py:4549
 msgid "rrule parsing failed validation: {}"
 msgstr "validación fallida analizando rrule: {}"
 
-#: awx/api/serializers.py:4603
+#: awx/api/serializers.py:4611
 msgid "Inventory Source must be a cloud resource."
 msgstr "Fuente del inventario debe ser un recurso cloud."
 
-#: awx/api/serializers.py:4605
+#: awx/api/serializers.py:4613
 msgid "Manual Project cannot have a schedule set."
 msgstr "El proyecto manual no puede tener una programación establecida."
 
-#: awx/api/serializers.py:4608
+#: awx/api/serializers.py:4616
 msgid ""
 "Inventory sources with `update_on_project_update` cannot be scheduled. "
 "Schedule its source project `{}` instead."
 msgstr "No se pueden programar las fuentes de inventario con `update_on_project_update. En su lugar, programe su proyecto fuente `{}`."
 
-#: awx/api/serializers.py:4618
+#: awx/api/serializers.py:4626
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance"
 msgstr "Cantidad de tareas en estado de ejecución o espera que están destinadas para esta instancia"
 
-#: awx/api/serializers.py:4623
+#: awx/api/serializers.py:4631
 msgid "Count of all jobs that target this instance"
 msgstr "Todos los trabajos que abordan esta instancia"
 
-#: awx/api/serializers.py:4656
+#: awx/api/serializers.py:4664
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
 msgstr "Cantidad de tareas en estado de ejecución o espera que están destinadas para este grupo de instancia"
 
-#: awx/api/serializers.py:4661
+#: awx/api/serializers.py:4669
 msgid "Count of all jobs that target this instance group"
 msgstr "Todos los trabajos que abordan este grupo de instancias"
 
-#: awx/api/serializers.py:4666
+#: awx/api/serializers.py:4674
 msgid "Indicates whether instance group controls any other group"
 msgstr "Indica si el grupo de instancias controla algún otro grupo"
 
-#: awx/api/serializers.py:4670
+#: awx/api/serializers.py:4678
 msgid ""
 "Indicates whether instances in this group are isolated.Isolated groups have "
 "a designated controller group."
 msgstr "Indica si las instancias de este grupo están aisladas. Los grupos aislados tienen un grupo controlador designado."
 
-#: awx/api/serializers.py:4675
+#: awx/api/serializers.py:4683
 msgid ""
 "Indicates whether instances in this group are containerized.Containerized "
 "groups have a designated Openshift or Kubernetes cluster."
 msgstr "Indica si las instancias de este grupo son contenedorizadas. Los grupos contenedorizados tienen un clúster Openshift o Kubernetes designado."
 
-#: awx/api/serializers.py:4683
+#: awx/api/serializers.py:4691
 msgid "Policy Instance Percentage"
 msgstr "Porcentaje de instancias de políticas"
 
-#: awx/api/serializers.py:4684
+#: awx/api/serializers.py:4692
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
 msgstr "Porcentaje mínimo de todas las instancias que se asignarán automáticamente a este grupo cuando nuevas instancias  aparezcan en línea."
 
-#: awx/api/serializers.py:4689
+#: awx/api/serializers.py:4697
 msgid "Policy Instance Minimum"
 msgstr "Mínimo de instancias de políticas"
 
-#: awx/api/serializers.py:4690
+#: awx/api/serializers.py:4698
 msgid ""
 "Static minimum number of Instances that will be automatically assign to this "
 "group when new instances come online."
 msgstr "Número mínimo estático de instancias que se asignarán automáticamente a este grupo cuando aparezcan nuevas instancias en línea."
 
-#: awx/api/serializers.py:4695
+#: awx/api/serializers.py:4703
 msgid "Policy Instance List"
 msgstr "Lista de instancias de políticas"
 
-#: awx/api/serializers.py:4696
+#: awx/api/serializers.py:4704
 msgid "List of exact-match Instances that will be assigned to this group"
 msgstr "Lista de instancias con coincidencia exacta que se asignarán a este grupo"
 
-#: awx/api/serializers.py:4722
+#: awx/api/serializers.py:4730
 msgid "Duplicate entry {}."
 msgstr "Entrada por duplicado {}."
 
-#: awx/api/serializers.py:4724
+#: awx/api/serializers.py:4732
 msgid "{} is not a valid hostname of an existing instance."
 msgstr "{} no es un nombre de host válido de una instancia existente."
 
-#: awx/api/serializers.py:4726 awx/api/views/mixin.py:98
+#: awx/api/serializers.py:4734 awx/api/views/mixin.py:98
 msgid ""
 "Isolated instances may not be added or removed from instances groups via the "
 "API."
 msgstr "No se pueden agregar ni eliminar instancias aisladas de los grupos de instancias a través de la API."
 
-#: awx/api/serializers.py:4728 awx/api/views/mixin.py:102
+#: awx/api/serializers.py:4736 awx/api/views/mixin.py:102
 msgid "Isolated instance group membership may not be managed via the API."
 msgstr "La membresía del grupo de instancias aisladas no puede administrarse a través de la API."
 
-#: awx/api/serializers.py:4730 awx/api/serializers.py:4735
-#: awx/api/serializers.py:4740
+#: awx/api/serializers.py:4738 awx/api/serializers.py:4743
+#: awx/api/serializers.py:4748
 msgid "Containerized instances may not be managed via the API"
 msgstr "Las instancias contenedorizadas no pueden ser gestionadas a través de la API."
 
-#: awx/api/serializers.py:4745
+#: awx/api/serializers.py:4753
 msgid "tower instance group name may not be changed."
 msgstr "No se puede cambiar el nombre del grupo de la instancia de tower."
 
-#: awx/api/serializers.py:4750
+#: awx/api/serializers.py:4758
 msgid "Only Kubernetes credentials can be associated with an Instance Group"
 msgstr "Solo las credenciales de Kubernetes pueden asociarse a un grupo de instancias."
 
-#: awx/api/serializers.py:4789
+#: awx/api/serializers.py:4797
 msgid ""
 "When present, shows the field name of the role or relationship that changed."
 msgstr "Cuando está presente, muestra el nombre de campo de la función o relación que cambió."
 
-#: awx/api/serializers.py:4791
+#: awx/api/serializers.py:4799
 msgid ""
 "When present, shows the model on which the role or relationship was defined."
 msgstr "Cuando está presente, muestra el modelo sobre el cual se definió el rol o la relación."
 
-#: awx/api/serializers.py:4824
+#: awx/api/serializers.py:4832
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "Un resumen de los valores nuevos y cambiados cuando un objeto es creado, actualizado o eliminado."
 
-#: awx/api/serializers.py:4826
+#: awx/api/serializers.py:4834
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr "Para crear, actualizar y eliminar eventos éste es el tipo de objeto que fue afectado. Para asociar o desasociar eventos éste es el tipo de objeto asociado o desasociado con object2."
 
-#: awx/api/serializers.py:4829
+#: awx/api/serializers.py:4837
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr "Vacío para crear, actualizar y eliminar eventos. Para asociar y desasociar eventos éste es el tipo de objetos que object1 con el está asociado."
 
-#: awx/api/serializers.py:4832
+#: awx/api/serializers.py:4840
 msgid "The action taken with respect to the given object(s)."
 msgstr "La acción tomada al respeto al/los especificado(s) objeto(s)."
 
@@ -1638,7 +1638,7 @@ msgstr "Ejemplo de ajuste"
 msgid "Example setting which can be different for each user."
 msgstr "Ejemplo de configuración que puede ser diferente para cada usuario."
 
-#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:55
+#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:56
 msgid "User"
 msgstr "Usuario"
 
@@ -1741,15 +1741,15 @@ msgstr "Sistema"
 msgid "OtherSystem"
 msgstr "Otro sistema"
 
-#: awx/conf/views.py:47
+#: awx/conf/views.py:48
 msgid "Setting Categories"
 msgstr "Categorías de ajustes"
 
-#: awx/conf/views.py:69
+#: awx/conf/views.py:70
 msgid "Setting Detail"
 msgstr "Detalles del ajuste"
 
-#: awx/conf/views.py:160
+#: awx/conf/views.py:162
 msgid "Logging Connectivity Test"
 msgstr "Registrando prueba de conectividad"
 
@@ -2794,7 +2794,7 @@ msgstr "URL de Conjur"
 msgid "API Key"
 msgstr "Clave API"
 
-#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1017
+#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1018
 msgid "Account"
 msgstr "Cuenta"
 
@@ -2881,7 +2881,7 @@ msgid ""
 msgstr "El nombre del backend de secretos kv (si deja vacío, se utilizará el primer segmento de la ruta del secreto)."
 
 #: awx/main/credential_plugins/hashivault.py:60
-#: awx/main/models/inventory.py:1022
+#: awx/main/models/inventory.py:1023
 msgid "Key Name"
 msgstr "Nombre clave"
 
@@ -3258,7 +3258,7 @@ msgid ""
 "Management (IAM) users."
 msgstr "El Security Token Service (STS) es un servicio web que habilita su solicitud temporalmente y con credenciales con privilegio limitado para usuarios de AWS Identity y Access Management (IAM)."
 
-#: awx/main/models/credential/__init__.py:780 awx/main/models/inventory.py:832
+#: awx/main/models/credential/__init__.py:780 awx/main/models/inventory.py:833
 msgid "OpenStack"
 msgstr "OpenStack"
 
@@ -3298,7 +3298,7 @@ msgstr "Los dominios OpenStack definen los límites administrativos. Solo es nec
 msgid "Verify SSL"
 msgstr "Verificar SSL"
 
-#: awx/main/models/credential/__init__.py:823 awx/main/models/inventory.py:829
+#: awx/main/models/credential/__init__.py:823 awx/main/models/inventory.py:830
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
@@ -3311,7 +3311,7 @@ msgid ""
 "Enter the hostname or IP address that corresponds to your VMware vCenter."
 msgstr "Introduzca el nombre de host o la dirección IP que corresponda a su VMWare vCenter."
 
-#: awx/main/models/credential/__init__.py:849 awx/main/models/inventory.py:830
+#: awx/main/models/credential/__init__.py:849 awx/main/models/inventory.py:831
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
@@ -3325,7 +3325,7 @@ msgid ""
 "example, https://satellite.example.org"
 msgstr "Introduzca la URL que corresponda a su servidor Red Hat Satellite 6. Por ejemplo, https://satellite.example.org"
 
-#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:831
+#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:832
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
@@ -3339,7 +3339,7 @@ msgid ""
 "instance. For example, https://cloudforms.example.org"
 msgstr "Introduzca la URL para la máquina virtual que corresponda a su instancia de CloudForm. Por ejemplo, https://cloudforms.example.org"
 
-#: awx/main/models/credential/__init__.py:902 awx/main/models/inventory.py:827
+#: awx/main/models/credential/__init__.py:902 awx/main/models/inventory.py:828
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
@@ -3368,7 +3368,7 @@ msgid ""
 "Paste the contents of the PEM file associated with the service account email."
 msgstr "Pegue el contenido del fichero PEM asociado al correo de la cuenta de servicio."
 
-#: awx/main/models/credential/__init__.py:936 awx/main/models/inventory.py:828
+#: awx/main/models/credential/__init__.py:936 awx/main/models/inventory.py:829
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
@@ -3406,7 +3406,7 @@ msgstr "Token de acceso personal de GitLab"
 msgid "This token needs to come from your profile settings in GitLab"
 msgstr "Este token debe provenir de la configuración de su perfil en GitLab"
 
-#: awx/main/models/credential/__init__.py:1041 awx/main/models/inventory.py:833
+#: awx/main/models/credential/__init__.py:1041 awx/main/models/inventory.py:834
 msgid "Red Hat Virtualization"
 msgstr "Virtualización de Red Hat"
 
@@ -3422,7 +3422,7 @@ msgstr "Archivo CA"
 msgid "Absolute file path to the CA file to use (optional)"
 msgstr "Ruta de archivo absoluta al archivo CA por usar (opcional)"
 
-#: awx/main/models/credential/__init__.py:1091 awx/main/models/inventory.py:834
+#: awx/main/models/credential/__init__.py:1091 awx/main/models/inventory.py:835
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
@@ -3466,7 +3466,7 @@ msgstr "El oriden debe ser una credencial externa"
 msgid "Input field must be defined on target credential (options are {})."
 msgstr "El campo de entrada debe definirse en la credencial de destino (las opciones son {})."
 
-#: awx/main/models/events.py:152 awx/main/models/events.py:655
+#: awx/main/models/events.py:152 awx/main/models/events.py:674
 msgid "Host Failed"
 msgstr "Servidor fallido"
 
@@ -3474,7 +3474,7 @@ msgstr "Servidor fallido"
 msgid "Host Started"
 msgstr "Host iniciado"
 
-#: awx/main/models/events.py:154 awx/main/models/events.py:656
+#: awx/main/models/events.py:154 awx/main/models/events.py:675
 msgid "Host OK"
 msgstr "Servidor OK"
 
@@ -3482,11 +3482,11 @@ msgstr "Servidor OK"
 msgid "Host Failure"
 msgstr "Fallo del servidor"
 
-#: awx/main/models/events.py:156 awx/main/models/events.py:662
+#: awx/main/models/events.py:156 awx/main/models/events.py:681
 msgid "Host Skipped"
 msgstr "Servidor omitido"
 
-#: awx/main/models/events.py:157 awx/main/models/events.py:657
+#: awx/main/models/events.py:157 awx/main/models/events.py:676
 msgid "Host Unreachable"
 msgstr "Servidor no alcanzable"
 
@@ -3570,27 +3570,27 @@ msgstr "Jugada iniciada"
 msgid "Playbook Complete"
 msgstr "Playbook terminado"
 
-#: awx/main/models/events.py:184 awx/main/models/events.py:672
+#: awx/main/models/events.py:184 awx/main/models/events.py:691
 msgid "Debug"
 msgstr "Debug"
 
-#: awx/main/models/events.py:185 awx/main/models/events.py:673
+#: awx/main/models/events.py:185 awx/main/models/events.py:692
 msgid "Verbose"
 msgstr "Nivel de detalle"
 
-#: awx/main/models/events.py:186 awx/main/models/events.py:674
+#: awx/main/models/events.py:186 awx/main/models/events.py:693
 msgid "Deprecated"
 msgstr "Obsoleto"
 
-#: awx/main/models/events.py:187 awx/main/models/events.py:675
+#: awx/main/models/events.py:187 awx/main/models/events.py:694
 msgid "Warning"
 msgstr "Advertencia"
 
-#: awx/main/models/events.py:188 awx/main/models/events.py:676
+#: awx/main/models/events.py:188 awx/main/models/events.py:695
 msgid "System Warning"
 msgstr "Advertencia del sistema"
 
-#: awx/main/models/events.py:189 awx/main/models/events.py:677
+#: awx/main/models/events.py:189 awx/main/models/events.py:696
 #: awx/main/models/unified_jobs.py:75
 msgid "Error"
 msgstr "Error"
@@ -3618,300 +3618,300 @@ msgid ""
 "this group"
 msgstr "Lista de instancias con coincidencia exacta que se asignarán siempre automáticamente a este grupo"
 
-#: awx/main/models/inventory.py:79
+#: awx/main/models/inventory.py:80
 msgid "Hosts have a direct link to this inventory."
 msgstr "Los hosts tienen un enlace directo a este inventario."
 
-#: awx/main/models/inventory.py:80
+#: awx/main/models/inventory.py:81
 msgid "Hosts for inventory generated using the host_filter property."
 msgstr "Hosts para inventario generados a través de la propiedad host_filter."
 
-#: awx/main/models/inventory.py:85
+#: awx/main/models/inventory.py:86
 msgid "inventories"
 msgstr "inventarios"
 
-#: awx/main/models/inventory.py:92
+#: awx/main/models/inventory.py:93
 msgid "Organization containing this inventory."
 msgstr "Organización que contiene este inventario."
 
-#: awx/main/models/inventory.py:99
+#: awx/main/models/inventory.py:100
 msgid "Inventory variables in JSON or YAML format."
 msgstr "Variables de inventario en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:104
+#: awx/main/models/inventory.py:105
 msgid ""
 "This field is deprecated and will be removed in a future release. Flag "
 "indicating whether any hosts in this inventory have failed."
 msgstr "Este campo es obsoleto y se eliminará en un lanzamiento futuro. Indicador que establece si algún host en este inventario ha fallado."
 
-#: awx/main/models/inventory.py:110
+#: awx/main/models/inventory.py:111
 msgid ""
 "This field is deprecated and will be removed in a future release. Total "
 "number of hosts in this inventory."
 msgstr "Este campo es obsoleto y se eliminará en un lanzamiento futuro. Cantidad total de hosts en este inventario."
 
-#: awx/main/models/inventory.py:116
+#: awx/main/models/inventory.py:117
 msgid ""
 "This field is deprecated and will be removed in a future release. Number of "
 "hosts in this inventory with active failures."
 msgstr "Este campo es obsoleto y se eliminará en un lanzamiento futuro. Cantidad de hosts en este inventario con fallas activas."
 
-#: awx/main/models/inventory.py:122
+#: awx/main/models/inventory.py:123
 msgid ""
 "This field is deprecated and will be removed in a future release. Total "
 "number of groups in this inventory."
 msgstr "Este campo es obsoleto y se eliminará en un lanzamiento futuro. Cantidad total de grupos en este inventario."
 
-#: awx/main/models/inventory.py:128
+#: awx/main/models/inventory.py:129
 msgid ""
 "This field is deprecated and will be removed in a future release. Flag "
 "indicating whether this inventory has any external inventory sources."
 msgstr "Este campo es obsoleto y se eliminará en un lanzamiento futuro. Indicador que establece si este inventario tiene algúna fuente de inventario externa."
 
-#: awx/main/models/inventory.py:134
+#: awx/main/models/inventory.py:135
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr "Número total de inventarios de origen externo configurado dentro de este inventario."
 
-#: awx/main/models/inventory.py:139
+#: awx/main/models/inventory.py:140
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr "Número de inventarios de origen externo  en este inventario con errores."
 
-#: awx/main/models/inventory.py:146
+#: awx/main/models/inventory.py:147
 msgid "Kind of inventory being represented."
 msgstr "Tipo de inventario que se representa."
 
-#: awx/main/models/inventory.py:152
+#: awx/main/models/inventory.py:153
 msgid "Filter that will be applied to the hosts of this inventory."
 msgstr "Filtro que se aplicará a los hosts de este inventario."
 
-#: awx/main/models/inventory.py:180
+#: awx/main/models/inventory.py:181
 msgid ""
 "Credentials to be used by hosts belonging to this inventory when accessing "
 "Red Hat Insights API."
 msgstr "Credenciales que utilizarán los hosts que pertenecen a este inventario cuando accedan a la API de Red Hat Insights."
 
-#: awx/main/models/inventory.py:189
+#: awx/main/models/inventory.py:190
 msgid "Flag indicating the inventory is being deleted."
 msgstr "Indicador que muestra que el inventario se eliminará."
 
-#: awx/main/models/inventory.py:244
+#: awx/main/models/inventory.py:245
 msgid "Could not parse subset as slice specification."
 msgstr "No se pudo analizar el subconjunto según las especificaciones de fraccionamiento."
 
-#: awx/main/models/inventory.py:248
+#: awx/main/models/inventory.py:249
 msgid "Slice number must be less than total number of slices."
 msgstr "El número de fraccionamiento debe ser inferior al número total de fraccionamientos."
 
-#: awx/main/models/inventory.py:250
+#: awx/main/models/inventory.py:251
 msgid "Slice number must be 1 or higher."
 msgstr "El número de fraccionamiento debe ser 1 o superior."
 
-#: awx/main/models/inventory.py:387
+#: awx/main/models/inventory.py:388
 msgid "Assignment not allowed for Smart Inventory"
 msgstr "Tarea no permitida para el inventario inteligente"
 
-#: awx/main/models/inventory.py:389 awx/main/models/projects.py:166
+#: awx/main/models/inventory.py:390 awx/main/models/projects.py:166
 msgid "Credential kind must be 'insights'."
 msgstr "Tipo de credencial debe ser 'insights'."
 
-#: awx/main/models/inventory.py:474
+#: awx/main/models/inventory.py:475
 msgid "Is this host online and available for running jobs?"
 msgstr "¿Está este servidor funcionando y disponible para ejecutar trabajos?"
 
-#: awx/main/models/inventory.py:480
+#: awx/main/models/inventory.py:481
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr "El valor usado por el inventario de fuente remota para identificar de forma única el servidor"
 
-#: awx/main/models/inventory.py:485
+#: awx/main/models/inventory.py:486
 msgid "Host variables in JSON or YAML format."
 msgstr "Variables del servidor en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:508
+#: awx/main/models/inventory.py:509
 msgid "Inventory source(s) that created or modified this host."
 msgstr "Fuente(s) del inventario que crearon o modificaron este servidor."
 
-#: awx/main/models/inventory.py:513
+#: awx/main/models/inventory.py:514
 msgid "Arbitrary JSON structure of most recent ansible_facts, per-host."
 msgstr "Estructura de JSON arbitraria de ansible_facts más reciente por host."
 
-#: awx/main/models/inventory.py:519
+#: awx/main/models/inventory.py:520
 msgid "The date and time ansible_facts was last modified."
 msgstr "La fecha y hora en las que se modificó ansible_facts por última vez."
 
-#: awx/main/models/inventory.py:526
+#: awx/main/models/inventory.py:527
 msgid "Red Hat Insights host unique identifier."
 msgstr "Identificador único de host de Red Hat Insights."
 
-#: awx/main/models/inventory.py:640
+#: awx/main/models/inventory.py:641
 msgid "Group variables in JSON or YAML format."
 msgstr "Grupo de variables en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:646
+#: awx/main/models/inventory.py:647
 msgid "Hosts associated directly with this group."
 msgstr "Hosts associated directly with this group."
 
-#: awx/main/models/inventory.py:652
+#: awx/main/models/inventory.py:653
 msgid "Inventory source(s) that created or modified this group."
 msgstr "Fuente(s) de inventario que crearon o modificaron este grupo."
 
-#: awx/main/models/inventory.py:824
+#: awx/main/models/inventory.py:825
 msgid "File, Directory or Script"
 msgstr "Archivo, directorio o script"
 
-#: awx/main/models/inventory.py:825
+#: awx/main/models/inventory.py:826
 msgid "Sourced from a Project"
 msgstr "Extraído de un proyecto"
 
-#: awx/main/models/inventory.py:826
+#: awx/main/models/inventory.py:827
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
-#: awx/main/models/inventory.py:835
+#: awx/main/models/inventory.py:836
 msgid "Custom Script"
 msgstr "Script personalizado"
 
-#: awx/main/models/inventory.py:952
+#: awx/main/models/inventory.py:953
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "Variables para la fuente del inventario en formato YAML o JSON."
 
-#: awx/main/models/inventory.py:963
+#: awx/main/models/inventory.py:964
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
 msgstr "Lista de expresiones de filtrado separadas por coma (sólo EC2). Servidores son importados cuando ALGÚN filtro coincide."
 
-#: awx/main/models/inventory.py:969
+#: awx/main/models/inventory.py:970
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr "Limitar grupos creados automáticamente desde la fuente del inventario (sólo EC2)"
 
-#: awx/main/models/inventory.py:973
+#: awx/main/models/inventory.py:974
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr "Sobrescribir grupos locales y servidores desde una fuente remota del inventario."
 
-#: awx/main/models/inventory.py:977
+#: awx/main/models/inventory.py:978
 msgid "Overwrite local variables from remote inventory source."
 msgstr "Sobrescribir las variables locales desde una fuente remota del inventario."
 
-#: awx/main/models/inventory.py:982 awx/main/models/jobs.py:154
+#: awx/main/models/inventory.py:983 awx/main/models/jobs.py:154
 #: awx/main/models/projects.py:135
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr "La cantidad de tiempo (en segundos) para ejecutar antes de que se cancele la tarea."
 
-#: awx/main/models/inventory.py:1015
+#: awx/main/models/inventory.py:1016
 msgid "Image ID"
 msgstr "Id de imagen"
 
-#: awx/main/models/inventory.py:1016
+#: awx/main/models/inventory.py:1017
 msgid "Availability Zone"
 msgstr "Zona de disponibilidad"
 
-#: awx/main/models/inventory.py:1018
+#: awx/main/models/inventory.py:1019
 msgid "Instance ID"
 msgstr "ID de instancia"
 
-#: awx/main/models/inventory.py:1019
+#: awx/main/models/inventory.py:1020
 msgid "Instance State"
 msgstr "Estado de instancia"
 
-#: awx/main/models/inventory.py:1020
+#: awx/main/models/inventory.py:1021
 msgid "Platform"
 msgstr "Plataforma"
 
-#: awx/main/models/inventory.py:1021
+#: awx/main/models/inventory.py:1022
 msgid "Instance Type"
 msgstr "Tipo de instancia"
 
-#: awx/main/models/inventory.py:1023
+#: awx/main/models/inventory.py:1024
 msgid "Region"
 msgstr "Región"
 
-#: awx/main/models/inventory.py:1024
+#: awx/main/models/inventory.py:1025
 msgid "Security Group"
 msgstr "Grupo de seguridad"
 
-#: awx/main/models/inventory.py:1025
+#: awx/main/models/inventory.py:1026
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: awx/main/models/inventory.py:1026
+#: awx/main/models/inventory.py:1027
 msgid "Tag None"
 msgstr "Etiqueta ninguna"
 
-#: awx/main/models/inventory.py:1027
+#: awx/main/models/inventory.py:1028
 msgid "VPC ID"
 msgstr "VPC ID"
 
-#: awx/main/models/inventory.py:1095
+#: awx/main/models/inventory.py:1096
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr "Las fuentes de inventario basados en la nube (como %s) requieren credenciales para el servicio en la nube coincidente."
 
-#: awx/main/models/inventory.py:1101
+#: awx/main/models/inventory.py:1102
 msgid "Credential is required for a cloud source."
 msgstr "Un credencial es necesario para una fuente cloud."
 
-#: awx/main/models/inventory.py:1104
+#: awx/main/models/inventory.py:1105
 msgid ""
 "Credentials of type machine, source control, insights and vault are "
 "disallowed for custom inventory sources."
 msgstr "Credenciales de tipo de máquina, control de fuentes, conocimientos y vault no están permitidas para las fuentes de inventario personalizado."
 
-#: awx/main/models/inventory.py:1109
+#: awx/main/models/inventory.py:1110
 msgid ""
 "Credentials of type insights and vault are disallowed for scm inventory "
 "sources."
 msgstr "Las credenciales de tipo de Insights y Vault no están permitidas para fuentes de inventario de SCM."
 
-#: awx/main/models/inventory.py:1169
+#: awx/main/models/inventory.py:1170
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr "Región %(source)s no válida: %(region)s"
 
-#: awx/main/models/inventory.py:1193
+#: awx/main/models/inventory.py:1194
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr "Expresión de filtro no válida: %(filter)s"
 
-#: awx/main/models/inventory.py:1214
+#: awx/main/models/inventory.py:1215
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr "Grupo por elección no válido: %(choice)s"
 
-#: awx/main/models/inventory.py:1242
+#: awx/main/models/inventory.py:1243
 msgid "Project containing inventory file used as source."
 msgstr "Proyecto que contiene el archivo de inventario usado como fuente."
 
-#: awx/main/models/inventory.py:1415
+#: awx/main/models/inventory.py:1416
 msgid ""
 "More than one SCM-based inventory source with update on project update per-"
 "inventory not allowed."
 msgstr "No se permite más de una fuente de inventario basada en SCM con actualización en la actualización del proyecto por inventario."
 
-#: awx/main/models/inventory.py:1422
+#: awx/main/models/inventory.py:1423
 msgid ""
 "Cannot update SCM-based inventory source on launch if set to update on "
 "project update. Instead, configure the corresponding source project to "
 "update on launch."
 msgstr "No se puede actualizar la fuente de inventario basada en SCM en la ejecución si está configurada para actualizarse en la actualización del proyecto. En su lugar, configure el proyecto de fuente correspondiente para actualizar en la ejecución."
 
-#: awx/main/models/inventory.py:1428
+#: awx/main/models/inventory.py:1429
 msgid "Cannot set source_path if not SCM type."
 msgstr "No se puede configurar source_path si no es de tipo SCM."
 
-#: awx/main/models/inventory.py:1471
+#: awx/main/models/inventory.py:1472
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr "Los archivos de inventario de esta actualización de proyecto se utilizaron para la actualización del inventario."
 
-#: awx/main/models/inventory.py:1582
+#: awx/main/models/inventory.py:1583
 msgid "Inventory script contents"
 msgstr "Contenido del script de inventario"
 
-#: awx/main/models/inventory.py:1587
+#: awx/main/models/inventory.py:1588
 msgid "Organization owning this inventory script"
 msgstr "Organización propietario de este script de inventario"
 
@@ -4010,28 +4010,28 @@ msgstr "Inventario aplicado como un aviso, asumiendo que la plantilla de trabajo
 msgid "job host summaries"
 msgstr "Resumen de trabajos de servidor"
 
-#: awx/main/models/jobs.py:1158
+#: awx/main/models/jobs.py:1144
 msgid "Remove jobs older than a certain number of days"
 msgstr "Eliminar trabajos más antiguos que el ńumero de días especificado"
 
-#: awx/main/models/jobs.py:1159
+#: awx/main/models/jobs.py:1145
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "Eliminar entradas del flujo de actividad más antiguos que el número de días especificado"
 
-#: awx/main/models/jobs.py:1160
+#: awx/main/models/jobs.py:1146
 msgid "Removes expired browser sessions from the database"
 msgstr "Elimina las sesiones de navegador expiradas de la base de datos"
 
-#: awx/main/models/jobs.py:1161
+#: awx/main/models/jobs.py:1147
 msgid "Removes expired OAuth 2 access tokens and refresh tokens"
 msgstr "Elimina los tokens de acceso OAuth2 expirados y los tokens de actualización"
 
-#: awx/main/models/jobs.py:1231
+#: awx/main/models/jobs.py:1217
 #, python-brace-format
 msgid "Variables {list_of_keys} are not allowed for system jobs."
 msgstr "Las variables {list_of_keys} no están permitidas para los trabajos del sistema."
 
-#: awx/main/models/jobs.py:1247
+#: awx/main/models/jobs.py:1233
 msgid "days must be a positive integer."
 msgstr "días debe ser un número entero."
 
@@ -4775,7 +4775,7 @@ msgstr "No se encontraron errores al manejar las rutas, el flujo de trabajo se m
 msgid "The approval node {name} ({pk}) has expired after {timeout} seconds."
 msgstr "El nodo de autorización {name} ({pk}) ha expirado después de {timeout} segundos."
 
-#: awx/main/tasks.py:1053
+#: awx/main/tasks.py:1049
 msgid "Invalid virtual environment selected: {}"
 msgstr "Entorno virtual seleccionado no válido: {}"
 
@@ -4812,53 +4812,53 @@ msgstr "No hay una ruta de acceso de control de errores para los nodos de tarea 
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "No puede convertir \"%s\" a booleano"
 
-#: awx/main/utils/common.py:275
+#: awx/main/utils/common.py:261
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "Tipo de SCM \"%s\" no admitido"
 
-#: awx/main/utils/common.py:282 awx/main/utils/common.py:294
-#: awx/main/utils/common.py:313
+#: awx/main/utils/common.py:268 awx/main/utils/common.py:280
+#: awx/main/utils/common.py:299
 #, python-format
 msgid "Invalid %s URL"
 msgstr "URL %s no válida"
 
-#: awx/main/utils/common.py:284 awx/main/utils/common.py:323
+#: awx/main/utils/common.py:270 awx/main/utils/common.py:309
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "URL %s no admitida"
 
-#: awx/main/utils/common.py:325
+#: awx/main/utils/common.py:311
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "Host  \"%s\" no admitido para URL de file://"
 
-#: awx/main/utils/common.py:327
+#: awx/main/utils/common.py:313
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "El host es obligatorio para URL %s"
 
-#: awx/main/utils/common.py:345
+#: awx/main/utils/common.py:331
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "El nombre de usuario debe ser \"git\" para el acceso de SSH a %s."
 
-#: awx/main/utils/common.py:351
+#: awx/main/utils/common.py:337
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "El nombre de usuario debe ser \"hg\" para el acceso de SSH a %s."
 
-#: awx/main/utils/common.py:682
+#: awx/main/utils/common.py:668
 #, python-brace-format
 msgid "Input type `{data_type}` is not a dictionary"
 msgstr "El tipo de entrada `{data_type}` no está en el diccionario"
 
-#: awx/main/utils/common.py:715
+#: awx/main/utils/common.py:701
 #, python-brace-format
 msgid "Variables not compatible with JSON standard (error: {json_error})"
 msgstr "Variables no compatibles con el estándar de JSON (error: {json_error})"
 
-#: awx/main/utils/common.py:721
+#: awx/main/utils/common.py:707
 #, python-brace-format
 msgid ""
 "Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error})."
