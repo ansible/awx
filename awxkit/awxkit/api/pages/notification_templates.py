@@ -24,6 +24,7 @@ notification_types = (
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
 
     dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def test(self):
         """Create test notification"""

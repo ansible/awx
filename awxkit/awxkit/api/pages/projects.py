@@ -14,6 +14,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
 
     optional_dependencies = [Credential, Organization]
     optional_schedule_fields = tuple()
+    NATURAL_KEY = ('organization', 'name')
 
     def payload(self, organization, scm_type='git', **kwargs):
         payload = PseudoNamespace(
