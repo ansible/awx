@@ -42,7 +42,6 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     error: contentError,
     isLoading,
     request: fetchJobs,
-    setValue,
   } = useRequest(
     useCallback(
       async () => {
@@ -58,31 +57,18 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     fetchJobs();
   }, [fetchJobs]);
 
-  const { request: addJobsById } = useRequest(
-    useCallback(
-      async ids => {
-        if (!ids.length) {
-          return;
-        }
-        const params = parseQueryString(QS_CONFIG, location.search);
-        params.id__in = ids.join(',');
-        const { data } = await UnifiedJobsAPI.read({ ...params });
-        setValue(prev => {
-          const deDuplicated = data.results.filter(
-            job => !prev.results.find(j => j.id === job.id)
-          );
-          const mergedJobsList = [...deDuplicated, ...prev.results];
-          return {
-            results: mergedJobsList.slice(0, params.page_size),
-            count: prev.count + data.count,
-          };
-        });
-      },
-      [location, setValue] // eslint-disable-line react-hooks/exhaustive-deps
-    )
+  // TODO: update QS_CONFIG to be safe for deps array
+  const fetchJobsById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await UnifiedJobsAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const jobs = useWsJobs(results, addJobsById, !!defaultParams);
+  const jobs = useWsJobs(results, fetchJobsById, !!defaultParams);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {

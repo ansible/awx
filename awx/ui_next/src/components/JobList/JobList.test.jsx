@@ -218,7 +218,7 @@ describe('<JobList />', () => {
     jest.restoreAllMocks();
   });
 
-  test('error is shown when job not successfully deleted from api', async () => {
+  test.only('error is shown when job not successfully deleted from api', async () => {
     JobsAPI.destroy.mockImplementation(() => {
       throw new Error({
         response: {

@@ -5,7 +5,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
   const [jobs, setJobs] = useState(initialJobs);
   const [lastMessage, setLastMessage] = useState(null);
   const [jobsToFetch, setJobsToFetch] = useState([]);
-  const throttleJobsToFetch = useThrottle(jobsToFetch, 5000);
+  const throttledJobsToFetch = useThrottle(jobsToFetch, 5000);
 
   useEffect(() => {
     setJobs(initialJobs);
@@ -17,11 +17,20 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
     }
   };
   useEffect(() => {
-    if (throttleJobsToFetch.length) {
-      fetchJobsById(throttleJobsToFetch);
+    (async () => {
+      if (!throttledJobsToFetch.length) {
+        return;
+      }
       setJobsToFetch([]);
-    }
-  }, [throttleJobsToFetch, fetchJobsById]);
+      const newJobs = await fetchJobsById(throttledJobsToFetch);
+      const deduplicated = newJobs.filter(
+        job => !jobs.find(j => j.id === job.id)
+      );
+      if (deduplicated.length) {
+        setJobs([...deduplicated, ...jobs]);
+      }
+    })();
+  }, [throttledJobsToFetch, fetchJobsById]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ws = useRef(null);
 
