@@ -21,7 +21,7 @@ const applications = {
           user_capabilities: { edit: true, delete: true },
         },
         url: '',
-        organiation: 10,
+        organization: 10,
       },
       {
         id: 2,
