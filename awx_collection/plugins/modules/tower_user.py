@@ -55,6 +55,13 @@ options:
       description:
         - Write-only field used to change the password.
       type: str
+    update_password:
+      description:
+        - C(always) will update passwords if they differ.
+        - C(on_create) will only set the password for newly created users.
+      type: str
+      choices: [ always, on_create ]
+      default: always
     state:
       description:
         - Desired state of the resource.
@@ -115,6 +122,7 @@ def main():
         is_superuser=dict(type='bool', default=False, aliases=['superuser']),
         is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
         password=dict(no_log=True),
+        update_password=dict(choices=['always', 'on_create'], default='always', no_log=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -129,6 +137,7 @@ def main():
     is_superuser = module.params.get('is_superuser')
     is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
+    update_password = module.params.get('update_password')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -158,7 +167,7 @@ def main():
         new_fields['is_superuser'] = is_superuser
     if is_system_auditor:
         new_fields['is_system_auditor'] = is_system_auditor
-    if password:
+    if password and (not existing_item or update_password == 'always'):
         new_fields['password'] = password
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
