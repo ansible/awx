@@ -287,7 +287,7 @@ class Credential(HasCopy, HasCreate, base.Base):
 
         credential_type, organization, user, team = filter_by_class(
             (credential_type, CredentialType), (organization, Organization), (user, User), (team, Team))
-        if not any((user, team, organization)):
+        if not all((user, team, organization)):
             organization = Organization
         self.create_and_update_dependencies(
             credential_type, organization, user, team)
@@ -323,7 +323,7 @@ class Credential(HasCopy, HasCreate, base.Base):
         return self.update_identity(
             Credentials(
                 self.connection)).post(payload)
- 
+
     def test(self, data):
         """Test the credential endpoint."""
         response = self.connection.post(urljoin(str(self.url), 'test/'), data)
