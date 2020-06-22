@@ -2644,8 +2644,16 @@ class CredentialSerializerCreate(CredentialSerializer):
                     owner_fields.add(field)
                 else:
                     attrs.pop(field)
+
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
+
+        if len(owner_fields) > 1:
+            received = ", ".join(sorted(owner_fields))
+            raise serializers.ValidationError({"detail": _(
+                "Only one of 'user', 'team', or 'organization' should be provided, "
+                "received {} fields.".format(received)
+            )})
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
