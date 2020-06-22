@@ -135,8 +135,8 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
-  test.skip('details should render with the proper values with prompts', async () => {
-    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+  test('details should render with the proper values with prompts', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValue({
       data: {
         count: 2,
         results: [
@@ -182,6 +182,7 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    // await waitForElement(wrapper, 'Title', el => el.length > 0);
     expect(
       wrapper
         .find('Detail[label="Name"]')
@@ -231,7 +232,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(1);
   });
-  test.skip('error shown when error encountered fetching credentials', async () => {
+  test('error shown when error encountered fetching credentials', async () => {
     SchedulesAPI.readCredentials.mockRejectedValueOnce(
       new Error({
         response: {
@@ -266,7 +267,7 @@ describe('<ScheduleDetail />', () => {
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 
-  test.skip('should show edit button for users with edit permission', async () => {
+  test('should show edit button for users with edit permission', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
       data: {
         count: 0,
