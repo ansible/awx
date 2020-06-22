@@ -3,7 +3,6 @@ import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
-import RoutedTabs from '../../components/RoutedTabs';
 import {
   Switch,
   Route,
@@ -13,6 +12,7 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
+import RoutedTabs from '../../components/RoutedTabs';
 import useRequest from '../../util/useRequest';
 import ContentError from '../../components/ContentError';
 import JobList from '../../components/JobList';

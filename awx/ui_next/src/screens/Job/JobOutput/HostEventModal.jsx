@@ -100,7 +100,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false, i18n }) {
       onClose={onClose}
       title={i18n._(t`Host Details`)}
       aria-label={i18n._(t`Host details modal`)}
-      width={'75%'}
+      width="75%"
     >
       <Tabs
         aria-label={i18n._(t`Tabs`)}

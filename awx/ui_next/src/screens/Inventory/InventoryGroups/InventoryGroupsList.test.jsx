@@ -178,7 +178,7 @@ describe('<InventoryGroupsList />', () => {
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
   });
 
-  test.skip('should show error modal when group is not successfully deleted from api', async () => {
+  test('should show error modal when group is not successfully deleted from api', async () => {
     GroupsAPI.destroy.mockRejectedValue(
       new Error({
         response: {
@@ -199,8 +199,8 @@ describe('<InventoryGroupsList />', () => {
     });
     await waitForElement(
       wrapper,
-      'InventoryGroupsDeleteModal',
-      el => el.props().isModalOpen === true
+      'AlertModal[title="Delete Group?"]',
+      el => el.props().isOpen === true
     );
     await act(async () => {
       wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
@@ -211,7 +211,11 @@ describe('<InventoryGroupsList />', () => {
         .find('ModalBoxFooter Button[aria-label="Delete"]')
         .invoke('onClick')();
     });
-    await waitForElement(wrapper, { title: 'Error!', variant: 'error' });
+    await waitForElement(
+      wrapper,
+      'AlertModal[title="Error!"] Modal',
+      el => el.props().isOpen === true && el.props().title === 'Error!'
+    );
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });
