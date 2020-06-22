@@ -105,6 +105,16 @@ function waitForLoaded(wrapper) {
 }
 
 describe('<JobList />', () => {
+  let debug;
+  beforeEach(() => {
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
+  });
+
+  afterEach(() => {
+    global.console.debug = debug;
+  });
+
   test('initially renders succesfully', async () => {
     let wrapper;
     await act(async () => {
@@ -218,7 +228,7 @@ describe('<JobList />', () => {
     jest.restoreAllMocks();
   });
 
-  test.only('error is shown when job not successfully deleted from api', async () => {
+  test('error is shown when job not successfully deleted from api', async () => {
     JobsAPI.destroy.mockImplementation(() => {
       throw new Error({
         response: {
