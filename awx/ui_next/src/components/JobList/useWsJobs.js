@@ -38,10 +38,10 @@ export default function useWsJobs(initialJobs, fetchJobsById, filtersApplied) {
     if (!lastMessage || !lastMessage.unified_job_id) {
       return;
     }
-    if (filtersApplied) {
-      if (['completed', 'failed', 'error'].includes(lastMessage.status)) {
-        enqueueJobId(lastMessage.unified_job_id);
-      }
+    if (
+      filtersApplied &&
+      !['completed', 'failed', 'error'].includes(lastMessage.status)
+    ) {
       return;
     }
 
