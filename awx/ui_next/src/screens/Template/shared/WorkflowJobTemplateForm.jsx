@@ -216,11 +216,10 @@ function WorkflowJobTemplateForm({
 
       {enableWebhooks && (
         <SubFormLayout>
-          <Title size="md" headingLevel="h4">{i18n._(t`Webhook details`)}</Title>
-          <WebhookSubForm
-            enableWebhooks={enableWebhooks}
-            templateType={template.type}
-          />
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Webhook details`)}
+          </Title>
+          <WebhookSubForm templateType={template.type} />
         </SubFormLayout>
       )}
 
