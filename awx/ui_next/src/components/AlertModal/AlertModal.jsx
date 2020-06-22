@@ -23,6 +23,7 @@ function AlertModal({
   i18n,
   isOpen = null,
   title,
+  label,
   variant,
   children,
   i18nHash,
@@ -73,7 +74,7 @@ function AlertModal({
   return (
     <Modal
       header={customHeader}
-      aria-label={i18n._(t`Alert modal`)}
+      aria-label={label || i18n._(t`Alert modal`)}
       aria-labelledby="alert-modal-header-label"
       isOpen={Boolean(isOpen)}
       variant="small"

@@ -325,7 +325,7 @@ describe('<JobOutput />', () => {
     expect(JobsAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
-  test.skip('should show error dialog for failed deletion', async () => {
+  test('should show error dialog for failed deletion', async () => {
     JobsAPI.destroy.mockRejectedValue(new Error({}));
     wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     await waitForElement(wrapper, 'JobEvent', el => el.length > 0);
@@ -338,7 +338,7 @@ describe('<JobOutput />', () => {
     wrapper.find('Modal button[aria-label="Delete"]').simulate('click');
     await waitForElement(wrapper, 'Modal ErrorDetail');
     const errorModalCloseBtn = wrapper.find(
-      'ModalBox div[aria-label="Job Delete Error"] button[aria-label="Close"]'
+      'ModalBox[aria-label="Job Delete Error"] ModalBoxCloseButton'
     );
     errorModalCloseBtn.simulate('click');
     await waitForElement(wrapper, 'Modal ErrorDetail', el => el.length === 0);

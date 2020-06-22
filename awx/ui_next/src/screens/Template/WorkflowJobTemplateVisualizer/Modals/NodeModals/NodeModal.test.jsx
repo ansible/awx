@@ -4,7 +4,10 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
@@ -22,7 +25,7 @@ let wrapper;
 const dispatch = jest.fn();
 const onSave = jest.fn();
 
-describe.skip('NodeModal', () => {
+describe('NodeModal', () => {
   beforeAll(() => {
     JobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -95,6 +98,7 @@ describe.skip('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
     });
 
     afterAll(() => {
@@ -307,6 +311,7 @@ describe.skip('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
@@ -388,6 +393,7 @@ describe.skip('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(
