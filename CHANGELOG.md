@@ -2,10 +2,11 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 13.0.0 (Jun 19, 2020)
+## 13.0.0 (Jun 23, 2020)
 - Removed scripts as a means of running inventory updates of built-in types (https://github.com/ansible/awx/pull/6911)
 - Ansible 2.8 is now unsupported. Some inventory source types are known to no longer work.
 - Fixed an issue where the vmware inventory source ssl_verify source variable was not recognized (https://github.com/ansible/awx/pull/7360)
+- Added import and export subcommands to the awx-cli tool, replacing send and receive from the old tower-cli (https://github.com/ansible/awx/pull/6125).
 
 ## 12.0.0 (Jun 9, 2020)
 - Removed memcached as a dependency of AWX (https://github.com/ansible/awx/pull/7240) 
