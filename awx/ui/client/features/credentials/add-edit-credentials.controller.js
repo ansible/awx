@@ -495,7 +495,10 @@ function AddEditCredentialsController (
     }
 
     function create (data) {
-        data.user = me.get('id');
+        // can send only one of org, user, team
+        if (!data.organization && !data.team) {
+            data.user = me.get('id');
+        }
 
         if (_.get(data.inputs, gceFileInputSchema.id)) {
             delete data.inputs[gceFileInputSchema.id];
@@ -524,7 +527,11 @@ function AddEditCredentialsController (
      * Otherwise inputs are merged together making the request invalid.
      */
     function update (data) {
-        data.user = me.get('id');
+        // can send only one of org, user, team
+        if (!data.organization && !data.team) {
+            data.user = me.get('id');
+        }
+
         credential.unset('inputs');
 
         if (_.get(data.inputs, gceFileInputSchema.id)) {

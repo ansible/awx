@@ -80,13 +80,15 @@ function CredentialEdit({ credential, me }) {
             return null;
           });
 
+        const modifiedData = { inputs: nonPluginInputs, ...remainingValues };
+        // can send only one of org, user, team
+        if (organization?.id) {
+          modifiedData.organization = organization.id;
+        } else if (me?.id) {
+          modifiedData.user = me.id;
+        }
         const [{ data }] = await Promise.all([
-          CredentialsAPI.update(credential.id, {
-            user: (me && me.id) || null,
-            organization: (organization && organization.id) || null,
-            inputs: nonPluginInputs,
-            ...remainingValues,
-          }),
+          CredentialsAPI.update(credential.id, modifiedData),
           ...destroyInputSources(),
         ]);
 

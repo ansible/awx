@@ -277,7 +277,6 @@ describe('<CredentialEdit />', () => {
       await act(async () => {
         wrapper.find('CredentialForm').prop('onSubmit')({
           user: 1,
-          organization: null,
           name: 'foo',
           description: 'bar',
           credential_type: '1',
@@ -316,7 +315,6 @@ describe('<CredentialEdit />', () => {
       });
       expect(CredentialsAPI.update).toHaveBeenCalledWith(3, {
         user: 1,
-        organization: null,
         name: 'foo',
         description: 'bar',
         credential_type: '1',
