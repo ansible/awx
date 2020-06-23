@@ -651,16 +651,14 @@ Potential uses include:
 * Checking on the status and output of job runs
 * Managing objects like organizations, users, teams, etc...
 
-The preferred way to install the AWX CLI is through pip directly from GitHub:
+The preferred way to install the AWX CLI is through pip directly from PyPI:
 
-    pip install "https://github.com/ansible/awx/archive/$VERSION.tar.gz#egg=awxkit&subdirectory=awxkit"
+    pip3 install awxkit
     awx --help
-
-...where ``$VERSION`` is the version of AWX you're running.  To see a list of all available releases, visit: https://github.com/ansible/awx/releases
 
 ## Building the CLI Documentation
 
-To build the docs, spin up a real AWX server, `pip install sphinx sphinxcontrib-autoprogram`, and run:
+To build the docs, spin up a real AWX server, `pip3 install sphinx sphinxcontrib-autoprogram`, and run:
 
     ~ TOWER_HOST=https://awx.example.org TOWER_USERNAME=example TOWER_PASSWORD=secret make clean html
     ~ cd build/html/ && python -m http.server
