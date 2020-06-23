@@ -52,14 +52,16 @@ function CredentialAdd({ me }) {
           }
         });
 
+        const modifiedData = { inputs: nonPluginInputs, ...remainingValues };
+        // can send only one of org, user, team
+        if (organization?.id) {
+          modifiedData.organization = organization.id;
+        } else if (me?.id) {
+          modifiedData.user = me.id;
+        }
         const {
           data: { id: newCredentialId },
-        } = await CredentialsAPI.create({
-          user: (me && me.id) || null,
-          organization: (organization && organization.id) || null,
-          inputs: nonPluginInputs,
-          ...remainingValues,
-        });
+        } = await CredentialsAPI.create(modifiedData);
 
         await Promise.all(
           Object.entries(pluginInputs).map(([key, value]) =>
