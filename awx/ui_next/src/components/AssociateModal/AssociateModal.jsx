@@ -74,9 +74,9 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
-        isFooterLeftAligned
-        isLarge
+        variant="large"
         title={title}
+        aria-label={i18n._(t`Association modal`)}
         isOpen={isModalOpen}
         onClose={handleClose}
         actions={[

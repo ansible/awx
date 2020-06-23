@@ -2,10 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  DataToolbar,
-  DataToolbarContent,
-} from '@patternfly/react-core/dist/umd/experimental';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import DataListToolbar from '../DataListToolbar';
 
 import {
@@ -107,17 +104,17 @@ class ListHeader extends React.Component {
     return (
       <Fragment>
         {isEmpty ? (
-          <DataToolbar
+          <Toolbar
             id={`${qsConfig.namespace}-list-toolbar`}
             clearAllFilters={this.handleRemoveAll}
-            collapseListedFiltersBreakpoint="md"
+            collapseListedFiltersBreakpoint="lg"
           >
-            <DataToolbarContent>
+            <ToolbarContent>
               <EmptyStateControlsWrapper>
                 {emptyStateControls}
               </EmptyStateControlsWrapper>
-            </DataToolbarContent>
-          </DataToolbar>
+            </ToolbarContent>
+          </Toolbar>
         ) : (
           <Fragment>
             {renderToolbar({

@@ -9,13 +9,11 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import useRequest from '../../../util/useRequest';
 
 import { InventoriesAPI } from '../../../api';
-import { TabbedCardHeader } from '../../../components/Card';
-import CardCloseButton from '../../../components/CardCloseButton';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
 import RoutedTabs from '../../../components/RoutedTabs';
@@ -110,16 +108,14 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     );
   }
 
+  let showCardHeader = true;
+  if (['edit'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
+
   return (
     <>
-      {['edit'].some(name => location.pathname.includes(name)) ? null : (
-        <TabbedCardHeader>
-          <RoutedTabs tabsArray={tabsArray} />
-          <CardActions>
-            <CardCloseButton linkTo={hostListUrl} />
-          </CardActions>
-        </TabbedCardHeader>
-      )}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
 
       {isLoading && <ContentLoading />}
 

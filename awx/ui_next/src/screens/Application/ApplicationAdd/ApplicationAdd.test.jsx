@@ -91,8 +91,8 @@ describe('<ApplicationAdd/>', () => {
     wrapper.update();
     expect(wrapper.find('input#name').prop('value')).toBe('new foo');
     expect(wrapper.find('input#description').prop('value')).toBe('new bar');
-    expect(wrapper.find('InnerChipGroup').length).toBe(1);
-    expect(wrapper.find('InnerChipGroup').text()).toBe('organization');
+    expect(wrapper.find('Chip').length).toBe(1);
+    expect(wrapper.find('Chip').text()).toBe('organization');
     expect(
       wrapper
         .find('AnsibleSelect[name="authorization_grant_type"]')

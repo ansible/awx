@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '../../components/CardCloseButton';
-import { TabbedCardHeader } from '../../components/Card';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import NotificationList from '../../components/NotificationList/NotificationList';
@@ -116,6 +115,16 @@ class Organization extends Component {
       (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Organizations`)}
+          </>
+        ),
+        link: `/organizations`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
       { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
@@ -129,21 +138,10 @@ class Organization extends Component {
       });
     }
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/organizations" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    let showCardHeader = true;
 
-    if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (location.pathname.endsWith('edit')) {
-      cardHeader = null;
+    if (!isInitialized || location.pathname.endsWith('edit')) {
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -168,7 +166,7 @@ class Organization extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect
               from="/organizations/:id"

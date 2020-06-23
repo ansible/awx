@@ -81,7 +81,7 @@ const ManualSubForm = ({
         fieldId="project-local-path"
         helperTextInvalid={pathMeta.error}
         isRequired
-        isValid={!pathMeta.touched || !pathMeta.error}
+        validated={!pathMeta.touched || !pathMeta.error ? 'default' : 'error'}
         label={i18n._(t`Playbook Directory`)}
       >
         <FieldTooltip

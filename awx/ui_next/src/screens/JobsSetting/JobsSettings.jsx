@@ -15,7 +15,9 @@ class JobsSettings extends Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`Jobs Settings`)}</Title>
+          <Title size="2xl" headingLevel="h2">
+            {i18n._(t`Jobs Settings`)}
+          </Title>
         </PageSection>
         <PageSection />
       </Fragment>

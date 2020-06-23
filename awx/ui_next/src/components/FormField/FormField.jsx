@@ -29,14 +29,14 @@ function FormField(props) {
           helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
-          isValid={isValid}
+          validated={isValid ? 'default' : 'error'}
           label={label}
         >
           <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextArea
             id={id}
             isRequired={isRequired}
-            isValid={isValid}
+            validated={isValid ? 'default' : 'error'}
             resizeOrientation="vertical"
             {...rest}
             {...field}
@@ -51,14 +51,14 @@ function FormField(props) {
           helperText={helperText}
           helperTextInvalid={meta.error}
           isRequired={isRequired}
-          isValid={isValid}
+          validated={isValid ? 'default' : 'error'}
           label={label}
         >
           <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextInput
             id={id}
             isRequired={isRequired}
-            isValid={isValid}
+            validated={isValid ? 'default' : 'error'}
             {...rest}
             {...field}
             type={type}

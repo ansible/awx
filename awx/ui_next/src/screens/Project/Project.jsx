@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import NotificationList from '../../components/NotificationList';
@@ -121,6 +120,16 @@ class Project extends Component {
     const canToggleNotifications = isNotifAdmin;
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Projects`)}
+          </>
+        ),
+        link: `/projects`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details` },
       { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
@@ -148,24 +157,14 @@ class Project extends Component {
       tab.id = n;
     });
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/projects" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
-
-    if (!isInitialized) {
-      cardHeader = null;
-    }
+    let showCardHeader = true;
 
     if (
+      !isInitialized ||
       location.pathname.endsWith('edit') ||
       location.pathname.includes('schedules/')
     ) {
-      cardHeader = null;
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -188,7 +187,7 @@ class Project extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect from="/projects/:id" to="/projects/:id/details" exact />
             {project && (

@@ -142,9 +142,9 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
-        isFooterLeftAligned
-        isLarge
+        variant="large"
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
+        aria-label={i18n._(t`Lookup modal`)}
         isOpen={isModalOpen}
         onClose={closeModal}
         actions={[

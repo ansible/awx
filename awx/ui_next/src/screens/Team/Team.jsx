@@ -9,9 +9,8 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '../../components/CardCloseButton';
-import { TabbedCardHeader } from '../../components/Card';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
@@ -41,22 +40,25 @@ function Team({ i18n, setBreadcrumb }) {
   }, [id, setBreadcrumb, location]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Teams`)}
+        </>
+      ),
+      link: `/teams`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `/teams/${id}/details`, id: 0 },
     { name: i18n._(t`Users`), link: `/teams/${id}/users`, id: 1 },
     { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 2 },
   ];
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/teams" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
 
   if (location.pathname.endsWith('edit')) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   if (!hasContentLoading && contentError) {
@@ -79,7 +81,7 @@ function Team({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect from="/teams/:id" to="/teams/:id/details" exact />
           {team && (

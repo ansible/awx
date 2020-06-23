@@ -40,12 +40,12 @@ function TeamAccessListItem({ role, i18n, detailUrl, onSelect }) {
                     label={i18n._(t`Role`)}
                     value={
                       <Chip
-                        isReadOnly={
-                          !role.summary_fields.user_capabilities.unattach
-                        }
                         key={role.name}
                         aria-label={role.name}
                         onClick={() => onSelect(role)}
+                        isReadOnly={
+                          !role.summary_fields.user_capabilities.unattach
+                        }
                       >
                         {role.name}
                       </Chip>

@@ -83,9 +83,11 @@ const SCMSubForm = ({ i18n }) => {
       <FormGroup
         fieldId="source_path"
         helperTextInvalid={sourcePathError?.message || sourcePathMeta.error}
-        isValid={
+        validated={
           (!sourcePathMeta.error || !sourcePathMeta.touched) &&
           !sourcePathError?.message
+            ? 'default'
+            : 'error'
         }
         isRequired
         label={i18n._(t`Inventory file`)}

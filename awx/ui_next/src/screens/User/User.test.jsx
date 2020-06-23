@@ -72,20 +72,10 @@ describe('<User />', () => {
         },
       });
     });
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 5);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 6);
 
     /* eslint-disable react/button-has-type */
-    expect(
-      wrapper
-        .find('Tabs')
-        .containsAllMatchingElements([
-          <button aria-label="Details">Details</button>,
-          <button aria-label="Organizations">Organizations</button>,
-          <button aria-label="Teams">Teams</button>,
-          <button aria-label="Access">Access</button>,
-          <button aria-label="Tokens">Tokens</button>,
-        ])
-    ).toEqual(true);
+    expect(wrapper.find('Tabs TabButton').length).toEqual(6);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

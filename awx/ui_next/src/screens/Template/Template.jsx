@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   Route,
@@ -11,14 +12,11 @@ import {
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
+import RoutedTabs from '../../components/RoutedTabs';
 import useRequest from '../../util/useRequest';
-
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
 import ContentError from '../../components/ContentError';
 import JobList from '../../components/JobList';
 import NotificationList from '../../components/NotificationList';
-import RoutedTabs from '../../components/RoutedTabs';
 import { Schedules } from '../../components/Schedule';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
@@ -82,6 +80,16 @@ function Template({ i18n, me, setBreadcrumb }) {
     template?.summary_fields?.user_capabilities.delete;
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Templates`)}
+        </>
+      ),
+      link: `/templates`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details` },
     { name: i18n._(t`Access`), link: `${match.url}/access` },
   ];
@@ -115,19 +123,13 @@ function Template({ i18n, me, setBreadcrumb }) {
     tab.id = n;
   });
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/templates" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
+
   if (
     location.pathname.endsWith('edit') ||
     location.pathname.includes('schedules/')
   ) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   const contentError = rolesAndTemplateError;
@@ -151,7 +153,7 @@ function Template({ i18n, me, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/templates/:templateType/:id"

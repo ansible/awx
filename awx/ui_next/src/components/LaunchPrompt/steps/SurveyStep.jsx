@@ -96,7 +96,7 @@ function MultipleChoiceField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
     >
       <FieldTooltip content={question.question_description} />
@@ -124,7 +124,7 @@ function MultiSelectField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
     >
       <FieldTooltip content={question.question_description} />
@@ -139,7 +139,7 @@ function MultiSelectField({ question }) {
             helpers.setValue(field.value.concat(option));
           }
         }}
-        isExpanded={isOpen}
+        isOpen={isOpen}
         selections={field.value}
       >
         {question.choices.split('\n').map(opt => (

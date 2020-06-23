@@ -142,7 +142,7 @@ describe('<SurveyList />', () => {
 
     expect(
       wrapper
-        .find('DataToolbar')
+        .find('Toolbar')
         .find('Checkbox')
         .prop('isDisabled')
     ).toBe(true);

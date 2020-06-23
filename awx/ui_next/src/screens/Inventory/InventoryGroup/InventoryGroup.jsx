@@ -10,13 +10,10 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import CardCloseButton from '../../../components/CardCloseButton';
 import RoutedTabs from '../../../components/RoutedTabs';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
-import { TabbedCardHeader } from '../../../components/Card';
 import InventoryGroupEdit from '../InventoryGroupEdit/InventoryGroupEdit';
 import InventoryGroupDetail from '../InventoryGroupDetail/InventoryGroupDetail';
 import InventoryGroupHosts from '../InventoryGroupHosts';
@@ -99,18 +96,14 @@ function InventoryGroup({ i18n, setBreadcrumb, inventory }) {
     );
   }
 
+  let showCardHeader = true;
+  if (['add', 'edit'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
+
   return (
     <>
-      {['add', 'edit'].some(name => location.pathname.includes(name)) ? null : (
-        <TabbedCardHeader>
-          <RoutedTabs tabsArray={tabsArray} />
-          <CardActions>
-            <CardCloseButton
-              linkTo={`/inventories/inventory/${inventory.id}/groups`}
-            />
-          </CardActions>
-        </TabbedCardHeader>
-      )}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
       <Switch>
         <Redirect
           from="/inventories/inventory/:id/groups/:groupId"

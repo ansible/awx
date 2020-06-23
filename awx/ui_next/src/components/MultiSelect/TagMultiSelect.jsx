@@ -50,8 +50,8 @@ function TagMultiSelect({ onChange, value }) {
         return name;
       }}
       selections={selections}
-      isExpanded={isExpanded}
-      ariaLabelledBy="tag-select"
+      isOpen={isExpanded}
+      aria-labelledby="tag-select"
     >
       {renderOptions(options)}
     </Select>

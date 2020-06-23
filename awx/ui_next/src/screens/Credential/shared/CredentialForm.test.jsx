@@ -191,6 +191,12 @@ describe('<CredentialForm />', () => {
       ).toBe('');
     });
     test('should show error when error thrown parsing JSON', async () => {
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 10);
+      });
+      wrapper.update();
       expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
         'Select a JSON formatted service account key to autopopulate the following fields.'
       );
@@ -201,7 +207,15 @@ describe('<CredentialForm />', () => {
         });
       });
       wrapper.update();
-      expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
+      expect(
+        wrapper.find('FormGroup[fieldId="credential-gce-file"]').prop('isValid')
+      ).toBe(false);
+
+      expect(
+        wrapper
+          .find('FormGroup[fieldId="credential-gce-file"]')
+          .prop('helperTextInvalid')
+      ).toBe(
         'There was an error parsing the file. Please check the file formatting and try again.'
       );
     });

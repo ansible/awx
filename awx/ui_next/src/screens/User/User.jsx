@@ -9,11 +9,10 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import useRequest from '../../util/useRequest';
 import { UsersAPI } from '../../api';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
@@ -52,6 +51,16 @@ function User({ i18n, setBreadcrumb }) {
   }, [user, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Users`)}
+        </>
+      ),
+      link: `/users`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
     {
       name: i18n._(t`Organizations`),
@@ -62,6 +71,11 @@ function User({ i18n, setBreadcrumb }) {
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 3 },
     { name: i18n._(t`Tokens`), link: `${match.url}/tokens`, id: 4 },
   ];
+
+  let showCardHeader = true;
+  if (['edit'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
 
   if (contentError) {
     return (
@@ -82,14 +96,7 @@ function User({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {['edit'].some(name => location.pathname.includes(name)) ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo={userListUrl} />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         {isLoading && <ContentLoading />}
         {!isLoading && user && (
           <Switch>

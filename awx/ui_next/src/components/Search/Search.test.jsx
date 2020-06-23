@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  DataToolbar,
-  DataToolbarContent,
-} from '@patternfly/react-core/dist/umd/experimental';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
@@ -33,15 +30,15 @@ describe('<Search />', () => {
     const onSearch = jest.fn();
 
     search = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </DataToolbarContent>
-      </DataToolbar>
+        </ToolbarContent>
+      </Toolbar>
     );
 
     search.find(searchTextInput).instance().value = 'test-321';
@@ -56,15 +53,15 @@ describe('<Search />', () => {
     const columns = [{ name: 'Name', key: 'name', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </DataToolbarContent>
-      </DataToolbar>
+        </ToolbarContent>
+      </Toolbar>
     ).find('Search');
     expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
     wrapper.instance().handleDropdownToggle(true);
@@ -78,15 +75,15 @@ describe('<Search />', () => {
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </DataToolbarContent>
-      </DataToolbar>
+        </ToolbarContent>
+      </Toolbar>
     ).find('Search');
     expect(wrapper.state('searchKey')).toEqual('name');
     wrapper
@@ -101,15 +98,15 @@ describe('<Search />', () => {
     const columns = [{ name: 'Name', key: 'name', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </DataToolbarContent>
-      </DataToolbar>
+        </ToolbarContent>
+      </Toolbar>
     );
 
     wrapper.find(searchTextInput).instance().value = '';
@@ -125,15 +122,15 @@ describe('<Search />', () => {
     const columns = [{ name: 'Name', key: 'name', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </DataToolbarContent>
-      </DataToolbar>
+        </ToolbarContent>
+      </Toolbar>
     );
 
     wrapper.find(searchTextInput).instance().value = 'test-321';
@@ -156,23 +153,23 @@ describe('<Search />', () => {
       initialEntries: [`/organizations/${query}`],
     });
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${QS_CONFIG.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search qsConfig={QS_CONFIG} columns={columns} />
-        </DataToolbarContent>
-      </DataToolbar>,
+        </ToolbarContent>
+      </Toolbar>,
       { context: { router: { history } } }
     );
     const typeFilterWrapper = wrapper.find(
-      'DataToolbarFilter[categoryName="Type"]'
+      'ToolbarFilter[categoryName="Type"]'
     );
     expect(typeFilterWrapper.prop('chips')[0].key).toEqual('or__type:foo');
     const nameFilterWrapper = wrapper.find(
-      'DataToolbarFilter[categoryName="Name"]'
+      'ToolbarFilter[categoryName="Name"]'
     );
     expect(nameFilterWrapper.prop('chips')[0].key).toEqual('name:bar');
   });
@@ -197,19 +194,19 @@ describe('<Search />', () => {
     });
     const onRemove = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${qsConfigNew.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
           />
-        </DataToolbarContent>
-      </DataToolbar>,
+        </ToolbarContent>
+      </Toolbar>,
       { context: { router: { history } } }
     );
     expect(history.location.search).toEqual(query);
@@ -243,19 +240,19 @@ describe('<Search />', () => {
     });
     const onRemove = jest.fn();
     const wrapper = mountWithContexts(
-      <DataToolbar
+      <Toolbar
         id={`${qsConfigNew.namespace}-list-toolbar`}
         clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="md"
+        collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           <Search
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
           />
-        </DataToolbarContent>
-      </DataToolbar>,
+        </ToolbarContent>
+      </Toolbar>,
       { context: { router: { history } } }
     );
     expect(history.location.search).toEqual(query);

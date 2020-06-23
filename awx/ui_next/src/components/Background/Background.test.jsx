@@ -11,7 +11,7 @@ describe('Background', () => {
       </Background>
     );
     expect(wrapper).toHaveLength(1);
-    expect(wrapper.find('BackgroundImage')).toHaveLength(1);
+    expect(wrapper.find('.pf-c-background-image')).toHaveLength(1);
     expect(wrapper.find('#test')).toHaveLength(1);
   });
 });
