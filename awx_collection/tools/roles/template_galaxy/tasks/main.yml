@@ -45,3 +45,9 @@
     src: "{{ collection_path }}/tools/roles/template_galaxy/templates/galaxy.yml.j2"
     dest: "{{ collection_path }}/galaxy.yml"
     force: true
+
+- name: Template the README.md file
+  template:
+    src: "{{ collection_path }}/tools/roles/template_galaxy/templates/README.md.j2"
+    dest: "{{ collection_path }}/README.md"
+    force: true

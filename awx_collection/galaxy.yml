@@ -19,8 +19,8 @@ homepage: https://www.ansible.com/
 issues: https://github.com/ansible/awx/issues?q=is%3Aissue+label%3Acomponent%3Aawx_collection
 license:
   - GPL-3.0-only
-name: {{ collection_package }}
-namespace: {{ collection_namespace }}
+name: awx
+namespace: awx
 readme: README.md
 repository: https://github.com/ansible/awx
 tags:
@@ -29,7 +29,7 @@ tags:
   - awx
   - ansible
   - automation
-version: {{ collection_version_override | default(collection_version) }}
+version: 0.0.1-devel
 build_ignore:
   - tools
   - setup.cfg

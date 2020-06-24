@@ -93,9 +93,9 @@ def test_no_templated_values(collection_import):
     checked into source.
     """
     TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
-    assert TowerModule._COLLECTION_VERSION == "devel", (
+    assert TowerModule._COLLECTION_VERSION == "0.0.1-devel", (
         'The collection version is templated when the collection is built '
-        'and the code should retain the placeholder of "devel".'
+        'and the code should retain the placeholder of "0.0.1-devel".'
     )
     InventoryModule = collection_import('plugins.inventory.tower').InventoryModule
     assert InventoryModule.NAME == 'awx.awx.tower', (

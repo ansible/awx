@@ -401,11 +401,11 @@ symlink_collection:
 
 build_collection:
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml -e collection_package=$(COLLECTION_PACKAGE) -e collection_namespace=$(COLLECTION_NAMESPACE) -e collection_version=$(VERSION) -e '{"awx_template_version":false}'
-	ansible-galaxy collection build awx_collection --force --output-path=awx_collection
+	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
-	ansible-galaxy collection install awx_collection/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
+	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(VERSION).tar.gz
 
 test_collection_sanity: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity
