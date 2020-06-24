@@ -23,6 +23,10 @@ function CredentialTypes({ i18n }) {
         '/credential_types': i18n._(t`Credential Types`),
         '/credential_types/add': i18n._(t`Create Credential Types`),
         [`/credential_types/${credentialTypes.id}`]: `${credentialTypes.name}`,
+        [`/credential_types/${credentialTypes.id}/edit`]: i18n._(
+          t`Edit Details`
+        ),
+        [`/credential_types/${credentialTypes.id}/details`]: i18n._(t`Details`),
       });
     },
     [i18n]

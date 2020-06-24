@@ -53,7 +53,7 @@ function CredentialTypeListItem({
               key="name"
               aria-label={i18n._(t`credential type name`)}
             >
-              <Link to={`${detailUrl} `}>
+              <Link to={`${detailUrl}`}>
                 <b>{credentialType.name}</b>
               </Link>
             </DataListCell>,
