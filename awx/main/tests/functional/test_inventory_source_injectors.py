@@ -124,6 +124,9 @@ def fake_credential_factory():
         for var in var_specs.keys():
             inputs[var] = generate_fake_var(var_specs[var])
 
+        if source == 'tower':
+            inputs.pop('oauth_token')  # mutually exclusive with user/pass
+
         return Credential.objects.create(
             credential_type=ct,
             inputs=inputs
