@@ -21,9 +21,6 @@ class Command(BaseCommand):
         threshold = options['threshold']
         history = options['history']
         ignore = options['ignore']
-        colorize = True
-        if options.get('no_color') is True:
-            colorize = False
 
         print('## ' + JobTemplate.objects.get(pk=jt).name + f' (last {history} runs)\n')
         with connection.cursor() as cursor:
@@ -70,20 +67,20 @@ class Command(BaseCommand):
 
         for event in slowest_events:
             _id, job_id, host, duration, task, action, playbook = event
-            playbook = playbook.rsplit('/')[-1]
             if ignore and action in ignore:
                 continue
             if duration.total_seconds() < threshold:
                 break
+            playbook = playbook.rsplit('/')[-1]
+            human_duration = format_td(duration)
 
             fastest_summary = ''
             fastest_match = fastest.get((action, playbook))
-            if fastest_match[2] != format_td(duration) and (host, action, playbook) not in warned:
+            if fastest_match[2] != human_duration and (host, action, playbook) not in warned:
                 warned.add((host, action, playbook))
                 fastest_summary = ' ' + self.style.WARNING(f'{fastest_match[1]} ran this in {fastest_match[2]}s at /api/v2/job_events/{fastest_match[0]}/')
 
             url = f'/api/v2/jobs/{job_id}/'
-            human_duration = format_td(duration)
             print(' -- '.join([url, host, human_duration, action, task, playbook]) + fastest_summary)
             host_counts.setdefault(host, [])
             host_counts[host].append(duration)
