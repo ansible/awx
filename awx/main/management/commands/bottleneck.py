@@ -28,6 +28,7 @@ class Command(BaseCommand):
                 f'''
                 SELECT 
                     b.id, b.job_id, b.host_name, b.created - a.created delta,
+                    b.task task,
                     b.event_data::json->'task_action' task_action,
                     b.event_data::json->'task_path' task_path
                 FROM main_jobevent a JOIN main_jobevent b
@@ -50,7 +51,7 @@ class Command(BaseCommand):
 
         fastest = dict()
         for event in slowest_events:
-            _id, job_id, host, duration, action, playbook = event
+            _id, job_id, host, duration, task, action, playbook = event
             playbook = playbook.rsplit('/')[-1]
             if ignore and action in ignore:
                 continue
@@ -61,7 +62,7 @@ class Command(BaseCommand):
         warned = set()
         print(f'slowest tasks (--threshold={threshold})\n---')
         for event in slowest_events:
-            _id, job_id, host, duration, action, playbook = event
+            _id, job_id, host, duration, task, action, playbook = event
             playbook = playbook.rsplit('/')[-1]
             if ignore and action in ignore:
                 continue
@@ -76,7 +77,7 @@ class Command(BaseCommand):
 
             url = f'/api/v2/jobs/{job_id}/'
             human_duration = str(duration).split('.')[0]
-            print(' -- '.join([url, host, human_duration, action, playbook]) + fastest_summary)
+            print(' -- '.join([url, host, human_duration, action, task, playbook]) + fastest_summary)
             host_counts.setdefault(host, [])
             host_counts[host].append(duration)
 
