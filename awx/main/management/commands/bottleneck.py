@@ -52,6 +52,9 @@ class Command(BaseCommand):
             )
             slowest_events = cursor.fetchall()
 
+        def format_td(x):
+            return str(x).split('.')[0]
+
         fastest = dict()
         for event in slowest_events:
             _id, job_id, host, duration, task, action, playbook = event
@@ -59,7 +62,7 @@ class Command(BaseCommand):
             if ignore and action in ignore:
                 continue
             if host:
-                fastest[(action, playbook)] = (_id, host, str(duration).split('.')[0])
+                fastest[(action, playbook)] = (_id, host, format_td(duration))
 
         host_counts = dict()
         warned = set()
@@ -75,12 +78,12 @@ class Command(BaseCommand):
 
             fastest_summary = ''
             fastest_match = fastest.get((action, playbook))
-            if fastest_match[2] != duration.total_seconds() and (host, action, playbook) not in warned:
+            if fastest_match[2] != format_td(duration) and (host, action, playbook) not in warned:
                 warned.add((host, action, playbook))
                 fastest_summary = ' ' + self.style.WARNING(f'{fastest_match[1]} ran this in {fastest_match[2]}s at /api/v2/job_events/{fastest_match[0]}/')
 
             url = f'/api/v2/jobs/{job_id}/'
-            human_duration = str(duration).split('.')[0]
+            human_duration = format_td(duration)
             print(' -- '.join([url, host, human_duration, action, task, playbook]) + fastest_summary)
             host_counts.setdefault(host, [])
             host_counts[host].append(duration)
