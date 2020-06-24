@@ -12,14 +12,17 @@ class Command(BaseCommand):
                             help='ID of the Job Template to profile')
         parser.add_argument('--threshold', dest='threshold', type=float, default=5,
                             help='Only show tasks that took at least this many seconds (defaults to 5)')
+        parser.add_argument('--history', dest='history', type=float, default=25,
+                            help='The number of historic jobs to look at')
         parser.add_argument('--ignore', action='append', help='ignore a specific action (e.g., --ignore git)')
 
     def handle(self, *args, **options):
         jt = options['jt']
         threshold = options['threshold']
+        history = options['history']
         ignore = options['ignore']
 
-        print('## ' + JobTemplate.objects.get(pk=jt).name + ' (last 25 runs)\n')
+        print('## ' + JobTemplate.objects.get(pk=jt).name + f' (last {history} runs)\n')
         with connection.cursor() as cursor:
             cursor.execute(
                 f'''
@@ -38,7 +41,7 @@ class Command(BaseCommand):
                         SELECT unifiedjob_ptr_id FROM main_job
                         WHERE job_template_id={jt}
                         ORDER BY unifiedjob_ptr_id DESC
-                        LIMIT 25
+                        LIMIT {history}
                     )
                 ORDER BY delta DESC;
                 '''
