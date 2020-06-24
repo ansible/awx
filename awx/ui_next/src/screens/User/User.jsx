@@ -20,10 +20,10 @@ import UserDetail from './UserDetail';
 import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';
 import UserTeams from './UserTeams';
-import UserTokens from './UserTokens';
+import UserTokenList from './UserTokenList';
 import UserAccessList from './UserAccess/UserAccessList';
 
-function User({ i18n, setBreadcrumb }) {
+function User({ i18n, setBreadcrumb, me }) {
   const location = useLocation();
   const match = useRouteMatch('/users/:id');
   const userListUrl = `/users`;
@@ -69,8 +69,15 @@ function User({ i18n, setBreadcrumb }) {
     },
     { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 3 },
-    { name: i18n._(t`Tokens`), link: `${match.url}/tokens`, id: 4 },
   ];
+
+  if (me?.id === Number(match.params.id)) {
+    tabsArray.push({
+      name: i18n._(t`Tokens`),
+      link: `${match.url}/tokens`,
+      id: 4,
+    });
+  }
 
   let showCardHeader = true;
   if (['edit'].some(name => location.pathname.includes(name))) {
@@ -93,6 +100,7 @@ function User({ i18n, setBreadcrumb }) {
       </PageSection>
     );
   }
+
   return (
     <PageSection>
       <Card>
@@ -123,7 +131,7 @@ function User({ i18n, setBreadcrumb }) {
               </Route>
             )}
             <Route path="/users/:id/tokens">
-              <UserTokens id={Number(match.params.id)} />
+              <UserTokenList id={Number(match.params.id)} />
             </Route>
             <Route key="not-found" path="*">
               <ContentError isNotFound>

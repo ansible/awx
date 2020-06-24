@@ -44,6 +44,12 @@ class Users extends Base {
   readTeamsOptions(userId) {
     return this.http.options(`${this.baseUrl}${userId}/teams/`);
   }
+
+  readTokens(userId, params) {
+    return this.http.get(`${this.baseUrl}${userId}/tokens/`, {
+      params,
+    });
+  }
 }
 
 export default Users;

@@ -4,6 +4,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import { Config } from '../../contexts/Config';
 
 import UsersList from './UserList/UserList';
 import UserAdd from './UserAdd/UserAdd';
@@ -44,7 +45,11 @@ function Users({ i18n }) {
           <UserAdd />
         </Route>
         <Route path={`${match.path}/:id`}>
-          <User setBreadcrumb={addUserBreadcrumb} />
+          <Config>
+            {({ me }) => (
+              <User setBreadcrumb={addUserBreadcrumb} me={me || {}} />
+            )}
+          </Config>
         </Route>
         <Route path={`${match.path}`}>
           <UsersList />
