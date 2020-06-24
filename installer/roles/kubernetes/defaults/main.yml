@@ -14,6 +14,9 @@ kubernetes_awx_image: "{{ tower_package_name | default('ansible/awx') }}"
 kubernetes_web_image: "{{ kubernetes_awx_image }}"
 kubernetes_task_image: "{{ kubernetes_awx_image }}"
 
+awx_deployment_security_context_enabled: true
+awx_deployment_fsgroup: 0
+
 awx_psp_create: false
 awx_psp_name: 'awx'
 awx_psp_privileged: true

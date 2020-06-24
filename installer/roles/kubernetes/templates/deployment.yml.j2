@@ -104,8 +104,12 @@ spec:
         app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: awx
+{% if awx_deployment_security_context_enabled is defined and awx_deployment_security_context_enabled | bool %}
       securityContext:
-        fsGroup: 0
+{% if awx_deployment_fsgroup is defined %}
+        fsGroup: {{ awx_deployment_fsgroup }}
+{% endif %}
+{% endif %}
       terminationGracePeriodSeconds: 10
 {% if custom_venvs is defined %}
 {% set trusted_hosts = "" %}
