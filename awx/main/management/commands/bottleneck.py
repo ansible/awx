@@ -5,7 +5,7 @@ from awx.main.models import JobTemplate
 
 
 class Command(BaseCommand):
-    help = 'Discover the slowest tasks and hosts for a specific Job Template.'
+    help = "Find the slowest tasks and hosts for a Job Template's most recent runs."
 
     def add_arguments(self, parser):
         parser.add_argument('--template', dest='jt', type=int,
