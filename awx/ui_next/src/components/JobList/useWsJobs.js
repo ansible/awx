@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import useThrottle from './useThrottle';
 import { parseQueryString } from '../../util/qs';
+import sortJobs from './sortJobs';
 
 export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
   const location = useLocation();
@@ -114,29 +115,4 @@ function updateJob(jobs, index, message) {
     finished: message.finished,
   };
   return [...jobs.slice(0, index), job, ...jobs.slice(index + 1)];
-}
-
-function sortJobs(jobs, orderBy) {
-  if (orderBy !== '-finished') {
-    return jobs;
-  }
-
-  return jobs.sort((a, b) => {
-    if (!a.finished) {
-      return -1;
-    }
-    if (!b.finished) {
-      return 1;
-    }
-
-    const dateA = new Date(a.finished);
-    const dateB = new Date(b.finished);
-    if (dateA < dateB) {
-      return 1;
-    }
-    if (dateA > dateB) {
-      return -1;
-    }
-    return 0;
-  });
 }
