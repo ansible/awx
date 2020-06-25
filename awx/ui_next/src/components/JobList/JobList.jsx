@@ -68,7 +68,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const jobs = useWsJobs(results, fetchJobsById, !!defaultParams);
+  const jobs = useWsJobs(results, fetchJobsById, QS_CONFIG);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {
