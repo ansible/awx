@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import { OrganizationsAPI } from '../../../api';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import OrganizationTeamListItem from './OrganizationTeamListItem';
 
 const QS_CONFIG = getQSConfig('team', {
   page: 1,
@@ -13,7 +14,7 @@ const QS_CONFIG = getQSConfig('team', {
   order_by: 'name',
 });
 
-function OrganizationTeams({ id, i18n }) {
+function OrganizationTeamList({ id, i18n }) {
   const location = useLocation();
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
@@ -70,13 +71,21 @@ function OrganizationTeams({ id, i18n }) {
           key: 'name',
         },
       ]}
+      renderItem={item => (
+        <OrganizationTeamListItem
+          key={item.id}
+          value={item.name}
+          team={item}
+          detailUrl={`/teams/${item.id}`}
+        />
+      )}
     />
   );
 }
 
-OrganizationTeams.propTypes = {
+OrganizationTeamList.propTypes = {
   id: PropTypes.number.isRequired,
 };
 
-export { OrganizationTeams as _OrganizationTeams };
-export default withI18n()(OrganizationTeams);
+export { OrganizationTeamList as _OrganizationTeamList };
+export default withI18n()(OrganizationTeamList);
