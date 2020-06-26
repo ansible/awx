@@ -7,14 +7,16 @@ const sortFns = {
   started: byStarted,
 };
 
-export default function sortJobs(jobs, orderBy) {
-  const key = orderBy.replace('-', '');
+export default function sortJobs(jobs, params) {
+  const { order_by = '-finished', page_size = 20 } = params;
+  const key = order_by.replace('-', '');
   const fn = sortFns[key];
   if (!fn) {
-    return jobs;
+    return jobs.slice(0, page_size);
   }
 
-  return orderBy[0] === '-' ? jobs.sort(reverse(fn)) : jobs.sort(fn);
+  const sorted = order_by[0] === '-' ? jobs.sort(reverse(fn)) : jobs.sort(fn);
+  return sorted.slice(0, page_size);
 }
 
 function reverse(fn) {
@@ -33,10 +35,10 @@ function byFinished(a, b) {
 
 function byStarted(a, b) {
   if (!a.started) {
-    return -1;
+    return 1;
   }
   if (!b.started) {
-    return 1;
+    return -1;
   }
   return sort(new Date(a.started), new Date(b.started));
 }
@@ -50,15 +52,13 @@ function byName(a, b) {
 }
 
 function byCreatedBy(a, b) {
-  const nameA = a.summary_fields?.created_by?.username;
-  const nameB = b.summary_fields?.created_by?.username;
-  return sort(nameA, nameB);
+  const nameA = a.summary_fields?.created_by?.id;
+  const nameB = b.summary_fields?.created_by?.id;
+  return sort(nameA, nameB) * -1;
 }
 
 function byProject(a, b) {
-  const projA = a.summary_fields?.project?.id;
-  const projB = b.summary_fields?.project?.id;
-  return sort(projA, projB);
+  return sort(a.unified_job_template, b.unified_job_template);
 }
 
 function sort(a, b) {

@@ -31,7 +31,8 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
         job => !jobs.find(j => j.id === job.id)
       );
       if (deduplicated.length) {
-        setJobs([...deduplicated, ...jobs]);
+        const params = parseQueryString(qsConfig, location.search);
+        setJobs(sortJobs([...deduplicated, ...jobs], params));
       }
     })();
   }, [throttledJobsToFetch, fetchJobsById]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -54,7 +55,7 @@ export default function useWsJobs(initialJobs, fetchJobsById, qsConfig) {
     const jobId = lastMessage.unified_job_id;
     const index = jobs.findIndex(j => j.id === jobId);
     if (index > -1) {
-      setJobs(sortJobs(updateJob(jobs, index, lastMessage), params.order_by));
+      setJobs(sortJobs(updateJob(jobs, index, lastMessage), params));
     } else {
       enqueueJobId(lastMessage.unified_job_id);
     }
