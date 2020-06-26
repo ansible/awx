@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { NavExpandable, NavItem } from '@patternfly/react-core';
 
 class NavExpandableGroup extends Component {
@@ -41,9 +41,8 @@ class NavExpandableGroup extends Component {
             groupId={groupId}
             isActive={this.isActivePath(path)}
             key={path}
-            to={`/#${path}`}
           >
-            {title}
+            <Link to={path}>{title}</Link>
           </NavItem>
         ))}
       </NavExpandable>

@@ -94,6 +94,7 @@ USE_TZ = True
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ui', 'static'),
+    os.path.join(BASE_DIR, 'ui_next', 'build', 'static'),
     os.path.join(BASE_DIR, 'static'),
 )
 
@@ -253,6 +254,7 @@ TEMPLATES = [
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'ui_next', 'build'),
         ],
     },
 ]

@@ -30,7 +30,7 @@ awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
 awx/ui_next/node_modules/
 awx/ui_next/coverage/
-awx/ui_next/build/locales/_build
+awx/ui_next/build
 rsyslog.pid
 /tower-license
 /tower-license/**

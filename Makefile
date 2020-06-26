@@ -568,14 +568,25 @@ ui-zuul-lint-and-test:
 # UI NEXT TASKS
 # --------------------------------------
 
-ui-next-lint:
+awx/ui_next/node_modules:
 	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next lint
-	$(NPM_BIN) run --prefix awx/ui_next prettier-check
 
-ui-next-test:
-	$(NPM_BIN) --prefix awx/ui_next install
-	$(NPM_BIN) run --prefix awx/ui_next test
+ui-release-next:
+	mkdir -p awx/ui_next/build/static
+	touch awx/ui_next/build/static/.placeholder
+
+ui-devel-next: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next run build
+	mkdir -p awx/public/static/css
+	mkdir -p awx/public/static/js
+	mkdir -p awx/public/static/media
+	cp -r awx/ui_next/build/static/css/* awx/public/static/css
+	cp -r awx/ui_next/build/static/js/* awx/public/static/js
+	cp -r awx/ui_next/build/static/media/* awx/public/static/media
+
+clean-ui-next:
+	rm -rf awx/ui_next/node_modules
+	rm -rf awx/ui_next/build
 
 ui-next-zuul-lint-and-test:
 	$(NPM_BIN) --prefix awx/ui_next install
@@ -594,10 +605,10 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release VERSION
+dist/$(SDIST_TAR_FILE): ui-release ui-release-next VERSION
 	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/$(WHEEL_FILE): ui-release
+dist/$(WHEEL_FILE): ui-release ui-release-next
 	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
