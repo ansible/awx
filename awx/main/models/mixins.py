@@ -34,7 +34,7 @@ logger = logging.getLogger('awx.main.models.mixins')
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
            'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
-           'TaskManagerInventoryUpdateMixin', 'CustomVirtualEnvMixin']
+           'TaskManagerInventoryUpdateMixin', 'ExecutionEnvironmentMixin', 'CustomVirtualEnvMixin']
 
 
 class ResourceMixin(models.Model):
@@ -439,6 +439,22 @@ class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+
+class ExecutionEnvironmentMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='%(class)ss',
+        help_text=_('The container image to be used for execution.'),
+    )
+    pull = models.BooleanField(default=True)
 
 
 class CustomVirtualEnvMixin(models.Model):
