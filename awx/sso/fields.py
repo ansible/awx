@@ -173,6 +173,11 @@ class AuthenticationBackendsField(fields.StringListField):
             'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
             'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET',
         ]),
+        ('social_core.backends.cognito.CognitoOAuth2', [
+            'SOCIAL_AUTH_COGNITO_POOL_DOMAIN',
+            'SOCIAL_AUTH_COGNITO_KEY',
+            'SOCIAL_AUTH_COGNITO_SECRET',
+        ]),
         ('social_core.backends.github.GithubOAuth2', [
             'SOCIAL_AUTH_GITHUB_KEY',
             'SOCIAL_AUTH_GITHUB_SECRET',

@@ -46,6 +46,17 @@
                         return newOption;
                     }
 
+                    function parseCognito(option) {
+                        var newOption = {};
+
+                        newOption.type = "cognito";
+                        newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-cognito";
+                        newOption.link = option.login_url;
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "Cognito");
+
+                        return newOption;
+                    }
+
                     function parseGithub(option, key) {
                         var newOption = {};
 
@@ -92,6 +103,8 @@
                             finalOption = parseAzure(option, key);
                         } else if (key.split("-")[0] === "google") {
                             finalOption = parseGoogle(option, key);
+                        } else if (key.split("-")[0] === "cognito") {
+                            finalOption = parseCognito(option, key);
                         } else if (key.split("-")[0] === "github") {
                             finalOption = parseGithub(option, key);
                         } else if (key.split(":")[0] === "saml") {

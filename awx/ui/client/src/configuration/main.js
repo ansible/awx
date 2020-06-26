@@ -14,6 +14,7 @@ import configurationGithubForm from './forms/auth-form/sub-forms/auth-github.for
 import configurationGithubOrgForm from './forms/auth-form/sub-forms/auth-github-org.form';
 import configurationGithubTeamForm from './forms/auth-form/sub-forms/auth-github-team.form';
 import configurationGoogleForm from './forms/auth-form/sub-forms/auth-google-oauth2.form';
+import configurationCognitoForm from './forms/auth-form/sub-forms/auth-cognito-oauth2.form';
 import configurationLdapForm from './forms/auth-form/sub-forms/auth-ldap.form.js';
 import configurationLdap1Form from './forms/auth-form/sub-forms/auth-ldap1.form.js';
 import configurationLdap2Form from './forms/auth-form/sub-forms/auth-ldap2.form.js';
@@ -47,6 +48,7 @@ angular.module('configuration', [])
     .factory('configurationGithubOrgForm', configurationGithubOrgForm)
     .factory('configurationGithubTeamForm', configurationGithubTeamForm)
     .factory('configurationGoogleForm', configurationGoogleForm)
+    .factory('configurationCognitoForm', configurationCognitoForm)
     .factory('configurationLdapForm', configurationLdapForm)
     .factory('configurationLdap1Form', configurationLdap1Form)
     .factory('configurationLdap2Form', configurationLdap2Form)

@@ -62,6 +62,10 @@
                 <div id="auth-google-form"></div>
             </div>
 
+            <div ng-show="authVm.activeAuthForm === 'cognito_oauth'">
+                <div id="auth-cognito-form"></div>
+            </div>
+
             <div ng-show="authVm.activeAuthForm === 'ldap'">
                 <div id="auth-ldap-form"></div>
             </div>

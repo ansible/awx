@@ -91,6 +91,7 @@ export default [
             {label: i18n._('Azure AD'), value: 'azure'},
             {label: i18n._('GitHub'), value: 'github'},
             {label: i18n._('Google OAuth2'), value: 'google_oauth'},
+            {label: i18n._('Cognito OAuth2'), value: 'cognito_oauth'},
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
             {label: i18n._('SAML'), value: 'saml'},
@@ -152,6 +153,11 @@ export default [
                 formDef: formDefs.google_oauth,
                 id: 'auth-google-form',
                 name: 'google_oauth'
+            },
+            {
+                formDef: formDefs.cognito_oauth,
+                id: 'auth-cognito-form',
+                name: 'cognito_oauth'
             },
             {
                 formDef: formDefs.radius,

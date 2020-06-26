@@ -622,6 +622,58 @@ register(
 )
 
 ###############################################################################
+# COGNITO OAUTH2 AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_COGNITO_CALLBACK_URL',
+    field_class=fields.CharField,
+    read_only=True,
+    default=SocialAuthCallbackURL('cognito-oauth2'),
+    label=_('Cognito OAuth2 Callback URL'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
+    category=_('Cognito OAuth2'),
+    category_slug='cognito-oauth2',
+    depends_on=['TOWER_URL_BASE'],
+)
+
+register(
+    'SOCIAL_AUTH_COGNITO_POOL_DOMAIN',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('Cognito Pool Domain'),
+    help_text=_('The Cognito Pool Domain from your web application.'),
+    category=_('Cognito OAuth2'),
+    category_slug='cognito-oauth2',
+)
+
+register(
+    'SOCIAL_AUTH_COGNITO_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('Cognito OAuth2 Key'),
+    help_text=_('The OAuth2 key from your web application.'),
+    category=_('Cognito OAuth2'),
+    category_slug='cognito-oauth2',
+)
+
+register(
+    'SOCIAL_AUTH_COGNITO_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('Cognito OAuth2 Secret'),
+    help_text=_('The OAuth2 secret from your web application.'),
+    category=_('Cognito OAuth2'),
+    category_slug='cognito-oauth2',
+    encrypted=True,
+)
+
+###############################################################################
 # GITHUB OAUTH2 AUTHENTICATION SETTINGS
 ###############################################################################
 

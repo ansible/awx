@@ -334,6 +334,7 @@ AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.cognito.CognitoOAuth2',
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github.GithubOrganizationOAuth2',
     'social_core.backends.github.GithubTeamOAuth2',
@@ -497,6 +498,11 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
+
+# Note: These settings may be overridden by database settings.
+SOCIAL_AUTH_COGNITO_POOL_DOMAIN = ''
+SOCIAL_AUTH_COGNITO_KEY = ''
+SOCIAL_AUTH_COGNITO_SECRET = ''
 
 SOCIAL_AUTH_GITHUB_KEY = ''
 SOCIAL_AUTH_GITHUB_SECRET = ''
