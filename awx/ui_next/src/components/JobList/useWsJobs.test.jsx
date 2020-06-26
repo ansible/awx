@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
 import WS from 'jest-websocket-mock';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import useWsJobs from './useWsJobs';
 
 /*
@@ -17,7 +17,8 @@ function TestInner() {
   return <div />;
 }
 function Test({ jobs, fetch }) {
-  const syncedJobs = useWsJobs(jobs, fetch);
+  const qsConfig = {};
+  const syncedJobs = useWsJobs(jobs, fetch, qsConfig);
   return <TestInner jobs={syncedJobs} />;
 }
 
@@ -35,7 +36,7 @@ describe('useWsJobs hook', () => {
 
   test('should return jobs list', () => {
     const jobs = [{ id: 1 }];
-    wrapper = mount(<Test jobs={jobs} />);
+    wrapper = mountWithContexts(<Test jobs={jobs} />);
 
     expect(wrapper.find('TestInner').prop('jobs')).toEqual(jobs);
     WS.clean();
@@ -47,7 +48,7 @@ describe('useWsJobs hook', () => {
 
     const jobs = [{ id: 1 }];
     await act(async () => {
-      wrapper = await mount(<Test jobs={jobs} />);
+      wrapper = await mountWithContexts(<Test jobs={jobs} />);
     });
 
     await mockServer.connected;
@@ -70,7 +71,7 @@ describe('useWsJobs hook', () => {
 
     const jobs = [{ id: 1, status: 'running' }];
     await act(async () => {
-      wrapper = await mount(<Test jobs={jobs} />);
+      wrapper = await mountWithContexts(<Test jobs={jobs} />);
     });
 
     await mockServer.connected;
@@ -105,9 +106,9 @@ describe('useWsJobs hook', () => {
     global.document.cookie = 'csrftoken=abc123';
     const mockServer = new WS('wss://localhost/websocket/');
     const jobs = [{ id: 1 }];
-    const fetch = jest.fn();
+    const fetch = jest.fn(() => []);
     await act(async () => {
-      wrapper = await mount(<Test jobs={jobs} fetch={fetch} />);
+      wrapper = await mountWithContexts(<Test jobs={jobs} fetch={fetch} />);
     });
 
     await mockServer.connected;
