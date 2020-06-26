@@ -61,6 +61,15 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         blank=True,
         related_name='%(class)s_notification_templates_for_approvals'
     )
+    default_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('The default execution environment for jobs run by this organization.'),
+    )
 
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,

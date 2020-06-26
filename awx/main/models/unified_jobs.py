@@ -39,7 +39,7 @@ from awx.main.models.base import (
 from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
-from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
 from awx.main.utils import (
     camelcase_to_underscore, get_model_for_type,
     encrypt_dict, decrypt_field, _inventory_updates,
@@ -59,7 +59,7 @@ logger_job_lifecycle = logging.getLogger('awx.analytics.job_lifecycle')
 # NOTE: ACTIVE_STATES moved to constants because it is used by parent modules
 
 
-class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
+class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEnvironmentMixin, NotificationFieldsModel):
     '''
     Concrete base class for unified job templates.
     '''
@@ -527,7 +527,7 @@ class StdoutMaxBytesExceeded(Exception):
 
 
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique,
-                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
+                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
