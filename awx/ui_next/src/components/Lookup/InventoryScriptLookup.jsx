@@ -64,7 +64,7 @@ function InventoryScriptLookup({
       fieldId="inventory-script"
       helperTextInvalid={helperTextInvalid}
       isRequired={required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Inventory script`)}
     >
       <Lookup

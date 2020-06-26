@@ -32,6 +32,9 @@ describe('<InventoryHostDetail />', () => {
       assertDetail('Description', 'localhost description');
       assertDetail('Created', '10/28/2019, 9:26:54 PM');
       assertDetail('Last Modified', '10/29/2019, 8:18:41 PM');
+      expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
+        1
+      );
     });
 
     test('should show edit button for users with edit permission', () => {

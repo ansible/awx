@@ -72,10 +72,12 @@ function HostDetail({ i18n, host }) {
       <HostToggle host={host} css="padding-bottom: 40px" />
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} dataCy="host-name" />
-        <Detail
-          label={i18n._(t`Activity`)}
-          value={<Sparkline jobs={recentPlaybookJobs} />}
-        />
+        {recentPlaybookJobs?.length > 0 && (
+          <Detail
+            label={i18n._(t`Activity`)}
+            value={<Sparkline jobs={recentPlaybookJobs} />}
+          />
+        )}
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail
           label={i18n._(t`Inventory`)}
