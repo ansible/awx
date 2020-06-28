@@ -182,28 +182,23 @@ def create_schema_nodes(module, schema, workflow_id):
         workflow_node_fields = {}
         search_fields = {}
         association_fields = {}
-        
+
         # Set Search fields
         search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
-
-        # Lookup Job Template ID
-        try:
-            if workflow_node['unified_job_template']['name']:
-              search_fields = {'name': workflow_node['unified_job_template']['name']}
-              if workflow_node['unified_job_template']['organization']['name']:
-                  organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
-                  search_fields['organization'] = organization_id
-              job_template = module.get_one('job_templates', **{'data': search_fields})
-              workflow_node_fields['unified_job_template'] = job_template['id']
-        except:
-            pass
-
-        # Lookup Inventory ID
-        try:
-            if workflow_node['inventory']:
-                workflow_node_fields['inventory'] = module.resolve_name_to_id('inventories', workflow_node['inventory'])
-        except:
-            pass
+        
+        # Lookup Job Template ID      
+        if workflow_node['unified_job_template']['name']:
+          search_fields = {'name': workflow_node['unified_job_template']['name']}
+          if "inventory" in workflow_node['unified_job_template']:
+              #workflow_node['unified_job_template']['inventory']:
+              organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
+              search_fields['organization'] = organization_id
+          else:
+              #workflow_node['unified_job_template']['organization']:
+              organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
+              search_fields['organization'] = organization_id
+          unified_job_template = module.get_one('unified_job_templates', **{'data': search_fields})
+          workflow_node_fields['unified_job_template'] = unified_job_template['id']
 
         # Lookup Values for other fields
 
@@ -366,7 +361,7 @@ def main():
                 workflow_job_template, organization
             ))
         workflow_job_template_id = wfjt_data['id']
-
+        
     # Work thorugh and lookup value for schema fields
     # Destroy current nodes if selected.
     if destroy_current_schema:
@@ -375,6 +370,7 @@ def main():
     create_schema_nodes(module, schema, workflow_job_template_id)
     # Create Schema Associations
     create_schema_nodes_association(module, schema, workflow_job_template_id)
+    #raise AnsibleError('var error:  {}'.format(workflow_job_template_id))
     module.exit_json(**module.json_output)
 
 
