@@ -31,6 +31,8 @@ EXPORTABLE_RELATIONS = [
     'NotificationTemplates',
     'WorkflowJobTemplateNodes',
     'Credentials',
+    'Groups',
+    'Hosts'
 ]
 
 
@@ -38,6 +40,8 @@ EXPORTABLE_DEPENDENT_OBJECTS = [
     'Labels',
     'SurveySpec',
     'Schedules',
+    'Groups',
+    'Hosts',
     # WFJT Nodes are a special case, we want full data for the create
     # view and natural keys for the attach views.
     'WorkflowJobTemplateNodes',
@@ -89,6 +93,26 @@ class ApiV2(base.Base):
                 return None  # This foreign key has unresolvable dependencies
             fields[key] = rel_natural_key
 
+        natural_key = _page.get_natural_key(self._cache)
+
+        if natural_key['type'] == 'inventory':
+            related = self._export_inventories(_page, post_fields)
+            if related:
+                fields['related'] = related
+        else:
+            related = self._export_related(_page, post_fields)
+            if related:
+                fields['related'] = related
+
+        if natural_key is None:
+            log.error("Unable to construct a natural key for object %s.", _page.endpoint)
+            return None
+
+        fields['natural_key'] = natural_key
+
+        return utils.remove_encrypted(fields)
+
+    def _export_related(self, _page, post_fields):
         related = {}
         for key, rel_endpoint in _page.related.items():
             if key in post_fields or not rel_endpoint:
@@ -126,16 +150,28 @@ class ApiV2(base.Base):
             else:
                 related[key] = rel_page.json
 
-        if related:
-            fields['related'] = related
+        return related
 
-        natural_key = _page.get_natural_key(self._cache)
-        if natural_key is None:
-            log.error("Unable to construct a natural key for object %s.", _page.endpoint)
-            return None
-        fields['natural_key'] = natural_key
+    def _export_inventories(self, _page, post_fields):
+        related = {}
+        for key, rel_endpoint in _page.related.items():
+            if key in post_fields or not rel_endpoint:
+                continue
 
-        return utils.remove_encrypted(fields)
+            rel_post_fields = utils.get_post_fields(rel_endpoint, self._cache)
+            if rel_post_fields is None:
+                log.debug("%s is a read-only endpoint.", rel_endpoint)
+                continue
+
+            rel_page = self._cache.get_page(rel_endpoint)
+            if rel_page is None:
+                continue
+
+            if 'results' in rel_page:
+                results = (self._export(x, rel_post_fields) for x in rel_page.results)
+                related[key] = [x for x in results if x is not None]
+
+        return related
 
     def _export_list(self, endpoint):
         post_fields = utils.get_post_fields(endpoint, self._cache)

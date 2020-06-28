@@ -259,6 +259,7 @@ class Group(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
     optional_dependencies = [Credential, InventoryScript]
+    NATURAL_KEY = ('name', 'inventory')
 
     @property
     def is_root_group(self):
@@ -367,6 +368,7 @@ page.register_page([resources.groups,
 class Host(HasCreate, HasVariables, base.Base):
 
     dependencies = [Inventory]
+    NATURAL_KEY = ('name', 'inventory')
 
     def payload(self, inventory, **kwargs):
         payload = PseudoNamespace(
