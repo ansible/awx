@@ -14,14 +14,11 @@ npm --prefix=awx/ui_next start
 
 ### Using an External Server
 If you normally run awx on an external host/server (in this example, `awx.local`),
-you'll need to update your django settings and use the `TARGET_HOST` and `TARGET_PORT` environment variables:
+you'll need use the `TARGET` environment variable when starting the ui development
+server:
 
 ```shell
-echo "CSRF_TRUSTED_ORIGINS = ['awx.local:8043']" >> /awx/settings/development.py
-TARGET_HOST='awx.local:8043' TARGET_PORT=8043 npm --prefix awx/ui_next start
-```
-**Note:** When using an external server, you must also manually update the `proxy` field in `package.json`
-to point to the new websocket url.
+TARGET='https://awx.local:8043' npm --prefix awx/ui_next start
 
 ## Testing
 ```shell
@@ -79,7 +76,7 @@ To run:
 ```shell
 cd awx/awx/ui_next
 docker build -t awx-ui-next .
-docker run --name tools_ui_next_1 --network tools_default --link 'tools_awx_1:awx' -e TARGET_HOST=awx -p '3001:3001' --rm -v $(pwd)/src:/ui_next/src awx-ui-next
+docker run --name tools_ui_next_1 --network tools_default --link 'tools_awx_1:awx' -e TARGET="https://awx:8043" -p '3001:3001' --rm -v $(pwd)/src:/ui_next/src awx-ui-next
 ```
 
-**Note:** This is for CI, test systems, zuul, etc. For local development, see [usage](https://github.com/ansible/awx/blob/devel/awx/ui_next/README.md#usage)
+**Note:** This is for CI, test systems, zuul, etc. For local development, see [usage](https://github.com/ansible/awx/blob/devel/awx/ui_next/README.md#Development)
