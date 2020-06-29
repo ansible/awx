@@ -179,7 +179,7 @@ describe('<CredentialAdd />', () => {
       expect(history.location.pathname).toBe('/credentials/13/details');
     });
 
-    test('handleCancel should return the user back to the inventories list', async () => {
+    test('handleCancel should return the user back to the credentials list', async () => {
       await waitForElement(wrapper, 'isLoading', el => el.length === 0);
       wrapper.find('Button[aria-label="Cancel"]').simulate('click');
       expect(history.location.pathname).toEqual('/credentials');

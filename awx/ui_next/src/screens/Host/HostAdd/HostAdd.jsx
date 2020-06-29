@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import { CardBody } from '../../../components/Card';
+
 import HostForm from '../../../components/HostForm';
+import { CardBody } from '../../../components/Card';
 import { HostsAPI } from '../../../api';
 
 function HostAdd() {
