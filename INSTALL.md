@@ -575,7 +575,7 @@ If you're deploying using Docker Compose, container names will be prefixed by th
 Immediately after the containers start, the *awx_task* container will perform required setup tasks, including database migrations. These tasks need to complete before the web interface can be accessed. To monitor the progress, you can follow the container's STDOUT by running the following:
 
 ```bash
-# Tail the the awx_task log
+# Tail the awx_task log
 $ docker logs -f awx_task
 ```
 
