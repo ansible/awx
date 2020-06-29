@@ -19,6 +19,7 @@ server:
 
 ```shell
 TARGET='https://awx.local:8043' npm --prefix awx/ui_next start
+```
 
 ## Testing
 ```shell
