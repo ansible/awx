@@ -15,6 +15,7 @@ import PaginatedDataList, {
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
+
 import CredentialTypeListItem from './CredentialTypeListItem';
 
 const QS_CONFIG = getQSConfig('credential_type', {
