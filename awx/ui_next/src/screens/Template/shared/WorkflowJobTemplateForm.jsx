@@ -4,7 +4,13 @@ import PropTypes, { shape } from 'prop-types';
 
 import { withI18n } from '@lingui/react';
 import { useField, withFormik } from 'formik';
-import { Form, FormGroup, Checkbox, TextInput } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  Checkbox,
+  TextInput,
+  Title,
+} from '@patternfly/react-core';
 import { required } from '../../../util/validators';
 
 import FieldWithPrompt from '../../../components/FieldWithPrompt';
@@ -16,6 +22,7 @@ import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
+  SubFormLayout,
 } from '../../../components/FormLayout';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
 import { InventoryLookup } from '../../../components/Lookup';
@@ -175,39 +182,47 @@ function WorkflowJobTemplateForm({
           )}
         />
       </FormFullWidthLayout>
-      <FormCheckboxLayout fieldId="options" isInline label={i18n._(t`Options`)}>
-        <Checkbox
-          aria-label={i18n._(t`Enable Webhook`)}
-          label={
-            <span>
-              {i18n._(t`Enable Webhook`)}
-              &nbsp;
-              <FieldTooltip
-                content={i18n._(
-                  t`Enable Webhook for this workflow job template.`
-                )}
-              />
-            </span>
-          }
-          id="wfjt-enabled-webhooks"
-          isChecked={enableWebhooks}
-          onChange={checked => {
-            setEnableWebhooks(checked);
-          }}
-        />
-        <CheckboxField
-          name="allow_simultaneous"
-          id="allow_simultaneous"
-          tooltip={i18n._(
-            t`If enabled, simultaneous runs of this workflow job template will be allowed.`
-          )}
-          label={i18n._(t`Enable Concurrent Jobs`)}
-        />
-      </FormCheckboxLayout>
-      <WebhookSubForm
-        enableWebhooks={enableWebhooks}
-        templateType={template.type}
-      />
+      <FormGroup fieldId="options" label={i18n._(t`Options`)}>
+        <FormCheckboxLayout isInline>
+          <Checkbox
+            aria-label={i18n._(t`Enable Webhook`)}
+            label={
+              <span>
+                {i18n._(t`Enable Webhook`)}
+                &nbsp;
+                <FieldTooltip
+                  content={i18n._(
+                    t`Enable Webhook for this workflow job template.`
+                  )}
+                />
+              </span>
+            }
+            id="wfjt-enabled-webhooks"
+            isChecked={enableWebhooks}
+            onChange={checked => {
+              setEnableWebhooks(checked);
+            }}
+          />
+          <CheckboxField
+            name="allow_simultaneous"
+            id="allow_simultaneous"
+            tooltip={i18n._(
+              t`If enabled, simultaneous runs of this workflow job template will be allowed.`
+            )}
+            label={i18n._(t`Enable Concurrent Jobs`)}
+          />
+        </FormCheckboxLayout>
+      </FormGroup>
+
+      {enableWebhooks && (
+        <SubFormLayout>
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Webhook details`)}
+          </Title>
+          <WebhookSubForm templateType={template.type} />
+        </SubFormLayout>
+      )}
+
       {submitError && <FormSubmitError error={submitError} />}
       <FormActionGroup onCancel={handleCancel} onSubmit={handleSubmit} />
     </Form>

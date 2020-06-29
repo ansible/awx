@@ -9,6 +9,7 @@ import {
   Switch,
   Checkbox,
   TextInput,
+  Title,
 } from '@patternfly/react-core';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -27,6 +28,7 @@ import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
+  SubFormLayout,
 } from '../../../components/FormLayout';
 import { VariablesField } from '../../../components/CodeMirrorInput';
 import { required } from '../../../util/validators';
@@ -547,30 +549,53 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
-            <WebhookSubForm
-              enableWebhooks={enableWebhooks}
-              templateType={template.type}
-            />
-            {allowCallbacks && (
+
+            {(allowCallbacks || enableWebhooks) && (
               <>
-                {callbackUrl && (
-                  <FormGroup
-                    label={i18n._(t`Provisioning Callback URL`)}
-                    fieldId="template-callback-url"
-                  >
-                    <TextInput
-                      id="template-callback-url"
-                      isDisabled
-                      value={callbackUrl}
-                    />
-                  </FormGroup>
-                )}
-                <FormField
-                  id="template-host-config-key"
-                  name="host_config_key"
-                  label={i18n._(t`Host Config Key`)}
-                  validate={allowCallbacks ? required(null, i18n) : null}
-                />
+                <SubFormLayout>
+                  {allowCallbacks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Provisioning Callback details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        {callbackUrl && (
+                          <FormGroup
+                            label={i18n._(t`Provisioning Callback URL`)}
+                            fieldId="template-callback-url"
+                          >
+                            <TextInput
+                              id="template-callback-url"
+                              isDisabled
+                              value={callbackUrl}
+                            />
+                          </FormGroup>
+                        )}
+                        <FormField
+                          id="template-host-config-key"
+                          name="host_config_key"
+                          label={i18n._(t`Host Config Key`)}
+                          validate={
+                            allowCallbacks ? required(null, i18n) : null
+                          }
+                        />
+                      </FormColumnLayout>
+                    </>
+                  )}
+
+                  {allowCallbacks && enableWebhooks && <br />}
+
+                  {enableWebhooks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Webhook details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        <WebhookSubForm templateType={template.type} />
+                      </FormColumnLayout>
+                    </>
+                  )}
+                </SubFormLayout>
               </>
             )}
           </FormColumnLayout>

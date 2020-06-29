@@ -44,7 +44,9 @@ describe('<WorkflowJobTemplateForm/>', () => {
     related: {
       webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
     },
+    webhook_credential: null,
     webhook_key: 'sdfghjklmnbvcdsew435678iokjhgfd',
+    webhook_service: 'github',
   };
 
   beforeEach(async () => {

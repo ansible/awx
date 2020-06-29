@@ -34,7 +34,7 @@ describe('<WebhookSubForm />', () => {
       wrapper = mountWithContexts(
         <Route path="templates/:templateType/:id/edit">
           <Formik initialValues={initialValues}>
-            <WebhookSubForm enableWebhooks templateType="job_template" />
+            <WebhookSubForm templateType="job_template" />
           </Formik>
         </Route>,
         {
@@ -103,7 +103,7 @@ describe('<WebhookSubForm />', () => {
               webhook_key: 'A NEW WEBHOOK KEY WILL BE GENERATED ON SAVE.',
             }}
           >
-            <WebhookSubForm enableWebhooks templateType="job_template" />
+            <WebhookSubForm templateType="job_template" />
           </Formik>
         </Route>,
         {
@@ -133,10 +133,7 @@ describe('<WebhookSubForm />', () => {
       newWrapper = mountWithContexts(
         <Route path="templates/:templateType/:id/edit">
           <Formik initialValues={{ ...initialValues, webhook_url }}>
-            <WebhookSubForm
-              enableWebhooks
-              templateType="workflow_job_template"
-            />
+            <WebhookSubForm templateType="workflow_job_template" />
           </Formik>
         </Route>,
         {
