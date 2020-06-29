@@ -1,8 +1,10 @@
 import React from 'react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { node, string } from 'prop-types';
-import { Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { formatDateString } from '../../util/dates';
 import _Detail from './Detail';
 import { SummaryFieldUser } from '../../types';
@@ -11,7 +13,7 @@ const Detail = styled(_Detail)`
   word-break: break-word;
 `;
 
-function UserDateDetail({ label, date, user, dataCy = null }) {
+function UserDateDetail({ i18n, label, date, user, dataCy = null }) {
   const dateStr = formatDateString(date);
   const username = user ? user.username : '';
   return (
@@ -20,9 +22,10 @@ function UserDateDetail({ label, date, user, dataCy = null }) {
       dataCy={dataCy}
       value={
         user ? (
-          <Trans>
-            {dateStr} by <Link to={`/users/${user.id}`}>{username}</Link>
-          </Trans>
+          <span>
+            {dateStr} {i18n._(t`by`)}{' '}
+            <Link to={`/users/${user.id}`}>{username}</Link>
+          </span>
         ) : (
           dateStr
         )
@@ -39,4 +42,4 @@ UserDateDetail.defaultProps = {
   user: null,
 };
 
-export default UserDateDetail;
+export default withI18n()(UserDateDetail);
