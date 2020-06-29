@@ -50,7 +50,7 @@ function Inventories({ i18n }) {
         [`${inventoryHostsPath}/${nested?.id}`]: `${nested?.name}`,
         [`${inventoryHostsPath}/${nested?.id}/edit`]: i18n._(t`Edit details`),
         [`${inventoryHostsPath}/${nested?.id}/details`]: i18n._(
-          t`Host Details`
+          t`Host details`
         ),
         [`${inventoryHostsPath}/${nested?.id}/completed_jobs`]: i18n._(
           t`Completed jobs`
@@ -80,7 +80,7 @@ function Inventories({ i18n }) {
         ),
         [`${inventorySourcesPath}/${nested?.id}/schedules/${schedule?.id}`]: `${schedule?.name}`,
         [`${inventorySourcesPath}/${nested?.id}/schedules/${schedule?.id}/details`]: i18n._(
-          t`Schedule Details`
+          t`Schedule details`
         ),
       });
     },
