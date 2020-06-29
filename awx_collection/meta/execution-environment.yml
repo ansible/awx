@@ -1,5 +1,5 @@
 dependencies:
   python:
-  - pytz
-  - awxkit
+  - pytz  # for tower_schedule_rrule lookup plugin
+  - awxkit  # For import and export modules
 version: 1
