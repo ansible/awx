@@ -65,11 +65,6 @@ function CredentialType({ i18n, setBreadcrumb }) {
     },
   ];
 
-  let cardHeader = <RoutedTabs tabsArray={tabsArray} />;
-  if (pathname.endsWith('edit')) {
-    cardHeader = null;
-  }
-
   if (!isLoading && contentError) {
     return (
       <PageSection>
@@ -89,6 +84,11 @@ function CredentialType({ i18n, setBreadcrumb }) {
     );
   }
 
+  let cardHeader = <RoutedTabs tabsArray={tabsArray} />;
+  if (pathname.endsWith('edit')) {
+    cardHeader = null;
+  }
+
   return (
     <PageSection>
       <Card>
@@ -104,7 +104,7 @@ function CredentialType({ i18n, setBreadcrumb }) {
             {credentialType && (
               <>
                 <Route path="/credential_types/:id/edit">
-                  <CredentialTypeEdit />
+                  <CredentialTypeEdit credentialType={credentialType} />
                 </Route>
                 <Route path="/credential_types/:id/details">
                   <CredentialTypeDetails credentialType={credentialType} />

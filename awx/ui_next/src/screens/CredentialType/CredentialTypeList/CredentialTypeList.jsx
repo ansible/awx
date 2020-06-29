@@ -131,7 +131,7 @@ function CredentialTypeList({ i18n }) {
             )}
             renderItem={credentialType => (
               <CredentialTypeListItem
-                key={credentialTypes.id}
+                key={credentialType.id}
                 value={credentialType.name}
                 credentialType={credentialType}
                 detailUrl={`${match.url}/${credentialType.id}/details`}

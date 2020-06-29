@@ -22,6 +22,8 @@ function FormSubmitError({ error }) {
       Object.values(error.response.data).forEach(value => {
         if (Array.isArray(value)) {
           messages = messages.concat(value);
+        } else {
+          messages.push(value);
         }
       });
       setErrorMessage(messages.length > 0 ? messages : null);
