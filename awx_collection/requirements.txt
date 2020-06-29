@@ -1,0 +1,3 @@
+pytz  # for tower_schedule_rrule lookup plugin
+python-dateutil>=2.7.0  # tower_schedule_rrule
+awxkit  # For import and export modules
