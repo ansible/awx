@@ -25,6 +25,29 @@
     "rrule": "^2.6.4",
     "styled-components": "^4.2.0"
   },
+  "devDependencies": {
+    "@babel/polyfill": "^7.8.7",
+    "@lingui/cli": "^2.9.1",
+    "@lingui/macro": "^2.9.1",
+    "@nteract/mockument": "^1.0.4",
+    "babel-core": "^7.0.0-bridge.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "enzyme-to-json": "^3.3.5",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^5.0.0",
+    "eslint-import-resolver-webpack": "0.11.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-react-hooks": "^2.2.0",
+    "http-proxy-middleware": "^1.0.3",
+    "jest-websocket-mock": "^2.0.2",
+    "mock-socket": "^9.0.3",
+    "prettier": "^1.18.2",
+    "react-scripts": "^3.4.1"
+  },
   "scripts": {
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
     "build": "react-scripts build",
@@ -49,29 +72,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@babel/polyfill": "^7.8.7",
-    "@lingui/cli": "^2.9.1",
-    "@lingui/macro": "^2.9.1",
-    "@nteract/mockument": "^1.0.4",
-    "babel-core": "^7.0.0-bridge.0",
-    "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.14.0",
-    "enzyme-to-json": "^3.3.5",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^5.0.0",
-    "eslint-import-resolver-webpack": "0.11.1",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.1",
-    "eslint-plugin-react": "^7.11.1",
-    "eslint-plugin-react-hooks": "^2.2.0",
-    "http-proxy-middleware": "^1.0.3",
-    "jest-websocket-mock": "^2.0.2",
-    "mock-socket": "^9.0.3",
-    "prettier": "^1.18.2",
-    "react-scripts": "^3.4.1"
   },
   "jest": {
     "snapshotSerializers": [
