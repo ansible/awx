@@ -224,7 +224,7 @@ def main():
 
     inventory = module.params.get('inventory')
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     # Create the data that gets sent for create and update
     for field_name in (
