@@ -108,6 +108,12 @@ function Inventory({ i18n, setBreadcrumb }) {
     showCardHeader = false;
   }
 
+  if (inventory?.kind === 'smart') {
+    return (
+      <Redirect to={`/inventories/smart_inventory/${inventory.id}/details`} />
+    );
+  }
+
   return (
     <PageSection>
       <Card>

@@ -77,7 +77,7 @@
   "created": "2019-10-04T15:29:11.542911Z",
   "modified": "2019-10-04T15:29:11.542924Z",
   "name": "Smart Inv",
-  "description": "",
+  "description": "smart inv description",
   "organization": 1,
   "kind": "smart",
   "host_filter": "search=local",
