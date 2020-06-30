@@ -14,7 +14,7 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
         let form = OrganizationForm(),
             defaultUrl = GetBasePath('organizations'),
             base = $location.path().replace(/^\//, '').split('/')[0],
-            master = {},
+            main = {},
             id = $stateParams.organization_id,
             instance_group_url = defaultUrl + id + '/instance_groups/';
 
@@ -55,7 +55,7 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
             for (fld in form.fields) {
                 if (typeof data[fld] !== 'undefined') {
                     $scope[fld] = data[fld];
-                    master[fld] = data[fld];
+                    main[fld] = data[fld];
                 }
             }
 
@@ -112,7 +112,7 @@ export default ['$scope', '$location', '$stateParams', 'isOrgAdmin', 'isNotifica
                             });
                         });
                     $scope.organization_name = $scope.name;
-                    master = params;
+                    main = params;
                 })
                 .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, OrganizationForm, {
