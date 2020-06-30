@@ -24,6 +24,7 @@ import Roles from './models/Roles';
 import Schedules from './models/Schedules';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
+import Tokens from './models/Tokens';
 import UnifiedJobTemplates from './models/UnifiedJobTemplates';
 import UnifiedJobs from './models/UnifiedJobs';
 import Users from './models/Users';
@@ -58,6 +59,7 @@ const RolesAPI = new Roles();
 const SchedulesAPI = new Schedules();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
+const TokensAPI = new Tokens();
 const UnifiedJobTemplatesAPI = new UnifiedJobTemplates();
 const UnifiedJobsAPI = new UnifiedJobs();
 const UsersAPI = new Users();
@@ -93,6 +95,7 @@ export {
   SchedulesAPI,
   SystemJobsAPI,
   TeamsAPI,
+  TokensAPI,
   UnifiedJobTemplatesAPI,
   UnifiedJobsAPI,
   UsersAPI,

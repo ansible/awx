@@ -234,6 +234,13 @@ export const Team = shape({
   organization: number,
 });
 
+export const Token = shape({
+  id: number.isRequired,
+  expires: string.isRequired,
+  summary_fields: shape({}),
+  scope: string.isRequired,
+});
+
 export const User = shape({
   id: number.isRequired,
   type: oneOf(['user']),

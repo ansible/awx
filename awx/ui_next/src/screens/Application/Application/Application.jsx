@@ -15,9 +15,9 @@ import { Card, PageSection } from '@patternfly/react-core';
 import useRequest from '../../../util/useRequest';
 import { ApplicationsAPI } from '../../../api';
 import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
 import ApplicationEdit from '../ApplicationEdit';
 import ApplicationDetails from '../ApplicationDetails';
+import ApplicationTokens from '../ApplicationTokens';
 import RoutedTabs from '../../../components/RoutedTabs';
 
 function Application({ setBreadcrumb, i18n }) {
@@ -82,6 +82,7 @@ function Application({ setBreadcrumb, i18n }) {
   if (pathname.endsWith('edit')) {
     cardHeader = null;
   }
+
   if (!isLoading && error) {
     return (
       <PageSection>
@@ -99,10 +100,6 @@ function Application({ setBreadcrumb, i18n }) {
         </Card>
       </PageSection>
     );
-  }
-
-  if (isLoading) {
-    return <ContentLoading />;
   }
 
   return (
@@ -130,6 +127,9 @@ function Application({ setBreadcrumb, i18n }) {
                   authorizationOptions={authorizationOptions}
                   clientTypeOptions={clientTypeOptions}
                 />
+              </Route>
+              <Route path="/applications/:id/tokens">
+                <ApplicationTokens application={application} />
               </Route>
             </>
           )}
