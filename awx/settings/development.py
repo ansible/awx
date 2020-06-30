@@ -183,5 +183,4 @@ else:
     except Exception:
         pass
 
-WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
 AWX_CALLBACK_PROFILE = True

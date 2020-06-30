@@ -1802,7 +1802,7 @@ class RunJob(BaseTask):
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,
-        # are whitelisted as "safe" (because they can only be set by users with
+        # are allowed as "safe" (because they can only be set by users with
         # higher levels of privilege - those that have the ability create and
         # edit Job Templates)
         safe_dict = {}
@@ -2472,7 +2472,7 @@ class RunInventoryUpdate(BaseTask):
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
-                if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
+                if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLOCKED:
                     env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')

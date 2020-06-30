@@ -1910,7 +1910,7 @@ class ec2(PluginFileInjector):
         # Compatibility content
         legacy_regex = {
             True: r"[^A-Za-z0-9\_]",
-            False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is whitelisted
+            False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is allowed
         }[replace_dash]
         list_replacer = 'map("regex_replace", "{rx}", "_") | list'.format(rx=legacy_regex)
         # this option, a plugin option, will allow dashes, but not unicode
@@ -1943,7 +1943,7 @@ class ec2(PluginFileInjector):
             ret['boto_profile'] = source_vars['boto_profile']
 
         elif not replace_dash:
-            # Using the plugin, but still want dashes whitelisted
+            # Using the plugin, but still want dashes allowed
             ret['use_contrib_script_compatible_sanitization'] = True
 
         if source_vars.get('nested_groups') is False:

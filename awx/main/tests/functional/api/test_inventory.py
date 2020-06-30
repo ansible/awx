@@ -449,7 +449,7 @@ def test_inventory_update_access_called(post, inventory_source, alice, mock_acce
 @pytest.mark.django_db
 def test_inventory_source_vars_prohibition(post, inventory, admin_user):
     with mock.patch('awx.api.serializers.settings') as mock_settings:
-        mock_settings.INV_ENV_VARIABLE_BLACKLIST = ('FOOBAR',)
+        mock_settings.INV_ENV_VARIABLE_BLOCKED = ('FOOBAR',)
         r = post(reverse('api:inventory_source_list'),
                  {'name': 'new inv src', 'source_vars': '{\"FOOBAR\": \"val\"}', 'inventory': inventory.pk},
                  admin_user, expect=400)

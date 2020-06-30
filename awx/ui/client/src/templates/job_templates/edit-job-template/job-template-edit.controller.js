@@ -41,7 +41,7 @@ export default
             let defaultUrl = GetBasePath('job_templates'),
                 generator = GenerateForm,
                 form = JobTemplateForm(),
-                master = {},
+                main = {},
                 id = $stateParams.job_template_id,
                 callback,
                 choicesCount = 0,
@@ -470,15 +470,15 @@ export default
             if ($scope.jobTemplateLoadedRemove) {
                 $scope.jobTemplateLoadedRemove();
             }
-            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, masterObject) {
+            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, mainObject) {
                 var dft;
 
-                master = masterObject;
+                main = mainObject;
 
                 dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
                 hashSetup({
                     scope: $scope,
-                    master: master,
+                    main: main,
                     check_field: 'allow_callbacks',
                     default_val: dft
                 });
@@ -486,10 +486,10 @@ export default
                 // set initial vals for webhook checkbox
                 if (jobTemplateData.webhook_service) {
                     $scope.enable_webhook = true;
-                    master.enable_webhook = true;
+                    main.enable_webhook = true;
                 } else {
                     $scope.enable_webhook = false;
-                    master.enable_webhook = false;
+                    main.enable_webhook = false;
                 }
 
                 ParseTypeChange({
@@ -540,17 +540,17 @@ export default
                                 $scope.survey_exists = true;
                             }
                         }
-                        master[fld] = $scope[fld];
+                        main[fld] = $scope[fld];
                     }
                     if (fld === 'extra_vars') {
                         // Parse extra_vars, converting to YAML.
                         $scope.extra_vars = ParseVariableString(jobTemplateData.extra_vars);
-                        master.extra_vars = $scope.extra_vars;
+                        main.extra_vars = $scope.extra_vars;
                     }
                     if (form.fields[fld].type === 'lookup' && jobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
                         $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                             jobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                        main[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                             $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                     }
                     if (form.fields[fld].type === 'checkbox_group') {
@@ -565,44 +565,44 @@ export default
                 $scope.survey_enabled = jobTemplateData.survey_enabled;
 
                 $scope.ask_variables_on_launch = (jobTemplateData.ask_variables_on_launch) ? true : false;
-                master.ask_variables_on_launch = $scope.ask_variables_on_launch;
+                main.ask_variables_on_launch = $scope.ask_variables_on_launch;
 
                 $scope.ask_verbosity_on_launch = (jobTemplateData.ask_verbosity_on_launch) ? true : false;
-                master.ask_verbosity_on_launch = $scope.ask_verbosity_on_launch;
+                main.ask_verbosity_on_launch = $scope.ask_verbosity_on_launch;
 
                 $scope.ask_limit_on_launch = (jobTemplateData.ask_limit_on_launch) ? true : false;
-                master.ask_limit_on_launch = $scope.ask_limit_on_launch;
+                main.ask_limit_on_launch = $scope.ask_limit_on_launch;
 
                 $scope.ask_tags_on_launch = (jobTemplateData.ask_tags_on_launch) ? true : false;
-                master.ask_tags_on_launch = $scope.ask_tags_on_launch;
+                main.ask_tags_on_launch = $scope.ask_tags_on_launch;
 
                 $scope.ask_skip_tags_on_launch = (jobTemplateData.ask_skip_tags_on_launch) ? true : false;
-                master.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch;
+                main.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch;
 
                 $scope.ask_diff_mode_on_launch = (jobTemplateData.ask_diff_mode_on_launch) ? true : false;
-                master.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch;
+                main.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch;
 
                 $scope.ask_scm_branch_on_launch = (jobTemplateData.ask_scm_branch_on_launch) ? true : false;
-                master.ask_scm_branch_on_launch = $scope.ask_scm_branch_on_launch;
+                main.ask_scm_branch_on_launch = $scope.ask_scm_branch_on_launch;
 
                 $scope.job_tag_options = (jobTemplateData.job_tags) ? jobTemplateData.job_tags.split(',')
                     .map((i) => ({name: i, label: i, value: i})) : [];
                 $scope.job_tags = $scope.job_tag_options;
-                master.job_tags = $scope.job_tags;
+                main.job_tags = $scope.job_tags;
 
                 $scope.skip_tag_options = (jobTemplateData.skip_tags) ? jobTemplateData.skip_tags.split(',')
                     .map((i) => ({name: i, label: i, value: i})) : [];
                 $scope.skip_tags = $scope.skip_tag_options;
-                master.skip_tags = $scope.skip_tags;
+                main.skip_tags = $scope.skip_tags;
 
                 $scope.ask_job_type_on_launch = (jobTemplateData.ask_job_type_on_launch) ? true : false;
-                master.ask_job_type_on_launch = $scope.ask_job_type_on_launch;
+                main.ask_job_type_on_launch = $scope.ask_job_type_on_launch;
 
                 $scope.ask_inventory_on_launch = (jobTemplateData.ask_inventory_on_launch) ? true : false;
-                master.ask_inventory_on_launch = $scope.ask_inventory_on_launch;
+                main.ask_inventory_on_launch = $scope.ask_inventory_on_launch;
 
                 $scope.ask_credential_on_launch = (jobTemplateData.ask_credential_on_launch) ? true : false;
-                master.ask_credential_on_launch = $scope.ask_credential_on_launch;
+                main.ask_credential_on_launch = $scope.ask_credential_on_launch;
 
                 if (jobTemplateData.host_config_key) {
                     $scope.example_config_key = jobTemplateData.host_config_key;
@@ -612,7 +612,7 @@ export default
 
                 $scope.callback_url = $scope.callback_server_path + ((jobTemplateData.related.callback) ? jobTemplateData.related.callback :
                 GetBasePath('job_templates') + id + '/callback/');
-                master.callback_url = $scope.callback_url;
+                main.callback_url = $scope.callback_url;
 
                 $scope.can_edit = jobTemplateData.summary_fields.user_capabilities.edit;
 
@@ -645,7 +645,7 @@ export default
                 $q.all(multiCredentialPromises)
                     .then(() => {
                         $scope.multiCredential = multiCredential;
-                        $scope.$emit('jobTemplateLoaded', master);
+                        $scope.$emit('jobTemplateLoaded', main);
                     });
             });
 

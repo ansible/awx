@@ -1946,7 +1946,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def validate_source_vars(self, value):
         ret = vars_validate_or_raise(value)
         for env_k in parse_yaml_or_json(value):
-            if env_k in settings.INV_ENV_VARIABLE_BLACKLIST:
+            if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
         return ret
 
