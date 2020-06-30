@@ -141,10 +141,6 @@ describe('<UserTokenList />', () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
-
-    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
-      true
-    );
   });
 
   test('should enable edit button', async () => {
@@ -165,8 +161,5 @@ describe('<UserTokenList />', () => {
     expect(
       wrapper.find('DataListCheck[id="select-token-3"]').props().checked
     ).toBe(true);
-    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
-      false
-    );
   });
 });

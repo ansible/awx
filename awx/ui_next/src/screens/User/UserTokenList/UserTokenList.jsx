@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import PaginatedDataList, {
   ToolbarAddButton,
-  ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
 import useSelected from '../../../util/useSelected';
 import useRequest from '../../../util/useRequest';
@@ -39,7 +38,7 @@ function UserTokenList({ i18n }) {
           application: result.summary_fields.application,
           user_capabilities: { delete: true },
         };
-        result.username = result.summary_fields.user.username;
+        result.name = result.summary_fields.application?.name;
         return result;
       });
       return { tokens: modifiedResults, itemCount: count };
@@ -114,12 +113,6 @@ function UserTokenList({ i18n }) {
                   />,
                 ]
               : []),
-            <ToolbarDeleteButton
-              key="delete"
-              onDelete={() => {}}
-              itemsToDelete={selected}
-              pluralizedItemName="Tokens"
-            />,
           ]}
         />
       )}
@@ -130,7 +123,6 @@ function UserTokenList({ i18n }) {
           onSelect={() => {
             handleSelect(token);
           }}
-          detailUrl={`${location.pathname}/details`}
           isSelected={selected.some(row => row.id === token.id)}
         />
       )}

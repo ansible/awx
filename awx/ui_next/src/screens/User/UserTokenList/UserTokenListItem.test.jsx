@@ -51,11 +51,11 @@ describe('<UserTokenListItem />', () => {
       );
     });
     expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
-    expect(wrapper.find('PFDataListCell[aria-label="name"]').text()).toBe(
-      'app'
-    );
+    expect(
+      wrapper.find('PFDataListCell[aria-label="application name"]').text()
+    ).toBe('Application:app');
     expect(wrapper.find('PFDataListCell[aria-label="scope"]').text()).toBe(
-      'Scoperead'
+      'ScopeRead'
     );
     expect(wrapper.find('PFDataListCell[aria-label="expiration"]').text()).toBe(
       'Expires10/25/3019, 3:06:43 PM'
