@@ -146,7 +146,7 @@ class FieldLookupBackend(BaseFilterBackend):
 
     # A list of fields that we know can be filtered on without the possiblity
     # of introducing duplicates
-    NO_DUPLICATES_WHITELIST = (CharField, IntegerField, BooleanField)
+    NO_DUPLICATES_ALLOW_LIST = (CharField, IntegerField, BooleanField)
 
     def get_fields_from_lookup(self, model, lookup):
 
@@ -205,7 +205,7 @@ class FieldLookupBackend(BaseFilterBackend):
         field_list, new_lookup = self.get_fields_from_lookup(model, lookup)
         field = field_list[-1]
 
-        needs_distinct = (not all(isinstance(f, self.NO_DUPLICATES_WHITELIST) for f in field_list))
+        needs_distinct = (not all(isinstance(f, self.NO_DUPLICATES_ALLOW_LIST) for f in field_list))
 
         # Type names are stored without underscores internally, but are presented and
         # and serialized over the API containing underscores so we remove `_`

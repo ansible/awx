@@ -50,7 +50,7 @@ from awx.main.models.rbac import (
     batch_role_ancestor_rebuilding, Role,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 )
-from awx.main.constants import ENV_BLACKLIST
+from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
 
@@ -870,9 +870,9 @@ class CredentialTypeInjectorField(JSONSchemaField):
                   'use is not allowed in credentials.').format(env_var),
                 code='invalid', params={'value': env_var},
             )
-        if env_var in ENV_BLACKLIST:
+        if env_var in ENV_BLOCKLIST:
             raise django_exceptions.ValidationError(
-                _('Environment variable {} is blacklisted from use in credentials.').format(env_var),
+                _('Environment variable {} is not allowed to be used in credentials.').format(env_var),
                 code='invalid', params={'value': env_var},
             )
 

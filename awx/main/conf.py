@@ -80,11 +80,11 @@ register(
 )
 
 register(
-    'PROXY_IP_WHITELIST',
+    'PROXY_IP_ALLOWED_LIST',
     field_class=fields.StringListField,
-    label=_('Proxy IP Whitelist'),
+    label=_('Proxy IP Allowed List'),
     help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
-                "to whitelist the proxy IP addresses from which Tower should trust "
+                "to configure the proxy IP addresses from which Tower should trust "
                 "custom REMOTE_HOST_HEADERS header values. "
                 "If this setting is an empty list (the default), the headers specified by "
                 "REMOTE_HOST_HEADERS will be trusted unconditionally')"),
@@ -241,7 +241,7 @@ register(
     field_class=fields.StringListField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
+    help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
 )

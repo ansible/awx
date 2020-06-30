@@ -1513,8 +1513,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         thus can be made by a job template administrator which may not have access
         to the any inventory, project, or credentials associated with the template.
         '''
-        # We are white listing fields that can
-        field_whitelist = [
+        allowed_fields = [
             'name', 'description', 'forks', 'limit', 'verbosity', 'extra_vars',
             'job_tags', 'force_handlers', 'skip_tags', 'ask_variables_on_launch',
             'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_skip_tags_on_launch',
@@ -1529,7 +1528,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
             if k not in [x.name for x in obj._meta.concrete_fields]:
                 continue
             if hasattr(obj, k) and getattr(obj, k) != v:
-                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
+                if k not in allowed_fields and v != getattr(obj, '%s_id' % k, None) \
                         and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
                     return False
         return True

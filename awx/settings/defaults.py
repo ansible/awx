@@ -163,13 +163,13 @@ ALLOWED_HOSTS = []
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
 # If Tower is behind a reverse proxy/load balancer, use this setting to
-# whitelist the proxy IP addresses from which Tower should trust custom
+# allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
-# PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']
+# PROXY_IP_ALLOWED_LIST = ['10.0.1.100', '10.0.1.101']
 # If this setting is an empty list (the default), the headers specified by
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
-PROXY_IP_WHITELIST = []
+PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
 
@@ -666,7 +666,7 @@ AD_HOC_COMMANDS = [
     'win_user',
 ]
 
-INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
+INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 
 # ----------------
 # -- Amazon EC2 --
@@ -694,11 +694,6 @@ EC2_REGION_NAMES = {
     'cn-north-1': _('China (Beijing)'),
 }
 
-EC2_REGIONS_BLACKLIST = [
-    'us-gov-west-1',
-    'cn-north-1',
-]
-
 # Inventory variable name/values for determining if host is active/enabled.
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
@@ -715,8 +710,6 @@ EC2_EXCLUDE_EMPTY_GROUPS = True
 # ------------
 # -- VMware --
 # ------------
-VMWARE_REGIONS_BLACKLIST = []
-
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
 VMWARE_ENABLED_VAR = 'guest.gueststate'
@@ -771,8 +764,6 @@ GCE_REGION_CHOICES = [
     ('australia-southeast1-b', _('Australia Southeast (B)')),
     ('australia-southeast1-c', _('Australia Southeast (C)')),
 ]
-GCE_REGIONS_BLACKLIST = []
-
 # Inventory variable name/value for determining whether a host is active
 # in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
@@ -817,8 +808,6 @@ AZURE_RM_REGION_CHOICES = [
     ('koreacentral', _('Korea Central')),
     ('koreasouth', _('Korea South')),
 ]
-AZURE_RM_REGIONS_BLACKLIST = []
-
 AZURE_RM_GROUP_FILTER = r'^.+$'
 AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'

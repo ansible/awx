@@ -32,7 +32,7 @@ The standard pattern applies to the following fields:
  - `ask_inventory_on_launch` allows use of `inventory`
 
 Surveys are a special-case of prompting for variables - applying a survey to
-a template whitelists variable names in the survey spec (requires the survey
+a template allows variable names in the survey spec (requires the survey
 spec to exist and `survey_enabled` to be true). On the other hand,
 if `ask_variables_on_launch` is true, users can provide any variables in
 `extra_vars`.

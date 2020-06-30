@@ -132,7 +132,7 @@ user performing the copy, and `new_objs`, a list of all sub objects of the creat
 `user`'s permission against these new sub objects and unlink related objects or send
 warning logs as necessary. `deep_copy_permission_check_func` should not return anything.
 
-Lastly, macro `REENCRYPTION_BLACKLIST_AT_COPY` is available as part of a model definition. It is a
+Lastly, macro `REENCRYPTION_BLOCKLIST_AT_COPY` is available as part of a model definition. It is a
 list of field names which will escape re-encryption during copy. For example, the `extra_data` field
 of workflow job template nodes.
 
