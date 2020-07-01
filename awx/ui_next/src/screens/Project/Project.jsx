@@ -174,8 +174,8 @@ class Project extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Project not found.`)}{' '}
-                  <Link to="/projects">{i18n._(`View all Projects.`)}</Link>
+                  {i18n._(t`Project not found.`)}{' '}
+                  <Link to="/projects">{i18n._(t`View all Projects.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -233,7 +233,7 @@ class Project extends Component {
                 <ContentError isNotFound>
                   {match.params.id && (
                     <Link to={`/projects/${match.params.id}/details`}>
-                      {i18n._(`View Project Details`)}
+                      {i18n._(t`View Project Details`)}
                     </Link>
                   )}
                 </ContentError>

@@ -151,9 +151,9 @@ class Organization extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Organization not found.`)}{' '}
+                  {i18n._(t`Organization not found.`)}{' '}
                   <Link to="/organizations">
-                    {i18n._(`View all Organizations.`)}
+                    {i18n._(t`View all Organizations.`)}
                   </Link>
                 </span>
               )}
@@ -208,7 +208,7 @@ class Organization extends Component {
                 <ContentError isNotFound>
                   {match.params.id && (
                     <Link to={`/organizations/${match.params.id}/details`}>
-                      {i18n._(`View Organization Details`)}
+                      {i18n._(t`View Organization Details`)}
                     </Link>
                   )}
                 </ContentError>

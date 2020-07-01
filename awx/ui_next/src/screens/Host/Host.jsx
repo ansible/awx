@@ -94,8 +94,8 @@ function Host({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError?.response?.status === 404 && (
               <span>
-                {i18n._(`Host not found.`)}{' '}
-                <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
+                {i18n._(t`Host not found.`)}{' '}
+                <Link to="/hosts">{i18n._(t`View all Hosts.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -136,7 +136,7 @@ function Host({ i18n, setBreadcrumb }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(`View Host Details`)}
+                {i18n._(t`View Host Details`)}
               </Link>
             </ContentError>
           </Route>

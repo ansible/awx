@@ -91,8 +91,8 @@ function User({ i18n, setBreadcrumb, me }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(`User not found.`)}{' '}
-                <Link to={userListUrl}>{i18n._(`View all Users.`)}</Link>
+                {i18n._(t`User not found.`)}{' '}
+                <Link to={userListUrl}>{i18n._(t`View all Users.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -137,7 +137,7 @@ function User({ i18n, setBreadcrumb, me }) {
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link to={`/users/${match.params.id}/details`}>
-                    {i18n._(`View User Details`)}
+                    {i18n._(t`View User Details`)}
                   </Link>
                 )}
               </ContentError>

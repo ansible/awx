@@ -79,8 +79,10 @@ function Credential({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(`Credential not found.`)}{' '}
-                <Link to="/credentials">{i18n._(`View all Credentials.`)}</Link>
+                {i18n._(t`Credential not found.`)}{' '}
+                <Link to="/credentials">
+                  {i18n._(t`View all Credentials.`)}
+                </Link>
               </span>
             )}
           </ContentError>
@@ -119,7 +121,7 @@ function Credential({ i18n, setBreadcrumb }) {
                 <ContentError isNotFound>
                   {match.params.id && (
                     <Link to={`/credentials/${match.params.id}/details`}>
-                      {i18n._(`View Credential Details`)}
+                      {i18n._(t`View Credential Details`)}
                     </Link>
                   )}
                 </ContentError>
@@ -131,7 +133,7 @@ function Credential({ i18n, setBreadcrumb }) {
               <ContentError isNotFound>
                 {id && (
                   <Link to={`/credentials/${id}/details`}>
-                    {i18n._(`View Credential Details`)}
+                    {i18n._(t`View Credential Details`)}
                   </Link>
                 )}
               </ContentError>

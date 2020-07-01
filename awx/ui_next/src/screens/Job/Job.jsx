@@ -93,8 +93,8 @@ class Job extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`The page you requested could not be found.`)}{' '}
-                  <Link to="/jobs">{i18n._(`View all Jobs.`)}</Link>
+                  {i18n._(t`The page you requested could not be found.`)}{' '}
+                  <Link to="/jobs">{i18n._(t`View all Jobs.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -149,7 +149,7 @@ class Job extends Component {
                       <Link
                         to={`/jobs/${match.params.type}/${match.params.id}/details`}
                       >
-                        {i18n._(`View Job Details`)}
+                        {i18n._(t`View Job Details`)}
                       </Link>
                     </ContentError>
                   )}
