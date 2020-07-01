@@ -161,7 +161,7 @@ spec:
             privileged: {{ web_security_context_privileged }}
 {% endif %}
 {% endif %}
-          image: "{{ kubernetes_awx_image }}:{{ kubernetes_web_version }}"
+          image: "{{ kubernetes_awx_image }}:{{ kubernetes_awx_version }}"
           imagePullPolicy: Always
           ports:
             - containerPort: 8052
@@ -253,7 +253,7 @@ spec:
             privileged: {{ task_security_context_privileged }}
 {% endif %}
 {% endif %}
-          image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+          image: "{{ kubernetes_awx_image }}:{{ kubernetes_awx_version }}"
           command:
             - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
