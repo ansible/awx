@@ -53,16 +53,19 @@ function AddEditCredentialsController (
             vm.form.disabled = !isEditable;
         }
 
-        vm.form.organization._disabled = !isOrgEditableByUser;
+        vm.form._organization._disabled = !isOrgEditableByUser;
         // Only exists for permissions compatibility
         $scope.credential_obj = credential.get();
 
-        vm.form.organization._resource = 'organization';
-        vm.form.organization._model = organization;
-        vm.form.organization._route = 'credentials.edit.organization';
-        vm.form.organization._value = credential.get('summary_fields.organization.id');
-        vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
-        vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
+        // Custom credentials can have input fields named 'name', 'organization',
+        // 'description', etc. Underscore these variables to make collisions
+        // less likely to occur.
+        vm.form._organization._resource = 'organization';
+        vm.form._organization._model = organization;
+        vm.form._organization._route = 'credentials.edit.organization';
+        vm.form._organization._value = credential.get('summary_fields.organization.id');
+        vm.form._organization._displayValue = credential.get('summary_fields.organization.name');
+        vm.form._organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
 
         vm.form.credential_type._resource = 'credential_type';
         vm.form.credential_type._model = credentialType;
@@ -98,10 +101,10 @@ function AddEditCredentialsController (
         vm.form._formName = 'credential';
         vm.form.disabled = !credential.isCreatable();
 
-        vm.form.organization._resource = 'organization';
-        vm.form.organization._route = 'credentials.add.organization';
-        vm.form.organization._model = organization;
-        vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
+        vm.form._organization._resource = 'organization';
+        vm.form._organization._route = 'credentials.add.organization';
+        vm.form._organization._model = organization;
+        vm.form._organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
 
         vm.form.credential_type._resource = 'credential_type';
         vm.form.credential_type._route = 'credentials.add.credentialType';
@@ -112,7 +115,7 @@ function AddEditCredentialsController (
 
     $scope.$watch('organization', () => {
         if ($scope.organization) {
-            vm.form.organization._idFromModal = $scope.organization;
+            vm.form._organization._idFromModal = $scope.organization;
         }
     });
 
