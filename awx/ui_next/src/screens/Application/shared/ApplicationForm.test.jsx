@@ -178,4 +178,62 @@ describe('<ApplicationForm', () => {
       redirect_uris: 'http://www.google.com',
     });
   });
+  test('should render required on Redirect URIs', async () => {
+    OrganizationsAPI.read.mockResolvedValue({
+      results: [{ id: 1 }, { id: 2 }],
+    });
+    const onSubmit = jest.fn();
+    const onCancel = jest.fn();
+    const application = {
+      id: 1,
+      type: 'o_auth2_application',
+      url: '/api/v2/applications/10/',
+      related: {
+        named_url: '/api/v2/applications/Alex++bar/',
+        tokens: '/api/v2/applications/10/tokens/',
+        activity_stream: '/api/v2/applications/10/activity_stream/',
+      },
+      summary_fields: {
+        organization: {
+          id: 230,
+          name: 'bar',
+          description:
+            'SaleNameBedPersonalityManagerWhileFinanceBreakToothPerson魲',
+        },
+        user_capabilities: {
+          edit: true,
+          delete: true,
+        },
+        tokens: {
+          count: 0,
+          results: [],
+        },
+      },
+      created: '2020-06-11T17:54:33.983993Z',
+      modified: '2020-06-11T17:54:33.984039Z',
+      name: 'Alex',
+      description: '',
+      client_id: 'b1dmj8xzkbFm1ZQ27ygw2ZeE9I0AXqqeL74fiyk4',
+      client_secret: '************',
+      client_type: 'confidential',
+      redirect_uris: 'http://www.google.com',
+      authorization_grant_type: 'authorization-code',
+      skip_authorization: false,
+      organization: 230,
+    };
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ApplicationForm
+          onSubmit={onSubmit}
+          application={application}
+          onCancel={onCancel}
+          authorizationOptions={authorizationOptions}
+          clientTypeOptions={clientTypeOptions}
+        />
+      );
+    });
+    expect(
+      wrapper.find('FormField[name="redirect_uris"]').prop('isRequired')
+    ).toBe(true);
+  });
 });

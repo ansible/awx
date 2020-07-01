@@ -58,6 +58,7 @@ describe('<Application />', () => {
     expect(ApplicationsAPI.readDetail).toBeCalledWith(1);
   });
   test('should throw error', async () => {
+    ApplicationsAPI.readOptions.mockResolvedValue(options);
     ApplicationsAPI.readDetail.mockRejectedValue(
       new Error({
         response: {
@@ -70,7 +71,6 @@ describe('<Application />', () => {
         },
       })
     );
-    ApplicationsAPI.readOptions.mockResolvedValue(options);
     await act(async () => {
       wrapper = mountWithContexts(<Application setBreadcrumb={() => {}} />);
     });
