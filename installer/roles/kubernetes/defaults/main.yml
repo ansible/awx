@@ -8,11 +8,8 @@ admin_password: ''
 
 kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernetes_deployment_name }}-config"
 
-kubernetes_task_version: "{{ tower_package_version | default(dockerhub_version) }}"
-kubernetes_web_version: "{{ tower_package_version | default(dockerhub_version) }}"
-kubernetes_awx_image: "{{ tower_package_name | default('ansible/awx') }}"
-kubernetes_web_image: "{{ kubernetes_awx_image }}"
-kubernetes_task_image: "{{ kubernetes_awx_image }}"
+kubernetes_awx_version: "{{ dockerhub_version }}"
+kubernetes_awx_image: "ansible/awx"
 
 awx_psp_create: false
 awx_psp_name: 'awx'
