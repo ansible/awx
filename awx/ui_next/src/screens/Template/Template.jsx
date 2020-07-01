@@ -140,8 +140,8 @@ function Template({ i18n, me, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response.status === 404 && (
               <span>
-                {i18n._(`Template not found.`)}{' '}
-                <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+                {i18n._(t`Template not found.`)}{' '}
+                <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -224,7 +224,7 @@ function Template({ i18n, me, setBreadcrumb }) {
                   <Link
                     to={`/templates/${match.params.templateType}/${match.params.id}/details`}
                   >
-                    {i18n._(`View Template Details`)}
+                    {i18n._(t`View Template Details`)}
                   </Link>
                 )}
               </ContentError>

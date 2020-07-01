@@ -167,7 +167,7 @@ function InventorySource({ i18n, inventory, setBreadcrumb, me }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(`View inventory source details`)}
+                {i18n._(t`View inventory source details`)}
               </Link>
             </ContentError>
           </Route>

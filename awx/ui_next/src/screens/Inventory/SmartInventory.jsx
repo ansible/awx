@@ -93,8 +93,10 @@ function SmartInventory({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError?.response?.status === 404 && (
               <span>
-                {i18n._(`Smart Inventory not found.`)}{' '}
-                <Link to="/inventories">{i18n._(`View all Inventories.`)}</Link>
+                {i18n._(t`Smart Inventory not found.`)}{' '}
+                <Link to="/inventories">
+                  {i18n._(t`View all Inventories.`)}
+                </Link>
               </span>
             )}
           </ContentError>
@@ -166,7 +168,7 @@ function SmartInventory({ i18n, setBreadcrumb }) {
                     <Link
                       to={`/inventories/smart_inventory/${match.params.id}/details`}
                     >
-                      {i18n._(`View Inventory Details`)}
+                      {i18n._(t`View Inventory Details`)}
                     </Link>
                   )}
                 </ContentError>

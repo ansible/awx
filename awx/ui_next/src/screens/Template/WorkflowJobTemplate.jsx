@@ -182,8 +182,8 @@ class WorkflowJobTemplate extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Template not found.`)}{' '}
-                  <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+                  {i18n._(t`Template not found.`)}{' '}
+                  <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -290,7 +290,7 @@ class WorkflowJobTemplate extends Component {
                   <Link
                     to={`/templates/workflow_job_template/${match.params.id}/details`}
                   >
-                    {i18n._(`View Template Details`)}
+                    {i18n._(t`View Template Details`)}
                   </Link>
                 )}
               </ContentError>
