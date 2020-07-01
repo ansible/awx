@@ -576,6 +576,8 @@ ui-release-next:
 	touch awx/ui_next/build/static/.placeholder
 
 ui-devel-next: awx/ui_next/node_modules
+	$(NPM_BIN) --prefix awx/ui_next run extract-strings
+	$(NPM_BIN) --prefix awx/ui_next run compile-strings
 	$(NPM_BIN) --prefix awx/ui_next run build
 	mkdir -p awx/public/static/css
 	mkdir -p awx/public/static/js
