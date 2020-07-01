@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from awx.api.versioning import reverse
 from awx.main.models.base import PrimordialModel
 
 
@@ -35,3 +36,6 @@ class ExecutionEnvironment(PrimordialModel):
         default=None,
         on_delete=models.SET_NULL,
     )
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
