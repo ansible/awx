@@ -692,6 +692,18 @@ class TeamAccessList(ResourceAccessList):
     parent_model = models.Team
 
 
+class ExecutionEnvironmentList(ListCreateAPIView):
+
+    model = models.ExecutionEnvironment
+    serializer_class = serializers.ExecutionEnvironmentSerializer
+
+
+class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
+
+    model = models.ExecutionEnvironment
+    serializer_class = serializers.ExecutionEnvironmentSerializer
+
+
 class ProjectList(ListCreateAPIView):
 
     model = models.Project
