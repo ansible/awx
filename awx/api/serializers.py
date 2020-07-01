@@ -50,7 +50,7 @@ from awx.main.constants import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
-    CredentialType, CustomInventoryScript, Group, Host, Instance,
+    CredentialType, CustomInventoryScript, ExecutionEnvironment, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
     JobNotificationMixin, JobTemplate, Label, Notification, NotificationTemplate,
@@ -1345,6 +1345,21 @@ class ProjectOptionsSerializer(BaseSerializer):
             raise serializers.ValidationError(errors)
 
         return super(ProjectOptionsSerializer, self).validate(attrs)
+
+
+class ExecutionEnvironmentSerializer(BaseSerializer):
+    class Meta:
+        model = ExecutionEnvironment
+        fields = ('*', '-name', 'organization', 'image', 'managed_by_tower', 'credential')
+
+    def get_related(self, obj):
+        res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
+        if obj.organization:
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
+        if obj.credential:
+            res['credential'] = self.reverse('api:credential_detail',
+                                             kwargs={'pk': obj.credential.pk})
+        return res
 
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
