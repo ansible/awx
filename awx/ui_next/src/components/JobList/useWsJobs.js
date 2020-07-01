@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import useThrottle from './useThrottle';
+import useThrottle from '../../util/useThrottle';
 import { parseQueryString } from '../../util/qs';
 import sortJobs from './sortJobs';
 
