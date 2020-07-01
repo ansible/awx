@@ -79,6 +79,7 @@ clean-ui: clean-languages
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
 	rm -rf awx/ui_next/node_modules/
+	rm -rf node_modules
 	rm -rf awx/ui_next/coverage/
 	rm -rf awx/ui_next/build/locales/_build/
 	rm -f $(UI_DEPS_FLAG_FILE)
@@ -585,6 +586,7 @@ ui-devel-next: awx/ui_next/node_modules
 	cp -r awx/ui_next/build/static/media/* awx/public/static/media
 
 clean-ui-next:
+	rm -rf node_modules
 	rm -rf awx/ui_next/node_modules
 	rm -rf awx/ui_next/build
 
