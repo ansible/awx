@@ -637,6 +637,14 @@ class CredentialInputField(JSONSchemaField):
             else:
                 decrypted_values[k] = v
 
+        # don't allow secrets with $encrypted$ on new object creation
+        if not model_instance.pk:
+            for field in model_instance.credential_type.secret_fields:
+                if value.get(field) == '$encrypted$':
+                    raise serializers.ValidationError({
+                        self.name: [f'$encrypted$ is a reserved keyword, and cannot be used for {field}.']
+                    })
+
         super(JSONSchemaField, self).validate(decrypted_values, model_instance)
         errors = {}
         for error in Draft4Validator(

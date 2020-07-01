@@ -1154,6 +1154,22 @@ def test_cloud_credential_type_mutability(patch, organization, admin, credential
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('field', ['password', 'ssh_key_data'])
+def test_secret_fields_cannot_be_special_encrypted_variable(post, organization, admin, credentialtype_ssh, field):
+    params = {
+        'name': 'Best credential ever',
+        'credential_type': credentialtype_ssh.id,
+        'inputs': {
+            'username': 'joe',
+            field: '$encrypted$',
+        },
+        'organization': organization.id,
+    }
+    response = post(reverse('api:credential_list'), params, admin, status=400)
+    assert str(response.data['inputs'][0]) == f'$encrypted$ is a reserved keyword, and cannot be used for {field}.'
+
+
+@pytest.mark.django_db
 def test_ssh_unlock_needed(put, organization, admin, credentialtype_ssh):
     params = {
         'name': 'Best credential ever',
