@@ -47,6 +47,9 @@ options:
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
+
+notes:
+  - To manage team members. See U(https://docs.ansible.com/ansible/latest/modules/tower_role_module.html)
 '''
 
 

@@ -282,6 +282,7 @@ notes:
   - JSON for survey_spec can be found in Tower API Documentation. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)
     for POST operation payload example.
+  - To manage permissions for job templates. See U(https://docs.ansible.com/ansible/latest/modules/tower_role_module.html)
 '''
 
 
