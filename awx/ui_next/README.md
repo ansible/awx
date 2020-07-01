@@ -7,6 +7,9 @@
 The API development server will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ```shell
+# install
+npm --prefix=awx/ui_next install
+
 # Start the ui development server. While running, the ui will be reachable
 # at https://127.0.0.1:3001 and updated automatically when code changes.
 npm --prefix=awx/ui_next start
