@@ -12,8 +12,9 @@ requirements:
 description:
   - Returns GET requests from the Ansible Tower API. See
     U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
-extends_documentation_fragment:
-  - awx.awx.auth_plugin
+  - For use that is cross-compatible between the awx.awx and ansible.tower collection
+    see the tower_meta module
+extends_documentation_fragment: awx.awx.auth_plugin
 options:
   _terms:
     description:

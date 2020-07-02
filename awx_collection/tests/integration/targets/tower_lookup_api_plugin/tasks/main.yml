@@ -19,10 +19,13 @@
   loop: "{{ usernames }}"
   register: user_creation_results
 
+- tower_meta:
+  register: tower_meta
+
 - block:
     - name: Test too many params (failure from validation of terms)
       set_fact:
-        junk: "{{ query('awx.awx.tower_api', 'users', 'teams', query_params={}, ) }}"
+        junk: "{{ query(tower_meta.prefix + '.tower_api', 'users', 'teams', query_params={}, ) }}"
       ignore_errors: true
       register: result
 
@@ -33,7 +36,7 @@
 
     - name: Try to load invalid endpoint
       set_fact:
-        junk: "{{ query('awx.awx.tower_api', 'john', query_params={}, ) }}"
+        junk: "{{ query(tower_meta.prefix + '.tower_api', 'john', query_params={}, ) }}"
       ignore_errors: true
       register: result
 
@@ -44,7 +47,7 @@
 
     - name: Load user of a specific name without promoting objects
       set_fact:
-        users: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=False) }}"
+        users: "{{ lookup(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=False) }}"
 
     - assert:
         that:
@@ -56,13 +59,13 @@
       assert:
         that:
           - item['id'] == user_creation_results['results'][0]['id']
-      loop: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
+      loop: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
       loop_control:
         label: "{{ item['id'] }}"
 
     - name: Get a page of users as just ids
       set_fact:
-        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
+        users: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
 
     - name: Assert that user list has 2 integer ids only
       assert:
@@ -72,7 +75,7 @@
 
     - name: Get all users of a system through next attribute
       set_fact:
-        users: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true ) }}"
+        users: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true ) }}"
 
     - assert:
         that:
@@ -80,11 +83,11 @@
 
     - name: Get the ID of the first user created and verify that it is correct
       assert:
-        that: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True) }}[0] == {{ user_creation_results['results'][0]['id'] }}"
+        that: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True) }}[0] == {{ user_creation_results['results'][0]['id'] }}"
 
     - name: Try to get an ID of someone who does not exist
       set_fact:
-        failed_user_id: "{{ query('awx.awx.tower_api', 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
+        failed_user_id: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
       register: result
       ignore_errors: true
 
@@ -95,7 +98,7 @@
 
     - name: Lookup too many users
       set_fact:
-        too_many_user_ids: " {{ query('awx.awx.tower_api', 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
+        too_many_user_ids: " {{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
       register: results
       ignore_errors: true
 
@@ -107,11 +110,11 @@
     - name: Get the settings page
       assert:
         that:
-          - "'CUSTOM_LOGO' in {{ lookup('awx.awx.tower_api', 'settings/ui' ) }}"
+          - "'CUSTOM_LOGO' in {{ lookup(tower_meta.prefix + '.tower_api', 'settings/ui' ) }}"
 
     - name: Get the ping page
       set_fact:
-        ping_data: "{{ lookup('awx.awx.tower_api', 'ping' ) }}"
+        ping_data: "{{ lookup(tower_meta.prefix + '.tower_api', 'ping' ) }}"
       register: results
 
     - assert:
