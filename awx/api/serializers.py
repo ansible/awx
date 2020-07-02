@@ -107,6 +107,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                            'insights_credential_id',),
     'host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
+    'default_environment': ('id', 'organization_id', 'image', 'description'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
@@ -1243,7 +1244,7 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = ('*', 'max_hosts', 'custom_virtualenv',)
+        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
@@ -1268,6 +1269,9 @@ class OrganizationSerializer(BaseSerializer):
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
             galaxy_credentials = self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
         ))
+        if obj.default_environment:
+            res['default_environment'] = self.reverse('api:execution_environment_detail',
+                                                      kwargs={'pk': obj.default_environment_id})
         return res
 
     def get_summary_fields(self, obj):
