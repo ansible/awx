@@ -170,7 +170,7 @@ def main():
                 if response['status_code'] == 204:
                     module.json_output['changed'] = True
                 else:
-                    module.fail_json(msg="Failed to grant role {0}".format(response['json']['detail']))
+                    module.fail_json(msg="Failed to grant role {0}".format(response['json']['msg']))
         else:
             for an_id in list(set(existing_associated_ids) & set(new_association_list)):
                 response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
