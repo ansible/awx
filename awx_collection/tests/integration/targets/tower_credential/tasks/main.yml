@@ -40,7 +40,6 @@
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     organization: Default
-    user: admin
     kind: ssh
     authorize: false
     authorize_password: 'test'
@@ -71,11 +70,10 @@
       # The 20 comes from the length of OLD_INPUT_NAMES + 1 for kind
       - result['deprecations'] | length() == 20
 
-- name: Create a User-specific credential (old school)
+- name: Create an Org-specific credential (old school)
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     organization: Default
-    user: admin
     state: present
     kind: ssh
   register: result
@@ -84,11 +82,10 @@
     that:
       - "result is changed"
 
-- name: Re-create the User-specific credential (new school)
+- name: Re-create the Org-specific credential (new school)
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     organization: Default
-    user: admin
     credential_type: 'Machine'
     state: present
   register: result
@@ -97,11 +94,10 @@
     that:
       - "result is not changed"
 
-- name: Delete a User-specific credential
+- name: Delete a Org-specific credential
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     organization: Default
-    user: admin
     state: absent
     kind: ssh
   register: result
@@ -110,7 +106,7 @@
     that:
       - "result is changed"
 
-- name: Create the User-specific credential tied to a user, no org
+- name: Create the User-specific credential
   tower_credential:
     name: "{{ ssh_cred_name1 }}"
     user: admin
