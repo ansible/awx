@@ -8,7 +8,7 @@ import useWsJobs from './useWsJobs';
   Jest mock timers don’t play well with jest-websocket-mock,
   so we'll stub out throttling to resolve immediately
 */
-jest.mock('./useThrottle', () => ({
+jest.mock('../../util/useThrottle', () => ({
   __esModule: true,
   default: jest.fn(val => val),
 }));
@@ -90,6 +90,7 @@ describe('useWsJobs hook', () => {
       mockServer.send(
         JSON.stringify({
           unified_job_id: 1,
+          type: 'job',
           status: 'successful',
         })
       );
@@ -116,6 +117,7 @@ describe('useWsJobs hook', () => {
       mockServer.send(
         JSON.stringify({
           unified_job_id: 2,
+          type: 'job',
           status: 'running',
         })
       );
