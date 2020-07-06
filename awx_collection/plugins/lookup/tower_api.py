@@ -70,12 +70,43 @@ notes:
 
 EXAMPLES = """
 - name: Load the UI settings
-  debug:
-    msg: "{{ query('awx.awx.tower_api', 'settings/ui') }}"
+  set_fact:
+    tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
 
 - name: Lookup any users who are admins
-  debug:
-    msg: "{{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) }}"
+  set_fact:
+    admin_user_list_view: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }, return_objects=False) }}"
+
+- name: Lookup any users who are admins and get their objects directly
+  set_fact:
+    admin_user_object: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true } ) }}"
+
+- name: Lookup the admin user and fail if there are more than one, and make sure its a list (without this, the response would be an object)
+  set_fact:
+    actual_admin_user: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, expect_one=True, wantlist=True) }}"
+
+- name: Get just the user ID of the admin user
+  set_fact:
+    admin_user_id: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, return_ids=True, expect_one=True) }}"
+
+- name: Create a job template with a looked up credential from a folded lookup
+  tower_job_template:
+    name: "{{ job_template_name }}"
+    credentials: >-
+        {{ lookup(
+            'awx.awx.tower_api',
+            'credentials',
+            query_params={ 'name' : credential_name },
+            return_ids=True,
+            expect_one=True,
+            wantlist=True
+        ) }}
+    project: "{{ project_name }}"
+    inventory: Demo Inventory
+    playbook: hello_world.yml
+    job_type: run
+    state: present
+  register: create_jt
 """
 
 RETURN = """
