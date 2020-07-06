@@ -1256,7 +1256,8 @@ class OrganizationSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
-        res.update(dict(
+        res.update(
+            execution_environments = self.reverse('api:organization_execution_environments_list', kwargs={'pk': obj.pk}),
             projects    = self.reverse('api:organization_projects_list',       kwargs={'pk': obj.pk}),
             inventories = self.reverse('api:organization_inventories_list',    kwargs={'pk': obj.pk}),
             job_templates = self.reverse('api:organization_job_templates_list', kwargs={'pk': obj.pk}),
@@ -1276,7 +1277,7 @@ class OrganizationSerializer(BaseSerializer):
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
             galaxy_credentials = self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
-        ))
+        )
         if obj.default_environment:
             res['default_environment'] = self.reverse('api:execution_environment_detail',
                                                       kwargs={'pk': obj.default_environment_id})
