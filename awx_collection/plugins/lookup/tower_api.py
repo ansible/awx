@@ -58,6 +58,7 @@ options:
   max_objects:
     description:
       - if C(return_all) is true, this is the maximum of number of objects to return from the list.
+      - If a list view returns more an max_objects an exception will be raised
     type: integer
     default: 1000
 
