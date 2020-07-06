@@ -65,7 +65,6 @@ options:
 
 notes:
   - If the query is not filtered properly this can cause a performance impact.
-  - In addition, the built in threshold is 10,000 items; if the query returns more an exception will be thrown.
 """
 
 EXAMPLES = """
@@ -73,40 +72,34 @@ EXAMPLES = """
   set_fact:
     tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
 
-- name: Lookup any users who are admins
-  set_fact:
-    admin_user_list_view: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }, return_objects=False) }}"
+- name: Report the usernames of all users with admin privs
+  debug:
+    msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
 
 - name: Lookup any users who are admins and get their objects directly
   set_fact:
     admin_user_object: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true } ) }}"
 
-- name: Lookup the admin user and fail if there are more than one, and make sure its a list (without this, the response would be an object)
-  set_fact:
-    actual_admin_user: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, expect_one=True, wantlist=True) }}"
+- name: Make sure user 'john' is an org admin of the default org if the user exists
+  tower_role:
+    organization: Default
+    role: admin
+    user: john
+    state: absent
+  register: tower_role_revoke
+  when: "lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'john' }) | length == 1"
 
-- name: Get just the user ID of the admin user
-  set_fact:
-    admin_user_id: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, return_ids=True, expect_one=True) }}"
-
-- name: Create a job template with a looked up credential from a folded lookup
-  tower_job_template:
-    name: "{{ job_template_name }}"
-    credentials: >-
-        {{ lookup(
-            'awx.awx.tower_api',
-            'credentials',
-            query_params={ 'name' : credential_name },
-            return_ids=True,
-            expect_one=True,
-            wantlist=True
-        ) }}
-    project: "{{ project_name }}"
-    inventory: Demo Inventory
-    playbook: hello_world.yml
-    job_type: run
-    state: present
-  register: create_jt
+- name: Create an inventory group with all 'foo' hosts
+  tower_group:
+    name: "Foo Group"
+    inventory: "Demo Inventory"
+    hosts: >-
+      {{ query(
+           'awx.awx.tower_api',
+            'hosts',
+            query_params={ 'name__startswith' : 'foo', },
+        ) | map(attribute='name') | list }}
+  register: group_creation
 """
 
 RETURN = """

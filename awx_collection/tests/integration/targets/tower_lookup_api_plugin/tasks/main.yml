@@ -10,9 +10,10 @@
       - "AWX-Collection-tests-tower_api_lookup-user1-{{ test_id }}"
       - "AWX-Collection-tests-tower_api_lookup-user2-{{ test_id }}"
       - "AWX-Collection-tests-tower_api_lookup-user3-{{ test_id }}"
-    credential_name: "AWX-Collection-tests-tower_api_lookup-cred1-{{ test_id }}"
-    job_template_name: "AWX-Collection-tests-tower_api_lookup-jt1-{{ test_id }}"
-    project_name: "AWX-Collection-tests-tower_api_lookup-proj1-{{ test_id }}"
+    hosts:
+      - "AWX-Collection-tests-tower_api_lookup-host1-{{ test_id }}"
+      - "AWX-Collection-tests-tower_api_lookup-host2-{{ test_id }}"
+    group_name: "AWX-Collection-tests-tower_api_lookup-group1-{{ test_id }}"
 
 - name: Get our collection package
   tower_meta:
@@ -31,19 +32,11 @@
   register: user_creation_results
 
 - block:
-    - name: Create our credential
-      tower_credential:
-        name: "{{ credential_name }}"
-        organization: "Default"
-        credential_type: "Machine"
-
-    - name: Create a Demo Project
-      tower_project:
-        name: "{{ project_name }}"
-        organization: Default
-        state: present
-        scm_type: git
-        scm_url: https://github.com/ansible/ansible-tower-samples.git
+    - name: Create our hosts
+      tower_host:
+        name: "{{ item }}"
+        inventory: "Demo Inventory"
+      loop: "{{ hosts }}"
 
     - name: Test too many params (failure from validation of terms)
       set_fact:
@@ -79,7 +72,7 @@
 
     - name: Load user of a specific name with promoting objects
       set_fact:
-        user_objects: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=True, wantlist=True ) }}"
+        user_objects: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=True ) }}"
 
     - assert:
         that:
@@ -90,7 +83,7 @@
       assert:
         that:
           - item['id'] == user_creation_results['results'][0]['id']
-      loop: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, wantlist=True) }}"
+      loop: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] } ) }}"
       loop_control:
         label: "{{ item.id }}"
 
@@ -126,7 +119,7 @@
 
     - name: Get the ID of the first user created and verify that it is correct
       assert:
-        that: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True, wantlist=True)[0] }} == {{ user_creation_results['results'][0]['id'] }}"
+        that: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True)[0] }} == {{ user_creation_results['results'][0]['id'] }}"
 
     - name: Try to get an ID of someone who does not exist
       set_fact:
@@ -185,13 +178,14 @@
         that:
           - "'CUSTOM_LOGO' in tower_settings"
 
-    - name: Lookup any users who are admins
-      set_fact:
-        admin_user_list_view: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }, return_objects=False) }}"
+    - name: Display the usernames of all admin users
+      debug:
+        msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
+      register: results
 
     - assert:
         that:
-          - "'count' in admin_user_list_view"
+          - "'admin' in results.msg"
 
     - name: Lookup any users who are admins and get their objects directly
       set_fact:
@@ -201,62 +195,47 @@
         that:
           - "'count' not in admin_user_object"
 
-    - name: Lookup the admin user and fail if there are more than one, and make sure its a list (without this, the response would be an object)
-      set_fact:
-        actual_admin_user: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, expect_one=True, wantlist=True) }}"
+    - name: Make sure user 'john' is an org admin of the default org if the user exists
+      tower_role:
+        organization: Default
+        role: admin
+        user: "{{ usernames[0] }}"
+        state: absent
+      register: tower_role_revoke
+      when: "query('awx.awx.tower_api', 'users', query_params={ 'username': 'DNE_TESTING' }) | length  == 1"
 
     - assert:
         that:
-          - actual_admin_user | length() == 1
+          - tower_role_revoke is skipped
 
-    - name: Get just the user ID of the admin user
-      set_fact:
-        admin_user_id: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, return_ids=True, expect_one=True) }}"
-
-    - assert:
-        that:
-          - admin_user_id | int() >= 1
-
-    - name: Create a job template with a looked up credential from a folded lookup
-      tower_job_template:
-        name: "{{ job_template_name }}"
-        credentials: >-
-            {{ lookup(
-                'awx.awx.tower_api',
-                'credentials',
-                query_params={ 'name' : credential_name },
-                return_ids=True,
-                expect_one=True,
-                wantlist=True
-            ) }}
-        project: "{{ project_name }}"
-        inventory: Demo Inventory
-        playbook: hello_world.yml
-        job_type: run
-        state: present
-      register: create_jt
+    - name: Create an inventory group with all 'foo' hosts
+      tower_group:
+        name: "{{ group_name }}"
+        inventory: "Demo Inventory"
+        hosts: >-
+          {{ query(
+               'awx.awx.tower_api',
+                'hosts',
+                query_params={ 'name__endswith' : test_id, },
+            ) | map(attribute='name') | list }}
+      register: group_creation
 
     - assert:
-        that:
-          - create_jt is changed
+        that: group_creation is changed
 
   always:
-    - name: Cleanup job template
-      tower_job_template:
-        name: "{{ job_template_name }}"
+    - name: Cleanup group
+      tower_group:
+        name: "{{ group_name }}"
+        inventory: "Demo Inventory"
         state: absent
 
-    - name: Delete our credential
-      tower_credential:
-        name: "{{ credential_name }}"
-        credential_type: Machine
+    - name: Cleanup hosts
+      tower_host:
+        name: "{{ item }}"
+        inventory: "Demo Inventory"
         state: absent
-
-    - name: Cleanup our project
-      tower_project:
-        name: "{{ project_name }}"
-        organization: Default
-        state: absent
+      loop: "{{ hosts }}"
 
     - name: Cleanup users
       tower_user:
