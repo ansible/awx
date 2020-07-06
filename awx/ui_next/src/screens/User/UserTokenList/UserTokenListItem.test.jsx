@@ -53,7 +53,7 @@ describe('<UserTokenListItem />', () => {
     expect(wrapper.find('DataListCheck').prop('checked')).toBe(false);
     expect(
       wrapper.find('PFDataListCell[aria-label="application name"]').text()
-    ).toBe('Application:app');
+    ).toBe('Applicationapp');
     expect(wrapper.find('PFDataListCell[aria-label="scope"]').text()).toBe(
       'ScopeRead'
     );

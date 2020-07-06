@@ -33,6 +33,7 @@ function Users({ i18n }) {
         [`/users/${user.id}/teams`]: i18n._(t`Teams`),
         [`/users/${user.id}/organizations`]: i18n._(t`Organizations`),
         [`/users/${user.id}/tokens`]: i18n._(t`Tokens`),
+        [`/users/${user.id}/tokens/add`]: i18n._(t`Create user token`),
       });
     },
     [i18n]

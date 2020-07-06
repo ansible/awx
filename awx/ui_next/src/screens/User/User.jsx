@@ -20,7 +20,7 @@ import UserDetail from './UserDetail';
 import UserEdit from './UserEdit';
 import UserOrganizations from './UserOrganizations';
 import UserTeams from './UserTeams';
-import UserTokenList from './UserTokenList';
+import UserTokens from './UserTokens';
 import UserAccessList from './UserAccess/UserAccessList';
 
 function User({ i18n, setBreadcrumb, me }) {
@@ -80,7 +80,7 @@ function User({ i18n, setBreadcrumb, me }) {
   }
 
   let showCardHeader = true;
-  if (['edit'].some(name => location.pathname.includes(name))) {
+  if (['edit', 'add'].some(name => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 
@@ -131,7 +131,7 @@ function User({ i18n, setBreadcrumb, me }) {
               </Route>
             )}
             <Route path="/users/:id/tokens">
-              <UserTokenList id={Number(match.params.id)} />
+              <UserTokens id={Number(match.params.id)} />
             </Route>
             <Route key="not-found" path="*">
               <ContentError isNotFound>
