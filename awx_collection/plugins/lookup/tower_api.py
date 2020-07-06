@@ -177,7 +177,7 @@ class LookupModule(LookupBase):
                 )
 
         if self.get_option('return_all') and 'results' in return_data:
-            if return_data['count'] >= self.get_option('max_objects'):
+            if return_data['count'] > self.get_option('max_objects'):
                 raise AnsibleError(
                     'List view at {0} returned {1} objects, which is more than the maximum allowed '
                     'by max_objects, {2}'.format(terms[0], return_data['count'], self.get_option('max_objects'))
