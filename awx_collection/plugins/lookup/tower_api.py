@@ -52,6 +52,7 @@ options:
     description:
       - If response contains objects, promote the id key to the top-level entries in the list.
       - Allows looking up a related object and passing it as a parameter to another module.
+      - This will convert the return to a string or list of strings depending on the number of selected items.
     type: boolean
     aliases: [return_id]
     default: False
@@ -160,9 +161,9 @@ class LookupModule(LookupBase):
 
         if self.get_option('return_ids'):
             if 'results' in return_data:
-                return_data['results'] = [item['id'] for item in return_data['results']]
+                return_data['results'] = [str(item['id']) for item in return_data['results']]
             elif 'id' in return_data:
-                return_data = return_data['id']
+                return_data = str(return_data['id'])
 
         if self.get_option('return_objects') and 'results' in return_data:
             return return_data['results']
