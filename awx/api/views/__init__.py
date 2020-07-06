@@ -110,6 +110,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationInventoriesList,
     OrganizationUsersList,
     OrganizationAdminsList,
+    OrganizationExecutionEnvironmentsList,
     OrganizationProjectsList,
     OrganizationJobTemplatesList,
     OrganizationWorkflowJobTemplatesList,
