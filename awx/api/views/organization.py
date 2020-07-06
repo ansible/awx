@@ -145,6 +145,7 @@ class OrganizationExecutionEnvironmentsList(SubListCreateAttachDetachAPIView):
     parent_model = Organization
     relationship = 'executionenvironments'
     parent_key = 'organization'
+    swagger_topic = "Execution Environments"
 
 
 class OrganizationJobTemplatesList(SubListCreateAPIView):
