@@ -108,6 +108,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': ('id', 'organization_id', 'image', 'description'),
+    'execution_environment': ('id', 'organization_id', 'image', 'description'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
@@ -648,7 +649,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJobTemplate
         fields = ('*', 'last_job_run', 'last_job_failed',
-                  'next_job_run', 'status')
+                  'next_job_run', 'status', 'execution_environment', 'pull')
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -658,6 +659,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['last_job'] = obj.last_job.get_absolute_url(request=self.context.get('request'))
         if obj.next_schedule:
             res['next_schedule'] = obj.next_schedule.get_absolute_url(request=self.context.get('request'))
+        if obj.execution_environment_id:
+            res['execution_environment'] = self.reverse('api:execution_environment_detail',
+                                                        kwargs={'pk': obj.execution_environment_id})
         return res
 
     def get_types(self):
@@ -712,6 +716,7 @@ class UnifiedJobSerializer(BaseSerializer):
     class Meta:
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
+                  'execution_environment', 'pull',
                   'failed', 'started', 'finished', 'canceled_on', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation',
                   'execution_node', 'controller_node',
@@ -749,6 +754,9 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = self.reverse('api:ad_hoc_command_stdout', kwargs={'pk': obj.pk})
         if obj.workflow_job_id:
             res['source_workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job_id})
+        if obj.execution_environment_id:
+            res['execution_environment'] = self.reverse('api:execution_environment_detail',
+                                                        kwargs={'pk': obj.execution_environment_id})
         return res
 
     def get_summary_fields(self, obj):
