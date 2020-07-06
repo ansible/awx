@@ -685,12 +685,14 @@ class ExecutionEnvironmentList(ListCreateAPIView):
 
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
+    swagger_topic = "Execution Environments"
 
 
 class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
 
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
+    swagger_topic = "Execution Environments"
 
 
 class ProjectList(ListCreateAPIView):
