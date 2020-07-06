@@ -2,6 +2,7 @@
 
 exports[`<ToolbarDeleteButton /> should render button 1`] = `
 <ToolbarDeleteButton
+  errorMessage=""
   i18n={"/i18n/"}
   itemsToDelete={Array []}
   onDelete={[Function]}

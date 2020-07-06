@@ -63,10 +63,12 @@ class ToolbarDeleteButton extends React.Component {
     onDelete: func.isRequired,
     itemsToDelete: arrayOf(ItemToDelete).isRequired,
     pluralizedItemName: string,
+    errorMessage: string,
   };
 
   static defaultProps = {
     pluralizedItemName: 'Items',
+    errorMessage: '',
   };
 
   constructor(props) {
@@ -96,7 +98,12 @@ class ToolbarDeleteButton extends React.Component {
   }
 
   renderTooltip() {
-    const { itemsToDelete, pluralizedItemName, i18n } = this.props;
+    const {
+      itemsToDelete,
+      pluralizedItemName,
+      errorMessage,
+      i18n,
+    } = this.props;
 
     const itemsUnableToDelete = itemsToDelete
       .filter(cannotDelete)
@@ -105,9 +112,11 @@ class ToolbarDeleteButton extends React.Component {
     if (itemsToDelete.some(cannotDelete)) {
       return (
         <div>
-          {i18n._(
-            t`You do not have permission to delete the following ${pluralizedItemName}: ${itemsUnableToDelete}`
-          )}
+          {errorMessage.length > 0
+            ? errorMessage
+            : i18n._(
+                t`You do not have permission to delete ${pluralizedItemName}: ${itemsUnableToDelete}`
+              )}
         </div>
       );
     }
