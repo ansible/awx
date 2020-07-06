@@ -116,7 +116,7 @@
     - name: Get all of the users created with a max_objects of 1
       set_fact:
         users: "{{ lookup(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true, max_objects=1 ) }}"
-      ignore_errors: True
+      ignore_errors: true
       register: max_user_errors
 
     - assert:
@@ -168,7 +168,7 @@
     - name: "Make sure that expect_objects fails on an API page"
       set_fact:
         my_var: "{{ lookup(plugin_name, 'settings/ui', expect_objects=True) }}"
-      ignore_errors: True
+      ignore_errors: true
       register: results
 
     - assert:
@@ -235,7 +235,7 @@
         job_type: run
         state: present
       register: create_jt
-      
+
     - assert:
         that:
           - create_jt is changed
