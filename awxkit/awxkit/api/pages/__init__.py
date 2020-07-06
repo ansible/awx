@@ -14,6 +14,7 @@ from .teams import *  # NOQA
 from .credentials import *  # NOQA
 from .unified_jobs import *  # NOQA
 from .unified_job_templates import *  # NOQA
+from .execution_environments import *  # NOQA
 from .projects import *  # NOQA
 from .inventory import *  # NOQA
 from .system_job_templates import *  # NOQA
