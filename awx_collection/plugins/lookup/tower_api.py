@@ -125,7 +125,7 @@ class LookupModule(LookupBase):
             raise AnsibleError("Unclear response from API: {0}".format(response))
 
         if response['status_code'] != 200:
-            raise AnsibleError("Failed to query the API: {0}".format(return_data.get('detail', return_data)))
+            raise AnsibleError("Failed to query the API: {0}".format(response['json'].get('detail', response['json'])))
 
         return_data = response['json']
 
