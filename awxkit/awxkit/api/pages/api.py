@@ -23,6 +23,7 @@ EXPORTABLE_RESOURCES = [
     'inventory_sources',
     'job_templates',
     'workflow_job_templates',
+    'execution_environments',
 ]
 
 
@@ -33,6 +34,7 @@ EXPORTABLE_RELATIONS = [
     'Credentials',
     'Hosts',
     'Groups',
+    'ExecutionEnvironments',
 ]
 
 
