@@ -95,6 +95,7 @@ def aim_backend(**kwargs):
         timeout=30,
         cert=cert,
         verify=verify,
+        allow_redirects=False,
     )
     res.raise_for_status()
     return res.json()['Content']

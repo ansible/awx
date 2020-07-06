@@ -97,7 +97,10 @@ def kv_backend(**kwargs):
     cacert = kwargs.get('cacert', None)
     api_version = kwargs['api_version']
 
-    request_kwargs = {'timeout': 30}
+    request_kwargs = {
+        'timeout': 30,
+        'allow_redirects': False,
+    }
     if cacert:
         request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 
@@ -150,7 +153,10 @@ def ssh_backend(**kwargs):
     role = kwargs['role']
     cacert = kwargs.get('cacert', None)
 
-    request_kwargs = {'timeout': 30}
+    request_kwargs = {
+        'timeout': 30,
+        'allow_redirects': False,
+    }
     if cacert:
         request_kwargs['verify'] = create_temporary_fifo(cacert.encode())
 

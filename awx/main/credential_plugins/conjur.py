@@ -63,7 +63,8 @@ def conjur_backend(**kwargs):
 
     auth_kwargs = {
         'headers': {'Content-Type': 'text/plain'},
-        'data': api_key
+        'data': api_key,
+        'allow_redirects': False,
     }
     if cacert:
         auth_kwargs['verify'] = create_temporary_fifo(cacert.encode())
@@ -78,6 +79,7 @@ def conjur_backend(**kwargs):
 
     lookup_kwargs = {
         'headers': {'Authorization': 'Token token="{}"'.format(token)},
+        'allow_redirects': False,
     }
     if cacert:
         lookup_kwargs['verify'] = create_temporary_fifo(cacert.encode())
