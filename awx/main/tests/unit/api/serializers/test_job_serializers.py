@@ -40,7 +40,7 @@ def project_update(mocker):
 @pytest.fixture
 def job(mocker, job_template, project_update):
     return mocker.MagicMock(pk=5, job_template=job_template, project_update=project_update,
-                            workflow_job_id=None)
+                            workflow_job_id=None, execution_environment_id=None)
 
 
 @pytest.fixture
