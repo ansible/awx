@@ -10,6 +10,17 @@
       - "AWX-Collection-tests-tower_api_lookup-user1-{{ test_id }}"
       - "AWX-Collection-tests-tower_api_lookup-user2-{{ test_id }}"
       - "AWX-Collection-tests-tower_api_lookup-user3-{{ test_id }}"
+    credential_name: "AWX-Collection-tests-tower_api_lookup-cred1-{{ test_id }}"
+    job_template_name: "AWX-Collection-tests-tower_api_lookup-jt1-{{ test_id }}"
+    project_name: "AWX-Collection-tests-tower_api_lookup-proj1-{{ test_id }}"
+
+- name: Get our collection package
+  tower_meta:
+  register: tower_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    plugin_name: "{{ tower_meta.prefix }}.tower_api"
 
 - name: Create all of our users
   tower_user:
@@ -19,13 +30,24 @@
   loop: "{{ usernames }}"
   register: user_creation_results
 
-- tower_meta:
-  register: tower_meta
-
 - block:
+    - name: Create our credential
+      tower_credential:
+        name: "{{ credential_name }}"
+        organization: "Default"
+        credential_type: "Machine"
+
+    - name: Create a Demo Project
+      tower_project:
+        name: "{{ project_name }}"
+        organization: Default
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+
     - name: Test too many params (failure from validation of terms)
       set_fact:
-        junk: "{{ query(tower_meta.prefix + '.tower_api', 'users', 'teams', query_params={}, ) }}"
+        junk: "{{ query(plugin_name, 'users', 'teams', query_params={}, ) }}"
       ignore_errors: true
       register: result
 
@@ -36,7 +58,7 @@
 
     - name: Try to load invalid endpoint
       set_fact:
-        junk: "{{ query(tower_meta.prefix + '.tower_api', 'john', query_params={}, ) }}"
+        junk: "{{ query(plugin_name, 'john', query_params={}, ) }}"
       ignore_errors: true
       register: result
 
@@ -47,47 +69,68 @@
 
     - name: Load user of a specific name without promoting objects
       set_fact:
-        users: "{{ lookup(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=False) }}"
+        users_list: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=False) }}"
 
     - assert:
         that:
-          - users['results'] | length() == 1
-          - users['count'] == 1
-          - users['results'][0]['id'] == user_creation_results['results'][0]['id']
+          - users_list['results'] | length() == 1
+          - users_list['count'] == 1
+          - users_list['results'][0]['id'] == user_creation_results['results'][0]['id']
+
+    - name: Load user of a specific name with promoting objects
+      set_fact:
+        user_objects: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_objects=True, wantlist=True ) }}"
+
+    - assert:
+        that:
+          - user_objects | length() == 1
+          - users_list['results'][0]['id'] == user_objects[0]['id']
 
     - name: Loop over one user with the loop syntax
       assert:
         that:
           - item['id'] == user_creation_results['results'][0]['id']
-      loop: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }) }}"
+      loop: "{{ lookup(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, wantlist=True) }}"
       loop_control:
-        label: "{{ item['id'] }}"
+        label: "{{ item.id }}"
 
     - name: Get a page of users as just ids
       set_fact:
-        users: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
+        users: "{{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
 
-    - name: Assert that user list has 2 integer ids only
+    - name: Assert that user list has 2 ids only and that they are strings, not ints
       assert:
         that:
           - users | length() == 2
-          - user_creation_results['results'][0]['id'] in users
+          - user_creation_results['results'][0]['id'] not in users
+          - user_creation_results['results'][0]['id'] | string in users
 
     - name: Get all users of a system through next attribute
       set_fact:
-        users: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true ) }}"
+        users: "{{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true ) }}"
 
     - assert:
         that:
           - users | length() >= 3
 
+    - name: Get all of the users created with a max_objects of 1
+      set_fact:
+        users: "{{ lookup(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true, max_objects=1 ) }}"
+      ignore_errors: True
+      register: max_user_errors
+
+    - assert:
+        that:
+          - max_user_errors is failed
+          - "'List view at users returned 3 objects, which is more than the maximum allowed by max_objects' in max_user_errors.msg"
+
     - name: Get the ID of the first user created and verify that it is correct
       assert:
-        that: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True) }}[0] == {{ user_creation_results['results'][0]['id'] }}"
+        that: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True, wantlist=True)[0] }} == {{ user_creation_results['results'][0]['id'] }}"
 
     - name: Try to get an ID of someone who does not exist
       set_fact:
-        failed_user_id: "{{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
+        failed_user_id: "{{ query(plugin_name, 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
       register: result
       ignore_errors: true
 
@@ -98,7 +141,7 @@
 
     - name: Lookup too many users
       set_fact:
-        too_many_user_ids: " {{ query(tower_meta.prefix + '.tower_api', 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
+        too_many_user_ids: " {{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
       register: results
       ignore_errors: true
 
@@ -110,11 +153,11 @@
     - name: Get the settings page
       assert:
         that:
-          - "'CUSTOM_LOGO' in {{ lookup(tower_meta.prefix + '.tower_api', 'settings/ui' ) }}"
+          - "'CUSTOM_LOGO' in {{ lookup(plugin_name, 'settings/ui' ) }}"
 
     - name: Get the ping page
       set_fact:
-        ping_data: "{{ lookup(tower_meta.prefix + '.tower_api', 'ping' ) }}"
+        ping_data: "{{ lookup(plugin_name, 'ping' ) }}"
       register: results
 
     - assert:
@@ -122,7 +165,99 @@
           - results is succeeded
           - "'active_node' in ping_data"
 
+    - name: "Make sure that expect_objects fails on an API page"
+      set_fact:
+        my_var: "{{ lookup(plugin_name, 'settings/ui', expect_objects=True) }}"
+      ignore_errors: True
+      register: results
+
+    - assert:
+        that:
+          - results is failed
+          - "'Did not obtain a list or detail view at settings/ui, and expect_objects or expect_one is set to True' in results.msg"
+
+    # DOCS Example Tests
+    - name: Load the UI settings
+      set_fact:
+        tower_settings: "{{ lookup('awx.awx.tower_api', 'settings/ui') }}"
+
+    - assert:
+        that:
+          - "'CUSTOM_LOGO' in tower_settings"
+
+    - name: Lookup any users who are admins
+      set_fact:
+        admin_user_list_view: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }, return_objects=False) }}"
+
+    - assert:
+        that:
+          - "'count' in admin_user_list_view"
+
+    - name: Lookup any users who are admins and get their objects directly
+      set_fact:
+        admin_user_object: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true } ) }}"
+
+    - assert:
+        that:
+          - "'count' not in admin_user_object"
+
+    - name: Lookup the admin user and fail if there are more than one, and make sure its a list (without this, the response would be an object)
+      set_fact:
+        actual_admin_user: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, expect_one=True, wantlist=True) }}"
+
+    - assert:
+        that:
+          - actual_admin_user | length() == 1
+
+    - name: Get just the user ID of the admin user
+      set_fact:
+        admin_user_id: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'admin' }, return_ids=True, expect_one=True) }}"
+
+    - assert:
+        that:
+          - admin_user_id | int() >= 1
+
+    - name: Create a job template with a looked up credential from a folded lookup
+      tower_job_template:
+        name: "{{ job_template_name }}"
+        credentials: >-
+            {{ lookup(
+                'awx.awx.tower_api',
+                'credentials',
+                query_params={ 'name' : credential_name },
+                return_ids=True,
+                expect_one=True,
+                wantlist=True
+            ) }}
+        project: "{{ project_name }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        job_type: run
+        state: present
+      register: create_jt
+      
+    - assert:
+        that:
+          - create_jt is changed
+
   always:
+    - name: Cleanup job template
+      tower_job_template:
+        name: "{{ job_template_name }}"
+        state: absent
+
+    - name: Delete our credential
+      tower_credential:
+        name: "{{ credential_name }}"
+        credential_type: Machine
+        state: absent
+
+    - name: Cleanup our project
+      tower_project:
+        name: "{{ project_name }}"
+        organization: Default
+        state: absent
+
     - name: Cleanup users
       tower_user:
         username: "{{ item }}"
