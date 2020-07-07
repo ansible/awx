@@ -99,8 +99,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
                               headers=grafana_headers,
                               verify=(not self.grafana_no_verify_ssl))
             if r.status_code >= 400:
-                logger.error(smart_text(_("Error sending notification grafana: {}").format(r.text)))
+                logger.error(smart_text(_("Error sending notification grafana: {}").format(r.status_code)))
                 if not self.fail_silently:
-                    raise Exception(smart_text(_("Error sending notification grafana: {}").format(r.text)))
+                    raise Exception(smart_text(_("Error sending notification grafana: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages

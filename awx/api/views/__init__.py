@@ -1397,7 +1397,7 @@ class CredentialExternalTest(SubDetailAPIView):
             obj.credential_type.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
