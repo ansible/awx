@@ -107,7 +107,7 @@
     "angular-moment": "^1.3.0",
     "angular-mousewheel": "^1.0.5",
     "angular-sanitize": "^1.7.9",
-    "angular-scheduler": "git+https://git@github.com/ansible/angular-scheduler.git#v0.4.3",
+    "angular-scheduler": "git+https://git@github.com/ansible/angular-scheduler.git#v0.4.4",
     "angular-tz-extensions": "git+https://git@github.com/ansible/angular-tz-extensions.git#v0.6.1",
     "angular-xeditable": "~0.8.0",
     "ansi-to-html": "^0.6.3",
