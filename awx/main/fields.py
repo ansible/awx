@@ -7,8 +7,8 @@ import json
 import re
 import urllib.parse
 
-from jinja2 import Environment, StrictUndefined
-from jinja2.exceptions import UndefinedError, TemplateSyntaxError
+from jinja2 import sandbox, StrictUndefined
+from jinja2.exceptions import UndefinedError, TemplateSyntaxError, SecurityError
 
 # Django
 from django.contrib.postgres.fields import JSONField as upstream_JSONBField
@@ -932,7 +932,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     self.validate_env_var_allowed(key)
             for key, tmpl in injector.items():
                 try:
-                    Environment(
+                    sandbox.ImmutableSandboxedEnvironment(
                         undefined=StrictUndefined
                     ).from_string(tmpl).render(valid_namespace)
                 except UndefinedError as e:
@@ -941,6 +941,10 @@ class CredentialTypeInjectorField(JSONSchemaField):
                             sub_key=key, error_msg=e),
                         code='invalid',
                         params={'value': value},
+                    )
+                except SecurityError as e:
+                    raise django_exceptions.ValidationError(
+                        _('Encountered unsafe code execution: {}').format(e)
                     )
                 except TemplateSyntaxError as e:
                     raise django_exceptions.ValidationError(
