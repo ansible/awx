@@ -47,8 +47,8 @@ class HipChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
                                         "from": m.from_email,
                                         "message_format": "text"})
                 if r.status_code != 204:
-                    logger.error(smart_text(_("Error sending messages: {}").format(r.text)))
+                    logger.error(smart_text(_("Error sending messages: {}").format(r.status_code)))
                     if not self.fail_silently:
-                        raise Exception(smart_text(_("Error sending message to hipchat: {}").format(r.text)))
+                        raise Exception(smart_text(_("Error sending message to hipchat: {}").format(r.status_code)))
                 sent_messages += 1
         return sent_messages
