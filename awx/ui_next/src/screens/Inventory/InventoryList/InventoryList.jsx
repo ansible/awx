@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -13,8 +12,8 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
-
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useWsInventories from './useWsInventories';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
@@ -30,7 +29,7 @@ function InventoryList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { inventories, itemCount, actions },
+    result: { results, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchInventories,
@@ -42,13 +41,13 @@ function InventoryList({ i18n }) {
         InventoriesAPI.readOptions(),
       ]);
       return {
-        inventories: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
       };
     }, [location]),
     {
-      inventories: [],
+      results: [],
       itemCount: 0,
       actions: {},
     }
@@ -57,6 +56,8 @@ function InventoryList({ i18n }) {
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
+
+  const inventories = useWsInventories(results);
 
   const isAllSelected =
     selected.length === inventories.length && selected.length > 0;
