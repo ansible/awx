@@ -76,17 +76,18 @@ EXAMPLES = """
   debug:
     msg: "Admin users: {{ query('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
 
-- name: Lookup any users who are admins and get their objects directly
-  set_fact:
-    admin_user_object: "{{ lookup('awx.awx.tower_api', 'users', query_params={ 'is_superuser': true } ) }}"
+- name: debug all organizations in a loop  # use query to return a list
+  debug:
+    msg: "Organization description={{ item['description'] }} id={{ item['id'] }}"
+  loop: "{{ query('awx.awx.tower_api', 'organizations') }}"
+  loop_control:
+    label: "{{ item['name'] }}"
 
 - name: Make sure user 'john' is an org admin of the default org if the user exists
   tower_role:
     organization: Default
     role: admin
     user: john
-    state: absent
-  register: tower_role_revoke
   when: "lookup('awx.awx.tower_api', 'users', query_params={ 'username': 'john' }) | length == 1"
 
 - name: Create an inventory group with all 'foo' hosts
