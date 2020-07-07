@@ -13,6 +13,7 @@ import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
+import useWsProjects from './useWsProjects';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import ProjectListItem from './ProjectListItem';
@@ -29,7 +30,7 @@ function ProjectList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { projects, itemCount, actions },
+    result: { results, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchProjects,
@@ -41,13 +42,13 @@ function ProjectList({ i18n }) {
         ProjectsAPI.readOptions(),
       ]);
       return {
-        projects: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
       };
     }, [location]),
     {
-      projects: [],
+      results: [],
       itemCount: 0,
       actions: {},
     }
@@ -56,6 +57,8 @@ function ProjectList({ i18n }) {
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  const projects = useWsProjects(results);
 
   const isAllSelected =
     selected.length === projects.length && selected.length > 0;
