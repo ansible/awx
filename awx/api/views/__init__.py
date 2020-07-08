@@ -700,6 +700,22 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
     swagger_topic = "Execution Environments"
 
 
+class ExecutionEnvironmentActivityStreamList(SubListAPIView):
+
+    model = models.ActivityStream
+    serializer_class = serializers.ActivityStreamSerializer
+    parent_model = models.ExecutionEnvironment
+    relationship = 'activitystream_set'
+    search_fields = ('changes',)
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(execution_environment=parent)
+
+
 class ProjectList(ListCreateAPIView):
 
     model = models.Project
