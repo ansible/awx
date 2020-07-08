@@ -85,7 +85,6 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
             [`openstack`, i18n._(t`OpenStack`)],
             [`rhv`, i18n._(t`Red Hat Virtualization`)],
             [`tower`, i18n._(t`Ansible Tower`)],
-            [`custom`, i18n._(t`Custom script`)],
           ],
         },
       ]}

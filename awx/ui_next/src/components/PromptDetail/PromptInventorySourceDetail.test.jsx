@@ -30,7 +30,6 @@ describe('PromptInventorySourceDetail', () => {
     assertDetail(wrapper, 'Source', 'scm');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory File', 'foo');
-    assertDetail(wrapper, 'Custom Inventory Script', 'Mock Script');
     assertDetail(wrapper, 'Verbosity', '2 (More Verbose)');
     assertDetail(wrapper, 'Cache Timeout', '2 Seconds');
     expect(
