@@ -6,16 +6,16 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # Otherwise the setup playbook will install the official Ansible images. Versions may
 # be selected based on: latest, 1, 1.0, 1.0.0, 1.0.0.123
 # by default the base will be used to search for ansible/awx
-# dockerhub_base=ansible
+dockerhub_base=ansible
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
 #           or set -e openshift_token=TOKEN
-openshift_host=https://api.ocp-squad-2.os.fyre.ibm.com:6443
-openshift_project=elena-awx
-openshift_user=kubeadmin
-openshift_skip_tls_verify=True
-openshift_pg_emptydir=True
+# openshift_host=127.0.0.1:8443	openshift_host=https://api.ocp-squad-2.os.fyre.ibm.com:6443
+# openshift_project=awx	openshift_project=elena-awx
+# openshift_user=developer	openshift_user=kubeadmin
+# openshift_skip_tls_verify=False	openshift_skip_tls_verify=True
+# openshift_pg_emptydir=True
 
 # Kubernetes Install
 # kubernetes_context=test-cluster
