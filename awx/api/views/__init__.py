@@ -700,6 +700,14 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
     swagger_topic = "Execution Environments"
 
 
+class ExecutionEnvironmentJobTemplateList(SubListAPIView):
+
+    model = models.UnifiedJobTemplate
+    serializer_class = serializers.UnifiedJobTemplateSerializer
+    parent_model = models.ExecutionEnvironment
+    relationship = 'unifiedjobtemplates'
+
+
 class ExecutionEnvironmentActivityStreamList(SubListAPIView):
 
     model = models.ActivityStream
