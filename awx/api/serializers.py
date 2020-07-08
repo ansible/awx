@@ -1368,7 +1368,8 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(ExecutionEnvironmentSerializer, self).get_related(obj)
         res.update(
-            activity_stream = self.reverse('api:execution_environment_activity_stream_list', kwargs={'pk': obj.pk}),
+            activity_stream=self.reverse('api:execution_environment_activity_stream_list', kwargs={'pk': obj.pk}),
+            unified_job_templates=self.reverse('api:execution_environment_job_template_list', kwargs={'pk': obj.pk}),
         )
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
