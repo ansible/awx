@@ -12,7 +12,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
 
     <div class="Form-nav--dropdownContainer" ng-show="authVm.activeTab === 'ldap'">
         <div class="Form-nav--dropdownLabel" translate>LDAP Server</div>
@@ -96,6 +96,10 @@
 
             <div ng-show="authVm.activeAuthForm === 'saml'">
                 <div id="auth-saml-form"></div>
+            </div>
+
+            <div ng-show="authVm.activeAuthForm === 'oidc'"> 
+                <div id="auth-oidc-form">test,test...</div>
             </div>
         </div>
     </div>

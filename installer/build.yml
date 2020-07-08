@@ -1,6 +1,6 @@
 ---
 - name: Build AWX Docker Images
-  hosts: all
+  hosts: localhost
   gather_facts: false
   roles:
     - {role: image_build}

@@ -45,7 +45,7 @@ export default [
             if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
                 authVm.activeTab = tab;
                 authVm.activeAuthForm = getActiveAuthForm(tab);
-                formTracker.setCurrentAuth(authVm.activeAuthForm);
+                formTracker.setCurrentAuth(authVm.activeAuthForm); 
                 startCodeMirrors();
             } else {
                 var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
@@ -94,8 +94,9 @@ export default [
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
             {label: i18n._('SAML'), value: 'saml'},
-            {label: i18n._('TACACS+'), value: 'tacacs'}
-        ];
+            {label: i18n._('TACACS+'), value: 'tacacs'},
+            {label: i18n._('OpenID Connect'), value: 'oidc'}
+        ]; 
 
         authVm.ldapDropdownOptions = [
             {label: i18n._('Default'), value: ''},
@@ -197,8 +198,14 @@ export default [
                 formDef: formDefs.ldap5,
                 id: 'auth-ldap5-form',
                 name: 'ldap5'
-            }
+            },
+            // { 
+            //     formDef: formDefs.oidc, ////////////////////////////// forms aren't rendering when this is uncommented
+            //     id: 'auth-oidc-form',
+            //     name: 'oidc'
+            // }
         ];
+        
         var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
