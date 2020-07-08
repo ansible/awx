@@ -14,6 +14,8 @@ import {
   FormFullWidthLayout,
 } from '../../../components/FormLayout';
 
+import { jsonToYaml } from '../../../util/yaml';
+
 function CredentialTypeFormFields({ i18n }) {
   return (
     <>
@@ -65,8 +67,12 @@ function CredentialTypeForm({
   const initialValues = {
     name: credentialType.name || '',
     description: credentialType.description || '',
-    inputs: credentialType.inputs || '---',
-    injectors: credentialType.injectors || '---',
+    inputs: credentialType.inputs
+      ? jsonToYaml(JSON.stringify(credentialType.inputs))
+      : '---',
+    injectors: credentialType.injectors
+      ? jsonToYaml(JSON.stringify(credentialType.injectors))
+      : '---',
   };
   return (
     <Formik initialValues={initialValues} onSubmit={values => onSubmit(values)}>
@@ -74,7 +80,7 @@ function CredentialTypeForm({
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <CredentialTypeFormFields {...rest} />
-            <FormSubmitError error={submitError} />
+            {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}
               onSubmit={formik.handleSubmit}

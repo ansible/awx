@@ -70,7 +70,7 @@ function CredentialTypeDetails({ credentialType, i18n }) {
             <Button
               aria-label={i18n._(t`edit`)}
               component={Link}
-              to={`credential_types/${id}/edit`}
+              to={`/credential_types/${id}/edit`}
             >
               {i18n._(t`Edit`)}
             </Button>
