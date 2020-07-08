@@ -40,7 +40,7 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
             >
               {token.summary_fields?.application?.name ? (
                 <span>
-                  <NameLabel>{i18n._(t`Application:`)}</NameLabel>
+                  <NameLabel>{i18n._(t`Application`)}</NameLabel>
                   {token.summary_fields.application.name}
                 </span>
               ) : (

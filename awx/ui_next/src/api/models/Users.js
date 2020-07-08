@@ -12,6 +12,10 @@ class Users extends Base {
     });
   }
 
+  createToken(userId, data) {
+    return this.http.post(`${this.baseUrl}${userId}/authorized_tokens/`, data);
+  }
+
   disassociateRole(userId, roleId) {
     return this.http.post(`${this.baseUrl}${userId}/roles/`, {
       id: roleId,
