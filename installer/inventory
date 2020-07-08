@@ -162,3 +162,9 @@ secret_key=awxsecret
 # Be aware that journald may rate limit your log messages if you choose it.
 # See: https://docs.docker.com/config/containers/logging/configure/
 # docker_logger=journald
+#
+
+# Add extra hosts to docker compose file. This might be necessary to
+# sneak in servernames. For exmaple for DMZ self-signed CA certificates.
+# Equivialent to using the --add-host parameter with "docker run".
+#docker_compose_extra_hosts="otherserver.local:192.168.0.1,ldap-server.local:192.168.0.2"
