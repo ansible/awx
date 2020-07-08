@@ -11,9 +11,9 @@ dockerhub_base=ansible
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
 #           or set -e openshift_token=TOKEN
-# openshift_host=127.0.0.1:8443	# openshift_host=127.0.0.1:8443	openshift_host=https://api.ocp-squad-2.os.fyre.ibm.com:6443
-# openshift_project=awx	# openshift_project=awx	openshift_project=elena-awx
-# openshift_user=developer	# openshift_user=developer	openshift_user=kubeadmin
+# openshift_host=127.0.0.1:8443	
+# openshift_project=awx
+# openshift_user=developer	
 # openshift_skip_tls_verify=False
 
 # Kubernetes Install
