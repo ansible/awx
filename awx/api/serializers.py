@@ -4663,6 +4663,8 @@ class InstanceSerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    show_capabilities = ['edit', 'delete']
+
     committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
