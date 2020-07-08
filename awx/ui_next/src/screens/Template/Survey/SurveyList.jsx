@@ -13,7 +13,6 @@ import {
 import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import ContentLoading from '../../../components/ContentLoading';
-// import ContentEmpty from '../../../components/ContentEmpty';
 import AlertModal from '../../../components/AlertModal';
 import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
