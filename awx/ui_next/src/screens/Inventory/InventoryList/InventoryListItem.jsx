@@ -54,7 +54,9 @@ function InventoryListItem({
   const labelId = `check-action-${inventory.id}`;
 
   let syncStatus = 'disabled';
-  if (inventory.has_inventory_sources) {
+  if (inventory.isSourceSyncRunning) {
+    syncStatus = 'syncing';
+  } else if (inventory.has_inventory_sources) {
     syncStatus =
       inventory.inventory_sources_with_failures > 0 ? 'error' : 'success';
   }

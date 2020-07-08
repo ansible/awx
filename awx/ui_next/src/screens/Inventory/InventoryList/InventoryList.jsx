@@ -57,7 +57,16 @@ function InventoryList({ i18n }) {
     fetchInventories();
   }, [fetchInventories]);
 
-  const inventories = useWsInventories(results);
+  const fetchInventoriesById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await InventoriesAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const inventories = useWsInventories(results, fetchInventoriesById);
 
   const isAllSelected =
     selected.length === inventories.length && selected.length > 0;

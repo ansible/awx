@@ -1,50 +1,88 @@
 import { useState, useEffect, useRef } from 'react';
+import useThrottle from '../../../util/useThrottle';
 
-export default function useWsProjects(initialInventories) {
+export default function useWsProjects(
+  initialInventories,
+  fetchInventoriesById
+) {
   const [inventories, setInventories] = useState(initialInventories);
   const [lastMessage, setLastMessage] = useState(null);
+  const [inventoriesToFetch, setInventoriesToFetch] = useState([]);
+  const throttledInventoriesToFetch = useThrottle(inventoriesToFetch, 5000);
   const ws = useRef(null);
 
   useEffect(() => {
     setInventories(initialInventories);
   }, [initialInventories]);
 
-  // const messageExample = {
-  //   unified_job_id: 533,
-  //   status: 'pending',
-  //   type: 'inventory_update',
-  //   inventory_source_id: 53,
-  //   inventory_id: 5,
-  //   group_name: 'jobs',
-  //   unified_job_template_id: 53,
-  // };
-  useEffect(() => {
-    if (!lastMessage?.unified_job_id || lastMessage.type !== 'project_update') {
-      return;
+  const enqueueId = id => {
+    if (!inventoriesToFetch.includes(id)) {
+      setInventoriesToFetch(ids => ids.concat(id));
     }
-    const index = inventories.findIndex(p => p.id === lastMessage.project_id);
-    if (index === -1) {
-      return;
-    }
+  };
+  useEffect(
+    function fetchUpdatedInventories() {
+      (async () => {
+        if (!throttledInventoriesToFetch.length) {
+          return;
+        }
+        setInventoriesToFetch([]);
+        const newInventories = await fetchInventoriesById(
+          throttledInventoriesToFetch
+        );
+        let updated = inventories;
+        newInventories.forEach(inventory => {
+          const index = inventories.findIndex(i => i.id === inventory.id);
+          if (index === -1) {
+            return;
+          }
+          updated = [
+            ...updated.slice(0, index),
+            inventory,
+            ...updated.slice(index + 1),
+          ];
+        });
+        setInventories(updated);
+      })();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [throttledInventoriesToFetch, fetchInventoriesById]
+  );
 
-    const inventory = inventories[index];
-    const updatedProject = {
-      ...inventory,
-      summary_fields: {
-        ...inventory.summary_fields,
-        // last_job: {
-        //   id: lastMessage.unified_job_id,
-        //   status: lastMessage.status,
-        //   finished: lastMessage.finished,
-        // },
-      },
-    };
-    setInventories([
-      ...inventories.slice(0, index),
-      updatedProject,
-      ...inventories.slice(index + 1),
-    ]);
-  }, [lastMessage]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(
+    function processWsMessage() {
+      if (
+        !lastMessage?.inventory_id ||
+        lastMessage.type !== 'inventory_update'
+      ) {
+        return;
+      }
+      const index = inventories.findIndex(
+        p => p.id === lastMessage.inventory_id
+      );
+      if (index === -1) {
+        return;
+      }
+
+      if (!['pending', 'waiting', 'running'].includes(lastMessage.status)) {
+        enqueueId(lastMessage.inventory_id);
+        return;
+      }
+
+      const inventory = inventories[index];
+      const updatedInventory = {
+        ...inventory,
+        isSourceSyncRunning: true,
+      };
+      setInventories([
+        ...inventories.slice(0, index),
+        updatedInventory,
+        ...inventories.slice(index + 1),
+      ]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps,
+    [lastMessage]
+  );
 
   useEffect(() => {
     ws.current = new WebSocket(`wss://${window.location.host}/websocket/`);
