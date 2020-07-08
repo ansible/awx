@@ -15,6 +15,7 @@ dockerhub_base=ansible
 # openshift_project=awx
 # openshift_user=developer	
 # openshift_skip_tls_verify=False
+# openshift_pg_emptydir=True
 
 # Kubernetes Install
 # kubernetes_context=test-cluster
