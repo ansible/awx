@@ -1,7 +1,15 @@
 ---
+- name: Get our collection package
+  tower_meta:
+  register: tower_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    plugin_name: "{{ tower_meta.prefix }}.tower_schedule_rrule"
+
 - name: Test too many params (failure from validation of terms)
   debug:
-    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
+    msg: "{{ query(plugin_name, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
   ignore_errors: true
   register: result
 
@@ -12,7 +20,7 @@
 
 - name: Test invalid frequency (failure from validation of term)
   debug:
-    msg: "{{ query('awx.awx.tower_schedule_rrule', 'john', start_date='2020-4-16 03:45:07') }}"
+    msg: "{{ query(plugin_name, 'john', start_date='2020-4-16 03:45:07') }}"
   ignore_errors: true
   register: result
 
@@ -23,7 +31,7 @@
 
 - name: Test an invalid start date (generic failure case from get_rrule)
   debug:
-    msg: "{{ query('awx.awx.tower_schedule_rrule', 'none', start_date='invalid') }}"
+    msg: "{{ query(plugin_name, 'none', start_date='invalid') }}"
   ignore_errors: true
   register: result
 
@@ -34,7 +42,7 @@
 
 - name: Test end_on as count (generic success case)
   debug:
-    msg: "{{ query('awx.awx.tower_schedule_rrule', 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
+    msg: "{{ query(plugin_name, 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
   register: result
 
 - assert:
