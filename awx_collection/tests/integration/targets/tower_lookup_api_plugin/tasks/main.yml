@@ -143,11 +143,6 @@
           - results is failed
           - "'Expected one object from endpoint users, but obtained 3' in results['msg']"
 
-    - name: Get the settings page
-      assert:
-        that:
-          - "'CUSTOM_LOGO' in {{ lookup(plugin_name, 'settings/ui' ) }}"
-
     - name: Get the ping page
       set_fact:
         ping_data: "{{ lookup(plugin_name, 'ping' ) }}"
