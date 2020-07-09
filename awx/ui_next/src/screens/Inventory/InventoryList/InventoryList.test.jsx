@@ -119,6 +119,7 @@ const mockInventories = [
 ];
 
 describe('<InventoryList />', () => {
+  let debug;
   beforeEach(() => {
     InventoriesAPI.read.mockResolvedValue({
       data: {
@@ -135,10 +136,13 @@ describe('<InventoryList />', () => {
         },
       },
     });
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    global.console.debug = debug;
   });
 
   test('should load and render inventories', async () => {
