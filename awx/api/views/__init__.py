@@ -212,10 +212,20 @@ class DashboardView(APIView):
                           'inventory_failed': groups_inventory_failed}
 
         user_hosts = get_user_queryset(request.user, models.Host)
+        # Also include hosts from smart inventories that may be created from inventories the user does not have access too
+        unique_smart_hostnames = []
+        for inventory in user_inventory:
+            if inventory.kind == 'smart':
+                for host in inventory.hosts.filter(**{}).only(*['name']):
+                    if host.name not in unique_smart_hostnames:
+                        unique_smart_hostnames.append(host.name)
+        for host in user_hosts:
+            if host.name not in unique_smart_hostnames:
+                unique_smart_hostnames.append(host.name)
         user_hosts_failed = user_hosts.filter(last_job_host_summary__failed=True)
         data['hosts'] = {'url': reverse('api:host_list', request=request),
                          'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
-                         'total': user_hosts.count(),
+                         'total': len(unique_smart_hostnames),
                          'failed': user_hosts_failed.count()}
 
         user_projects = get_user_queryset(request.user, models.Project)
