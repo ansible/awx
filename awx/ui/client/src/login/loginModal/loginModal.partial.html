@@ -98,7 +98,12 @@
                         </div>
                     </div>
                 </form>
-                <div id="login_modal_notice" class="LoginModalNotice" ng-if="customLoginInfoPresent"><div class="LoginModalNotice-title" translate>NOTICE</div>{{ customLoginInfo | sanitize }}</div>
+                <div id="login_modal_notice" class="LoginModalNotice" ng-if="customLoginInfoPresent">
+                    <div class="LoginModalNotice-title" translate>NOTICE</div>
+                    <ng-bind-html ng-bind-html="customLoginInfo"
+                        ng-style="{'white-space' : customLoginInfoIsHTML ? 'initial' : 'pre-wrap'}">
+                    </ng-bind-html>
+                </div>
             </div>
             <div class="LoginModal-footer">
                 <div class="LoginModal-footerBlock">
