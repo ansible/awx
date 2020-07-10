@@ -64,6 +64,13 @@ services:
     {% elif awx_alternate_dns_servers is defined %}
     dns: "{{ awx_alternate_dns_servers }}"
     {% endif %}
+    {% if (docker_compose_extra_hosts is defined) and (':' in docker_compose_extra_hosts) %}
+    {% set docker_compose_extra_hosts_list = docker_compose_extra_hosts.split(',') %}
+    extra_hosts:
+    {% for docker_compose_extra_host in docker_compose_extra_hosts_list %}
+      - "{{ docker_compose_extra_host }}"
+    {% endfor %}
+    {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
@@ -123,6 +130,13 @@ services:
     {% endfor %}
     {% elif awx_alternate_dns_servers is defined %}
     dns: "{{ awx_alternate_dns_servers }}"
+    {% endif %}
+    {% if (docker_compose_extra_hosts is defined) and (':' in docker_compose_extra_hosts) %}
+    {% set docker_compose_extra_hosts_list = docker_compose_extra_hosts.split(',') %}
+    extra_hosts:
+    {% for docker_compose_extra_host in docker_compose_extra_hosts_list %}
+      - "{{ docker_compose_extra_host }}"
+    {% endfor %}
     {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
