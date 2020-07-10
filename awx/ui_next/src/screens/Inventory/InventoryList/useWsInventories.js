@@ -34,17 +34,13 @@ export default function useWsProjects(
         const newInventories = await fetchInventoriesById(
           throttledInventoriesToFetch
         );
-        let updated = inventories;
+        const updated = [...inventories];
         newInventories.forEach(inventory => {
           const index = inventories.findIndex(i => i.id === inventory.id);
           if (index === -1) {
             return;
           }
-          updated = [
-            ...updated.slice(0, index),
-            inventory,
-            ...updated.slice(index + 1),
-          ];
+          updated[index] = inventory;
         });
         setInventories(updated);
       })();
