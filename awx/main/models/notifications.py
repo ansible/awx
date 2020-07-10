@@ -267,7 +267,7 @@ class JobNotificationMixin(object):
                                'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
                                'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
                                'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
-                               'approval_status', 'approval_node_name', 'workflow_url', 'scm_branch',
+                               'approval_status', 'approval_node_name', 'workflow_url', 'scm_branch', 'artifacts',
                                {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark'
                                                        'processed', 'rescued', 'ignored']},
                                {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
@@ -288,6 +288,7 @@ class JobNotificationMixin(object):
         Context has the same structure as the context that will actually be used to render
         a notification message."""
         context = {'job': {'allow_simultaneous': False,
+                           'artifacts': {},
                            'controller_node': 'foo_controller',
                            'created': datetime.datetime(2018, 11, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
                            'custom_virtualenv': 'my_venv',
