@@ -29,7 +29,9 @@ awx/ui/client/languages
 awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
 awx/ui_next/node_modules/
-awx/ui_next/src/locales/
+awx/ui_next/src/locales/_build
+awx/ui_next/src/locales/**/*.js
+awx/ui_next/src/locales/**/*.po
 awx/ui_next/coverage/
 awx/ui_next/build
 awx/ui_next/.env.local
