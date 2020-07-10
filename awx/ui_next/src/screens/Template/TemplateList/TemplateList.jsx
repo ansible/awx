@@ -17,7 +17,7 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-
+import useWsTemplates from './useWsTemplates';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
 
@@ -36,27 +36,27 @@ function TemplateList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { templates, count, jtActions, wfjtActions },
+    result: { results, count, jtActions, wfjtActions },
     error: contentError,
     isLoading,
     request: fetchTemplates,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const results = await Promise.all([
+      const responses = await Promise.all([
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
         WorkflowJobTemplatesAPI.readOptions(),
       ]);
       return {
-        templates: results[0].data.results,
-        count: results[0].data.count,
-        jtActions: results[1].data.actions,
-        wfjtActions: results[2].data.actions,
+        results: responses[0].data.results,
+        count: responses[0].data.count,
+        jtActions: responses[1].data.actions,
+        wfjtActions: responses[2].data.actions,
       };
     }, [location]),
     {
-      templates: [],
+      results: [],
       count: 0,
       jtActions: {},
       wfjtActions: {},
@@ -66,6 +66,8 @@ function TemplateList({ i18n }) {
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
+
+  const templates = useWsTemplates(results);
 
   const isAllSelected =
     selected.length === templates.length && selected.length > 0;
