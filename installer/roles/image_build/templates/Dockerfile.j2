@@ -35,7 +35,6 @@ RUN dnf -y update && \
     glibc-langpack-en \
     libcurl-devel \
     libffi-devel \
-    libstdc++.so.6 \
     libtool-ltdl-devel \
     make \
     nodejs \
@@ -115,7 +114,6 @@ RUN dnf -y install \
 
 # Install runtime requirements
 RUN dnf -y update && \
-    dnf -y install https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:10' && \
     dnf config-manager --set-enabled PowerTools && \
@@ -140,11 +138,16 @@ RUN dnf -y update && \
     vim-minimal \
     which \
     xmlsec1-openssl && \
-    dnf -y --repofrompath gcloud,https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64 \
-       --setopt gcloud.gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg \
-      install kubectl && \
     dnf -y install centos-release-stream && dnf -y install "rsyslog >= 8.1911.0" && dnf -y remove centos-release-stream && \
     dnf -y clean all
+
+# Install kubectl
+RUN curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.8/bin/linux/{{ kubectl_architecture | default('amd64') }}/kubectl && \
+    chmod a+x /usr/bin/kubectl
+
+# Install tini
+RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
+    chmod +x /usr/bin/tini
 
 RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %}
 
@@ -244,7 +247,7 @@ CMD ["/bin/bash"]
 USER 1000
 EXPOSE 8052
 
-ENTRYPOINT ["tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 {% endif %}
