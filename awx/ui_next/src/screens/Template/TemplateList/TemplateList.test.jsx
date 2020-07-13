@@ -75,6 +75,7 @@ const mockTemplates = [
 ];
 
 describe('<TemplateList />', () => {
+  let debug;
   beforeEach(() => {
     UnifiedJobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -88,10 +89,13 @@ describe('<TemplateList />', () => {
         actions: [],
       },
     });
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    global.console.debug = debug;
   });
 
   test('initially renders successfully', async () => {

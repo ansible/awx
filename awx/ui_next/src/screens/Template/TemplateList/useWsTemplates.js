@@ -10,13 +10,6 @@ export default function useWsTemplates(initialTemplates) {
     setTemplates(initialTemplates);
   }, [initialTemplates]);
 
-  // x = {
-  //   unified_job_id: 548,
-  //   status: 'pending',
-  //   type: 'job',
-  //   group_name: 'jobs',
-  //   unified_job_template_id: 26,
-  // };
   useEffect(
     function parseWsMessage() {
       if (!lastMessage?.unified_job_id) {
@@ -89,7 +82,7 @@ function updateTemplate(template, message) {
   const job = {
     id: message.unified_job_id,
     status: message.status,
-    finished: message.finished,
+    finished: message.finished || null,
     type: message.type,
   };
   const index = recentJobs.findIndex(j => j.id === job.id);
