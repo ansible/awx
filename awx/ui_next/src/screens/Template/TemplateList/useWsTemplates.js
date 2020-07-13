@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import useWebsocket from '../../../util/useWebsocket';
 
 export default function useWsTemplates(initialTemplates) {
   const [templates, setTemplates] = useState(initialTemplates);
-
-  const [lastMessage, setLastMessage] = useState(null);
-  const ws = useRef(null);
+  const lastMessage = useWebsocket({
+    jobs: ['status_changed'],
+    control: ['limit_reached_1'],
+  });
 
   useEffect(() => {
     setTemplates(initialTemplates);
@@ -29,50 +31,6 @@ export default function useWsTemplates(initialTemplates) {
     },
     [lastMessage] // eslint-disable-line react-hooks/exhaustive-deps
   );
-
-  useEffect(() => {
-    ws.current = new WebSocket(`wss://${window.location.host}/websocket/`);
-
-    const connect = () => {
-      const xrftoken = `; ${document.cookie}`
-        .split('; csrftoken=')
-        .pop()
-        .split(';')
-        .shift();
-      ws.current.send(
-        JSON.stringify({
-          xrftoken,
-          groups: {
-            jobs: ['status_changed'],
-            control: ['limit_reached_1'],
-          },
-        })
-      );
-    };
-    ws.current.onopen = connect;
-
-    ws.current.onmessage = e => {
-      setLastMessage(JSON.parse(e.data));
-    };
-
-    ws.current.onclose = e => {
-      // eslint-disable-next-line no-console
-      console.debug('Socket closed. Reconnecting...', e);
-      setTimeout(() => {
-        connect();
-      }, 1000);
-    };
-
-    ws.current.onerror = err => {
-      // eslint-disable-next-line no-console
-      console.debug('Socket error: ', err, 'Disconnecting...');
-      ws.current.close();
-    };
-
-    return () => {
-      ws.current.close();
-    };
-  }, []);
 
   return templates;
 }
