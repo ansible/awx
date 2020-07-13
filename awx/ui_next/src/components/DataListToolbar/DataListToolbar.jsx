@@ -20,6 +20,7 @@ import { SearchColumns, SortColumns, QSConfig } from '../../types';
 class DataListToolbar extends React.Component {
   render() {
     const {
+      itemCount,
       clearAllFilters,
       searchColumns,
       sortColumns,
@@ -85,6 +86,9 @@ class DataListToolbar extends React.Component {
               </Fragment>
             </ToolbarGroup>
           )}
+          <ToolbarItem id="item-count">
+            {itemCount} {i18n._(t`results`)}
+          </ToolbarItem>
           <ToolbarGroup>
             {additionalControls.map(control => (
               <ToolbarItem key={control.key}>{control}</ToolbarItem>
@@ -97,6 +101,7 @@ class DataListToolbar extends React.Component {
 }
 
 DataListToolbar.propTypes = {
+  itemCount: PropTypes.number,
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
@@ -114,6 +119,7 @@ DataListToolbar.propTypes = {
 };
 
 DataListToolbar.defaultProps = {
+  itemCount: 0,
   clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,

@@ -118,6 +118,7 @@ class ListHeader extends React.Component {
         ) : (
           <Fragment>
             {renderToolbar({
+              itemCount,
               searchColumns,
               sortColumns,
               onSearch: this.handleSearch,
