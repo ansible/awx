@@ -145,12 +145,12 @@ class TestActiveCount:
     def test_host_case_insensitivity(self, organization):
         inv1 = Inventory.objects.create(name='inv1', organization=organization)
         inv2 = Inventory.objects.create(name='inv2', organization=organization)
-        assert Host.objects.active_count() = 0
+        assert Host.objects.active_count() == 0
         inv1.hosts.create(name='host1')
         inv2.hosts.create(name='Host1')
-        assert Host.objects.active_count() = 1
+        assert Host.objects.active_count() == 1
         inv1.hosts.create(name='host2')
-        assert Host.objects.active_count() = 2
+        assert Host.objects.active_count() == 2
 
 @pytest.mark.django_db
 class TestSCMUpdateFeatures:
