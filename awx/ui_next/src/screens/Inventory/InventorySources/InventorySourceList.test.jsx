@@ -55,8 +55,11 @@ const sources = {
 describe('<InventorySourceList />', () => {
   let wrapper;
   let history;
+  let debug;
 
   beforeEach(async () => {
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
     InventoriesAPI.readSources.mockResolvedValue(sources);
     InventorySourcesAPI.readOptions.mockResolvedValue({
       data: {
@@ -98,6 +101,7 @@ describe('<InventorySourceList />', () => {
   afterEach(() => {
     wrapper.unmount();
     jest.clearAllMocks();
+    global.console.debug = debug;
   });
 
   test('should mount properly', async () => {
