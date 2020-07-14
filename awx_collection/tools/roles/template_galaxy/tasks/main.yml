@@ -11,7 +11,7 @@
   replace:
     path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
     regexp: '^    _COLLECTION_TYPE = "awx"'
-    replace: '    _COLLECTION_TYPE = "{{ collection_namespace }}"'
+    replace: '    _COLLECTION_TYPE = "{{ collection_package }}"'
 
 - name: Do file content replacements for non-default namespace or package name
   block:
@@ -19,9 +19,12 @@
     - name: Change module doc_fragments to support desired namespace and package names
       replace:
         path: "{{ item }}"
-        regexp: '^extends_documentation_fragment: awx.awx.auth'
-        replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth'
-      with_fileglob: "{{ collection_path }}/plugins/modules/tower_*.py"
+        regexp: '^extends_documentation_fragment: awx.awx.auth([a-zA-Z0-9_]*)$'
+        replace: 'extends_documentation_fragment: {{ collection_namespace }}.{{ collection_package }}.auth\1'
+      with_fileglob:
+        - "{{ collection_path }}/plugins/inventory/*.py"
+        - "{{ collection_path }}/plugins/lookup/*.py"
+        - "{{ collection_path }}/plugins/modules/tower_*.py"
       loop_control:
         label: "{{ item | basename }}"
 
