@@ -39,6 +39,7 @@ function ApplicationFormFields({
     name: 'client_type',
     validate: required(null, i18n),
   });
+
   return (
     <>
       <FormField
@@ -68,8 +69,12 @@ function ApplicationFormFields({
       <FormGroup
         fieldId="authType"
         helperTextInvalid={authorizationTypeMeta.error}
+        validated={
+          !authorizationTypeMeta.touched || !authorizationTypeMeta.error
+            ? 'default'
+            : 'error'
+        }
         isRequired
-        isValid={!authorizationTypeMeta.touched || !authorizationTypeMeta.error}
         label={i18n._(t`Authorization grant type`)}
       >
         <FieldTooltip
@@ -79,6 +84,9 @@ function ApplicationFormFields({
         />
         <AnsibleSelect
           {...authorizationTypeField}
+          isValid={
+            !authorizationTypeMeta.touched || !authorizationTypeMeta.error
+          }
           isDisabled={match.url.endsWith('edit')}
           id="authType"
           data={[{ label: '', key: 1, value: '' }, ...authorizationOptions]}
@@ -105,8 +113,10 @@ function ApplicationFormFields({
       <FormGroup
         fieldId="clientType"
         helperTextInvalid={clientTypeMeta.error}
+        validated={
+          !clientTypeMeta.touched || !clientTypeMeta.error ? 'default' : 'error'
+        }
         isRequired
-        isValid={!clientTypeMeta.touched || !clientTypeMeta.error}
         label={i18n._(t`Client type`)}
       >
         <FieldTooltip
@@ -116,6 +126,7 @@ function ApplicationFormFields({
         />
         <AnsibleSelect
           {...clientTypeField}
+          isValid={!clientTypeMeta.touched || !clientTypeMeta.error}
           id="clientType"
           data={[{ label: '', key: 1, value: '' }, ...clientTypeOptions]}
           onChange={(event, value) => {
