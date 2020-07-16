@@ -37,6 +37,7 @@ class DataListToolbar extends React.Component {
       additionalControls,
       i18n,
       qsConfig,
+      pagination
     } = this.props;
 
     const showExpandCollapse = onCompact && onExpand;
@@ -86,14 +87,16 @@ class DataListToolbar extends React.Component {
               </Fragment>
             </ToolbarGroup>
           )}
-          <ToolbarItem id="item-count">
-            {itemCount} {i18n._(t`results`)}
-          </ToolbarItem>
           <ToolbarGroup>
             {additionalControls.map(control => (
               <ToolbarItem key={control.key}>{control}</ToolbarItem>
             ))}
           </ToolbarGroup>
+          {(pagination && itemCount > 0) &&
+            <ToolbarItem variant="pagination">
+              {pagination}
+            </ToolbarItem>
+          }
         </ToolbarContent>
       </Toolbar>
     );
