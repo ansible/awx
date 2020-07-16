@@ -167,21 +167,22 @@ function SurveyList({
       </AlertModal>
     );
   }
-
+  if (!questions || questions?.length <= 0) {
+    return (
+      <EmptyState variant="full">
+        <EmptyStateIcon icon={CubesIcon} />
+        <Title size="lg" headingLevel="h3">
+          {i18n._(t`No survey questions found.`)}
+        </Title>
+        <EmptyStateBody>
+          {i18n._(t`Please add survey questions.`)}
+        </EmptyStateBody>
+        <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
+      </EmptyState>
+    );
+  }
   return (
     <>
-      {(!questions || questions?.length <= 0) && (
-        <EmptyState variant="full">
-          <EmptyStateIcon icon={CubesIcon} />
-          <Title size="lg" headingLevel="h3">
-            {i18n._(t`No survey questions found.`)}
-          </Title>
-          <EmptyStateBody>
-            {i18n._(t`Please add survey questions.`)}
-          </EmptyStateBody>
-          <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
-        </EmptyState>
-      )}
       <SurveyToolbar
         isAllSelected={isAllSelected}
         onSelectAll={handleSelectAll}
