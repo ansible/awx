@@ -257,6 +257,11 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key in self.RESERVED_NAMES:
                     continue
 
+                # HACK: make `created` available via API for the Django User ORM model
+                # so it keep compatiblity with other objects which exposes the `created` attr.
+                if queryset.model._meta.object_name == 'User' and key.startswith('created'):
+                    key = key.replace('created', 'date_joined')
+
                 # HACK: Make job event filtering by host name mostly work even
                 # when not capturing job event hosts M2M.
                 if queryset.model._meta.object_name == 'JobEvent' and key.startswith('hosts__name'):

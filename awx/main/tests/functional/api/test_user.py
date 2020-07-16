@@ -61,3 +61,9 @@ def test_user_cannot_update_last_login(patch, admin):
         middleware=SessionMiddleware()
     )
     assert User.objects.get(pk=admin.pk).last_login is None
+
+
+@pytest.mark.django_db
+def test_user_verify_attribute_created(admin):
+    assert admin.created == admin.date_joined
+    User.objects.get(pk=admin.pk).created == User.objects.get(pk=admin.pk).date_joined
