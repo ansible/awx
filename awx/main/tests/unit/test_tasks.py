@@ -1037,6 +1037,34 @@ class TestJobCredentials(TestJobExecution):
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
 
+    def test_k8s_credential(self, job, private_data_dir):
+        k8s = CredentialType.defaults['kubernetes_bearer_token']()
+        credential = Credential(
+            pk=1,
+            credential_type=k8s,
+            inputs = {
+                'host': 'https://example.org/',
+                'bearer_token': 'token123',
+                'verify_ssl': True,
+                'ssl_ca_cert': 'CERTDATA'
+            }
+        )
+        credential.inputs['bearer_token'] = encrypt_field(credential, 'bearer_token')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
+
+        assert env['K8S_AUTH_HOST'] == 'https://example.org/'
+        assert env['K8S_AUTH_API_KEY'] == 'token123'
+        assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
+        cert = open(env['K8S_AUTH_SSL_CA_CERT'], 'r').read()
+        assert cert == 'CERTDATA'
+        assert safe_env['K8S_AUTH_API_KEY'] == tasks.HIDDEN_PASSWORD
+
     def test_aws_cloud_credential(self, job, private_data_dir):
         aws = CredentialType.defaults['aws']()
         credential = Credential(
