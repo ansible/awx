@@ -1169,18 +1169,7 @@ ManagedCredentialType(
             'multiline': True,
         }],
         'required': ['host', 'bearer_token'],
-    },
-    injectors={
-        'file': {
-            'template': '{{ ssl_ca_cert }}'
-        },
-        'env': {
-            'K8S_AUTH_HOST': '{{ host }}',
-            'K8S_AUTH_API_KEY': '{{ bearer_token }}',
-            'K8S_AUTH_VERIFY_SSL': '{{ verify_ssl }}',
-            'K8S_AUTH_SSL_CA_CERT': '{{ tower.filename }}',
-        },
-    },
+    }
 )
 
 
