@@ -111,7 +111,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
         scope.credentialTypes.forEach((credentialType => {
             if(credentialType.kind
-                .match(/^(machine|cloud|net|ssh|vault)$/)) {
+                .match(/^(machine|cloud|net|ssh|vault|kubernetes)$/)) {
                     scope.displayedCredentialTypes.push(credentialType);
             }
         }));
