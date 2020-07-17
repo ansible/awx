@@ -29,7 +29,7 @@ export function toSearchParams(string = '') {
  * Convert params object to an encoded namespaced url query string
  * Used to put into url bar when modal opens
  * @param {object} config Config object for namespacing params
- * @param {object} obj A string or array of strings keyed by query param key
+ * @param {object} searchParams A string or array of strings keyed by query param key
  * @return {string} URL query string
  */
 export function toQueryString(config, searchParams = {}) {
@@ -54,7 +54,7 @@ export function toQueryString(config, searchParams = {}) {
 
 /**
  * Convert params object to host filter string
- * @param {object} obj A string or array of strings keyed by query param key
+ * @param {object} searchParams A string or array of strings keyed by query param key
  * @return {string} Host filter string
  */
 export function toHostFilter(searchParams = {}) {
