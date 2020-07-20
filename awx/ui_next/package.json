@@ -2,6 +2,9 @@
   "name": "ui_next",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "10.x"
+  },
   "dependencies": {
     "@lingui/react": "^2.9.1",
     "@patternfly/patternfly": "^4.10.31",
