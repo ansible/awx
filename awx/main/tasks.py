@@ -2014,12 +2014,6 @@ class RunProjectUpdate(BaseTask):
             credential = project_update.credential
             if credential.has_input('ssh_key_data'):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
-
-        # Create dir where collections will live for the job run
-        if project_update.job_type != 'check' and getattr(self, 'job_private_data_dir'):
-            for folder_name in ('requirements_collections', 'requirements_roles'):
-                folder_path = os.path.join(self.job_private_data_dir, folder_name)
-                os.mkdir(folder_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
         return private_data
 
     def build_passwords(self, project_update, runtime_passwords):
