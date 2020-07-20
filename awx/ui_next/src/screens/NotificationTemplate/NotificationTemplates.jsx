@@ -1,28 +1,48 @@
-import React, { Component, Fragment } from 'react';
+import React, { useState } from 'react';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  PageSectionVariants,
-  Title,
-} from '@patternfly/react-core';
+import NotificationTemplateList from './NotificationTemplateList';
+import NotificationTemplateAdd from './NotificationTemplateAdd';
+import NotificationTemplate from './NotificationTemplate';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
-class NotificationTemplates extends Component {
-  render() {
-    const { i18n } = this.props;
-    const { light } = PageSectionVariants;
+function NotificationTemplates({ i18n }) {
+  const match = useRouteMatch();
+  const [breadcrumbConfig, setBreadcrumbConfig] = useState({
+    '/notification_templates': i18n._(t`Notification Templates`),
+    '/notification_templates/add': i18n._(t`Create New Notification Template`),
+  });
 
-    return (
-      <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl" headingLevel="h2">
-            {i18n._(t`Notification Templates`)}
-          </Title>
-        </PageSection>
-        <PageSection />
-      </Fragment>
-    );
-  }
+  const updateBreadcrumbConfig = notification => {
+    const { id } = notification;
+    setBreadcrumbConfig({
+      '/notification_templates': i18n._(t`Notification Templates`),
+      '/notification_templates/add': i18n._(
+        t`Create New Notification Template`
+      ),
+      [`/notification_templates/${id}`]: notification.name,
+      [`/notification_templates/${id}/edit`]: i18n._(t`Edit Details`),
+      [`/notification_templates/${id}/details`]: i18n._(t`Details`),
+    });
+  };
+
+  return (
+    <>
+      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <Switch>
+        <Route path={`${match.url}/add`}>
+          <NotificationTemplateAdd />
+        </Route>
+        <Route path={`${match.url}/:id`}>
+          <NotificationTemplate setBreadcrumb={updateBreadcrumbConfig} />
+        </Route>
+        <Route path={`${match.url}`}>
+          <NotificationTemplateList />
+        </Route>
+      </Switch>
+    </>
+  );
 }
 
 export default withI18n()(NotificationTemplates);
