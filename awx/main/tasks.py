@@ -2167,9 +2167,6 @@ class RunProjectUpdate(BaseTask):
             'roles_enabled': settings.AWX_ROLES_ENABLED,
             'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
         })
-        if project_update.job_type != 'check' and self.job_private_data_dir:
-            extra_vars['collections_destination'] = os.path.join(self.job_private_data_dir, 'requirements_collections')
-            extra_vars['roles_destination'] = os.path.join(self.job_private_data_dir, 'requirements_roles')
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:
             extra_vars['scm_refspec'] = project_update.scm_refspec

@@ -3,7 +3,7 @@
 # projects_root: Global location for caching project checkouts and roles and collections
 #     should not have trailing slash on end
 # local_path: Path within projects_root to use for this project
-# project_path: projects_root/local_path
+# project_path: A simple join of projects_root/local_path folders
 # scm_url: https://server/repo
 # insights_url: Insights service URL (from configuration)
 # scm_branch: branch/tag/revision (HEAD if unset)
@@ -14,8 +14,6 @@
 # scm_refspec: a refspec to fetch in addition to obtaining version
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
-# roles_destination: Path to save roles from galaxy to
-# collections_destination: Path to save collections from galaxy to
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 
