@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -64,6 +66,18 @@ def test_user_cannot_update_last_login(patch, admin):
 
 
 @pytest.mark.django_db
-def test_user_verify_attribute_created(admin):
+def test_user_verify_attribute_created(admin, get):
     assert admin.created == admin.date_joined
-    User.objects.get(pk=admin.pk).created == User.objects.get(pk=admin.pk).date_joined
+    resp = get(
+        reverse('api:user_detail', kwargs={'pk': admin.pk}),
+        admin
+    )
+    assert resp.data['created'] == admin.date_joined
+
+    past = date(2020, 1, 1).isoformat()
+    for op, count in (('gt', 1), ('lt', 0)):
+        resp = get(
+            reverse('api:user_list') + f'?created__{op}={past}',
+            admin
+        )
+        assert resp.data['count'] == count
