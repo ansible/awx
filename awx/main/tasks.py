@@ -1883,7 +1883,7 @@ class RunJob(BaseTask):
                 logger.debug('Needed commit for {} not in local source tree, will sync with remote'.format(job.log_format))
                 sync_needs.append(source_update_tag)
         else:
-            logger.debug('Project not available locally {}, will sync with remote'.format(job.project))
+            logger.debug('Project not available locally, {} will sync with remote'.format(job.log_format))
             sync_needs.append(source_update_tag)
 
         has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), job.project.cache_id))
@@ -2303,13 +2303,12 @@ class RunProjectUpdate(BaseTask):
                     self.original_branch = git_repo.head.commit
                 else:
                     self.original_branch = git_repo.active_branch
+
         stage_path = os.path.join(instance.get_cache_path(), 'stage')
         if os.path.exists(stage_path):
-            logger.warning('{0} cache staging area unexpectedly existed before update.')
+            logger.warning('{0} unexpectedly existed before update'.format(stage_path))
             shutil.rmtree(stage_path)
-        # Important - the presence of an empty cache will indicate that a given
-        # project revision did not have any roles or collections
-        os.makedirs(stage_path)
+        os.makedirs(stage_path)  # presence of empty cache indicates lack of roles or collections
 
     @staticmethod
     def clear_project_cache(cache_dir, keep_value):
@@ -2392,7 +2391,7 @@ class RunProjectUpdate(BaseTask):
             if status == 'successful' and 'install_' in instance.job_tags:
                 # Clear other caches before saving this one, and if branch is overridden
                 # do not clear cache for main branch, but do clear it for other branches
-                self.clear_project_cache(base_path, keep_value=str(instance.project.cache_id))
+                self.clear_project_cache(base_path, keep_value=instance.project.cache_id)
                 cache_path = os.path.join(base_path, instance.cache_id)
                 if os.path.exists(stage_path):
                     if os.path.exists(cache_path):
