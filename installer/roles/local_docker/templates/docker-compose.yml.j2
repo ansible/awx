@@ -167,7 +167,7 @@ services:
     container_name: awx_postgres
     restart: unless-stopped
     volumes:
-      - {{ postgres_data_dir }}/10/data/:/var/lib/postgresql/data:Z
+      - postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: {{ pg_username }}
       POSTGRES_PASSWORD: {{ pg_password }}
@@ -195,3 +195,4 @@ volumes:
   supervisor-socket:
   rsyslog-socket:
   rsyslog-config:
+  postgres-data:
