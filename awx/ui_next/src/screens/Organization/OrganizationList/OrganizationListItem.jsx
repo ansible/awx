@@ -62,12 +62,10 @@ function OrganizationListItem({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="divider">
-              <span id={labelId}>
-                <Link to={`${detailUrl}`}>
-                  <b>{organization.name}</b>
-                </Link>
-              </span>
+            <DataListCell key="name" id={labelId}>
+              <Link to={`${detailUrl}`}>
+                <b>{organization.name}</b>
+              </Link>
             </DataListCell>,
             <DataListCell key="related-field-counts">
               <ListGroup>
@@ -85,11 +83,7 @@ function OrganizationListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
-        >
+        <DataListAction aria-label="actions" aria-labelledby={labelId}>
           {organization.summary_fields.user_capabilities.edit ? (
             <Tooltip content={i18n._(t`Edit Organization`)} position="top">
               <Button

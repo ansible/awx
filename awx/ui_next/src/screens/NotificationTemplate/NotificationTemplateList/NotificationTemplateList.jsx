@@ -105,18 +105,18 @@ function NotificationTemplatesList({ i18n }) {
                 isDefault: true,
               },
               {
-                name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
-              },
-              {
-                name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                name: i18n._(t`Type`),
+                key: 'notification_type',
               },
             ]}
             toolbarSortColumns={[
               {
                 name: i18n._(t`Name`),
                 key: 'name',
+              },
+              {
+                name: i18n._(t`Type`),
+                key: 'notification_type',
               },
             ]}
             renderToolbar={props => (
