@@ -21,7 +21,6 @@ import CredentialTypeListItem from './CredentialTypeListItem';
 const QS_CONFIG = getQSConfig('credential_type', {
   page: 1,
   page_size: 20,
-  order_by: 'name',
   managed_by_tower: false,
 });
 
@@ -67,7 +66,7 @@ function CredentialTypeList({ i18n }) {
   const {
     isLoading: deleteLoading,
     deletionError,
-    deleteItems: handleDeleteCredentialTypes,
+    deleteItems: deleteCredentialTypes,
     clearDeletionError,
   } = useDeleteItems(
     useCallback(async () => {
@@ -83,7 +82,7 @@ function CredentialTypeList({ i18n }) {
   );
 
   const handleDelete = async () => {
-    await handleDeleteCredentialTypes();
+    await deleteCredentialTypes();
     setSelected([]);
   };
 
