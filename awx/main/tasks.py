@@ -1886,8 +1886,7 @@ class RunJob(BaseTask):
             logger.debug('Project not available locally {}, will sync with remote'.format(job.project))
             sync_needs.append(source_update_tag)
 
-        cache_id = str(job.project.last_job_id)  # content cache - for roles and collections
-        has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), cache_id))
+        has_cache = os.path.exists(os.path.join(job.project.get_cache_path(), job.project.cache_id))
         # Galaxy requirements are not supported for manual projects
         if job.project.scm_type and ((not has_cache) or branch_override):
             sync_needs.extend(['install_roles', 'install_collections'])
@@ -2393,7 +2392,7 @@ class RunProjectUpdate(BaseTask):
             if status == 'successful' and 'install_' in instance.job_tags:
                 # Clear other caches before saving this one, and if branch is overridden
                 # do not clear cache for main branch, but do clear it for other branches
-                self.clear_project_cache(base_path, keep_value=str(instance.project.last_job_id))
+                self.clear_project_cache(base_path, keep_value=str(instance.project.cache_id))
                 cache_path = os.path.join(base_path, instance.cache_id)
                 if os.path.exists(stage_path):
                     if os.path.exists(cache_path):
@@ -2665,8 +2664,7 @@ class RunInventoryUpdate(BaseTask):
 
             # Check if the content cache exists, so that we do not unnecessarily re-download roles
             sync_needs = ['update_{}'.format(source_project.scm_type)]
-            cache_id = str(source_project.last_job_id)  # content cache id for roles and collections
-            has_cache = os.path.exists(os.path.join(source_project.get_cache_path(), cache_id))
+            has_cache = os.path.exists(os.path.join(source_project.get_cache_path(), source_project.cache_id))
             # Galaxy requirements are not supported for manual projects
             if not has_cache:
                 sync_needs.extend(['install_roles', 'install_collections'])
