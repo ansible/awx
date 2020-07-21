@@ -13,6 +13,6 @@ collections:
   - name: openstack.cloud
     version: 0.0.1-dev85  # earlier had checksum mismatch
   - name: community.vmware
-    version: 0.4.0  # first to contain necessary grouping and filtering features
+    version: 1.0.0
   - name: ovirt.ovirt
     version: 1.0.0  # contains naming fix, was originally named ovirt.ovirt_collection
