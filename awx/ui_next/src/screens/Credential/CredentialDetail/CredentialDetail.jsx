@@ -60,7 +60,9 @@ function CredentialDetail({ i18n, credential }) {
         {
           data: { inputs: credentialTypeInputs, managed_by_tower },
         },
-        loadedInputSources,
+        {
+          data: { results: loadedInputSources },
+        },
       ] = await Promise.all([
         CredentialTypesAPI.readDetail(credential_type.id),
         CredentialsAPI.readInputSources(credentialId),

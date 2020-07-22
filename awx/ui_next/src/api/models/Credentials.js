@@ -41,7 +41,11 @@ class Credentials extends Base {
             inputSources.concat(data.results)
           );
         }
-        return Promise.resolve(inputSources.concat(data.results));
+        return Promise.resolve({
+          data: {
+            results: inputSources.concat(data.results),
+          },
+        });
       } catch (error) {
         return Promise.reject(error);
       }

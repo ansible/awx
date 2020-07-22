@@ -37,7 +37,11 @@ CredentialTypesAPI.readDetail.mockResolvedValue({
   data: mockCredentialType,
 });
 
-CredentialsAPI.readInputSources.mockResolvedValue([mockInputSource]);
+CredentialsAPI.readInputSources.mockResolvedValue({
+  data: {
+    results: [mockInputSource],
+  },
+});
 
 function expectDetailToMatch(wrapper, label, value) {
   const detail = wrapper.find(`Detail[label="${label}"]`);
