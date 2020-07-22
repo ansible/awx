@@ -122,7 +122,7 @@ function TemplateList({ i18n }) {
 
   if (canAddJT) {
     addButtonOptions.push({
-      label: i18n._(t`Template`),
+      label: i18n._(t`Job Template`),
       url: `/templates/job_template/add/`,
     });
   }

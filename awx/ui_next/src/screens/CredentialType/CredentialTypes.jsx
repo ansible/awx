@@ -11,7 +11,7 @@ import Breadcrumbs from '../../components/Breadcrumbs';
 function CredentialTypes({ i18n }) {
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
     '/credential_types': i18n._(t`Credential Types`),
-    '/credential_types/add': i18n._(t`Create Credential Types`),
+    '/credential_types/add': i18n._(t`Create new credential type`),
   });
 
   const buildBreadcrumbConfig = useCallback(
@@ -21,10 +21,10 @@ function CredentialTypes({ i18n }) {
       }
       setBreadcrumbConfig({
         '/credential_types': i18n._(t`Credential Types`),
-        '/credential_types/add': i18n._(t`Create Credential Types`),
+        '/credential_types/add': i18n._(t`Create new credential Type`),
         [`/credential_types/${credentialTypes.id}`]: `${credentialTypes.name}`,
         [`/credential_types/${credentialTypes.id}/edit`]: i18n._(
-          t`Edit Details`
+          t`Edit details`
         ),
         [`/credential_types/${credentialTypes.id}/details`]: i18n._(t`Details`),
       });
