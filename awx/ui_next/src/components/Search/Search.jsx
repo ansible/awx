@@ -97,13 +97,16 @@ function Search({
   };
 
   const getLabelFromValue = (value, colKey) => {
+    let label = value;
     const currentSearchColumn = columns.find(({ key }) => key === colKey);
     if (currentSearchColumn?.options?.length) {
-      return currentSearchColumn.options.find(
+      [, label] = currentSearchColumn.options.find(
         ([optVal]) => optVal === value
-      )[1];
+      );
+    } else if (currentSearchColumn?.booleanLabels) {
+      label = currentSearchColumn.booleanLabels[value];
     }
-    return value.toString();
+    return label.toString();
   };
 
   const getChipsByKey = () => {
@@ -227,7 +230,7 @@ function Search({
                 aria-label={name}
                 onToggle={setIsFilterDropdownOpen}
                 onSelect={(event, selection) => onReplaceSearch(key, selection)}
-                selections={chipsByKey[key].chips[0]}
+                selections={chipsByKey[key].chips[0]?.label}
                 isOpen={isFilterDropdownOpen}
                 placeholderText={`Filter By ${name}`}
               >

@@ -7,13 +7,14 @@ export function toSearchParams(string = '') {
   if (string === '') {
     return {};
   }
-
   return string
     .replace(/^\?/, '')
-    .replace(/&/, ' and ')
+    .replace(/&/g, ' and ')
     .split(/ and | or /)
     .map(s => s.split('='))
-    .reduce((searchParams, [key, value]) => {
+    .reduce((searchParams, [k, v]) => {
+      const key = decodeURIComponent(k);
+      const value = decodeURIComponent(v);
       if (searchParams[key] === undefined) {
         searchParams[key] = value;
       } else if (Array.isArray(searchParams[key])) {
@@ -61,13 +62,9 @@ export function toHostFilter(searchParams = {}) {
   return Object.keys(searchParams)
     .flatMap(key => {
       if (Array.isArray(searchParams[key])) {
-        return searchParams[key].map(
-          val => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
-        );
+        return searchParams[key].map(val => `${key}=${val}`);
       }
-      return `${encodeURIComponent(key)}=${encodeURIComponent(
-        searchParams[key]
-      )}`;
+      return `${key}=${searchParams[key]}`;
     })
     .join(' and ');
 }

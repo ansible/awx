@@ -81,7 +81,6 @@ const SmartInventoryFormFields = withI18n()(({ i18n }) => {
           id="variables"
           name="variables"
           label={i18n._(t`Variables`)}
-          promptId="variables"
           tooltip={i18n._(
             t`Enter inventory variables using either JSON or YAML syntax.
             Use the radio button to toggle between the two. Refer to the

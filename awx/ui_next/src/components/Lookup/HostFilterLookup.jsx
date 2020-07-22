@@ -84,12 +84,13 @@ const buildSearchColumns = i18n => [
     key: 'groups__name',
   },
   {
-    name: i18n._(t`Inventory`),
+    name: i18n._(t`Inventory ID`),
     key: 'inventory',
   },
   {
     name: i18n._(t`Enabled`),
     key: 'enabled',
+    isBoolean: true,
   },
   {
     name: i18n._(t`Instance ID`),
@@ -102,10 +103,6 @@ const buildSearchColumns = i18n => [
   {
     name: i18n._(t`Insights system ID`),
     key: 'insights_system_id',
-  },
-  {
-    name: i18n._(t`Ansible facts modified`),
-    key: 'ansible_facts_modified',
   },
 ];
 
