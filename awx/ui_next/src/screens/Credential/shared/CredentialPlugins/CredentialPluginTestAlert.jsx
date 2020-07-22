@@ -55,14 +55,7 @@ function CredentialPluginTestAlert({
     <AlertGroup isToast>
       {testMessage && testVariant && (
         <Alert
-          title={
-            <>
-              <b id="credential-plugin-test-name">{credentialName}</b>
-              <p id="credential-plugin-test-message">{testMessage}</p>
-            </>
-          }
-          variant={testVariant}
-          action={
+          actionClose={
             <AlertActionCloseButton
               onClose={() => {
                 setTestMessage(null);
@@ -70,6 +63,13 @@ function CredentialPluginTestAlert({
               }}
             />
           }
+          title={
+            <>
+              <b id="credential-plugin-test-name">{credentialName}</b>
+              <p id="credential-plugin-test-message">{testMessage}</p>
+            </>
+          }
+          variant={testVariant}
         />
       )}
     </AlertGroup>

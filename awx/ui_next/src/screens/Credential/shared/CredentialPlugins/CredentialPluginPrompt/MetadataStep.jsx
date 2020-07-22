@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
 import { useField, useFormikContext } from 'formik';
 import styled from 'styled-components';
-import { Button, Form, FormGroup, Tooltip } from '@patternfly/react-core';
+import { Form, FormGroup, Tooltip } from '@patternfly/react-core';
 import { QuestionCircleIcon as PFQuestionCircleIcon } from '@patternfly/react-icons';
-import { CredentialsAPI, CredentialTypesAPI } from '../../../../../api';
+import { CredentialTypesAPI } from '../../../../../api';
 import AnsibleSelect from '../../../../../components/AnsibleSelect';
 import ContentError from '../../../../../components/ContentError';
 import ContentLoading from '../../../../../components/ContentLoading';
@@ -13,35 +12,15 @@ import FormField from '../../../../../components/FormField';
 import { FormFullWidthLayout } from '../../../../../components/FormLayout';
 import useRequest from '../../../../../util/useRequest';
 import { required } from '../../../../../util/validators';
-import { CredentialPluginTestAlert } from '..';
 
 const QuestionCircleIcon = styled(PFQuestionCircleIcon)`
   margin-left: 10px;
-`;
-
-const TestButton = styled(Button)`
-  margin-top: 20px;
 `;
 
 function MetadataStep({ i18n }) {
   const form = useFormikContext();
   const [selectedCredential] = useField('credential');
   const [inputValues] = useField('inputs');
-
-  const {
-    result: testPluginSuccess,
-    error: testPluginError,
-    request: testPluginMetadata,
-  } = useRequest(
-    useCallback(
-      async () =>
-        CredentialsAPI.test(selectedCredential.value.id, {
-          metadata: inputValues.value,
-        }),
-      [selectedCredential.value.id, inputValues.value]
-    ),
-    null
-  );
 
   const {
     result: fields,
@@ -148,26 +127,6 @@ function MetadataStep({ i18n }) {
           </FormFullWidthLayout>
         </Form>
       )}
-      <Tooltip
-        content={i18n._(
-          t`Click this button to verify connection to the secret management system using the selected credential and specified inputs.`
-        )}
-        position="right"
-      >
-        <TestButton
-          id="credential-plugin-test"
-          variant="primary"
-          type="submit"
-          onClick={() => testPluginMetadata()}
-        >
-          {i18n._(t`Test`)}
-        </TestButton>
-      </Tooltip>
-      <CredentialPluginTestAlert
-        credentialName={selectedCredential.value.name}
-        successResponse={testPluginSuccess}
-        errorResponse={testPluginError}
-      />
     </>
   );
 }

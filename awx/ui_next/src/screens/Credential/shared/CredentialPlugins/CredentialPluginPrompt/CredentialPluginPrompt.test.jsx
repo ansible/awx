@@ -238,7 +238,7 @@ describe('<CredentialPluginPrompt />', () => {
     });
     test('clicking Test button makes correct call', async () => {
       await act(async () => {
-        wrapper.find('Button#credential-plugin-test').simulate('click');
+        wrapper.find('Button[children="Test"]').simulate('click');
       });
       expect(CredentialsAPI.test).toHaveBeenCalledWith(1, {
         metadata: { secret_path: '/foo/bar', secret_version: '9000' },
