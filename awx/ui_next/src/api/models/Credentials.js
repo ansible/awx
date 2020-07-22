@@ -35,7 +35,7 @@ class Credentials extends Base {
             },
           }
         );
-        if (data.next && requestCounter <= maxRequests) {
+        if (data?.next && requestCounter <= maxRequests) {
           return fetchInputSources(
             pageNo + 1,
             inputSources.concat(data.results)
