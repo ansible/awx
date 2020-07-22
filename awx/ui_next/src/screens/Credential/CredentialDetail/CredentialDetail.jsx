@@ -238,7 +238,9 @@ function CredentialDetail({ i18n, credential }) {
       </DetailList>
       {Object.keys(inputSources).length > 0 && (
         <PluginFieldText>
-          {i18n._(t`* This field will be retrieved from an external secret management system using the specified credential.`)}
+          {i18n._(
+            t`* This field will be retrieved from an external secret management system using the specified credential.`
+          )}
         </PluginFieldText>
       )}
       <CardActionsRow>
