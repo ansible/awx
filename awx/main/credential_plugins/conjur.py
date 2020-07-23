@@ -1,4 +1,4 @@
-from .plugin import CredentialPlugin, CertFiles
+from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
 import base64
 from urllib.parse import urljoin, quote_plus
@@ -69,7 +69,7 @@ def conjur_backend(**kwargs):
             urljoin(url, '/'.join(['authn', account, username, 'authenticate'])),
             **auth_kwargs
         )
-    resp.raise_for_status()
+    raise_for_status(resp)
     token = base64.b64encode(resp.content).decode('utf-8')
 
     lookup_kwargs = {
@@ -90,7 +90,7 @@ def conjur_backend(**kwargs):
     with CertFiles(cacert) as cert:
         lookup_kwargs['verify'] = cert
         resp = requests.get(path, timeout=30, **lookup_kwargs)
-    resp.raise_for_status()
+    raise_for_status(resp)
     return resp.text
 
 
