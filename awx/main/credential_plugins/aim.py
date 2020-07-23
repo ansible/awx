@@ -1,4 +1,4 @@
-from .plugin import CredentialPlugin, CertFiles
+from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
 from urllib.parse import quote, urlencode, urljoin
 
@@ -84,7 +84,7 @@ def aim_backend(**kwargs):
             verify=verify,
             allow_redirects=False,
         )
-    res.raise_for_status()
+    raise_for_status(res)
     return res.json()['Content']
 
 

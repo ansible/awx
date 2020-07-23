@@ -3,7 +3,17 @@ import tempfile
 
 from collections import namedtuple
 
+from requests.exceptions import HTTPError
+
 CredentialPlugin = namedtuple('CredentialPlugin', ['name', 'inputs', 'backend'])
+
+
+def raise_for_status(resp):
+    resp.raise_for_status()
+    if resp.status_code >= 300:
+        exc = HTTPError()
+        setattr(exc, 'response', resp)
+        raise exc
 
 
 class CertFiles():
