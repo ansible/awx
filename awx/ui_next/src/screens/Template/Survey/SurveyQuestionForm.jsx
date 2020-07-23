@@ -29,16 +29,18 @@ function AnswerTypeField({ i18n }) {
   return (
     <FormGroup
       label={i18n._(t`Answer Type`)}
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(
+            t`Choose an answer type or format you want as the prompt for the user.
+          Refer to the Ansible Tower Documentation for more additional
+          information about each option.`
+          )}
+        />
+      }
       isRequired
       fieldId="question-answer-type"
     >
-      <FieldTooltip
-        content={i18n._(
-          t`Choose an answer type or format you want as the prompt for the user.
-          Refer to the Ansible Tower Documentation for more additional
-          information about each option.`
-        )}
-      />
       <AnsibleSelect
         id="question-type"
         {...field}

@@ -65,8 +65,8 @@ function ProjectLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Project`)}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="project"
         header={i18n._(t`Project`)}

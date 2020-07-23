@@ -86,9 +86,9 @@ function CredentialLookup({
       isRequired={required}
       validated={isValid ? 'default' : 'error'}
       label={label}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
       helperTextInvalid={helperTextInvalid}
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="credential"
         header={label}

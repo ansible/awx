@@ -35,12 +35,14 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
       fieldId={`credential-${fieldOptions.id}`}
       helperTextInvalid={meta.error}
       label={fieldOptions.label}
+      labelIcon={
+        fieldOptions.help_text && (
+          <FieldTooltip content={fieldOptions.help_text} />
+        )
+      }
       isRequired={isRequired}
       isValid={!(meta.touched && meta.error)}
     >
-      {fieldOptions.help_text && (
-        <FieldTooltip content={fieldOptions.help_text} />
-      )}
       <Select
         maxHeight={200}
         variant={SelectVariant.typeahead}

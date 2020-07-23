@@ -98,8 +98,8 @@ function MultipleChoiceField({ question }) {
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
+      labelIcon={<FieldTooltip content={question.question_description} />}
     >
-      <FieldTooltip content={question.question_description} />
       <AnsibleSelect
         id={id}
         isValid={isValid}
@@ -126,8 +126,8 @@ function MultiSelectField({ question }) {
       isRequired={question.required}
       validated={isValid ? 'default' : 'error'}
       label={question.question_name}
+      labelIcon={<FieldTooltip content={question.question_description} />}
     >
-      <FieldTooltip content={question.question_description} />
       <Select
         variant={SelectVariant.typeaheadMulti}
         id={id}

@@ -91,12 +91,14 @@ const SCMSubForm = ({ i18n }) => {
         }
         isRequired
         label={i18n._(t`Inventory file`)}
-      >
-        <FieldTooltip
-          content={i18n._(t`Select the inventory file
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(t`Select the inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`)}
-        />
+          />
+        }
+      >
         <AnsibleSelect
           {...sourcePathField}
           id="source_path"

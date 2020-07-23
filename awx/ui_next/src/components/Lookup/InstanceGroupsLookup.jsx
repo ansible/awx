@@ -54,9 +54,9 @@ function InstanceGroupsLookup(props) {
     <FormGroup
       className={className}
       label={i18n._(t`Instance Groups`)}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
       fieldId="org-instance-groups"
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="org-instance-groups"
         header={i18n._(t`Instance Groups`)}

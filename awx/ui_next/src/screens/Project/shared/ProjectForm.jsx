@@ -259,11 +259,13 @@ function ProjectFormFields({
             <FormGroup
               fieldId="project-custom-virtualenv"
               label={i18n._(t`Ansible Environment`)}
-            >
-              <FieldTooltip
-                content={i18n._(t`Select the playbook to be executed by
+              labelIcon={
+                <FieldTooltip
+                  content={i18n._(t`Select the playbook to be executed by
                 this job.`)}
-              />
+                />
+              }
+            >
               <AnsibleSelect
                 id="project-custom-virtualenv"
                 data={[

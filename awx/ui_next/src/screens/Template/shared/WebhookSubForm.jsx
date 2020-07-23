@@ -126,8 +126,10 @@ function WebhookSubForm({ i18n, templateType }) {
         fieldId="webhook_service"
         helperTextInvalid={webhookServiceMeta.error}
         label={i18n._(t`Webhook Service`)}
+        labelIcon={
+          <FieldTooltip content={i18n._(t`Select a webhook service.`)} />
+        }
       >
-        <FieldTooltip content={i18n._(t`Select a webhook service.`)} />
         <AnsibleSelect
           {...webhookServiceField}
           id="webhook_service"
@@ -162,13 +164,15 @@ function WebhookSubForm({ i18n, templateType }) {
           type="text"
           fieldId="jt-webhookURL"
           label={i18n._(t`Webhook URL`)}
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(
+                t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
+              )}
+            />
+          }
           name="webhook_url"
         >
-          <FieldTooltip
-            content={i18n._(
-              t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`
-            )}
-          />
           <TextInput
             id="t-webhookURL"
             aria-label={i18n._(t`Webhook URL`)}
@@ -178,13 +182,15 @@ function WebhookSubForm({ i18n, templateType }) {
         </FormGroup>
         <FormGroup
           label={i18n._(t`Webhook Key`)}
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(
+                t`Webhook services can use this as a shared secret.`
+              )}
+            />
+          }
           fieldId="template-webhook_key"
         >
-          <FieldTooltip
-            content={i18n._(
-              t`Webhook services can use this as a shared secret.`
-            )}
-          />
           <InputGroup>
             <TextInput
               id="template-webhook_key"

@@ -31,8 +31,10 @@ function FormField(props) {
           isRequired={isRequired}
           validated={isValid ? 'default' : 'error'}
           label={label}
+          labelIcon={
+            <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
+          }
         >
-          <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextArea
             id={id}
             isRequired={isRequired}
@@ -53,8 +55,10 @@ function FormField(props) {
           isRequired={isRequired}
           validated={isValid ? 'default' : 'error'}
           label={label}
+          labelIcon={
+            <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
+          }
         >
-          <FieldTooltip content={tooltip} maxWidth={tooltipMaxWidth} />
           <TextInput
             id={id}
             isRequired={isRequired}
