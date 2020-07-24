@@ -1,3 +1,4 @@
+import collections
 import json
 import logging
 import time
@@ -13,9 +14,45 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 
+from channels_redis.core import RedisChannelLayer
+
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
+
+
+class RedisChannelLayer(RedisChannelLayer):
+    #
+    # the default RedisChannelLayer appears to have some form of memory leak
+    # whereby self.receive_buffer continues to grow forever _even after_
+    # channels are disconnected
+    #
+    # to avoid this endless growth, track a (bounded) list of disconnections,
+    # and ignore additional messages that come in for the associated channels
+    #
+    # it might be that this behavior is just a (bad) behavior of channels_redis,
+    # given this comment:
+    #
+    # https://github.com/django/channels_redis/blob/90129a68660d94b16bd223fe92018a0a95e30847/channels_redis/core.py#L535
+    # related: https://github.com/django/channels_redis/issues/212
+    #
+
+    def __init__(self, *args, **kw):
+        self.disconnected = collections.OrderedDict()
+        super().__init__(*args, **kw)
+
+    def receive(self, channel):
+        if channel in self.disconnected:
+            return
+        return super().receive(channel)
+
+    def ban(self, channel):
+        self.disconnected[channel] = 1
+        # make sure the list of disconnected channels doesn't
+        # grow boundlessly (even though the strings are fairly small,
+        # and you'd need a *lot* to take up a notable amount of memory)
+        if len(self.disconnected) > 1000000:
+            self.disconnected.popitem(last=False)
 
 
 class WebsocketSecretAuthHelper:
@@ -131,6 +168,7 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, code):
+        self.channel_layer.ban(self.channel_name)
         current_groups = set(self.scope['session'].pop('groups') if 'groups' in self.scope['session'] else [])
         for group_name in current_groups:
             await self.channel_layer.group_discard(

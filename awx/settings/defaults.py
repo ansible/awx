@@ -916,7 +916,7 @@ ASGI_APPLICATION = "awx.main.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "awx.main.consumers.RedisChannelLayer",
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,
