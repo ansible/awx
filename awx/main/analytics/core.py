@@ -191,6 +191,9 @@ def ship(path):
     if not path:
         logger.error('Automation Analytics TAR not found')
         return
+    if not os.path.exists(path):
+        logger.error('Automation Analytics TAR {} not found'.format(path))
+        return
     if "Error:" in str(path):
         return
     try:
@@ -223,4 +226,5 @@ def ship(path):
                                                                                   response.text))
     finally:
         # cleanup tar.gz
-        os.remove(path)
+        if os.path.exists(path):
+            os.remove(path)
