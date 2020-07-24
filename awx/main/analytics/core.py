@@ -14,7 +14,6 @@ from rest_framework.exceptions import PermissionDenied
 from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
-from awx.main.models.ha import TowerAnalyticsState
 from awx.main.utils import get_awx_http_client_headers, set_environ
 
 __all__ = ['register', 'gather', 'ship']
@@ -92,18 +91,9 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
                     functions; defaults to awx.main.analytics.collectors
     """
 
-    run_now = now()
-    state = TowerAnalyticsState.get_solo()
-    last_run = state.last_run
-    logger.debug("Last analytics run was: {}".format(last_run))
+    last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (now() - timedelta(weeks=4))
+    logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
     
-    max_interval = now() - timedelta(weeks=4)
-    if last_run < max_interval or not last_run:
-        last_run = max_interval
-    if since:
-        last_run = since
-        logger.debug("Gathering overriden to start at: {}".format(since))
-
     if _valid_license() is False:
         logger.exception("Invalid License provided, or No License Provided")
         return "Error: Invalid License provided, or No License Provided"
@@ -179,7 +169,7 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     # can't use isoformat() since it has colons, which GNU tar doesn't like
     tarname = '_'.join([
         settings.SYSTEM_UUID,
-        run_now.strftime('%Y-%m-%d-%H%M%S%z')
+        until.strftime('%Y-%m-%d-%H%M%S%z')
     ])
     try:
         tgz = shutil.make_archive(
@@ -231,10 +221,6 @@ def ship(path):
             if response.status_code >= 300:
                 return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
                                                                                   response.text))
-        run_now = now()
-        state = TowerAnalyticsState.get_solo()
-        state.last_run = run_now
-        state.save()
     finally:
         # cleanup tar.gz
         os.remove(path)
