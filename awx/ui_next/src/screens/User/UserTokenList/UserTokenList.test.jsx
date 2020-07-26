@@ -4,10 +4,11 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import { UsersAPI } from '../../../api';
+import { UsersAPI, TokensAPI } from '../../../api';
 import UserTokenList from './UserTokenList';
 
 jest.mock('../../../api/models/Users');
+jest.mock('../../../api/models/Tokens');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -161,5 +162,97 @@ describe('<UserTokenList />', () => {
     expect(
       wrapper.find('DataListCheck[id="select-token-3"]').props().checked
     ).toBe(true);
+  });
+  test('delete button should be disabled', async () => {
+    UsersAPI.readTokens.mockResolvedValue(tokens);
+    await act(async () => {
+      wrapper = mountWithContexts(<UserTokenList />);
+    });
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+  });
+  test('should select and then delete item properly', async () => {
+    UsersAPI.readTokens.mockResolvedValue(tokens);
+    await act(async () => {
+      wrapper = mountWithContexts(<UserTokenList />);
+    });
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+    await act(async () => {
+      wrapper
+        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .prop('onChange')(tokens.data.results[0]);
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .prop('checked')
+    ).toBe(true);
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      false
+    );
+    await act(async () =>
+      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
+    );
+    wrapper.update();
+    await act(async () => expect(wrapper.find('AlertModal').length).toBe(1));
+    await act(async () =>
+      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(TokensAPI.destroy).toHaveBeenCalledWith(3);
+  });
+  test('should select and then delete item properly', async () => {
+    UsersAPI.readTokens.mockResolvedValue(tokens);
+    TokensAPI.destroy.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'delete',
+            url: '/api/v2/tokens',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(<UserTokenList />);
+    });
+    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      true
+    );
+    await act(async () => {
+      wrapper
+        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .prop('onChange')(tokens.data.results[0]);
+    });
+    wrapper.update();
+    expect(
+      wrapper
+        .find('DataListCheck[aria-labelledby="check-action-3"]')
+        .prop('checked')
+    ).toBe(true);
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      false
+    );
+    await act(async () =>
+      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
+    );
+    wrapper.update();
+    await act(async () => expect(wrapper.find('AlertModal').length).toBe(1));
+    await act(async () =>
+      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(TokensAPI.destroy).toHaveBeenCalledWith(3);
+    wrapper.update();
+    expect(wrapper.find('ErrorDetail').length).toBe(1);
   });
 });
