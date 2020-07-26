@@ -285,21 +285,4 @@ describe('<DataListToolbar />', () => {
     const checkbox = toolbar.find('Checkbox');
     expect(checkbox.prop('isChecked')).toBe(true);
   });
-
-  test('it shows item count', () => {
-    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
-    const sortColumns = [{ name: 'Name', key: 'name' }];
-    const itemCount = 5;
-
-    toolbar = mountWithContexts(
-      <DataListToolbar
-        qsConfig={QS_CONFIG}
-        searchColumns={searchColumns}
-        sortColumns={sortColumns}
-        itemCount={itemCount}
-      />
-    );
-    const count = toolbar.find('#item-count');
-    expect(count.at(0).text()).toEqual('5 results');
-  });
 });

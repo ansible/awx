@@ -121,7 +121,7 @@ class PaginatedDataList extends React.Component {
       );
     }
 
-    let ToolbarPagination = (
+    const ToolbarPagination = (
       <Pagination
         isCompact
         dropDirection="down"
@@ -141,7 +141,7 @@ class PaginatedDataList extends React.Component {
         onSetPage={this.handleSetPage}
         onPerPageSelect={this.handleSetPageSize}
       />
-    )
+    );
 
     return (
       <Fragment>
@@ -153,8 +153,7 @@ class PaginatedDataList extends React.Component {
           sortColumns={sortColumns}
           qsConfig={qsConfig}
           pagination={ToolbarPagination}
-        >
-        </ListHeader>
+        />
         {Content}
         {items.length ? (
           <Pagination

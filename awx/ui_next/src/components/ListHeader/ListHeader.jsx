@@ -98,7 +98,7 @@ class ListHeader extends React.Component {
       renderToolbar,
       qsConfig,
       location,
-      pagination
+      pagination,
     } = this.props;
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
@@ -128,7 +128,7 @@ class ListHeader extends React.Component {
               onRemove: this.handleRemove,
               clearAllFilters: this.handleRemoveAll,
               qsConfig,
-              pagination
+              pagination,
             })}
           </Fragment>
         )}
@@ -143,11 +143,10 @@ ListHeader.propTypes = {
   searchColumns: SearchColumns.isRequired,
   sortColumns: SortColumns.isRequired,
   renderToolbar: PropTypes.func,
-  pagination: PropTypes.element
 };
 
 ListHeader.defaultProps = {
-  renderToolbar: props => <DataListToolbar {...props} />
+  renderToolbar: props => <DataListToolbar {...props} />,
 };
 
 export default withRouter(ListHeader);
