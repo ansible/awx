@@ -25,6 +25,10 @@ class Credentials extends Base {
       params,
     });
   }
+
+  test(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/test/`, data);
+  }
 }
 
 export default Credentials;

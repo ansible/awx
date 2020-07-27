@@ -99,6 +99,9 @@ describe('<CredentialForm />', () => {
     test('should display form fields on add properly', async () => {
       addFieldExpects();
     });
+    test('should hide Test button initially', () => {
+      expect(wrapper.find('Button[children="Test"]').length).toBe(0);
+    });
     test('should update form values', async () => {
       // name and description change
       await act(async () => {
@@ -219,6 +222,18 @@ describe('<CredentialForm />', () => {
           .prop('helperTextInvalid')
       ).toBe(
         'There was an error parsing the file. Please check the file formatting and try again.'
+      );
+    });
+    test('should show Test button when external credential type is selected', async () => {
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 21);
+      });
+      wrapper.update();
+      expect(wrapper.find('Button[children="Test"]').length).toBe(1);
+      expect(wrapper.find('Button[children="Test"]').props().isDisabled).toBe(
+        true
       );
     });
     test('should call handleCancel when Cancel button is clicked', async () => {
