@@ -43,7 +43,7 @@ This document provides a guide for installing AWX.
 - [Installing the AWX CLI](#installing-the-awx-cli)
   * [Building the CLI Documentation](#building-the-cli-documentation)
 
-    
+
 ## Getting started
 
 ### Clone the repo
@@ -351,7 +351,7 @@ Once you access the AWX server, you will be prompted with a login dialog. The de
 A Kubernetes deployment will require you to have access to a Kubernetes cluster as well as the following tools:
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [helm](https://docs.helm.sh/using_helm/#quickstart-guide)
+- [helm](https://helm.sh/docs/intro/quickstart/)
 
 The installation program will reference `kubectl` directly. `helm` is only necessary if you are letting the installer configure PostgreSQL for you.
 
@@ -382,9 +382,9 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 ### Configuring Helm
 
-If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://docs.helm.sh/using_helm/#quickstart-guide](https://docs.helm.sh/using_helm/#quickstart-guide).
+If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://helm.sh/docs/intro/quickstart/](https://helm.sh/docs/intro/quickstart/).
 
-Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://docs.helm.sh/using_helm/#role-based-access-control](https://docs.helm.sh/using_helm/#role-based-access-control)
+Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://helm.sh/docs/topics/rbac/](https://helm.sh/docs/topics/rbac/)
 
 ### Run the installer
 
