@@ -65,10 +65,6 @@ options:
       description:
         - Regions for cloud provider.
       type: str
-    instance_filters:
-      description:
-        - Comma-separated list of filter expressions for matching hosts.
-      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
@@ -162,7 +158,6 @@ def main():
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
-        instance_filters=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -240,7 +235,7 @@ def main():
 
     OPTIONAL_VARS = (
         'description', 'source', 'source_path', 'source_vars',
-        'source_regions', 'instance_filters',
+        'source_regions',
         'overwrite', 'overwrite_vars', 'custom_virtualenv',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
         'update_on_project_update'

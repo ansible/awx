@@ -838,89 +838,6 @@ class InventorySourceOptions(BaseModel):
         (2, '2 (DEBUG)'),
     ]
 
-    # Use tools/scripts/get_ec2_filter_names.py to build this list.
-    INSTANCE_FILTER_NAMES = [
-        "architecture",
-        "association.allocation-id",
-        "association.association-id",
-        "association.ip-owner-id",
-        "association.public-ip",
-        "availability-zone",
-        "block-device-mapping.attach-time",
-        "block-device-mapping.delete-on-termination",
-        "block-device-mapping.device-name",
-        "block-device-mapping.status",
-        "block-device-mapping.volume-id",
-        "client-token",
-        "dns-name",
-        "group-id",
-        "group-name",
-        "hypervisor",
-        "iam-instance-profile.arn",
-        "image-id",
-        "instance-id",
-        "instance-lifecycle",
-        "instance-state-code",
-        "instance-state-name",
-        "instance-type",
-        "instance.group-id",
-        "instance.group-name",
-        "ip-address",
-        "kernel-id",
-        "key-name",
-        "launch-index",
-        "launch-time",
-        "monitoring-state",
-        "network-interface-private-dns-name",
-        "network-interface.addresses.association.ip-owner-id",
-        "network-interface.addresses.association.public-ip",
-        "network-interface.addresses.primary",
-        "network-interface.addresses.private-ip-address",
-        "network-interface.attachment.attach-time",
-        "network-interface.attachment.attachment-id",
-        "network-interface.attachment.delete-on-termination",
-        "network-interface.attachment.device-index",
-        "network-interface.attachment.instance-id",
-        "network-interface.attachment.instance-owner-id",
-        "network-interface.attachment.status",
-        "network-interface.availability-zone",
-        "network-interface.description",
-        "network-interface.group-id",
-        "network-interface.group-name",
-        "network-interface.mac-address",
-        "network-interface.network-interface.id",
-        "network-interface.owner-id",
-        "network-interface.requester-id",
-        "network-interface.requester-managed",
-        "network-interface.source-destination-check",
-        "network-interface.status",
-        "network-interface.subnet-id",
-        "network-interface.vpc-id",
-        "owner-id",
-        "placement-group-name",
-        "platform",
-        "private-dns-name",
-        "private-ip-address",
-        "product-code",
-        "product-code.type",
-        "ramdisk-id",
-        "reason",
-        "requester-id",
-        "reservation-id",
-        "root-device-name",
-        "root-device-type",
-        "source-dest-check",
-        "spot-instance-request-id",
-        "state-reason-code",
-        "state-reason-message",
-        "subnet-id",
-        "tag-key",
-        "tag-value",
-        "tenancy",
-        "virtualization-type",
-        "vpc-id"
-    ]
-
     class Meta:
         abstract = True
 
@@ -951,12 +868,6 @@ class InventorySourceOptions(BaseModel):
         max_length=1024,
         blank=True,
         default='',
-    )
-    instance_filters = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Comma-separated list of filter expressions (EC2 only). Hosts are imported when ANY of the filters match.'),
     )
     overwrite = models.BooleanField(
         default=False,
@@ -1138,32 +1049,6 @@ class InventorySourceOptions(BaseModel):
         return ','.join(regions)
 
     source_vars_dict = VarsDictProperty('source_vars')
-
-    def clean_instance_filters(self):
-        instance_filters = str(self.instance_filters or '')
-        if self.source == 'ec2':
-            invalid_filters = []
-            instance_filter_re = re.compile(r'^((tag:.+)|([a-z][a-z\.-]*[a-z]))=.*$')
-            for instance_filter in instance_filters.split(','):
-                instance_filter = instance_filter.strip()
-                if not instance_filter:
-                    continue
-                if not instance_filter_re.match(instance_filter):
-                    invalid_filters.append(instance_filter)
-                    continue
-                instance_filter_name = instance_filter.split('=', 1)[0]
-                if instance_filter_name.startswith('tag:'):
-                    continue
-                if instance_filter_name not in self.INSTANCE_FILTER_NAMES:
-                    invalid_filters.append(instance_filter)
-            if invalid_filters:
-                raise ValidationError(_('Invalid filter expression: %(filter)s') %
-                                      {'filter': ', '.join(invalid_filters)})
-            return instance_filters
-        elif self.source in ('vmware', 'tower'):
-            return instance_filters
-        else:
-            return ''
 
 
 class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualEnvMixin, RelatedJobsMixin):

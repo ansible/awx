@@ -64,4 +64,12 @@ class Migration(migrations.Migration):
             model_name='inventoryupdate',
             name='group_by',
         ),
+        migrations.RemoveField(
+            model_name='inventorysource',
+            name='instance_filter',
+        ),
+        migrations.RemoveField(
+            model_name='inventoryupdate',
+            name='instance_filter',
+        ),
     ]
