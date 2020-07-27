@@ -2020,7 +2020,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
-        inventory_update.source_regions = 'north, south, east, west'
 
         def get_cred():
             cred = Credential(
@@ -2059,7 +2058,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
-        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(
@@ -2097,7 +2095,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
-        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(

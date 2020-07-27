@@ -500,7 +500,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
 
         optional_fields = (
             'source_path',
-            'source_regions',
             'source_vars',
             'timeout',
             'overwrite',

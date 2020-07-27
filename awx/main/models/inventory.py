@@ -4,7 +4,6 @@
 # Python
 import datetime
 import time
-import json
 import logging
 import re
 import copy
@@ -19,7 +18,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
-from django.utils.encoding import iri_to_uri
 from django.db.models import Q
 
 # REST Framework
@@ -56,7 +54,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.credential.injectors import _openstack_data
-from awx.main.utils import _inventory_updates, region_sorting
+from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 
@@ -864,11 +862,6 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_('Inventory source variables in YAML or JSON format.'),
     )
-    source_regions = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
     overwrite = models.BooleanField(
         default=False,
         help_text=_('Overwrite local groups and hosts from remote inventory source.'),
@@ -887,79 +880,6 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default=1,
     )
-
-    @classmethod
-    def get_ec2_region_choices(cls):
-        ec2_region_names = getattr(settings, 'EC2_REGION_NAMES', {})
-        ec2_name_replacements = {
-            'us': 'US',
-            'ap': 'Asia Pacific',
-            'eu': 'Europe',
-            'sa': 'South America',
-        }
-        import boto.ec2
-        regions = [('all', 'All')]
-        for region in boto.ec2.regions():
-            label = ec2_region_names.get(region.name, '')
-            if not label:
-                label_parts = []
-                for part in region.name.split('-'):
-                    part = ec2_name_replacements.get(part.lower(), part.title())
-                    label_parts.append(part)
-                label = ' '.join(label_parts)
-            regions.append((region.name, label))
-        return sorted(regions, key=region_sorting)
-
-    @classmethod
-    def get_gce_region_choices(self):
-        """Return a complete list of regions in GCE, as a list of
-        two-tuples.
-        """
-        # It's not possible to get a list of regions from GCE without
-        # authenticating first.  Therefore, use a list from settings.
-        regions = list(getattr(settings, 'GCE_REGION_CHOICES', []))
-        regions.insert(0, ('all', 'All'))
-        return sorted(regions, key=region_sorting)
-
-    @classmethod
-    def get_azure_rm_region_choices(self):
-        """Return a complete list of regions in Microsoft Azure, as a list of
-        two-tuples.
-        """
-        # It's not possible to get a list of regions from Azure without
-        # authenticating first (someone reading these might think there's
-        # a pattern here!).  Therefore, you guessed it, use a list from
-        # settings.
-        regions = list(getattr(settings, 'AZURE_RM_REGION_CHOICES', []))
-        regions.insert(0, ('all', 'All'))
-        return sorted(regions, key=region_sorting)
-
-    @classmethod
-    def get_vmware_region_choices(self):
-        """Return a complete list of regions in VMware, as a list of two-tuples
-        (but note that VMware doesn't actually have regions!).
-        """
-        return [('all', 'All')]
-
-    @classmethod
-    def get_openstack_region_choices(self):
-        """I don't think openstack has regions"""
-        return [('all', 'All')]
-
-    @classmethod
-    def get_satellite6_region_choices(self):
-        """Red Hat Satellite 6 region choices (not implemented)"""
-        return [('all', 'All')]
-
-    @classmethod
-    def get_rhv_region_choices(self):
-        """No region supprt"""
-        return [('all', 'All')]
-
-    @classmethod
-    def get_tower_region_choices(self):
-        """No region supprt"""
-        return [('all', 'All')]
 
     @staticmethod
     def cloud_credential_validation(source, cred):
@@ -1025,28 +945,6 @@ class InventorySourceOptions(BaseModel):
         if cred is not None:
             return cred.pk
 
-    def clean_source_regions(self):
-        regions = self.source_regions
-
-        if self.source in CLOUD_PROVIDERS:
-            get_regions = getattr(self, 'get_%s_region_choices' % self.source)
-            valid_regions = [x[0] for x in get_regions()]
-            region_transform = lambda x: x.strip().lower()
-        else:
-            return ''
-        all_region = region_transform('all')
-        valid_regions = [region_transform(x) for x in valid_regions]
-        regions = [region_transform(x) for x in regions.split(',') if x.strip()]
-        if all_region in regions:
-            return all_region
-        invalid_regions = []
-        for r in regions:
-            if r not in valid_regions and r not in invalid_regions:
-                invalid_regions.append(r)
-        if invalid_regions:
-            raise ValidationError(_('Invalid %(source)s region: %(region)s') % {
-                'source': self.source, 'region': ', '.join(invalid_regions)})
-        return ','.join(regions)
 
     source_vars_dict = VarsDictProperty('source_vars')
 
@@ -1550,7 +1448,7 @@ class gce(PluginFileInjector):
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super().inventory_as_dict(inventory_update, private_data_dir)
-        credential = inventory_source.get_cloud_credential()
+        credential = inventory_update.get_cloud_credential()
         ret['projects'] = [credential.get_input('project', default='')]
         return ret
 

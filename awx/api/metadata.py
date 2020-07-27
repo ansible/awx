@@ -23,7 +23,7 @@ from rest_framework.request import clone_request
 # AWX
 from awx.api.fields import ChoiceNullField
 from awx.main.fields import JSONField, ImplicitRoleField
-from awx.main.models import InventorySource, NotificationTemplate
+from awx.main.models import NotificationTemplate
 from awx.main.scheduler.kubernetes import PodManager
 
 
@@ -114,13 +114,6 @@ class Metadata(metadata.SimpleMetadata):
         # Indicate if a field is write-only.
         if getattr(field, 'write_only', False):
             field_info['write_only'] = True
-
-        # Special handling of inventory source_region choices that vary based on
-        # selected inventory source.
-        if field.field_name == 'source_regions':
-            for cp in ('azure_rm', 'ec2', 'gce'):
-                get_regions = getattr(InventorySource, 'get_%s_region_choices' % cp)
-                field_info['%s_region_choices' % cp] = get_regions()
 
         # Special handling of notification configuration where the required properties
         # are conditional on the type selected.

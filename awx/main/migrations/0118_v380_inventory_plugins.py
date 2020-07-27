@@ -3,9 +3,8 @@
 import logging
 import json
 
-from django.db import migrations, models
+from django.db import migrations
 
-from awx.main.models.inventory import InventorySource
 from ._inventory_source_vars import FrozenInjectors
 
 
@@ -13,15 +12,16 @@ logger = logging.getLogger('awx.main.migrations')
 BACKUP_FILENAME = '/tmp/tower_migration_inventory_source_vars.json'
 
 
-def _get_inventory_sources():
-    # TODO: Maybe pull this list from an import
+def _get_inventory_sources(InventorySource):
+    # TODO: Maybe pull the list of cloud sources from code
     return InventorySource.objects.filter(source__in=['ec2', 'gce', 'azure_rm', 'vmware', 'satellite6', 'openstack', 'rhv', 'tower'])
 
 
 def inventory_source_vars_forward(apps, schema_editor):
+    InventorySource = apps.get_model("main", "InventorySource")
     source_vars_backup = dict()
 
-    for inv_source_obj in _get_inventory_sources():
+    for inv_source_obj in _get_inventory_sources(InventorySource):
         # TODO: Log error if this is false, it shouldn't be false
         if inv_source_obj.source in FrozenInjectors:
             source_vars_backup[inv_source_obj.id] = dict(inv_source_obj.source_vars_dict)
@@ -66,10 +66,18 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='inventorysource',
-            name='instance_filter',
+            name='instance_filters',
         ),
         migrations.RemoveField(
             model_name='inventoryupdate',
-            name='instance_filter',
+            name='instance_filters',
+        ),
+        migrations.RemoveField(
+            model_name='inventorysource',
+            name='source_regions',
+        ),
+        migrations.RemoveField(
+            model_name='inventoryupdate',
+            name='source_regions',
         ),
     ]

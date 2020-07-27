@@ -672,28 +672,6 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # -- Amazon EC2 --
 # ----------------
 
-# AWS does not appear to provide pretty region names via any API, so store the
-# list of names here.  The available region IDs will be pulled from boto.
-# http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
-EC2_REGION_NAMES = {
-    'us-east-1': _('US East (Northern Virginia)'),
-    'us-east-2': _('US East (Ohio)'),
-    'us-west-2': _('US West (Oregon)'),
-    'us-west-1': _('US West (Northern California)'),
-    'ca-central-1': _('Canada (Central)'),
-    'eu-central-1': _('EU (Frankfurt)'),
-    'eu-west-1': _('EU (Ireland)'),
-    'eu-west-2': _('EU (London)'),
-    'ap-southeast-1': _('Asia Pacific (Singapore)'),
-    'ap-southeast-2': _('Asia Pacific (Sydney)'),
-    'ap-northeast-1': _('Asia Pacific (Tokyo)'),
-    'ap-northeast-2': _('Asia Pacific (Seoul)'),
-    'ap-south-1': _('Asia Pacific (Mumbai)'),
-    'sa-east-1': _('South America (Sao Paulo)'),
-    'us-gov-west-1': _('US West (GovCloud)'),
-    'cn-north-1': _('China (Beijing)'),
-}
-
 # Inventory variable name/values for determining if host is active/enabled.
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
@@ -729,41 +707,6 @@ VMWARE_VALIDATE_CERTS = False
 # -- Google Compute Engine --
 # ---------------------------
 
-# It's not possible to get zones in GCE without authenticating, so we
-# provide a list here.
-# Source: https://developers.google.com/compute/docs/zones
-GCE_REGION_CHOICES = [
-    ('us-east1-b', _('US East 1 (B)')),
-    ('us-east1-c', _('US East 1 (C)')),
-    ('us-east1-d', _('US East 1 (D)')),
-    ('us-east4-a', _('US East 4 (A)')),
-    ('us-east4-b', _('US East 4 (B)')),
-    ('us-east4-c', _('US East 4 (C)')),
-    ('us-central1-a', _('US Central (A)')),
-    ('us-central1-b', _('US Central (B)')),
-    ('us-central1-c', _('US Central (C)')),
-    ('us-central1-f', _('US Central (F)')),
-    ('us-west1-a', _('US West (A)')),
-    ('us-west1-b', _('US West (B)')),
-    ('us-west1-c', _('US West (C)')),
-    ('europe-west1-b', _('Europe West 1 (B)')),
-    ('europe-west1-c', _('Europe West 1 (C)')),
-    ('europe-west1-d', _('Europe West 1 (D)')),
-    ('europe-west2-a', _('Europe West 2 (A)')),
-    ('europe-west2-b', _('Europe West 2 (B)')),
-    ('europe-west2-c', _('Europe West 2 (C)')),
-    ('asia-east1-a', _('Asia East (A)')),
-    ('asia-east1-b', _('Asia East (B)')),
-    ('asia-east1-c', _('Asia East (C)')),
-    ('asia-southeast1-a', _('Asia Southeast (A)')),
-    ('asia-southeast1-b', _('Asia Southeast (B)')),
-    ('asia-northeast1-a', _('Asia Northeast (A)')),
-    ('asia-northeast1-b', _('Asia Northeast (B)')),
-    ('asia-northeast1-c', _('Asia Northeast (C)')),
-    ('australia-southeast1-a', _('Australia Southeast (A)')),
-    ('australia-southeast1-b', _('Australia Southeast (B)')),
-    ('australia-southeast1-c', _('Australia Southeast (C)')),
-]
 # Inventory variable name/value for determining whether a host is active
 # in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
@@ -779,35 +722,6 @@ GCE_INSTANCE_ID_VAR = 'gce_id'
 # --------------------------------------
 # -- Microsoft Azure Resource Manager --
 # --------------------------------------
-# It's not possible to get zones in Azure without authenticating, so we
-# provide a list here.
-AZURE_RM_REGION_CHOICES = [
-    ('eastus', _('US East')),
-    ('eastus2', _('US East 2')),
-    ('centralus', _('US Central')),
-    ('northcentralus', _('US North Central')),
-    ('southcentralus', _('US South Central')),
-    ('westcentralus', _('US West Central')),
-    ('westus', _('US West')),
-    ('westus2', _('US West 2')),
-    ('canadaeast', _('Canada East')),
-    ('canadacentral', _('Canada Central')),
-    ('brazilsouth', _('Brazil South')),
-    ('northeurope', _('Europe North')),
-    ('westeurope', _('Europe West')),
-    ('ukwest', _('UK West')),
-    ('uksouth', _('UK South')),
-    ('eastasia', _('Asia East')),
-    ('southestasia', _('Asia Southeast')),
-    ('australiaeast', _('Australia East')),
-    ('australiasoutheast', _('Australia Southeast')),
-    ('westindia', _('India West')),
-    ('southindia', _('India South')),
-    ('japaneast', _('Japan East')),
-    ('japanwest', _('Japan West')),
-    ('koreacentral', _('Korea Central')),
-    ('koreasouth', _('Korea South')),
-]
 AZURE_RM_GROUP_FILTER = r'^.+$'
 AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'
