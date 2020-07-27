@@ -192,7 +192,6 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 # UoPL          	?	?	o	-	-	-		-	-	-		-		-	-	-
 # source_regions	?	?	-	o	o	o		-	-	-		-		-	-	-
 # instance_filters	?	?	-	o	-	-		o	-	-		-		-	o	-
-# group_by			?	?	-	o	-	-		o	-	-		-		-	-	-
 # source_vars*		?	?	-	o	-	o		o	o	o		o		-	-	-
 # environmet vars*	?	?	o	-	-	-		-	-	-		-		-	-	o
 # source_script		?	?	-	-	-	-		-	-	-		-		-	-	r

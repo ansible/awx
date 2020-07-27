@@ -122,12 +122,6 @@ class Metadata(metadata.SimpleMetadata):
                 get_regions = getattr(InventorySource, 'get_%s_region_choices' % cp)
                 field_info['%s_region_choices' % cp] = get_regions()
 
-        # Special handling of group_by choices for EC2.
-        if field.field_name == 'group_by':
-            for cp in ('ec2',):
-                get_group_by_choices = getattr(InventorySource, 'get_%s_group_by_choices' % cp)
-                field_info['%s_group_by_choices' % cp] = get_group_by_choices()
-
         # Special handling of notification configuration where the required properties
         # are conditional on the type selected.
         if field.field_name == 'notification_configuration':

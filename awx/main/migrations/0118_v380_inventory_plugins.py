@@ -56,4 +56,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(inventory_source_vars_forward, inventory_source_vars_backward,),
+        migrations.RemoveField(
+            model_name='inventorysource',
+            name='group_by',
+        ),
+        migrations.RemoveField(
+            model_name='inventoryupdate',
+            name='group_by',
+        ),
     ]

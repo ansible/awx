@@ -1937,7 +1937,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'source_regions', 'instance_filters', 'overwrite', 'overwrite_vars',
                   'custom_virtualenv', 'timeout', 'verbosity')
 
     def get_related(self, obj):

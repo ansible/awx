@@ -69,10 +69,6 @@ options:
       description:
         - Comma-separated list of filter expressions for matching hosts.
       type: str
-    group_by:
-      description:
-        - Limit groups automatically created from inventory source.
-      type: str
     overwrite:
       description:
         - Delete child groups and hosts not found in source.
@@ -167,7 +163,6 @@ def main():
         credential=dict(),
         source_regions=dict(),
         instance_filters=dict(),
-        group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -245,7 +240,7 @@ def main():
 
     OPTIONAL_VARS = (
         'description', 'source', 'source_path', 'source_vars',
-        'source_regions', 'instance_filters', 'group_by',
+        'source_regions', 'instance_filters',
         'overwrite', 'overwrite_vars', 'custom_virtualenv',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
         'update_on_project_update'

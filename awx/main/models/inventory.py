@@ -958,12 +958,6 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_('Comma-separated list of filter expressions (EC2 only). Hosts are imported when ANY of the filters match.'),
     )
-    group_by = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Limit groups automatically created from inventory source (EC2 only).'),
-    )
     overwrite = models.BooleanField(
         default=False,
         help_text=_('Overwrite local groups and hosts from remote inventory source.'),
@@ -982,24 +976,6 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default=1,
     )
-
-    @classmethod
-    def get_ec2_group_by_choices(cls):
-        return [
-            ('ami_id', _('Image ID')),
-            ('availability_zone', _('Availability Zone')),
-            ('aws_account', _('Account')),
-            ('instance_id', _('Instance ID')),
-            ('instance_state', _('Instance State')),
-            ('platform', _('Platform')),
-            ('instance_type', _('Instance Type')),
-            ('key_pair', _('Key Name')),
-            ('region', _('Region')),
-            ('security_group', _('Security Group')),
-            ('tag_keys', _('Tags')),
-            ('tag_none', _('Tag None')),
-            ('vpc_id', _('VPC ID')),
-        ]
 
     @classmethod
     def get_ec2_region_choices(cls):
@@ -1186,27 +1162,6 @@ class InventorySourceOptions(BaseModel):
             return instance_filters
         elif self.source in ('vmware', 'tower'):
             return instance_filters
-        else:
-            return ''
-
-    def clean_group_by(self):
-        group_by = str(self.group_by or '')
-        if self.source == 'ec2':
-            get_choices = getattr(self, 'get_%s_group_by_choices' % self.source)
-            valid_choices = [x[0] for x in get_choices()]
-            choice_transform = lambda x: x.strip().lower()
-            valid_choices = [choice_transform(x) for x in valid_choices]
-            choices = [choice_transform(x) for x in group_by.split(',') if x.strip()]
-            invalid_choices = []
-            for c in choices:
-                if c not in valid_choices and c not in invalid_choices:
-                    invalid_choices.append(c)
-            if invalid_choices:
-                raise ValidationError(_('Invalid group by choice: %(choice)s') %
-                                      {'choice': ', '.join(invalid_choices)})
-            return ','.join(choices)
-        elif self.source == 'vmware':
-            return group_by
         else:
             return ''
 
