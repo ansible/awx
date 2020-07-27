@@ -49,17 +49,19 @@ export const RegionsField = withI18n()(({ i18n, regionOptions }) => {
       helperTextInvalid={meta.error}
       validated="default"
       label={i18n._(t`Regions`)}
+      labelIcon={
+        <FieldTooltip
+          content={
+            <Trans>
+              Click on the regions field to see a list of regions for your cloud
+              provider. You can select multiple regions, or choose
+              <em> All</em> to include all regions. Only Hosts associated with
+              the selected regions will be updated.
+            </Trans>
+          }
+        />
+      }
     >
-      <FieldTooltip
-        content={
-          <Trans>
-            Click on the regions field to see a list of regions for your cloud
-            provider. You can select multiple regions, or choose
-            <em> All</em> to include all regions. Only Hosts associated with the
-            selected regions will be updated.
-          </Trans>
-        }
-      />
       <Select
         variant={SelectVariant.typeaheadMulti}
         id="regions"
@@ -139,56 +141,58 @@ export const GroupByField = withI18n()(
         helperTextInvalid={meta.error}
         validated="default"
         label={i18n._(t`Only group by`)}
+        labelIcon={
+          <FieldTooltip
+            content={
+              <Trans>
+                Select which groups to create automatically. AWX will create
+                group names similar to the following examples based on the
+                options selected:
+                <br />
+                <br />
+                <ul>
+                  <li>
+                    Availability Zone: <strong>zones &raquo; us-east-1b</strong>
+                  </li>
+                  <li>
+                    Image ID: <strong>images &raquo; ami-b007ab1e</strong>
+                  </li>
+                  <li>
+                    Instance ID: <strong>instances &raquo; i-ca11ab1e </strong>
+                  </li>
+                  <li>
+                    Instance Type: <strong>types &raquo; type_m1_medium</strong>
+                  </li>
+                  <li>
+                    Key Name: <strong>keys &raquo; key_testing</strong>
+                  </li>
+                  <li>
+                    Region: <strong>regions &raquo; us-east-1</strong>
+                  </li>
+                  <li>
+                    Security Group:{' '}
+                    <strong>
+                      security_groups &raquo; security_group_default
+                    </strong>
+                  </li>
+                  <li>
+                    Tags: <strong>tags &raquo; tag_Name_host1</strong>
+                  </li>
+                  <li>
+                    VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong>
+                  </li>
+                  <li>
+                    Tag None: <strong>tags &raquo; tag_none</strong>
+                  </li>
+                </ul>
+                <br />
+                If blank, all groups above are created except{' '}
+                <em>Instance ID</em>.
+              </Trans>
+            }
+          />
+        }
       >
-        <FieldTooltip
-          content={
-            <Trans>
-              Select which groups to create automatically. AWX will create group
-              names similar to the following examples based on the options
-              selected:
-              <br />
-              <br />
-              <ul>
-                <li>
-                  Availability Zone: <strong>zones &raquo; us-east-1b</strong>
-                </li>
-                <li>
-                  Image ID: <strong>images &raquo; ami-b007ab1e</strong>
-                </li>
-                <li>
-                  Instance ID: <strong>instances &raquo; i-ca11ab1e </strong>
-                </li>
-                <li>
-                  Instance Type: <strong>types &raquo; type_m1_medium</strong>
-                </li>
-                <li>
-                  Key Name: <strong>keys &raquo; key_testing</strong>
-                </li>
-                <li>
-                  Region: <strong>regions &raquo; us-east-1</strong>
-                </li>
-                <li>
-                  Security Group:{' '}
-                  <strong>
-                    security_groups &raquo; security_group_default
-                  </strong>
-                </li>
-                <li>
-                  Tags: <strong>tags &raquo; tag_Name_host1</strong>
-                </li>
-                <li>
-                  VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong>
-                </li>
-                <li>
-                  Tag None: <strong>tags &raquo; tag_none</strong>
-                </li>
-              </ul>
-              <br />
-              If blank, all groups above are created except <em>Instance ID</em>
-              .
-            </Trans>
-          }
-        />
         <Select
           variant={SelectVariant.typeaheadMulti}
           id="group-by"
@@ -231,11 +235,13 @@ export const VerbosityField = withI18n()(({ i18n }) => {
       fieldId="verbosity"
       validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
-    >
-      <FieldTooltip
-        content={i18n._(t`Control the level of output Ansible
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(t`Control the level of output Ansible
         will produce for inventory source update jobs.`)}
-      />
+        />
+      }
+    >
       <AnsibleSelect
         id="verbosity"
         data={options}

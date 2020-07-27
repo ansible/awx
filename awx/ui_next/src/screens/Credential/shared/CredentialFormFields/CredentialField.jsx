@@ -126,12 +126,14 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
         fieldId={`credential-${fieldOptions.id}`}
         helperTextInvalid={meta.error}
         label={fieldOptions.label}
+        labelIcon={
+          fieldOptions.help_text && (
+            <FieldTooltip content={fieldOptions.help_text} />
+          )
+        }
         isRequired={isRequired}
         isValid={isValid}
       >
-        {fieldOptions.help_text && (
-          <FieldTooltip content={fieldOptions.help_text} />
-        )}
         <CredentialInput
           credentialKind={credentialType.kind}
           fieldOptions={fieldOptions}

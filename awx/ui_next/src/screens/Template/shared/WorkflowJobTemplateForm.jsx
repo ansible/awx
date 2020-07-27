@@ -157,12 +157,17 @@ function WorkflowJobTemplateForm({
         </FieldWithPrompt>
       </FormColumnLayout>
       <FormFullWidthLayout>
-        <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-          <FieldTooltip
-            content={i18n._(t`Optional labels that describe this job template,
+        <FormGroup
+          label={i18n._(t`Labels`)}
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(t`Optional labels that describe this job template,
                     such as 'dev' or 'test'. Labels can be used to group and filter
                     job templates and completed jobs.`)}
-          />
+            />
+          }
+          fieldId="template-labels"
+        >
           <LabelSelect
             value={labelsField.value}
             onChange={labels => labelsHelpers.setValue(labels)}

@@ -76,12 +76,14 @@ function ApplicationFormFields({
         }
         isRequired
         label={i18n._(t`Authorization grant type`)}
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(
+              t`The Grant type the user must use for acquire tokens for this application`
+            )}
+          />
+        }
       >
-        <FieldTooltip
-          content={i18n._(
-            t`The Grant type the user must use for acquire tokens for this application`
-          )}
-        />
         <AnsibleSelect
           {...authorizationTypeField}
           isValid={
@@ -118,12 +120,14 @@ function ApplicationFormFields({
         }
         isRequired
         label={i18n._(t`Client type`)}
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(
+              t`Set to Public or Confidential depending on how secure the client device is.`
+            )}
+          />
+        }
       >
-        <FieldTooltip
-          content={i18n._(
-            t`Set to Public or Confidential depending on how secure the client device is.`
-          )}
-        />
         <AnsibleSelect
           {...clientTypeField}
           isValid={!clientTypeMeta.touched || !clientTypeMeta.error}

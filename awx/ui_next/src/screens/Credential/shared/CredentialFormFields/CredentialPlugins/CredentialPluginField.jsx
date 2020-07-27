@@ -127,10 +127,12 @@ function CredentialPluginField(props) {
           isRequired={isRequired}
           isValid={isValid}
           label={fieldOptions.label}
+          labelIcon={
+            fieldOptions.help_text && (
+              <FieldTooltip content={fieldOptions.help_text} />
+            )
+          }
         >
-          {fieldOptions.help_text && (
-            <FieldTooltip content={fieldOptions.help_text} />
-          )}
           <CredentialPluginInput {...props} />
         </FormGroup>
       )}

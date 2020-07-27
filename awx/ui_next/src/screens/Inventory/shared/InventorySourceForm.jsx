@@ -143,12 +143,14 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
         <FormGroup
           fieldId="custom-virtualenv"
           label={i18n._(t`Ansible Environment`)}
-        >
-          <FieldTooltip
-            content={i18n._(t`Select the custom
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(t`Select the custom
             Python virtual environment for this
             inventory source sync to run on.`)}
-          />
+            />
+          }
+        >
           <AnsibleSelect
             id="custom-virtualenv"
             data={[
