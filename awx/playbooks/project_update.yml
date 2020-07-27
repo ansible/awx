@@ -163,7 +163,7 @@
         - name: fetch galaxy collections from collections/requirements.yml
           command: >
             ansible-galaxy collection install -r collections/requirements.yml
-            --collections-path {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
+            -p {{projects_root}}/.__awx_cache/{{local_path}}/stage/requirements_collections
             {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
           args:
             chdir: "{{project_path|quote}}"
