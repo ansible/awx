@@ -17,6 +17,7 @@ import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '../../api';
 import TeamAccessList from './TeamAccess';
+import TeamUsersList from './TeamUsers';
 
 function Team({ i18n, setBreadcrumb }) {
   const [team, setTeam] = useState(null);
@@ -51,8 +52,8 @@ function Team({ i18n, setBreadcrumb }) {
       id: 99,
     },
     { name: i18n._(t`Details`), link: `/teams/${id}/details`, id: 0 },
-    { name: i18n._(t`Users`), link: `/teams/${id}/users`, id: 1 },
-    { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 2 },
+    { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 1 },
+    { name: i18n._(t`Roles`), link: `/teams/${id}/roles`, id: 2 },
   ];
 
   let showCardHeader = true;
@@ -95,12 +96,12 @@ function Team({ i18n, setBreadcrumb }) {
             </Route>
           )}
           {team && (
-            <Route path="/teams/:id/users">
-              <span>Coming soon :)</span>
+            <Route path="/teams/:id/access">
+              <TeamUsersList />
             </Route>
           )}
           {team && (
-            <Route path="/teams/:id/access">
+            <Route path="/teams/:id/roles">
               <TeamAccessList />
             </Route>
           )}
