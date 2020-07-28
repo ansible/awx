@@ -32,7 +32,7 @@ function ApplicationsList({ i18n }) {
     isLoading,
     error,
     request: fetchApplications,
-    result: { applications, itemCount, actions },
+    result: { applications, itemCount, actions, relatedSearchFields },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -46,12 +46,16 @@ function ApplicationsList({ i18n }) {
         applications: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [location]),
     {
       applications: [],
       itemCount: 0,
       actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -85,6 +89,10 @@ function ApplicationsList({ i18n }) {
   };
 
   const canAdd = actions && actions.POST;
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <>
@@ -101,12 +109,12 @@ function ApplicationsList({ i18n }) {
             toolbarSearchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Description`),
-                key: 'description',
+                key: 'description__icontains',
               },
             ]}
             toolbarSortColumns={[
@@ -127,6 +135,8 @@ function ApplicationsList({ i18n }) {
                 key: 'description',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}

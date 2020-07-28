@@ -12,9 +12,8 @@ jest.mock('../../../api/models/Roles');
 
 UsersAPI.readOptions.mockResolvedValue({
   data: {
-    actions: {
-      GET: {},
-    },
+    actions: { GET: {} },
+    related_search_fields: [],
   },
 });
 
@@ -144,6 +143,15 @@ describe('<UserAccessList />', () => {
     );
   });
   test('should not render add button when user cannot create other users and user cannot edit this user', async () => {
+    UsersAPI.readRoleOptions.mockResolvedValueOnce({
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
+    });
+
     UsersAPI.readRoles.mockResolvedValue({
       data: {
         results: [

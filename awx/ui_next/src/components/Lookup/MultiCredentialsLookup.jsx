@@ -49,7 +49,7 @@ function MultiCredentialsLookup(props) {
   }, [fetchTypes]);
 
   const {
-    result: { credentials, credentialsCount },
+    result: { credentials, credentialsCount, actions, relatedSearchFields },
     request: fetchCredentials,
     error: credentialsError,
     isLoading: isCredentialsLoading,
@@ -62,15 +62,24 @@ function MultiCredentialsLookup(props) {
         };
       }
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { results, count } = await loadCredentials(params, selectedType.id);
+      const [{ results, count }, actionsResponse] = await Promise.all([
+        loadCredentials(params, selectedType.id),
+        CredentialsAPI.readOptions(),
+      ]);
       return {
         credentials: results,
         credentialsCount: count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [selectedType, history.location]),
     {
       credentials: [],
       credentialsCount: 0,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -94,6 +103,11 @@ function MultiCredentialsLookup(props) {
   );
 
   const isVault = selectedType?.kind === 'vault';
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <Lookup
@@ -149,16 +163,16 @@ function MultiCredentialsLookup(props) {
               searchColumns={[
                 {
                   name: i18n._(t`Name`),
-                  key: 'name',
+                  key: 'name__icontains',
                   isDefault: true,
                 },
                 {
                   name: i18n._(t`Created By (Username)`),
-                  key: 'created_by__username',
+                  key: 'created_by__username__icontains',
                 },
                 {
                   name: i18n._(t`Modified By (Username)`),
-                  key: 'modified_by__username',
+                  key: 'modified_by__username__icontains',
                 },
               ]}
               sortColumns={[
@@ -167,6 +181,8 @@ function MultiCredentialsLookup(props) {
                   key: 'name',
                 },
               ]}
+              toolbarSearchableKeys={searchableKeys}
+              toolbarRelatedSearchableKeys={relatedSearchableKeys}
               multiple={isVault}
               header={i18n._(t`Credentials`)}
               name="credentials"

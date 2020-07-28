@@ -32,13 +32,13 @@ const QS_CONFIG = getQSConfig('roles', {
 function UserAccessList({ i18n, user }) {
   const { search } = useLocation();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+
   const {
     isLoading,
     request: fetchRoles,
     error,
-    result: { roleCount, roles, options },
+    result: { roleCount, roles, actions, relatedSearchFields },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
@@ -46,20 +46,28 @@ function UserAccessList({ i18n, user }) {
         {
           data: { results, count },
         },
-        {
-          data: { actions },
-        },
+        actionsResponse,
       ] = await Promise.all([
         UsersAPI.readRoles(user.id, params),
         UsersAPI.readOptions(),
       ]);
-      return { roleCount: count, roles: results, options: actions };
+      return {
+        roleCount: count,
+        roles: results,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+      };
     }, [user.id, search]),
     {
       roles: [],
       roleCount: 0,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
+
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
@@ -82,7 +90,12 @@ function UserAccessList({ i18n, user }) {
 
   const canAdd =
     user?.summary_fields?.user_capabilities?.edit ||
-    (options && Object.prototype.hasOwnProperty.call(options, 'POST'));
+    (actions && Object.prototype.hasOwnProperty.call(actions, 'POST'));
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   const saveRoles = () => {
     setIsWizardOpen(false);
@@ -132,16 +145,18 @@ function UserAccessList({ i18n, user }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Role`),
-            key: 'role_field',
+            key: 'role_field__icontains',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: i18n._(t`ID`),
             key: 'id',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={role => {
           return (
             <UserAccessListItem

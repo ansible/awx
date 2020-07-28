@@ -20,6 +20,16 @@ CredentialsAPI.read.mockResolvedValue({
   },
 });
 
+CredentialsAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: {
+      GET: {},
+      POST: {},
+    },
+    related_search_fields: [],
+  },
+});
+
 CredentialTypesAPI.readDetail.mockResolvedValue({
   data: {
     id: 20,

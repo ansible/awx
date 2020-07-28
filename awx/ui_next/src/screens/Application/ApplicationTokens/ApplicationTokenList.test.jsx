@@ -82,6 +82,19 @@ const tokens = {
 };
 describe('<ApplicationTokenList/>', () => {
   let wrapper;
+
+  beforeEach(() => {
+    ApplicationsAPI.readTokenOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
+  });
+
   test('should mount properly', async () => {
     ApplicationsAPI.readTokens.mockResolvedValue(tokens);
     await act(async () => {

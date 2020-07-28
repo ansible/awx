@@ -35,7 +35,7 @@ function CredentialLookup({
   tooltip,
 }) {
   const {
-    result: { count, credentials },
+    result: { count, credentials, actions, relatedSearchFields },
     error,
     request: fetchCredentials,
   } = useRequest(
@@ -51,16 +51,23 @@ function CredentialLookup({
         ? { credential_type__namespace: credentialTypeNamespace }
         : {};
 
-      const { data } = await CredentialsAPI.read(
-        mergeParams(params, {
-          ...typeIdParams,
-          ...typeKindParams,
-          ...typeNamespaceParams,
-        })
-      );
+      const [{ data }, actionsResponse] = await Promise.all([
+        CredentialsAPI.read(
+          mergeParams(params, {
+            ...typeIdParams,
+            ...typeKindParams,
+            ...typeNamespaceParams,
+          })
+        ),
+        CredentialsAPI.readOptions,
+      ]);
       return {
         count: data.count,
         credentials: data.results,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [
       credentialTypeId,
@@ -71,12 +78,19 @@ function CredentialLookup({
     {
       count: 0,
       credentials: [],
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
   useEffect(() => {
     fetchCredentials();
   }, [fetchCredentials]);
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   // TODO: replace credential type search with REST-based grabbing of cred types
 
@@ -107,16 +121,16 @@ function CredentialLookup({
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
@@ -125,6 +139,8 @@ function CredentialLookup({
                 key: 'name',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}

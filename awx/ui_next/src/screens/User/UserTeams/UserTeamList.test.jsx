@@ -58,13 +58,14 @@ describe('<UserTeamList />', () => {
         data: mockAPIUserTeamList.data,
       })
     );
-    UsersAPI.readOptions = jest.fn(() =>
+    UsersAPI.readTeamsOptions = jest.fn(() =>
       Promise.resolve({
         data: {
           actions: {
             GET: {},
             POST: {},
           },
+          related_search_fields: [],
         },
       })
     );

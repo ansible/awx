@@ -82,7 +82,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -116,7 +118,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -190,7 +194,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );

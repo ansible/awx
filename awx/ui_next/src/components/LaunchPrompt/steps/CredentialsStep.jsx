@@ -52,7 +52,7 @@ function CredentialsStep({ i18n }) {
   }, [fetchTypes]);
 
   const {
-    result: { credentials, count },
+    result: { credentials, count, actions, relatedSearchFields },
     error: credentialsError,
     isLoading: isCredentialsLoading,
     request: fetchCredentials,
@@ -62,16 +62,23 @@ function CredentialsStep({ i18n }) {
         return { credentials: [], count: 0 };
       }
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { data } = await CredentialsAPI.read({
-        ...params,
-        credential_type: selectedType.id,
-      });
+      const [{ data }, actionsResponse] = await Promise.all([
+        CredentialsAPI.read({
+          ...params,
+          credential_type: selectedType.id,
+        }),
+        CredentialsAPI.readOptions(),
+      ]);
       return {
         credentials: data.results,
         count: data.count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [selectedType, history.location.search]),
-    { credentials: [], count: 0 }
+    { credentials: [], count: 0, actions: {}, relatedSearchFields: [] }
   );
 
   useEffect(() => {
@@ -95,6 +102,11 @@ function CredentialsStep({ i18n }) {
       isReadOnly={!canDelete}
       credential={item}
     />
+  );
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
   );
 
   return (
@@ -129,16 +141,16 @@ function CredentialsStep({ i18n }) {
           searchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
               name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username',
+              key: 'modified_by__username__icontains',
             },
           ]}
           sortColumns={[
@@ -147,6 +159,8 @@ function CredentialsStep({ i18n }) {
               key: 'name',
             },
           ]}
+          searchableKeys={searchableKeys}
+          relatedSearchableKeys={relatedSearchableKeys}
           multiple={isVault}
           header={i18n._(t`Credentials`)}
           name="credentials"

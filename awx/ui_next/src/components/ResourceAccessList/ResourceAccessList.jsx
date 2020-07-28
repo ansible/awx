@@ -80,16 +80,16 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Username`),
-            key: 'username',
+            key: 'username__icontains',
             isDefault: true,
           },
           {
-            name: i18n._(t`First name`),
-            key: 'first_name',
+            name: i18n._(t`First Name`),
+            key: 'first_name__icontains',
           },
           {
-            name: i18n._(t`Last name`),
-            key: 'last_name',
+            name: i18n._(t`Last Name`),
+            key: 'last_name__icontains',
           },
         ]}
         toolbarSortColumns={[
@@ -98,11 +98,11 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
             key: 'username',
           },
           {
-            name: i18n._(t`First name`),
+            name: i18n._(t`First Name`),
             key: 'first_name',
           },
           {
-            name: i18n._(t`Last name`),
+            name: i18n._(t`Last Name`),
             key: 'last_name',
           },
         ]}

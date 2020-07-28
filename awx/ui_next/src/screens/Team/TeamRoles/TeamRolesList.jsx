@@ -37,7 +37,7 @@ function TeamRolesList({ i18n, me, team }) {
     isLoading,
     request: fetchRoles,
     contentError,
-    result: { roleCount, roles, isAdminOfOrg },
+    result: { roleCount, roles, isAdminOfOrg, actions, relatedSearchFields },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
@@ -46,22 +46,30 @@ function TeamRolesList({ i18n, me, team }) {
           data: { results, count },
         },
         { count: orgAdminCount },
+        actionsResponse,
       ] = await Promise.all([
         TeamsAPI.readRoles(team.id, params),
         UsersAPI.readAdminOfOrganizations(me.id, {
           id: team.organization,
         }),
+        TeamsAPI.readRoleOptions(team.id),
       ]);
       return {
         roleCount: count,
         roles: results,
         isAdminOfOrg: orgAdminCount > 0,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [me.id, team.id, team.organization, search]),
     {
       roles: [],
       roleCount: 0,
       isAdminOfOrg: false,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -90,6 +98,10 @@ function TeamRolesList({ i18n, me, team }) {
   );
 
   const canAdd = team?.summary_fields?.user_capabilities?.edit || isAdminOfOrg;
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   const detailUrl = role => {
     const { resource_id, resource_type } = role.summary_fields;
@@ -136,16 +148,18 @@ function TeamRolesList({ i18n, me, team }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Role`),
-            key: 'role_field',
+            key: 'role_field__icontains',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: i18n._(t`ID`),
             key: 'id',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}

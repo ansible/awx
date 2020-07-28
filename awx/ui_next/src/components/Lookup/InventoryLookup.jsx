@@ -19,25 +19,37 @@ const QS_CONFIG = getQSConfig('inventory', {
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
   const {
-    result: { inventories, count },
+    result: { inventories, count, actions, relatedSearchFields },
     request: fetchInventories,
     error,
     isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { data } = await InventoriesAPI.read(params);
+      const [{ data }, actionsResponse] = await Promise.all([
+        InventoriesAPI.read(params),
+        InventoriesAPI.readOptions(),
+      ]);
       return {
         inventories: data.results,
         count: data.count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [history.location]),
-    { inventories: [], count: 0 }
+    { inventories: [], count: 0, actions: {}, relatedSearchFields: [] }
   );
 
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <>
@@ -58,16 +70,16 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
@@ -76,6 +88,8 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
                 key: 'name',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
             header={i18n._(t`Inventory`)}
             name="inventory"

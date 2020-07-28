@@ -28,13 +28,19 @@ function UserTokenList({ i18n }) {
     error,
     isLoading,
     request: fetchTokens,
-    result: { tokens, itemCount },
+    result: { tokens, itemCount, actions, relatedSearchFields },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const {
-        data: { results, count },
-      } = await UsersAPI.readTokens(id, params);
+      const [
+        {
+          data: { results, count },
+        },
+        actionsResponse,
+      ] = await Promise.all([
+        UsersAPI.readTokens(id, params),
+        UsersAPI.readTokenOptions(id),
+      ]);
       const modifiedResults = results.map(result => {
         result.summary_fields = {
           user: result.summary_fields.user,
@@ -44,9 +50,16 @@ function UserTokenList({ i18n }) {
         result.name = result.summary_fields.application?.name;
         return result;
       });
-      return { tokens: modifiedResults, itemCount: count };
+      return {
+        tokens: modifiedResults,
+        itemCount: count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+      };
     }, [id, location.search]),
-    { tokens: [], itemCount: 0 }
+    { tokens: [], itemCount: 0, actions: {}, relatedSearchFields: [] }
   );
 
   useEffect(() => {
@@ -80,6 +93,10 @@ function UserTokenList({ i18n }) {
   };
 
   const canAdd = true;
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
   return (
     <>
       <PaginatedDataList
@@ -93,12 +110,12 @@ function UserTokenList({ i18n }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'application__name',
+            key: 'application__name__icontains',
             isDefault: true,
           },
           {
             name: i18n._(t`Description`),
-            key: 'description',
+            key: 'description__icontains',
           },
         ]}
         toolbarSortColumns={[

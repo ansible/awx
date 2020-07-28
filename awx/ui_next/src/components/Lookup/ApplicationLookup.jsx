@@ -22,22 +22,41 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
   const location = useLocation();
   const {
     error,
-    result: { applications, itemCount },
+    result: { applications, itemCount, actions, relatedSearchFields },
     request: fetchApplications,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
 
-      const {
-        data: { results, count },
-      } = await ApplicationsAPI.read(params);
-      return { applications: results, itemCount: count };
+      const [
+        {
+          data: { results, count },
+        },
+        actionsResponse,
+      ] = await Promise.all([
+        ApplicationsAPI.read(params),
+        ApplicationsAPI.readOptions,
+      ]);
+      return {
+        applications: results,
+        itemCount: count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+      };
     }, [location]),
-    { applications: [], itemCount: 0 }
+    { applications: [], itemCount: 0, actions: {}, relatedSearchFields: [] }
   );
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
+
   return (
     <FormGroup fieldId="application" label={label}>
       <Lookup
@@ -56,12 +75,12 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Description`),
-                key: 'description',
+                key: 'description__icontains',
               },
             ]}
             sortColumns={[
@@ -82,6 +101,8 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
                 key: 'description',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="application"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}

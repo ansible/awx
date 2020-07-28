@@ -96,6 +96,16 @@ UnifiedJobsAPI.read.mockResolvedValue({
   data: { count: 3, results: mockResults },
 });
 
+UnifiedJobsAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: {
+      GET: {},
+      POST: {},
+    },
+    related_search_fields: [],
+  },
+});
+
 function waitForLoaded(wrapper) {
   return waitForElement(
     wrapper,

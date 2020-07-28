@@ -68,12 +68,12 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
       toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Source`),
-          key: 'source',
+          key: 'or__source',
           options: [
             [`file`, i18n._(t`File, directory or script`)],
             [`scm`, i18n._(t`Sourced from a project`)],
