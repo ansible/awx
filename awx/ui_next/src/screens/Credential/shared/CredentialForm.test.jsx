@@ -208,8 +208,10 @@ describe('<CredentialForm />', () => {
       });
       wrapper.update();
       expect(
-        wrapper.find('FormGroup[fieldId="credential-gce-file"]').prop('isValid')
-      ).toBe(false);
+        wrapper
+          .find('FormGroup[fieldId="credential-gce-file"]')
+          .prop('validated')
+      ).toBe('error');
 
       expect(
         wrapper

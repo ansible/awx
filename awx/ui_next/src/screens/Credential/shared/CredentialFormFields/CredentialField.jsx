@@ -29,7 +29,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
         onChange={(value, event) => {
           subFormField.onChange(event);
         }}
-        isValid={isValid}
+        validated={isValid ? 'default' : 'error'}
       />
     );
   }
@@ -38,7 +38,6 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
       <PasswordInput
         {...subFormField}
         id={`credential-${fieldOptions.id}`}
-        isValid={isValid}
         {...rest}
       />
     );
@@ -55,7 +54,7 @@ function CredentialInput({ fieldOptions, credentialKind, ...rest }) {
       onChange={(value, event) => {
         subFormField.onChange(event);
       }}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
     />
   );
 }
@@ -107,7 +106,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
         helperTextInvalid={meta.error}
         label={fieldOptions.label}
         isRequired={isRequired}
-        isValid={isValid}
+        validated={isValid ? 'default' : 'error'}
       >
         <AnsibleSelect
           {...subFormField}
@@ -132,7 +131,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
           )
         }
         isRequired={isRequired}
-        isValid={isValid}
+        validated={isValid ? 'default' : 'error'}
       >
         <CredentialInput
           credentialKind={credentialType.kind}
@@ -150,7 +149,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
     <CredentialPluginField
       fieldOptions={fieldOptions}
       isRequired={isRequired}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
     >
       <CredentialInput fieldOptions={fieldOptions} />
     </CredentialPluginField>

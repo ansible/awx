@@ -20,7 +20,7 @@ function GceFileUploadField({ i18n }) {
   return (
     <FormGroup
       fieldId="credential-gce-file"
-      isValid={!fileError}
+      validated={!fileError ? 'default' : 'error'}
       label={i18n._(t`Service account JSON file`)}
       helperText={i18n._(
         t`Select a JSON formatted service account key to autopopulate the following fields.`
