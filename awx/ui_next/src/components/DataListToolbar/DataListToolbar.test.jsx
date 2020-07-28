@@ -25,7 +25,9 @@ describe('<DataListToolbar />', () => {
   const onSelectAll = jest.fn();
 
   test('it triggers the expected callbacks', () => {
-    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const searchColumns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+    ];
     const sortColumns = [{ name: 'Name', key: 'name' }];
     const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -108,7 +110,7 @@ describe('<DataListToolbar />', () => {
     searchDropdownToggle.simulate('click');
     toolbar.update();
     let searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
-    expect(searchDropdownItems.length).toBe(1);
+    expect(searchDropdownItems.length).toBe(2);
     const mockedSortEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
@@ -144,7 +146,7 @@ describe('<DataListToolbar />', () => {
     toolbar.update();
 
     searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
-    expect(searchDropdownItems.length).toBe(1);
+    expect(searchDropdownItems.length).toBe(2);
 
     const mockedSearchEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSearchEvent);
@@ -282,5 +284,32 @@ describe('<DataListToolbar />', () => {
     );
     const checkbox = toolbar.find('Checkbox');
     expect(checkbox.prop('isChecked')).toBe(true);
+  });
+
+  test('always adds advanced item to search column array', () => {
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
+
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
+        onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        additionalControls={[
+          <button key="1" id="test" type="button">
+            click
+          </button>,
+        ]}
+      />
+    );
+
+    const search = toolbar.find('Search');
+    expect(
+      search.prop('columns').filter(col => col.key === 'advanced').length
+    ).toBe(1);
   });
 });

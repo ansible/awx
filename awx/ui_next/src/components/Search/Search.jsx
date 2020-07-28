@@ -24,6 +24,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { parseQueryString } from '../../util/qs';
 import { QSConfig, SearchColumns } from '../../types';
+import AdvancedSearch from './AdvancedSearch';
 
 const NoOptionDropdown = styled.div`
   align-self: stretch;
@@ -77,19 +78,10 @@ class Search extends React.Component {
     e.preventDefault();
 
     const { searchKey, searchValue } = this.state;
-    const { onSearch, qsConfig } = this.props;
+    const { onSearch } = this.props;
 
     if (searchValue) {
-      const isNonStringField =
-        qsConfig.integerFields.find(field => field === searchKey) ||
-        qsConfig.dateFields.find(field => field === searchKey);
-
-      const actualSearchKey = isNonStringField
-        ? searchKey
-        : `${searchKey}__icontains`;
-
-      onSearch(actualSearchKey, searchValue);
-
+      onSearch(searchKey, searchValue);
       this.setState({ searchValue: '' });
     }
   }
@@ -112,9 +104,9 @@ class Search extends React.Component {
     const { onSearch, onRemove } = this.props;
 
     if (event.target.checked) {
-      onSearch(`or__${key}`, actualValue);
+      onSearch(key, actualValue);
     } else {
-      onRemove(`or__${key}`, actualValue);
+      onRemove(key, actualValue);
     }
   }
 
@@ -125,7 +117,16 @@ class Search extends React.Component {
 
   render() {
     const { up } = DropdownPosition;
-    const { columns, i18n, onRemove, qsConfig, location } = this.props;
+    const {
+      columns,
+      i18n,
+      onSearch,
+      onRemove,
+      qsConfig,
+      location,
+      searchableKeys,
+      relatedSearchableKeys,
+    } = this.props;
     const {
       isSearchDropdownOpen,
       searchKey,
@@ -172,12 +173,14 @@ class Search extends React.Component {
       );
 
       nonDefaultParams.forEach(key => {
-        const columnKey = key.replace('__icontains', '').replace('or__', '');
+        const columnKey = key;
         const label = columns.filter(
           ({ key: keyToCheck }) => columnKey === keyToCheck
         ).length
-          ? columns.filter(({ key: keyToCheck }) => columnKey === keyToCheck)[0]
-              .name
+          ? `${
+              columns.find(({ key: keyToCheck }) => columnKey === keyToCheck)
+                .name
+            } (${key})`
           : columnKey;
 
         queryParamsByKey[columnKey] = { key, label, chips: [] };
@@ -196,7 +199,6 @@ class Search extends React.Component {
           });
         }
       });
-
       return queryParamsByKey;
     };
 
@@ -238,30 +240,37 @@ class Search extends React.Component {
               key={key}
               showToolbarItem={searchKey === key}
             >
-              {(options && (
-                <Fragment>
-                  <Select
-                    variant={SelectVariant.checkbox}
-                    aria-label={name}
-                    onToggle={this.handleFilterDropdownToggle}
-                    onSelect={(event, selection) =>
-                      this.handleFilterDropdownSelect(key, event, selection)
-                    }
-                    selections={chipsByKey[key].chips.map(chip => {
-                      const [, ...value] = chip.key.split(':');
-                      return value.join(':');
-                    })}
-                    isOpen={isFilterDropdownOpen}
-                    placeholderText={`Filter By ${name}`}
-                  >
-                    {options.map(([optionKey, optionLabel]) => (
-                      <SelectOption key={optionKey} value={optionKey}>
-                        {optionLabel}
-                      </SelectOption>
-                    ))}
-                  </Select>
-                </Fragment>
+              {(key === 'advanced' && (
+                <AdvancedSearch
+                  onSearch={onSearch}
+                  searchableKeys={searchableKeys}
+                  relatedSearchableKeys={relatedSearchableKeys}
+                />
               )) ||
+                (options && (
+                  <Fragment>
+                    <Select
+                      variant={SelectVariant.checkbox}
+                      aria-label={name}
+                      onToggle={this.handleFilterDropdownToggle}
+                      onSelect={(event, selection) =>
+                        this.handleFilterDropdownSelect(key, event, selection)
+                      }
+                      selections={chipsByKey[key].chips.map(chip => {
+                        const [, ...value] = chip.key.split(':');
+                        return value.join(':');
+                      })}
+                      isOpen={isFilterDropdownOpen}
+                      placeholderText={`Filter By ${name}`}
+                    >
+                      {options.map(([optionKey, optionLabel]) => (
+                        <SelectOption key={optionKey} value={optionKey}>
+                          {optionLabel}
+                        </SelectOption>
+                      ))}
+                    </Select>
+                  </Fragment>
+                )) ||
                 (isBoolean && (
                   <Select
                     aria-label={name}
@@ -312,6 +321,28 @@ class Search extends React.Component {
             </ToolbarFilter>
           )
         )}
+        {/* Add a ToolbarFilter for any key that doesn't have it's own
+        search column so the chips show up */}
+        {Object.keys(chipsByKey)
+          .filter(val => chipsByKey[val].chips.length > 0)
+          .filter(val => columns.map(val => val.key).indexOf(val) === -1)
+          .map(leftoverKey => (
+            <ToolbarFilter
+              chips={
+                chipsByKey[leftoverKey] ? chipsByKey[leftoverKey].chips : []
+              }
+              deleteChip={(unusedKey, chip) => {
+                const [columnKey, ...value] = chip.key.split(':');
+                onRemove(columnKey, value.join(':'));
+              }}
+              categoryName={
+                chipsByKey[leftoverKey]
+                  ? chipsByKey[leftoverKey].label
+                  : leftoverKey
+              }
+              key={leftoverKey}
+            />
+          ))}
       </ToolbarGroup>
     );
   }

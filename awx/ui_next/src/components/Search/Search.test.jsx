@@ -22,7 +22,7 @@ describe('<Search />', () => {
   });
 
   test('it triggers the expected callbacks', () => {
-    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const columns = [{ name: 'Name', key: 'name__icontains', isDefault: true }];
 
     const searchBtn = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -50,7 +50,7 @@ describe('<Search />', () => {
   });
 
   test('handleDropdownToggle properly updates state', async () => {
-    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const columns = [{ name: 'Name', key: 'name__icontains', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
       <Toolbar
@@ -70,8 +70,8 @@ describe('<Search />', () => {
 
   test('handleDropdownSelect properly updates state', async () => {
     const columns = [
-      { name: 'Name', key: 'name', isDefault: true },
-      { name: 'Description', key: 'description' },
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+      { name: 'Description', key: 'description__icontains' },
     ];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
@@ -85,17 +85,17 @@ describe('<Search />', () => {
         </ToolbarContent>
       </Toolbar>
     ).find('Search');
-    expect(wrapper.state('searchKey')).toEqual('name');
+    expect(wrapper.state('searchKey')).toEqual('name__icontains');
     wrapper
       .instance()
       .handleDropdownSelect({ target: { innerText: 'Description' } });
-    expect(wrapper.state('searchKey')).toEqual('description');
+    expect(wrapper.state('searchKey')).toEqual('description__icontains');
   });
 
   test('attempt to search with empty string', () => {
     const searchButton = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
-    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const columns = [{ name: 'Name', key: 'name__icontains', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
       <Toolbar
@@ -119,7 +119,7 @@ describe('<Search />', () => {
   test('search with a valid string', () => {
     const searchButton = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
-    const columns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const columns = [{ name: 'Name', key: 'name__icontains', isDefault: true }];
     const onSearch = jest.fn();
     const wrapper = mountWithContexts(
       <Toolbar
@@ -143,12 +143,12 @@ describe('<Search />', () => {
 
   test('filter keys are properly labeled', () => {
     const columns = [
-      { name: 'Name', key: 'name', isDefault: true },
-      { name: 'Type', key: 'type', options: [['foo', 'Foo Bar!']] },
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+      { name: 'Type', key: 'or__scm_type', options: [['foo', 'Foo Bar!']] },
       { name: 'Description', key: 'description' },
     ];
     const query =
-      '?organization.or__type=foo&organization.name=bar&item.page_size=10';
+      '?organization.or__scm_type=foo&organization.name__icontains=bar&item.page_size=10';
     const history = createMemoryHistory({
       initialEntries: [`/organizations/${query}`],
     });
@@ -165,13 +165,15 @@ describe('<Search />', () => {
       { context: { router: { history } } }
     );
     const typeFilterWrapper = wrapper.find(
-      'ToolbarFilter[categoryName="Type"]'
+      'ToolbarFilter[categoryName="Type (or__scm_type)"]'
     );
-    expect(typeFilterWrapper.prop('chips')[0].key).toEqual('or__type:foo');
+    expect(typeFilterWrapper.prop('chips')[0].key).toEqual('or__scm_type:foo');
     const nameFilterWrapper = wrapper.find(
-      'ToolbarFilter[categoryName="Name"]'
+      'ToolbarFilter[categoryName="Name (name__icontains)"]'
     );
-    expect(nameFilterWrapper.prop('chips')[0].key).toEqual('name:bar');
+    expect(nameFilterWrapper.prop('chips')[0].key).toEqual(
+      'name__icontains:bar'
+    );
   });
 
   test('should test handle remove of option-based key', async () => {
@@ -264,5 +266,38 @@ describe('<Search />', () => {
         .simulate('click');
     });
     expect(onRemove).toBeCalledWith('or__type', '');
+  });
+
+  test("ToolbarFilter added for any key that doesn't have search column", () => {
+    const columns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+      { name: 'Type', key: 'or__scm_type', options: [['foo', 'Foo Bar!']] },
+      { name: 'Description', key: 'description' },
+    ];
+    const query =
+      '?organization.or__scm_type=foo&organization.name__icontains=bar&organization.name__exact=baz&item.page_size=10&organization.foo=bar';
+    const history = createMemoryHistory({
+      initialEntries: [`/organizations/${query}`],
+    });
+    const wrapper = mountWithContexts(
+      <Toolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
+        clearAllFilters={() => {}}
+        collapseListedFiltersBreakpoint="lg"
+      >
+        <ToolbarContent>
+          <Search qsConfig={QS_CONFIG} columns={columns} />
+        </ToolbarContent>
+      </Toolbar>,
+      { context: { router: { history } } }
+    );
+    const nameExactFilterWrapper = wrapper.find(
+      'ToolbarFilter[categoryName="name__exact"]'
+    );
+    expect(nameExactFilterWrapper.prop('chips')[0].key).toEqual(
+      'name__exact:baz'
+    );
+    const fooFilterWrapper = wrapper.find('ToolbarFilter[categoryName="foo"]');
+    expect(fooFilterWrapper.prop('chips')[0].key).toEqual('foo:bar');
   });
 });

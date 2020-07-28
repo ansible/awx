@@ -23,6 +23,8 @@ class DataListToolbar extends React.Component {
       itemCount,
       clearAllFilters,
       searchColumns,
+      searchableKeys,
+      relatedSearchableKeys,
       sortColumns,
       showSelectAll,
       isAllSelected,
@@ -64,7 +66,12 @@ class DataListToolbar extends React.Component {
             <ToolbarItem>
               <Search
                 qsConfig={qsConfig}
-                columns={searchColumns}
+                columns={[
+                  ...searchColumns,
+                  { name: i18n._(t`Advanced`), key: 'advanced' },
+                ]}
+                searchableKeys={searchableKeys}
+                relatedSearchableKeys={relatedSearchableKeys}
                 onSearch={onSearch}
                 onReplaceSearch={onReplaceSearch}
                 onRemove={onRemove}
@@ -106,6 +113,8 @@ DataListToolbar.propTypes = {
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
+  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns.isRequired,
   showSelectAll: PropTypes.bool,
   isAllSelected: PropTypes.bool,
@@ -121,6 +130,8 @@ DataListToolbar.propTypes = {
 
 DataListToolbar.defaultProps = {
   itemCount: 0,
+  searchableKeys: [],
+  relatedSearchableKeys: [],
   clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,

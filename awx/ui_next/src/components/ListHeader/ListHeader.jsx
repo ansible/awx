@@ -94,6 +94,8 @@ class ListHeader extends React.Component {
       emptyStateControls,
       itemCount,
       searchColumns,
+      searchableKeys,
+      relatedSearchableKeys,
       sortColumns,
       renderToolbar,
       qsConfig,
@@ -122,6 +124,8 @@ class ListHeader extends React.Component {
               itemCount,
               searchColumns,
               sortColumns,
+              searchableKeys,
+              relatedSearchableKeys,
               onSearch: this.handleSearch,
               onReplaceSearch: this.handleReplaceSearch,
               onSort: this.handleSort,
@@ -141,12 +145,16 @@ ListHeader.propTypes = {
   itemCount: PropTypes.number.isRequired,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
+  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns.isRequired,
   renderToolbar: PropTypes.func,
 };
 
 ListHeader.defaultProps = {
   renderToolbar: props => <DataListToolbar {...props} />,
+  searchableKeys: [],
+  relatedSearchableKeys: [],
 };
 
 export default withRouter(ListHeader);

@@ -30,25 +30,37 @@ function InstanceGroupsLookup(props) {
   } = props;
 
   const {
-    result: { instanceGroups, count },
+    result: { instanceGroups, count, actions, relatedSearchFields },
     request: fetchInstanceGroups,
     error,
     isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { data } = await InstanceGroupsAPI.read(params);
+      const [{ data }, actionsResponse] = await Promise.all([
+        InstanceGroupsAPI.read(params),
+        InstanceGroupsAPI.readOptions(),
+      ]);
       return {
         instanceGroups: data.results,
         count: data.count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [history.location]),
-    { instanceGroups: [], count: 0 }
+    { instanceGroups: [], count: 0, actions: {}, relatedSearchFields: [] }
   );
 
   useEffect(() => {
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <FormGroup
@@ -74,12 +86,12 @@ function InstanceGroupsLookup(props) {
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Credential Name`),
-                key: 'credential__name',
+                key: 'credential__name__icontains',
               },
             ]}
             sortColumns={[
@@ -88,6 +100,8 @@ function InstanceGroupsLookup(props) {
                 key: 'name',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
             header={i18n._(t`Instance Groups`)}
             name="instanceGroups"
