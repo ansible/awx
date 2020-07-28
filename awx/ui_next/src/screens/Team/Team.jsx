@@ -17,7 +17,7 @@ import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '../../api';
 import TeamAccessList from './TeamAccess';
-import TeamUsersList from './TeamUsers';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 
 function Team({ i18n, setBreadcrumb }) {
   const [team, setTeam] = useState(null);
@@ -97,7 +97,7 @@ function Team({ i18n, setBreadcrumb }) {
           )}
           {team && (
             <Route path="/teams/:id/access">
-              <TeamUsersList />
+              <ResourceAccessList resource={team} apiModel={TeamsAPI} />
             </Route>
           )}
           {team && (
