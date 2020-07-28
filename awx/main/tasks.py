@@ -357,19 +357,23 @@ def send_notifications(notification_list, job_id=None):
 @task(queue=get_local_queuename)
 def gather_analytics():
     def _gather_and_ship(subset, since, until):
+        tgzfiles = []
         try:
-            tgz = analytics.gather(subset=subset, since=since, until=until)
+            tgzfiles = analytics.gather(subset=subset, since=since, until=until)
             # empty analytics without raising an exception is not an error
-            if not tgz:
+            if not tgzfiles:
                 return True
-            logger.info('gathered analytics: {}'.format(tgz))
-            analytics.ship(tgz)
+            logger.info('Gathered analytics from {} to {}: {}'.format(since, until, tgzfiles))
+            for tgz in tgzfiles:
+                analytics.ship(tgz)
         except Exception:
             logger.exception('Error gathering and sending analytics for {} to {}.'.format(since,until))
             return False
         finally:
-            if os.path.exists(tgz):
-                os.remove(tgz)
+            if tgzfiles:
+                for tgz in tgzfiles:
+                    if os.path.exists(tgz):
+                        os.remove(tgz)
         return True
 
     from awx.conf.models import Setting
@@ -404,7 +408,7 @@ def gather_analytics():
                 start = since
                 until = None
                 while start < gather_time:
-                    until = start + timedelta(minutes=20)
+                    until = start + timedelta(hours = 4)
                     if (until > gather_time):
                         until = gather_time
                     if not _gather_and_ship(incremental_collectors, since=start, until=until):

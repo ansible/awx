@@ -90,6 +90,15 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     :param module: the module to search for registered analytic collector
                     functions; defaults to awx.main.analytics.collectors
     """
+    def _write_manifest(destdir, manifest):
+        path = os.path.join(destdir, 'manifest.json')
+        with open(path, 'w', encoding='utf-8') as f:
+            try:
+                json.dump(manifest, f)
+            except Exception:
+                f.close()
+                os.remove(f.name)
+                logger.exception("Could not generate manifest.json")
 
     last_run = since or settings.AUTOMATION_ANALYTICS_LAST_GATHER or (now() - timedelta(weeks=4))
     logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
@@ -103,10 +112,12 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
         return
 
     collector_list = []
-    if module is None:
+    if module:
+        collector_module = module
+    else:
         from awx.main.analytics import collectors
-        module = collectors
-    for name, func in inspect.getmembers(module):
+        collector_module = collectors
+    for name, func in inspect.getmembers(collector_module):
         if (
             inspect.isfunction(func) and
             hasattr(func, '__awx_analytics_key__') and
@@ -116,10 +127,13 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
 
     manifest = dict()
     dest = dest or tempfile.mkdtemp(prefix='awx_analytics')
+    gather_dir = os.path.join(dest, 'stage')
+    os.mkdir(gather_dir, 0o700)
+    num_splits = 1
     for name, func in collector_list:
         if func.__awx_analytics_type__ == 'json':
             key = func.__awx_analytics_key__
-            path = '{}.json'.format(os.path.join(dest, key))
+            path = '{}.json'.format(os.path.join(gather_dir, key))
             with open(path, 'w', encoding='utf-8') as f:
                 try:
                     json.dump(func(last_run, collection_type=collection_type, until=until), f)
@@ -131,8 +145,11 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
         elif func.__awx_analytics_type__ == 'csv':
             key = func.__awx_analytics_key__
             try:
-                if func(last_run, full_path=dest, until=until):
+                files = func(last_run, full_path=gather_dir, until=until)
+                if files:
                     manifest['{}.csv'.format(key)] = func.__awx_analytics_version__
+                if len(files) > num_splits:
+                    num_splits = len(files)
             except Exception:
                 logger.exception("Could not generate metric {}.csv".format(key))
 
@@ -145,11 +162,12 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
     # Always include config.json if we're using our collectors
     if 'config.json' not in manifest.keys() and not module:
         from awx.main.analytics import collectors
-        path = '{}.json'.format(os.path.join(dest, key))
+        config = collectors.config
+        path = '{}.json'.format(os.path.join(gather_dir, config.__awx_analytics_key__))
         with open(path, 'w', encoding='utf-8') as f:
             try:
                 json.dump(collectors.config(last_run), f)
-                manifest['config.json'] = collectors.config.__awx_analytics_version__
+                manifest['config.json'] = config.__awx_analytics_version__
             except Exception:
                 logger.exception("Could not generate metric {}.json".format(key))
                 f.close()
@@ -157,31 +175,52 @@ def gather(dest=None, module=None, subset = None, since = None, until = now(), c
                 shutil.rmtree(dest)
                 return None
 
-    path = os.path.join(dest, 'manifest.json')
-    with open(path, 'w', encoding='utf-8') as f:
-        try:
-            json.dump(manifest, f)
-        except Exception:
-            logger.exception("Could not generate manifest.json")
-            f.close()
-            os.remove(f.name)
+    stage_dirs = [gather_dir]
+    if num_splits > 1:
+        for i in range(0, num_splits):
+            split_path = os.path.join(dest, 'split{}'.format(i))
+            os.mkdir(split_path, 0o700)
+            filtered_manifest = {}
+            shutil.copy(os.path.join(gather_dir, 'config.json'), split_path)
+            filtered_manifest['config.json'] = manifest['config.json']
+            suffix = '_split{}'.format(i)
+            for file in os.listdir(gather_dir):
+                if file.endswith(suffix):
+                    old_file = os.path.join(gather_dir, file)
+                    new_filename = file.replace(suffix, '')
+                    new_file = os.path.join(split_path, new_filename)
+                    shutil.move(old_file, new_file)
+                    filtered_manifest[new_filename] = manifest[new_filename]
+            _write_manifest(split_path, filtered_manifest)
+            stage_dirs.append(split_path)
 
-    # can't use isoformat() since it has colons, which GNU tar doesn't like
-    tarname = '_'.join([
-        settings.SYSTEM_UUID,
-        until.strftime('%Y-%m-%d-%H%M%S%z')
-    ])
+    for item in list(manifest.keys()):
+        if not os.path.exists(os.path.join(gather_dir, item)):
+            manifest.pop(item)
+    _write_manifest(gather_dir, manifest)
+
+    tarfiles = []
     try:
-        tgz = shutil.make_archive(
-            os.path.join(os.path.dirname(dest), tarname),
-            'gztar',
-            dest
-        )
-        return tgz
+        for i in range(0, len(stage_dirs)):
+            stage_dir = stage_dirs[i]
+            # can't use isoformat() since it has colons, which GNU tar doesn't like
+            tarname = '_'.join([
+                settings.SYSTEM_UUID,
+                until.strftime('%Y-%m-%d-%H%M%S%z'),
+                str(i)
+            ])
+            tgz = shutil.make_archive(
+                os.path.join(os.path.dirname(dest), tarname),
+                'gztar',
+                stage_dir
+            )
+            tarfiles.append(tgz)
     except Exception:
+        shutil.rmtree(stage_dir, ignore_errors = True)
         logger.exception("Failed to write analytics archive file")
-    finally: 
-        shutil.rmtree(dest)
+    finally:
+        shutil.rmtree(dest, ignore_errors = True)
+    return tarfiles
 
 
 def ship(path):

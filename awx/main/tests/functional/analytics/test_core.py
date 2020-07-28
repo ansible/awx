@@ -39,9 +39,9 @@ def mock_valid_license():
 def test_gather(mock_valid_license):
     settings.INSIGHTS_TRACKING_STATE = True
     
-    tgz = gather(module=importlib.import_module(__name__))
+    tgzfiles = gather(module=importlib.import_module(__name__))
     files = {}
-    with tarfile.open(tgz, "r:gz") as archive:
+    with tarfile.open(tgzfiles[0], "r:gz") as archive:
         for member in archive.getmembers():
             files[member.name] = archive.extractfile(member)
 
@@ -53,7 +53,8 @@ def test_gather(mock_valid_license):
         assert './bad_json.json' not in files.keys()
         assert './throws_error.json' not in files.keys()
     try:
-        os.remove(tgz)
+        for tgz in tgzfiles:
+            os.remove(tgz)
     except Exception:
         pass
         

@@ -1,3 +1,4 @@
+import io
 import os
 import os.path
 import platform
@@ -227,21 +228,58 @@ def query_info(since, collection_type, **kwargs):
     return query_info
 
 
+'''
+The event table can be *very* large, and we have a 100MB upload limit.
+
+Split large table dumps at dump time into a series of files.
+'''
+MAX_TABLE_SIZE = 200 * 1048576
+
+
+class FileSplitter(io.StringIO):
+    def __init__(self, filespec=None, *args, **kwargs):
+        self.filespec = filespec
+        self.files = []
+        self.currentfile = None
+        self.header = None
+        self.counter = 0
+        self.cycle_file()
+
+    def cycle_file(self):
+        if self.currentfile:
+            self.currentfile.close()
+        self.counter = 0
+        fname = '{}_split{}'.format(self.filespec, len(self.files))
+        self.currentfile = open(fname, 'w', encoding='utf-8')
+        self.files.append(fname)
+        if self.header:
+            self.currentfile.write('{}\n'.format(self.header))
+
+    def file_list(self):
+        self.currentfile.close()
+        # Check for an empty dump
+        if len(self.header) + 1 == self.counter:
+            os.remove(self.files[-1])
+            self.files = self.files[:-1]
+        # If we only have one file, remove the suffix
+        if len(self.files) == 1:
+            os.rename(self.files[0],self.files[0].replace('_split0',''))
+        return self.files
+
+    def write(self, s):
+        if not self.header:
+            self.header = s[0:s.index('\n')]
+        self.counter += self.currentfile.write(s)
+        if self.counter >= MAX_TABLE_SIZE:
+            self.cycle_file()
+
+
 def _copy_table(table, query, path):
     file_path = os.path.join(path, table + '_table.csv')
-    file = open(file_path, 'w', encoding='utf-8')
+    file = FileSplitter(filespec=file_path)
     with connection.cursor() as cursor:
         cursor.copy_expert(query, file)
-        file.close()
-    # Ensure we actually dumped data, and not just headers
-    file = open(file_path, 'r', encoding='utf-8')
-    file.readline()
-    data = file.readline()
-    file.close()
-    if not data:
-        os.remove(file_path)
-        return None
-    return file_path
+    return file.file_list()
 
 
 @register('events_table', '1.1', format='csv', description=_('Automation task records'), expensive=True)
