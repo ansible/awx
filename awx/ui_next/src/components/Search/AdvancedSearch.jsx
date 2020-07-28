@@ -1,5 +1,6 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -134,7 +135,7 @@ function AdvancedSearch({
         onCreateOption={setKeySelection}
         maxHeight="500px"
       >
-        {allKeys.map((optionKey) => (
+        {allKeys.map(optionKey => (
           <SelectOption key={optionKey} value={optionKey}>
             {optionKey}
           </SelectOption>
@@ -265,6 +266,15 @@ function AdvancedSearch({
   );
 }
 
-// TODO: prop types
+AdvancedSearch.propTypes = {
+  onSearch: PropTypes.func.isRequired,
+  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
+};
+
+AdvancedSearch.defaultProps = {
+  searchableKeys: [],
+  relatedSearchableKeys: [],
+};
 
 export default withI18n()(AdvancedSearch);
