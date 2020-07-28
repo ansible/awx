@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { DetailList, Detail } from '../../../components/DetailList';
 import DataListCell from '../../../components/DataListCell';
 
-function TeamAccessListItem({ role, i18n, detailUrl, onSelect }) {
+function TeamRoleListItem({ role, i18n, detailUrl, onSelect }) {
   const labelId = `teamRole-${role.id}`;
   return (
     <DataListItem key={role.id} aria-labelledby={labelId} id={`${role.id}`}>
@@ -60,4 +60,4 @@ function TeamAccessListItem({ role, i18n, detailUrl, onSelect }) {
     </DataListItem>
   );
 }
-export default withI18n()(TeamAccessListItem);
+export default withI18n()(TeamRoleListItem);

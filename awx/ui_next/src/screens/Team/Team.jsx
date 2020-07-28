@@ -16,7 +16,7 @@ import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '../../api';
-import TeamAccessList from './TeamAccess';
+import TeamAccessList from './TeamRoles';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 
 function Team({ i18n, setBreadcrumb }) {

@@ -5,7 +5,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import TeamAccessList from './TeamAccessList';
+import TeamRolesList from './TeamRolesList';
 
 jest.mock('../../../api/models/Teams');
 jest.mock('../../../api/models/Roles');
@@ -92,7 +92,7 @@ const roles = {
 const options = {
   data: { actions: { POST: { id: 1, disassociate: true } } },
 };
-describe('<TeamAccessList />', () => {
+describe('<TeamRolesList />', () => {
   let wrapper;
 
   afterEach(() => {
@@ -104,9 +104,9 @@ describe('<TeamAccessList />', () => {
     TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
-    expect(wrapper.find('TeamAccessList').length).toBe(1);
+    expect(wrapper.find('TeamRolesList').length).toBe(1);
   });
 
   test('should create proper detailUrl', async () => {
@@ -114,7 +114,7 @@ describe('<TeamAccessList />', () => {
     TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
@@ -161,7 +161,7 @@ describe('<TeamAccessList />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -175,7 +175,7 @@ describe('<TeamAccessList />', () => {
     TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -228,7 +228,7 @@ describe('<TeamAccessList />', () => {
     TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -285,7 +285,7 @@ describe('<TeamAccessList />', () => {
     TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamAccessList />);
+      wrapper = mountWithContexts(<TeamRolesList />);
     });
 
     waitForElement(

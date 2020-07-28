@@ -19,7 +19,7 @@ import PaginatedDataList from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
-import TeamAccessListItem from './TeamAccessListItem';
+import TeamRoleListItem from './TeamRoleListItem';
 import UserAndTeamAccessAdd from '../../../components/UserAndTeamAccessAdd/UserAndTeamAccessAdd';
 
 const QS_CONFIG = getQSConfig('roles', {
@@ -28,7 +28,7 @@ const QS_CONFIG = getQSConfig('roles', {
   order_by: 'id',
 });
 
-function TeamAccessList({ i18n }) {
+function TeamRolesList({ i18n }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { search } = useLocation();
   const { id } = useParams();
@@ -165,7 +165,7 @@ function TeamAccessList({ i18n }) {
           />
         )}
         renderItem={role => (
-          <TeamAccessListItem
+          <TeamRoleListItem
             key={role.id}
             role={role}
             detailUrl={detailUrl(role)}
@@ -234,4 +234,4 @@ function TeamAccessList({ i18n }) {
     </>
   );
 }
-export default withI18n()(TeamAccessList);
+export default withI18n()(TeamRolesList);
