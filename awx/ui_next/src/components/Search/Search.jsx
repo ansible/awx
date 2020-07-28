@@ -325,7 +325,7 @@ class Search extends React.Component {
         search column so the chips show up */}
         {Object.keys(chipsByKey)
           .filter(val => chipsByKey[val].chips.length > 0)
-          .filter(val => columns.map(val => val.key).indexOf(val) === -1)
+          .filter(val => columns.map(val2 => val2.key).indexOf(val) === -1)
           .map(leftoverKey => (
             <ToolbarFilter
               chips={

@@ -134,8 +134,8 @@ function AdvancedSearch({
         onCreateOption={setKeySelection}
         maxHeight="500px"
       >
-        {allKeys.map((optionKey, i) => (
-          <SelectOption key={`${i}.${optionKey}`} value={optionKey}>
+        {allKeys.map((optionKey) => (
+          <SelectOption key={optionKey} value={optionKey}>
             {optionKey}
           </SelectOption>
         ))}
