@@ -7,6 +7,7 @@ import time
 import logging
 import re
 import copy
+import json
 import os.path
 from urllib.parse import urljoin
 import yaml
@@ -1157,6 +1158,20 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             raise ValidationError(_("Cannot set source_path if not SCM type."))
         return self.source_path
 
+    def clean_source_vars(self):
+        injector = self.injectors.get(self.source)
+        source_vars = dict(self.source_vars_dict) # make a copy
+        if injector and self.source_vars_dict.get('plugin', '') != injector.get_proper_name():
+            source_vars['plugin'] = injector.get_proper_name()
+        elif not injector:
+            source_vars = dict(self.source_vars_dict) # make a copy
+            collection_pattern = re.compile("^(.+)\.(.+)\.(.+)$") # noqa
+            if 'plugin' not in source_vars:
+                raise ValidationError(_("plugin: must be present and of the form namespace.collection.inv_plugin"))
+            elif not bool(collection_pattern.match(source_vars['plugin'])):
+                raise ValidationError(_("plugin: must be of the form namespace.collection.inv_plugin"))
+        return json.dumps(source_vars)
+
     '''
     RelatedJobsMixin
     '''
@@ -1343,6 +1358,12 @@ class PluginFileInjector(object):
     def __init__(self, ansible_version):
         # This is InventoryOptions instance, could be source or inventory update
         self.ansible_version = ansible_version
+
+    @classmethod
+    def get_proper_name(cls):
+        if cls.plugin_name is None:
+            return None
+        return f'{cls.namespace}.{cls.collection}.{cls.plugin_name}'
 
     @property
     def filename(self):

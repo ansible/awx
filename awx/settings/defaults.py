@@ -8,8 +8,6 @@ from datetime import timedelta
 
 # global settings
 from django.conf import global_settings
-# ugettext lazy
-from django.utils.translation import ugettext_lazy as _
 
 # Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pytest
+import json
 from unittest import mock
 
 from django.core.exceptions import ValidationError
@@ -7,8 +8,6 @@ from django.core.exceptions import ValidationError
 from awx.api.versioning import reverse
 
 from awx.main.models import InventorySource, Inventory, ActivityStream
-
-import json
 
 
 @pytest.fixture
@@ -458,6 +457,56 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('source,source_var_actual,source_var_expected,description', [
+    ('ec2', {'plugin': 'blah'}, {'plugin': 'amazon.aws.aws_ec2'}, 'source plugin mismatch'),
+    ('ec2', {'plugin': 'amazon.aws.aws_ec2'}, {'plugin': 'amazon.aws.aws_ec2'}, 'valid plugin'),
+])
+def test_inventory_source_vars_source_plugin_ok(post, inventory, admin_user, source, source_var_actual, source_var_expected, description):
+    r = post(reverse('api:inventory_source_list'),
+             {'name': 'new inv src', 'source_vars': json.dumps(source_var_actual), 'inventory': inventory.pk, 'source': source},
+             admin_user, expect=201)
+
+    assert r.data['source_vars'] == json.dumps(source_var_expected)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('source_var_actual,description', [
+    ({'plugin': 'namespace.collection.script'}, 'valid scm user plugin'),
+])
+def test_inventory_source_vars_source_plugin_scm_ok(post, inventory, admin_user, project, source_var_actual, description):
+    r = post(reverse('api:inventory_source_list'),
+             {'name': 'new inv src',
+              'source_vars': json.dumps(source_var_actual),
+              'inventory': inventory.pk,
+              'source': 'scm',
+              'source_project': project.id,},
+             admin_user, expect=201)
+
+    assert r.data['source_vars'] == json.dumps(source_var_actual)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('source_var_actual,err_msg,description', [
+    ({'foo': 'bar'}, 'plugin: must be present and of the form namespace.collection.inv_plugin', 'no plugin line'),
+    ({'plugin': ''}, 'plugin: must be of the form namespace.collection.inv_plugin', 'blank plugin line'),
+    ({'plugin': '.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing namespace, collection name, and inventory plugin'),
+    ({'plugin': 'a.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing collection name and inventory plugin'),
+    ({'plugin': 'a.b'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing inventory plugin'),
+    ({'plugin': 'a.b.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing inventory plugin'),
+])
+def test_inventory_source_vars_source_plugin_scm_invalid(post, inventory, admin_user, project, source_var_actual, err_msg, description):
+    r = post(reverse('api:inventory_source_list'),
+             {'name': 'new inv src',
+              'source_vars': json.dumps(source_var_actual),
+              'inventory': inventory.pk,
+              'source': 'scm',
+              'source_project': project.id,},
+             admin_user, expect=400)
+
+    assert err_msg in r.data['source_vars'][0]
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('role,expect', [
     ('admin_role', 200),
     ('use_role', 403),
@@ -522,7 +571,8 @@ class TestInventorySourceCredential:
             data={
                 'inventory': inventory.pk, 'name': 'fobar', 'source': 'scm',
                 'source_project': project.pk, 'source_path': '',
-                'credential': vault_credential.pk
+                'credential': vault_credential.pk,
+                'source_vars': 'plugin: a.b.c',
             },
             expect=400,
             user=admin_user
@@ -561,7 +611,7 @@ class TestInventorySourceCredential:
             data={
                 'inventory': inventory.pk, 'name': 'fobar', 'source': 'scm',
                 'source_project': project.pk, 'source_path': '',
-                'credential': os_cred.pk
+                'credential': os_cred.pk, 'source_vars': 'plugin: a.b.c',
             },
             expect=201,
             user=admin_user
@@ -636,8 +686,14 @@ class TestControlledBySCM:
         assert scm_inventory.inventory_sources.count() == 0
 
     def test_adding_inv_src_ok(self, post, scm_inventory, project, admin_user):
-        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-             {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
+        post(reverse('api:inventory_inventory_sources_list',
+             kwargs={'pk': scm_inventory.id}),
+             {'name': 'new inv src',
+              'source_project': project.pk,
+              'update_on_project_update': False,
+              'source': 'scm',
+              'overwrite_vars': True,
+              'source_vars': 'plugin: a.b.c'},
              admin_user, expect=201)
 
     def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
@@ -657,7 +713,7 @@ class TestControlledBySCM:
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)
         post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
-             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
+             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True, 'source_vars': 'plugin: a.b.c'},
              rando, expect=403)
 
 
