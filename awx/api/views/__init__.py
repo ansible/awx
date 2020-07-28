@@ -14,6 +14,8 @@ import time
 from base64 import b64encode
 from collections import OrderedDict, Iterable
 
+from urllib3.exceptions import ConnectTimeoutError
+
 
 # Django
 from django.conf import settings
@@ -1409,7 +1411,15 @@ class CredentialExternalTest(SubDetailAPIView):
             message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
-            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            message = exc.__class__.__name__
+            args = getattr(exc, 'args', [])
+            for a in args:
+                if isinstance(
+                    getattr(a, 'reason', None),
+                    ConnectTimeoutError
+                ):
+                    message = str(a.reason)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
@@ -1458,10 +1468,18 @@ class CredentialTypeExternalTest(SubDetailAPIView):
             obj.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
-            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            message = exc.__class__.__name__
+            args = getattr(exc, 'args', [])
+            for a in args:
+                if isinstance(
+                    getattr(a, 'reason', None),
+                    ConnectTimeoutError
+                ):
+                    message = str(a.reason)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostRelatedSearchMixin(object):
