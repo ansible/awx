@@ -1,8 +1,9 @@
+import yaml
 import json
 import os
-import sys
 
 from awxkit import api, config
+from awxkit.exceptions import ImportExportError
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
 from awxkit.api.pages.api import EXPORTABLE_RESOURCES
@@ -135,7 +136,13 @@ class Import(CustomCommand):
             parser.print_help()
             raise SystemExit()
 
-        data = json.load(sys.stdin)
+        format = getattr(client.args, 'conf.format')
+        if format == 'json':
+            data = json.load(client.stdin)
+        elif format == 'yaml':
+            data = yaml.safe_load(client.stdin)
+        else:
+            raise ImportExportError("Unsupported format for Import: " + format)
 
         client.authenticate()
         client.v2.import_assets(data)
