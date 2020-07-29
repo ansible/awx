@@ -12,7 +12,6 @@ import { Jobs } from './screens/Job';
 import ManagementJobs from './screens/ManagementJob';
 import NotificationTemplates from './screens/NotificationTemplate';
 import Organizations from './screens/Organization';
-import Portal from './screens/Portal';
 import Projects from './screens/Project';
 import Schedules from './screens/Schedule';
 import AuthSettings from './screens/AuthSetting';
@@ -48,11 +47,6 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Schedules`),
           path: '/schedules',
           screen: Schedules,
-        },
-        {
-          title: i18n._(t`My View`),
-          path: '/portal',
-          screen: Portal,
         },
       ],
     },
