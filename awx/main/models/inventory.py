@@ -1163,13 +1163,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         source_vars = dict(self.source_vars_dict) # make a copy
         if injector and self.source_vars_dict.get('plugin', '') != injector.get_proper_name():
             source_vars['plugin'] = injector.get_proper_name()
-        elif not injector:
-            source_vars = dict(self.source_vars_dict) # make a copy
-            collection_pattern = re.compile("^(.+)\.(.+)\.(.+)$") # noqa
-            if 'plugin' not in source_vars:
-                raise ValidationError(_("plugin: must be present and of the form namespace.collection.inv_plugin"))
-            elif not bool(collection_pattern.match(source_vars['plugin'])):
-                raise ValidationError(_("plugin: must be of the form namespace.collection.inv_plugin"))
         return json.dumps(source_vars)
 
     '''

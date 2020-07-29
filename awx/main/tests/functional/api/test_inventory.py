@@ -471,7 +471,10 @@ def test_inventory_source_vars_source_plugin_ok(post, inventory, admin_user, sou
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('source_var_actual,description', [
-    ({'plugin': 'namespace.collection.script'}, 'valid scm user plugin'),
+    ({'plugin': 'namespace.collection.script'}, 'scm source type source_vars are ignored valid'),
+    ({'plugin': 'namespace.collection.script'}, 'scm source type source_vars are ignored invalid'),
+    ({'plugin': ''}, 'scm source type source_vars are ignored blank'),
+    ({}, 'scm source type source_vars are ignored non-existent'),
 ])
 def test_inventory_source_vars_source_plugin_scm_ok(post, inventory, admin_user, project, source_var_actual, description):
     r = post(reverse('api:inventory_source_list'),
@@ -483,27 +486,6 @@ def test_inventory_source_vars_source_plugin_scm_ok(post, inventory, admin_user,
              admin_user, expect=201)
 
     assert r.data['source_vars'] == json.dumps(source_var_actual)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('source_var_actual,err_msg,description', [
-    ({'foo': 'bar'}, 'plugin: must be present and of the form namespace.collection.inv_plugin', 'no plugin line'),
-    ({'plugin': ''}, 'plugin: must be of the form namespace.collection.inv_plugin', 'blank plugin line'),
-    ({'plugin': '.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing namespace, collection name, and inventory plugin'),
-    ({'plugin': 'a.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing collection name and inventory plugin'),
-    ({'plugin': 'a.b'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing inventory plugin'),
-    ({'plugin': 'a.b.'}, 'plugin: must be of the form namespace.collection.inv_plugin', 'missing inventory plugin'),
-])
-def test_inventory_source_vars_source_plugin_scm_invalid(post, inventory, admin_user, project, source_var_actual, err_msg, description):
-    r = post(reverse('api:inventory_source_list'),
-             {'name': 'new inv src',
-              'source_vars': json.dumps(source_var_actual),
-              'inventory': inventory.pk,
-              'source': 'scm',
-              'source_project': project.id,},
-             admin_user, expect=400)
-
-    assert err_msg in r.data['source_vars'][0]
 
 
 @pytest.mark.django_db
