@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { InventorySourcesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
 import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
@@ -16,29 +17,31 @@ const QS_CONFIG = getQSConfig('inventory_sources', {
 });
 
 function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [inventorySources, setInventorySources] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setInventorySources([]);
-      setCount(0);
+  const {
+    result: { inventorySources, count },
+    error,
+    isLoading,
+    request: fetchInventorySources,
+  } = useRequest(
+    useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      try {
-        const { data } = await InventorySourcesAPI.read(params);
-        setInventorySources(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [location]);
+      const results = await InventorySourcesAPI.read(params);
+      return {
+        inventorySources: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      inventorySources: [],
+      count: 0,
+    }
+  );
+
+  useEffect(() => {
+    fetchInventorySources();
+  }, [fetchInventorySources]);
 
   return (
     <PaginatedDataList
