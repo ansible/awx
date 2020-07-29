@@ -83,15 +83,15 @@ function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
           ],
         },
         {
-          name: i18n._(t`Source Control URL`),
+          name: i18n._(t`Source control URL`),
           key: 'scm_url',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
       ]}
