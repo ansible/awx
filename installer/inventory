@@ -25,6 +25,7 @@ dockerhub_base=ansible
 # pg_serviceaccount=awx
 # pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
+# pg_persistence_existingclaim=postgres_pvc
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 

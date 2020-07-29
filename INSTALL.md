@@ -384,6 +384,8 @@ Before starting the install process, review the [inventory](./installer/inventor
 
 If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://helm.sh/docs/intro/quickstart/](https://helm.sh/docs/intro/quickstart/).
 
+You do not need to create a [Persistent Volume Claim](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html) as Helm does it for you. However, an existing one may be used by setting the `pg_persistence_existingclaim` variable.
+
 Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://helm.sh/docs/topics/rbac/](https://helm.sh/docs/topics/rbac/)
 
 ### Run the installer
