@@ -102,11 +102,11 @@ function UserList({ i18n }) {
                 isDefault: true,
               },
               {
-                name: i18n._(t`First Name`),
+                name: i18n._(t`First name`),
                 key: 'first_name',
               },
               {
-                name: i18n._(t`Last Name`),
+                name: i18n._(t`Last name`),
                 key: 'last_name',
               },
             ]}
@@ -116,11 +116,11 @@ function UserList({ i18n }) {
                 key: 'username',
               },
               {
-                name: i18n._(t`First Name`),
+                name: i18n._(t`First name`),
                 key: 'first_name',
               },
               {
-                name: i18n._(t`Last Name`),
+                name: i18n._(t`Last name`),
                 key: 'last_name',
               },
             ]}
