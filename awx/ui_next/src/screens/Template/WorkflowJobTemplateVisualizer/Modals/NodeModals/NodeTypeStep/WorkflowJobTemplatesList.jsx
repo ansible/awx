@@ -78,19 +78,19 @@ function WorkflowJobTemplatesList({
           isDefault: true,
         },
         {
-          name: i18n._(t`Organization (Name)`),
+          name: i18n._(t`Organization (name)`),
           key: 'organization__name',
         },
         {
-          name: i18n._(t`Inventory (Name)`),
+          name: i18n._(t`Inventory (name)`),
           key: 'inventory__name',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
       ]}
