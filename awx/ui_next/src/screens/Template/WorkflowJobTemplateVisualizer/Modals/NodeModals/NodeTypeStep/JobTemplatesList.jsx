@@ -78,11 +78,11 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
           key: 'playbook',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
       ]}
