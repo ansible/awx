@@ -3,9 +3,9 @@ import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import { OptionsField, RegionsField, VerbosityField } from './SharedFields';
+import { OptionsField, VerbosityField } from './SharedFields';
 
-const GCESubForm = ({ i18n, sourceOptions }) => {
+const GCESubForm = ({ i18n }) => {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
   );
@@ -23,11 +23,6 @@ const GCESubForm = ({ i18n, sourceOptions }) => {
         }}
         value={credentialField.value}
         required
-      />
-      <RegionsField
-        regionOptions={
-          sourceOptions?.actions?.POST?.source_regions?.gce_region_choices
-        }
       />
       <VerbosityField />
       <OptionsField />

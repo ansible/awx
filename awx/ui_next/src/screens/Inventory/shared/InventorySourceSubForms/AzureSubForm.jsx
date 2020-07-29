@@ -3,14 +3,9 @@ import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import {
-  OptionsField,
-  RegionsField,
-  SourceVarsField,
-  VerbosityField,
-} from './SharedFields';
+import { OptionsField, SourceVarsField, VerbosityField } from './SharedFields';
 
-const AzureSubForm = ({ i18n, sourceOptions }) => {
+const AzureSubForm = ({ i18n }) => {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
     'credential'
   );
@@ -28,11 +23,6 @@ const AzureSubForm = ({ i18n, sourceOptions }) => {
         }}
         value={credentialField.value}
         required
-      />
-      <RegionsField
-        regionOptions={
-          sourceOptions?.actions?.POST?.source_regions?.azure_rm_region_choices
-        }
       />
       <VerbosityField />
       <OptionsField />

@@ -3,11 +3,7 @@ import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import {
-  InstanceFiltersField,
-  OptionsField,
-  VerbosityField,
-} from './SharedFields';
+import { OptionsField, VerbosityField } from './SharedFields';
 
 const TowerSubForm = ({ i18n }) => {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
@@ -28,7 +24,6 @@ const TowerSubForm = ({ i18n }) => {
         value={credentialField.value}
         required
       />
-      <InstanceFiltersField />
       <VerbosityField />
       <OptionsField />
     </>

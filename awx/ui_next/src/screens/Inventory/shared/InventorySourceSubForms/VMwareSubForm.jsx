@@ -3,13 +3,7 @@ import { useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
-import {
-  InstanceFiltersField,
-  GroupByField,
-  OptionsField,
-  SourceVarsField,
-  VerbosityField,
-} from './SharedFields';
+import { OptionsField, SourceVarsField, VerbosityField } from './SharedFields';
 
 const VMwareSubForm = ({ i18n }) => {
   const [credentialField, credentialMeta, credentialHelpers] = useField(
@@ -30,8 +24,6 @@ const VMwareSubForm = ({ i18n }) => {
         value={credentialField.value}
         required
       />
-      <InstanceFiltersField />
-      <GroupByField isCreatable />
       <VerbosityField />
       <OptionsField />
       <SourceVarsField />
