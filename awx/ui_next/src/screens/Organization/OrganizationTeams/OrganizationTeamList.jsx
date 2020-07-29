@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
@@ -6,6 +6,7 @@ import { t } from '@lingui/macro';
 import { OrganizationsAPI } from '../../../api';
 import PaginatedDataList from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useRequest from '../../../util/useRequest';
 import OrganizationTeamListItem from './OrganizationTeamListItem';
 
 const QS_CONFIG = getQSConfig('team', {
@@ -16,38 +17,37 @@ const QS_CONFIG = getQSConfig('team', {
 
 function OrganizationTeamList({ id, i18n }) {
   const location = useLocation();
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(false);
-  const [itemCount, setItemCount] = useState(0);
-  const [teams, setTeams] = useState([]);
+
+  const {
+    result: { teams, count },
+    error,
+    isLoading,
+    request: fetchTeams,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const results = await OrganizationsAPI.readTeams(id, params);
+      return {
+        teams: results.data.results,
+        count: results.data.count,
+      };
+    }, [id, location]),
+    {
+      teams: [],
+      count: 0,
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
-      setContentError(null);
-      setHasContentLoading(true);
-      try {
-        const {
-          data: { count = 0, results = [] },
-        } = await OrganizationsAPI.readTeams(id, params);
-        setItemCount(count);
-        setTeams(
-          results.map(team => ({ ...team, url: `/teams/${team.id}/details` }))
-        );
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setHasContentLoading(false);
-      }
-    })();
-  }, [id, location]);
+    fetchTeams();
+  }, [fetchTeams]);
 
   return (
     <PaginatedDataList
-      contentError={contentError}
-      hasContentLoading={hasContentLoading}
+      contentError={error}
+      hasContentLoading={isLoading}
       items={teams}
-      itemCount={itemCount}
+      itemCount={count}
       pluralizedItemName={i18n._(t`Teams`)}
       qsConfig={QS_CONFIG}
       toolbarSearchColumns={[
