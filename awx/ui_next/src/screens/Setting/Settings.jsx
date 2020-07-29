@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Route, Switch } from 'react-router-dom';
+import { Link, Route, Switch, Redirect } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { PageSection, Card } from '@patternfly/react-core';
@@ -19,8 +19,10 @@ import SAML from './SAML';
 import SettingList from './SettingList';
 import TACACS from './TACACS';
 import UI from './UI';
+import { useConfig } from '../../contexts/Config';
 
 function Settings({ i18n }) {
+  const { license_info = {} } = useConfig();
   const breadcrumbConfig = {
     '/settings': i18n._(t`Settings`),
     '/settings/activity_stream': i18n._(t`Activity stream`),
@@ -61,7 +63,11 @@ function Settings({ i18n }) {
           <LDAP />
         </Route>
         <Route path="/settings/license">
-          <License />
+          {license_info?.license_type === 'open' ? (
+            <License />
+          ) : (
+            <Redirect to="/settings" />
+          )}
         </Route>
         <Route path="/settings/logging">
           <Logging />

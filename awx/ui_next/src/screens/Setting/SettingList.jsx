@@ -11,17 +11,19 @@ import {
   DataListCell,
   DataListItemCells,
   DataListItemRow,
-  PageSection as _PageSection,
+  PageSection,
 } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { BrandName } from '../../variables';
+import { useConfig } from '../../contexts/Config';
+import ContentLoading from '../../components/ContentLoading/ContentLoading';
 
 // Setting BrandName to a variable here is necessary to get the jest tests
 // passing.  Attempting to use BrandName in the template literal results
 // in failing tests.
 const brandName = BrandName;
 
-const PageSection = styled(_PageSection)`
+const SplitLayout = styled(PageSection)`
   column-count: 1;
   column-gap: 24px;
   @media (min-width: 576px) {
@@ -47,11 +49,12 @@ const CardDescription = styled.div`
 `;
 
 function SettingList({ i18n }) {
+  const config = useConfig();
   const settingRoutes = [
     {
       header: i18n._(t`Authentication`),
       description: i18n._(
-        t`Enable simplified login for your Tower applications`
+        t`Enable simplified login for your ${brandName} applications`
       ),
       id: 'authentication',
       routes: [
@@ -87,7 +90,9 @@ function SettingList({ i18n }) {
     },
     {
       header: i18n._(t`Jobs`),
-      description: i18n._(t`Update settings pertaining to Jobs within Tower`),
+      description: i18n._(
+        t`Update settings pertaining to Jobs within ${brandName}`
+      ),
       id: 'jobs',
       routes: [
         {
@@ -141,10 +146,20 @@ function SettingList({ i18n }) {
     },
   ];
 
+  if (Object.keys(config).length === 0) {
+    return (
+      <PageSection>
+        <Card>
+          <ContentLoading />
+        </Card>
+      </PageSection>
+    );
+  }
+
   return (
-    <PageSection>
+    <SplitLayout>
       {settingRoutes.map(({ description, header, id, routes }) => {
-        if (id === 'license' && brandName === 'Tower') {
+        if (id === 'license' && config?.license_info?.license_type === 'open') {
           return null;
         }
         return (
@@ -171,7 +186,7 @@ function SettingList({ i18n }) {
           </Card>
         );
       })}
-    </PageSection>
+    </SplitLayout>
   );
 }
 
