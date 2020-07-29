@@ -49,26 +49,9 @@ describe('<Search />', () => {
     expect(onSearch).toBeCalledWith('name__icontains', 'test-321');
   });
 
-  test('handleDropdownToggle properly updates state', async () => {
-    const columns = [{ name: 'Name', key: 'name__icontains', isDefault: true }];
-    const onSearch = jest.fn();
-    const wrapper = mountWithContexts(
-      <Toolbar
-        id={`${QS_CONFIG.namespace}-list-toolbar`}
-        clearAllFilters={() => {}}
-        collapseListedFiltersBreakpoint="lg"
-      >
-        <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
-        </ToolbarContent>
-      </Toolbar>
-    ).find('Search');
-    expect(wrapper.state('isSearchDropdownOpen')).toEqual(false);
-    wrapper.instance().handleDropdownToggle(true);
-    expect(wrapper.state('isSearchDropdownOpen')).toEqual(true);
-  });
-
-  test('handleDropdownSelect properly updates state', async () => {
+  test('changing key select updates which key is called for onSearch', () => {
+    const searchButton = 'button[aria-label="Search submit button"]';
+    const searchTextInput = 'input[aria-label="Search text input"]';
     const columns = [
       { name: 'Name', key: 'name__icontains', isDefault: true },
       { name: 'Description', key: 'description__icontains' },
@@ -84,12 +67,20 @@ describe('<Search />', () => {
           <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
         </ToolbarContent>
       </Toolbar>
-    ).find('Search');
-    expect(wrapper.state('searchKey')).toEqual('name__icontains');
-    wrapper
-      .instance()
-      .handleDropdownSelect({ target: { innerText: 'Description' } });
-    expect(wrapper.state('searchKey')).toEqual('description__icontains');
+    );
+
+    act(() => {
+      wrapper
+        .find('Select[aria-label="Simple key select"]')
+        .invoke('onSelect')({ target: { innerText: 'Description' } });
+    });
+    wrapper.update();
+    wrapper.find(searchTextInput).instance().value = 'test-321';
+    wrapper.find(searchTextInput).simulate('change');
+    wrapper.find(searchButton).simulate('click');
+
+    expect(onSearch).toHaveBeenCalledTimes(1);
+    expect(onSearch).toBeCalledWith('description__icontains', 'test-321');
   });
 
   test('attempt to search with empty string', () => {
