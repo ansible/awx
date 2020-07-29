@@ -75,8 +75,8 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
           name: i18n._(t`Source`),
           key: 'source',
           options: [
-            [`file`, i18n._(t`File, Directory or Script`)],
-            [`scm`, i18n._(t`Sourced from a Project`)],
+            [`file`, i18n._(t`File, directory or script`)],
+            [`scm`, i18n._(t`Sourced from a project`)],
             [`ec2`, i18n._(t`Amazon EC2`)],
             [`gce`, i18n._(t`Google Compute Engine`)],
             [`azure_rm`, i18n._(t`Microsoft Azure Resource Manager`)],
@@ -85,7 +85,7 @@ function InventorySourcesList({ i18n, nodeResource, onUpdateNodeResource }) {
             [`openstack`, i18n._(t`OpenStack`)],
             [`rhv`, i18n._(t`Red Hat Virtualization`)],
             [`tower`, i18n._(t`Ansible Tower`)],
-            [`custom`, i18n._(t`Custom Script`)],
+            [`custom`, i18n._(t`Custom script`)],
           ],
         },
       ]}
