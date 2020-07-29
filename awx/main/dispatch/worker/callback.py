@@ -13,6 +13,7 @@ from django.utils.timezone import now as tz_now
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError, IntegrityError
 
+from awx.main.analytics.collectors import cache_event_data
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
                              InventoryUpdateEvent, SystemJobEvent, UnifiedJob,
@@ -103,6 +104,7 @@ class CallbackBrokerWorker(BaseWorker):
                             logger.exception('Database Error Saving Job Event')
                 for e in events:
                     emit_event_detail(e)
+                cache_event_data(events)
             self.buff = {}
 
     def perform_work(self, body):

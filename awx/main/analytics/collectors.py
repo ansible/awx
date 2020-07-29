@@ -1,6 +1,8 @@
+import csv
 import os
 import os.path
 import platform
+import subprocess
 
 from django.db import connection
 from django.db.models import Count
@@ -13,6 +15,16 @@ from awx.main.utils import (get_awx_version, get_ansible_version,
 from awx.main import models
 from django.contrib.sessions.models import Session
 from awx.main.analytics import register, table_version
+
+
+CACHEPATH = '/var/lib/awx/.insights-cache'
+EVENT_HEADERS = [
+    'id', 'created', 'uuid', 'parent_uuid', 'event', 'task_action',
+    'failed', 'changed', 'playbook', 'play', 'task', 'role', 'job_id',
+    'host_id', 'host_name', 'start', 'end', 'duration', 'warnings',
+    'deprecations'
+]
+
 
 '''
 This module is used to define metrics collected by awx.main.analytics.gather()
@@ -226,6 +238,45 @@ def query_info(since, collection_type):
     return query_info
 
 
+def cache_event_data(events):
+    if not settings.INSIGHTS_TRACKING_STATE:
+        return
+    if not os.path.exists(os.path.join(CACHEPATH, '.stage')):
+        os.makedirs(os.path.join(CACHEPATH, '.stage'), mode=0o700)
+
+    for e in events:
+        if not isinstance(e, models.JobEvent):
+            continue
+        path = os.path.join(CACHEPATH, e.uuid)
+        with open(path, 'w') as f:
+            os.chmod(path, 0o700)
+            writer = csv.DictWriter(f, fieldnames=EVENT_HEADERS)
+            start = e.event_data.get('start')
+            end = e.event_data.get('end')
+            writer.writerow({
+                'id': e.id,
+                'created': e.created.isoformat(),
+                'uuid': e.uuid,
+                'parent_uuid': e.parent_uuid,
+                'event': e.event,
+                'task_action': e.event_data.get('task_action', ''),
+                'failed': 't' if e.failed else 't',
+                'changed': 't' if e.changed else 't',
+                'playbook': e.playbook,
+                'play': e.play,
+                'task': e.task,
+                'role': e.role,
+                'job_id': e.job_id,
+                'host_id': e.host_id,
+                'host_name': e.host_name,
+                'start': start,
+                'end': end,
+                'duration': e.event_data.get('duration', ''),
+                'warnings': e.event_data.get('res', {}).get('warnings'),
+                'deprecations': e.event_data.get('res', {}).get('deprecations'),
+            })
+            os.rename(path, f'{path}.csv')
+
 # Copies Job Events from db to a .csv to be shipped
 @table_version('events_table.csv', '1.1')
 @table_version('unified_jobs_table.csv', '1.0')
@@ -241,31 +292,16 @@ def copy_tables(since, full_path, subset=None):
             file.close()
         return file_path
 
-    events_query = '''COPY (SELECT main_jobevent.id, 
-                              main_jobevent.created,
-                              main_jobevent.uuid,
-                              main_jobevent.parent_uuid,
-                              main_jobevent.event, 
-                              main_jobevent.event_data::json->'task_action' AS task_action,
-                              main_jobevent.failed, 
-                              main_jobevent.changed, 
-                              main_jobevent.playbook, 
-                              main_jobevent.play,
-                              main_jobevent.task,
-                              main_jobevent.role, 
-                              main_jobevent.job_id, 
-                              main_jobevent.host_id, 
-                              main_jobevent.host_name
-                              , CAST(main_jobevent.event_data::json->>'start' AS TIMESTAMP WITH TIME ZONE) AS start,
-                              CAST(main_jobevent.event_data::json->>'end' AS TIMESTAMP WITH TIME ZONE) AS end,
-                              main_jobevent.event_data::json->'duration' AS duration,
-                              main_jobevent.event_data::json->'res'->'warnings' AS warnings,
-                              main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
-                              FROM main_jobevent 
-                              WHERE main_jobevent.created > {}
-                              ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER'''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"))
-    if not subset or 'events' in subset:
-        _copy_table(table='events', query=events_query, path=full_path)
+    events_path = os.path.join(full_path, 'events_table.csv')
+    with open(events_path, 'w') as f:
+        writer = csv.DictWriter(f, fieldnames=EVENT_HEADERS)
+        writer.writeheader()
+
+    subprocess.call('&& '.join([
+        f'mv {CACHEPATH}/*.csv {CACHEPATH}/.stage/',
+        f'cat {CACHEPATH}/.stage/*.csv >> {events_path}',
+        f'rm {CACHEPATH}/.stage/*.csv'
+    ]), shell=True)
 
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
