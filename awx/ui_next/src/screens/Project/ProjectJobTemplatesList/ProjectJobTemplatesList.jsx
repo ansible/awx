@@ -1,14 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card } from '@patternfly/react-core';
-
-import {
-  JobTemplatesAPI,
-  UnifiedJobTemplatesAPI,
-  WorkflowJobTemplatesAPI,
-} from '../../../api';
+import { JobTemplatesAPI } from '../../../api';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -17,144 +12,93 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useSelected from '../../../util/useSelected';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import ProjectTemplatesListItem from './ProjectJobTemplatesListItem';
 
-// The type value in const QS_CONFIG below does not have a space between job_template and
-// workflow_job_template so the params sent to the API match what the api expects.
 const QS_CONFIG = getQSConfig('template', {
   page: 1,
   page_size: 20,
   order_by: 'name',
-  type: 'job_template,workflow_job_template',
 });
 
 function ProjectJobTemplatesList({ i18n }) {
   const { id: projectId } = useParams();
-  const { pathname, search } = useLocation();
+  const location = useLocation();
 
-  const [deletionError, setDeletionError] = useState(null);
-  const [contentError, setContentError] = useState(null);
-  const [hasContentLoading, setHasContentLoading] = useState(true);
-  const [jtActions, setJTActions] = useState(null);
-  const [wfjtActions, setWFJTActions] = useState(null);
-  const [count, setCount] = useState(0);
-  const [templates, setTemplates] = useState([]);
-  const [selected, setSelected] = useState([]);
-
-  useEffect(
-    () => {
-      const loadTemplates = async () => {
-        const params = {
-          ...parseQueryString(QS_CONFIG, search),
-        };
-
-        let jtOptionsPromise;
-        if (jtActions) {
-          jtOptionsPromise = Promise.resolve({
-            data: { actions: jtActions },
-          });
-        } else {
-          jtOptionsPromise = JobTemplatesAPI.readOptions();
-        }
-
-        let wfjtOptionsPromise;
-        if (wfjtActions) {
-          wfjtOptionsPromise = Promise.resolve({
-            data: { actions: wfjtActions },
-          });
-        } else {
-          wfjtOptionsPromise = WorkflowJobTemplatesAPI.readOptions();
-        }
-        if (pathname.startsWith('/projects') && projectId) {
-          params.jobtemplate__project = projectId;
-        }
-
-        const promises = Promise.all([
-          UnifiedJobTemplatesAPI.read(params),
-          jtOptionsPromise,
-          wfjtOptionsPromise,
-        ]);
-        setDeletionError(null);
-
-        try {
-          const [
-            {
-              data: { count: itemCount, results },
-            },
-            {
-              data: { actions: jobTemplateActions },
-            },
-            {
-              data: { actions: workFlowJobTemplateActions },
-            },
-          ] = await promises;
-          setJTActions(jobTemplateActions);
-          setWFJTActions(workFlowJobTemplateActions);
-          setCount(itemCount);
-          setTemplates(results);
-          setHasContentLoading(false);
-        } catch (err) {
-          setContentError(err);
-        }
+  const {
+    result: { jobTemplates, itemCount, actions },
+    error: contentError,
+    isLoading,
+    request: fetchTemplates,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.project = projectId;
+      const [response, actionsResponse] = await Promise.all([
+        JobTemplatesAPI.read(params),
+        JobTemplatesAPI.readOptions(),
+      ]);
+      return {
+        jobTemplates: response.data.results,
+        itemCount: response.data.count,
+        actions: actionsResponse.data.actions,
       };
-      loadTemplates();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pathname, search, count, projectId]
+    }, [location, projectId]),
+    {
+      jobTemplates: [],
+      itemCount: 0,
+      actions: {},
+    }
   );
 
-  const handleSelectAll = isSelected => {
-    const selectedItems = isSelected ? [...templates] : [];
-    setSelected(selectedItems);
-  };
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
 
-  const handleSelect = template => {
-    if (selected.some(s => s.id === template.id)) {
-      setSelected(selected.filter(s => s.id !== template.id));
-    } else {
-      setSelected(selected.concat(template));
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
+    jobTemplates
+  );
+
+  const {
+    isLoading: isDeleteLoading,
+    deleteItems: deleteTemplates,
+    deletionError,
+    clearDeletionError,
+  } = useDeleteItems(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(template => JobTemplatesAPI.destroy(template.id))
+      );
+    }, [selected]),
+    {
+      qsConfig: QS_CONFIG,
+      allItemsSelected: isAllSelected,
+      fetchItems: fetchTemplates,
     }
-  };
+  );
 
   const handleTemplateDelete = async () => {
-    setHasContentLoading(true);
-    try {
-      await Promise.all(
-        selected.map(({ type, id }) => {
-          let deletePromise;
-          if (type === 'job_template') {
-            deletePromise = JobTemplatesAPI.destroy(id);
-          } else if (type === 'workflow_job_template') {
-            deletePromise = WorkflowJobTemplatesAPI.destroy(id);
-          }
-          return deletePromise;
-        })
-      );
-      setCount(count - selected.length);
-    } catch (err) {
-      setDeletionError(err);
-    }
+    await deleteTemplates();
+    setSelected([]);
   };
 
   const canAddJT =
-    jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
+    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   const addButton = (
     <ToolbarAddButton key="add" linkTo="/templates/job_template/add/" />
   );
-
-  const isAllSelected =
-    selected.length === templates.length && selected.length > 0;
 
   return (
     <>
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={hasContentLoading}
-          items={templates}
-          itemCount={count}
-          pluralizedItemName={i18n._(t`Templates`)}
+          hasContentLoading={isDeleteLoading || isLoading}
+          items={jobTemplates}
+          itemCount={itemCount}
+          pluralizedItemName={i18n._(t`Job templates`)}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
@@ -164,23 +108,15 @@ function ProjectJobTemplatesList({ i18n }) {
               isDefault: true,
             },
             {
-              name: i18n._(t`Type`),
-              key: 'type',
-              options: [
-                [`job_template`, i18n._(t`Job Template`)],
-                [`workflow_job_template`, i18n._(t`Workflow Template`)],
-              ],
-            },
-            {
               name: i18n._(t`Playbook name`),
               key: 'job_template__playbook',
             },
             {
-              name: i18n._(t`Created By (Username)`),
+              name: i18n._(t`Created by (username)`),
               key: 'created_by__username',
             },
             {
-              name: i18n._(t`Modified By (Username)`),
+              name: i18n._(t`Modified by (username)`),
               key: 'modified_by__username',
             },
           ]}
@@ -190,7 +126,7 @@ function ProjectJobTemplatesList({ i18n }) {
               key: 'job_template__inventory__id',
             },
             {
-              name: i18n._(t`Last Job Run`),
+              name: i18n._(t`Last job run`),
               key: 'last_job_run',
             },
             {
@@ -216,7 +152,9 @@ function ProjectJobTemplatesList({ i18n }) {
               showSelectAll
               showExpandCollapse
               isAllSelected={isAllSelected}
-              onSelectAll={handleSelectAll}
+              onSelectAll={isSelected =>
+                setSelected(isSelected ? [...jobTemplates] : [])
+              }
               qsConfig={QS_CONFIG}
               additionalControls={[
                 ...(canAddJT ? [addButton] : []),
@@ -224,7 +162,7 @@ function ProjectJobTemplatesList({ i18n }) {
                   key="delete"
                   onDelete={handleTemplateDelete}
                   itemsToDelete={selected}
-                  pluralizedItemName="Templates"
+                  pluralizedItemName={i18n._(t`Job templates`)}
                 />,
               ]}
             />
@@ -246,9 +184,9 @@ function ProjectJobTemplatesList({ i18n }) {
         isOpen={deletionError}
         variant="danger"
         title={i18n._(t`Error!`)}
-        onClose={() => setDeletionError(null)}
+        onClose={clearDeletionError}
       >
-        {i18n._(t`Failed to delete one or more templates.`)}
+        {i18n._(t`Failed to delete one or more job templates.`)}
         <ErrorDetail error={deletionError} />
       </AlertModal>
     </>
