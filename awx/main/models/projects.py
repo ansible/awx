@@ -194,6 +194,11 @@ class ProjectOptions(models.Model):
             if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
+    def get_cache_path(self):
+        local_path = os.path.basename(self.local_path)
+        if local_path:
+            return os.path.join(settings.PROJECTS_ROOT, '.__awx_cache', local_path)
+
     @property
     def playbooks(self):
         results = []
@@ -419,6 +424,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         return False
 
     @property
+    def cache_id(self):
+        return str(self.last_job_id)
+
+    @property
     def notification_templates(self):
         base_notification_templates = NotificationTemplate.objects
         error_notification_templates = list(base_notification_templates
@@ -455,11 +464,12 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         )
 
     def delete(self, *args, **kwargs):
-        path_to_delete = self.get_project_path(check_if_exists=False)
+        paths_to_delete = (self.get_project_path(check_if_exists=False), self.get_cache_path())
         r = super(Project, self).delete(*args, **kwargs)
-        if self.scm_type and path_to_delete:  # non-manual, concrete path
-            from awx.main.tasks import delete_project_files
-            delete_project_files.delay(path_to_delete)
+        for path_to_delete in paths_to_delete:
+            if self.scm_type and path_to_delete:  # non-manual, concrete path
+                from awx.main.tasks import delete_project_files
+                delete_project_files.delay(path_to_delete)
         return r
 
 
@@ -554,6 +564,19 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def result_stdout_raw(self):
         return self._result_stdout_raw(redact_sensitive=True)
 
+    @property
+    def branch_override(self):
+        """Whether a branch other than the project default is used."""
+        if not self.project:
+            return True
+        return bool(self.scm_branch and self.scm_branch != self.project.scm_branch)
+
+    @property
+    def cache_id(self):
+        if self.branch_override or self.job_type == 'check' or (not self.project):
+            return str(self.id)
+        return self.project.cache_id
+
     def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True):
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive)
 
@@ -597,10 +620,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def save(self, *args, **kwargs):
         added_update_fields = []
         if not self.job_tags:
-            job_tags = ['update_{}'.format(self.scm_type)]
-            if self.job_type == 'run':
-                job_tags.append('install_roles')
-                job_tags.append('install_collections')
+            job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
