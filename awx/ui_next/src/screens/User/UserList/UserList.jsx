@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -12,6 +12,7 @@ import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import UserListItem from './UserListItem';
 
@@ -24,7 +25,6 @@ const QS_CONFIG = getQSConfig('user', {
 function UserList({ i18n }) {
   const location = useLocation();
   const match = useRouteMatch();
-  const [selected, setSelected] = useState([]);
 
   const {
     result: { users, itemCount, actions },
@@ -55,7 +55,9 @@ function UserList({ i18n }) {
     fetchUsers();
   }, [fetchUsers]);
 
-  const isAllSelected = selected.length === users.length && selected.length > 0;
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
+    users
+  );
 
   const {
     isLoading: isDeleteLoading,
@@ -80,18 +82,6 @@ function UserList({ i18n }) {
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...users] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
 
   return (
     <>
@@ -139,7 +129,9 @@ function UserList({ i18n }) {
                 {...props}
                 showSelectAll
                 isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
+                onSelectAll={isSelected =>
+                  setSelected(isSelected ? [...users] : [])
+                }
                 qsConfig={QS_CONFIG}
                 additionalControls={[
                   ...(canAdd
