@@ -126,46 +126,6 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 includeInventoryFileNotFoundError: true,
                 subForm: 'sourceSubForm'
             },
-            source_regions: {
-                label: i18n._('Regions'),
-                type: 'select',
-                ngOptions: 'source.label for source in source_region_choices track by source.value',
-                multiSelect: true,
-                ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure_rm')",
-                dataTitle: i18n._('Source Regions'),
-                dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
-                        "<em>" + i18n._("All") + "</em> " + i18n._("to include all regions. Only Hosts associated with the selected regions will be updated.") + "</p>",
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
-            instance_filters: {
-                label: i18n._("Instance Filters"),
-                type: 'text',
-                ngShow: "source && (source.value == 'ec2' || source.value == 'vmware' || source.value == 'tower')",
-                dataTitle: i18n._('Instance Filters'),
-                dataPlacement: 'right',
-                awPopOverWatch: 'instanceFilterPopOver',
-                awPopOver: '{{ instanceFilterPopOver }}',
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
-            group_by: {
-                label: i18n._('Only Group By'),
-                type: 'select',
-                ngShow: "source && (source.value == 'ec2' || source.value == 'vmware')",
-                ngOptions: 'source.label for source in group_by_choices track by source.value',
-                multiSelect: true,
-                dataTitle: i18n._("Only Group By"),
-                dataPlacement: 'right',
-                awPopOverWatch: 'groupByPopOver',
-                awPopOver: '{{ groupByPopOver }}',
-                dataContainer: 'body',
-                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-                subForm: 'sourceSubForm'
-            },
             inventory_script: {
                 label :  i18n._("Custom Inventory Script"),
                 type: 'lookup',
