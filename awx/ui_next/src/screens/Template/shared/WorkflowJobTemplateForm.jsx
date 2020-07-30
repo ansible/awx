@@ -131,7 +131,9 @@ function WorkflowJobTemplateForm({
           <TextInput
             id="text-wfjt-limit"
             {...limitField}
-            isValid={!limitMeta.touched || !limitMeta.error}
+            validated={
+              !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
+            }
             onChange={value => {
               limitHelpers.setValue(value);
             }}

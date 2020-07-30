@@ -41,7 +41,7 @@ function BecomeMethodField({ fieldOptions, isRequired }) {
         )
       }
       isRequired={isRequired}
-      isValid={!(meta.touched && meta.error)}
+      validated={!(meta.touched && meta.error) ? 'default' : 'error'}
     >
       <Select
         maxHeight={200}
