@@ -1,8 +1,8 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import TeamAccessListItem from './TeamAccessListItem';
+import TeamRoleListItem from './TeamRoleListItem';
 
-describe('<TeamAccessListItem/>', () => {
+describe('<TeamRoleListItem/>', () => {
   let wrapper;
   const role = {
     id: 1,
@@ -20,7 +20,7 @@ describe('<TeamAccessListItem/>', () => {
 
   test('should mount properly', () => {
     wrapper = mountWithContexts(
-      <TeamAccessListItem
+      <TeamRoleListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -31,7 +31,7 @@ describe('<TeamAccessListItem/>', () => {
 
   test('should render proper list item data', () => {
     wrapper = mountWithContexts(
-      <TeamAccessListItem
+      <TeamRoleListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -49,7 +49,7 @@ describe('<TeamAccessListItem/>', () => {
   });
   test('should render deletable chip', () => {
     wrapper = mountWithContexts(
-      <TeamAccessListItem
+      <TeamRoleListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
@@ -59,7 +59,7 @@ describe('<TeamAccessListItem/>', () => {
   test('should render read only chip', () => {
     role.summary_fields.user_capabilities.unattach = false;
     wrapper = mountWithContexts(
-      <TeamAccessListItem
+      <TeamRoleListItem
         role={role}
         detailUrl="/templates/job_template/15/details"
       />
