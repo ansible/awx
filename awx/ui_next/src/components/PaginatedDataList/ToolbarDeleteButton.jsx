@@ -142,7 +142,7 @@ class ToolbarDeleteButton extends React.Component {
         <Tooltip content={this.renderTooltip()} position="top">
           <div>
             <Button
-              variant="danger"
+              variant="secondary"
               aria-label={i18n._(t`Delete`)}
               onClick={this.handleConfirmDelete}
               isDisabled={isDisabled}
