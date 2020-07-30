@@ -487,9 +487,13 @@ metadata:
   labels:
     name: {{ kubernetes_deployment_name }}-web-svc
 spec:
+  type: {{ kubernetes_web_svc_type }}
   ports:
     - name: http
       port: 80
+{% if kubernetes_web_svc_type == "ClusterIP" %}
+      nodePort: null
+{% endif %}
       targetPort: 8052
   selector:
     name: {{ kubernetes_deployment_name }}-web-deploy

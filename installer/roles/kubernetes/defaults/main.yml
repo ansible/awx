@@ -10,6 +10,7 @@ kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernete
 
 kubernetes_awx_version: "{{ dockerhub_version }}"
 kubernetes_awx_image: "ansible/awx"
+kubernetes_web_svc_type: "NodePort"
 
 awx_psp_create: false
 awx_psp_name: 'awx'
