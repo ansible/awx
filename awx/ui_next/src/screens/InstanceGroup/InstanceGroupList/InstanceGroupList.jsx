@@ -10,11 +10,12 @@ import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import useSelected from '../../../util/useSelected';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-  ToolbarAddButton,
 } from '../../../components/PaginatedDataList';
 import ErrorDetail from '../../../components/ErrorDetail';
 import AlertModal from '../../../components/AlertModal';
 import DatalistToolbar from '../../../components/DataListToolbar';
+import AddDropDownButton from '../../../components/AddDropDownButton';
+
 import InstanceGroupListItem from './InstanceGroupListItem';
 
 const QS_CONFIG = getQSConfig('instance_group', {
@@ -137,6 +138,27 @@ function InstanceGroupList({ i18n }) {
     );
   }
 
+  const addButtonOptions = [
+    {
+      label: i18n._(t`Instance group`),
+      url: '/instance_groups/add',
+    },
+    {
+      label: i18n._(t`Container group`),
+      url: '/instance_groups/container_group/add',
+    },
+  ];
+
+  const addButton = (
+    <AddDropDownButton key="add" dropdownItems={addButtonOptions} />
+  );
+
+  const getDetailUrl = item => {
+    return item.is_containerized
+      ? `${match.url}/container_group/${item.id}/details`
+      : `${match.url}/${item.id}/details`;
+  };
+
   return (
     <>
       <PageSection>
@@ -160,14 +182,7 @@ function InstanceGroupList({ i18n }) {
                 }
                 qsConfig={QS_CONFIG}
                 additionalControls={[
-                  ...(canAdd
-                    ? [
-                        <ToolbarAddButton
-                          key="add"
-                          linkTo={`${match.url}/add`}
-                        />,
-                      ]
-                    : []),
+                  ...(canAdd ? [addButton] : []),
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleDelete}
@@ -183,16 +198,12 @@ function InstanceGroupList({ i18n }) {
                 key={instanceGroup.id}
                 value={instanceGroup.name}
                 instanceGroup={instanceGroup}
-                detailUrl={`${match.url}/${instanceGroup.id}/details`}
+                detailUrl={getDetailUrl(instanceGroup)}
                 onSelect={() => handleSelect(instanceGroup)}
                 isSelected={selected.some(row => row.id === instanceGroup.id)}
               />
             )}
-            emptyStateControls={
-              canAdd && (
-                <ToolbarAddButton key="add" linkTo={`${match.url}/add`} />
-              )
-            }
+            emptyStateControls={canAdd && addButton}
           />
         </Card>
       </PageSection>

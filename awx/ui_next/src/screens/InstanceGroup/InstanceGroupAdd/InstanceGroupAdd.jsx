@@ -5,7 +5,7 @@ function InstanceGroupAdd() {
   return (
     <PageSection>
       <Card>
-        <div>Instance Group Add</div>
+        <div>Add instance group</div>
       </Card>
     </PageSection>
   );

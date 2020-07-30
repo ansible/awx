@@ -18,12 +18,11 @@ import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 
-import InstanceGroupDetails from './InstanceGroupDetails';
-import InstanceGroupEdit from './InstanceGroupEdit';
+import ContainerGroupDetails from './ContainerGroupDetails';
+import ContainerGroupEdit from './ContainerGroupEdit';
 import Jobs from './Jobs';
-import Instances from './Instances';
 
-function InstanceGroup({ i18n, setBreadcrumb }) {
+function ContainerGroup({ i18n, setBreadcrumb }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -62,18 +61,13 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
     },
     {
       name: i18n._(t`Details`),
-      link: `/instance_groups/${id}/details`,
+      link: `/instance_groups/container_group/${id}/details`,
       id: 0,
     },
     {
-      name: i18n._(t`Instances`),
-      link: `/instance_groups/${id}/instances`,
-      id: 1,
-    },
-    {
       name: i18n._(t`Jobs`),
-      link: `/instance_groups/${id}/jobs`,
-      id: 2,
+      link: `/instance_groups/container_group/${id}/jobs`,
+      id: 1,
     },
   ];
 
@@ -84,7 +78,7 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(t`Instance group not found.`)}
+                {i18n._(t`Container group not found.`)}
                 {''}
                 <Link to="/instance_groups">
                   {i18n._(t`View all instance groups`)}
@@ -110,22 +104,19 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
         {!isLoading && instanceGroup && (
           <Switch>
             <Redirect
-              from="/instance_groups/:id"
-              to="/instance_groups/:id/details"
+              from="/instance_groups/container_group/:id"
+              to="/instance_groups/container_group/:id/details"
               exact
             />
             {instanceGroup && (
               <>
-                <Route path="/instance_groups/:id/edit">
-                  <InstanceGroupEdit instanceGroup={instanceGroup} />
+                <Route path="/instance_groups/container_group/:id/edit">
+                  <ContainerGroupEdit />
                 </Route>
-                <Route path="/instance_groups/:id/details">
-                  <InstanceGroupDetails instanceGroup={instanceGroup} />
+                <Route path="/instance_groups/container_group/:id/details">
+                  <ContainerGroupDetails />
                 </Route>
-                <Route path="/instance_groups/:id/instances">
-                  <Instances />
-                </Route>
-                <Route path="/instance_groups/:id/jobs">
+                <Route path="/instance_groups/container_group/:id/jobs">
                   <Jobs />
                 </Route>
               </>
@@ -137,4 +128,4 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
   );
 }
 
-export default withI18n()(InstanceGroup);
+export default withI18n()(ContainerGroup);

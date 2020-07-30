@@ -1,14 +1,14 @@
 import React from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 
-function InstanceGroupEdit() {
+function Jobs() {
   return (
     <PageSection>
       <Card>
-        <div>Edit instance group</div>
+        <div>Jobs</div>
       </Card>
     </PageSection>
   );
 }
 
-export default InstanceGroupEdit;
+export default Jobs;

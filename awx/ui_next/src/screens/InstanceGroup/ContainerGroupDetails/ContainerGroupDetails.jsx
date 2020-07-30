@@ -1,14 +1,14 @@
 import React from 'react';
 import { Card, PageSection } from '@patternfly/react-core';
 
-function InstanceGroupEdit() {
+function ContainerGroupDetails() {
   return (
     <PageSection>
       <Card>
-        <div>Edit instance group</div>
+        <div>Container group details</div>
       </Card>
     </PageSection>
   );
 }
 
-export default InstanceGroupEdit;
+export default ContainerGroupDetails;
