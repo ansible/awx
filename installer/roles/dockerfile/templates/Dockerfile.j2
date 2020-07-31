@@ -103,6 +103,7 @@ RUN dnf -y update && \
     krb5-workstation \
     libcgroup-tools \
     nginx \
+    podman \
     @postgresql:12 \
     python3-devel \
     python3-libselinux \
@@ -216,6 +217,7 @@ RUN for dir in \
       /var/lib/awx \
       /var/lib/awx/rsyslog \
       /var/lib/awx/rsyslog/conf.d \
+      /var/lib/awx/.local/share/containers/storage \
       /var/run/awx-rsyslog \
       /var/log/tower \
       /var/log/nginx \
@@ -225,6 +227,8 @@ RUN for dir in \
       /var/lib/nginx ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
+      /etc/subuid \
+      /etc/subgid \
       /etc/passwd ; \
     do touch $file ; chmod g+rw $file ; chgrp root $file ; done
 
@@ -254,6 +258,8 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 {% endif %}
 
+RUN echo -e 'cgroup_manager = "cgroupfs"\nevents_logger = "file"' > /etc/containers/libpod.conf
+
 ENV HOME="/var/lib/awx"
 ENV PATH="/usr/pgsql-10/bin:${PATH}"
 
@@ -271,3 +277,5 @@ ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 {% endif %}
+
+VOLUME /var/lib/awx/.local/share/containers/storage
