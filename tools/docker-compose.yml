@@ -34,6 +34,7 @@ services:
       - "../awx/projects/:/var/lib/awx/projects/"
       - "./redis/redis_socket_standalone:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
     privileged: true
     tty: true
   # A useful container that simply passes through log messages to the console
