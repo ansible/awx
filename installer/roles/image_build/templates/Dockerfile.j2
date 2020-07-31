@@ -24,6 +24,7 @@ USER root
 
 # Install build dependencies
 RUN dnf -y update && \
+    localectl set-locale LANG=en_US.UTF-8 && \
     dnf -y install epel-release 'dnf-command(config-manager)' && \
     dnf module -y enable 'postgresql:10' && \
     dnf config-manager --set-enabled PowerTools && \
