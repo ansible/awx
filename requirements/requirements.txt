@@ -1,7 +1,7 @@
 adal==1.2.2               # via msrestazure
 aiohttp==3.6.2            # via -r /awx_devel/requirements/requirements.in
 aioredis==1.3.1           # via channels-redis
-ansible-runner==1.4.7     # via -r /awx_devel/requirements/requirements.in
+# ansible-runner==1.4.7     # via -r /awx_devel/requirements/requirements.in
 ansiconv==1.0.0           # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25      # via -r /awx_devel/requirements/requirements.in
 asgiref==3.2.5            # via channels, channels-redis, daphne
