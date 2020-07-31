@@ -6,6 +6,9 @@ persistence:
 {% if pg_persistence_storageClass is defined %}
   storageClass: {{ pg_persistence_storageClass }}
 {% endif %}
+{% if pg_persistence_existingclaim is defined %}
+  existingClaim: {{ pg_persistence_existingclaim }}
+{% endif %}
 {% if pg_cpu_limit is defined or pg_mem_limit is defined %}
 resources:
   limits:
