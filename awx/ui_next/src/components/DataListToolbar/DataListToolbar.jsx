@@ -20,6 +20,7 @@ import { SearchColumns, SortColumns, QSConfig } from '../../types';
 class DataListToolbar extends React.Component {
   render() {
     const {
+      itemCount,
       clearAllFilters,
       searchColumns,
       sortColumns,
@@ -36,6 +37,7 @@ class DataListToolbar extends React.Component {
       additionalControls,
       i18n,
       qsConfig,
+      pagination,
     } = this.props;
 
     const showExpandCollapse = onCompact && onExpand;
@@ -90,6 +92,9 @@ class DataListToolbar extends React.Component {
               <ToolbarItem key={control.key}>{control}</ToolbarItem>
             ))}
           </ToolbarGroup>
+          {pagination && itemCount > 0 && (
+            <ToolbarItem variant="pagination">{pagination}</ToolbarItem>
+          )}
         </ToolbarContent>
       </Toolbar>
     );
@@ -97,6 +102,7 @@ class DataListToolbar extends React.Component {
 }
 
 DataListToolbar.propTypes = {
+  itemCount: PropTypes.number,
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
@@ -114,6 +120,7 @@ DataListToolbar.propTypes = {
 };
 
 DataListToolbar.defaultProps = {
+  itemCount: 0,
   clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,

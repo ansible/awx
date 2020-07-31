@@ -98,6 +98,7 @@ class ListHeader extends React.Component {
       renderToolbar,
       qsConfig,
       location,
+      pagination,
     } = this.props;
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
@@ -118,6 +119,7 @@ class ListHeader extends React.Component {
         ) : (
           <Fragment>
             {renderToolbar({
+              itemCount,
               searchColumns,
               sortColumns,
               onSearch: this.handleSearch,
@@ -126,6 +128,7 @@ class ListHeader extends React.Component {
               onRemove: this.handleRemove,
               clearAllFilters: this.handleRemoveAll,
               qsConfig,
+              pagination,
             })}
           </Fragment>
         )}

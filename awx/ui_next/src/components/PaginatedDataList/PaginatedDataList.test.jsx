@@ -55,7 +55,7 @@ describe('<PaginatedDataList />', () => {
       { context: { router: { history } } }
     );
 
-    const pagination = wrapper.find('Pagination');
+    const pagination = wrapper.find('Pagination').at(1);
     pagination.prop('onSetPage')(null, 2);
     expect(history.location.search).toEqual('?item.page=2');
     wrapper.update();
@@ -82,7 +82,7 @@ describe('<PaginatedDataList />', () => {
       { context: { router: { history } } }
     );
 
-    const pagination = wrapper.find('Pagination');
+    const pagination = wrapper.find('Pagination').at(1);
     pagination.prop('onPerPageSelect')(null, 25, 2);
     expect(history.location.search).toEqual('?item.page=2&item.page_size=25');
     wrapper.update();

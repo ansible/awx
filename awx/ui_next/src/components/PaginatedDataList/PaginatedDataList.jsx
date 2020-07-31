@@ -121,6 +121,28 @@ class PaginatedDataList extends React.Component {
       );
     }
 
+    const ToolbarPagination = (
+      <Pagination
+        isCompact
+        dropDirection="down"
+        itemCount={itemCount}
+        page={queryParams.page || 1}
+        perPage={queryParams.page_size}
+        perPageOptions={
+          showPageSizeOptions
+            ? [
+                { title: '5', value: 5 },
+                { title: '10', value: 10 },
+                { title: '20', value: 20 },
+                { title: '50', value: 50 },
+              ]
+            : []
+        }
+        onSetPage={this.handleSetPage}
+        onPerPageSelect={this.handleSetPageSize}
+      />
+    );
+
     return (
       <Fragment>
         <ListHeader
@@ -130,6 +152,7 @@ class PaginatedDataList extends React.Component {
           searchColumns={searchColumns}
           sortColumns={sortColumns}
           qsConfig={qsConfig}
+          pagination={ToolbarPagination}
         />
         {Content}
         {items.length ? (
