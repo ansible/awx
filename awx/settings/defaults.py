@@ -64,6 +64,8 @@ AWX_CONTAINER_GROUP_POD_LAUNCH_RETRY_DELAY = 5
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = 'default'
 AWX_CONTAINER_GROUP_DEFAULT_IMAGE = 'ansible/ansible-runner'
 
+AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE = 'quay.io/ansible/ansible-runner:devel'
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 #
