@@ -33,6 +33,7 @@ services:
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "redis_socket:/var/run/redis/:rw"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
     privileged: true
     tty: true
   # A useful container that simply passes through log messages to the console
