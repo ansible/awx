@@ -1424,10 +1424,6 @@ class BaseTask(object):
             cwd = self.build_cwd(self.instance, private_data_dir)
             resource_profiling_params = self.build_params_resource_profiling(self.instance,
                                                                              private_data_dir)
-            # TODO: Remove if fully replaced with containerized runs
-            # process_isolation_params = self.build_params_process_isolation(self.instance,
-            #                                                                private_data_dir,
-            #                                                                cwd)
             execution_environment_params = self.build_execution_environment_params(self.instance)
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
@@ -1463,7 +1459,6 @@ class BaseTask(object):
                 'settings': {
                     'job_timeout': self.get_instance_timeout(self.instance),
                     'suppress_ansible_output': True,
-                    #**process_isolation_params,
                     **resource_profiling_params,
                 },
             }
