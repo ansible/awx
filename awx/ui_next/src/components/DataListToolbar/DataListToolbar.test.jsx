@@ -68,11 +68,12 @@ describe('<DataListToolbar />', () => {
 
   test('dropdown items sortable/searchable columns work', () => {
     const sortDropdownToggleSelector = 'button[id="awx-sort"]';
-    const searchDropdownToggleSelector = 'button[id="awx-search"]';
+    const searchDropdownToggleSelector =
+      'Select[aria-label="Simple key select"] SelectToggle';
     const sortDropdownMenuItems =
       'DropdownMenu > ul[aria-labelledby="awx-sort"]';
     const searchDropdownMenuItems =
-      'DropdownMenu > ul[aria-labelledby="awx-search"]';
+      'Select[aria-label="Simple key select"] SelectOption';
 
     const NEW_QS_CONFIG = {
       namespace: 'organization',
