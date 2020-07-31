@@ -162,7 +162,7 @@
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
 
       when:
-        - "ansible_version.full is version_compare('2.8', '>=')"
+        - "ansible_version.full is version_compare('2.9', '>=')"
         - collections_enabled|bool
       tags:
         - install_collections
