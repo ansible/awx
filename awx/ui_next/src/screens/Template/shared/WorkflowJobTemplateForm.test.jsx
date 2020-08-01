@@ -2,21 +2,22 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { sleep } from '@testUtils/testUtils';
+import { sleep } from '../../../../testUtils/testUtils';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplateForm from './WorkflowJobTemplateForm';
 import {
   WorkflowJobTemplatesAPI,
   LabelsAPI,
   OrganizationsAPI,
   InventoriesAPI,
-} from '@api';
+} from '../../../api';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Labels');
-jest.mock('@api/models/Organizations');
-jest.mock('@api/models/Inventories');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+jest.mock('../../../api/models/Labels');
+jest.mock('../../../api/models/Organizations');
+jest.mock('../../../api/models/Inventories');
 
 describe('<WorkflowJobTemplateForm/>', () => {
   let wrapper;
@@ -31,7 +32,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
       inventory: { id: 1, name: 'Inventory 1' },
       organization: { id: 1, name: 'Organization 1' },
       labels: {
-        results: [{ name: 'Label 1', id: 1 }, { name: 'Label 2', id: 2 }],
+        results: [
+          { name: 'Label 1', id: 1 },
+          { name: 'Label 2', id: 2 },
+        ],
       },
     },
     scm_branch: 'devel',
@@ -40,6 +44,9 @@ describe('<WorkflowJobTemplateForm/>', () => {
     related: {
       webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
     },
+    webhook_credential: null,
+    webhook_key: 'sdfghjklmnbvcdsew435678iokjhgfd',
+    webhook_service: 'github',
   };
 
   beforeEach(async () => {
@@ -59,7 +66,10 @@ describe('<WorkflowJobTemplateForm/>', () => {
       results: [{ id: 1 }, { id: 2 }],
     });
     InventoriesAPI.read.mockResolvedValue({
-      results: [{ id: 1, name: 'Foo' }, { id: 2, name: 'Bar' }],
+      results: [
+        { id: 1, name: 'Foo' },
+        { id: 2, name: 'Bar' },
+      ],
     });
 
     history = createMemoryHistory({
@@ -74,7 +84,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
               template={mockTemplate}
               handleCancel={handleCancel}
               handleSubmit={handleSubmit}
-              webhook_key="sdfghjklmnbvcdsew435678iokjhgfd"
             />
           )}
         />,
@@ -106,13 +115,14 @@ describe('<WorkflowJobTemplateForm/>', () => {
     const fields = [
       'FormField[name="name"]',
       'FormField[name="description"]',
-      'Field[name="organization"]',
-      'Field[name="inventory"]',
-      'FormField[name="limit"]',
-      'FormField[name="scm_branch"]',
-      'Field[name="labels"]',
+      'FormGroup[label="Organization"]',
+      'FieldWithPrompt[label="Inventory"]',
+      'FieldWithPrompt[label="Limit"]',
+      'FieldWithPrompt[label="Source control branch"]',
+      'FormGroup[label="Labels"]',
       'VariablesField',
     ];
+
     const assertField = field => {
       expect(wrapper.find(`${field}`).length).toBe(1);
     };
@@ -128,11 +138,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
       {
         element: 'wfjt-description',
         value: { value: 'new bar', name: 'description' },
-      },
-      { element: 'wfjt-limit', value: { value: 1234567890, name: 'limit' } },
-      {
-        element: 'wfjt-scm_branch',
-        value: { value: 'new branch', name: 'scm_branch' },
       },
     ];
     const changeInputs = async ({ element, value }) => {
@@ -169,6 +174,26 @@ describe('<WorkflowJobTemplateForm/>', () => {
     inputsToChange.map(input => assertChanges(input));
   });
 
+  test('test changes in FieldWithPrompt', async () => {
+    await act(async () => {
+      wrapper.find('TextInputBase#text-wfjt-scm-branch').prop('onChange')(
+        'main'
+      );
+      wrapper.find('TextInputBase#text-wfjt-limit').prop('onChange')(
+        1234567890
+      );
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find('input#text-wfjt-scm-branch').prop('value')).toEqual(
+      'main'
+    );
+    expect(wrapper.find('input#text-wfjt-limit').prop('value')).toEqual(
+      1234567890
+    );
+  });
+
   test('webhooks and enable concurrent jobs functions properly', async () => {
     act(() => {
       wrapper.find('Checkbox[aria-label="Enable Webhook"]').invoke('onChange')(
@@ -182,7 +207,6 @@ describe('<WorkflowJobTemplateForm/>', () => {
     expect(
       wrapper.find('Checkbox[aria-label="Enable Webhook"]').prop('isChecked')
     ).toBe(true);
-
     expect(
       wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('readOnly')
     ).toBe(true);
@@ -190,24 +214,25 @@ describe('<WorkflowJobTemplateForm/>', () => {
       wrapper.find('input[aria-label="wfjt-webhook-key"]').prop('value')
     ).toBe('sdfghjklmnbvcdsew435678iokjhgfd');
     await act(() =>
-      wrapper
-        .find('FormGroup[name="webhook_key"]')
-        .find('Button[variant="tertiary"]')
-        .prop('onClick')()
+      wrapper.find('Button[aria-label="Update webhook key"]').prop('onClick')()
     );
     expect(WorkflowJobTemplatesAPI.updateWebhookKey).toBeCalledWith('6');
     expect(
       wrapper.find('TextInputBase[aria-label="Webhook URL"]').prop('value')
     ).toContain('/api/v2/workflow_job_templates/57/gitlab/');
-
     wrapper.update();
-
-    expect(wrapper.find('Field[name="webhook_service"]').length).toBe(1);
-
-    act(() => wrapper.find('AnsibleSelect').prop('onChange')({}, 'gitlab'));
+    expect(wrapper.find('FormGroup[name="webhook_service"]').length).toBe(1);
+    expect(wrapper.find('AnsibleSelect#webhook_service').length).toBe(1);
+    await act(async () => {
+      wrapper.find('AnsibleSelect#webhook_service').prop('onChange')(
+        {},
+        'gitlab'
+      );
+    });
     wrapper.update();
-
-    expect(wrapper.find('AnsibleSelect').prop('value')).toBe('gitlab');
+    expect(wrapper.find('AnsibleSelect#webhook_service').prop('value')).toBe(
+      'gitlab'
+    );
   });
 
   test('handleSubmit is called on submit button click', async () => {

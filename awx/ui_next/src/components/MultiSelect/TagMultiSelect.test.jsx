@@ -17,7 +17,7 @@ describe('<TagMultiSelect />', () => {
   it('should not treat empty string as an option', () => {
     const wrapper = mount(<TagMultiSelect value="" onChange={jest.fn()} />);
     wrapper.find('input').simulate('focus');
-    expect(wrapper.find('Select').prop('isExpanded')).toEqual(true);
+    expect(wrapper.find('Select').prop('isOpen')).toEqual(true);
     expect(wrapper.find('SelectOption')).toHaveLength(0);
   });
 

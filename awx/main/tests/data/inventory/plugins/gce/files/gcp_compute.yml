@@ -40,7 +40,7 @@ keyed_groups:
 - key: image
   prefix: ''
   separator: ''
-plugin: gcp_compute
+plugin: google.cloud.gcp_compute
 projects:
 - fooo
 retrieve_image_info: true

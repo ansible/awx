@@ -153,10 +153,10 @@ data:
 
     STATIC_ROOT = '/var/lib/awx/public/static'
     PROJECTS_ROOT = '/var/lib/awx/projects'
+    AWX_ANSIBLE_COLLECTIONS_PATHS = '/var/lib/awx/vendor/awx_ansible_collections'
     JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
     SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
     ALLOWED_HOSTS = ['*']
-    INTERNAL_API_URL = 'http://127.0.0.1:8052'
     SERVER_EMAIL = 'root@localhost'
     DEFAULT_FROM_EMAIL = 'webmaster@localhost'
     EMAIL_SUBJECT_PREFIX = '[AWX] '
@@ -192,16 +192,6 @@ data:
     LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '{}:{}'.format("localhost", "11211")
-        },
-        'ephemeral': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-
     USE_X_FORWARDED_PORT = True
 
     AWX_CONTAINER_GROUP_DEFAULT_IMAGE = "{{ container_groups_image }}"
@@ -212,6 +202,6 @@ data:
 
   {{ kubernetes_deployment_name }}_redis_conf: |
     unixsocket /var/run/redis/redis.sock
-    unixsocketperm 777
+    unixsocketperm 660
     port 0
     bind 127.0.0.1

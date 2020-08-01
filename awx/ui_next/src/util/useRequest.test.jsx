@@ -1,7 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../testUtils/enzymeHelpers';
 import useRequest, { useDeleteItems } from './useRequest';
 
 function TestInner() {

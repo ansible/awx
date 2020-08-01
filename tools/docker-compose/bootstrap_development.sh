@@ -3,7 +3,6 @@ set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=memcached port=11211" all
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "path=/var/run/redis/redis.sock" all
 
 # In case AWX in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
@@ -21,7 +20,6 @@ else
 fi
 
 make awx-link
-yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /etc/supervisord.conf
 
 # AWX bootstrapping
 make version_file
@@ -30,3 +28,4 @@ make init
 
 mkdir -p /awx_devel/awx/public/static
 mkdir -p /awx_devel/awx/ui/static
+mkdir -p /awx_devel/awx/ui_next/build/static

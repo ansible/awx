@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import OrganizationAdd from './OrganizationAdd';
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<OrganizationAdd />', () => {
   test('onSubmit should post to api', async () => {
@@ -89,7 +92,10 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component renders if there are virtual environments', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,
@@ -116,7 +122,10 @@ describe('<OrganizationAdd />', () => {
   });
 
   test('AnsibleSelect component does not render if there are 0 virtual environments', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,

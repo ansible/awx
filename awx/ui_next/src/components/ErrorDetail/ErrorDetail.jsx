@@ -7,8 +7,9 @@ import { t } from '@lingui/macro';
 import {
   Card as PFCard,
   CardBody as PFCardBody,
-  Expandable as PFExpandable,
+  ExpandableSection as PFExpandable,
 } from '@patternfly/react-core';
+import getErrorMessage from './getErrorMessage';
 
 const Card = styled(PFCard)`
   background-color: var(--pf-global--BackgroundColor--200);
@@ -52,14 +53,7 @@ class ErrorDetail extends Component {
   renderNetworkError() {
     const { error } = this.props;
     const { response } = error;
-
-    let message = '';
-    if (response?.data) {
-      message =
-        typeof response.data === 'string'
-          ? response.data
-          : response.data?.detail;
-    }
+    const message = getErrorMessage(response);
 
     return (
       <Fragment>
@@ -67,7 +61,17 @@ class ErrorDetail extends Component {
           {response?.config?.method.toUpperCase()} {response?.config?.url}{' '}
           <strong>{response?.status}</strong>
         </CardBody>
-        <CardBody>{message}</CardBody>
+        <CardBody>
+          {Array.isArray(message) ? (
+            <ul>
+              {message.map(m => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+          ) : (
+            message
+          )}
+        </CardBody>
       </Fragment>
     );
   }

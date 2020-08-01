@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { encodeQueryString } from '@util/qs';
+import { encodeQueryString } from '../util/qs';
 
 const defaultHttp = axios.create({
   xsrfCookieName: 'csrftoken',
@@ -44,6 +44,10 @@ class Base {
 
   update(id, data) {
     return this.http.patch(`${this.baseUrl}${id}/`, data);
+  }
+
+  copy(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/copy/`, data);
   }
 }
 

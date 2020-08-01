@@ -1,17 +1,20 @@
 /* eslint-disable react/jsx-pascal-case */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import AddResourceRole, { _AddResourceRole } from './AddResourceRole';
-import { TeamsAPI, UsersAPI } from '@api';
+import { TeamsAPI, UsersAPI } from '../../api';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<_AddResourceRole />', () => {
   UsersAPI.read.mockResolvedValue({
     data: {
       count: 2,
-      results: [{ id: 1, username: 'foo' }, { id: 2, username: 'bar' }],
+      results: [
+        { id: 1, username: 'foo' },
+        { id: 2, username: 'bar' },
+      ],
     },
   });
   const roles = {

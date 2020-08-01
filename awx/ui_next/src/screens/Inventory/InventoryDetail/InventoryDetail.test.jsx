@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { InventoriesAPI, CredentialTypesAPI } from '@api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { InventoriesAPI, CredentialTypesAPI } from '../../../api';
 import InventoryDetail from './InventoryDetail';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInventory = {
   id: 1,
@@ -90,11 +90,11 @@ describe('<InventoryDetail />', () => {
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
     const org = wrapper.find('Detail[label="Organization"]');
     expect(org.prop('value')).toMatchInlineSnapshot(`
-      <Link
+      <ForwardRef
         to="/organizations/1/details"
       >
         The Organization
-      </Link>
+      </ForwardRef>
     `);
     const vars = wrapper.find('VariablesDetail');
     expect(vars).toHaveLength(1);

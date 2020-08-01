@@ -1,8 +1,13 @@
 import React from 'react';
 
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { createMemoryHistory } from 'history';
+import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI } from '../../../api';
+import mockJobTemplateData from '../shared/data.job_template.json';
 import TemplateListItem from './TemplateListItem';
+
+jest.mock('../../../api');
 
 describe('<TemplateListItem />', () => {
   test('launch button shown to users with start capabilities', () => {
@@ -185,5 +190,53 @@ describe('<TemplateListItem />', () => {
     expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
+  });
+  test('should call api to copy template', async () => {
+    JobTemplatesAPI.copy.mockResolvedValue();
+
+    const wrapper = mountWithContexts(
+      <TemplateListItem
+        isSelected={false}
+        detailUrl="/templates/job_template/1/details"
+        template={mockJobTemplateData}
+      />
+    );
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    expect(JobTemplatesAPI.copy).toHaveBeenCalled();
+    jest.clearAllMocks();
+  });
+
+  test('should render proper alert modal on copy error', async () => {
+    JobTemplatesAPI.copy.mockRejectedValue(new Error());
+
+    const wrapper = mountWithContexts(
+      <TemplateListItem
+        isSelected={false}
+        detailUrl="/templates/job_template/1/details"
+        template={mockJobTemplateData}
+      />
+    );
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    wrapper.update();
+    expect(wrapper.find('Modal').prop('isOpen')).toBe(true);
+    jest.clearAllMocks();
+  });
+
+  test('should not render copy button', async () => {
+    const wrapper = mountWithContexts(
+      <TemplateListItem
+        isSelected={false}
+        detailUrl="/templates/job_template/1/details"
+        template={{
+          ...mockJobTemplateData,
+          summary_fields: { user_capabilities: { copy: false } },
+        }}
+      />
+    );
+    expect(wrapper.find('CopyButton').length).toBe(0);
   });
 });

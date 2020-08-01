@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '@components/CardCloseButton';
-import { TabbedCardHeader } from '@components/Card';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import NotificationList from '@components/NotificationList/NotificationList';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import NotificationList from '../../components/NotificationList/NotificationList';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
-import { OrganizationsAPI } from '@api';
+import { OrganizationsAPI } from '../../api';
 
 class Organization extends Component {
   constructor(props) {
@@ -116,6 +115,16 @@ class Organization extends Component {
       (me.is_system_auditor || isAuditorOfThisOrg || isAdminOfThisOrg);
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Organizations`)}
+          </>
+        ),
+        link: `/organizations`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
       { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
@@ -129,21 +138,10 @@ class Organization extends Component {
       });
     }
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/organizations" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    let showCardHeader = true;
 
-    if (!isInitialized) {
-      cardHeader = null;
-    }
-
-    if (location.pathname.endsWith('edit')) {
-      cardHeader = null;
+    if (!isInitialized || location.pathname.endsWith('edit')) {
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -153,9 +151,9 @@ class Organization extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Organization not found.`)}{' '}
+                  {i18n._(t`Organization not found.`)}{' '}
                   <Link to="/organizations">
-                    {i18n._(`View all Organizations.`)}
+                    {i18n._(t`View all Organizations.`)}
                   </Link>
                 </span>
               )}
@@ -168,7 +166,7 @@ class Organization extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect
               from="/organizations/:id"
@@ -176,61 +174,46 @@ class Organization extends Component {
               exact
             />
             {organization && (
-              <Route
-                path="/organizations/:id/edit"
-                render={() => <OrganizationEdit organization={organization} />}
-              />
+              <Route path="/organizations/:id/edit">
+                <OrganizationEdit organization={organization} />
+              </Route>
             )}
             {organization && (
-              <Route
-                path="/organizations/:id/details"
-                render={() => (
-                  <OrganizationDetail organization={organization} />
-                )}
-              />
+              <Route path="/organizations/:id/details">
+                <OrganizationDetail organization={organization} />
+              </Route>
             )}
             {organization && (
-              <Route
-                path="/organizations/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={organization}
-                    apiModel={OrganizationsAPI}
-                  />
-                )}
-              />
+              <Route path="/organizations/:id/access">
+                <ResourceAccessList
+                  resource={organization}
+                  apiModel={OrganizationsAPI}
+                />
+              </Route>
             )}
-            <Route
-              path="/organizations/:id/teams"
-              render={() => <OrganizationTeams id={Number(match.params.id)} />}
-            />
+            <Route path="/organizations/:id/teams">
+              <OrganizationTeams id={Number(match.params.id)} />
+            </Route>
             {canSeeNotificationsTab && (
-              <Route
-                path="/organizations/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={OrganizationsAPI}
-                  />
-                )}
-              />
+              <Route path="/organizations/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={OrganizationsAPI}
+                />
+              </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/organizations/${match.params.id}/details`}>
-                        {i18n._(`View Organization Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/organizations/${match.params.id}/details`}>
+                      {i18n._(t`View Organization Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
+            </Route>
             ,
           </Switch>
         </Card>

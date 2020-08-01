@@ -85,7 +85,6 @@ def test_invalid_notification_configuration(run_module, admin_user, organization
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(reason='Handling API validation changes w.r.t. changed status is an open item')
 def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
     nt_config = {
         'url': 'http://www.example.com/hook',

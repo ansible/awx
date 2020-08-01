@@ -2,22 +2,22 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, mergeParams, parseQueryString } from '@util/qs';
-import { GroupsAPI, InventoriesAPI } from '@api';
+import { getQSConfig, mergeParams, parseQueryString } from '../../../util/qs';
+import { GroupsAPI, InventoriesAPI } from '../../../api';
 
 import useRequest, {
   useDeleteItems,
   useDismissableError,
-} from '@util/useRequest';
-import useSelected from '@util/useSelected';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList from '@components/PaginatedDataList';
+} from '../../../util/useRequest';
+import useSelected from '../../../util/useSelected';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
+import PaginatedDataList from '../../../components/PaginatedDataList';
+import AssociateModal from '../../../components/AssociateModal';
+import DisassociateButton from '../../../components/DisassociateButton';
 import InventoryGroupHostListItem from './InventoryGroupHostListItem';
-import AssociateModal from './AssociateModal';
 import AddHostDropdown from './AddHostDropdown';
-import DisassociateButton from './DisassociateButton';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -67,7 +67,7 @@ function InventoryGroupHostList({ i18n }) {
   const {
     isLoading: isDisassociateLoading,
     deleteItems: disassociateHosts,
-    deletionError: disassociateError,
+    deletionError: disassociateErr,
   } = useDeleteItems(
     useCallback(async () => {
       return Promise.all(
@@ -96,7 +96,7 @@ function InventoryGroupHostList({ i18n }) {
     [groupId, inventoryId]
   );
 
-  const { request: handleAssociate, error: associateError } = useRequest(
+  const { request: handleAssociate, error: associateErr } = useRequest(
     useCallback(
       async hostsToAssociate => {
         await Promise.all(
@@ -110,9 +110,14 @@ function InventoryGroupHostList({ i18n }) {
     )
   );
 
-  const { error, dismissError } = useDismissableError(
-    associateError || disassociateError
-  );
+  const {
+    error: associateError,
+    dismissError: dismissAssociateError,
+  } = useDismissableError(associateErr);
+  const {
+    error: disassociateError,
+    dismissError: dismissDisassociateError,
+  } = useDismissableError(disassociateErr);
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
@@ -211,17 +216,26 @@ function InventoryGroupHostList({ i18n }) {
           title={i18n._(t`Select Hosts`)}
         />
       )}
-      {error && (
+      {associateError && (
         <AlertModal
-          isOpen={error}
-          onClose={dismissError}
+          isOpen={associateError}
+          onClose={dismissAssociateError}
           title={i18n._(t`Error!`)}
           variant="error"
         >
-          {associateError
-            ? i18n._(t`Failed to associate.`)
-            : i18n._(t`Failed to disassociate one or more hosts.`)}
-          <ErrorDetail error={error} />
+          {i18n._(t`Failed to associate.`)}
+          <ErrorDetail error={associateError} />
+        </AlertModal>
+      )}
+      {disassociateError && (
+        <AlertModal
+          isOpen={disassociateError}
+          onClose={dismissDisassociateError}
+          title={i18n._(t`Error!`)}
+          variant="error"
+        >
+          {i18n._(t`Failed to disassociate one or more hosts.`)}
+          <ErrorDetail error={disassociateError} />
         </AlertModal>
       )}
     </>

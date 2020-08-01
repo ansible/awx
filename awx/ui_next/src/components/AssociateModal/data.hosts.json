@@ -1,0 +1,393 @@
+
+{
+  "count": 3,
+  "results": [
+      {
+          "id": 2,
+          "type": "host",
+          "url": "/api/v2/hosts/2/",
+          "related": {
+              "created_by": "/api/v2/users/10/",
+              "modified_by": "/api/v2/users/19/",
+              "variable_data": "/api/v2/hosts/2/variable_data/",
+              "groups": "/api/v2/hosts/2/groups/",
+              "all_groups": "/api/v2/hosts/2/all_groups/",
+              "job_events": "/api/v2/hosts/2/job_events/",
+              "job_host_summaries": "/api/v2/hosts/2/job_host_summaries/",
+              "activity_stream": "/api/v2/hosts/2/activity_stream/",
+              "inventory_sources": "/api/v2/hosts/2/inventory_sources/",
+              "smart_inventories": "/api/v2/hosts/2/smart_inventories/",
+              "ad_hoc_commands": "/api/v2/hosts/2/ad_hoc_commands/",
+              "ad_hoc_command_events": "/api/v2/hosts/2/ad_hoc_command_events/",
+              "insights": "/api/v2/hosts/2/insights/",
+              "ansible_facts": "/api/v2/hosts/2/ansible_facts/",
+              "inventory": "/api/v2/inventories/2/",
+              "last_job": "/api/v2/jobs/236/",
+              "last_job_host_summary": "/api/v2/job_host_summaries/2202/"
+          },
+          "summary_fields": {
+              "inventory": {
+                  "id": 2,
+                  "name": " Inventory 1 Org 0",
+                  "description": "",
+                  "has_active_failures": false,
+                  "total_hosts": 33,
+                  "hosts_with_active_failures": 0,
+                  "total_groups": 4,
+                  "has_inventory_sources": false,
+                  "total_inventory_sources": 0,
+                  "inventory_sources_with_failures": 0,
+                  "organization_id": 2,
+                  "kind": ""
+              },
+              "last_job": {
+                  "id": 236,
+                  "name": " Job Template 1 Project 0",
+                  "description": "",
+                  "finished": "2020-02-26T03:15:21.471439Z",
+                  "status": "successful",
+                  "failed": false,
+                  "job_template_id": 18,
+                  "job_template_name": " Job Template 1 Project 0"
+              },
+              "last_job_host_summary": {
+                  "id": 2202,
+                  "failed": false
+              },
+              "created_by": {
+                  "id": 10,
+                  "username": "user-3",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "modified_by": {
+                  "id": 19,
+                  "username": "all",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "user_capabilities": {
+                  "edit": true,
+                  "delete": true
+              },
+              "groups": {
+                  "count": 2,
+                  "results": [
+                      {
+                          "id": 1,
+                          "name": " Group 1 Inventory 0"
+                      },
+                      {
+                          "id": 2,
+                          "name": " Group 2 Inventory 0"
+                      }
+                  ]
+              },
+              "recent_jobs": [
+                  {
+                      "id": 236,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-26T03:15:21.471439Z"
+                  },
+                  {
+                      "id": 232,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T21:20:33.593789Z"
+                  },
+                  {
+                      "id": 229,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:19:46.364134Z"
+                  },
+                  {
+                      "id": 228,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:18:54.138363Z"
+                  },
+                  {
+                      "id": 225,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T15:55:32.247652Z"
+                  }
+              ]
+          },
+          "created": "2020-02-24T15:10:58.922179Z",
+          "modified": "2020-02-26T21:52:43.428530Z",
+          "name": ".host-000001.group-00000.dummy",
+          "description": "",
+          "inventory": 2,
+          "enabled": false,
+          "instance_id": "",
+          "variables": "",
+          "has_active_failures": false,
+          "has_inventory_sources": false,
+          "last_job": 236,
+          "last_job_host_summary": 2202,
+          "insights_system_id": null,
+          "ansible_facts_modified": null
+      },
+      {
+          "id": 3,
+          "type": "host",
+          "url": "/api/v2/hosts/3/",
+          "related": {
+              "created_by": "/api/v2/users/11/",
+              "modified_by": "/api/v2/users/1/",
+              "variable_data": "/api/v2/hosts/3/variable_data/",
+              "groups": "/api/v2/hosts/3/groups/",
+              "all_groups": "/api/v2/hosts/3/all_groups/",
+              "job_events": "/api/v2/hosts/3/job_events/",
+              "job_host_summaries": "/api/v2/hosts/3/job_host_summaries/",
+              "activity_stream": "/api/v2/hosts/3/activity_stream/",
+              "inventory_sources": "/api/v2/hosts/3/inventory_sources/",
+              "smart_inventories": "/api/v2/hosts/3/smart_inventories/",
+              "ad_hoc_commands": "/api/v2/hosts/3/ad_hoc_commands/",
+              "ad_hoc_command_events": "/api/v2/hosts/3/ad_hoc_command_events/",
+              "insights": "/api/v2/hosts/3/insights/",
+              "ansible_facts": "/api/v2/hosts/3/ansible_facts/",
+              "inventory": "/api/v2/inventories/2/",
+              "last_job": "/api/v2/jobs/236/",
+              "last_job_host_summary": "/api/v2/job_host_summaries/2195/"
+          },
+          "summary_fields": {
+              "inventory": {
+                  "id": 2,
+                  "name": " Inventory 1 Org 0",
+                  "description": "",
+                  "has_active_failures": false,
+                  "total_hosts": 33,
+                  "hosts_with_active_failures": 0,
+                  "total_groups": 4,
+                  "has_inventory_sources": false,
+                  "total_inventory_sources": 0,
+                  "inventory_sources_with_failures": 0,
+                  "organization_id": 2,
+                  "kind": ""
+              },
+              "last_job": {
+                  "id": 236,
+                  "name": " Job Template 1 Project 0",
+                  "description": "",
+                  "finished": "2020-02-26T03:15:21.471439Z",
+                  "status": "successful",
+                  "failed": false,
+                  "job_template_id": 18,
+                  "job_template_name": " Job Template 1 Project 0"
+              },
+              "last_job_host_summary": {
+                  "id": 2195,
+                  "failed": false
+              },
+              "created_by": {
+                  "id": 11,
+                  "username": "user-4",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "modified_by": {
+                  "id": 1,
+                  "username": "admin",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "user_capabilities": {
+                  "edit": true,
+                  "delete": true
+              },
+              "groups": {
+                  "count": 2,
+                  "results": [
+                      {
+                          "id": 1,
+                          "name": " Group 1 Inventory 0"
+                      },
+                      {
+                          "id": 2,
+                          "name": " Group 2 Inventory 0"
+                      }
+                  ]
+              },
+              "recent_jobs": [
+                  {
+                      "id": 236,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-26T03:15:21.471439Z"
+                  },
+                  {
+                      "id": 232,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T21:20:33.593789Z"
+                  },
+                  {
+                      "id": 229,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:19:46.364134Z"
+                  },
+                  {
+                      "id": 228,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:18:54.138363Z"
+                  },
+                  {
+                      "id": 225,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T15:55:32.247652Z"
+                  }
+              ]
+          },
+          "created": "2020-02-24T15:10:58.945113Z",
+          "modified": "2020-02-27T03:43:43.635871Z",
+          "name": ".host-000002.group-00000.dummy",
+          "description": "",
+          "inventory": 2,
+          "enabled": false,
+          "instance_id": "",
+          "variables": "",
+          "has_active_failures": false,
+          "has_inventory_sources": false,
+          "last_job": 236,
+          "last_job_host_summary": 2195,
+          "insights_system_id": null,
+          "ansible_facts_modified": null
+      },
+      {
+          "id": 4,
+          "type": "host",
+          "url": "/api/v2/hosts/4/",
+          "related": {
+              "created_by": "/api/v2/users/12/",
+              "modified_by": "/api/v2/users/1/",
+              "variable_data": "/api/v2/hosts/4/variable_data/",
+              "groups": "/api/v2/hosts/4/groups/",
+              "all_groups": "/api/v2/hosts/4/all_groups/",
+              "job_events": "/api/v2/hosts/4/job_events/",
+              "job_host_summaries": "/api/v2/hosts/4/job_host_summaries/",
+              "activity_stream": "/api/v2/hosts/4/activity_stream/",
+              "inventory_sources": "/api/v2/hosts/4/inventory_sources/",
+              "smart_inventories": "/api/v2/hosts/4/smart_inventories/",
+              "ad_hoc_commands": "/api/v2/hosts/4/ad_hoc_commands/",
+              "ad_hoc_command_events": "/api/v2/hosts/4/ad_hoc_command_events/",
+              "insights": "/api/v2/hosts/4/insights/",
+              "ansible_facts": "/api/v2/hosts/4/ansible_facts/",
+              "inventory": "/api/v2/inventories/2/",
+              "last_job": "/api/v2/jobs/236/",
+              "last_job_host_summary": "/api/v2/job_host_summaries/2192/"
+          },
+          "summary_fields": {
+              "inventory": {
+                  "id": 2,
+                  "name": " Inventory 1 Org 0",
+                  "description": "",
+                  "has_active_failures": false,
+                  "total_hosts": 33,
+                  "hosts_with_active_failures": 0,
+                  "total_groups": 4,
+                  "has_inventory_sources": false,
+                  "total_inventory_sources": 0,
+                  "inventory_sources_with_failures": 0,
+                  "organization_id": 2,
+                  "kind": ""
+              },
+              "last_job": {
+                  "id": 236,
+                  "name": " Job Template 1 Project 0",
+                  "description": "",
+                  "finished": "2020-02-26T03:15:21.471439Z",
+                  "status": "successful",
+                  "failed": false,
+                  "job_template_id": 18,
+                  "job_template_name": " Job Template 1 Project 0"
+              },
+              "last_job_host_summary": {
+                  "id": 2192,
+                  "failed": false
+              },
+              "created_by": {
+                  "id": 12,
+                  "username": "user-5",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "modified_by": {
+                  "id": 1,
+                  "username": "admin",
+                  "first_name": "",
+                  "last_name": ""
+              },
+              "user_capabilities": {
+                  "edit": true,
+                  "delete": true
+              },
+              "groups": {
+                  "count": 2,
+                  "results": [
+                      {
+                          "id": 1,
+                          "name": " Group 1 Inventory 0"
+                      },
+                      {
+                          "id": 2,
+                          "name": " Group 2 Inventory 0"
+                      }
+                  ]
+              },
+              "recent_jobs": [
+                  {
+                      "id": 236,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-26T03:15:21.471439Z"
+                  },
+                  {
+                      "id": 232,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T21:20:33.593789Z"
+                  },
+                  {
+                      "id": 229,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:19:46.364134Z"
+                  },
+                  {
+                      "id": 228,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T16:18:54.138363Z"
+                  },
+                  {
+                      "id": 225,
+                      "name": " Job Template 1 Project 0",
+                      "status": "successful",
+                      "finished": "2020-02-25T15:55:32.247652Z"
+                  }
+              ]
+          },
+          "created": "2020-02-24T15:10:58.962312Z",
+          "modified": "2020-02-27T03:43:45.528882Z",
+          "name": ".host-000003.group-00000.dummy",
+          "description": "",
+          "inventory": 2,
+          "enabled": false,
+          "instance_id": "",
+          "variables": "",
+          "has_active_failures": false,
+          "has_inventory_sources": false,
+          "last_job": 236,
+          "last_job_host_summary": 2192,
+          "insights_system_id": null,
+          "ansible_facts_modified": null
+        }
+    ]
+}

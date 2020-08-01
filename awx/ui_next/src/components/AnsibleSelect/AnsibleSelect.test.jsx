@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import AnsibleSelect, { _AnsibleSelect } from './AnsibleSelect';
 
 const mockData = [

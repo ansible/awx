@@ -5,9 +5,9 @@ import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem } from '@patternfly/react-core';
-import { CheckboxField, FieldTooltip } from '@components/FormField';
-import MultiButtonToggle from '@components/MultiButtonToggle';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
+import { CheckboxField, FieldTooltip } from '../FormField';
+import MultiButtonToggle from '../MultiButtonToggle';
+import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -35,7 +35,7 @@ function VariablesField({
   return (
     <div className="pf-c-form__group">
       <FieldHeader>
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
@@ -44,7 +44,10 @@ function VariablesField({
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
-              buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
+              buttons={[
+                [YAML_MODE, 'YAML'],
+                [JSON_MODE, 'JSON'],
+              ]}
               value={mode}
               onChange={newMode => {
                 try {
@@ -64,7 +67,7 @@ function VariablesField({
         {promptId && (
           <StyledCheckboxField
             id="template-ask-variables-on-launch"
-            label={i18n._(t`Prompt On Launch`)}
+            label={i18n._(t`Prompt on launch`)}
             name="ask_variables_on_launch"
           />
         )}

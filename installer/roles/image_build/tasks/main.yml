@@ -84,13 +84,9 @@
   set_fact:
     docker_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/docker-image"
 
-- name: Set awx_web image name
+- name: Set awx image name
   set_fact:
-    web_image: "{{ web_image|default('awx_web') }}"
-
-- name: Set awx_task image name
-  set_fact:
-    task_image: "{{ task_image|default('awx_task') }}"
+    awx_image: "{{ awx_image|default('awx') }}"
 
 - name: Ensure directory exists
   file:
@@ -110,31 +106,25 @@
     dest: "{{ docker_base_path }}/Dockerfile"
   delegate_to: localhost
 
-- name: Template task Dockerfile
-  template:
-    src: Dockerfile.task.j2
-    dest: "{{ docker_base_path }}/Dockerfile.task"
-  delegate_to: localhost
-
 - name: Stage launch_awx
   copy:
     src: launch_awx.sh
     dest: "{{ docker_base_path }}/launch_awx.sh"
-    mode: '0700'
+    mode: '0755'
   delegate_to: localhost
 
 - name: Stage launch_awx_task
   template:
     src: launch_awx_task.sh.j2
     dest: "{{ docker_base_path }}/launch_awx_task.sh"
-    mode: '0700'
+    mode: '0755'
   delegate_to: localhost
 
-- name: Stage google-cloud-sdk.repo
+- name: Stage rsyslog.conf
   copy:
-    src: google-cloud-sdk.repo
-    dest: "{{ docker_base_path }}/google-cloud-sdk.repo"
-    mode: '0700'
+    src: rsyslog.conf
+    dest: "{{ docker_base_path }}/rsyslog.conf"
+    mode: '0660'
   delegate_to: localhost
 
 - name: Stage supervisor.conf
@@ -165,6 +155,7 @@
   copy:
     src: ../tools/scripts/config-watcher
     dest: "{{ docker_base_path }}/config-watcher"
+    mode: 0755
   delegate_to: localhost
 
 - name: Stage Makefile
@@ -173,7 +164,7 @@
     dest: "{{ docker_base_path }}/Makefile"
   delegate_to: localhost
 
-- name: Build base web image
+- name: Build base awx image
   docker_image:
     build:
       path: "{{ docker_base_path }}"
@@ -183,34 +174,17 @@
         http_proxy: "{{ http_proxy | default('') }}"
         https_proxy: "{{ https_proxy | default('') }}"
         no_proxy: "{{ no_proxy | default('') }}"
-    name: "{{ web_image }}"
+    name: "{{ awx_image }}"
     tag: "{{ awx_version }}"
     source: 'build'
     force_source: true
   delegate_to: localhost
 
-- name: Build base task image
-  docker_image:
-    build:
-      path: "{{ docker_base_path }}"
-      dockerfile: Dockerfile.task
-      pull: false
-      args:
-        http_proxy: "{{ http_proxy | default('') }}"
-        https_proxy: "{{ https_proxy | default('') }}"
-        no_proxy: "{{ no_proxy | default('') }}"
-    name: "{{ task_image }}"
-    tag: "{{ awx_version }}"
-    source: 'build'
-    force_source: true
-  delegate_to: localhost
-
-- name: Tag task and web images as latest
+- name: Tag awx images as latest
   command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
   delegate_to: localhost
   with_items:
-    - "{{ task_image }}"
-    - "{{ web_image }}"
+    - "{{ awx_image }}"
 
 - name: Clean docker base directory
   file:

@@ -16,7 +16,7 @@ DATA = os.path.join(os.path.dirname(data.__file__), 'inventory')
 
 TEST_SOURCE_FIELDS = {
     'vmware': {
-        'instance_filters': 'foobaa',
+        'instance_filters': '{{ config.name == "only_my_server" }},{{ somevar == "bar"}}',
         'group_by': 'fouo'
     },
     'ec2': {
@@ -38,7 +38,10 @@ TEST_SOURCE_FIELDS = {
 
 INI_TEST_VARS = {
     'ec2': {
-        'boto_profile': '/tmp/my_boto_stuff'
+        'boto_profile': '/tmp/my_boto_stuff',
+        'iam_role_arn': 'arn:aws:iam::123456789012:role/test-role',
+        'hostname_variable': 'public_dns_name',
+        'destination_variable': 'public_dns_name'
     },
     'gce': {},
     'openstack': {
@@ -47,9 +50,11 @@ INI_TEST_VARS = {
         'expand_hostvars': True,
         'fail_on_errors': True
     },
-    'rhv': {},  # there are none
     'tower': {},  # there are none
     'vmware': {
+        'alias_pattern': "{{ config.foo }}",
+        'host_filters': '{{ config.zoo == "DC0_H0_VM0" }}',
+        'groupby_patterns': "{{ config.asdf }}",
         # setting VMWARE_VALIDATE_CERTS is duplicated with env var
     },
     'azure_rm': {
@@ -58,21 +63,17 @@ INI_TEST_VARS = {
         'tags': 'Creator:jmarshall, peanutbutter:jelly'
     },
     'satellite6': {
-        'satellite6_group_patterns': 'foo_group_patterns',
+        'satellite6_group_patterns': '["{app}-{tier}-{color}", "{app}-{color}"]',
         'satellite6_group_prefix': 'foo_group_prefix',
         'satellite6_want_hostcollections': True,
         'satellite6_want_ansible_ssh_host': True,
-        'satellite6_rich_params': True,
         'satellite6_want_facts': True
-
     },
-    'cloudforms': {
-        'version': '2.4',
-        'purge_actions': 'maybe',
-        'clean_group_keys': 'this_key',
-        'nest_tags': 'yes',
-        'suffix': '.ppt',
-        'prefer_ipv4': 'yes'
+    'rhv': {  # options specific to the plugin
+        'ovirt_insecure': False,
+        'groups': {
+            'dev': '"dev" in tags'
+        }
     }
 }
 
@@ -111,21 +112,27 @@ def credential_kind(source):
 
 
 @pytest.fixture
-def fake_credential_factory(source):
-    ct = CredentialType.defaults[credential_kind(source)]()
-    ct.save()
+def fake_credential_factory():
+    def wrap(source):
+        ct = CredentialType.defaults[credential_kind(source)]()
+        ct.save()
 
-    inputs = {}
-    var_specs = {}  # pivoted version of inputs
-    for element in ct.inputs.get('fields'):
-        var_specs[element['id']] = element
-    for var in var_specs.keys():
-        inputs[var] = generate_fake_var(var_specs[var])
+        inputs = {}
+        var_specs = {}  # pivoted version of inputs
+        for element in ct.inputs.get('fields'):
+            var_specs[element['id']] = element
+        for var in var_specs.keys():
+            inputs[var] = generate_fake_var(var_specs[var])
 
-    return Credential.objects.create(
-        credential_type=ct,
-        inputs=inputs
-    )
+        if source == 'tower':
+            inputs.pop('oauth_token')  # mutually exclusive with user/pass
+
+        return Credential.objects.create(
+            credential_type=ct,
+            inputs=inputs
+        )
+    return wrap
+
 
 
 def read_content(private_data_dir, raw_env, inventory_update):
@@ -237,8 +244,7 @@ def create_reference_data(source_dir, env, content):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
-@pytest.mark.parametrize('script_or_plugin', ['scripts', 'plugins'])
-def test_inventory_update_injected_content(this_kind, script_or_plugin, inventory):
+def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory):
     src_vars = dict(base_source_var='value_of_var')
     if this_kind in INI_TEST_VARS:
         src_vars.update(INI_TEST_VARS[this_kind])
@@ -255,8 +261,7 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
     inventory_update = inventory_source.create_unified_job()
     task = RunInventoryUpdate()
 
-    use_plugin = bool(script_or_plugin == 'plugins')
-    if use_plugin and InventorySource.injectors[this_kind].plugin_name is None:
+    if InventorySource.injectors[this_kind].plugin_name is None:
         pytest.skip('Use of inventory plugin is not enabled for this source')
 
     def substitute_run(envvars=None, **_kw):
@@ -266,11 +271,11 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         If MAKE_INVENTORY_REFERENCE_FILES is set, it will produce reference files
         """
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
-        assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == ('auto' if use_plugin else 'script')
+        assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
         env, content = read_content(private_data_dir, envvars, inventory_update)
         env.pop('ANSIBLE_COLLECTIONS_PATHS', None)  # collection paths not relevant to this test
-        base_dir = os.path.join(DATA, script_or_plugin)
+        base_dir = os.path.join(DATA, 'plugins')
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
         source_dir = os.path.join(base_dir, this_kind)  # this_kind is a global
@@ -304,20 +309,13 @@ def test_inventory_update_injected_content(this_kind, script_or_plugin, inventor
         Res = namedtuple('Result', ['status', 'rc'])
         return Res('successful', 0)
 
-    mock_licenser = mock.Mock(return_value=mock.Mock(
-        validate=mock.Mock(return_value={'license_type': 'open'})
-    ))
-
     # Mock this so that it will not send events to the callback receiver
     # because doing so in pytest land creates large explosions
     with mock.patch('awx.main.queue.CallbackQueueDispatcher.dispatch', lambda self, obj: None):
-        # Force the update to use the script injector
-        with mock.patch('awx.main.models.inventory.PluginFileInjector.should_use_plugin', return_value=use_plugin):
-            # Also do not send websocket status updates
-            with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
+        # Also do not send websocket status updates
+        with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
+            with mock.patch.object(task, 'get_ansible_version', return_value='2.13'):
                 # The point of this test is that we replace run with assertions
                 with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
-                    # mocking the licenser is necessary for the tower source
-                    with mock.patch('awx.main.models.inventory.get_licenser', mock_licenser):
-                        # so this sets up everything for a run and then yields control over to substitute_run
-                        task.run(inventory_update.pk)
+                    # so this sets up everything for a run and then yields control over to substitute_run
+                    task.run(inventory_update.pk)

@@ -37,7 +37,7 @@ def get_broadcast_hosts():
                                 .order_by('hostname') \
                                 .values('hostname', 'ip_address') \
                                 .distinct()
-    return [i['ip_address'] or i['hostname'] for i in instances]
+    return {i['hostname']: i['ip_address'] or i['hostname'] for i in instances}
 
 
 def get_local_host():
@@ -70,7 +70,7 @@ class WebsocketTask():
 
     async def connect(self, attempt):
         from awx.main.consumers import WebsocketSecretAuthHelper # noqa
-        logger.debug(f"{self.name} connect attempt {attempt} to {self.remote_host}")
+        logger.debug(f"Connection from {self.name} to {self.remote_host} attempt number {attempt}.")
 
         '''
         Can not put get_channel_layer() in the init code because it is in the init
@@ -83,7 +83,7 @@ class WebsocketTask():
             if attempt > 0:
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_RECONNECT_RETRY_RATE_SECONDS)
         except asyncio.CancelledError:
-            logger.warn(f"{self.name} connection to {self.remote_host} cancelled")
+            logger.warn(f"Connection from {self.name} to {self.remote_host} cancelled")
             raise
 
         uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/{self.endpoint}/"
@@ -93,29 +93,29 @@ class WebsocketTask():
         try:
             async with aiohttp.ClientSession(headers={'secret': secret_val},
                                              timeout=timeout) as session:
-                async with session.ws_connect(uri, ssl=self.verify_ssl) as websocket:
+                async with session.ws_connect(uri, ssl=self.verify_ssl, heartbeat=20) as websocket:
+                    logger.info(f"Connection from {self.name} to {self.remote_host} established.")
                     self.stats.record_connection_established()
                     attempt = 0
                     await self.run_loop(websocket)
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
-            logger.warn(f"{self.name} connection to {self.remote_host} cancelled")
+            logger.warn(f"Connection from {self.name} to {self.remote_host} cancelled.")
             self.stats.record_connection_lost()
             raise
         except client_exceptions.ClientConnectorError as e:
-            logger.warn(f"Failed to connect to {self.remote_host}: '{e}'. Reconnecting ...")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
+            logger.warn(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.")
         except asyncio.TimeoutError:
-            logger.warn(f"Timeout while trying to connect to {self.remote_host}. Reconnecting ...")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
+            logger.warn(f"Connection from {self.name} to {self.remote_host} timed out.")
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
-            logger.warn(f"Websocket broadcast client exception {type(e)} {e}")
-            self.stats.record_connection_lost()
-            self.start(attempt=attempt + 1)
+            logger.warn(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
+        else:
+            logger.warn(f"Connection from {self.name} to {self.remote_host} list.")
+
+        self.stats.record_connection_lost()
+        self.start(attempt=attempt + 1)
 
     def start(self, attempt=0):
         self.async_task = self.event_loop.create_task(self.connect(attempt=attempt))
@@ -149,23 +149,37 @@ class BroadcastWebsocketTask(WebsocketTask):
 class BroadcastWebsocketManager(object):
     def __init__(self):
         self.event_loop = asyncio.get_event_loop()
+        '''
+        {
+            'hostname1': BroadcastWebsocketTask(),
+            'hostname2': BroadcastWebsocketTask(),
+            'hostname3': BroadcastWebsocketTask(),
+        }
+        '''
         self.broadcast_tasks = dict()
-        # parallel dict to broadcast_tasks that tracks stats
         self.local_hostname = get_local_host()
         self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
 
     async def run_per_host_websocket(self):
 
         while True:
-            future_remote_hosts = get_broadcast_hosts()
+            known_hosts = get_broadcast_hosts()
+            future_remote_hosts = known_hosts.keys()
             current_remote_hosts = self.broadcast_tasks.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
             new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
 
+            remote_addresses = {k: v.remote_host for k, v in self.broadcast_tasks.items()}
+            for hostname, address in known_hosts.items():
+                if hostname in self.broadcast_tasks and \
+                        address != remote_addresses[hostname]:
+                    deleted_remote_hosts.add(hostname)
+                    new_remote_hosts.add(hostname)
+
             if deleted_remote_hosts:
-                logger.warn(f"{self.local_hostname} going to remove {deleted_remote_hosts} from the websocket broadcast list")
+                logger.warn(f"Removing {deleted_remote_hosts} from websocket broadcast list")
             if new_remote_hosts:
-                logger.warn(f"{self.local_hostname} going to add {new_remote_hosts} to the websocket broadcast list")
+                logger.warn(f"Adding {new_remote_hosts} to websocket broadcast list")
 
             for h in deleted_remote_hosts:
                 self.broadcast_tasks[h].cancel()
@@ -177,7 +191,7 @@ class BroadcastWebsocketManager(object):
                 broadcast_task = BroadcastWebsocketTask(name=self.local_hostname,
                                                         event_loop=self.event_loop,
                                                         stats=stats,
-                                                        remote_host=h)
+                                                        remote_host=known_hosts[h])
                 broadcast_task.start()
                 self.broadcast_tasks[h] = broadcast_task
 

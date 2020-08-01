@@ -213,7 +213,6 @@ with the traceback message.
 
 Log messages should be sent outside of the
 request-response cycle. For example, Loggly examples use
-`requests_futures.sessions.FuturesSession`, which does some
-threading work to fire the message without interfering with other
+rsyslog, which handles these messages without interfering with other
 operations. A timeout on the part of the log aggregation service should
 not cause Tower operations to hang.

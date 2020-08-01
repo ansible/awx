@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Dropdown, DropdownPosition } from '@patternfly/react-core';
-import { ToolbarAddButton } from '@components/PaginatedDataList';
+import { ToolbarAddButton } from '../PaginatedDataList';
 
 function AddDropDownButton({ dropdownItems }) {
   const [isOpen, setIsOpen] = useState(false);

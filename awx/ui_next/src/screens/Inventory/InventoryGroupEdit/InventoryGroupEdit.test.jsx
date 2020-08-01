@@ -1,13 +1,13 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { GroupsAPI } from '@api';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { GroupsAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryGroupEdit from './InventoryGroupEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 GroupsAPI.readDetail.mockResolvedValue({
   data: {
     name: 'Foo',
@@ -24,10 +24,9 @@ describe('<InventoryGroupEdit />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/:groupId/edit"
-          component={() => <InventoryGroupEdit inventoryGroup={{ id: 2 }} />}
-        />,
+        <Route path="/inventories/inventory/:id/groups/:groupId/edit">
+          <InventoryGroupEdit inventoryGroup={{ id: 2 }} />
+        </Route>,
         {
           context: {
             router: {

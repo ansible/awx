@@ -1,12 +1,15 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { OrganizationsAPI, ProjectsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockOrganization from '@util/data.organization.json';
+import { OrganizationsAPI, ProjectsAPI } from '../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
+import mockOrganization from '../../util/data.organization.json';
 import mockDetails from './data.project.json';
 import Project from './Project';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 const mockMe = {
   is_super_user: true,
@@ -41,9 +44,9 @@ describe('<Project />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 5
+      el => el.length === 6
     );
-    expect(tabs.at(2).text()).toEqual('Notifications');
+    expect(tabs.at(3).text()).toEqual('Notifications');
     done();
   });
 
@@ -62,7 +65,7 @@ describe('<Project />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();
@@ -83,9 +86,9 @@ describe('<Project />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
-    expect(tabs.at(3).text()).toEqual('Schedules');
+    expect(tabs.at(4).text()).toEqual('Schedules');
     done();
   });
 
@@ -105,7 +108,7 @@ describe('<Project />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 3
+      el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Schedules'));
     done();

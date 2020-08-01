@@ -4,16 +4,13 @@
 # Python
 import datetime
 import time
+import json
 import logging
 import re
 import copy
 import os.path
 from urllib.parse import urljoin
 import yaml
-import configparser
-import tempfile
-from io import StringIO
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -59,7 +56,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.credential.injectors import _openstack_data
-from awx.main.utils import _inventory_updates, region_sorting, get_licenser
+from awx.main.utils import _inventory_updates, region_sorting
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 
@@ -828,7 +825,6 @@ class InventorySourceOptions(BaseModel):
         ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
         ('satellite6', _('Red Hat Satellite 6')),
-        ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('rhv', _('Red Hat Virtualization')),
         ('tower', _('Ansible Tower')),
@@ -1066,11 +1062,6 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_satellite6_region_choices(self):
         """Red Hat Satellite 6 region choices (not implemented)"""
-        return [('all', 'All')]
-
-    @classmethod
-    def get_cloudforms_region_choices(self):
-        """Red Hat CloudForms region choices (not implemented)"""
         return [('all', 'All')]
 
     @classmethod
@@ -1601,17 +1592,15 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
 
 
-# TODO: move to awx/main/models/inventory/injectors.py
 class PluginFileInjector(object):
-    # if plugin_name is not given, no inventory plugin functionality exists
     plugin_name = None  # Ansible core name used to reference plugin
-    # if initial_version is None, but we have plugin name, injection logic exists,
-    # but it is vaporware, meaning we do not use it for some reason in Ansible core
-    initial_version = None  # at what version do we switch to the plugin
-    ini_env_reference = None  # env var name that points to old ini config file
     # base injector should be one of None, "managed", or "template"
     # this dictates which logic to borrow from playbook injectors
     base_injector = None
+    # every source should have collection, these are for the collection name
+    namespace = None
+    collection = None
+    collection_migration = '2.9'  # Starting with this version, we use collections
 
     def __init__(self, ansible_version):
         # This is InventoryOptions instance, could be source or inventory update
@@ -1624,12 +1613,6 @@ class PluginFileInjector(object):
         """
         return '{0}.yml'.format(self.plugin_name)
 
-    @property
-    def script_name(self):
-        """Name of the script located in awx/plugins/inventory
-        """
-        return '{0}.py'.format(self.__class__.__name__)
-
     def inventory_as_dict(self, inventory_update, private_data_dir):
         """Default implementation of inventory plugin file contents.
         There are some valid cases when all parameters can be obtained from
@@ -1638,7 +1621,8 @@ class PluginFileInjector(object):
         """
         if self.plugin_name is None:
             raise NotImplementedError('At minimum the plugin name is needed for inventory plugin use.')
-        return {'plugin': self.plugin_name}
+        proper_name = f'{self.namespace}.{self.collection}.{self.plugin_name}'
+        return {'plugin': proper_name}
 
     def inventory_contents(self, inventory_update, private_data_dir):
         """Returns a string that is the content for the inventory file for the inventory plugin
@@ -1649,17 +1633,8 @@ class PluginFileInjector(object):
             width=1000
         )
 
-    def should_use_plugin(self):
-        return bool(
-            self.plugin_name and self.initial_version and
-            Version(self.ansible_version) >= Version(self.initial_version)
-        )
-
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
-        if self.should_use_plugin():
-            injector_env = self.get_plugin_env(inventory_update, private_data_dir, private_data_files)
-        else:
-            injector_env = self.get_script_env(inventory_update, private_data_dir, private_data_files)
+        injector_env = self.get_plugin_env(inventory_update, private_data_dir, private_data_files)
         env.update(injector_env)
         # Preserves current behavior for Ansible change in default planned for 2.10
         env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'never'
@@ -1667,7 +1642,6 @@ class PluginFileInjector(object):
 
     def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
         """By default, we will apply the standard managed_by_tower injectors
-        for the script injection
         """
         injected_env = {}
         credential = inventory_update.get_cloud_credential()
@@ -1693,51 +1667,22 @@ class PluginFileInjector(object):
         return injected_env
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self._get_shared_env(inventory_update, private_data_dir, private_data_files)
-
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
-        injected_env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
-
-        # Put in env var reference to private ini data files, if relevant
-        if self.ini_env_reference:
-            credential = inventory_update.get_cloud_credential()
-            cred_data = private_data_files['credentials']
-            injected_env[self.ini_env_reference] = cred_data[credential]
-
-        return injected_env
+        env = self._get_shared_env(inventory_update, private_data_dir, private_data_files)
+        env['ANSIBLE_COLLECTIONS_PATHS'] = settings.AWX_ANSIBLE_COLLECTIONS_PATHS
+        return env
 
     def build_private_data(self, inventory_update, private_data_dir):
-        if self.should_use_plugin():
-            return self.build_plugin_private_data(inventory_update, private_data_dir)
-        else:
-            return self.build_script_private_data(inventory_update, private_data_dir)
-
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        return None
+        return self.build_plugin_private_data(inventory_update, private_data_dir)
 
     def build_plugin_private_data(self, inventory_update, private_data_dir):
         return None
 
-    @staticmethod
-    def dump_cp(cp, credential):
-        """Dump config parser data and return it as a string.
-        Helper method intended for use by build_script_private_data
-        """
-        if cp.sections():
-            f = StringIO()
-            cp.write(f)
-            private_data = {'credentials': {}}
-            private_data['credentials'][credential] = f.getvalue()
-            return private_data
-        else:
-            return None
-
 
 class azure_rm(PluginFileInjector):
     plugin_name = 'azure_rm'
-    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars, host names
-    ini_env_reference = 'AZURE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'azure'
+    collection = 'azcollection'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(azure_rm, self).get_plugin_env(*args, **kwargs)
@@ -1845,33 +1790,12 @@ class azure_rm(PluginFileInjector):
             ret['exclude_host_filters'].append("location not in {}".format(repr(python_regions)))
         return ret
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        section = 'azure'
-        cp.add_section(section)
-        cp.set(section, 'include_powerstate', 'yes')
-        cp.set(section, 'group_by_resource_group', 'yes')
-        cp.set(section, 'group_by_location', 'yes')
-        cp.set(section, 'group_by_tag', 'yes')
-
-        if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
-            cp.set(
-                section, 'locations',
-                ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
-            )
-
-        azure_rm_opts = dict(inventory_update.source_vars_dict.items())
-        for k, v in azure_rm_opts.items():
-            cp.set(section, k, str(v))
-        return self.dump_cp(cp, inventory_update.get_cloud_credential())
-
 
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
-    # blocked by https://github.com/ansible/ansible/issues/54059
-    # initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
-    ini_env_reference = 'EC2_INI_PATH'
     base_injector = 'managed'
+    namespace = 'amazon'
+    collection = 'aws'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(ec2, self).get_plugin_env(*args, **kwargs)
@@ -1986,7 +1910,7 @@ class ec2(PluginFileInjector):
         # Compatibility content
         legacy_regex = {
             True: r"[^A-Za-z0-9\_]",
-            False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is whitelisted
+            False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is allowed
         }[replace_dash]
         list_replacer = 'map("regex_replace", "{rx}", "_") | list'.format(rx=legacy_regex)
         # this option, a plugin option, will allow dashes, but not unicode
@@ -2011,13 +1935,20 @@ class ec2(PluginFileInjector):
                 grouping_data['key'] += ' | regex_replace("{rx}", "_")'.format(rx=legacy_regex)
         # end compatibility content
 
+        if source_vars.get('iam_role_arn', None):
+            ret['iam_role_arn'] = source_vars['iam_role_arn']
+
         # This was an allowed ec2.ini option, also plugin option, so pass through
         if source_vars.get('boto_profile', None):
             ret['boto_profile'] = source_vars['boto_profile']
 
         elif not replace_dash:
-            # Using the plugin, but still want dashes whitelisted
+            # Using the plugin, but still want dashes allowed
             ret['use_contrib_script_compatible_sanitization'] = True
+
+        if source_vars.get('nested_groups') is False:
+            for this_keyed_group in keyed_groups:
+                this_keyed_group.pop('parent_group', None)
 
         if keyed_groups:
             ret['keyed_groups'] = keyed_groups
@@ -2030,17 +1961,34 @@ class ec2(PluginFileInjector):
         compose_dict.update(self._compat_compose_vars())
         # plugin provides "aws_ec2", but not this which the script gave
         ret['groups'] = {'ec2': True}
-        # public_ip as hostname is non-default plugin behavior, script behavior
-        ret['hostnames'] = [
-            'network-interface.addresses.association.public-ip',
-            'dns-name',
-            'private-dns-name'
-        ]
+        if source_vars.get('hostname_variable') is not None:
+            hnames = []
+            for expr in source_vars.get('hostname_variable').split(','):
+                if expr == 'public_dns_name':
+                    hnames.append('dns-name')
+                elif not expr.startswith('tag:') and '_' in expr:
+                    hnames.append(expr.replace('_', '-'))
+                else:
+                    hnames.append(expr)
+            ret['hostnames'] = hnames
+        else:
+            # public_ip as hostname is non-default plugin behavior, script behavior
+            ret['hostnames'] = [
+                'network-interface.addresses.association.public-ip',
+                'dns-name',
+                'private-dns-name'
+            ]
         # The script returned only running state by default, the plugin does not
         # https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options
         # options: pending | running | shutting-down | terminated | stopping | stopped
         inst_filters['instance-state-name'] = ['running']
         # end compatibility content
+
+        if source_vars.get('destination_variable') or source_vars.get('vpc_destination_variable'):
+            for fd in ('destination_variable', 'vpc_destination_variable'):
+                if source_vars.get(fd):
+                    compose_dict['ansible_host'] = source_vars.get(fd)
+                    break
 
         if compose_dict:
             ret['compose'] = compose_dict
@@ -2067,64 +2015,18 @@ class ec2(PluginFileInjector):
 
         return ret
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        # Build custom ec2.ini for ec2 inventory script to use.
-        section = 'ec2'
-        cp.add_section(section)
-        ec2_opts = dict(inventory_update.source_vars_dict.items())
-        regions = inventory_update.source_regions or 'all'
-        regions = ','.join([x.strip() for x in regions.split(',')])
-        regions_blacklist = ','.join(settings.EC2_REGIONS_BLACKLIST)
-        ec2_opts['regions'] = regions
-        ec2_opts.setdefault('regions_exclude', regions_blacklist)
-        ec2_opts.setdefault('destination_variable', 'public_dns_name')
-        ec2_opts.setdefault('vpc_destination_variable', 'ip_address')
-        ec2_opts.setdefault('route53', 'False')
-        ec2_opts.setdefault('all_instances', 'True')
-        ec2_opts.setdefault('all_rds_instances', 'False')
-        ec2_opts.setdefault('include_rds_clusters', 'False')
-        ec2_opts.setdefault('rds', 'False')
-        ec2_opts.setdefault('nested_groups', 'True')
-        ec2_opts.setdefault('elasticache', 'False')
-        ec2_opts.setdefault('stack_filters', 'False')
-        if inventory_update.instance_filters:
-            ec2_opts.setdefault('instance_filters', inventory_update.instance_filters)
-        group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
-        for choice in inventory_update.get_ec2_group_by_choices():
-            value = bool((group_by and choice[0] in group_by) or (not group_by and choice[0] != 'instance_id'))
-            ec2_opts.setdefault('group_by_%s' % choice[0], str(value))
-        if 'cache_path' not in ec2_opts:
-            cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=private_data_dir)
-            ec2_opts['cache_path'] = cache_path
-        ec2_opts.setdefault('cache_max_age', '300')
-        for k, v in ec2_opts.items():
-            cp.set(section, k, str(v))
-        return self.dump_cp(cp, inventory_update.get_cloud_credential())
-
 
 class gce(PluginFileInjector):
     plugin_name = 'gcp_compute'
-    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
-    ini_env_reference = 'GCE_INI_PATH'
     base_injector = 'managed'
+    namespace = 'google'
+    collection = 'cloud'
 
     def get_plugin_env(self, *args, **kwargs):
         ret = super(gce, self).get_plugin_env(*args, **kwargs)
         # We need native jinja2 types so that ip addresses can give JSON null value
         ret['ANSIBLE_JINJA2_NATIVE'] = str(True)
         return ret
-
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
-        env = super(gce, self).get_script_env(inventory_update, private_data_dir, private_data_files)
-        cred = inventory_update.get_cloud_credential()
-        # these environment keys are unique to the script operation, and are not
-        # concepts in the modern inventory plugin or gce Ansible module
-        # email and project are redundant with the creds file
-        env['GCE_EMAIL'] = cred.get_input('username', default='')
-        env['GCE_PROJECT'] = cred.get_input('project', default='')
-        env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
-        return env
 
     def _compat_compose_vars(self):
         # missing: gce_image, gce_uuid
@@ -2198,73 +2100,123 @@ class gce(PluginFileInjector):
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        # by default, the GCE inventory source caches results on disk for
-        # 5 minutes; disable this behavior
-        cp.add_section('cache')
-        cp.set('cache', 'cache_max_age', '0')
-        return self.dump_cp(cp, inventory_update.get_cloud_credential())
-
 
 class vmware(PluginFileInjector):
-    # plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
-    ini_env_reference = 'VMWARE_INI_PATH'
+    plugin_name = 'vmware_vm_inventory'
     base_injector = 'managed'
+    namespace = 'community'
+    collection = 'vmware'
 
-    @property
-    def script_name(self):
-        return 'vmware_inventory.py'  # exception
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(vmware, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['strict'] = False
+        # Documentation of props, see
+        # https://github.com/ansible/ansible/blob/devel/docs/docsite/rst/scenario_guides/vmware_scenarios/vmware_inventory_vm_attributes.rst
+        UPPERCASE_PROPS = [
+            "availableField",
+            "configIssue",
+            "configStatus",
+            "customValue",  # optional
+            "datastore",
+            "effectiveRole",
+            "guestHeartbeatStatus",  # optional
+            "layout",  # optional
+            "layoutEx",  # optional
+            "name",
+            "network",
+            "overallStatus",
+            "parentVApp",  # optional
+            "permission",
+            "recentTask",
+            "resourcePool",
+            "rootSnapshot",
+            "snapshot",  # optional
+            "triggeredAlarmState",
+            "value"
+        ]
+        NESTED_PROPS = [
+            "capability",
+            "config",
+            "guest",
+            "runtime",
+            "storage",
+            "summary",  # repeat of other properties
+        ]
+        ret['properties'] = UPPERCASE_PROPS + NESTED_PROPS
+        ret['compose'] = {'ansible_host': 'guest.ipAddress'}  # default value
+        ret['compose']['ansible_ssh_host'] = ret['compose']['ansible_host']
+        # the ansible_uuid was unique every host, every import, from the script
+        ret['compose']['ansible_uuid'] = '99999999 | random | to_uuid'
+        for prop in UPPERCASE_PROPS:
+            if prop == prop.lower():
+                continue
+            ret['compose'][prop.lower()] = prop
+        ret['with_nested_properties'] = True
+        # ret['property_name_format'] = 'lower_case'  # only dacrystal/topic/vmware-inventory-plugin-property-format
 
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        credential = inventory_update.get_cloud_credential()
-
-        # Allow custom options to vmware inventory script.
-        section = 'vmware'
-        cp.add_section(section)
-        cp.set('vmware', 'cache_max_age', '0')
-        cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
-        cp.set('vmware', 'username', credential.get_input('username', default=''))
-        cp.set('vmware', 'password', credential.get_input('password', default=''))
-        cp.set('vmware', 'server', credential.get_input('host', default=''))
-
+        # process custom options
         vmware_opts = dict(inventory_update.source_vars_dict.items())
         if inventory_update.instance_filters:
             vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
         if inventory_update.group_by:
             vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
-        for k, v in vmware_opts.items():
-            cp.set(section, k, str(v))
+        alias_pattern = vmware_opts.get('alias_pattern')
+        if alias_pattern:
+            ret.setdefault('hostnames', [])
+            for alias in alias_pattern.split(','):  # make best effort
+                striped_alias = alias.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_alias:
+                    continue
+                ret['hostnames'].append(striped_alias)
 
-        return self.dump_cp(cp, credential)
+        host_pattern = vmware_opts.get('host_pattern')  # not working in script
+        if host_pattern:
+            stripped_hp = host_pattern.replace('{', '').replace('}', '').strip()  # make best effort
+            ret['compose']['ansible_host'] = stripped_hp
+            ret['compose']['ansible_ssh_host'] = stripped_hp
+
+        host_filters = vmware_opts.get('host_filters')
+        if host_filters:
+            ret.setdefault('filters', [])
+            for hf in host_filters.split(','):
+                striped_hf = hf.replace('{', '').replace('}', '').strip()  # make best effort
+                if not striped_hf:
+                    continue
+                ret['filters'].append(striped_hf)
+        else:
+            # default behavior filters by power state
+            ret['filters'] = ['runtime.powerState == "poweredOn"']
+
+        groupby_patterns = vmware_opts.get('groupby_patterns')
+        ret.setdefault('keyed_groups', [])
+        if groupby_patterns:
+            for pattern in groupby_patterns.split(','):
+                stripped_pattern = pattern.replace('{', '').replace('}', '').strip()  # make best effort
+                ret['keyed_groups'].append({
+                    'prefix': '', 'separator': '',
+                    'key': stripped_pattern
+                })
+        else:
+            # default groups from script
+            for entry in ('config.guestId', '"templates" if config.template else "guests"'):
+                ret['keyed_groups'].append({
+                    'prefix': '', 'separator': '',
+                    'key': entry
+                })
+
+        return ret
 
 
 class openstack(PluginFileInjector):
-    ini_env_reference = 'OS_CLIENT_CONFIG_FILE'
     plugin_name = 'openstack'
-    # minimum version of 2.7.8 may be theoretically possible
-    initial_version = '2.8'  # Driven by consistency with other sources
+    namespace = 'openstack'
+    collection = 'cloud'
 
-    @property
-    def script_name(self):
-        return 'openstack_inventory.py'  # exception
-
-    def _get_clouds_dict(self, inventory_update, cred, private_data_dir, mk_cache=True):
+    def _get_clouds_dict(self, inventory_update, cred, private_data_dir):
         openstack_data = _openstack_data(cred)
 
         openstack_data['clouds']['devstack']['private'] = inventory_update.source_vars_dict.get('private', True)
-        if mk_cache:
-            # Retrieve cache path from inventory update vars if available,
-            # otherwise create a temporary cache path only for this update.
-            cache = inventory_update.source_vars_dict.get('cache', {})
-            if not isinstance(cache, dict):
-                cache = {}
-            if not cache.get('path', ''):
-                cache_path = tempfile.mkdtemp(prefix='openstack_cache', dir=private_data_dir)
-                cache['path'] = cache_path
-            openstack_data['cache'] = cache
         ansible_variables = {
             'use_hostnames': True,
             'expand_hostvars': False,
@@ -2281,23 +2233,15 @@ class openstack(PluginFileInjector):
             openstack_data['ansible'] = ansible_variables
         return openstack_data
 
-    def build_script_private_data(self, inventory_update, private_data_dir, mk_cache=True):
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
         credential = inventory_update.get_cloud_credential()
         private_data = {'credentials': {}}
 
-        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir, mk_cache=mk_cache)
+        openstack_data = self._get_clouds_dict(inventory_update, credential, private_data_dir)
         private_data['credentials'][credential] = yaml.safe_dump(
             openstack_data, default_flow_style=False, allow_unicode=True
         )
         return private_data
-
-    def build_plugin_private_data(self, inventory_update, private_data_dir):
-        # Credentials can be passed in the same way as the script did
-        # but do not create the tmp cache file
-        return self.build_script_private_data(inventory_update, private_data_dir, mk_cache=False)
-
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        return self.get_script_env(inventory_update, private_data_dir, private_data_files)
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
         def use_host_name_for_name(a_bool_maybe):
@@ -2309,12 +2253,10 @@ class openstack(PluginFileInjector):
             else:
                 return 'uuid'
 
-        ret = dict(
-            plugin=self.plugin_name,
-            fail_on_errors=True,
-            expand_hostvars=True,
-            inventory_hostname=use_host_name_for_name(False),
-        )
+        ret = super(openstack, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['fail_on_errors'] = True
+        ret['expand_hostvars'] = True
+        ret['inventory_hostname'] = use_host_name_for_name(False)
         # Note: mucking with defaults will break import integrity
         # For the plugin, we need to use the same defaults as the old script
         # or else imports will conflict. To find script defaults you have
@@ -2335,43 +2277,70 @@ class openstack(PluginFileInjector):
             ret['inventory_hostname'] = use_host_name_for_name(source_vars['use_hostnames'])
         return ret
 
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        env = super(openstack, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        credential = inventory_update.get_cloud_credential()
+        cred_data = private_data_files['credentials']
+        env['OS_CLIENT_CONFIG_FILE'] = cred_data[credential]
+        return env
+
 
 class rhv(PluginFileInjector):
     """ovirt uses the custom credential templating, and that is all
     """
-    # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
+    plugin_name = 'ovirt'
     base_injector = 'template'
+    initial_version = '2.9'
+    namespace = 'ovirt'
+    collection = 'ovirt'
 
-    @property
-    def script_name(self):
-        return 'ovirt4.py'  # exception
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(rhv, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['ovirt_insecure'] = False  # Default changed from script
+        # TODO: process strict option upstream
+        ret['compose'] = {
+            'ansible_host': '(devices.values() | list)[0][0] if devices else None'
+        }
+        ret['keyed_groups'] = []
+        for key in ('cluster', 'status'):
+            ret['keyed_groups'].append({'prefix': key, 'separator': '_', 'key': key})
+        ret['keyed_groups'].append({'prefix': 'tag', 'separator': '_', 'key': 'tags'})
+        ret['ovirt_hostname_preference'] = ['name', 'fqdn']
+        source_vars = inventory_update.source_vars_dict
+        for key, value in source_vars.items():
+            if key == 'plugin':
+                continue
+            ret[key] = value
+        return ret
 
 
 class satellite6(PluginFileInjector):
     plugin_name = 'foreman'
-    ini_env_reference = 'FOREMAN_INI_PATH'
-    # initial_version = '2.8'  # FIXME: turn on after plugin is validated
-    # No base injector, because this does not work in playbooks. Bug??
+    namespace = 'theforeman'
+    collection = 'foreman'
 
-    @property
-    def script_name(self):
-        return 'foreman.py'  # exception
-
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        # this assumes that this is merged
+        # https://github.com/ansible/ansible/pull/52693
         credential = inventory_update.get_cloud_credential()
+        ret = super(satellite6, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        if credential:
+            ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
+            ret['FOREMAN_USER'] = credential.get_input('username', default='')
+            ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
 
-        section = 'foreman'
-        cp.add_section(section)
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(satellite6, self).inventory_as_dict(inventory_update, private_data_dir)
+        ret['validate_certs'] = False
 
         group_patterns = '[]'
         group_prefix = 'foreman_'
-        want_hostcollections = 'False'
-        want_ansible_ssh_host = 'False'
-        rich_params = 'False'
-        want_facts = 'True'
-        foreman_opts = dict(inventory_update.source_vars_dict.items())
-        foreman_opts.setdefault('ssl_verify', 'False')
+        want_hostcollections = False
+        want_ansible_ssh_host = False
+        want_facts = True
+
+        foreman_opts = inventory_update.source_vars_dict.copy()
         for k, v in foreman_opts.items():
             if k == 'satellite6_group_patterns' and isinstance(v, str):
                 group_patterns = v
@@ -2381,93 +2350,103 @@ class satellite6(PluginFileInjector):
                 want_hostcollections = v
             elif k == 'satellite6_want_ansible_ssh_host' and isinstance(v, bool):
                 want_ansible_ssh_host = v
-            elif k == 'satellite6_rich_params' and isinstance(v, bool):
-                rich_params = v
             elif k == 'satellite6_want_facts' and isinstance(v, bool):
                 want_facts = v
+            # add backwards support for ssl_verify
+            # plugin uses new option, validate_certs, instead
+            elif k == 'ssl_verify' and isinstance(v, bool):
+                ret['validate_certs'] = v
             else:
-                cp.set(section, k, str(v))
+                ret[k] = str(v)
 
-        if credential:
-            cp.set(section, 'url', credential.get_input('host', default=''))
-            cp.set(section, 'user', credential.get_input('username', default=''))
-            cp.set(section, 'password', credential.get_input('password', default=''))
+        # Compatibility content
+        group_by_hostvar = {
+            "environment":           {"prefix": "{}environment_".format(group_prefix),
+                                      "separator": "",
+                                      "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | "
+                                             "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')"},
+            "location":              {"prefix": "{}location_".format(group_prefix),
+                                      "separator": "",
+                                      "key": "foreman['location_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "organization":          {"prefix": "{}organization_".format(group_prefix),
+                                      "separator": "",
+                                      "key": "foreman['organization_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "lifecycle_environment": {"prefix": "{}lifecycle_environment_".format(group_prefix),
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['lifecycle_environment_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"},
+            "content_view":          {"prefix": "{}content_view_".format(group_prefix),
+                                      "separator": "",
+                                      "key": "foreman['content_facet_attributes']['content_view_name'] | "
+                                             "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')"}
+        }
 
-        section = 'ansible'
-        cp.add_section(section)
-        cp.set(section, 'group_patterns', group_patterns)
-        cp.set(section, 'want_facts', str(want_facts))
-        cp.set(section, 'want_hostcollections', str(want_hostcollections))
-        cp.set(section, 'group_prefix', group_prefix)
-        cp.set(section, 'want_ansible_ssh_host', str(want_ansible_ssh_host))
-        cp.set(section, 'rich_params', str(rich_params))
+        ret['legacy_hostvars'] = True  # convert hostvar structure to the form used by the script
+        ret['want_params'] = True
+        ret['group_prefix'] = group_prefix
+        ret['want_hostcollections'] = want_hostcollections
+        ret['want_facts'] = want_facts
 
-        section = 'cache'
-        cp.add_section(section)
-        cp.set(section, 'path', '/tmp')
-        cp.set(section, 'max_age', '0')
+        if want_ansible_ssh_host:
+            ret['compose'] = {'ansible_ssh_host': "foreman['ip6'] | default(foreman['ip'], true)"}
+        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by_hostvar]
 
-        return self.dump_cp(cp, credential)
+        def form_keyed_group(group_pattern):
+            """
+            Converts foreman group_pattern to
+            inventory plugin keyed_group
 
-    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
-        # this assumes that this is merged
-        # https://github.com/ansible/ansible/pull/52693
-        credential = inventory_update.get_cloud_credential()
-        ret = {}
-        if credential:
-            ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
-            ret['FOREMAN_USER'] = credential.get_input('username', default='')
-            ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+            e.g. {app_param}-{tier_param}-{dc_param}
+                 becomes
+                 "%s-%s-%s" | format(app_param, tier_param, dc_param)
+            """
+            if type(group_pattern) is not str:
+                return None
+            params = re.findall('{[^}]*}', group_pattern)
+            if len(params) == 0:
+                return None
+
+            param_names = []
+            for p in params:
+                param_names.append(p[1:-1].strip())  # strip braces and space
+
+            # form keyed_group key by
+            # replacing curly braces with '%s'
+            # (for use with jinja's format filter)
+            key = group_pattern
+            for p in params:
+                key = key.replace(p, '%s', 1)
+
+            # apply jinja filter to key
+            key = '"{}" | format({})'.format(key, ', '.join(param_names))
+
+            keyed_group = {'key': key,
+                           'separator': ''}
+            return keyed_group
+
+        try:
+            group_patterns = json.loads(group_patterns)
+
+            if type(group_patterns) is list:
+                for group_pattern in group_patterns:
+                    keyed_group = form_keyed_group(group_pattern)
+                    if keyed_group:
+                        ret['keyed_groups'].append(keyed_group)
+        except json.JSONDecodeError:
+            logger.warning('Could not parse group_patterns. Expected JSON-formatted string, found: {}'
+                           .format(group_patterns))
+
         return ret
-
-
-class cloudforms(PluginFileInjector):
-    # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
-    ini_env_reference = 'CLOUDFORMS_INI_PATH'
-    # Also no base_injector because this does not work in playbooks
-
-    def build_script_private_data(self, inventory_update, private_data_dir):
-        cp = configparser.RawConfigParser()
-        credential = inventory_update.get_cloud_credential()
-
-        section = 'cloudforms'
-        cp.add_section(section)
-
-        if credential:
-            cp.set(section, 'url', credential.get_input('host', default=''))
-            cp.set(section, 'username', credential.get_input('username', default=''))
-            cp.set(section, 'password', credential.get_input('password', default=''))
-            cp.set(section, 'ssl_verify', "false")
-
-        cloudforms_opts = dict(inventory_update.source_vars_dict.items())
-        for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags', 'suffix', 'prefer_ipv4']:
-            if opt in cloudforms_opts:
-                cp.set(section, opt, str(cloudforms_opts[opt]))
-
-        section = 'cache'
-        cp.add_section(section)
-        cp.set(section, 'max_age', "0")
-        cache_path = tempfile.mkdtemp(
-            prefix='cloudforms_cache',
-            dir=private_data_dir
-        )
-        cp.set(section, 'path', cache_path)
-
-        return self.dump_cp(cp, credential)
 
 
 class tower(PluginFileInjector):
     plugin_name = 'tower'
     base_injector = 'template'
-    initial_version = '2.8'  # Driven by "include_metadata" hostvars
-
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
-        env = super(tower, self).get_script_env(inventory_update, private_data_dir, private_data_files)
-        env['TOWER_INVENTORY'] = inventory_update.instance_filters
-        env['TOWER_LICENSE_TYPE'] = get_licenser().validate().get('license_type', 'unlicensed')
-        return env
+    namespace = 'awx'
+    collection = 'awx'
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(tower, self).inventory_as_dict(inventory_update, private_data_dir)
         # Credentials injected as env vars, same as script
         try:
             # plugin can take an actual int type
@@ -2475,11 +2454,9 @@ class tower(PluginFileInjector):
         except ValueError:
             # inventory_id could be a named URL
             identifier = iri_to_uri(inventory_update.instance_filters)
-        return {
-            'plugin': self.plugin_name,
-            'inventory_id': identifier,
-            'include_metadata': True  # used for license check
-        }
+        ret['inventory_id'] = identifier
+        ret['include_metadata'] = True  # used for license check
+        return ret
 
 
 for cls in PluginFileInjector.__subclasses__():

@@ -1,10 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { SchedulesAPI } from '@api';
+import { RRule } from 'rrule';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { SchedulesAPI } from '../../../api';
 import ScheduleAdd from './ScheduleAdd';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../../api/models/Schedules');
 
 SchedulesAPI.readZoneInfo.mockResolvedValue({
   data: [
@@ -117,7 +121,7 @@ describe('<ScheduleAdd />', () => {
   test('Successfully creates a schedule with weekly repeat frequency on mon/wed/fri', async () => {
     await act(async () => {
       wrapper.find('ScheduleForm').invoke('handleSubmit')({
-        daysOfWeek: ['MO', 'WE', 'FR'],
+        daysOfWeek: [RRule.MO, RRule.WE, RRule.FR],
         description: 'test description',
         end: 'never',
         frequency: 'week',
@@ -131,8 +135,7 @@ describe('<ScheduleAdd />', () => {
     expect(createSchedule).toHaveBeenCalledWith({
       description: 'test description',
       name: 'Run weekly on mon/wed/fri',
-      rrule:
-        'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=MO,WE,FR',
+      rrule: `DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=${RRule.MO},${RRule.WE},${RRule.FR}`,
     });
   });
   test('Successfully creates a schedule with monthly repeat frequency on the first day of the month', async () => {

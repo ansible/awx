@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -11,15 +12,14 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
-
-import Sparkline from '@components/Sparkline';
-import { Host } from '@types';
 import styled from 'styled-components';
-import HostToggle from '@components/HostToggle';
+import DataListCell from '../../../components/DataListCell';
+
+import Sparkline from '../../../components/Sparkline';
+import { Host } from '../../../types';
+import HostToggle from '../../../components/HostToggle';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -30,11 +30,6 @@ const DataListAction = styled(_DataListAction)`
 
 function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
   const labelId = `check-action-${host.id}`;
-  const recentPlaybookJobs = host.summary_fields.recent_jobs.map(job => ({
-    ...job,
-    type: 'job',
-  }));
-
   return (
     <DataListItem key={host.id} aria-labelledby={labelId} id={`${host.id}`}>
       <DataListItemRow>
@@ -52,7 +47,7 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
               </Link>
             </DataListCell>,
             <DataListCell key="recentJobs">
-              <Sparkline jobs={recentPlaybookJobs} />
+              <Sparkline jobs={host.summary_fields.recent_jobs} />
             </DataListCell>,
             <DataListCell key="inventory">
               {host.summary_fields.inventory && (

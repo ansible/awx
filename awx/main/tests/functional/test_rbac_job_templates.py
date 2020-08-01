@@ -66,13 +66,28 @@ def test_job_template_access_read_level(jt_linked, rando):
 
 
 @pytest.mark.django_db
+def test_project_use_access(project, rando):
+    project.use_role.members.add(rando)
+    access = JobTemplateAccess(rando)
+    assert access.can_add(None)
+    assert access.can_add({'project': project.id, 'ask_inventory_on_launch': True})
+    project2 = Project.objects.create(
+        name='second-project', scm_type=project.scm_type, playbook_files=project.playbook_files,
+        organization=project.organization,
+    )
+    project2.use_role.members.add(rando)
+    jt = JobTemplate.objects.create(project=project, ask_inventory_on_launch=True)
+    jt.admin_role.members.add(rando)
+    assert access.can_change(jt, {'project': project2.pk})
+
+
+@pytest.mark.django_db
 def test_job_template_access_use_level(jt_linked, rando):
     access = JobTemplateAccess(rando)
     jt_linked.project.use_role.members.add(rando)
     jt_linked.inventory.use_role.members.add(rando)
-    jt_linked.organization.job_template_admin_role.members.add(rando)
+    jt_linked.admin_role.members.add(rando)
     proj_pk = jt_linked.project.pk
-    org_pk = jt_linked.organization_id
 
     assert access.can_change(jt_linked, {'job_type': 'check', 'project': proj_pk})
     assert access.can_change(jt_linked, {'job_type': 'check', 'inventory': None})
@@ -80,8 +95,8 @@ def test_job_template_access_use_level(jt_linked, rando):
     for cred in jt_linked.credentials.all():
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
 
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
-    assert access.can_add(dict(project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
+    assert access.can_add(dict(project=proj_pk))
 
 
 @pytest.mark.django_db
@@ -94,17 +109,16 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
     assert not access.can_read(jt_linked)
     assert not access.can_delete(jt_linked)
 
-    # Appoint this user as admin of the organization
-    jt_linked.organization.admin_role.members.add(rando)
-    org_pk = jt_linked.organization.id
+    # Appoint this user to the org role
+    organization = jt_linked.organization
+    for role_name in role_names:
+        getattr(organization, role_name).members.add(rando)
 
     # Assign organization permission in the same way the create view does
-    organization = jt_linked.inventory.organization
     ssh_cred.admin_role.parents.add(organization.admin_role)
 
     proj_pk = jt_linked.project.pk
-    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk, organization=org_pk))
-    assert access.can_add(dict(credential=ssh_cred.pk, project=proj_pk, organization=org_pk))
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
 
     for cred in jt_linked.credentials.all():
         assert access.can_unattach(jt_linked, cred, 'credentials', {})
@@ -114,7 +128,7 @@ def test_job_template_access_admin(role_names, jt_linked, rando):
 
 
 @pytest.mark.django_db
-def test_job_template_extra_credentials_prompts_access(
+def test_job_template_credentials_prompts_access(
         rando, post, inventory, project, machine_credential, vault_credential):
     jt = JobTemplate.objects.create(
         name = 'test-jt',
@@ -135,14 +149,14 @@ def test_job_template_extra_credentials_prompts_access(
 @pytest.mark.django_db
 class TestJobTemplateCredentials:
 
-    def test_job_template_cannot_add_extra_credentials(self, job_template, credential, rando):
+    def test_job_template_cannot_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.read_role.members.add(rando)
         # without permission to credential, user can not attach it
         assert not JobTemplateAccess(rando).can_attach(
             job_template, credential, 'credentials', {})
 
-    def test_job_template_can_add_extra_credentials(self, job_template, credential, rando):
+    def test_job_template_can_add_credentials(self, job_template, credential, rando):
         job_template.admin_role.members.add(rando)
         credential.use_role.members.add(rando)
         # user has permission to apply credential
@@ -170,12 +184,10 @@ class TestOrphanJobTemplate:
 @pytest.mark.job_permissions
 def test_job_template_creator_access(project, organization, rando, post):
     project.use_role.members.add(rando)
-    organization.job_template_admin_role.members.add(rando)
     response = post(url=reverse('api:job_template_list'), data=dict(
         name='newly-created-jt',
         ask_inventory_on_launch=True,
         project=project.pk,
-        organization=organization.id,
         playbook='helloworld.yml'
     ), user=rando, expect=201)
 

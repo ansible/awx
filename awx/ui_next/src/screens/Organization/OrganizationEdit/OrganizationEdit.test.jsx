@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { OrganizationsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { OrganizationsAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import OrganizationEdit from './OrganizationEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<OrganizationEdit />', () => {
   const mockData = {
@@ -61,7 +64,10 @@ describe('<OrganizationEdit />', () => {
   });
 
   test('should navigate to organization detail when cancel is clicked', async () => {
-    const mockInstanceGroups = [{ name: 'One', id: 1 }, { name: 'Two', id: 2 }];
+    const mockInstanceGroups = [
+      { name: 'One', id: 1 },
+      { name: 'Two', id: 2 },
+    ];
     OrganizationsAPI.readInstanceGroups.mockReturnValue({
       data: {
         results: mockInstanceGroups,

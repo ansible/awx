@@ -439,13 +439,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             field = self._meta.get_field(field_name)
             if isinstance(field, models.ManyToManyField):
                 old_value = set(old_value.all())
-                if getattr(self, '_deprecated_credential_launch', False):
-                    # TODO: remove this code branch when support for `extra_credentials` goes away
-                    new_value = set(kwargs[field_name])
-                else:
-                    new_value = set(kwargs[field_name]) - old_value
-                    if not new_value:
-                        continue
+                new_value = set(kwargs[field_name]) - old_value
+                if not new_value:
+                    continue
 
             if new_value == old_value:
                 # no-op case: Fields the same as template's value
@@ -1133,20 +1129,6 @@ class JobHostSummary(CreatedModifiedModel):
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
         super(JobHostSummary, self).save(*args, **kwargs)
-        self.update_host_last_job_summary()
-
-    def update_host_last_job_summary(self):
-        update_fields = []
-        if self.host is None:
-            return
-        if self.host.last_job_id != self.job_id:
-            self.host.last_job_id = self.job_id
-            update_fields.append('last_job_id')
-        if self.host.last_job_host_summary_id != self.id:
-            self.host.last_job_host_summary_id = self.id
-            update_fields.append('last_job_host_summary_id')
-        if update_fields:
-            self.host.save(update_fields=update_fields)
 
 
 class SystemJobOptions(BaseModel):

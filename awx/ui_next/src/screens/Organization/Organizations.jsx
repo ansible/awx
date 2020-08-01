@@ -3,8 +3,8 @@ import { Route, withRouter, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Config } from '@contexts/Config';
-import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+import { Config } from '../../contexts/Config';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 
 import OrganizationsList from './OrganizationList/OrganizationList';
 import OrganizationAdd from './OrganizationAdd/OrganizationAdd';
@@ -55,26 +55,24 @@ class Organizations extends Component {
       <Fragment>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route
-            path={`${match.path}/add`}
-            render={() => <OrganizationAdd />}
-          />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <Organization
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
-            )}
-          />
-          <Route path={`${match.path}`} render={() => <OrganizationsList />} />
+          <Route path={`${match.path}/add`}>
+            <OrganizationAdd />
+          </Route>
+          <Route path={`${match.path}/:id`}>
+            <Config>
+              {({ me }) => (
+                <Organization
+                  history={history}
+                  location={location}
+                  setBreadcrumb={this.setBreadcrumbConfig}
+                  me={me || {}}
+                />
+              )}
+            </Config>
+          </Route>
+          <Route path={`${match.path}`}>
+            <OrganizationsList />
+          </Route>
         </Switch>
       </Fragment>
     );

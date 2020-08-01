@@ -2,11 +2,14 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { InventoriesAPI, GroupsAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { InventoriesAPI, GroupsAPI } from '../../../api';
 import InventoryGroupsList from './InventoryGroupsList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockGroups = [
   {
@@ -73,10 +76,9 @@ describe('<InventoryGroupsList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups"
-          component={() => <InventoryGroupsList />}
-        />,
+        <Route path="/inventories/inventory/:id/groups">
+          <InventoryGroupsList />
+        </Route>,
         {
           context: {
             router: { history, route: { location: history.location } },
@@ -161,9 +163,7 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('DataToolbar Button[aria-label="Delete"]')
-        .invoke('onClick')();
+      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
     });
     await waitForElement(
       wrapper,
@@ -195,14 +195,12 @@ describe('<InventoryGroupsList />', () => {
     });
     wrapper.update();
     await act(async () => {
-      wrapper
-        .find('DataToolbar Button[aria-label="Delete"]')
-        .invoke('onClick')();
+      wrapper.find('Toolbar Button[aria-label="Delete"]').invoke('onClick')();
     });
     await waitForElement(
       wrapper,
-      'InventoryGroupsDeleteModal',
-      el => el.props().isModalOpen === true
+      'AlertModal[title="Delete Group?"]',
+      el => el.props().isOpen === true
     );
     await act(async () => {
       wrapper.find('Radio[id="radio-delete"]').invoke('onChange')();
@@ -213,7 +211,11 @@ describe('<InventoryGroupsList />', () => {
         .find('ModalBoxFooter Button[aria-label="Delete"]')
         .invoke('onClick')();
     });
-    await waitForElement(wrapper, { title: 'Error!', variant: 'error' });
+    await waitForElement(
+      wrapper,
+      'AlertModal[title="Error!"] Modal',
+      el => el.props().isOpen === true && el.props().title === 'Error!'
+    );
     await act(async () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });

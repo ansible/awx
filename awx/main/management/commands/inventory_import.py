@@ -169,7 +169,7 @@ class AnsibleInventoryLoader(object):
             self.tmp_private_dir = build_proot_temp_dir()
             logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
             kwargs['proot_temp_dir'] = self.tmp_private_dir
-            kwargs['proot_show_paths'] = [functioning_dir(self.source)]
+            kwargs['proot_show_paths'] = [functioning_dir(self.source), settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
         logger.debug("Running from `{}` working directory.".format(cwd))
 
         if self.venv_path != settings.ANSIBLE_VENV_PATH:
@@ -271,7 +271,7 @@ class Command(BaseCommand):
                                      logging.DEBUG, 0]))
         logger.setLevel(log_levels.get(self.verbosity, 0))
 
-    def _get_instance_id(self, from_dict, default=''):
+    def _get_instance_id(self, variables, default=''):
         '''
         Retrieve the instance ID from the given dict of host variables.
 
@@ -279,15 +279,23 @@ class Command(BaseCommand):
         the lookup will traverse into nested dicts, equivalent to:
 
         from_dict.get('foo', {}).get('bar', default)
+
+        Multiple ID variables may be specified as 'foo.bar,foobar', so that
+        it will first try to find 'bar' inside of 'foo', and if unable,
+        will try to find 'foobar' as a fallback
         '''
         instance_id = default
         if getattr(self, 'instance_id_var', None):
-            for key in self.instance_id_var.split('.'):
-                if not hasattr(from_dict, 'get'):
-                    instance_id = default
+            for single_instance_id in self.instance_id_var.split(','):
+                from_dict = variables
+                for key in single_instance_id.split('.'):
+                    if not hasattr(from_dict, 'get'):
+                        instance_id = default
+                        break
+                    instance_id = from_dict.get(key, default)
+                    from_dict = instance_id
+                if instance_id:
                     break
-                instance_id = from_dict.get(key, default)
-                from_dict = instance_id
         return smart_text(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
@@ -422,7 +430,7 @@ class Command(BaseCommand):
             for mem_host in self.all_group.all_hosts.values():
                 instance_id = self._get_instance_id(mem_host.variables)
                 if not instance_id:
-                    logger.warning('Host "%s" has no "%s" variable',
+                    logger.warning('Host "%s" has no "%s" variable(s)',
                                    mem_host.name, self.instance_id_var)
                     continue
                 mem_host.instance_id = instance_id
@@ -649,11 +657,12 @@ class Command(BaseCommand):
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
+            group_desc = mem_group.variables.pop('_awx_description', 'imported')
             group = self.inventory.groups.update_or_create(
                 name=group_name,
                 defaults={
                     'variables':json.dumps(mem_group.variables),
-                    'description':'imported'
+                    'description':group_desc
                 }
             )[0]
             logger.debug('Group "%s" added', group.name)
@@ -776,8 +785,9 @@ class Command(BaseCommand):
         # Create any new hosts.
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
-            host_attrs = dict(variables=json.dumps(mem_host.variables),
-                              description='imported')
+            import_vars = mem_host.variables
+            host_desc = import_vars.pop('_awx_description', 'imported')
+            host_attrs = dict(variables=json.dumps(import_vars), description=host_desc)
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
@@ -1078,7 +1088,7 @@ class Command(BaseCommand):
                             if settings.SQL_DEBUG:
                                 logger.warning('update computed fields took %d queries',
                                                len(connection.queries) - queries_before2)
-                        # Check if the license is valid. 
+                        # Check if the license is valid.
                         # If the license is not valid, a CommandError will be thrown,
                         # and inventory update will be marked as invalid.
                         # with transaction.atomic() will roll back the changes.

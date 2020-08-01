@@ -1,8 +1,5 @@
+import 'styled-components/macro';
 import React, { useContext } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { bool, func, shape } from 'prop-types';
@@ -20,8 +17,12 @@ import {
   TrashAltIcon,
   WrenchIcon,
 } from '@patternfly/react-icons';
-import LaunchButton from '@components/LaunchButton';
 import styled from 'styled-components';
+import LaunchButton from '../../../components/LaunchButton';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../contexts/Workflow';
 
 const Badge = styled(PFBadge)`
   align-items: center;
@@ -67,7 +68,11 @@ function VisualizerToolbar({
   return (
     <div id="visualizer-toolbar">
       <div css="align-items: center; border-bottom: 1px solid grey; display: flex; height: 56px; padding: 0px 20px;">
-        <Title size="xl" id="visualizer-toolbar-template-name">
+        <Title
+          headingLevel="h2"
+          size="xl"
+          id="visualizer-toolbar-template-name"
+        >
           {template.name}
         </Title>
         <div css="align-items: center; display: flex; flex: 1; justify-content: flex-end">

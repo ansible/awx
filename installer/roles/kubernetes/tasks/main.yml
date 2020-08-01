@@ -190,15 +190,10 @@
 
 - name: Set image names if using custom registry
   block:
-    - name: Set task image name
+    - name: Set awx image name
       set_fact:
-        kubernetes_task_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
-      when: kubernetes_task_image is not defined
-
-    - name: Set web image name
-      set_fact:
-        kubernetes_web_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
-      when: kubernetes_web_image is not defined
+        kubernetes_awx_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_image }}"
+      when: kubernetes_awx_image is not defined
   when: docker_registry is defined
 
 - name: Determine Deployment api version
@@ -292,7 +287,5 @@
 
 - name: Scale up deployment
   shell: |
-    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
-      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ replicas | default(kubernetes_deployment_replica_size) }}

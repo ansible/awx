@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { CardBody } from '@components/Card';
-import HostForm from '@components/HostForm';
+import { CardBody } from '../../../components/Card';
+import HostForm from '../../../components/HostForm';
 
-import { GroupsAPI } from '@api';
+import { GroupsAPI } from '../../../api';
 
 function InventoryGroupHostAdd({ inventoryGroup }) {
   const [formError, setFormError] = useState(null);

@@ -1,18 +1,23 @@
+import 'styled-components/macro';
 import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Host } from '@types';
 import { Button } from '@patternfly/react-core';
-import { CardBody, CardActionsRow } from '@components/Card';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import Sparkline from '@components/Sparkline';
-import DeleteButton from '@components/DeleteButton';
-import { HostsAPI } from '@api';
-import HostToggle from '@components/HostToggle';
+import { Host } from '../../../types';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import {
+  DetailList,
+  Detail,
+  UserDateDetail,
+} from '../../../components/DetailList';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import Sparkline from '../../../components/Sparkline';
+import DeleteButton from '../../../components/DeleteButton';
+import { HostsAPI } from '../../../api';
+import HostToggle from '../../../components/HostToggle';
 
 function HostDetail({ i18n, host }) {
   const {
@@ -67,10 +72,12 @@ function HostDetail({ i18n, host }) {
       <HostToggle host={host} css="padding-bottom: 40px" />
       <DetailList gutter="sm">
         <Detail label={i18n._(t`Name`)} value={name} dataCy="host-name" />
-        <Detail
-          label={i18n._(t`Activity`)}
-          value={<Sparkline jobs={recentPlaybookJobs} />}
-        />
+        {recentPlaybookJobs?.length > 0 && (
+          <Detail
+            label={i18n._(t`Activity`)}
+            value={<Sparkline jobs={recentPlaybookJobs} />}
+          />
+        )}
         <Detail label={i18n._(t`Description`)} value={description} />
         <Detail
           label={i18n._(t`Inventory`)}

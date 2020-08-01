@@ -1,21 +1,20 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { InventoriesAPI } from '@api';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import { InventoriesAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
+import DatalistToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-
-import { getQSConfig, parseQueryString } from '@util/qs';
-import AddDropDownButton from '@components/AddDropDownButton';
+} from '../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useWsInventories from './useWsInventories';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
 const QS_CONFIG = getQSConfig('inventory', {
@@ -30,7 +29,7 @@ function InventoryList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { inventories, itemCount, actions },
+    result: { results, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchInventories,
@@ -42,13 +41,13 @@ function InventoryList({ i18n }) {
         InventoriesAPI.readOptions(),
       ]);
       return {
-        inventories: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
       };
     }, [location]),
     {
-      inventories: [],
+      results: [],
       itemCount: 0,
       actions: {},
     }
@@ -57,6 +56,17 @@ function InventoryList({ i18n }) {
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
+
+  const fetchInventoriesById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await InventoriesAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const inventories = useWsInventories(results, fetchInventoriesById);
 
   const isAllSelected =
     selected.length === inventories.length && selected.length > 0;
@@ -167,6 +177,7 @@ function InventoryList({ i18n }) {
               key={inventory.id}
               value={inventory.name}
               inventory={inventory}
+              fetchInventories={fetchInventories}
               detailUrl={
                 inventory.kind === 'smart'
                   ? `${match.url}/smart_inventory/${inventory.id}/details`
@@ -182,6 +193,7 @@ function InventoryList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
+        aria-label={i18n._(t`Deletion Error`)}
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >

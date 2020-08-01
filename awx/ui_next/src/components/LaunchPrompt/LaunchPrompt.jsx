@@ -3,81 +3,83 @@ import { Wizard } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
-import InventoryStep from './InventoryStep';
-import CredentialsStep from './CredentialsStep';
-import OtherPromptsStep from './OtherPromptsStep';
-import SurveyStep from './SurveyStep';
-import PreviewStep from './PreviewStep';
+import ContentError from '../ContentError';
+import ContentLoading from '../ContentLoading';
+import mergeExtraVars from './mergeExtraVars';
+import useSteps from './useSteps';
+import getSurveyValues from './getSurveyValues';
 
 function LaunchPrompt({ config, resource, onLaunch, onCancel, i18n }) {
-  const steps = [];
-  const initialValues = {};
-  if (config.ask_inventory_on_launch) {
-    initialValues.inventory = resource?.summary_fields?.inventory || null;
-    steps.push({
-      name: i18n._(t`Inventory`),
-      component: <InventoryStep />,
-    });
+  const {
+    steps,
+    initialValues,
+    isReady,
+    validate,
+    visitStep,
+    visitAllSteps,
+    contentError,
+  } = useSteps(config, resource, i18n);
+
+  if (contentError) {
+    return <ContentError error={contentError} />;
   }
-  // TODO: match old UI Logic:
-  // if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
-  //     (_.has(vm, 'promptDataClone.prompts.credentials.passwords.vault') &&
-  //     vm.promptDataClone.prompts.credentials.passwords.vault.length > 0) ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_key_unlock') ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.become_password') ||
-  //     _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_password')
-  // ) {
-  if (config.ask_credential_on_launch) {
-    initialValues.credentials = resource?.summary_fields?.credentials || [];
-    steps.push({
-      name: i18n._(t`Credential`),
-      component: <CredentialsStep />,
-    });
+  if (!isReady) {
+    return <ContentLoading />;
   }
-  if (
-    config.ask_scm_branch_on_launch ||
-    (config.ask_variables_on_launch && !config.ignore_ask_variables) ||
-    config.ask_tags_on_launch ||
-    config.ask_diff_mode_on_launch ||
-    config.ask_skip_tags_on_launch ||
-    config.ask_job_type_on_launch ||
-    config.ask_limit_on_launch ||
-    config.ask_verbosity_on_launch
-  ) {
-    steps.push({
-      name: i18n._(t`Other Prompts`),
-      component: <OtherPromptsStep config={config} />,
-    });
-  }
-  if (config.survey_enabled) {
-    steps.push({
-      name: i18n._(t`Survey`),
-      component: <SurveyStep />,
-    });
-  }
-  steps.push({
-    name: i18n._(t`Preview`),
-    component: <PreviewStep />,
-    nextButtonText: i18n._(t`Launch`),
-  });
 
   const submit = values => {
     const postValues = {};
-    if (values.inventory) {
-      postValues.inventory_id = values.inventory.id;
-    }
+    const setValue = (key, value) => {
+      if (typeof value !== 'undefined' && value !== null) {
+        postValues[key] = value;
+      }
+    };
+    const surveyValues = getSurveyValues(values);
+    setValue('inventory_id', values.inventory?.id);
+    setValue(
+      'credentials',
+      values.credentials?.map(c => c.id)
+    );
+    setValue('job_type', values.job_type);
+    setValue('limit', values.limit);
+    setValue('job_tags', values.job_tags);
+    setValue('skip_tags', values.skip_tags);
+    const extraVars = config.ask_variables_on_launch
+      ? values.extra_vars || '---'
+      : resource.extra_vars;
+    setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
+    setValue('scm_branch', values.scm_branch);
     onLaunch(postValues);
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ handleSubmit }) => (
+    <Formik initialValues={initialValues} onSubmit={submit} validate={validate}>
+      {({ validateForm, setTouched, handleSubmit }) => (
         <Wizard
           isOpen
           onClose={onCancel}
           onSave={handleSubmit}
+          onNext={async (nextStep, prevStep) => {
+            if (nextStep.id === 'preview') {
+              visitAllSteps(setTouched);
+            } else {
+              visitStep(prevStep.prevId);
+            }
+            await validateForm();
+          }}
+          onGoToStep={async (newStep, prevStep) => {
+            if (newStep.id === 'preview') {
+              visitAllSteps(setTouched);
+            } else {
+              visitStep(prevStep.prevId);
+            }
+            await validateForm();
+          }}
           title={i18n._(t`Prompts`)}
           steps={steps}
+          backButtonText={i18n._(t`Back`)}
+          cancelButtonText={i18n._(t`Cancel`)}
+          nextButtonText={i18n._(t`Next`)}
         />
       )}
     </Formik>

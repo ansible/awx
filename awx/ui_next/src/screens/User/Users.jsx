@@ -1,81 +1,64 @@
-import React, { Component, Fragment } from 'react';
-import { Route, withRouter, Switch } from 'react-router-dom';
+import React, { Fragment, useState, useCallback } from 'react';
+import { Route, useRouteMatch, Switch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Config } from '@contexts/Config';
-import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import { Config } from '../../contexts/Config';
 
 import UsersList from './UserList/UserList';
 import UserAdd from './UserAdd/UserAdd';
 import User from './User';
 
-class Users extends Component {
-  constructor(props) {
-    super(props);
+function Users({ i18n }) {
+  const [breadcrumbConfig, setBreadcrumbConfig] = useState({
+    '/users': i18n._(t`Users`),
+    '/users/add': i18n._(t`Create New User`),
+  });
+  const match = useRouteMatch();
 
-    const { i18n } = props;
+  const addUserBreadcrumb = useCallback(
+    user => {
+      if (!user) {
+        return;
+      }
 
-    this.state = {
-      breadcrumbConfig: {
+      setBreadcrumbConfig({
         '/users': i18n._(t`Users`),
         '/users/add': i18n._(t`Create New User`),
-      },
-    };
-  }
-
-  setBreadcrumbConfig = user => {
-    const { i18n } = this.props;
-
-    if (!user) {
-      return;
-    }
-
-    const breadcrumbConfig = {
-      '/users': i18n._(t`Users`),
-      '/users/add': i18n._(t`Create New User`),
-      [`/users/${user.id}`]: `${user.username}`,
-      [`/users/${user.id}/edit`]: i18n._(t`Edit Details`),
-      [`/users/${user.id}/details`]: i18n._(t`Details`),
-      [`/users/${user.id}/access`]: i18n._(t`Access`),
-      [`/users/${user.id}/teams`]: i18n._(t`Teams`),
-      [`/users/${user.id}/organizations`]: i18n._(t`Organizations`),
-      [`/users/${user.id}/tokens`]: i18n._(t`Tokens`),
-    };
-
-    this.setState({ breadcrumbConfig });
-  };
-
-  render() {
-    const { match, history, location } = this.props;
-    const { breadcrumbConfig } = this.state;
-
-    return (
-      <Fragment>
-        <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
-        <Switch>
-          <Route path={`${match.path}/add`} render={() => <UserAdd />} />
-          <Route
-            path={`${match.path}/:id`}
-            render={() => (
-              <Config>
-                {({ me }) => (
-                  <User
-                    history={history}
-                    location={location}
-                    setBreadcrumb={this.setBreadcrumbConfig}
-                    me={me || {}}
-                  />
-                )}
-              </Config>
+        [`/users/${user.id}`]: `${user.username}`,
+        [`/users/${user.id}/edit`]: i18n._(t`Edit Details`),
+        [`/users/${user.id}/details`]: i18n._(t`Details`),
+        [`/users/${user.id}/access`]: i18n._(t`Access`),
+        [`/users/${user.id}/teams`]: i18n._(t`Teams`),
+        [`/users/${user.id}/organizations`]: i18n._(t`Organizations`),
+        [`/users/${user.id}/tokens`]: i18n._(t`Tokens`),
+        [`/users/${user.id}/tokens/add`]: i18n._(t`Create user token`),
+      });
+    },
+    [i18n]
+  );
+  return (
+    <Fragment>
+      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <Switch>
+        <Route path={`${match.path}/add`}>
+          <UserAdd />
+        </Route>
+        <Route path={`${match.path}/:id`}>
+          <Config>
+            {({ me }) => (
+              <User setBreadcrumb={addUserBreadcrumb} me={me || {}} />
             )}
-          />
-          <Route path={`${match.path}`} render={() => <UsersList />} />
-        </Switch>
-      </Fragment>
-    );
-  }
+          </Config>
+        </Route>
+        <Route path={`${match.path}`}>
+          <UsersList />
+        </Route>
+      </Switch>
+    </Fragment>
+  );
 }
 
 export { Users as _Users };
-export default withI18n()(withRouter(Users));
+export default withI18n()(Users);

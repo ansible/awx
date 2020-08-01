@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_template
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower job templates.
 description:
     - Create, update, or destroy Ansible Tower job templates. See
@@ -39,12 +38,19 @@ options:
     job_type:
       description:
         - The job type to use for the job template.
-      required: False
       choices: ["run", "check"]
       type: str
     inventory:
       description:
         - Name of the inventory to use for the job template.
+      type: str
+    organization:
+      description:
+        - Organization the job template exists in.
+        - Used to help lookup the object, cannot be modified using this module.
+        - The Organization is inferred from the associated project
+        - If not provided, will lookup by name only, which does not work with duplicates.
+        - Requires Tower Version 3.7.0 or AWX 10.0.0 IS NOT backwards compatible with earlier versions.
       type: str
     project:
       description:
@@ -58,20 +64,16 @@ options:
       description:
         - Name of the credential to use for the job template.
         - Deprecated, use 'credentials'.
-      version_added: 2.7
       type: str
     credentials:
       description:
         - List of credentials to use for the job template.
       type: list
       elements: str
-      version_added: 2.8
-      default: []
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
-      version_added: 2.7
       type: str
     forks:
       description:
@@ -91,7 +93,6 @@ options:
       description:
         - Specify C(extra_vars) for the template.
       type: dict
-      version_added: 3.7
     job_tags:
       description:
         - Comma separated list of the tags to use for the job template.
@@ -99,7 +100,6 @@ options:
     force_handlers:
       description:
         - Enable forcing playbook handlers to run even if a task fails.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -111,12 +111,10 @@ options:
     start_at_task:
       description:
         - Start the playbook at the task matching this name.
-      version_added: 2.7
       type: str
     diff_mode:
       description:
         - Enable diff mode for the job template.
-      version_added: 2.7
       type: bool
       aliases:
         - diff_mode_enabled
@@ -124,7 +122,6 @@ options:
     use_fact_cache:
       description:
         - Enable use of fact caching for the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -141,7 +138,6 @@ options:
     ask_diff_mode_on_launch:
       description:
         - Prompt user to enable diff mode (show changes) to files when supported by modules.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -156,7 +152,6 @@ options:
     ask_limit_on_launch:
       description:
         - Prompt user for a limit on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -171,7 +166,6 @@ options:
     ask_skip_tags_on_launch:
       description:
         - Prompt user for job tags to skip on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -186,7 +180,6 @@ options:
     ask_verbosity_on_launch:
       description:
         - Prompt user to choose a verbosity level on launch.
-      version_added: 2.7
       type: bool
       default: 'False'
       aliases:
@@ -208,13 +201,11 @@ options:
     survey_enabled:
       description:
         - Enable a survey on the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
     survey_spec:
       description:
         - JSON/YAML dict formatted survey definition.
-      version_added: 2.8
       type: dict
     become_enabled:
       description:
@@ -224,7 +215,6 @@ options:
     allow_simultaneous:
       description:
         - Allow simultaneous runs of the job template.
-      version_added: 2.7
       type: bool
       default: 'no'
       aliases:
@@ -234,7 +224,6 @@ options:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
     custom_virtualenv:
-      version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
@@ -248,6 +237,7 @@ options:
         - Service that webhook requests will be accepted from
       type: str
       choices:
+        - ''
         - 'github'
         - 'gitlab'
     webhook_credential:
@@ -270,11 +260,21 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    tower_oauthtoken:
+    notification_templates_started:
       description:
-        - The Tower OAuth token to use.
-      type: str
-      version_added: "3.7"
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -286,10 +286,11 @@ notes:
 
 
 EXAMPLES = '''
-- name: Create tower Ping job template
+- name: Create Tower Ping job template
   tower_job_template:
     name: "Ping"
     job_type: "run"
+    organization: "Default"
     inventory: "Local"
     project: "Demo"
     playbook: "ping.yml"
@@ -300,6 +301,20 @@ EXAMPLES = '''
     survey_enabled: yes
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
     custom_virtualenv: "/var/lib/awx/venv/custom-venv/"
+
+- name: Add start notification to Job Template
+  tower_job_template:
+    name: "Ping"
+    notification_templates_started:
+      - Notification1
+      - Notification2
+
+- name: Remove Notification1 start notification from Job Template
+  tower_job_template:
+    name: "Ping"
+    notification_templates_started:
+      - Notification2
+
 '''
 
 from ..module_utils.tower_api import TowerModule
@@ -326,18 +341,19 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         description=dict(default=''),
+        organization=dict(),
         job_type=dict(choices=['run', 'check']),
         inventory=dict(),
         project=dict(),
         playbook=dict(),
         credential=dict(default=''),
         vault_credential=dict(default=''),
-        custom_virtualenv=dict(required=False),
-        credentials=dict(type='list', default=[], elements='str'),
+        custom_virtualenv=dict(),
+        credentials=dict(type='list', elements='str'),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
-        extra_vars=dict(type='dict', required=False),
+        extra_vars=dict(type='dict'),
         job_tags=dict(default=''),
         force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
         skip_tags=dict(default=''),
@@ -362,14 +378,17 @@ def main():
         scm_branch=dict(),
         ask_scm_branch_on_launch=dict(type='bool'),
         job_slice_count=dict(type='int', default='1'),
-        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_service=dict(choices=['github', 'gitlab', '']),
         webhook_credential=dict(),
         labels=dict(type="list", elements='str'),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -380,24 +399,33 @@ def main():
     credential = module.params.get('credential')
     vault_credential = module.params.get('vault_credential')
     credentials = module.params.get('credentials')
-    if vault_credential:
+    if vault_credential != '':
         if credentials is None:
             credentials = []
         credentials.append(vault_credential)
-    if credential:
+    if credential != '':
         if credentials is None:
             credentials = []
         credentials.append(credential)
 
+    new_fields = {}
+    search_fields = {'name': name}
+
+    # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = None
+    organization = module.params.get('organization')
+    if organization:
+        organization_id = module.resolve_name_to_id('organizations', organization)
+        search_fields['organization'] = new_fields['organization'] = organization_id
+
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('job_templates', **{
-        'data': {
-            'name': name,
-        }
-    })
+    existing_item = module.get_one('job_templates', **{'data': search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     new_fields['name'] = new_name if new_name else name
     for field_name in (
         'description', 'job_type', 'playbook', 'scm_branch', 'forks', 'limit', 'verbosity',
@@ -424,22 +452,53 @@ def main():
     if inventory is not None:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
     if project is not None:
-        new_fields['project'] = module.resolve_name_to_id('projects', project)
+        if organization_id is not None:
+            project_data = module.get_one('projects', **{
+                'data': {
+                    'name': project,
+                    'organization': organization_id,
+                }
+            })
+            if project_data is None:
+                module.fail_json(msg="The project {0} in organization {1} was not found on the Tower server".format(
+                    project, organization
+                ))
+            new_fields['project'] = project_data['id']
+        else:
+            new_fields['project'] = module.resolve_name_to_id('projects', project)
     if webhook_credential is not None:
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
 
-    credentials_ids = None
+    association_fields = {}
+
     if credentials is not None:
-        credentials_ids = []
+        association_fields['credentials'] = []
         for item in credentials:
-            credentials_ids.append(module.resolve_name_to_id('credentials', item))
+            association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
     labels = module.params.get('labels')
-    labels_ids = None
     if labels is not None:
-        labels_ids = []
+        association_fields['labels'] = []
         for item in labels:
-            labels_ids.append(module.resolve_name_to_id('labels', item))
+            association_fields['labels'].append(module.resolve_name_to_id('labels', item))
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     on_change = None
     new_spec = module.params.get('survey_spec')
@@ -450,22 +509,17 @@ def main():
             existing_spec = module.get_endpoint(spec_endpoint)['json']
         if new_spec != existing_spec:
             module.json_output['changed'] = True
+            if existing_item and module.has_encrypted_values(existing_spec):
+                module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
             on_change = update_survey
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='job_templates', item_type='job_template',
-            associations={
-                'credentials': credentials_ids,
-                'labels': labels_ids,
-            },
-            on_create=on_change, on_update=on_change,
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='job_templates', item_type='job_template',
+        associations=association_fields,
+        on_create=on_change, on_update=on_change,
+    )
 
 
 if __name__ == '__main__':

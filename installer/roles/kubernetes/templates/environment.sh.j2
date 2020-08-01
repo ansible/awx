@@ -3,5 +3,3 @@ DATABASE_NAME={{ pg_database }}
 DATABASE_HOST={{ pg_hostname|default('postgresql') }}
 DATABASE_PORT={{ pg_port|default('5432') }}
 DATABASE_PASSWORD={{ pg_password | quote }}
-MEMCACHED_HOST={{ memcached_hostname|default('localhost') }}
-MEMCACHED_PORT={{ memcached_port|default('11211') }}

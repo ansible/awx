@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'status': ['preview'],
+ANSIBLE_METADATA = {'status': ['deprecated'],
                     'supported_by': 'community',
                     'metadata_version': '1.1'}
 
@@ -16,8 +16,11 @@ ANSIBLE_METADATA = {'status': ['preview'],
 DOCUMENTATION = '''
 ---
 module: tower_workflow_template
+deprecated:
+  removed_in: "14.0.0"
+  why: Deprecated in favor of C(_workflow_job_template) and C(_workflow_job_template_node) modules.
+  alternative: Use M(tower_workflow_job_template) and M(_workflow_job_template_node) instead.
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower workflow template.
 description:
     - A tower-cli based module for CRUD actions on workflow job templates.
@@ -33,12 +36,10 @@ options:
       description:
         - Prompt user for (extra_vars) on launch.
       type: bool
-      version_added: "2.9"
     ask_inventory:
       description:
         - Prompt user for inventory on launch.
       type: bool
-      version_added: "2.9"
     description:
       description:
         - The description to use for the workflow.
@@ -50,7 +51,6 @@ options:
     inventory:
       description:
         - Name of the inventory to use for the job template.
-      version_added: "2.9"
       type: str
     name:
       description:
@@ -78,7 +78,6 @@ options:
       description:
         - The definition of the survey associated to the workflow.
       type: dict
-      required: false
     state:
       description:
         - Desired state of the resource.
@@ -89,7 +88,7 @@ options:
 requirements:
 - ansible-tower-cli >= 3.0.2
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 
@@ -128,16 +127,16 @@ except ImportError:
 def main():
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        extra_vars=dict(type='dict', required=False),
-        organization=dict(required=False),
-        allow_simultaneous=dict(type='bool', required=False),
-        schema=dict(type='list', elements='dict', required=False),
+        description=dict(),
+        extra_vars=dict(type='dict'),
+        organization=dict(),
+        allow_simultaneous=dict(type='bool'),
+        schema=dict(type='list', elements='dict'),
         survey=dict(type='dict'),
-        survey_enabled=dict(type='bool', required=False),
-        inventory=dict(required=False),
-        ask_inventory=dict(type='bool', required=False),
-        ask_extra_vars=dict(type='bool', required=False),
+        survey_enabled=dict(type='bool'),
+        inventory=dict(),
+        ask_inventory=dict(type='bool'),
+        ask_extra_vars=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -150,7 +149,7 @@ def main():
         "This module is replaced by the combination of tower_workflow_job_template and "
         "tower_workflow_job_template_node. This uses the old tower-cli and wll be "
         "removed in 2022."
-    ), version='4.2.0')
+    ), version='awx.awx:14.0.0')
 
     name = module.params.get('name')
     state = module.params.get('state')

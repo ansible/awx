@@ -1,11 +1,14 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { OrganizationsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockOrganization from '@util/data.organization.json';
+import { OrganizationsAPI } from '../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
+import mockOrganization from '../../util/data.organization.json';
 import Organization from './Organization';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 const mockMe = {
   is_super_user: true,
@@ -50,7 +53,7 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 4
+      el => el.length === 5
     );
     expect(tabs.last().text()).toEqual('Notifications');
     done();
@@ -71,7 +74,7 @@ describe('<Organization />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 3
+      el => el.length === 4
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();

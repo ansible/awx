@@ -4,16 +4,16 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '@api';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import { OrganizationsAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 import OrganizationListItem from './OrganizationListItem';
 
 const QS_CONFIG = getQSConfig('organization', {
@@ -108,7 +108,7 @@ function OrganizationsList({ i18n }) {
             hasContentLoading={hasContentLoading}
             items={organizations}
             itemCount={organizationCount}
-            pluralizedItemName="Organizations"
+            pluralizedItemName={i18n._(t`Organizations`)}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
             toolbarSearchColumns={[

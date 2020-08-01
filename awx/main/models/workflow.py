@@ -139,7 +139,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
         'char_prompts', 'all_parents_must_converge', 'identifier'
     ]
-    REENCRYPTION_BLACKLIST_AT_COPY = ['extra_data', 'survey_passwords']
+    REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data', 'survey_passwords']
 
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',

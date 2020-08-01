@@ -9,17 +9,15 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
-
-import { InventoriesAPI } from '@api';
-import { Card, CardActions } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import RoutedTabs from '@components/RoutedTabs';
-import JobList from '@components/JobList';
+import useRequest from '../../../util/useRequest';
+
+import { InventoriesAPI } from '../../../api';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import RoutedTabs from '../../../components/RoutedTabs';
+import JobList from '../../../components/JobList';
 import InventoryHostDetail from '../InventoryHostDetail';
 import InventoryHostEdit from '../InventoryHostEdit';
 import InventoryHostFacts from '../InventoryHostFacts';
@@ -99,9 +97,9 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
         <ContentError error={contentError}>
           {contentError.response && contentError.response.status === 404 && (
             <span>
-              {i18n._(`Host not found.`)}{' '}
+              {i18n._(t`Host not found.`)}{' '}
               <Link to={hostListUrl}>
-                {i18n._(`View all Inventory Hosts.`)}
+                {i18n._(t`View all Inventory Hosts.`)}
               </Link>
             </span>
           )}
@@ -110,16 +108,14 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
     );
   }
 
+  let showCardHeader = true;
+  if (['edit'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
+
   return (
     <>
-      {['edit'].some(name => location.pathname.includes(name)) ? null : (
-        <TabbedCardHeader>
-          <RoutedTabs tabsArray={tabsArray} />
-          <CardActions>
-            <CardCloseButton linkTo={hostListUrl} />
-          </CardActions>
-        </TabbedCardHeader>
-      )}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
 
       {isLoading && <ContentLoading />}
 
@@ -163,7 +159,7 @@ function InventoryHost({ i18n, setBreadcrumb, inventory }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(`View Inventory Host Details`)}
+                {i18n._(t`View Inventory Host Details`)}
               </Link>
             </ContentError>
           </Route>

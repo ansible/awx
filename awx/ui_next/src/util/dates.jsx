@@ -17,6 +17,18 @@ export function secondsToHHMMSS(seconds) {
   return new Date(seconds * 1000).toISOString().substr(11, 8);
 }
 
+export function timeOfDay() {
+  const date = new Date();
+  const hour = date.getHours();
+  const minute = prependZeros(date.getMinutes());
+  const second = prependZeros(date.getSeconds());
+  const time =
+    hour > 12
+      ? `${hour - 12}:${minute}:${second} PM`
+      : `${hour}:${minute}:${second} AM`;
+  return time;
+}
+
 export function dateToInputDateTime(dateObj) {
   // input type="date-time" expects values to be formatted
   // like: YYYY-MM-DDTHH-MM-SS

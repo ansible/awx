@@ -1,0 +1,6 @@
+plugins/modules/tower_receive.py validate-modules:deprecation-mismatch
+plugins/modules/tower_receive.py validate-modules:invalid-documentation
+plugins/modules/tower_send.py validate-modules:deprecation-mismatch
+plugins/modules/tower_send.py validate-modules:invalid-documentation
+plugins/modules/tower_workflow_template.py validate-modules:deprecation-mismatch
+plugins/modules/tower_workflow_template.py validate-modules:invalid-documentation

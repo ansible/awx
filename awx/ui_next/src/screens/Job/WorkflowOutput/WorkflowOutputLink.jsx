@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { WorkflowStateContext } from '@contexts/Workflow';
 import { func, shape } from 'prop-types';
+import { WorkflowStateContext } from '../../../contexts/Workflow';
 import {
   generateLine,
   getLinePoints,
   getLinkOverlayPoints,
-} from '@components/Workflow/WorkflowUtils';
+} from '../../../components/Workflow/WorkflowUtils';
 
 function WorkflowOutputLink({ link, mouseEnter, mouseLeave }) {
   const ref = useRef(null);

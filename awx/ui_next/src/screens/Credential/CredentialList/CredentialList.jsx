@@ -2,18 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CredentialsAPI } from '@api';
 import { Card, PageSection } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import DataListToolbar from '@components/DataListToolbar';
+import { CredentialsAPI } from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { CredentialListItem } from '.';
+} from '../../../components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import CredentialListItem from './CredentialListItem';
 
 const QS_CONFIG = getQSConfig('credential', {
   page: 1,
@@ -106,6 +106,7 @@ function CredentialList({ i18n }) {
             <CredentialListItem
               key={item.id}
               credential={item}
+              fetchCredentials={fetchCredentials}
               detailUrl={`/credentials/${item.id}/details`}
               isSelected={selected.some(row => row.id === item.id)}
               onSelect={() => handleSelect(item)}
@@ -134,6 +135,7 @@ function CredentialList({ i18n }) {
         />
       </Card>
       <AlertModal
+        aria-label={i18n._(t`Deletion Error`)}
         isOpen={deletionError}
         variant="error"
         title={i18n._(t`Error!`)}

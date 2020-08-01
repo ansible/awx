@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useCallback, useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { InventoriesAPI, GroupsAPI } from '@api';
 import { Button, Tooltip } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import DataListToolbar from '@components/DataListToolbar';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useSelected from '../../../util/useSelected';
+import useRequest from '../../../util/useRequest';
+import { InventoriesAPI, GroupsAPI } from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import ErrorDetail from '../../../components/ErrorDetail';
+import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
-} from '@components/PaginatedDataList';
+} from '../../../components/PaginatedDataList';
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 
@@ -37,60 +39,45 @@ const useModal = () => {
   };
 };
 
-function InventoryGroupsList({ i18n, location, match }) {
-  const [actions, setActions] = useState(null);
-  const [contentError, setContentError] = useState(null);
+function InventoryGroupsList({ i18n }) {
   const [deletionError, setDeletionError] = useState(null);
-  const [groupCount, setGroupCount] = useState(0);
-  const [groups, setGroups] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selected, setSelected] = useState([]);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const location = useLocation();
   const { isModalOpen, toggleModal } = useModal();
+  const { id: inventoryId } = useParams();
 
-  const inventoryId = match.params.id;
-  const fetchGroups = (id, queryString) => {
-    const params = parseQueryString(QS_CONFIG, queryString);
-    return InventoriesAPI.readGroups(id, params);
-  };
+  const {
+    result: { groups, groupCount, actions },
+    error: contentError,
+    isLoading,
+    request: fetchGroups,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const [response, actionsResponse] = await Promise.all([
+        InventoriesAPI.readGroups(inventoryId, params),
+        InventoriesAPI.readGroupsOptions(inventoryId),
+      ]);
+      return {
+        groups: response.data.results,
+        groupCount: response.data.count,
+        actions: actionsResponse.data.actions,
+      };
+    }, [inventoryId, location]),
+    {
+      groups: [],
+      groupCount: 0,
+      actions: {},
+    }
+  );
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [
-          {
-            data: { count, results },
-          },
-          {
-            data: { actions: optionActions },
-          },
-        ] = await Promise.all([
-          fetchGroups(inventoryId, location.search),
-          InventoriesAPI.readGroupsOptions(inventoryId),
-        ]);
+    fetchGroups();
+  }, [fetchGroups]);
 
-        setGroups(results);
-        setGroupCount(count);
-        setActions(optionActions);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchData();
-  }, [inventoryId, location]);
-
-  const handleSelectAll = isSelected => {
-    setSelected(isSelected ? [...groups] : []);
-  };
-
-  const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
-    }
-  };
+  const { selected, isAllSelected, handleSelect, setSelected } = useSelected(
+    groups
+  );
 
   const renderTooltip = () => {
     const itemsUnableToDelete = selected
@@ -114,7 +101,7 @@ function InventoryGroupsList({ i18n, location, match }) {
   };
 
   const handleDelete = async option => {
-    setIsLoading(true);
+    setIsDeleteLoading(true);
 
     try {
       /* eslint-disable no-await-in-loop */
@@ -134,30 +121,19 @@ function InventoryGroupsList({ i18n, location, match }) {
     }
 
     toggleModal();
-
-    try {
-      const {
-        data: { count, results },
-      } = await fetchGroups(inventoryId, location.search);
-      setGroups(results);
-      setGroupCount(count);
-    } catch (error) {
-      setContentError(error);
-    }
-
-    setIsLoading(false);
+    fetchGroups();
+    setSelected([]);
+    setIsDeleteLoading(false);
   };
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const isAllSelected =
-    selected.length > 0 && selected.length === groups.length;
 
   return (
     <>
       <PaginatedDataList
         contentError={contentError}
-        hasContentLoading={isLoading}
+        hasContentLoading={isLoading || isDeleteLoading}
         items={groups}
         itemCount={groupCount}
         qsConfig={QS_CONFIG}
@@ -169,20 +145,20 @@ function InventoryGroupsList({ i18n, location, match }) {
             isDefault: true,
           },
           {
-            name: i18n._(t`Group Type`),
+            name: i18n._(t`Group type`),
             key: 'parents__isnull',
             isBoolean: true,
             booleanLabels: {
-              true: i18n._(t`Show Only Root Groups`),
-              false: i18n._(t`Show All Groups`),
+              true: i18n._(t`Show only root groups`),
+              false: i18n._(t`Show all groups`),
             },
           },
           {
-            name: i18n._(t`Created By (Username)`),
+            name: i18n._(t`Created by (username)`),
             key: 'created_by__username',
           },
           {
-            name: i18n._(t`Modified By (Username)`),
+            name: i18n._(t`Modified by (username)`),
             key: 'modified_by__username',
           },
         ]}
@@ -206,7 +182,9 @@ function InventoryGroupsList({ i18n, location, match }) {
             {...props}
             showSelectAll
             isAllSelected={isAllSelected}
-            onSelectAll={handleSelectAll}
+            onSelectAll={isSelected =>
+              setSelected(isSelected ? [...groups] : [])
+            }
             qsConfig={QS_CONFIG}
             additionalControls={[
               ...(canAdd
@@ -263,4 +241,4 @@ function InventoryGroupsList({ i18n, location, match }) {
     </>
   );
 }
-export default withI18n()(withRouter(InventoryGroupsList));
+export default withI18n()(InventoryGroupsList);

@@ -11,7 +11,6 @@ from functools import reduce
 from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -496,7 +495,7 @@ class NotificationAttachMixin(BaseAccess):
             # due to this special case, we use symmetrical logic with attach permission
             return self._can_attach(notification_template=sub_obj, resource_obj=obj)
         return super(NotificationAttachMixin, self).can_unattach(
-            obj, sub_obj, relationship, relationship, data=data
+            obj, sub_obj, relationship, data=data
         )
 
 
@@ -642,8 +641,8 @@ class UserAccess(BaseAccess):
                 # in these cases only superusers can modify orphan users
                 return False
             return not obj.roles.all().exclude(
-                content_type=ContentType.objects.get_for_model(User)
-            ).filter(ancestors__in=self.user.roles.all()).exists()
+                ancestors__in=self.user.roles.all()
+            ).exists()
         else:
             return self.is_all_org_admin(obj)
 
@@ -1426,7 +1425,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'job_template_admin_role').exists()
+            return Project.accessible_objects(self.user, 'use_role').exists()
 
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
@@ -1495,11 +1494,6 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         if data is None:
             return True
 
-        # standard type of check for organization - cannot change the value
-        # unless posessing the respective job_template_admin_role, otherwise non-blocking
-        if not self.check_related('organization', Organization, data, obj=obj, role_field='job_template_admin_role'):
-            return False
-
         data = dict(data)
 
         if self.changes_are_non_sensitive(obj, data):
@@ -1519,8 +1513,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
         thus can be made by a job template administrator which may not have access
         to the any inventory, project, or credentials associated with the template.
         '''
-        # We are white listing fields that can
-        field_whitelist = [
+        allowed_fields = [
             'name', 'description', 'forks', 'limit', 'verbosity', 'extra_vars',
             'job_tags', 'force_handlers', 'skip_tags', 'ask_variables_on_launch',
             'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_skip_tags_on_launch',
@@ -1535,7 +1528,7 @@ class JobTemplateAccess(NotificationAttachMixin, BaseAccess):
             if k not in [x.name for x in obj._meta.concrete_fields]:
                 continue
             if hasattr(obj, k) and getattr(obj, k) != v:
-                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
+                if k not in allowed_fields and v != getattr(obj, '%s_id' % k, None) \
                         and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
                     return False
         return True

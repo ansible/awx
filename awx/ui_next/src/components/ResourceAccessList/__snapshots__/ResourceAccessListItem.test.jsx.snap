@@ -52,12 +52,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
           <ResourceAccessListItem__DataListItemCells
             dataListCells={
               Array [
-                <DataListCell>
+                <ForwardRef(Styled(PFDataListCell))>
                   <TextContent>
                     <Text
                       component="h6"
                     >
-                      <Styled(Link)
+                      <ForwardRef(ResourceAccessListItem___StyledLink)
                         to={
                           Object {
                             "pathname": "/users/2/details",
@@ -65,10 +65,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         }
                       >
                         jane
-                      </Styled(Link)>
+                      </ForwardRef(ResourceAccessListItem___StyledLink)>
                     </Text>
                   </TextContent>
-                  <DetailList
+                  <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
                     <Detail
@@ -77,10 +77,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       label="Name"
                       value="jane brown"
                     />
-                  </DetailList>
-                </DataListCell>,
-                <DataListCell>
-                  <DetailList
+                  </ForwardRef(Styled(DetailList))>
+                </ForwardRef(Styled(PFDataListCell))>,
+                <ForwardRef(Styled(PFDataListCell))>
+                  <ForwardRef(Styled(DetailList))
                     stacked={true}
                   >
                     <Detail
@@ -88,25 +88,26 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       fullWidth={false}
                       label="Team Roles"
                       value={
-                        <ChipGroup
-                          className=""
-                          collapsedText="\${remaining} more"
-                          defaultIsOpen={false}
-                          expandedText="Show Less"
+                        <WithI18n
                           numChips={5}
-                          withToolbar={false}
+                          totalChips={1}
                         >
-                          <Unknown
+                          <Chip
+                            className=""
+                            closeBtnAriaLabel="close"
+                            component="div"
+                            isOverflowChip={false}
                             isReadOnly={false}
                             onClick={[Function]}
+                            tooltipPosition="top"
                           >
                             Member
-                          </Unknown>
-                        </ChipGroup>
+                          </Chip>
+                        </WithI18n>
                       }
                     />
-                  </DetailList>
-                </DataListCell>,
+                  </ForwardRef(Styled(DetailList))>
+                </ForwardRef(Styled(PFDataListCell))>,
               ]
             }
             key=".0"
@@ -115,12 +116,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
             <StyledComponent
               dataListCells={
                 Array [
-                  <DataListCell>
+                  <ForwardRef(Styled(PFDataListCell))>
                     <TextContent>
                       <Text
                         component="h6"
                       >
-                        <Styled(Link)
+                        <ForwardRef(ResourceAccessListItem___StyledLink)
                           to={
                             Object {
                               "pathname": "/users/2/details",
@@ -128,10 +129,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           }
                         >
                           jane
-                        </Styled(Link)>
+                        </ForwardRef(ResourceAccessListItem___StyledLink)>
                       </Text>
                     </TextContent>
-                    <DetailList
+                    <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
                       <Detail
@@ -140,10 +141,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         label="Name"
                         value="jane brown"
                       />
-                    </DetailList>
-                  </DataListCell>,
-                  <DataListCell>
-                    <DetailList
+                    </ForwardRef(Styled(DetailList))>
+                  </ForwardRef(Styled(PFDataListCell))>,
+                  <ForwardRef(Styled(PFDataListCell))>
+                    <ForwardRef(Styled(DetailList))
                       stacked={true}
                     >
                       <Detail
@@ -151,25 +152,26 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                         fullWidth={false}
                         label="Team Roles"
                         value={
-                          <ChipGroup
-                            className=""
-                            collapsedText="\${remaining} more"
-                            defaultIsOpen={false}
-                            expandedText="Show Less"
+                          <WithI18n
                             numChips={5}
-                            withToolbar={false}
+                            totalChips={1}
                           >
-                            <Unknown
+                            <Chip
+                              className=""
+                              closeBtnAriaLabel="close"
+                              component="div"
+                              isOverflowChip={false}
                               isReadOnly={false}
                               onClick={[Function]}
+                              tooltipPosition="top"
                             >
                               Member
-                            </Unknown>
-                          </ChipGroup>
+                            </Chip>
+                          </WithI18n>
                         }
                       />
-                    </DetailList>
-                  </DataListCell>,
+                    </ForwardRef(Styled(DetailList))>
+                  </ForwardRef(Styled(PFDataListCell))>,
                 ]
               }
               forwardedComponent={
@@ -177,9 +179,9 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                   "$$typeof": Symbol(react.forward_ref),
                   "attrs": Array [],
                   "componentStyle": ComponentStyle {
-                    "componentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
-                    "isStatic": true,
-                    "lastClassName": "WzRoT",
+                    "componentId": "ResourceAccessListItem__DataListItemCells-sc-658iqk-0",
+                    "isStatic": false,
+                    "lastClassName": "jCdAGK",
                     "rules": Array [
                       "align-items:start;",
                     ],
@@ -187,7 +189,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                   "displayName": "ResourceAccessListItem__DataListItemCells",
                   "foldedComponentIds": Array [],
                   "render": [Function],
-                  "styledComponentId": "ResourceAccessListItem__DataListItemCells-a3r9sq-0",
+                  "styledComponentId": "ResourceAccessListItem__DataListItemCells-sc-658iqk-0",
                   "target": [Function],
                   "toString": [Function],
                   "warnTooManyClasses": [Function],
@@ -198,15 +200,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
               rowid="access-list-item"
             >
               <DataListItemCells
-                className="ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
+                className="ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 dataListCells={
                   Array [
-                    <DataListCell>
+                    <ForwardRef(Styled(PFDataListCell))>
                       <TextContent>
                         <Text
                           component="h6"
                         >
-                          <Styled(Link)
+                          <ForwardRef(ResourceAccessListItem___StyledLink)
                             to={
                               Object {
                                 "pathname": "/users/2/details",
@@ -214,10 +216,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                             }
                           >
                             jane
-                          </Styled(Link)>
+                          </ForwardRef(ResourceAccessListItem___StyledLink)>
                         </Text>
                       </TextContent>
-                      <DetailList
+                      <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
                         <Detail
@@ -226,10 +228,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           label="Name"
                           value="jane brown"
                         />
-                      </DetailList>
-                    </DataListCell>,
-                    <DataListCell>
-                      <DetailList
+                      </ForwardRef(Styled(DetailList))>
+                    </ForwardRef(Styled(PFDataListCell))>,
+                    <ForwardRef(Styled(PFDataListCell))>
+                      <ForwardRef(Styled(DetailList))
                         stacked={true}
                       >
                         <Detail
@@ -237,31 +239,32 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           fullWidth={false}
                           label="Team Roles"
                           value={
-                            <ChipGroup
-                              className=""
-                              collapsedText="\${remaining} more"
-                              defaultIsOpen={false}
-                              expandedText="Show Less"
+                            <WithI18n
                               numChips={5}
-                              withToolbar={false}
+                              totalChips={1}
                             >
-                              <Unknown
+                              <Chip
+                                className=""
+                                closeBtnAriaLabel="close"
+                                component="div"
+                                isOverflowChip={false}
                                 isReadOnly={false}
                                 onClick={[Function]}
+                                tooltipPosition="top"
                               >
                                 Member
-                              </Unknown>
-                            </ChipGroup>
+                              </Chip>
+                            </WithI18n>
                           }
                         />
-                      </DetailList>
-                    </DataListCell>,
+                      </ForwardRef(Styled(DetailList))>
+                    </ForwardRef(Styled(PFDataListCell))>,
                   ]
                 }
                 rowid="access-list-item"
               >
                 <div
-                  className="pf-c-data-list__item-content ResourceAccessListItem__DataListItemCells-a3r9sq-0 WzRoT"
+                  className="pf-c-data-list__item-content ResourceAccessListItem__DataListItemCells-sc-658iqk-0 jCdAGK"
                 >
                   <DataListCell
                     key="name"
@@ -272,17 +275,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           "$$typeof": Symbol(react.forward_ref),
                           "attrs": Array [],
                           "componentStyle": ComponentStyle {
-                            "componentId": "DataListCell-sc-18ntxrx-0",
-                            "isStatic": true,
-                            "lastClassName": "flJMIO",
+                            "componentId": "sc-bdVaJa",
+                            "isStatic": false,
+                            "lastClassName": "kruorc",
                             "rules": Array [
-                              "word-break:break-word;",
+                              "
+  word-break: break-word;
+",
                             ],
                           },
                           "displayName": "DataListCell",
                           "foldedComponentIds": Array [],
                           "render": [Function],
-                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "styledComponentId": "sc-bdVaJa",
                           "target": [Function],
                           "toString": [Function],
                           "warnTooManyClasses": [Function],
@@ -292,10 +297,10 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       forwardedRef={null}
                     >
                       <PFDataListCell
-                        className="DataListCell-sc-18ntxrx-0 flJMIO"
+                        className="sc-bdVaJa kruorc"
                       >
                         <div
-                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                          className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
                           <TextContent>
                             <div
@@ -308,7 +313,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   className=""
                                   data-pf-content={true}
                                 >
-                                  <Styled(Link)
+                                  <ResourceAccessListItem___StyledLink
                                     to={
                                       Object {
                                         "pathname": "/users/2/details",
@@ -321,14 +326,14 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           "$$typeof": Symbol(react.forward_ref),
                                           "attrs": Array [],
                                           "componentStyle": ComponentStyle {
-                                            "componentId": "sc-bdVaJa",
-                                            "isStatic": true,
-                                            "lastClassName": "fqQVUT",
+                                            "componentId": "ResourceAccessListItem___StyledLink-sc-658iqk-1",
+                                            "isStatic": false,
+                                            "lastClassName": "ddHgXz",
                                             "rules": Array [
-                                              "font-weight: bold",
+                                              "font-weight:bold",
                                             ],
                                           },
-                                          "displayName": "Styled(Link)",
+                                          "displayName": "ResourceAccessListItem___StyledLink",
                                           "foldedComponentIds": Array [],
                                           "propTypes": Object {
                                             "innerRef": [Function],
@@ -338,7 +343,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             "to": [Function],
                                           },
                                           "render": [Function],
-                                          "styledComponentId": "sc-bdVaJa",
+                                          "styledComponentId": "ResourceAccessListItem___StyledLink-sc-658iqk-1",
                                           "target": Object {
                                             "$$typeof": Symbol(react.forward_ref),
                                             "displayName": "Link",
@@ -364,7 +369,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       }
                                     >
                                       <Link
-                                        className="sc-bdVaJa fqQVUT"
+                                        className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
                                         to={
                                           Object {
                                             "pathname": "/users/2/details",
@@ -372,12 +377,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                         }
                                       >
                                         <LinkAnchor
-                                          className="sc-bdVaJa fqQVUT"
+                                          className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
                                           href="/users/2/details"
                                           navigate={[Function]}
                                         >
                                           <a
-                                            className="sc-bdVaJa fqQVUT"
+                                            className="ResourceAccessListItem___StyledLink-sc-658iqk-1 ddHgXz"
                                             href="/users/2/details"
                                             onClick={[Function]}
                                           >
@@ -386,12 +391,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                         </LinkAnchor>
                                       </Link>
                                     </StyledComponent>
-                                  </Styled(Link)>
+                                  </ResourceAccessListItem___StyledLink>
                                 </h6>
                               </Text>
                             </div>
                           </TextContent>
-                          <DetailList
+                          <Styled(DetailList)
                             stacked={true}
                           >
                             <StyledComponent
@@ -400,18 +405,24 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "iAtits",
+                                    "lastClassName": "kVCDmm",
                                     "rules": Array [
-                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      "
+  display: grid;
+  grid-gap: 20px;
+  align-items: center;
+  ",
                                       [Function],
+                                      "
+",
                                     ],
                                   },
-                                  "displayName": "DetailList",
+                                  "displayName": "Styled(DetailList)",
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
-                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "styledComponentId": "sc-bwzfXH",
                                   "target": [Function],
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -422,15 +433,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="DetailList-sc-12g7m4-0 iAtits"
+                                className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
                                   <dl
-                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    className="sc-bwzfXH kVCDmm"
                                     data-pf-content={true}
                                   >
                                     <Detail
@@ -439,7 +450,7 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       label="Name"
                                       value="jane brown"
                                     >
-                                      <Detail__DetailName
+                                      <Styled(Component)
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
@@ -452,18 +463,22 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "componentId": "sc-htpNat",
                                                 "isStatic": false,
-                                                "lastClassName": "erdIBg",
+                                                "lastClassName": "iYJcPm",
                                                 "rules": Array [
-                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  "
+  font-weight: var(--pf-global--FontWeight--bold);
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailName",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "styledComponentId": "sc-htpNat",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -474,18 +489,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            className="sc-htpNat iYJcPm"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                className="sc-htpNat iYJcPm"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -494,8 +509,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailName>
-                                      <Detail__DetailValue
+                                      </Styled(Component)>
+                                      <Styled(Component)
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
@@ -508,20 +523,25 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "kCDjmZ",
+                                                "lastClassName": "gxmPlV",
                                                 "rules": Array [
-                                                  "word-break:break-all;",
+                                                  "
+  word-break: break-all;
+  ",
                                                   [Function],
-                                                  " ",
+                                                  "
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailValue",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -532,18 +552,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            className="sc-bxivhb gxmPlV"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                className="sc-bxivhb gxmPlV"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -552,13 +572,13 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailValue>
+                                      </Styled(Component)>
                                     </Detail>
                                   </dl>
                                 </TextList>
                               </DetailList>
                             </StyledComponent>
-                          </DetailList>
+                          </Styled(DetailList)>
                         </div>
                       </PFDataListCell>
                     </StyledComponent>
@@ -572,17 +592,19 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                           "$$typeof": Symbol(react.forward_ref),
                           "attrs": Array [],
                           "componentStyle": ComponentStyle {
-                            "componentId": "DataListCell-sc-18ntxrx-0",
-                            "isStatic": true,
-                            "lastClassName": "flJMIO",
+                            "componentId": "sc-bdVaJa",
+                            "isStatic": false,
+                            "lastClassName": "kruorc",
                             "rules": Array [
-                              "word-break:break-word;",
+                              "
+  word-break: break-word;
+",
                             ],
                           },
                           "displayName": "DataListCell",
                           "foldedComponentIds": Array [],
                           "render": [Function],
-                          "styledComponentId": "DataListCell-sc-18ntxrx-0",
+                          "styledComponentId": "sc-bdVaJa",
                           "target": [Function],
                           "toString": [Function],
                           "warnTooManyClasses": [Function],
@@ -592,12 +614,12 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                       forwardedRef={null}
                     >
                       <PFDataListCell
-                        className="DataListCell-sc-18ntxrx-0 flJMIO"
+                        className="sc-bdVaJa kruorc"
                       >
                         <div
-                          className="pf-c-data-list__cell DataListCell-sc-18ntxrx-0 flJMIO"
+                          className="pf-c-data-list__cell sc-bdVaJa kruorc"
                         >
-                          <DetailList
+                          <Styled(DetailList)
                             stacked={true}
                           >
                             <StyledComponent
@@ -606,18 +628,24 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                   "$$typeof": Symbol(react.forward_ref),
                                   "attrs": Array [],
                                   "componentStyle": ComponentStyle {
-                                    "componentId": "DetailList-sc-12g7m4-0",
+                                    "componentId": "sc-bwzfXH",
                                     "isStatic": false,
-                                    "lastClassName": "iAtits",
+                                    "lastClassName": "kVCDmm",
                                     "rules": Array [
-                                      "display:grid;grid-gap:20px;align-items:center;",
+                                      "
+  display: grid;
+  grid-gap: 20px;
+  align-items: center;
+  ",
                                       [Function],
+                                      "
+",
                                     ],
                                   },
-                                  "displayName": "DetailList",
+                                  "displayName": "Styled(DetailList)",
                                   "foldedComponentIds": Array [],
                                   "render": [Function],
-                                  "styledComponentId": "DetailList-sc-12g7m4-0",
+                                  "styledComponentId": "sc-bwzfXH",
                                   "target": [Function],
                                   "toString": [Function],
                                   "warnTooManyClasses": [Function],
@@ -628,15 +656,15 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                               stacked={true}
                             >
                               <DetailList
-                                className="DetailList-sc-12g7m4-0 iAtits"
+                                className="sc-bwzfXH kVCDmm"
                                 stacked={true}
                               >
                                 <TextList
-                                  className="DetailList-sc-12g7m4-0 iAtits"
+                                  className="sc-bwzfXH kVCDmm"
                                   component="dl"
                                 >
                                   <dl
-                                    className="DetailList-sc-12g7m4-0 iAtits"
+                                    className="sc-bwzfXH kVCDmm"
                                     data-pf-content={true}
                                   >
                                     <Detail
@@ -644,24 +672,25 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                       fullWidth={false}
                                       label="Team Roles"
                                       value={
-                                        <ChipGroup
-                                          className=""
-                                          collapsedText="\${remaining} more"
-                                          defaultIsOpen={false}
-                                          expandedText="Show Less"
+                                        <WithI18n
                                           numChips={5}
-                                          withToolbar={false}
+                                          totalChips={1}
                                         >
-                                          <Unknown
+                                          <Chip
+                                            className=""
+                                            closeBtnAriaLabel="close"
+                                            component="div"
+                                            isOverflowChip={false}
                                             isReadOnly={false}
                                             onClick={[Function]}
+                                            tooltipPosition="top"
                                           >
                                             Member
-                                          </Unknown>
-                                        </ChipGroup>
+                                          </Chip>
+                                        </WithI18n>
                                       }
                                     >
-                                      <Detail__DetailName
+                                      <Styled(Component)
                                         component="dt"
                                         data-cy={null}
                                         fullWidth={false}
@@ -674,18 +703,22 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailName-sc-16ypsyv-0",
+                                                "componentId": "sc-htpNat",
                                                 "isStatic": false,
-                                                "lastClassName": "erdIBg",
+                                                "lastClassName": "iYJcPm",
                                                 "rules": Array [
-                                                  "font-weight:var(--pf-global--FontWeight--bold);",
+                                                  "
+  font-weight: var(--pf-global--FontWeight--bold);
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailName",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailName-sc-16ypsyv-0",
+                                              "styledComponentId": "sc-htpNat",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -696,18 +729,18 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                            className="sc-htpNat iYJcPm"
                                             component="dt"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                              className="sc-htpNat iYJcPm"
                                               component="dt"
                                               data-cy={null}
                                             >
                                               <dt
-                                                className="Detail__DetailName-sc-16ypsyv-0 erdIBg"
+                                                className="sc-htpNat iYJcPm"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
@@ -716,8 +749,8 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailName>
-                                      <Detail__DetailValue
+                                      </Styled(Component)>
+                                      <Styled(Component)
                                         component="dd"
                                         data-cy={null}
                                         fullWidth={false}
@@ -730,20 +763,25 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                               "$$typeof": Symbol(react.forward_ref),
                                               "attrs": Array [],
                                               "componentStyle": ComponentStyle {
-                                                "componentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                                "componentId": "sc-bxivhb",
                                                 "isStatic": false,
-                                                "lastClassName": "kCDjmZ",
+                                                "lastClassName": "gxmPlV",
                                                 "rules": Array [
-                                                  "word-break:break-all;",
+                                                  "
+  word-break: break-all;
+  ",
                                                   [Function],
-                                                  " ",
+                                                  "
+  ",
                                                   [Function],
+                                                  "
+",
                                                 ],
                                               },
-                                              "displayName": "Detail__DetailValue",
+                                              "displayName": "Styled(Component)",
                                               "foldedComponentIds": Array [],
                                               "render": [Function],
-                                              "styledComponentId": "Detail__DetailValue-sc-16ypsyv-1",
+                                              "styledComponentId": "sc-bxivhb",
                                               "target": [Function],
                                               "toString": [Function],
                                               "warnTooManyClasses": [Function],
@@ -754,158 +792,111 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                           fullWidth={false}
                                         >
                                           <Component
-                                            className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                            className="sc-bxivhb gxmPlV"
                                             component="dd"
                                             data-cy={null}
                                             fullWidth={false}
                                           >
                                             <TextListItem
-                                              className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                              className="sc-bxivhb gxmPlV"
                                               component="dd"
                                               data-cy={null}
                                             >
                                               <dd
-                                                className="Detail__DetailValue-sc-16ypsyv-1 kCDjmZ"
+                                                className="sc-bxivhb gxmPlV"
                                                 data-cy={null}
                                                 data-pf-content={true}
                                               >
-                                                <ChipGroup
-                                                  className=""
-                                                  collapsedText="\${remaining} more"
-                                                  defaultIsOpen={false}
-                                                  expandedText="Show Less"
+                                                <WithI18n
                                                   numChips={5}
-                                                  withToolbar={false}
+                                                  totalChips={1}
                                                 >
-                                                  <ul
-                                                    className="pf-c-chip-group"
+                                                  <I18n
+                                                    update={true}
+                                                    withHash={true}
                                                   >
-                                                    <InnerChipGroup
-                                                      className=""
-                                                      collapsedText="\${remaining} more"
-                                                      defaultIsOpen={false}
-                                                      expandedText="Show Less"
-                                                      isOpen={false}
+                                                    <ChipGroup
+                                                      i18n={"/i18n/"}
                                                       numChips={5}
-                                                      onToggleCollapse={[Function]}
-                                                      withToolbar={false}
+                                                      totalChips={1}
                                                     >
-                                                      <Component
-                                                        component="li"
-                                                        isReadOnly={false}
-                                                        key=".$3"
+                                                      <ChipGroup
+                                                        aria-label="Chip group category"
+                                                        categoryName=""
+                                                        closeBtnAriaLabel="Close chip group"
+                                                        collapsedText="-4 more"
+                                                        defaultIsOpen={false}
+                                                        expandedText="Show less"
+                                                        isClosable={false}
+                                                        numChips={5}
                                                         onClick={[Function]}
+                                                        tooltipPosition="top"
                                                       >
-                                                        <ComponentWithOuia
-                                                          component={[Function]}
-                                                          componentProps={
-                                                            Object {
-                                                              "children": "Member",
-                                                              "component": "li",
-                                                              "isReadOnly": false,
-                                                              "onClick": [Function],
-                                                            }
-                                                          }
-                                                          consumerContext={null}
+                                                        <GenerateId
+                                                          prefix="pf-random-id-"
                                                         >
-                                                          <Chip
-                                                            className=""
-                                                            closeBtnAriaLabel="close"
-                                                            component="li"
-                                                            isOverflowChip={false}
-                                                            isReadOnly={false}
-                                                            onClick={[Function]}
-                                                            ouiaContext={
-                                                              Object {
-                                                                "isOuia": false,
-                                                                "ouiaId": null,
-                                                              }
-                                                            }
-                                                            tooltipPosition="top"
+                                                          <div
+                                                            className="pf-c-chip-group"
                                                           >
-                                                            <GenerateId
-                                                              prefix="pf-random-id-"
+                                                            <ul
+                                                              aria-label="Chip group category"
+                                                              className="pf-c-chip-group__list"
+                                                              role="list"
                                                             >
                                                               <li
-                                                                className="pf-c-chip"
+                                                                className="pf-c-chip-group__list-item"
+                                                                key="0"
                                                               >
-                                                                <span
-                                                                  className="pf-c-chip__text"
-                                                                  id="pf-random-id-0"
-                                                                >
-                                                                  Member
-                                                                </span>
-                                                                <ChipButton
-                                                                  aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                  ariaLabel="close"
-                                                                  id="remove_pf-random-id-0"
+                                                                <Chip
+                                                                  className=""
+                                                                  closeBtnAriaLabel="close"
+                                                                  component="div"
+                                                                  isOverflowChip={false}
+                                                                  isReadOnly={false}
+                                                                  key=".$3"
                                                                   onClick={[Function]}
+                                                                  tooltipPosition="top"
                                                                 >
-                                                                  <Component
-                                                                    aria-label="close"
-                                                                    aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                    className=""
-                                                                    id="remove_pf-random-id-0"
-                                                                    onClick={[Function]}
-                                                                    variant="plain"
+                                                                  <GenerateId
+                                                                    prefix="pf-random-id-"
                                                                   >
-                                                                    <ComponentWithOuia
-                                                                      component={[Function]}
-                                                                      componentProps={
-                                                                        Object {
-                                                                          "aria-label": "close",
-                                                                          "aria-labelledby": "remove_pf-random-id-0 pf-random-id-0",
-                                                                          "children": <TimesCircleIcon
-                                                                            aria-hidden="true"
-                                                                            color="currentColor"
-                                                                            noVerticalAlign={false}
-                                                                            size="sm"
-                                                                            title={null}
-                                                                          />,
-                                                                          "className": "",
-                                                                          "id": "remove_pf-random-id-0",
-                                                                          "onClick": [Function],
-                                                                          "variant": "plain",
-                                                                        }
-                                                                      }
-                                                                      consumerContext={
-                                                                        Object {
-                                                                          "isOuia": false,
-                                                                          "ouiaId": null,
-                                                                        }
-                                                                      }
+                                                                    <div
+                                                                      className="pf-c-chip"
+                                                                      data-ouia-component-id={2}
+                                                                      data-ouia-component-type="PF4/Chip"
+                                                                      data-ouia-safe={true}
                                                                     >
+                                                                      <span
+                                                                        className="pf-c-chip__text"
+                                                                        id="pf-random-id-1"
+                                                                      >
+                                                                        Member
+                                                                      </span>
                                                                       <Button
                                                                         aria-label="close"
-                                                                        aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
-                                                                        className=""
-                                                                        id="remove_pf-random-id-0"
+                                                                        aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
+                                                                        id="remove_pf-random-id-1"
                                                                         onClick={[Function]}
-                                                                        ouiaContext={
-                                                                          Object {
-                                                                            "isOuia": false,
-                                                                            "ouiaId": null,
-                                                                          }
-                                                                        }
                                                                         variant="plain"
                                                                       >
                                                                         <button
-                                                                          aria-disabled={null}
+                                                                          aria-disabled={false}
                                                                           aria-label="close"
-                                                                          aria-labelledby="remove_pf-random-id-0 pf-random-id-0"
+                                                                          aria-labelledby="remove_pf-random-id-1 pf-random-id-1"
                                                                           className="pf-c-button pf-m-plain"
+                                                                          data-ouia-component-id={3}
+                                                                          data-ouia-component-type="PF4/Button"
+                                                                          data-ouia-safe={true}
                                                                           disabled={false}
-                                                                          id="remove_pf-random-id-0"
+                                                                          id="remove_pf-random-id-1"
                                                                           onClick={[Function]}
-                                                                          tabIndex={null}
                                                                           type="button"
                                                                         >
-                                                                          <TimesCircleIcon
+                                                                          <TimesIcon
                                                                             aria-hidden="true"
                                                                             color="currentColor"
                                                                             noVerticalAlign={false}
                                                                             size="sm"
-                                                                            title={null}
                                                                           >
                                                                             <svg
                                                                               aria-hidden="true"
@@ -918,39 +909,39 @@ exports[`<ResourceAccessListItem /> initially renders succesfully 1`] = `
                                                                                   "verticalAlign": "-0.125em",
                                                                                 }
                                                                               }
-                                                                              viewBox="0 0 512 512"
+                                                                              viewBox="0 0 352 512"
                                                                               width="1em"
                                                                             >
                                                                               <path
-                                                                                d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
+                                                                                d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
                                                                                 transform=""
                                                                               />
                                                                             </svg>
-                                                                          </TimesCircleIcon>
+                                                                          </TimesIcon>
                                                                         </button>
                                                                       </Button>
-                                                                    </ComponentWithOuia>
-                                                                  </Component>
-                                                                </ChipButton>
+                                                                    </div>
+                                                                  </GenerateId>
+                                                                </Chip>
                                                               </li>
-                                                            </GenerateId>
-                                                          </Chip>
-                                                        </ComponentWithOuia>
-                                                      </Component>
-                                                    </InnerChipGroup>
-                                                  </ul>
-                                                </ChipGroup>
+                                                            </ul>
+                                                          </div>
+                                                        </GenerateId>
+                                                      </ChipGroup>
+                                                    </ChipGroup>
+                                                  </I18n>
+                                                </WithI18n>
                                               </dd>
                                             </TextListItem>
                                           </Component>
                                         </StyledComponent>
-                                      </Detail__DetailValue>
+                                      </Styled(Component)>
                                     </Detail>
                                   </dl>
                                 </TextList>
                               </DetailList>
                             </StyledComponent>
-                          </DetailList>
+                          </Styled(DetailList)>
                         </div>
                       </PFDataListCell>
                     </StyledComponent>

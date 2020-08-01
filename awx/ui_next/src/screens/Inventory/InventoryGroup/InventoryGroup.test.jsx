@@ -1,13 +1,16 @@
 import React from 'react';
-import { GroupsAPI } from '@api';
 import { Route } from 'react-router-dom';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { GroupsAPI } from '../../../api';
 
 import InventoryGroup from './InventoryGroup';
 
-jest.mock('@api');
+jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -43,12 +46,9 @@ describe('<InventoryGroup />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups"
-          component={() => (
-            <InventoryGroup setBreadcrumb={() => {}} inventory={inventory} />
-          )}
-        />,
+        <Route path="/inventories/inventory/:id/groups">
+          <InventoryGroup setBreadcrumb={() => {}} inventory={inventory} />
+        </Route>,
         { context: { router: { history } } }
       );
     });

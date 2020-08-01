@@ -1,30 +1,27 @@
 import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   Route,
   Redirect,
-  withRouter,
   Link,
   useLocation,
   useParams,
   useRouteMatch,
 } from 'react-router-dom';
-import useRequest from '@util/useRequest';
-
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import JobList from '@components/JobList';
-import NotificationList from '@components/NotificationList';
-import RoutedTabs from '@components/RoutedTabs';
-import { Schedules } from '@components/Schedule';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import RoutedTabs from '../../components/RoutedTabs';
+import useRequest from '../../util/useRequest';
+import ContentError from '../../components/ContentError';
+import JobList from '../../components/JobList';
+import NotificationList from '../../components/NotificationList';
+import { Schedules } from '../../components/Schedule';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
+import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
 import TemplateSurvey from './TemplateSurvey';
 
 function Template({ i18n, me, setBreadcrumb }) {
@@ -46,6 +43,12 @@ function Template({ i18n, me, setBreadcrumb }) {
           role_level: 'notification_admin_role',
         }),
       ]);
+      if (data.webhook_service && data?.related?.webhook_key) {
+        const {
+          data: { webhook_key },
+        } = await JobTemplatesAPI.readWebhookKey(templateId);
+        data.webhook_key = webhook_key;
+      }
       setBreadcrumb(data);
 
       return {
@@ -72,8 +75,21 @@ function Template({ i18n, me, setBreadcrumb }) {
   };
 
   const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
+  const canAddAndEditSurvey =
+    template?.summary_fields?.user_capabilities.edit ||
+    template?.summary_fields?.user_capabilities.delete;
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Templates`)}
+        </>
+      ),
+      link: `/templates`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details` },
     { name: i18n._(t`Access`), link: `${match.url}/access` },
   ];
@@ -98,7 +114,7 @@ function Template({ i18n, me, setBreadcrumb }) {
       link: `${match.url}/completed_jobs`,
     },
     {
-      name: i18n._(t`Survey`),
+      name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
       link: `${match.url}/survey`,
     }
   );
@@ -107,19 +123,13 @@ function Template({ i18n, me, setBreadcrumb }) {
     tab.id = n;
   });
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/templates" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
+
   if (
     location.pathname.endsWith('edit') ||
     location.pathname.includes('schedules/')
   ) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   const contentError = rolesAndTemplateError;
@@ -130,8 +140,8 @@ function Template({ i18n, me, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response.status === 404 && (
               <span>
-                {i18n._(`Template not found.`)}{' '}
-                <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+                {i18n._(t`Template not found.`)}{' '}
+                <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -143,7 +153,7 @@ function Template({ i18n, me, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/templates/:templateType/:id"
@@ -201,7 +211,10 @@ function Template({ i18n, me, setBreadcrumb }) {
           )}
           {template && (
             <Route path="/templates/:templateType/:id/survey">
-              <TemplateSurvey template={template} />
+              <TemplateSurvey
+                template={template}
+                canEdit={canAddAndEditSurvey}
+              />
             </Route>
           )}
           {!hasRolesandTemplateLoading && (
@@ -211,7 +224,7 @@ function Template({ i18n, me, setBreadcrumb }) {
                   <Link
                     to={`/templates/${match.params.templateType}/${match.params.id}/details`}
                   >
-                    {i18n._(`View Template Details`)}
+                    {i18n._(t`View Template Details`)}
                   </Link>
                 )}
               </ContentError>
@@ -224,4 +237,4 @@ function Template({ i18n, me, setBreadcrumb }) {
 }
 
 export { Template as _Template };
-export default withI18n()(withRouter(Template));
+export default withI18n()(Template);

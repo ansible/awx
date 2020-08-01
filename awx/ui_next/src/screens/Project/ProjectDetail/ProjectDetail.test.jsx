@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { ProjectsAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { ProjectsAPI } from '../../../api';
 import ProjectDetail from './ProjectDetail';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<ProjectDetail />', () => {
   const mockProject = {
@@ -74,12 +77,12 @@ describe('<ProjectDetail />', () => {
     assertDetail('Name', mockProject.name);
     assertDetail('Description', mockProject.description);
     assertDetail('Organization', mockProject.summary_fields.organization.name);
-    assertDetail('SCM Type', 'Git');
-    assertDetail('SCM URL', mockProject.scm_url);
-    assertDetail('SCM Branch', mockProject.scm_branch);
-    assertDetail('SCM Refspec', mockProject.scm_refspec);
+    assertDetail('Source Control Type', 'Git');
+    assertDetail('Source Control URL', mockProject.scm_url);
+    assertDetail('Source Control Branch', mockProject.scm_branch);
+    assertDetail('Source Control Refspec', mockProject.scm_refspec);
     assertDetail(
-      'SCM Credential',
+      'Source Control Credential',
       `Scm: ${mockProject.summary_fields.credential.name}`
     );
     assertDetail(

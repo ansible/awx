@@ -1,12 +1,21 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { sleep } from '@testUtils/testUtils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { JobTemplatesAPI, LabelsAPI, ProjectsAPI } from '@api';
+import { sleep } from '../../../../testUtils/testUtils';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import {
+  CredentialsAPI,
+  CredentialTypesAPI,
+  JobTemplatesAPI,
+  LabelsAPI,
+  ProjectsAPI,
+} from '../../../api';
 import JobTemplateEdit from './JobTemplateEdit';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockJobTemplate = {
   allow_callbacks: false,
@@ -35,7 +44,7 @@ const mockJobTemplate = {
   limit: '',
   name: 'Foo',
   playbook: 'Baz',
-  project: { id: 3, summary_fields: { organization: { id: 1 } } },
+  project: 3,
   scm_branch: '',
   skip_tags: '',
   summary_fields: {
@@ -43,7 +52,10 @@ const mockJobTemplate = {
       edit: true,
     },
     labels: {
-      results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+      results: [
+        { name: 'Sushi', id: 1 },
+        { name: 'Major', id: 2 },
+      ],
     },
     inventory: {
       id: 2,
@@ -54,7 +66,7 @@ const mockJobTemplate = {
       { id: 2, kind: 'ssh', name: 'Bar' },
     ],
     project: {
-      id: 15,
+      id: 3,
       name: 'Boo',
     },
   },
@@ -62,6 +74,12 @@ const mockJobTemplate = {
   type: 'job_template',
   use_fact_cache: false,
   verbosity: '0',
+  webhook_credential: null,
+  webhook_key: 'webhook Key',
+  webhook_service: 'gitlab',
+  related: {
+    webhook_receiver: '/api/v2/workflow_job_templates/57/gitlab/',
+  },
 };
 
 const mockRelatedCredentials = {
@@ -164,6 +182,13 @@ ProjectsAPI.readPlaybooks.mockResolvedValue({
   data: mockRelatedProjectPlaybooks,
 });
 LabelsAPI.read.mockResolvedValue({ data: { results: [] } });
+CredentialsAPI.read.mockResolvedValue({
+  data: {
+    results: [],
+    count: 0,
+  },
+});
+CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
 
 describe('<JobTemplateEdit />', () => {
   beforeEach(() => {
@@ -239,12 +264,15 @@ describe('<JobTemplateEdit />', () => {
 
     const expected = {
       ...mockJobTemplate,
-      project: mockJobTemplate.project.id,
+      project: mockJobTemplate.project,
       ...updatedTemplateData,
     };
     delete expected.summary_fields;
     delete expected.id;
     delete expected.type;
+    delete expected.related;
+    delete expected.webhook_key;
+    delete expected.webhook_url;
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, expected);
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(4);
@@ -298,7 +326,10 @@ describe('<JobTemplateEdit />', () => {
           edit: true,
         },
         labels: {
-          results: [{ name: 'Sushi', id: 1 }, { name: 'Major', id: 2 }],
+          results: [
+            { name: 'Sushi', id: 1 },
+            { name: 'Major', id: 2 },
+          ],
         },
         inventory: {
           id: 2,
@@ -308,6 +339,12 @@ describe('<JobTemplateEdit />', () => {
           { id: 1, kind: 'cloud', name: 'Foo' },
           { id: 2, kind: 'ssh', name: 'Bar' },
         ],
+        webhook_credential: {
+          id: 7,
+          name: 'webhook credential',
+          kind: 'github_token',
+          credential_type_id: 12,
+        },
       },
     };
     await act(async () =>

@@ -5,20 +5,20 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { withRouter } from 'react-router-dom';
 
-import ListHeader from '@components/ListHeader';
-import ContentEmpty from '@components/ContentEmpty';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import Pagination from '@components/Pagination';
-import DataListToolbar from '@components/DataListToolbar';
+import ListHeader from '../ListHeader';
+import ContentEmpty from '../ContentEmpty';
+import ContentError from '../ContentError';
+import ContentLoading from '../ContentLoading';
+import Pagination from '../Pagination';
+import DataListToolbar from '../DataListToolbar';
 
 import {
   encodeNonDefaultQueryString,
   parseQueryString,
   replaceParams,
-} from '@util/qs';
+} from '../../util/qs';
 
-import { QSConfig, SearchColumns, SortColumns } from '@types';
+import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 import PaginatedDataListItem from './PaginatedDataListItem';
 
@@ -43,11 +43,13 @@ class PaginatedDataList extends React.Component {
     this.pushHistoryState(replaceParams(oldParams, { page: pageNumber }));
   }
 
-  handleSetPageSize(event, pageSize) {
+  handleSetPageSize(event, pageSize, page) {
     const { history, qsConfig } = this.props;
     const { search } = history.location;
     const oldParams = parseQueryString(qsConfig, search);
-    this.pushHistoryState(replaceParams(oldParams, { page_size: pageSize }));
+    this.pushHistoryState(
+      replaceParams(oldParams, { page_size: pageSize, page })
+    );
   }
 
   pushHistoryState(params) {
@@ -119,6 +121,28 @@ class PaginatedDataList extends React.Component {
       );
     }
 
+    const ToolbarPagination = (
+      <Pagination
+        isCompact
+        dropDirection="down"
+        itemCount={itemCount}
+        page={queryParams.page || 1}
+        perPage={queryParams.page_size}
+        perPageOptions={
+          showPageSizeOptions
+            ? [
+                { title: '5', value: 5 },
+                { title: '10', value: 10 },
+                { title: '20', value: 20 },
+                { title: '50', value: 50 },
+              ]
+            : []
+        }
+        onSetPage={this.handleSetPage}
+        onPerPageSelect={this.handleSetPageSize}
+      />
+    );
+
     return (
       <Fragment>
         <ListHeader
@@ -128,6 +152,7 @@ class PaginatedDataList extends React.Component {
           searchColumns={searchColumns}
           sortColumns={sortColumns}
           qsConfig={qsConfig}
+          pagination={ToolbarPagination}
         />
         {Content}
         {items.length ? (

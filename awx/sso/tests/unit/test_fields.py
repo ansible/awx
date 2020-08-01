@@ -71,6 +71,14 @@ class TestSAMLTeamAttrField():
             {'team': 'Engineering', 'organization': 'Ansible2'},
             {'team': 'Engineering2', 'organization': 'Ansible'},
         ]},
+        {'remove': True, 'saml_attr': 'foobar', 'team_org_map': [
+            {
+                'team': 'Engineering', 'team_alias': 'Engineering Team',
+                'organization': 'Ansible', 'organization_alias': 'Awesome Org'
+            },
+            {'team': 'Engineering', 'organization': 'Ansible2'},
+            {'team': 'Engineering2', 'organization': 'Ansible'},
+        ]},
     ])
     def test_internal_value_valid(self, data):
         field = SAMLTeamAttrField()

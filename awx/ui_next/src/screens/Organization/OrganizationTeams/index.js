@@ -1,1 +1,1 @@
-export { default } from './OrganizationTeams';
+export { default } from './OrganizationTeamList';

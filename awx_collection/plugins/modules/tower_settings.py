@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_settings
 author: "Nikhil Jain (@jainnikhil30)"
-version_added: "2.7"
 short_description: Modify Ansible Tower settings.
 description:
     - Modify Ansible Tower settings. See
@@ -26,27 +25,17 @@ options:
     name:
       description:
         - Name of setting to modify
-      required: False
       type: str
     value:
       description:
         - Value to be modified for given setting.
         - If given a non-string type, will make best effort to cast it to type API expects.
         - For better control over types, use the C(settings) param instead.
-      required: False
       type: str
     settings:
       description:
         - A data structure to be sent into the settings endpoint
-      required: False
       type: dict
-      version_added: "3.7"
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 requirements:
   - pyyaml
 extends_documentation_fragment: awx.awx.auth
@@ -91,6 +80,10 @@ except ImportError:
 
 
 def coerce_type(module, value):
+    # If our value is already None we can just return directly
+    if value is None:
+        return value
+
     yaml_ish = bool((
         value.startswith('{') and value.endswith('}')
     ) or (
@@ -112,15 +105,14 @@ def coerce_type(module, value):
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=False),
-        value=dict(required=False),
-        settings=dict(required=False, type='dict'),
+        name=dict(),
+        value=dict(),
+        settings=dict(type='dict'),
     )
 
     # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
-        supports_check_mode=True,
         required_one_of=[['name', 'settings']],
         mutually_exclusive=[['name', 'settings']],
         required_if=[['name', 'present', ['value']]]

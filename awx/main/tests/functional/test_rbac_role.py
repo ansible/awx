@@ -60,6 +60,8 @@ def test_org_user_role_attach(user, organization, inventory):
     '''
     admin = user('admin')
     nonmember = user('nonmember')
+    other_org = Organization.objects.create(name="other_org")
+    other_org.member_role.members.add(nonmember)
     inventory.admin_role.members.add(nonmember)
 
     organization.admin_role.members.add(admin)
@@ -186,13 +188,17 @@ def test_need_all_orgs_to_admin_user(user):
 
 # Orphaned user can be added to member role, only in special cases
 @pytest.mark.django_db
-def test_orphaned_user_allowed(org_admin, rando, organization):
+def test_orphaned_user_allowed(org_admin, rando, organization, org_credential):
     '''
     We still allow adoption of orphaned* users by assigning them to
     organization member role, but only in the situation where the
     org admin already posesses indirect access to all of the user's roles
     *orphaned means user is not a member of any organization
     '''
+    # give a descendent role to rando, to trigger the conditional
+    # where all ancestor roles of rando should be in the set of
+    # org_admin roles.
+    org_credential.admin_role.members.add(rando)
     role_access = RoleAccess(org_admin)
     org_access = OrganizationAccess(org_admin)
     assert role_access.can_attach(organization.member_role, rando, 'members', None)

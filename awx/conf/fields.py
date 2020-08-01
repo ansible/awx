@@ -172,9 +172,9 @@ class URLField(CharField):
                         netloc = '{}:{}'.format(netloc, url_parts.port)
                     if url_parts.username:
                         if url_parts.password:
-                            netloc = '{}:{}@{}' % (url_parts.username, url_parts.password, netloc)
+                            netloc = '{}:{}@{}'.format(url_parts.username, url_parts.password, netloc)
                         else:
-                            netloc = '{}@{}' % (url_parts.username, netloc)
+                            netloc = '{}@{}'.format(url_parts.username, netloc)
                     value = urlparse.urlunsplit([url_parts.scheme, netloc, url_parts.path, url_parts.query, url_parts.fragment])
             except Exception:
                 raise  # If something fails here, just fall through and let the validators check it.

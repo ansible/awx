@@ -24,7 +24,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
 
         const { me } = models;
         var form = UserForm,
-            master = {},
+            main = {},
             id = $stateParams.user_id,
             defaultUrl = GetBasePath('users') + id,
             user_obj = resourceData.data;
@@ -50,7 +50,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             $scope.user_id = id;
             $scope.ldap_user = (user_obj.ldap_dn !== null && user_obj.ldap_dn !== undefined && user_obj.ldap_dn !== '') ? true : false;
             $scope.not_ldap_user = !$scope.ldap_user;
-            master.ldap_user = $scope.ldap_user;
+            main.ldap_user = $scope.ldap_user;
             $scope.socialAuthUser = (user_obj.auth.length > 0) ? true : false;
             $scope.last_login = user_obj.last_login;
             $scope.external_account = user_obj.external_account;

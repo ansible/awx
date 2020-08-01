@@ -1,50 +1,53 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { withFormik, useField, useFormikContext } from 'formik';
+import { withFormik, useField } from 'formik';
 import {
   Form,
   FormGroup,
   Switch,
   Checkbox,
   TextInput,
+  Title,
 } from '@patternfly/react-core';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { TagMultiSelect } from '@components/MultiSelect';
-import useRequest from '@util/useRequest';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { TagMultiSelect } from '../../../components/MultiSelect';
+import useRequest from '../../../util/useRequest';
 
-import FormActionGroup from '@components/FormActionGroup';
+import FormActionGroup from '../../../components/FormActionGroup';
 import FormField, {
   CheckboxField,
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
-import FieldWithPrompt from '@components/FieldWithPrompt';
+} from '../../../components/FormField';
+import FieldWithPrompt from '../../../components/FieldWithPrompt';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
   FormCheckboxLayout,
-} from '@components/FormLayout';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { required } from '@util/validators';
-import { JobTemplate } from '@types';
+  SubFormLayout,
+} from '../../../components/FormLayout';
+import { VariablesField } from '../../../components/CodeMirrorInput';
+import { required } from '../../../util/validators';
+import { JobTemplate } from '../../../types';
 import {
   InventoryLookup,
   InstanceGroupsLookup,
   ProjectLookup,
   MultiCredentialsLookup,
-} from '@components/Lookup';
-import { JobTemplatesAPI, ProjectsAPI } from '@api';
+} from '../../../components/Lookup';
+import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 import PlaybookSelect from './PlaybookSelect';
+import WebhookSubForm from './WebhookSubForm';
+
+const { origin } = document.location;
 
 function JobTemplateForm({
   template,
-  validateField,
   handleCancel,
   handleSubmit,
   setFieldValue,
@@ -52,15 +55,17 @@ function JobTemplateForm({
   i18n,
 }) {
   const [contentError, setContentError] = useState(false);
-  const [project, setProject] = useState(null);
   const [inventory, setInventory] = useState(
     template?.summary_fields?.inventory
   );
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
   );
+  const [enableWebhooks, setEnableWebhooks] = useState(
+    Boolean(template.webhook_service)
+  );
 
-  const { values: formikValues } = useFormikContext();
+  const [askInventoryOnLaunchField] = useField('ask_inventory_on_launch');
   const [jobTypeField, jobTypeMeta, jobTypeHelpers] = useField({
     name: 'job_type',
     validate: required(null, i18n),
@@ -68,19 +73,16 @@ function JobTemplateForm({
   const [, inventoryMeta, inventoryHelpers] = useField('inventory');
   const [projectField, projectMeta, projectHelpers] = useField({
     name: 'project',
-    validate: () => handleProjectValidation(),
+    validate: project => handleProjectValidation(project),
   });
-
   const [scmField, , scmHelpers] = useField('scm_branch');
-
   const [playbookField, playbookMeta, playbookHelpers] = useField({
     name: 'playbook',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
-
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
-  const [limitField, limitMeta] = useField('limit');
+  const [limitField, limitMeta, limitHelpers] = useField('limit');
   const [verbosityField] = useField('verbosity');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] = useField(
@@ -95,14 +97,12 @@ function JobTemplateForm({
     contentLoading: hasProjectLoading,
   } = useRequest(
     useCallback(async () => {
-      let projectData;
       if (template?.project) {
-        projectData = await ProjectsAPI.readDetail(template?.project);
-        validateField('project');
-        setProject(projectData.data);
+        await ProjectsAPI.readDetail(template?.project);
       }
-    }, [template, validateField])
+    }, [template])
   );
+
   const {
     request: loadRelatedInstanceGroups,
     error: instanceGroupError,
@@ -126,24 +126,30 @@ function JobTemplateForm({
     loadRelatedInstanceGroups();
   }, [loadRelatedInstanceGroups]);
 
-  const handleProjectValidation = () => {
+  const handleProjectValidation = project => {
     if (!project && projectMeta.touched) {
       return i18n._(t`Select a value for this field`);
     }
-    if (project && project.status === 'never updated') {
+    if (project?.value?.status === 'never updated') {
       return i18n._(t`This project needs to be updated`);
     }
     return undefined;
   };
 
   const handleProjectUpdate = useCallback(
-    newProject => {
-      setProject(newProject);
-      projectHelpers.setValue(newProject);
+    value => {
       playbookHelpers.setValue(0);
       scmHelpers.setValue('');
+      projectHelpers.setValue(value);
     },
-    [setProject, projectHelpers, playbookHelpers, scmHelpers]
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleProjectAutocomplete = useCallback(
+    val => {
+      projectHelpers.setValue(val);
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const jobTypeOptions = [
@@ -170,7 +176,6 @@ function JobTemplateForm({
   ];
   let callbackUrl;
   if (template?.related) {
-    const { origin } = document.location;
     const path = template.related.callback || `${template.url}callback`;
     callbackUrl = `${origin}${path}`;
   }
@@ -179,8 +184,12 @@ function JobTemplateForm({
     return <ContentLoading />;
   }
 
-  if (instanceGroupError || projectContentError) {
-    return <ContentError error={contentError} />;
+  if (contentError || instanceGroupError || projectContentError) {
+    return (
+      <ContentError
+        error={contentError || instanceGroupError || projectContentError}
+      />
+    );
   }
 
   return (
@@ -223,7 +232,7 @@ function JobTemplateForm({
         </FieldWithPrompt>
         <FieldWithPrompt
           fieldId="template-inventory"
-          isRequired
+          isRequired={!askInventoryOnLaunchField.value}
           label={i18n._(t`Inventory`)}
           promptId="template-ask-inventory-on-launch"
           promptName="ask_inventory_on_launch"
@@ -234,14 +243,14 @@ function JobTemplateForm({
             value={inventory}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
-              inventoryHelpers.setValue(value.id);
+              inventoryHelpers.setValue(value ? value.id : null);
               setInventory(value);
             }}
-            required
+            required={!askInventoryOnLaunchField.value}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
           />
-          {(inventoryMeta.touched || formikValues.ask_inventory_on_launch) &&
+          {(inventoryMeta.touched || askInventoryOnLaunchField.value) &&
             inventoryMeta.error && (
               <div
                 className="pf-c-form__helper-text pf-m-error"
@@ -251,29 +260,32 @@ function JobTemplateForm({
               </div>
             )}
         </FieldWithPrompt>
-
         <ProjectLookup
-          value={project}
+          value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
           tooltip={i18n._(t`Select the project containing the playbook
                   you want this job to execute.`)}
           isValid={!projectMeta.touched || !projectMeta.error}
           helperTextInvalid={projectMeta.error}
           onChange={handleProjectUpdate}
+          autocomplete={handleProjectAutocomplete}
           required
         />
-        {project?.allow_override && (
+        {projectField.value?.allow_override && (
           <FieldWithPrompt
             fieldId="template-scm-branch"
-            label={i18n._(t`SCM Branch`)}
+            label={i18n._(t`Source Control Branch`)}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
+            tooltip={i18n._(
+              t`Select a branch for the job template. This branch is applied to all job template nodes that prompt for a branch.`
+            )}
           >
             <TextInput
               id="template-scm-branch"
               {...scmField}
-              onChange={(value, event) => {
-                scmField.onChange(event);
+              onChange={value => {
+                scmHelpers.setValue(value);
               }}
             />
           </FieldWithPrompt>
@@ -281,15 +293,22 @@ function JobTemplateForm({
         <FormGroup
           fieldId="template-playbook"
           helperTextInvalid={playbookMeta.error}
+          validated={
+            !playbookMeta.touched || !playbookMeta.error ? 'default' : 'error'
+          }
           isRequired
           label={i18n._(t`Playbook`)}
+          labelIcon={
+            <FieldTooltip
+              content={i18n._(
+                t`Select the playbook to be executed by this job.`
+              )}
+            />
+          }
         >
-          <FieldTooltip
-            content={i18n._(t`Select the playbook to be executed by this job.`)}
-          />
           <PlaybookSelect
-            projectId={project?.id || projectField.value?.id}
-            isValid={!(playbookMeta.touched || playbookMeta.error)}
+            projectId={projectField.value?.id}
+            isValid={!playbookMeta.touched || !playbookMeta.error}
             field={playbookField}
             onBlur={() => playbookHelpers.setTouched()}
             onError={setContentError}
@@ -315,16 +334,22 @@ function JobTemplateForm({
               onError={setContentError}
             />
           </FieldWithPrompt>
-          <FormGroup label={i18n._(t`Labels`)} fieldId="template-labels">
-            <FieldTooltip
-              content={i18n._(t`Optional labels that describe this job template,
+          <FormGroup
+            label={i18n._(t`Labels`)}
+            labelIcon={
+              <FieldTooltip
+                content={i18n._(t`Optional labels that describe this job template,
                       such as 'dev' or 'test'. Labels can be used to group and filter
                       job templates and completed jobs.`)}
-            />
+              />
+            }
+            fieldId="template-labels"
+          >
             <LabelSelect
               value={labelsField.value}
               onChange={labels => labelsHelpers.setValue(labels)}
               onError={setContentError}
+              createText={i18n._(t`Create`)}
             />
           </FormGroup>
           <VariablesField
@@ -332,6 +357,9 @@ function JobTemplateForm({
             name="extra_vars"
             label={i18n._(t`Variables`)}
             promptId="template-ask-variables-on-launch"
+            tooltip={i18n._(
+              t`Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.`
+            )}
           />
           <FormColumnLayout>
             <FormField
@@ -366,9 +394,11 @@ function JobTemplateForm({
               <TextInput
                 id="template-limit"
                 {...limitField}
-                isValid={!limitMeta.touched || !limitMeta.error}
-                onChange={(value, event) => {
-                  limitField.onChange(event);
+                validated={
+                  !limitMeta.touched || !limitMeta.error ? 'default' : 'error'
+                }
+                onChange={value => {
+                  limitHelpers.setValue(value);
                 }}
               />
             </FieldWithPrompt>
@@ -493,6 +523,23 @@ function JobTemplateForm({
                       setAllowCallbacks(checked);
                     }}
                   />
+                  <Checkbox
+                    aria-label={i18n._(t`Enable Webhook`)}
+                    label={
+                      <span>
+                        {i18n._(t`Enable Webhook`)}
+                        &nbsp;
+                        <FieldTooltip
+                          content={i18n._(t`Enable webhook for this template.`)}
+                        />
+                      </span>
+                    }
+                    id="wfjt-enabled-webhooks"
+                    isChecked={enableWebhooks}
+                    onChange={checked => {
+                      setEnableWebhooks(checked);
+                    }}
+                  />
                   <CheckboxField
                     id="option-concurrent"
                     name="allow_simultaneous"
@@ -511,26 +558,53 @@ function JobTemplateForm({
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
-            {allowCallbacks && (
+
+            {(allowCallbacks || enableWebhooks) && (
               <>
-                {callbackUrl && (
-                  <FormGroup
-                    label={i18n._(t`Provisioning Callback URL`)}
-                    fieldId="template-callback-url"
-                  >
-                    <TextInput
-                      id="template-callback-url"
-                      isDisabled
-                      value={callbackUrl}
-                    />
-                  </FormGroup>
-                )}
-                <FormField
-                  id="template-host-config-key"
-                  name="host_config_key"
-                  label={i18n._(t`Host Config Key`)}
-                  validate={allowCallbacks ? required(null, i18n) : null}
-                />
+                <SubFormLayout>
+                  {allowCallbacks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Provisioning Callback details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        {callbackUrl && (
+                          <FormGroup
+                            label={i18n._(t`Provisioning Callback URL`)}
+                            fieldId="template-callback-url"
+                          >
+                            <TextInput
+                              id="template-callback-url"
+                              isDisabled
+                              value={callbackUrl}
+                            />
+                          </FormGroup>
+                        )}
+                        <FormField
+                          id="template-host-config-key"
+                          name="host_config_key"
+                          label={i18n._(t`Host Config Key`)}
+                          validate={
+                            allowCallbacks ? required(null, i18n) : null
+                          }
+                        />
+                      </FormColumnLayout>
+                    </>
+                  )}
+
+                  {allowCallbacks && enableWebhooks && <br />}
+
+                  {enableWebhooks && (
+                    <>
+                      <Title size="md" headingLevel="h4">
+                        {i18n._(t`Webhook details`)}
+                      </Title>
+                      <FormColumnLayout>
+                        <WebhookSubForm templateType={template.type} />
+                      </FormColumnLayout>
+                    </>
+                  )}
+                </SubFormLayout>
               </>
             )}
           </FormColumnLayout>
@@ -567,7 +641,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {} }) {
+  mapPropsToValues({ template = {}, i18n }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -576,6 +650,8 @@ const FormikApp = withFormik({
     } = template;
 
     return {
+      allow_callbacks: template.allow_callbacks || false,
+      allow_simultaneous: template.allow_simultaneous || false,
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
@@ -586,31 +662,37 @@ const FormikApp = withFormik({
       ask_tags_on_launch: template.ask_tags_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
       ask_verbosity_on_launch: template.ask_verbosity_on_launch || false,
-      name: template.name || '',
-      description: template.description || '',
-      job_type: template.job_type || 'run',
-      inventory: template.inventory || null,
-      project: template.project || null,
-      scm_branch: template.scm_branch || '',
-      playbook: template.playbook || '',
-      labels: summary_fields.labels.results || [],
-      forks: template.forks || 0,
-      limit: template.limit || '',
-      verbosity: template.verbosity || '0',
-      job_slice_count: template.job_slice_count || 1,
-      timeout: template.timeout || 0,
-      diff_mode: template.diff_mode || false,
-      job_tags: template.job_tags || '',
-      skip_tags: template.skip_tags || '',
       become_enabled: template.become_enabled || false,
-      allow_callbacks: template.allow_callbacks || false,
-      allow_simultaneous: template.allow_simultaneous || false,
-      use_fact_cache: template.use_fact_cache || false,
+      credentials: summary_fields.credentials || [],
+      description: template.description || '',
+      diff_mode: template.diff_mode || false,
+      extra_vars: template.extra_vars || '---\n',
+      forks: template.forks || 0,
       host_config_key: template.host_config_key || '',
       initialInstanceGroups: [],
       instanceGroups: [],
-      credentials: summary_fields.credentials || [],
-      extra_vars: template.extra_vars || '---\n',
+      inventory: template.inventory || null,
+      job_slice_count: template.job_slice_count || 1,
+      job_tags: template.job_tags || '',
+      job_type: template.job_type || 'run',
+      labels: summary_fields.labels.results || [],
+      limit: template.limit || '',
+      name: template.name || '',
+      playbook: template.playbook || '',
+      project: summary_fields?.project || null,
+      scm_branch: template.scm_branch || '',
+      skip_tags: template.skip_tags || '',
+      timeout: template.timeout || 0,
+      use_fact_cache: template.use_fact_cache || false,
+      verbosity: template.verbosity || '0',
+      webhook_service: template.webhook_service || '',
+      webhook_url: template?.related?.webhook_receiver
+        ? `${origin}${template.related.webhook_receiver}`
+        : i18n._(t`a new webhook url will be generated on save.`).toUpperCase(),
+      webhook_key:
+        template.webhook_key ||
+        i18n._(t`a new webhook key will be generated on save.`).toUpperCase(),
+      webhook_credential: template?.summary_fields?.webhook_credential || null,
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {
@@ -637,4 +719,4 @@ const FormikApp = withFormik({
 })(JobTemplateForm);
 
 export { JobTemplateForm as _JobTemplateForm };
-export default withI18n()(withRouter(FormikApp));
+export default withI18n()(FormikApp);

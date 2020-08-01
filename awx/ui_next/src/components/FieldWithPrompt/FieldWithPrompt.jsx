@@ -2,21 +2,16 @@ import React from 'react';
 import { bool, node, string } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CheckboxField, FieldTooltip } from '@components/FormField';
 import styled from 'styled-components';
+import { CheckboxField, FieldTooltip } from '../FormField';
 
 const FieldHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding-bottom: var(--pf-c-form__label--PaddingBottom);
-
-  label {
-    --pf-c-form__label--PaddingBottom: 0px;
-  }
 `;
 
 const StyledCheckboxField = styled(CheckboxField)`
   --pf-c-check__label--FontSize: var(--pf-c-form__label--FontSize);
+  margin-left: auto;
 `;
 
 function FieldWithPrompt({
@@ -45,7 +40,7 @@ function FieldWithPrompt({
         </div>
         <StyledCheckboxField
           id={promptId}
-          label={i18n._(t`Prompt On Launch`)}
+          label={i18n._(t`Prompt on launch`)}
           name={promptName}
         />
       </FieldHeader>

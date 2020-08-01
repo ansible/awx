@@ -15,7 +15,7 @@ from django.apps import apps
 from django.db import models
 from django.conf import settings
 
-from awx.main.constants import LOGGER_BLACKLIST
+from awx.main.constants import LOGGER_BLOCKLIST
 from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter', 'ExternalLoggerEnabled', 'DynamicLevelFilter']
@@ -48,11 +48,11 @@ class FieldFromSettings(object):
             instance.settings_override[self.setting_name] = value
 
 
-def record_is_blacklisted(record):
-    """Given a log record, return True if it is considered to be in
-    the logging blacklist, return False if not
+def record_is_blocked(record):
+    """Given a log record, return True if it is considered to be
+    blocked, return False if not
     """
-    for logger_name in LOGGER_BLACKLIST:
+    for logger_name in LOGGER_BLOCKLIST:
         if record.name.startswith(logger_name):
             return True
     return False
@@ -81,7 +81,7 @@ class ExternalLoggerEnabled(Filter):
         True - should be logged
         """
         # Do not send exceptions to external logger
-        if record_is_blacklisted(record):
+        if record_is_blocked(record):
             return False
         # General enablement
         if not self.enabled_flag:
@@ -108,8 +108,8 @@ class DynamicLevelFilter(Filter):
         """Filters out logs that have a level below the threshold defined
         by the databse setting LOG_AGGREGATOR_LEVEL
         """
-        if record_is_blacklisted(record):
-            # Fine to write blacklisted loggers to file, apply default filtering level
+        if record_is_blocked(record):
+            # Fine to write denied loggers to file, apply default filtering level
             cutoff_level = logging.WARNING
         else:
             try:
@@ -179,7 +179,7 @@ class SmartFilter(object):
               pyparsing do the heavy lifting.
         TODO: separate django filter requests from our custom json filter
               request so we don't process the key any. This could be
-              accomplished using a whitelist or introspecting the
+              accomplished using an allowed list or introspecting the
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):

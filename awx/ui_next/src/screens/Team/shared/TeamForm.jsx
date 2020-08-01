@@ -4,11 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { Form } from '@patternfly/react-core';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import FormField, { FormSubmitError } from '@components/FormField';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { required } from '@util/validators';
-import { FormColumnLayout } from '@components/FormLayout';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import FormField, { FormSubmitError } from '../../../components/FormField';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import { required } from '../../../util/validators';
+import { FormColumnLayout } from '../../../components/FormLayout';
 
 function TeamFormFields(props) {
   const { team, i18n } = props;

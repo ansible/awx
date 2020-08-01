@@ -1,10 +1,10 @@
+import 'styled-components/macro';
 import React from 'react';
 import { func } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
   Chip,
-  ChipGroup,
   DataListItem,
   DataListItemRow,
   DataListItemCells as PFDataListItemCells,
@@ -12,12 +12,13 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
 
-import { DetailList, Detail } from '@components/DetailList';
-import { AccessRecord } from '@types';
+import ChipGroup from '../ChipGroup';
+import { DetailList, Detail } from '../DetailList';
+import { AccessRecord } from '../../types';
 
 const DataListItemCells = styled(PFDataListItemCells)`
   align-items: start;
@@ -58,10 +59,10 @@ class ResourceAccessListItem extends React.Component {
     return (
       <Chip
         key={role.id}
-        isReadOnly={!role.user_capabilities.unattach}
         onClick={() => {
           onRoleDelete(role, accessRecord);
         }}
+        isReadOnly={!role.user_capabilities.unattach}
       >
         {role.name}
       </Chip>
@@ -115,7 +116,7 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`User Roles`)}
                       value={
-                        <ChipGroup numChips={5}>
+                        <ChipGroup numChips={5} totalChips={userRoles.length}>
                           {userRoles.map(this.renderChip)}
                         </ChipGroup>
                       }
@@ -125,7 +126,7 @@ class ResourceAccessListItem extends React.Component {
                     <Detail
                       label={i18n._(t`Team Roles`)}
                       value={
-                        <ChipGroup numChips={5}>
+                        <ChipGroup numChips={5} totalChips={teamRoles.length}>
                           {teamRoles.map(this.renderChip)}
                         </ChipGroup>
                       }

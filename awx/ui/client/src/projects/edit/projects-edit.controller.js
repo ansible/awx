@@ -17,7 +17,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
 
         let form = ProjectsForm(),
             defaultUrl = GetBasePath('projects') + $stateParams.project_id + '/',
-            master = {},
+            main = {},
             id = $stateParams.project_id;
 
         $scope.project_local_paths = [];
@@ -46,7 +46,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             $scope.projectLoadedRemove();
         }
         $scope.projectLoadedRemove = $scope.$on('projectLoaded', function() {
-            GetProjectPath({ scope: $scope, master: master });
+            GetProjectPath({ scope: $scope, main: main });
 
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
@@ -76,19 +76,19 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                         if (form.fields[fld].type === 'checkbox_group') {
                             for (i = 0; i < form.fields[fld].fields.length; i++) {
                                 $scope[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
-                                master[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
+                                main[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
                             }
                         } else {
                             if (data[fld] !== undefined) {
                                 $scope[fld] = data[fld];
-                                master[fld] = data[fld];
+                                main[fld] = data[fld];
                             }
                         }
                         if (form.fields[fld].sourceModel && data.summary_fields &&
                             data.summary_fields[form.fields[fld].sourceModel]) {
                             $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                            master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            main[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                         }
                     }
@@ -109,7 +109,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                         $scope.scmRequired = false;
                     }
 
-                    master.scm_type = $scope.scm_type;
+                    main.scm_type = $scope.scm_type;
                     CreateSelect2({
                         element: '#project_scm_type',
                         multiple: false

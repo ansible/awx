@@ -2,8 +2,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import SelectableCard from '@components/SelectableCard';
-import Wizard from '@components/Wizard';
+import SelectableCard from '../SelectableCard';
+import Wizard from '../Wizard';
 import SelectResourceStep from './SelectResourceStep';
 import SelectRoleStep from './SelectRoleStep';
 import { TeamsAPI, UsersAPI } from '../../api';
@@ -258,7 +258,7 @@ class AddResourceRole extends React.Component {
                 sortColumns={userSortColumns}
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={readUsers}
+                fetchItems={readUsers}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 sortedColumnKey="username"
@@ -269,7 +269,7 @@ class AddResourceRole extends React.Component {
                 searchColumns={teamSearchColumns}
                 sortColumns={teamSortColumns}
                 onRowClick={this.handleResourceCheckboxClick}
-                onSearch={readTeams}
+                fetchItems={readTeams}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
               />
@@ -312,6 +312,8 @@ class AddResourceRole extends React.Component {
         steps={steps}
         title={wizardTitle}
         nextButtonText={currentStep.nextButtonText || undefined}
+        backButtonText={i18n._(t`Back`)}
+        cancelButtonText={i18n._(t`Cancel`)}
       />
     );
   }

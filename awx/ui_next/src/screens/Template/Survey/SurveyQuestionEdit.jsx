@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import ContentLoading from '@components/ContentLoading';
-import { CardBody } from '@components/Card';
+import ContentLoading from '../../../components/ContentLoading';
+import { CardBody } from '../../../components/Card';
 import SurveyQuestionForm from './SurveyQuestionForm';
 
 export default function SurveyQuestionEdit({ survey, updateSurvey }) {
@@ -38,6 +38,13 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
       );
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');
+      }
+      if (formData.type === 'multiselect') {
+        formData.default = formData.default
+          .split('\n')
+          .filter(v => v !== '' || '\n')
+          .map(v => v.trim())
+          .join('\n');
       }
       await updateSurvey([
         ...survey.spec.slice(0, questionIndex),

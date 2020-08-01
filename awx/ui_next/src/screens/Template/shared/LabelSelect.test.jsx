@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import { LabelsAPI } from '@api';
+import { LabelsAPI } from '../../../api';
 import LabelSelect from './LabelSelect';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
-const options = [{ id: 1, name: 'one' }, { id: 2, name: 'two' }];
+const options = [
+  { id: 1, name: 'one' },
+  { id: 2, name: 'two' },
+];
 
 describe('<LabelSelect />', () => {
   afterEach(() => {
@@ -40,7 +43,10 @@ describe('<LabelSelect />', () => {
     });
     LabelsAPI.read.mockReturnValueOnce({
       data: {
-        results: [{ id: 3, name: 'three' }, { id: 4, name: 'four' }],
+        results: [
+          { id: 3, name: 'three' },
+          { id: 4, name: 'four' },
+        ],
       },
     });
     let wrapper;

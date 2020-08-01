@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_list
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: List Ansible Tower jobs.
 description:
     - List Ansible Tower jobs. See
@@ -41,12 +40,6 @@ options:
       description:
         - Query used to further filter the list of jobs. C({"foo":"bar"}) will be passed at C(?foo=bar)
       type: dict
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -102,7 +95,6 @@ def main():
     # Create a module for ourselves
     module = TowerModule(
         argument_spec=argument_spec,
-        supports_check_mode=True,
         mutually_exclusive=[
             ('page', 'all_pages'),
         ]

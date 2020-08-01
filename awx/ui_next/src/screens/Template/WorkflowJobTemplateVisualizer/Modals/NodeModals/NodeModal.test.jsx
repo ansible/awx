@@ -3,20 +3,23 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+} from '../../../../../contexts/Workflow';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../../../api';
 import NodeModal from './NodeModal';
 
-jest.mock('@api/models/InventorySources');
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/Projects');
-jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('../../../../../api/models/InventorySources');
+jest.mock('../../../../../api/models/JobTemplates');
+jest.mock('../../../../../api/models/Projects');
+jest.mock('../../../../../api/models/WorkflowJobTemplates');
 
 let wrapper;
 const dispatch = jest.fn();
@@ -95,6 +98,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
     });
 
     afterAll(() => {
@@ -307,6 +311,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
@@ -388,6 +393,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(

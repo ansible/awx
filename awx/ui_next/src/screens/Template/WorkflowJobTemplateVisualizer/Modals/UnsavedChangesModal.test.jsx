@@ -1,6 +1,6 @@
 import React from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { WorkflowDispatchContext } from '../../../../contexts/Workflow';
+import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import UnsavedChangesModal from './UnsavedChangesModal';
 
 let wrapper;

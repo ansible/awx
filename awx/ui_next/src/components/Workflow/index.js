@@ -1,7 +1,5 @@
 export { default as WorkflowActionTooltip } from './WorkflowActionTooltip';
-export {
-  default as WorkflowActionTooltipItem,
-} from './WorkflowActionTooltipItem';
+export { default as WorkflowActionTooltipItem } from './WorkflowActionTooltipItem';
 export { default as WorkflowHelp } from './WorkflowHelp';
 export { default as WorkflowLegend } from './WorkflowLegend';
 export { default as WorkflowLinkHelp } from './WorkflowLinkHelp';

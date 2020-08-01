@@ -157,8 +157,7 @@ If you start a second terminal session, you can take a look at the running conta
 $ docker ps
 CONTAINER ID        IMAGE                                              COMMAND                  CREATED             STATUS              PORTS                                                                                                                                                              NAMES
 44251b476f98        gcr.io/ansible-tower-engineering/awx_devel:devel   "/entrypoint.sh /bin…"   27 seconds ago      Up 23 seconds       0.0.0.0:6899->6899/tcp, 0.0.0.0:7899-7999->7899-7999/tcp, 0.0.0.0:8013->8013/tcp, 0.0.0.0:8043->8043/tcp, 0.0.0.0:8080->8080/tcp, 22/tcp, 0.0.0.0:8888->8888/tcp   tools_awx_run_9e820694d57e
-b049a43817b4        memcached:alpine                                   "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:11211->11211/tcp                                                                                                                                           tools_memcached_1
-40de380e3c2e        redis:latest                                       "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:6379->6379/tcp                                                                                                                                             tools_redis_1
+40de380e3c2e        redis:latest                                       "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds
 b66a506d3007        postgres:10                                        "docker-entrypoint.s…"   28 seconds ago      Up 26 seconds       0.0.0.0:5432->5432/tcp                                                                                                                                             tools_postgres_1
 ```
 **NOTE**
@@ -215,17 +214,22 @@ Using `docker exec`, this will create a session in the running *awx* container, 
 If you want to start and use the development environment, you'll first need to bootstrap it by running the following command:
 
 ```bash
-(container)# /bootstrap_development.sh
+(container)# /usr/bin/bootstrap_development.sh
 ```
 
-The above will do all the setup tasks, including running database migrations, so it may take a couple minutes.
+The above will do all the setup tasks, including running database migrations, so it may take a couple minutes. Once it's done it
+will drop you back to the shell.
 
-Now you can start each service individually, or start all services in a pre-configured tmux session like so:
+In order to launch all developer services:
 
 ```bash
-(container)# cd /awx_devel
-(container)# make server
+(container)# /usr/bin/launch_awx.sh
 ```
+
+`launch_awx.sh` also calls `bootstrap_development.sh` so if all you are doing is launching the supervisor to start all services, you don't
+need to call `bootstrap_development.sh` first.
+
+
 
 ### Post Build Steps
 

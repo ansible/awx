@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { JobTemplatesAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import PaginatedDataList from '@components/PaginatedDataList';
-import DataListToolbar from '@components/DataListToolbar';
-import CheckboxListItem from '@components/CheckboxListItem';
+import { JobTemplatesAPI } from '../../../../../../api';
+import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
+import PaginatedDataList from '../../../../../../components/PaginatedDataList';
+import DataListToolbar from '../../../../../../components/DataListToolbar';
+import CheckboxListItem from '../../../../../../components/CheckboxListItem';
 
 const QS_CONFIG = getQSConfig('job_templates', {
   page: 1,
@@ -15,36 +16,34 @@ const QS_CONFIG = getQSConfig('job_templates', {
   order_by: 'name',
 });
 
-function JobTemplatesList({
-  i18n,
-  history,
-  nodeResource,
-  onUpdateNodeResource,
-}) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [jobTemplates, setJobTemplates] = useState([]);
+function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
+  const location = useLocation();
+
+  const {
+    result: { jobTemplates, count },
+    error,
+    isLoading,
+    request: fetchJobTemplates,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const results = await JobTemplatesAPI.read(params, {
+        role_level: 'execute_role',
+      });
+      return {
+        jobTemplates: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      jobTemplates: [],
+      count: 0,
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setJobTemplates([]);
-      setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await JobTemplatesAPI.read(params, {
-          role_level: 'execute_role',
-        });
-        setJobTemplates(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [history.location]);
+    fetchJobTemplates();
+  }, [fetchJobTemplates]);
 
   return (
     <PaginatedDataList
@@ -79,11 +78,11 @@ function JobTemplatesList({
           key: 'playbook',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
       ]}
@@ -106,4 +105,4 @@ JobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(JobTemplatesList));
+export default withI18n()(JobTemplatesList);

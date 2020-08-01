@@ -2,18 +2,17 @@ import React, { Component } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Switch, Route, withRouter, Redirect, Link } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import NotificationList from '@components/NotificationList';
-import { ResourceAccessList } from '@components/ResourceAccessList';
-import { Schedules } from '@components/Schedule';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import NotificationList from '../../components/NotificationList';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
+import { Schedules } from '../../components/Schedule';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 import ProjectJobTemplatesList from './ProjectJobTemplatesList';
-import { OrganizationsAPI, ProjectsAPI } from '@api';
+import { OrganizationsAPI, ProjectsAPI } from '../../api';
 
 class Project extends Component {
   constructor(props) {
@@ -121,6 +120,16 @@ class Project extends Component {
     const canToggleNotifications = isNotifAdmin;
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Projects`)}
+          </>
+        ),
+        link: `/projects`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details` },
       { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
@@ -148,24 +157,14 @@ class Project extends Component {
       tab.id = n;
     });
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/projects" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
-
-    if (!isInitialized) {
-      cardHeader = null;
-    }
+    let showCardHeader = true;
 
     if (
+      !isInitialized ||
       location.pathname.endsWith('edit') ||
       location.pathname.includes('schedules/')
     ) {
-      cardHeader = null;
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -175,8 +174,8 @@ class Project extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Project not found.`)}{' '}
-                  <Link to="/projects">{i18n._(`View all Projects.`)}</Link>
+                  {i18n._(t`Project not found.`)}{' '}
+                  <Link to="/projects">{i18n._(t`View all Projects.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -188,79 +187,58 @@ class Project extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect from="/projects/:id" to="/projects/:id/details" exact />
             {project && (
-              <Route
-                path="/projects/:id/edit"
-                render={() => <ProjectEdit project={project} />}
-              />
+              <Route path="/projects/:id/edit">
+                <ProjectEdit project={project} />
+              </Route>
             )}
             {project && (
-              <Route
-                path="/projects/:id/details"
-                render={() => <ProjectDetail project={project} />}
-              />
+              <Route path="/projects/:id/details">
+                <ProjectDetail project={project} />
+              </Route>
             )}
             {project && (
-              <Route
-                path="/projects/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={project}
-                    apiModel={ProjectsAPI}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/access">
+                <ResourceAccessList resource={project} apiModel={ProjectsAPI} />
+              </Route>
             )}
             {canSeeNotificationsTab && (
-              <Route
-                path="/projects/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={ProjectsAPI}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={ProjectsAPI}
+                />
+              </Route>
             )}
-            <Route
-              path="/projects/:id/job_templates"
-              render={() => (
-                <ProjectJobTemplatesList id={Number(match.params.id)} />
-              )}
-            />
+            <Route path="/projects/:id/job_templates">
+              <ProjectJobTemplatesList id={Number(match.params.id)} />
+            </Route>
             {project?.scm_type && project.scm_type !== '' && (
-              <Route
-                path="/projects/:id/schedules"
-                render={() => (
-                  <Schedules
-                    setBreadcrumb={setBreadcrumb}
-                    unifiedJobTemplate={project}
-                    createSchedule={this.createSchedule}
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
+              <Route path="/projects/:id/schedules">
+                <Schedules
+                  setBreadcrumb={setBreadcrumb}
+                  unifiedJobTemplate={project}
+                  createSchedule={this.createSchedule}
+                  loadSchedules={this.loadSchedules}
+                  loadScheduleOptions={this.loadScheduleOptions}
+                />
+              </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/projects/${match.params.id}/details`}>
-                        {i18n._(`View Project Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
+                <ContentError isNotFound>
+                  {match.params.id && (
+                    <Link to={`/projects/${match.params.id}/details`}>
+                      {i18n._(t`View Project Details`)}
+                    </Link>
+                  )}
+                </ContentError>
+              )}
+            </Route>
             ,
           </Switch>
         </Card>

@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+} from '../../../../../contexts/Workflow';
 import NodeModal from './NodeModal';
 
 function NodeAddModal({ i18n }) {

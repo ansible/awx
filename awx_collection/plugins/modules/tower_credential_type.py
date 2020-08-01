@@ -18,7 +18,6 @@ DOCUMENTATION = '''
 ---
 module: tower_credential_type
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: Create, update, or destroy custom Ansible Tower credential type.
 description:
     - Create, update, or destroy Ansible Tower credential type. See
@@ -32,7 +31,6 @@ options:
     description:
       description:
         - The description of the credential type to give more detail about it.
-      required: False
       type: str
     kind:
       description:
@@ -41,35 +39,25 @@ options:
           net can be used for creating credential types. Refer to the Ansible
           for more information.
       choices: [ 'ssh', 'vault', 'net', 'scm', 'cloud', 'insights' ]
-      required: False
       type: str
     inputs:
       description:
         - >-
           Enter inputs using either JSON or YAML syntax. Refer to the Ansible
           Tower documentation for example syntax.
-      required: False
       type: dict
     injectors:
       description:
         - >-
           Enter injectors using either JSON or YAML syntax. Refer to the
           Ansible Tower documentation for example syntax.
-      required: False
       type: dict
     state:
       description:
         - Desired state of the resource.
-      required: False
       default: "present"
       choices: ["present", "absent"]
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -109,15 +97,15 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        kind=dict(required=False, choices=list(KIND_CHOICES.keys())),
-        inputs=dict(type='dict', required=False),
-        injectors=dict(type='dict', required=False),
+        description=dict(),
+        kind=dict(choices=list(KIND_CHOICES.keys())),
+        inputs=dict(type='dict'),
+        injectors=dict(type='dict'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -128,9 +116,10 @@ def main():
     # These will be passed into the create/updates
     credential_type_params = {
         'name': new_name if new_name else name,
-        'kind': kind,
         'managed_by_tower': False,
     }
+    if kind:
+        credential_type_params['kind'] = kind
     if module.params.get('description'):
         credential_type_params['description'] = module.params.get('description')
     if module.params.get('inputs'):
@@ -148,9 +137,9 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential_type)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing credential type, this will return on its own
-        module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
+
+    # If the state was present and we can let the module build or update the existing credential type, this will return on its own
+    module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
 
 
 if __name__ == '__main__':

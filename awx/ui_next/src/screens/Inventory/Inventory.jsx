@@ -9,21 +9,19 @@ import {
   useLocation,
   useRouteMatch,
 } from 'react-router-dom';
-
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import JobList from '@components/JobList';
-import RoutedTabs from '@components/RoutedTabs';
-import { ResourceAccessList } from '@components/ResourceAccessList';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
+import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
+import RoutedTabs from '../../components/RoutedTabs';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 import InventoryDetail from './InventoryDetail';
 import InventoryEdit from './InventoryEdit';
 import InventoryGroups from './InventoryGroups';
 import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
-import { InventoriesAPI } from '@api';
+import { InventoriesAPI } from '../../api';
 
 function Inventory({ i18n, setBreadcrumb }) {
   const [contentError, setContentError] = useState(null);
@@ -51,6 +49,16 @@ function Inventory({ i18n, setBreadcrumb }) {
   }, [match.params.id, location.pathname, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Inventories`)}
+        </>
+      ),
+      link: `/inventories`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 1 },
     { name: i18n._(t`Groups`), link: `${match.url}/groups`, id: 2 },
@@ -80,8 +88,10 @@ function Inventory({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response?.status === 404 && (
               <span>
-                {i18n._(`Inventory not found.`)}{' '}
-                <Link to="/inventories">{i18n._(`View all Inventories.`)}</Link>
+                {i18n._(t`Inventory not found.`)}{' '}
+                <Link to="/inventories">
+                  {i18n._(t`View all Inventories.`)}
+                </Link>
               </span>
             )}
           </ContentError>
@@ -90,19 +100,26 @@ function Inventory({ i18n, setBreadcrumb }) {
     );
   }
 
+  let showCardHeader = true;
+
+  if (
+    ['edit', 'add', 'groups/', 'hosts/', 'sources/'].some(name =>
+      location.pathname.includes(name)
+    )
+  ) {
+    showCardHeader = false;
+  }
+
+  if (inventory?.kind === 'smart') {
+    return (
+      <Redirect to={`/inventories/smart_inventory/${inventory.id}/details`} />
+    );
+  }
+
   return (
     <PageSection>
       <Card>
-        {['edit', 'add', 'groups/', 'hosts/'].some(name =>
-          location.pathname.includes(name)
-        ) ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo="/inventories" />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/inventories/inventory/:id"
@@ -138,7 +155,10 @@ function Inventory({ i18n, setBreadcrumb }) {
               />
             </Route>,
             <Route path="/inventories/inventory/:id/sources" key="sources">
-              <InventorySources inventory={inventory} />
+              <InventorySources
+                inventory={inventory}
+                setBreadcrumb={setBreadcrumb}
+              />
             </Route>,
             <Route
               path="/inventories/inventory/:id/completed_jobs"
@@ -160,7 +180,7 @@ function Inventory({ i18n, setBreadcrumb }) {
                   <Link
                     to={`/inventories/inventory/${match.params.id}/details`}
                   >
-                    {i18n._(`View Inventory Details`)}
+                    {i18n._(t`View Inventory Details`)}
                   </Link>
                 )}
               </ContentError>

@@ -10,15 +10,17 @@ import {
   DataListItemRow,
   Switch,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 16px;
   grid-template-columns: repeat(3, max-content);
+`;
+const Label = styled.b`
+  margin-right: 20px;
 `;
 
 function NotificationListItem(props) {
@@ -55,6 +57,7 @@ function NotificationListItem(props) {
               </Link>
             </DataListCell>,
             <DataListCell key="type">
+              <Label>{i18n._(t`Type `)}</Label>
               {typeLabels[notification.notification_type]}
             </DataListCell>,
           ]}

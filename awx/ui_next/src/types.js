@@ -42,6 +42,18 @@ export const AccessRecord = shape({
   type: string,
 });
 
+export const Application = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+  organization: number,
+  summary_fields: shape({
+    organization: shape({
+      id: number.isRequired,
+      name: string.isRequired,
+    }),
+  }),
+});
+
 export const Organization = shape({
   id: number.isRequired,
   name: string.isRequired,
@@ -70,7 +82,13 @@ export const JobTemplate = shape({
   inventory: number,
   job_type: oneOf(['run', 'check']),
   playbook: string,
-  project: shape({}),
+  project: number,
+});
+
+export const WorkFlowJobTemplate = shape({
+  name: string.isRequired,
+  description: string,
+  inventory: number,
 });
 
 export const Inventory = shape({
@@ -87,6 +105,12 @@ export const Inventory = shape({
   total_groups: number,
   total_hosts: number,
   total_inventory_sources: number,
+});
+
+export const InventoryScript = shape({
+  description: string,
+  id: number.isRequired,
+  name: string,
 });
 
 export const InstanceGroup = shape({
@@ -210,6 +234,13 @@ export const Team = shape({
   organization: number,
 });
 
+export const Token = shape({
+  id: number.isRequired,
+  expires: string.isRequired,
+  summary_fields: shape({}),
+  scope: string.isRequired,
+});
+
 export const User = shape({
   id: number.isRequired,
   type: oneOf(['user']),
@@ -299,4 +330,35 @@ export const Schedule = shape({
   next_run: string,
   timezone: string,
   until: string,
+});
+
+export const SurveyQuestion = shape({
+  question_name: string,
+  question_description: string,
+  required: bool,
+  type: string,
+  variable: string,
+  min: number,
+  max: number,
+  default: string,
+  choices: string,
+});
+
+export const Survey = shape({
+  name: string,
+  description: string,
+  spec: arrayOf(SurveyQuestion),
+});
+
+export const CredentialType = shape({
+  id: number.isRequired,
+  type: string.isRequired,
+  url: string.isRequired,
+  related: shape({}),
+  summary_fields: shape({}),
+  name: string.isRequired,
+  description: string,
+  kind: string.isRequired,
+  namespace: string,
+  inputs: shape({}).isRequired,
 });

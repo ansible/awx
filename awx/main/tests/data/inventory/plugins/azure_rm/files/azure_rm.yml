@@ -39,5 +39,5 @@ keyed_groups:
   prefix: ''
   separator: ''
 plain_host_names: true
-plugin: azure_rm
+plugin: azure.azcollection.azure_rm
 use_contrib_script_compatible_sanitization: true

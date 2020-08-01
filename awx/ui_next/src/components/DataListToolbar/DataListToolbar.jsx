@@ -2,33 +2,25 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Checkbox } from '@patternfly/react-core';
-import styled from 'styled-components';
-import { SearchIcon } from '@patternfly/react-icons';
 import {
-  DataToolbar,
-  DataToolbarContent as _DataToolbarContent,
-  DataToolbarGroup as _DataToolbarGroup,
-  DataToolbarItem,
-  DataToolbarToggleGroup,
-} from '@patternfly/react-core/dist/umd/experimental';
+  Checkbox,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+  ToolbarToggleGroup,
+} from '@patternfly/react-core';
+import { SearchIcon } from '@patternfly/react-icons';
 import ExpandCollapse from '../ExpandCollapse';
 import Search from '../Search';
 import Sort from '../Sort';
 
-import { SearchColumns, SortColumns, QSConfig } from '@types';
-
-const DataToolbarContent = styled(_DataToolbarContent)`
-  --pf-c-data-toolbar__content--PaddingLeft: 24px;
-  --pf-c-data-toolbar__content--PaddingRight: 8px;
-`;
-const DataToolbarGroup = styled(_DataToolbarGroup)`
-  --pf-c-data-toolbar__group--spacer: 24px;
-`;
+import { SearchColumns, SortColumns, QSConfig } from '../../types';
 
 class DataListToolbar extends React.Component {
   render() {
     const {
+      itemCount,
       clearAllFilters,
       searchColumns,
       sortColumns,
@@ -45,30 +37,31 @@ class DataListToolbar extends React.Component {
       additionalControls,
       i18n,
       qsConfig,
+      pagination,
     } = this.props;
 
     const showExpandCollapse = onCompact && onExpand;
     return (
-      <DataToolbar
+      <Toolbar
         id={`${qsConfig.namespace}-list-toolbar`}
         clearAllFilters={clearAllFilters}
         collapseListedFiltersBreakpoint="lg"
       >
-        <DataToolbarContent>
+        <ToolbarContent>
           {showSelectAll && (
-            <DataToolbarGroup>
-              <DataToolbarItem>
+            <ToolbarGroup>
+              <ToolbarItem>
                 <Checkbox
                   isChecked={isAllSelected}
                   onChange={onSelectAll}
                   aria-label={i18n._(t`Select all`)}
                   id="select-all"
                 />
-              </DataToolbarItem>
-            </DataToolbarGroup>
+              </ToolbarItem>
+            </ToolbarGroup>
           )}
-          <DataToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
-            <DataToolbarItem>
+          <ToolbarToggleGroup toggleIcon={<SearchIcon />} breakpoint="lg">
+            <ToolbarItem>
               <Search
                 qsConfig={qsConfig}
                 columns={searchColumns}
@@ -76,36 +69,40 @@ class DataListToolbar extends React.Component {
                 onReplaceSearch={onReplaceSearch}
                 onRemove={onRemove}
               />
-            </DataToolbarItem>
-            <DataToolbarItem>
+            </ToolbarItem>
+            <ToolbarItem>
               <Sort qsConfig={qsConfig} columns={sortColumns} onSort={onSort} />
-            </DataToolbarItem>
-          </DataToolbarToggleGroup>
+            </ToolbarItem>
+          </ToolbarToggleGroup>
           {showExpandCollapse && (
-            <DataToolbarGroup>
+            <ToolbarGroup>
               <Fragment>
-                <DataToolbarItem>
+                <ToolbarItem>
                   <ExpandCollapse
                     isCompact={isCompact}
                     onCompact={onCompact}
                     onExpand={onExpand}
                   />
-                </DataToolbarItem>
+                </ToolbarItem>
               </Fragment>
-            </DataToolbarGroup>
+            </ToolbarGroup>
           )}
-          <DataToolbarGroup>
+          <ToolbarGroup>
             {additionalControls.map(control => (
-              <DataToolbarItem key={control.key}>{control}</DataToolbarItem>
+              <ToolbarItem key={control.key}>{control}</ToolbarItem>
             ))}
-          </DataToolbarGroup>
-        </DataToolbarContent>
-      </DataToolbar>
+          </ToolbarGroup>
+          {pagination && itemCount > 0 && (
+            <ToolbarItem variant="pagination">{pagination}</ToolbarItem>
+          )}
+        </ToolbarContent>
+      </Toolbar>
     );
   }
 }
 
 DataListToolbar.propTypes = {
+  itemCount: PropTypes.number,
   clearAllFilters: PropTypes.func,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
@@ -123,6 +120,7 @@ DataListToolbar.propTypes = {
 };
 
 DataListToolbar.defaultProps = {
+  itemCount: 0,
   clearAllFilters: null,
   showSelectAll: false,
   isAllSelected: false,

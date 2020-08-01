@@ -1,0 +1,196 @@
+{
+  "id": 7,
+  "type": "job_template",
+  "url": "/api/v2/job_templates/7/",
+  "related": {
+      "named_url": "/api/v2/job_templates/MockJT/",
+      "created_by": "/api/v2/users/1/",
+      "modified_by": "/api/v2/users/1/",
+      "labels": "/api/v2/job_templates/7/labels/",
+      "inventory": "/api/v2/inventories/1/",
+      "project": "/api/v2/projects/6/",
+      "credentials": "/api/v2/job_templates/7/credentials/",
+      "last_job": "/api/v2/jobs/12/",
+      "jobs": "/api/v2/job_templates/7/jobs/",
+      "schedules": "/api/v2/job_templates/7/schedules/",
+      "activity_stream": "/api/v2/job_templates/7/activity_stream/",
+      "launch": "/api/v2/job_templates/7/launch/",
+      "webhook_key": "/api/v2/job_templates/7/webhook_key/",
+      "webhook_receiver": "/api/v2/job_templates/7/github/",
+      "notification_templates_started": "/api/v2/job_templates/7/notification_templates_started/",
+      "notification_templates_success": "/api/v2/job_templates/7/notification_templates_success/",
+      "notification_templates_error": "/api/v2/job_templates/7/notification_templates_error/",
+      "access_list": "/api/v2/job_templates/7/access_list/",
+      "survey_spec": "/api/v2/job_templates/7/survey_spec/",
+      "object_roles": "/api/v2/job_templates/7/object_roles/",
+      "instance_groups": "/api/v2/job_templates/7/instance_groups/",
+      "slice_workflow_jobs": "/api/v2/job_templates/7/slice_workflow_jobs/",
+      "copy": "/api/v2/job_templates/7/copy/",
+      "callback": "/api/v2/job_templates/7/callback/",
+      "webhook_credential": "/api/v2/credentials/8/"
+  },
+  "summary_fields": {
+      "inventory": {
+          "id": 1,
+          "name": "Demo Inventory",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 1,
+          "hosts_with_active_failures": 0,
+          "total_groups": 0,
+          "groups_with_active_failures": 0,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": ""
+      },
+      "project": {
+          "id": 6,
+          "name": "Mock Project",
+          "description": "",
+          "status": "successful",
+          "scm_type": "git"
+      },
+      "last_job": {
+          "id": 12,
+          "name": "Mock JT",
+          "description": "",
+          "finished": "2019-10-01T14:34:35.142483Z",
+          "status": "successful",
+          "failed": false
+      },
+      "last_update": {
+          "id": 12,
+          "name": "Mock JT",
+          "description": "",
+          "status": "successful",
+          "failed": false
+      },
+      "webhook_credential": {
+          "id": 8,
+          "name": "GitHub Cred",
+          "description": "",
+          "kind": "github_token",
+          "cloud": false,
+          "credential_type_id": 12
+      },
+      "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+      },
+      "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+      },
+      "object_roles": {
+          "admin_role": {
+              "description": "Can manage all aspects of the job template",
+              "name": "Admin",
+              "id": 24
+          },
+          "execute_role": {
+              "description": "May run the job template",
+              "name": "Execute",
+              "id": 25
+          },
+          "read_role": {
+              "description": "May view settings for the job template",
+              "name": "Read",
+              "id": 26
+          }
+      },
+      "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "start": true,
+          "schedule": true,
+          "copy": true
+      },
+      "labels": {
+        "count": 1,
+        "results": [
+            {
+                "id": 91,
+                "name": "L_91o2"
+            },
+            {
+                "id": 92,
+                "name": "L_91o3"
+            }
+        ]
+    },
+      "survey": {
+          "title": "",
+          "description": ""
+      },
+      "recent_jobs": [
+          {
+              "id": 12,
+              "status": "successful",
+              "finished": "2019-10-01T14:34:35.142483Z",
+              "type": "job"
+          },
+          {
+              "id": 13,
+              "status": "successful",
+              "finished": "2019-10-01T14:34:35.142483Z",
+              "type": "job"
+          }
+      ],
+      "credentials": [
+        {
+          "id": 1, "kind": "ssh" , "name": "Credential 1"
+        },
+        {
+          "id": 2, "kind": "awx" , "name": "Credential 2"
+        }
+      ]
+  },
+  "created": "2019-09-30T16:18:34.564820Z",
+  "modified": "2019-10-01T14:47:31.818431Z",
+  "name": "Mock JT",
+  "description": "Mock JT Description",
+  "job_type": "run",
+  "inventory": 1,
+  "project": 6,
+  "playbook": "ping.yml",
+  "scm_branch": "Foo branch",
+  "forks": 2,
+  "limit": "alpha:beta",
+  "verbosity": 3,
+  "extra_vars": "---foo: bar",
+  "job_tags": "T_100,T_200",
+  "force_handlers": false,
+  "skip_tags": "S_100,S_200",
+  "start_at_task": "",
+  "timeout": 0,
+  "use_fact_cache": true,
+  "last_job_run": "2019-10-01T14:34:35.142483Z",
+  "last_job_failed": false,
+  "next_job_run": null,
+  "status": "successful",
+  "host_config_key": "a1b2c3",
+  "ask_scm_branch_on_launch": false,
+  "ask_diff_mode_on_launch": false,
+  "ask_variables_on_launch": false,
+  "ask_limit_on_launch": false,
+  "ask_tags_on_launch": false,
+  "ask_skip_tags_on_launch": false,
+  "ask_job_type_on_launch": false,
+  "ask_verbosity_on_launch": false,
+  "ask_inventory_on_launch": false,
+  "ask_credential_on_launch": false,
+  "survey_enabled": true,
+  "become_enabled": true,
+  "diff_mode": false,
+  "allow_simultaneous": true,
+  "custom_virtualenv": null,
+  "job_slice_count": 1,
+  "webhook_service": "github",
+  "webhook_credential": 8
+}

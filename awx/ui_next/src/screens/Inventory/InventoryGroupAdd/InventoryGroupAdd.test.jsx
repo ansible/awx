@@ -1,14 +1,14 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { GroupsAPI } from '@api';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { GroupsAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryGroupAdd from './InventoryGroupAdd';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<InventoryGroupAdd />', () => {
   let wrapper;
@@ -19,10 +19,9 @@ describe('<InventoryGroupAdd />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route
-          path="/inventories/inventory/:id/groups/add"
-          component={() => <InventoryGroupAdd />}
-        />,
+        <Route path="/inventories/inventory/:id/groups/add">
+          <InventoryGroupAdd />
+        </Route>,
         {
           context: {
             router: { history, route: { location: history.location } },

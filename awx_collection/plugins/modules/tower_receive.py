@@ -9,15 +9,18 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
 ---
 module: tower_receive
+deprecated:
+  removed_in: "14.0.0"
+  why: Deprecated in favor of upcoming C(_export) module.
+  alternative: Once published, use M(tower_export) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.8"
 short_description: Receive assets from Ansible Tower.
 description:
     - Receive assets from Ansible Tower. See
@@ -101,7 +104,7 @@ requirements:
 notes:
   - Specifying a name of "all" for any asset type will export all items of that asset type.
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 EXAMPLES = '''
@@ -162,7 +165,7 @@ def main():
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
 
-    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
+    module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI export command.", version="awx.awx:14.0.0")
 
     if not HAS_TOWER_CLI:
         module.fail_json(msg='ansible-tower-cli required for this module')

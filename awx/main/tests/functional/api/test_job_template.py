@@ -46,27 +46,6 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
 
 
 @pytest.mark.django_db
-def test_extra_credential_creation(get, post, organization_factory, job_template_factory, credentialtype_aws):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
-    response = post(url, {
-        'name': 'My Cred',
-        'credential_type': credentialtype_aws.pk,
-        'inputs': {
-            'username': 'bob',
-            'password': 'secret',
-        }
-    }, objs.superusers.admin)
-    assert response.status_code == 201
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 1
-
-
-@pytest.mark.django_db
 @pytest.mark.parametrize('kind', ['scm', 'insights'])
 def test_invalid_credential_kind_xfail(get, post, organization_factory, job_template_factory, kind):
     objs = organization_factory("org", superusers=['admin'])
@@ -88,42 +67,6 @@ def test_invalid_credential_kind_xfail(get, post, organization_factory, job_temp
 
 
 @pytest.mark.django_db
-def test_extra_credential_unique_type_xfail(get, post, organization_factory, job_template_factory, credentialtype_aws):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
-    response = post(url, {
-        'name': 'My Cred',
-        'credential_type': credentialtype_aws.pk,
-        'inputs': {
-            'username': 'bob',
-            'password': 'secret',
-        }
-    }, objs.superusers.admin)
-    assert response.status_code == 201
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 1
-
-    # this request should fail because you can't assign the same type (aws)
-    # twice
-    response = post(url, {
-        'name': 'My Cred',
-        'credential_type': credentialtype_aws.pk,
-        'inputs': {
-            'username': 'joe',
-            'password': 'another-secret',
-        }
-    }, objs.superusers.admin)
-    assert response.status_code == 400
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 1
-
-
-@pytest.mark.django_db
 def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, inventory, settings):
     project.use_role.members.add(alice)
     inventory.use_role.members.add(alice)
@@ -141,60 +84,6 @@ def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, invento
         expect=400
     )
     assert 'Maximum number of forks (10) exceeded' in str(response.data)
-
-
-@pytest.mark.django_db
-def test_attach_extra_credential(get, post, organization_factory, job_template_factory, credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
-    response = post(url, {
-        'associate': True,
-        'id': credential.id,
-    }, objs.superusers.admin)
-    assert response.status_code == 204
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 1
-
-
-@pytest.mark.django_db
-def test_detach_extra_credential(get, post, organization_factory, job_template_factory, credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-    jt.credentials.add(credential)
-    jt.save()
-
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
-    response = post(url, {
-        'disassociate': True,
-        'id': credential.id,
-    }, objs.superusers.admin)
-    assert response.status_code == 204
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 0
-
-
-@pytest.mark.django_db
-def test_attach_extra_credential_wrong_kind_xfail(get, post, organization_factory, job_template_factory, machine_credential):
-    """Extra credentials only allow net + cloud credentials"""
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-
-    url = reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk})
-    response = post(url, {
-        'associate': True,
-        'id': machine_credential.id,
-    }, objs.superusers.admin)
-    assert response.status_code == 400
-
-    response = get(url, user=objs.superusers.admin)
-    assert response.data.get('count') == 0
 
 
 @pytest.mark.django_db
@@ -366,57 +255,6 @@ def test_launch_with_pending_deletion_inventory_workflow(get, post, organization
         user=admin_user, expect=400
     )
     assert resp.data['inventory'] == ['The inventory associated with this Workflow is being deleted.']
-
-
-@pytest.mark.django_db
-def test_launch_with_extra_credentials(get, post, organization_factory,
-                                       job_template_factory, machine_credential,
-                                       credential, net_credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-    jt.ask_credential_on_launch = True
-    jt.save()
-
-    resp = post(
-        reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
-        dict(
-            credentials=[machine_credential.pk, credential.pk, net_credential.pk]
-        ),
-        objs.superusers.admin, expect=201
-    )
-    job_pk = resp.data.get('id')
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 2
-
-    resp = get(reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
-
-
-@pytest.mark.django_db
-def test_launch_with_extra_credentials_not_allowed(get, post, organization_factory,
-                                                   job_template_factory, machine_credential,
-                                                   credential, net_credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-    jt.credentials.add(machine_credential)
-    jt.ask_credential_on_launch = False
-    jt.save()
-
-    resp = post(
-        reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
-        dict(
-            credentials=[machine_credential.pk, credential.pk, net_credential.pk]
-        ),
-        objs.superusers.admin
-    )
-    assert 'credentials' in resp.data['ignored_fields'].keys()
-    job_pk = resp.data.get('id')
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
 
 
 @pytest.mark.django_db

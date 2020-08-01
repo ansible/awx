@@ -4,15 +4,15 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
   PasswordField,
   FormSubmitError,
-} from '@components/FormField';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { required, requiredEmail } from '@util/validators';
-import { FormColumnLayout } from '@components/FormLayout';
+} from '../../../components/FormField';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import { required, requiredEmail } from '../../../util/validators';
+import { FormColumnLayout } from '../../../components/FormLayout';
 
 function UserFormFields({ user, i18n }) {
   const [organization, setOrganization] = useState(null);
@@ -117,7 +117,9 @@ function UserFormFields({ user, i18n }) {
         fieldId="user-type"
         helperTextInvalid={userTypeMeta.error}
         isRequired
-        isValid={!userTypeMeta.touched || !userTypeMeta.error}
+        validated={
+          !userTypeMeta.touched || !userTypeMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`User Type`)}
       >
         <AnsibleSelect

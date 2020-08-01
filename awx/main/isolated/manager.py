@@ -58,7 +58,7 @@ class IsolatedManager(object):
                 os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             for host in hosts:
                 inventory['all']['hosts'][host] = {
-                    "ansible_connection": "kubectl",
+                    "ansible_connection": "community.kubernetes.kubectl",
                     "ansible_kubectl_config": path,
                 }
         else:
@@ -74,6 +74,7 @@ class IsolatedManager(object):
         env['ANSIBLE_RETRY_FILES_ENABLED'] = 'False'
         env['ANSIBLE_HOST_KEY_CHECKING'] = str(settings.AWX_ISOLATED_HOST_KEY_CHECKING)
         env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'plugins', 'isolated')
+        env['ANSIBLE_COLLECTIONS_PATHS'] = settings.AWX_ANSIBLE_COLLECTIONS_PATHS
         set_pythonpath(os.path.join(settings.ANSIBLE_VENV_PATH, 'lib'), env)
 
         def finished_callback(runner_obj):
@@ -109,7 +110,6 @@ class IsolatedManager(object):
             'cancel_callback': self.canceled_callback,
             'settings': {
                 'job_timeout': settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
-                'pexpect_timeout': getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 'suppress_ansible_output': True,
             },
         }
@@ -268,13 +268,6 @@ class IsolatedManager(object):
         # in the final sync
         self.consume_events()
 
-        # emit an EOF event
-        event_data = {
-            'event': 'EOF',
-            'final_counter': len(self.handled_events)
-        }
-        self.event_handler(event_data)
-
         return status, rc
 
     def consume_events(self):
@@ -287,7 +280,7 @@ class IsolatedManager(object):
         if os.path.exists(events_path):
             for event in set(os.listdir(events_path)) - self.handled_events:
                 path = os.path.join(events_path, event)
-                if os.path.exists(path):
+                if os.path.exists(path) and os.path.isfile(path):
                     try:
                         event_data = json.load(
                             open(os.path.join(events_path, event), 'r')
@@ -420,8 +413,4 @@ class IsolatedManager(object):
         status, rc = self.dispatch(playbook, module, module_args)
         if status == 'successful':
             status, rc = self.check()
-        else:
-            # emit an EOF event
-            event_data = {'event': 'EOF', 'final_counter': 0}
-            self.event_handler(event_data)
         return status, rc

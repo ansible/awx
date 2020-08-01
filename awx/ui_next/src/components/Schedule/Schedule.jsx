@@ -10,15 +10,13 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { CardActions } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import { TabbedCardHeader } from '@components/Card';
-import { ScheduleDetail } from '@components/Schedule';
-import { SchedulesAPI } from '@api';
+import RoutedTabs from '../RoutedTabs';
+import ContentError from '../ContentError';
+import ContentLoading from '../ContentLoading';
+import ScheduleDetail from './ScheduleDetail';
+import ScheduleEdit from './ScheduleEdit';
+import { SchedulesAPI } from '../../api';
 
 function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
   const [schedule, setSchedule] = useState(null);
@@ -34,7 +32,6 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
       try {
         const { data } = await SchedulesAPI.readDetail(scheduleId);
         setSchedule(data);
-        setBreadcrumb(unifiedJobTemplate, data);
       } catch (err) {
         setContentError(err);
       } finally {
@@ -43,8 +40,14 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
     };
 
     loadData();
-  }, [location.pathname, scheduleId, unifiedJobTemplate, setBreadcrumb]);
+  }, [location.pathname, scheduleId]);
 
+  useEffect(() => {
+    if (schedule) {
+      setBreadcrumb(unifiedJobTemplate, schedule);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schedule, unifiedJobTemplate]);
   const tabsArray = [
     {
       name: (
@@ -84,23 +87,17 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
     return <ContentError error={contentError} />;
   }
 
-  let cardHeader = null;
+  let showCardHeader = true;
+
   if (
-    location.pathname.includes('schedules/') &&
-    !location.pathname.endsWith('edit')
+    !location.pathname.includes('schedules/') ||
+    location.pathname.endsWith('edit')
   ) {
-    cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo={`${pathRoot}schedules`} />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    showCardHeader = false;
   }
   return (
     <>
-      {cardHeader}
+      {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
       <Switch>
         <Redirect
           from={`${pathRoot}schedules/:scheduleId`}
@@ -108,29 +105,23 @@ function Schedule({ i18n, setBreadcrumb, unifiedJobTemplate }) {
           exact
         />
         {schedule && [
+          <Route key="edit" path={`${pathRoot}schedules/:id/edit`}>
+            <ScheduleEdit schedule={schedule} />
+          </Route>,
           <Route
             key="details"
             path={`${pathRoot}schedules/:scheduleId/details`}
-            render={() => {
-              return <ScheduleDetail schedule={schedule} />;
-            }}
-          />,
+          >
+            <ScheduleDetail schedule={schedule} />
+          </Route>,
         ]}
-        <Route
-          key="not-found"
-          path="*"
-          render={() => {
-            return (
-              <ContentError>
-                {unifiedJobTemplate && (
-                  <Link to={`${pathRoot}details`}>
-                    {i18n._(t`View Details`)}
-                  </Link>
-                )}
-              </ContentError>
-            );
-          }}
-        />
+        <Route key="not-found" path="*">
+          <ContentError>
+            {unifiedJobTemplate && (
+              <Link to={`${pathRoot}details`}>{i18n._(t`View Details`)}</Link>
+            )}
+          </ContentError>
+        </Route>
       </Switch>
     </>
   );

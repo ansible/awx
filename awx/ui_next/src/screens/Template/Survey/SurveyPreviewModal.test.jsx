@@ -1,6 +1,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { waitForElement, mountWithContexts } from '@testUtils/enzymeHelpers';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../testUtils/enzymeHelpers';
 
 import SurveyPreviewModal from './SurveyPreviewModal';
 
@@ -64,13 +67,16 @@ const questions = [
 
 describe('<SurveyPreviewModal />', () => {
   let wrapper;
-  beforeEach(async () => {
+  beforeAll(async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SurveyPreviewModal questions={questions} isPreviewModalOpen />
       );
     });
     waitForElement(wrapper, 'Form');
+  });
+  afterAll(() => {
+    wrapper.unmount();
   });
   test('renders successfully', async () => {
     expect(wrapper.find('SurveyPreviewModal').length).toBe(1);
@@ -100,19 +106,20 @@ describe('<SurveyPreviewModal />', () => {
       .find('Select[aria-label="Multi-Select"]')
       .find('Chip');
 
-    expect(question1.text()).toBe('Text Question');
+    expect(question1.text()).toBe('Text Question ');
     expect(question1Value.prop('value')).toBe('Text Question Value');
     expect(question1Value.prop('isDisabled')).toBe(true);
 
     expect(question2.text()).toBe('Select Question');
-    expect(question2Value.find('span').text()).toBe('Select Question Value');
+    expect(question2Value.find('.pf-c-select__toggle-text').text()).toBe(
+      'Select Question Value'
+    );
     expect(question2Value.prop('isDisabled')).toBe(true);
 
     expect(question3.text()).toBe('Text Area Question');
     expect(question3Value.prop('value')).toBe('Text Area Question Value');
     expect(question3Value.prop('disabled')).toBe(true);
-
-    expect(question4.text()).toBe('Password Question');
+    expect(question4.text()).toBe('Password Question ');
     expect(question4Value.prop('placeholder')).toBe('ENCRYPTED');
     expect(question4Value.prop('isDisabled')).toBe(true);
 

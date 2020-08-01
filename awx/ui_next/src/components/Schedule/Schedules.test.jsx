@@ -1,7 +1,7 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import Schedules from './Schedules';
 
 describe('<Schedules />', () => {

@@ -1,0 +1,12 @@
+---
+collections:
+  - name: awx.awx
+  - name: azure.azcollection
+  - name: amazon.aws
+  - name: theforeman.foreman
+  - name: google.cloud
+  - name: openstack.cloud
+  - name: community.vmware
+  - name: ovirt.ovirt
+  - name: community.kubernetes  # required for isolated management playbooks
+  - name: ansible.posix  # required for isolated management playbooks

@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_role
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: grant or revoke an Ansible Tower role.
 description:
@@ -76,15 +75,6 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
-
-requirements:
-- ansible-tower-cli >= 3.0.2
 
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -119,7 +109,7 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     role_type = module.params.pop('role')
     role_field = role_type + '_role'

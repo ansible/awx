@@ -1,11 +1,11 @@
-localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python"
+localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python3"
 
 [all:vars]
 
 # Remove these lines if you want to run a local image build
 # Otherwise the setup playbook will install the official Ansible images. Versions may
 # be selected based on: latest, 1, 1.0, 1.0.0, 1.0.0.123
-# by default the base will be used to search for ansible/awx_web and ansible/awx_task
+# by default the base will be used to search for ansible/awx
 dockerhub_base=ansible
 
 # Openshift Install
@@ -20,11 +20,13 @@ dockerhub_base=ansible
 # Kubernetes Install
 # kubernetes_context=test-cluster
 # kubernetes_namespace=awx
+# kubernetes_web_svc_type=NodePort
 # Optional Kubernetes Variables
 # pg_image_registry=docker.io
 # pg_serviceaccount=awx
 # pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
+# pg_persistence_existingclaim=postgres_pvc
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
@@ -38,7 +40,7 @@ dockerhub_base=ansible
 # kubernetes_ingress_tls_secret=awx-cert
 
 # Kubernetes and Openshift Install Resource Requests
-# These are the request and limit values for a pod's container for task/web/redis/memcached/management.
+# These are the request and limit values for a pod's container for task/web/redis/management.
 # The total amount of requested resources for a pod is the sum of all
 # resources requested by all containers in the pod
 # A cpu_request of 1500 is 1.5 cores for the container to start out with.
@@ -54,8 +56,6 @@ dockerhub_base=ansible
 # web_mem_limit=2
 # redis_cpu_limit=1000
 # redis_mem_limit=3
-# memcached_cpu_limit=1000
-# memcached_mem_limit=2
 # management_cpu_limit=2000
 # management_mem_limit=2
 
@@ -66,6 +66,8 @@ postgres_data_dir="~/.awx/pgdocker"
 host_port=80
 host_port_ssl=443
 #ssl_certificate=
+# Optional key file
+#ssl_certificate_key=
 docker_compose_dir="~/.awx/awxcompose"
 
 # Required for Openshift when building the image on your own
@@ -143,6 +145,8 @@ secret_key=awxsecret
 # CA Trust directory. If you need to provide custom CA certificates, supplying
 # this variable causes this directory on the host to be bind mounted over
 # /etc/pki/ca-trust in the awx_task and awx_web containers.
+# If you are deploying on openshift or kubernetes, set the variable to /etc/pki/ca-trust instead,
+# as the awx_web and awx_task containers will not run the `update-ca-trust` command.
 #ca_trust_dir=/etc/pki/ca-trust/source/anchors
 
 # Include /etc/nginx/awx_extra.conf
@@ -150,3 +154,19 @@ secret_key=awxsecret
 # which makes include "optional" - i.e. not fail
 # if file is absent
 #extra_nginx_include="/etc/nginx/awx_extra[.]conf"
+
+# Docker compose explicit subnet. Set to avoid overlapping your existing LAN networks.
+#docker_compose_subnet="172.17.0.1/16"
+#
+# Allow for different docker logging drivers
+# By Default; the logger will be json-file, however you can override
+# that by uncommenting the docker_logger below.
+# Be aware that journald may rate limit your log messages if you choose it.
+# See: https://docs.docker.com/config/containers/logging/configure/
+# docker_logger=journald
+#
+
+# Add extra hosts to docker compose file. This might be necessary to
+# sneak in servernames. For exmaple for DMZ self-signed CA certificates.
+# Equivialent to using the --add-host parameter with "docker run".
+#docker_compose_extra_hosts="otherserver.local:192.168.0.1,ldap-server.local:192.168.0.2"

@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -11,13 +12,13 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
+import DataListCell from '../../../components/DataListCell';
 
-import { Team } from '@types';
+import { Team } from '../../../types';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -57,7 +58,7 @@ class TeamListItem extends React.Component {
               <DataListCell key="organization">
                 {team.summary_fields.organization && (
                   <Fragment>
-                    <b css="margin-right: 24px">{i18n._(t`Organization`)}</b>
+                    <b>{i18n._(t`Organization`)}</b>{' '}
                     <Link
                       to={`/organizations/${team.summary_fields.organization.id}/details`}
                     >

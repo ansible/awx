@@ -1,12 +1,15 @@
 import React from 'react';
-import { SchedulesAPI } from '@api';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { SchedulesAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ScheduleDetail from './ScheduleDetail';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../../api/models/Schedules');
 
 const schedule = {
   url: '/api/v2/schedules/1',
@@ -66,7 +69,9 @@ describe('<ScheduleDetail />', () => {
   });
   afterEach(() => {
     wrapper.unmount();
+    jest.clearAllMocks();
   });
+
   test('details should render with the proper values without prompts', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
       data: {
@@ -121,7 +126,9 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Title[children="Prompted Fields"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Type"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(0);
-    expect(wrapper.find('Detail[label="SCM Branch"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Source Control Branch"]').length).toBe(
+      0
+    );
     expect(wrapper.find('Detail[label="Limit"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Show Changes"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
@@ -129,7 +136,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
   test('details should render with the proper values with prompts', async () => {
-    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+    SchedulesAPI.readCredentials.mockResolvedValue({
       data: {
         count: 2,
         results: [
@@ -175,6 +182,7 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    // await waitForElement(wrapper, 'Title', el => el.length > 0);
     expect(
       wrapper
         .find('Detail[label="Name"]')
@@ -209,7 +217,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Inventory"]').length).toBe(1);
     expect(
       wrapper
-        .find('Detail[label="SCM Branch"]')
+        .find('Detail[label="Source Control Branch"]')
         .find('dd')
         .text()
     ).toBe('foo/branch');
@@ -257,5 +265,90 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('should show edit button for users with edit permission', async () => {
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={schedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    const editButton = await waitForElement(
+      wrapper,
+      'ScheduleDetail Button[aria-label="Edit"]'
+    );
+    expect(editButton.text()).toEqual('Edit');
+    expect(editButton.prop('to')).toBe(
+      '/templates/job_template/1/schedules/1/edit'
+    );
+  });
+
+  test('Error dialog shown for failed deletion', async () => {
+    SchedulesAPI.destroy.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
+    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={schedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+
+    await act(async () => {
+      wrapper.find('DeleteButton').invoke('onConfirm')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 1
+    );
+    await act(async () => {
+      wrapper.find('Modal[title="Error!"]').invoke('onClose')();
+    });
+    await waitForElement(
+      wrapper,
+      'Modal[title="Error!"]',
+      el => el.length === 0
+    );
+    expect(SchedulesAPI.destroy).toHaveBeenCalledTimes(1);
   });
 });

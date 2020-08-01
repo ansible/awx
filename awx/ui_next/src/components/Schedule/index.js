@@ -5,3 +5,4 @@ export { default as ScheduleOccurrences } from './ScheduleOccurrences';
 export { default as ScheduleToggle } from './ScheduleToggle';
 export { default as ScheduleDetail } from './ScheduleDetail';
 export { default as ScheduleAdd } from './ScheduleAdd';
+export { default as ScheduleEdit } from './ScheduleEdit';

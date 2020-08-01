@@ -1,14 +1,10 @@
 ---
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
+awx_image: "awx"
 redis_image: "redis"
 
 postgresql_version: "10"
 postgresql_image: "postgres:{{postgresql_version}}"
-
-memcached_image: "memcached"
-memcached_version: "alpine"
-memcached_hostname: "memcached"
-memcached_port: "11211"
 
 compose_start_containers: true

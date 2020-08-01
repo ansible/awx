@@ -2,11 +2,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  DataToolbar,
-  DataToolbarContent,
-} from '@patternfly/react-core/dist/umd/experimental';
-import DataListToolbar from '@components/DataListToolbar';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
+import DataListToolbar from '../DataListToolbar';
 
 import {
   encodeNonDefaultQueryString,
@@ -14,8 +11,8 @@ import {
   mergeParams,
   replaceParams,
   removeParams,
-} from '@util/qs';
-import { QSConfig, SearchColumns, SortColumns } from '@types';
+} from '../../util/qs';
+import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const EmptyStateControlsWrapper = styled.div`
   display: flex;
@@ -65,7 +62,13 @@ class ListHeader extends React.Component {
   }
 
   handleRemoveAll() {
-    this.pushHistoryState(null);
+    // remove everything in oldParams except for page_size and order_by
+    const { location, qsConfig } = this.props;
+    const oldParams = parseQueryString(qsConfig, location.search);
+    const oldParamsClone = { ...oldParams };
+    delete oldParamsClone.page_size;
+    delete oldParamsClone.order_by;
+    this.pushHistoryState(removeParams(qsConfig, oldParams, oldParamsClone));
   }
 
   handleSort(key, order) {
@@ -95,26 +98,28 @@ class ListHeader extends React.Component {
       renderToolbar,
       qsConfig,
       location,
+      pagination,
     } = this.props;
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
       <Fragment>
         {isEmpty ? (
-          <DataToolbar
+          <Toolbar
             id={`${qsConfig.namespace}-list-toolbar`}
             clearAllFilters={this.handleRemoveAll}
-            collapseListedFiltersBreakpoint="md"
+            collapseListedFiltersBreakpoint="lg"
           >
-            <DataToolbarContent>
+            <ToolbarContent>
               <EmptyStateControlsWrapper>
                 {emptyStateControls}
               </EmptyStateControlsWrapper>
-            </DataToolbarContent>
-          </DataToolbar>
+            </ToolbarContent>
+          </Toolbar>
         ) : (
           <Fragment>
             {renderToolbar({
+              itemCount,
               searchColumns,
               sortColumns,
               onSearch: this.handleSearch,
@@ -123,6 +128,7 @@ class ListHeader extends React.Component {
               onRemove: this.handleRemove,
               clearAllFilters: this.handleRemoveAll,
               qsConfig,
+              pagination,
             })}
           </Fragment>
         )}

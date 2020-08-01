@@ -9,6 +9,7 @@ from . import page
 class Label(HasCreate, base.Base):
 
     dependencies = [Organization]
+    NATURAL_KEY = ('organization', 'name')
 
     def silent_delete(self):
         """Label pages do not support DELETE requests. Here, we override the base page object

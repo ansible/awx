@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_workflow_job_template_node
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower workflow job template nodes.
 description:
     - Create, update, or destroy Ansible Tower workflow job template nodes.
@@ -31,23 +30,19 @@ options:
       description:
         - Variables to apply at launch time.
         - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
-      required: False
       type: dict
       default: {}
     inventory:
       description:
         - Inventory applied as a prompt, if job template prompts for inventory
-      required: False
       type: str
     scm_branch:
       description:
         - SCM branch applied as a prompt, if job template prompts for SCM branch
-      required: False
       type: str
     job_type:
       description:
         - Job type applied as a prompt, if job template prompts for job type
-      required: False
       type: str
       choices:
         - 'run'
@@ -55,27 +50,22 @@ options:
     job_tags:
       description:
         - Job tags applied as a prompt, if job template prompts for job tags
-      required: False
       type: str
     skip_tags:
       description:
         - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
-      required: False
       type: str
     limit:
       description:
         - Limit to act on, applied as a prompt, if job template prompts for limit
-      required: False
       type: str
     diff_mode:
       description:
         - Run diff mode, applied as a prompt, if job template prompts for diff mode
-      required: False
       type: bool
     verbosity:
       description:
         - Verbosity applied as a prompt, if job template prompts for verbosity
-      required: False
       type: str
       choices:
         - '0'
@@ -96,19 +86,16 @@ options:
       description:
         - The organization of the workflow job template the node exists in.
         - Used for looking up the workflow, not a direct model field.
-      required: False
       type: str
     unified_job_template:
       description:
         - Name of unified job template to run in the workflow.
         - Can be a job template, project, inventory source, etc.
         - Omit if creating an approval node (not yet implemented).
-      required: False
       type: str
     all_parents_must_converge:
       description:
         - If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
-      required: False
       type: bool
     identifier:
       description:
@@ -120,21 +107,18 @@ options:
       description:
         - Nodes that will run after this node completes.
         - List of node identifiers.
-      required: False
       type: list
       elements: str
     success_nodes:
       description:
         - Nodes that will run after this node on success.
         - List of node identifiers.
-      required: False
       type: list
       elements: str
     failure_nodes:
       description:
         - Nodes that will run after this node on failure.
         - List of node identifiers.
-      required: False
       type: list
       elements: str
     credentials:
@@ -142,7 +126,6 @@ options:
         - Credentials to be applied to job as launch-time prompts.
         - List of credential names.
         - Uniqueness is not handled rigorously.
-      required: False
       type: list
       elements: str
     state:
@@ -151,12 +134,6 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -186,19 +163,19 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        identifier=dict(required=True, type='str'),
-        workflow_job_template=dict(required=True, type='str', aliases=['workflow']),
-        organization=dict(type='str'),
+        identifier=dict(required=True),
+        workflow_job_template=dict(required=True, aliases=['workflow']),
+        organization=dict(),
         extra_data=dict(type='dict'),
-        inventory=dict(type='str'),
-        scm_branch=dict(type='str'),
-        job_type=dict(type='str', choices=['run', 'check']),
-        job_tags=dict(type='str'),
-        skip_tags=dict(type='str'),
-        limit=dict(type='str'),
+        inventory=dict(),
+        scm_branch=dict(),
+        job_type=dict(choices=['run', 'check']),
+        job_tags=dict(),
+        skip_tags=dict(),
+        limit=dict(),
         diff_mode=dict(type='bool'),
-        verbosity=dict(type='str', choices=['0', '1', '2', '3', '4', '5']),
-        unified_job_template=dict(type='str'),
+        verbosity=dict(choices=['0', '1', '2', '3', '4', '5']),
+        unified_job_template=dict(),
         all_parents_must_converge=dict(type='bool'),
         success_nodes=dict(type='list', elements='str'),
         always_nodes=dict(type='list', elements='str'),
@@ -208,7 +185,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     identifier = module.params.get('identifier')
@@ -234,16 +211,20 @@ def main():
         workflow_job_template_id = wfjt_data['id']
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     unified_job_template = module.params.get('unified_job_template')
     if unified_job_template:
         new_fields['unified_job_template'] = module.resolve_name_to_id('unified_job_templates', unified_job_template)
 
     inventory = module.params.get('inventory')
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
-
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     # Create the data that gets sent for create and update
     for field_name in (
@@ -278,16 +259,12 @@ def main():
     # In the case of a new object, the utils need to know it is a node
     new_fields['type'] = 'workflow_job_template_node'
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
-            associations=association_fields
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='workflow_job_template_nodes', item_type='workflow_job_template_node',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -9,8 +10,6 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
-
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import {
@@ -18,11 +17,12 @@ import {
   PencilAltIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
-
-import LaunchButton from '@components/LaunchButton';
-import Sparkline from '@components/Sparkline';
-import { toTitleCase } from '@util/strings';
 import styled from 'styled-components';
+import DataListCell from '../../../components/DataListCell';
+
+import LaunchButton from '../../../components/LaunchButton';
+import Sparkline from '../../../components/Sparkline';
+import { toTitleCase } from '../../../util/strings';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;

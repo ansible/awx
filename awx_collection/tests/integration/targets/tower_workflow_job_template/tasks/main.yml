@@ -1,11 +1,17 @@
 ---
-- name: Generate names
+- name: Generate a random string for names
   set_fact:
-    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Generate random names for test objects
+  set_fact:
+    scm_cred_name: "AWX-Collection-tests-tower_workflow_job_template-scm-cred-{{ test_id }}"
+    demo_project_name: "AWX-Collection-tests-tower_workflow_job_template-proj-{{ test_id }}"
+    jt1_name: "AWX-Collection-tests-tower_workflow_job_template-jt1-{{ test_id }}"
+    jt2_name: "AWX-Collection-tests-tower_workflow_job_template-jt2-{{ test_id }}"
+    wfjt_name: "AWX-Collection-tests-tower_workflow_job_template-wfjt-{{ test_id }}"
+    email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ test_id }}"
 
 - name: Create an SCM Credential
   tower_credential:
@@ -17,6 +23,33 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Add email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    username: user
+    password: s3cr3t
+    sender: tower@example.com
+    recipients:
+      - user1@example.com
+    host: smtp.example.com
+    port: 25
+    use_tls: false
+    use_ssl: false
+    state: present
+
+- name: Add webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    url: http://www.example.com/hook
+    headers:
+      X-Custom-Header: value123
+    state: present
+  register: result
 
 - name: Create a Demo Project
   tower_project:
@@ -82,6 +115,7 @@
 - name: Create a workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
+    inventory: Demo Inventory
     extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
   register: result
 
@@ -103,9 +137,58 @@
     unified_job_template: "{{ jt1_name }}"
     workflow: "{{ wfjt_name }}"
 
-- name: Delete a workflow job template
+- name: Add started notifications to workflow job template
   tower_workflow_job_template:
     name: "{{ wfjt_name }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add started notifications to workflow job template
+  tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add success notifications to workflow job template
+  tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    notification_templates_success:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove "on start" webhook notification from workflow job template
+  tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a workflow job template with an invalid inventory and webook_credential
+  tower_workflow_job_template:
+    name: "{{ wfjt_name }}"
+    inventory: "Does Not Exist"
+    webhook_credential: "Does Not Exist"
     state: absent
   register: result
 
@@ -179,3 +262,15 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Delete email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
+
+- name: Delete webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    state: absent

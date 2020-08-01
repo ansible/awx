@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { InventoriesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI } from '../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import mockInventory from './shared/data.inventory.json';
 import Inventory from './Inventory';
 
-jest.mock('@api');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({
@@ -27,7 +30,7 @@ describe('<Inventory />', () => {
       wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 6);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 7);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

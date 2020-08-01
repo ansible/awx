@@ -1,27 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PageSection, Card } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
+import { CardBody } from '../../../components/Card';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 
-import { CredentialTypesAPI, CredentialsAPI } from '@api';
+import {
+  CredentialInputSourcesAPI,
+  CredentialTypesAPI,
+  CredentialsAPI,
+} from '../../../api';
 import CredentialForm from '../shared/CredentialForm';
+import useRequest from '../../../util/useRequest';
 
 function CredentialAdd({ me }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [credentialTypes, setCredentialTypes] = useState(null);
-  const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
+
+  const {
+    error: submitError,
+    request: submitRequest,
+    result: credentialId,
+  } = useRequest(
+    useCallback(
+      async (values, credentialTypesMap) => {
+        const { inputs: credentialTypeInputs } = credentialTypesMap[
+          values.credential_type
+        ];
+
+        const {
+          inputs,
+          organization,
+          passwordPrompts,
+          ...remainingValues
+        } = values;
+
+        const nonPluginInputs = {};
+        const pluginInputs = {};
+        const possibleFields = credentialTypeInputs.fields || [];
+
+        possibleFields.forEach(field => {
+          const input = inputs[field.id];
+          if (input.credential && input.inputs) {
+            pluginInputs[field.id] = input;
+          } else if (passwordPrompts[field.id]) {
+            nonPluginInputs[field.id] = 'ASK';
+          } else {
+            nonPluginInputs[field.id] = input;
+          }
+        });
+
+        const modifiedData = { inputs: nonPluginInputs, ...remainingValues };
+        // can send only one of org, user, team
+        if (organization?.id) {
+          modifiedData.organization = organization.id;
+        } else if (me?.id) {
+          modifiedData.user = me.id;
+        }
+        const {
+          data: { id: newCredentialId },
+        } = await CredentialsAPI.create(modifiedData);
+
+        await Promise.all(
+          Object.entries(pluginInputs).map(([key, value]) =>
+            CredentialInputSourcesAPI.create({
+              input_field_name: key,
+              metadata: value.inputs,
+              source_credential: value.credential.id,
+              target_credential: newCredentialId,
+            })
+          )
+        );
+
+        return newCredentialId;
+      },
+      [me]
+    )
+  );
+
+  useEffect(() => {
+    if (credentialId) {
+      history.push(`/credentials/${credentialId}/details`);
+    }
+  }, [credentialId, history]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const {
           data: { results: loadedCredentialTypes },
-        } = await CredentialTypesAPI.read({ or__kind: ['scm', 'ssh'] });
-        setCredentialTypes(loadedCredentialTypes);
+        } = await CredentialTypesAPI.read();
+        setCredentialTypes(
+          loadedCredentialTypes.reduce((credentialTypesMap, credentialType) => {
+            credentialTypesMap[credentialType.id] = credentialType;
+            return credentialTypesMap;
+          }, {})
+        );
       } catch (err) {
         setError(err);
       } finally {
@@ -36,21 +112,7 @@ function CredentialAdd({ me }) {
   };
 
   const handleSubmit = async values => {
-    const { organization, ...remainingValues } = values;
-    setFormSubmitError(null);
-    try {
-      const {
-        data: { id: credentialId },
-      } = await CredentialsAPI.create({
-        user: (me && me.id) || null,
-        organization: (organization && organization.id) || null,
-        ...remainingValues,
-      });
-      const url = `/credentials/${credentialId}/details`;
-      history.push(`${url}`);
-    } catch (err) {
-      setFormSubmitError(err);
-    }
+    await submitRequest(values, credentialTypes);
   };
 
   if (error) {
@@ -65,7 +127,15 @@ function CredentialAdd({ me }) {
     );
   }
   if (isLoading) {
-    return <ContentLoading />;
+    return (
+      <PageSection>
+        <Card>
+          <CardBody>
+            <ContentLoading />
+          </CardBody>
+        </Card>
+      </PageSection>
+    );
   }
   return (
     <PageSection>
@@ -75,7 +145,7 @@ function CredentialAdd({ me }) {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             credentialTypes={credentialTypes}
-            submitError={formSubmitError}
+            submitError={submitError}
           />
         </CardBody>
       </Card>

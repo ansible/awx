@@ -5,6 +5,8 @@
 - name: Poll for status of active job.
   hosts: all
   gather_facts: false
+  collections:
+    - ansible.posix
 
   tasks:
 
@@ -38,6 +40,7 @@
         recursive: true
         set_remote_user: false
         rsync_opts:
+          - "--blocking-io"
           - "--rsh=$RSH"
       environment:
         RSH: "oc rsh --config={{ ansible_kubectl_config }}"
@@ -51,6 +54,7 @@
         mode: pull
         set_remote_user: false
         rsync_opts:
+          - "--blocking-io"
           - "--rsh=$RSH"
       environment:
         RSH: "oc rsh --config={{ ansible_kubectl_config }}"

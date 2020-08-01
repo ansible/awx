@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { useState, useEffect, useRef } from 'react';
 import { bool } from 'prop-types';
 import styled from 'styled-components';

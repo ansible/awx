@@ -1,39 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { number, string, oneOfType } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { ProjectsAPI } from '@api';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import { ProjectsAPI } from '../../../api';
+import useRequest from '../../../util/useRequest';
 
 function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
-  const [options, setOptions] = useState([]);
+  const {
+    result: options,
+    request: fetchOptions,
+    isLoading,
+    error,
+  } = useRequest(
+    useCallback(async () => {
+      if (!projectId) {
+        return [];
+      }
+      const { data } = await ProjectsAPI.readPlaybooks(projectId);
+      const opts = (data || []).map(playbook => ({
+        value: playbook,
+        key: playbook,
+        label: playbook,
+        isDisabled: false,
+      }));
+
+      opts.unshift({
+        value: '',
+        key: '',
+        label: i18n._(t`Choose a playbook`),
+        isDisabled: false,
+      });
+      return opts;
+    }, [projectId, i18n]),
+    []
+  );
 
   useEffect(() => {
-    if (!projectId) {
-      return;
-    }
-    (async () => {
-      try {
-        const { data } = await ProjectsAPI.readPlaybooks(projectId);
-        const opts = (data || []).map(playbook => ({
-          value: playbook,
-          key: playbook,
-          label: playbook,
-          isDisabled: false,
-        }));
+    fetchOptions();
+  }, [fetchOptions]);
 
-        opts.unshift({
-          value: '',
-          key: '',
-          label: i18n._(t`Choose a playbook`),
-          isDisabled: false,
-        });
-        setOptions(opts);
-      } catch (contentError) {
-        onError(contentError);
-      }
-    })();
-  }, [projectId, i18n, onError]);
+  useEffect(() => {
+    if (error) {
+      onError(error);
+    }
+  }, [error, onError]);
+
   return (
     <AnsibleSelect
       id="template-playbook"
@@ -41,6 +53,7 @@ function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
       isValid={isValid}
       {...field}
       onBlur={onBlur}
+      isDisabled={isLoading}
     />
   );
 }

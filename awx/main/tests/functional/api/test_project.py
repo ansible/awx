@@ -54,7 +54,9 @@ def test_no_changing_overwrite_behavior_if_used(post, patch, organization, admin
         data={
             'name': 'fooo',
             'organization': organization.id,
-            'allow_override': True
+            'allow_override': True,
+            'scm_type': 'git',
+            'scm_url': 'https://github.com/ansible/test-playbooks.git'
         },
         user=admin_user,
         expect=201
@@ -83,7 +85,9 @@ def test_changing_overwrite_behavior_okay_if_not_used(post, patch, organization,
         data={
             'name': 'fooo',
             'organization': organization.id,
-            'allow_override': True
+            'allow_override': True,
+            'scm_type': 'git',
+            'scm_url': 'https://github.com/ansible/test-playbooks.git'
         },
         user=admin_user,
         expect=201

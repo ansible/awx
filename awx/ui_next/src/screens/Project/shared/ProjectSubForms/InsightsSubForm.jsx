@@ -2,8 +2,8 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import { required } from '@util/validators';
+import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import { required } from '../../../../util/validators';
 import { ScmTypeOptions } from './SharedFields';
 
 const InsightsSubForm = ({

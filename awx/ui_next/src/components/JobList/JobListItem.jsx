@@ -11,13 +11,13 @@ import {
   DataListItemCells,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 import { RocketIcon } from '@patternfly/react-icons';
-import LaunchButton from '@components/LaunchButton';
-import StatusIcon from '@components/StatusIcon';
-import { formatDateString } from '@util/dates';
-import { JOB_TYPE_URL_SEGMENTS } from '@constants';
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
+import LaunchButton from '../LaunchButton';
+import StatusIcon from '../StatusIcon';
+import { formatDateString } from '../../util/dates';
+import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -36,7 +36,7 @@ function JobListItem({
   const labelId = `check-action-${job.id}`;
 
   const jobTypes = {
-    project_update: i18n._(t`SCM Update`),
+    project_update: i18n._(t`Source Control Update`),
     inventory_update: i18n._(t`Inventory Sync`),
     job: i18n._(t`Playbook Run`),
     command: i18n._(t`Command`),
@@ -75,7 +75,7 @@ function JobListItem({
                 ]
               : []),
             <DataListCell key="finished">
-              {formatDateString(job.finished)}
+              {job.finished ? formatDateString(job.finished) : ''}
             </DataListCell>,
           ]}
         />

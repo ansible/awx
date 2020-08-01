@@ -1,0 +1,50 @@
+---
+- name: Check for existing Postgres data
+  stat:
+    path: "{{ postgres_data_dir }}/pgdata/PG_VERSION"
+  register: pg_version_file
+
+- name: Record Postgres version
+  set_fact:
+    old_pg_version: "{{ lookup('file', postgres_data_dir + '/pgdata/PG_VERSION') }}"
+  when: pg_version_file.stat.exists
+
+- name: Determine whether to upgrade postgres
+  set_fact:
+    upgrade_postgres: "{{ old_pg_version is defined and old_pg_version == '9.6' }}"
+
+- name: Set up new postgres paths pre-upgrade
+  file:
+    state: directory
+    path: "{{ item }}"
+    recurse: true
+  when: upgrade_postgres | bool
+  with_items:
+    - "{{ postgres_data_dir }}/10/data"
+
+- name: Stop AWX before upgrading postgres
+  docker_service:
+    project_src: "{{ docker_compose_dir }}"
+    stopped: true
+  when: upgrade_postgres | bool
+
+- name: Upgrade Postgres
+  shell: |
+    docker run --rm \
+      -v {{ postgres_data_dir }}/pgdata:/var/lib/postgresql/9.6/data \
+      -v {{ postgres_data_dir }}/10/data:/var/lib/postgresql/10/data \
+      -e PGUSER={{ pg_username }} -e POSTGRES_INITDB_ARGS="-U {{ pg_username }}" \
+      tianon/postgres-upgrade:9.6-to-10 --username={{ pg_username }}
+  when: upgrade_postgres | bool
+
+- name: Copy old pg_hba.conf
+  copy:
+    src: "{{ postgres_data_dir + '/pgdata/pg_hba.conf' }}"
+    dest: "{{ postgres_data_dir + '/10/data/' }}"
+  when: upgrade_postgres | bool
+
+- name: Remove old data directory
+  file:
+    path: "{{ postgres_data_dir + '/pgdata' }}"
+    state: absent
+  when: compose_start_containers|bool

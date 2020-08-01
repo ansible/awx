@@ -4,12 +4,15 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+} from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 
 import TemplateList from './TemplateList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockTemplates = [
   {
@@ -20,6 +23,8 @@ const mockTemplates = [
     summary_fields: {
       user_capabilities: {
         delete: true,
+        edit: true,
+        copy: true,
       },
     },
   },
@@ -70,6 +75,7 @@ const mockTemplates = [
 ];
 
 describe('<TemplateList />', () => {
+  let debug;
   beforeEach(() => {
     UnifiedJobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -83,10 +89,13 @@ describe('<TemplateList />', () => {
         actions: [],
       },
     });
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    global.console.debug = debug;
   });
 
   test('initially renders successfully', async () => {
@@ -300,10 +309,24 @@ describe('<TemplateList />', () => {
         .find('button[aria-label="confirm delete"]')
         .prop('onClick')();
     });
+
     await waitForElement(
       wrapper,
-      'Modal',
+      'Modal[aria-label="Deletion Error"]',
       el => el.props().isOpen === true && el.props().title === 'Error!'
     );
+  });
+  test('should properly copy template', async () => {
+    JobTemplatesAPI.copy.mockResolvedValue({});
+    const wrapper = mountWithContexts(<TemplateList />);
+    await act(async () => {
+      await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    });
+    await act(async () =>
+      wrapper.find('Button[aria-label="Copy"]').prop('onClick')()
+    );
+    expect(JobTemplatesAPI.copy).toHaveBeenCalled();
+    expect(UnifiedJobTemplatesAPI.read).toHaveBeenCalled();
+    wrapper.update();
   });
 });

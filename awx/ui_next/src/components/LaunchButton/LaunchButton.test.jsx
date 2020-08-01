@@ -1,13 +1,13 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { sleep } from '../../../testUtils/testUtils';
 
 import LaunchButton from './LaunchButton';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/JobTemplates');
+jest.mock('../../api/models/WorkflowJobTemplates');
+jest.mock('../../api/models/JobTemplates');
 
 describe('LaunchButton', () => {
   JobTemplatesAPI.readLaunch.mockResolvedValue({
@@ -62,7 +62,7 @@ describe('LaunchButton', () => {
     button.prop('onClick')();
     expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
-    expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, null);
+    expect(JobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
   });
 
@@ -99,7 +99,7 @@ describe('LaunchButton', () => {
     button.prop('onClick')();
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     await sleep(0);
-    expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, null);
+    expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/workflow/9000/output');
   });
 

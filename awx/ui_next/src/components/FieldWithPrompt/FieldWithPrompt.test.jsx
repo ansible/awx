@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { Field, Formik } from 'formik';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import FieldWithPrompt from './FieldWithPrompt';
 
 describe('FieldWithPrompt', () => {

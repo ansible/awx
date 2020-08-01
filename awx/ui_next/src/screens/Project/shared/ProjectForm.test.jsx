@@ -1,10 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import ProjectForm from './ProjectForm';
-import { CredentialTypesAPI, ProjectsAPI } from '@api';
+import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<ProjectForm />', () => {
   let wrapper;
@@ -119,7 +122,9 @@ describe('<ProjectForm />', () => {
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="SCM Type"]').length).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Source Control Credential Type"]').length
+    ).toBe(1);
     expect(wrapper.find('FormGroup[label="Ansible Environment"]').length).toBe(
       1
     );
@@ -140,12 +145,18 @@ describe('<ProjectForm />', () => {
       );
     });
     wrapper.update();
-    expect(wrapper.find('FormGroup[label="SCM URL"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Source Control URL"]').length).toBe(
+      1
+    );
     expect(
-      wrapper.find('FormGroup[label="SCM Branch/Tag/Commit"]').length
+      wrapper.find('FormGroup[label="Source Control Branch/Tag/Commit"]').length
     ).toBe(1);
-    expect(wrapper.find('FormGroup[label="SCM Refspec"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="SCM Credential"]').length).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Source Control Refspec"]').length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Source Control Credential"]').length
+    ).toBe(1);
     expect(wrapper.find('FormGroup[label="Options"]').length).toBe(1);
   });
 
@@ -184,7 +195,7 @@ describe('<ProjectForm />', () => {
     });
   });
 
-  test('should display insights credential lookup when scm type is "insights"', async () => {
+  test('should display insights credential lookup when source control type is "insights"', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
@@ -268,7 +279,7 @@ describe('<ProjectForm />', () => {
     expect(wrapper.find('ManualSubForm Alert').length).toBe(1);
   });
 
-  test('should reset scm subform values when scm type changes', async () => {
+  test('should reset source control subform values when source control type changes', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectForm
@@ -281,16 +292,18 @@ describe('<ProjectForm />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
 
     const scmTypeSelect = wrapper.find(
-      'FormGroup[label="SCM Type"] FormSelect'
+      'FormGroup[label="Source Control Credential Type"] FormSelect'
     );
     await act(async () => {
       scmTypeSelect.invoke('onChange')('hg', { target: { name: 'Mercurial' } });
     });
     wrapper.update();
     await act(async () => {
-      wrapper.find('FormGroup[label="SCM URL"] input').simulate('change', {
-        target: { value: 'baz', name: 'scm_url' },
-      });
+      wrapper
+        .find('FormGroup[label="Source Control URL"] input')
+        .simulate('change', {
+          target: { value: 'baz', name: 'scm_url' },
+        });
     });
     wrapper.update();
     expect(wrapper.find('input#project-scm-url').prop('value')).toEqual('baz');

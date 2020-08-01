@@ -1,24 +1,23 @@
 import React, { Component } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import { Switch, Route, Redirect, withRouter, Link } from 'react-router-dom';
-import { TabbedCardHeader } from '@components/Card';
-import AppendBody from '@components/AppendBody';
-import CardCloseButton from '@components/CardCloseButton';
-import ContentError from '@components/ContentError';
-import FullPage from '@components/FullPage';
-import JobList from '@components/JobList';
-import RoutedTabs from '@components/RoutedTabs';
-import { Schedules } from '@components/Schedule';
-import ContentLoading from '@components/ContentLoading';
-import { ResourceAccessList } from '@components/ResourceAccessList';
-import NotificationList from '@components/NotificationList';
+import AppendBody from '../../components/AppendBody';
+import ContentError from '../../components/ContentError';
+import FullPage from '../../components/FullPage';
+import JobList from '../../components/JobList';
+import RoutedTabs from '../../components/RoutedTabs';
+import { Schedules } from '../../components/Schedule';
+import ContentLoading from '../../components/ContentLoading';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
+import NotificationList from '../../components/NotificationList';
 import {
   WorkflowJobTemplatesAPI,
   CredentialsAPI,
   OrganizationsAPI,
-} from '@api';
+} from '../../api';
 import WorkflowJobTemplateDetail from './WorkflowJobTemplateDetail';
 import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
@@ -32,7 +31,6 @@ class WorkflowJobTemplate extends Component {
       contentError: null,
       hasContentLoading: true,
       template: null,
-      webhook_key: null,
       isNotifAdmin: false,
     };
     this.createSchedule = this.createSchedule.bind(this);
@@ -59,11 +57,9 @@ class WorkflowJobTemplate extends Component {
     this.setState({ contentError: null });
     try {
       const { data } = await WorkflowJobTemplatesAPI.readDetail(id);
-      if (data?.related?.webhook_key) {
-        const {
-          data: { webhook_key },
-        } = await WorkflowJobTemplatesAPI.readWebhookKey(id);
-        this.setState({ webhook_key });
+      let webhookKey;
+      if (data?.webhook_service && data?.related?.webhook_key) {
+        webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
       }
       if (data?.summary_fields?.webhook_credential) {
         const {
@@ -83,7 +79,7 @@ class WorkflowJobTemplate extends Component {
       });
       setBreadcrumb(data);
       this.setState({
-        template: data,
+        template: { ...data, webhook_key: webhookKey?.data.webhook_key },
         isNotifAdmin: notifAdminRes.data.results.length > 0,
       });
     } catch (err) {
@@ -114,14 +110,26 @@ class WorkflowJobTemplate extends Component {
       contentError,
       hasContentLoading,
       template,
-      webhook_key,
       isNotifAdmin,
     } = this.state;
 
     const canSeeNotificationsTab = me.is_system_auditor || isNotifAdmin;
     const canToggleNotifications = isNotifAdmin;
+    const canAddAndEditSurvey =
+      template?.summary_fields?.user_capabilities.edit ||
+      template?.summary_fields?.user_capabilities.delete;
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Templates`)}
+          </>
+        ),
+        link: `/templates`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details` },
       { name: i18n._(t`Access`), link: `${match.url}/access` },
     ];
@@ -149,7 +157,7 @@ class WorkflowJobTemplate extends Component {
       link: `${match.url}/completed_jobs`,
     });
     tabsArray.push({
-      name: i18n._(t`Survey`),
+      name: canAddAndEditSurvey ? i18n._(t`Survey`) : i18n._(t`View Survey`),
       link: `${match.url}/survey`,
     });
 
@@ -174,8 +182,8 @@ class WorkflowJobTemplate extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`Template not found.`)}{' '}
-                  <Link to="/templates">{i18n._(`View all Templates.`)}</Link>
+                  {i18n._(t`Template not found.`)}{' '}
+                  <Link to="/templates">{i18n._(t`View all Templates.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -184,22 +192,19 @@ class WorkflowJobTemplate extends Component {
       );
     }
 
-    const cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/templates" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    let showCardHeader = true;
+
+    if (
+      location.pathname.endsWith('edit') ||
+      location.pathname.includes('schedules/')
+    ) {
+      showCardHeader = false;
+    }
 
     return (
       <PageSection>
         <Card>
-          {location.pathname.endsWith('edit') ||
-          location.pathname.includes('schedules/')
-            ? null
-            : cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect
               from="/templates/workflow_job_template/:id"
@@ -210,61 +215,46 @@ class WorkflowJobTemplate extends Component {
               <Route
                 key="wfjt-details"
                 path="/templates/workflow_job_template/:id/details"
-                render={() => (
-                  <WorkflowJobTemplateDetail
-                    template={template}
-                    webhook_key={webhook_key}
-                  />
-                )}
-              />
+              >
+                <WorkflowJobTemplateDetail template={template} />
+              </Route>
             )}
             {template && (
-              <Route
-                path="/templates/workflow_job_template/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={template}
-                    apiModel={WorkflowJobTemplatesAPI}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/access">
+                <ResourceAccessList
+                  resource={template}
+                  apiModel={WorkflowJobTemplatesAPI}
+                />
+              </Route>
             )}
             {canSeeNotificationsTab && (
-              <Route
-                path="/templates/workflow_job_template/:id/notifications"
-                render={() => (
-                  <NotificationList
-                    id={Number(match.params.id)}
-                    canToggleNotifications={canToggleNotifications}
-                    apiModel={WorkflowJobTemplatesAPI}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/notifications">
+                <NotificationList
+                  id={Number(match.params.id)}
+                  canToggleNotifications={canToggleNotifications}
+                  apiModel={WorkflowJobTemplatesAPI}
+                />
+              </Route>
             )}
             {template && (
               <Route
                 key="wfjt-edit"
                 path="/templates/workflow_job_template/:id/edit"
-                render={() => (
-                  <WorkflowJobTemplateEdit
-                    template={template}
-                    webhook_key={webhook_key}
-                  />
-                )}
-              />
+              >
+                <WorkflowJobTemplateEdit template={template} />
+              </Route>
             )}
             {template && (
               <Route
                 key="wfjt-visualizer"
                 path="/templates/workflow_job_template/:id/visualizer"
-                render={() => (
-                  <AppendBody>
-                    <FullPage>
-                      <Visualizer template={template} />
-                    </FullPage>
-                  </AppendBody>
-                )}
-              />
+              >
+                <AppendBody>
+                  <FullPage>
+                    <Visualizer template={template} />
+                  </FullPage>
+                </AppendBody>
+              </Route>
             )}
             {template?.id && (
               <Route path="/templates/workflow_job_template/:id/completed_jobs">
@@ -276,39 +266,35 @@ class WorkflowJobTemplate extends Component {
               </Route>
             )}
             {template?.id && (
-              <Route
-                path="/templates/workflow_job_template/:id/schedules"
-                render={() => (
-                  <Schedules
-                    setBreadcrumb={setBreadcrumb}
-                    unifiedJobTemplate={template}
-                    createSchedule={this.createSchedule}
-                    loadSchedules={this.loadSchedules}
-                    loadScheduleOptions={this.loadScheduleOptions}
-                  />
-                )}
-              />
+              <Route path="/templates/workflow_job_template/:id/schedules">
+                <Schedules
+                  setBreadcrumb={setBreadcrumb}
+                  unifiedJobTemplate={template}
+                  createSchedule={this.createSchedule}
+                  loadSchedules={this.loadSchedules}
+                  loadScheduleOptions={this.loadScheduleOptions}
+                />
+              </Route>
             )}
             {template && (
               <Route path="/templates/:templateType/:id/survey">
-                <TemplateSurvey template={template} />
+                <TemplateSurvey
+                  template={template}
+                  canEdit={canAddAndEditSurvey}
+                />
               </Route>
             )}
-            <Route
-              key="not-found"
-              path="*"
-              render={() => (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/templates/workflow_job_template/${match.params.id}/details`}
-                    >
-                      {i18n._(`View Template Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )}
-            />
+            <Route key="not-found" path="*">
+              <ContentError isNotFound>
+                {match.params.id && (
+                  <Link
+                    to={`/templates/workflow_job_template/${match.params.id}/details`}
+                  >
+                    {i18n._(t`View Template Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            </Route>
           </Switch>
         </Card>
       </PageSection>

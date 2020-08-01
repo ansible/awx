@@ -21,7 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-# don't use memcache when running tests
 if "pytest" in sys.modules:
     CACHES = {
         'default': {
@@ -148,6 +147,9 @@ for setting in dir(this_module):
 include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
+# Installed differently in Dockerfile compared to production versions
+AWX_ANSIBLE_COLLECTIONS_PATHS = '/vendor/awx_ansible_collections'
+
 BASE_VENV_PATH = "/venv/"
 ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
@@ -176,7 +178,9 @@ CLUSTER_HOST_ID = socket.gethostname()
 if 'Docker Desktop' in os.getenv('OS', ''):
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
 else:
-    os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    try:
+        os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    except Exception:
+        pass
 
-WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
 AWX_CALLBACK_PROFILE = True

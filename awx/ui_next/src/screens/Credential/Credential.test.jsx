@@ -1,13 +1,16 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { CredentialsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import mockCredential from './shared/data.credential.json';
+import { CredentialsAPI } from '../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
+import mockCredential from './shared/data.scmCredential.json';
 import mockOrgCredential from './shared/data.orgCredential.json';
 import Credential from './Credential';
 
-jest.mock('@api');
+jest.mock('../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({
@@ -28,7 +31,7 @@ describe('<Credential />', () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 1);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 2);
   });
 
   test('initially renders org-based credential succesfully', async () => {
@@ -41,7 +44,7 @@ describe('<Credential />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
     // org-based credential detail needs access tab
-    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 2);
+    await waitForElement(wrapper, '.pf-c-tabs__item', el => el.length === 3);
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

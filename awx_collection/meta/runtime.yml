@@ -1,0 +1,15 @@
+---
+plugin_routing:
+  modules:
+    tower_receive:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    tower_send:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details
+    tower_workflow_template:
+      deprecation:
+        removal_date: TBD
+        warning_text: see plugin documentation for details

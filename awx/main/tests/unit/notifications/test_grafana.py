@@ -18,7 +18,7 @@ def test_send_messages():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': [], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': None},
             verify=True)
         assert sent_messages == 1
 
@@ -36,7 +36,7 @@ def test_send_messages_with_no_verify_ssl():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': [], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None,'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None,'time': 60000, 'dashboardId': None},
             verify=False)
         assert sent_messages == 1
 
@@ -54,7 +54,7 @@ def test_send_messages_with_dashboardid():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': [], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': 42},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': 42},
             verify=True)
         assert sent_messages == 1
 
@@ -72,7 +72,7 @@ def test_send_messages_with_panelid():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': [], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': None},
             verify=True)
         assert sent_messages == 1
 
@@ -90,7 +90,7 @@ def test_send_messages_with_bothids():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': [], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': 42},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': 42},
             verify=True)
         assert sent_messages == 1
 

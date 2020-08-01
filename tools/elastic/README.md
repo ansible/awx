@@ -16,6 +16,7 @@ done by getting via bash in the running Docker machine. Example:
 ```bash
 docker-machine ssh default sudo sysctl -w vm.max_map_count=262144
 ```
+> Note: If you are running docker natively on linux, you need only run `sysctl -w vm.max_map_count=262144`
 
 After this, the containers can be started up with commands like:
 

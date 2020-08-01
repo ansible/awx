@@ -2,12 +2,12 @@ export default
     function hashSetup() {
         return function(params) {
             var scope = params.scope,
-                master = params.master,
+                main = params.main,
                 check_field = params.check_field,
                 default_val = params.default_val;
 
             scope[check_field] = default_val;
-            master[check_field] = default_val;
+            main[check_field] = default_val;
 
             // Original gist here: https://gist.github.com/jed/982883
             scope.genHash = function (fld) {

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_group
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower group.
 description:
     - Create, update, or destroy Ansible Tower groups. See
@@ -44,13 +43,11 @@ options:
     hosts:
       description:
         - List of hosts that should be put in this group.
-      required: False
       type: list
       elements: str
     children:
       description:
         - List of groups that should be nested inside in this group.
-      required: False
       type: list
       elements: str
       aliases:
@@ -64,15 +61,7 @@ options:
     new_name:
       description:
         - A new name for this group (for renaming)
-      required: False
       type: str
-      version_added: "3.7"
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -95,17 +84,17 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(required=False),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
-        variables=dict(type='dict', required=False),
+        variables=dict(type='dict'),
         hosts=dict(type='list', elements='str'),
         children=dict(type='list', elements='str', aliases=['groups']),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -125,6 +114,10 @@ def main():
             'inventory': inventory_id
         }
     })
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(group)
 
     # Create the data that gets sent for create and update
     group_fields = {
@@ -152,15 +145,11 @@ def main():
         if id_list:
             association_fields[relationship] = id_list
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(group)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing group, this will return on its own
-        module.create_or_update_if_needed(
-            group, group_fields, endpoint='groups', item_type='group',
-            associations=association_fields
-        )
+    # If the state was present we can let the module build or update the existing group, this will return on its own
+    module.create_or_update_if_needed(
+        group, group_fields, endpoint='groups', item_type='group',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':

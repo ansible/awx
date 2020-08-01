@@ -11,7 +11,7 @@ from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction, connection
-from django.db.utils import Error as DBError
+from django.db.utils import Error as DBError, ProgrammingError
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -31,18 +31,18 @@ logger = logging.getLogger('awx.conf.settings')
 # Store a special value to indicate when a setting is not set in the database.
 SETTING_CACHE_NOTSET = '___notset___'
 
-# Cannot store None in memcached; use a special value instead to indicate None.
+# Cannot store None in cache; use a special value instead to indicate None.
 # If the special value for None is the same as the "not set" value, then a value
 # of None will be equivalent to the setting not being set (and will raise an
 # AttributeError if there is no other default defined).
 # SETTING_CACHE_NONE = '___none___'
 SETTING_CACHE_NONE = SETTING_CACHE_NOTSET
 
-# Cannot store empty list/tuple in memcached; use a special value instead to
+# Cannot store empty list/tuple in cache; use a special value instead to
 # indicate an empty list.
 SETTING_CACHE_EMPTY_LIST = '___[]___'
 
-# Cannot store empty dict in memcached; use a special value instead to indicate
+# Cannot store empty dict in cache; use a special value instead to indicate
 # an empty dict.
 SETTING_CACHE_EMPTY_DICT = '___{}___'
 
@@ -74,10 +74,19 @@ def _ctit_db_wrapper(trans_safe=False):
                     logger.debug('Obtaining database settings in spite of broken transaction.')
                     transaction.set_rollback(False)
         yield
-    except DBError:
+    except DBError as exc:
         if trans_safe:
             if 'migrate' not in sys.argv and 'check_migrations' not in sys.argv:
-                logger.exception('Database settings are not available, using defaults.')
+                level = logger.exception
+                if isinstance(exc, ProgrammingError):
+                    if 'relation' in str(exc) and 'does not exist' in str(exc):
+                        # this generally means we can't fetch Tower configuration
+                        # because the database hasn't actually finished migrating yet;
+                        # this is usually a sign that a service in a container (such as ws_broadcast)
+                        # has come up *before* the database has finished migrating, and
+                        # especially that the conf.settings table doesn't exist yet
+                        level = logger.debug
+                level('Database settings are not available, using defaults.')
         else:
             logger.exception('Error modifying something related to database settings.')
     finally:
@@ -410,7 +419,7 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to set read only setting "%s".', name)
-            raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
+            raise ImproperlyConfigured('Setting "{}" is read only.'.format(name))
 
         try:
             data = field.to_representation(value)
@@ -441,7 +450,7 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to delete read only setting "%s".', name)
-            raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
+            raise ImproperlyConfigured('Setting "{}" is read only.'.format(name))
         for setting in Setting.objects.filter(key=name, user__isnull=True):
             setting.delete()
             # pre_delete handler will delete from cache.

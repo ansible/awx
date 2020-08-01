@@ -1,10 +1,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import MultiCredentialsLookup from './MultiCredentialsLookup';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
+import { CredentialsAPI, CredentialTypesAPI } from '../../api';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<MultiCredentialsLookup />', () => {
   let wrapper;
@@ -18,21 +21,16 @@ describe('<MultiCredentialsLookup />', () => {
   ];
 
   beforeEach(() => {
-    CredentialTypesAPI.read.mockResolvedValueOnce({
-      data: {
-        results: [
-          {
-            id: 400,
-            kind: 'ssh',
-            namespace: 'biz',
-            name: 'Amazon Web Services',
-          },
-          { id: 500, kind: 'vault', namespace: 'buzz', name: 'Vault' },
-          { id: 600, kind: 'machine', namespace: 'fuzz', name: 'Machine' },
-        ],
-        count: 2,
+    CredentialTypesAPI.loadAllTypes.mockResolvedValueOnce([
+      {
+        id: 400,
+        kind: 'ssh',
+        namespace: 'biz',
+        name: 'Amazon Web Services',
       },
-    });
+      { id: 500, kind: 'vault', namespace: 'buzz', name: 'Vault' },
+      { id: 600, kind: 'machine', namespace: 'fuzz', name: 'Machine' },
+    ]);
     CredentialsAPI.read.mockResolvedValueOnce({
       data: {
         results: [
@@ -52,7 +50,7 @@ describe('<MultiCredentialsLookup />', () => {
     wrapper.unmount();
   });
 
-  test('MultiCredentialsLookup renders properly', async () => {
+  test('should load credential types', async () => {
     const onChange = jest.fn();
     await act(async () => {
       wrapper = mountWithContexts(
@@ -64,8 +62,9 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
+    wrapper.update();
     expect(wrapper.find('MultiCredentialsLookup')).toHaveLength(1);
-    expect(CredentialTypesAPI.read).toHaveBeenCalled();
+    expect(CredentialTypesAPI.loadAllTypes).toHaveBeenCalled();
   });
 
   test('onChange is called when you click to remove a credential from input', async () => {
@@ -82,7 +81,7 @@ describe('<MultiCredentialsLookup />', () => {
     });
     const chip = wrapper.find('CredentialChip');
     expect(chip).toHaveLength(5);
-    const button = chip.at(1).find('ChipButton');
+    const button = chip.at(1).find('Chip Button');
     await act(async () => {
       button.invoke('onClick')();
     });
@@ -105,7 +104,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -118,12 +120,12 @@ describe('<MultiCredentialsLookup />', () => {
         count: 1,
       },
     });
-    expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
+    expect(CredentialsAPI.read).toHaveBeenCalledTimes(1);
     await act(async () => {
       select.invoke('onChange')({}, 500);
     });
     wrapper.update();
-    expect(CredentialsAPI.read).toHaveBeenCalledTimes(3);
+    expect(CredentialsAPI.read).toHaveBeenCalledTimes(2);
     expect(wrapper.find('OptionsList').prop('options')).toEqual([
       { id: 1, kind: 'cloud', name: 'New Cred', url: 'www.google.com' },
     ]);
@@ -141,7 +143,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -157,7 +162,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -181,7 +186,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -202,7 +210,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -227,7 +235,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -249,7 +260,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([
@@ -280,7 +291,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -302,7 +316,7 @@ describe('<MultiCredentialsLookup />', () => {
       });
     });
     wrapper.update();
-    act(() => {
+    await act(async () => {
       wrapper.find('Button[variant="primary"]').invoke('onClick')();
     });
     expect(onChange).toBeCalledWith([

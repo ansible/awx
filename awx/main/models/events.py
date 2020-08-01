@@ -7,7 +7,7 @@ from collections import defaultdict
 from django.db import models, DatabaseError, connection
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
-from django.utils.timezone import utc
+from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 
@@ -338,7 +338,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
 
             if isinstance(self, JobEvent):
                 hostnames = self._hostnames()
-                self._update_host_summary_from_stats(hostnames)
+                self._update_host_summary_from_stats(set(hostnames))
                 if self.job.inventory:
                     try:
                         self.job.inventory.update_computed_fields()
@@ -407,11 +407,14 @@ class BasePlaybookEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
+        host_map = kwargs.pop('host_map', {})
+
         sanitize_event_keys(kwargs, cls.VALID_KEYS)
         workflow_job_id = kwargs.pop('workflow_job_id', None)
         event = cls(**kwargs)
         if workflow_job_id:
             setattr(event, 'workflow_job_id', workflow_job_id)
+        setattr(event, 'host_map', host_map)
         event._update_from_event_data()
         return event
 
@@ -484,29 +487,47 @@ class JobEvent(BasePlaybookEvent):
             if not self.job or not self.job.inventory:
                 logger.info('Event {} missing job or inventory, host summaries not updated'.format(self.pk))
                 return
-            qs = self.job.inventory.hosts.filter(name__in=hostnames)
             job = self.job
+
+            from awx.main.models import Host, JobHostSummary  # circular import
+            all_hosts = Host.objects.filter(
+                pk__in=self.host_map.values()
+            ).only('id')
+            existing_host_ids = set(h.id for h in all_hosts)
+
+            summaries = dict()
             for host in hostnames:
+                host_id = self.host_map.get(host, None)
+                if host_id not in existing_host_ids:
+                    host_id = None
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                if qs.filter(name=host).exists():
-                    host_actual = qs.get(name=host)
-                    host_summary, created = job.job_host_summaries.get_or_create(host=host_actual, host_name=host_actual.name, defaults=host_stats)
-                else:
-                    host_summary, created = job.job_host_summaries.get_or_create(host_name=host, defaults=host_stats)
+                summary = JobHostSummary(
+                    created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats
+                )
+                summary.failed = bool(summary.dark or summary.failures)
+                summaries[(host_id, host)] = summary
 
-                if not created:
-                    update_fields = []
-                    for stat, value in host_stats.items():
-                        if getattr(host_summary, stat) != value:
-                            setattr(host_summary, stat, value)
-                            update_fields.append(stat)
-                    if update_fields:
-                        host_summary.save(update_fields=update_fields)
+            JobHostSummary.objects.bulk_create(summaries.values())
+
+            # update the last_job_id and last_job_host_summary_id
+            # in single queries
+            host_mapping = dict(
+                (summary['host_id'], summary['id'])
+                for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id')
+            )
+            for h in all_hosts:
+                # if the hostname *shows up* in the playbook_on_stats event
+                if h.name in hostnames:
+                    h.last_job_id = job.id
+                if h.id in host_mapping:
+                    h.last_job_host_summary_id = host_mapping[h.id]
+            Host.objects.bulk_update(all_hosts, ['last_job_id', 'last_job_host_summary_id'])
+
 
     @property
     def job_verbosity(self):

@@ -1,11 +1,12 @@
+import 'styled-components/macro';
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { required } from '@util/validators';
-import AnsibleSelect from '@components/AnsibleSelect';
-import FormField, { FieldTooltip } from '@components/FormField';
 import { FormGroup, Alert } from '@patternfly/react-core';
+import { required } from '../../../../util/validators';
+import AnsibleSelect from '../../../../components/AnsibleSelect';
+import FormField, { FieldTooltip } from '../../../../components/FormField';
 import { BrandName } from '../../../../variables';
 
 // Setting BrandName to a variable here is necessary to get the jest tests
@@ -54,7 +55,7 @@ const ManualSubForm = ({
             assigned to other projects. Create a new directory there and make
             sure the playbook files can be read by the "awx" system user,
             or have ${brandName} directly retrieve your playbooks from
-            source control using the SCM Type option above.`)}
+            source control using the Source Control Type option above.`)}
         </Alert>
       )}
       <FormField
@@ -80,14 +81,16 @@ const ManualSubForm = ({
         fieldId="project-local-path"
         helperTextInvalid={pathMeta.error}
         isRequired
-        isValid={!pathMeta.touched || !pathMeta.error}
+        validated={!pathMeta.touched || !pathMeta.error ? 'default' : 'error'}
         label={i18n._(t`Playbook Directory`)}
-      >
-        <FieldTooltip
-          content={i18n._(t`Select from the list of directories found in
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(t`Select from the list of directories found in
           the Project Base Path. Together the base path and the playbook
           directory provide the full path used to locate playbooks.`)}
-        />
+          />
+        }
+      >
         <AnsibleSelect
           {...pathField}
           id="local_path"

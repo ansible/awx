@@ -1,0 +1,156 @@
+{
+  "id": 47,
+  "type": "workflow_job_template",
+  "url": "/api/v2/workflow_job_templates/47/",
+  "related": {
+      "created_by": "/api/v2/users/8/",
+      "modified_by": "/api/v2/users/1/",
+      "last_job": "/api/v2/workflow_jobs/226/",
+      "workflow_jobs": "/api/v2/workflow_job_templates/47/workflow_jobs/",
+      "schedules": "/api/v2/workflow_job_templates/47/schedules/",
+      "launch": "/api/v2/workflow_job_templates/47/launch/",
+      "webhook_key": "/api/v2/workflow_job_templates/47/webhook_key/",
+      "webhook_receiver": "/api/v2/workflow_job_templates/47/github/",
+      "workflow_nodes": "/api/v2/workflow_job_templates/47/workflow_nodes/",
+      "labels": "/api/v2/workflow_job_templates/47/labels/",
+      "activity_stream": "/api/v2/workflow_job_templates/47/activity_stream/",
+      "notification_templates_started": "/api/v2/workflow_job_templates/47/notification_templates_started/",
+      "notification_templates_success": "/api/v2/workflow_job_templates/47/notification_templates_success/",
+      "notification_templates_error": "/api/v2/workflow_job_templates/47/notification_templates_error/",
+      "notification_templates_approvals": "/api/v2/workflow_job_templates/47/notification_templates_approvals/",
+      "access_list": "/api/v2/workflow_job_templates/47/access_list/",
+      "object_roles": "/api/v2/workflow_job_templates/47/object_roles/",
+      "survey_spec": "/api/v2/workflow_job_templates/47/survey_spec/",
+      "copy": "/api/v2/workflow_job_templates/47/copy/",
+      "organization": "/api/v2/organizations/3/",
+      "webhook_credential": "/api/v2/credentials/8/"
+  },
+  "summary_fields": {
+      "organization": {
+          "id": 3,
+          "name": "Mock Org",
+          "description": ""
+      },
+      "inventory": {
+          "id": 7,
+          "name": "Mock Smart Inv",
+          "description": "",
+          "has_active_failures": false,
+          "total_hosts": 1,
+          "hosts_with_active_failures": 0,
+          "total_groups": 0,
+          "has_inventory_sources": false,
+          "total_inventory_sources": 0,
+          "inventory_sources_with_failures": 0,
+          "organization_id": 1,
+          "kind": "smart"
+      },
+      "last_job": {
+          "id": 226,
+          "name": "abc",
+          "description": "From Tower bulk-data script",
+          "finished": "2020-04-08T21:30:44.282245Z",
+          "status": "failed",
+          "failed": true
+      },
+      "last_update": {
+          "id": 226,
+          "name": "abc",
+          "description": "From Tower bulk-data script",
+          "status": "failed",
+          "failed": true
+      },
+      "webhook_credential": {
+          "id": 8,
+          "name": "github",
+          "description": "",
+          "kind": "github_token",
+          "cloud": false,
+          "credential_type_id": 12
+      },
+      "created_by": {
+          "id": 8,
+          "username": "user-2",
+          "first_name": "",
+          "last_name": ""
+      },
+      "modified_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+      },
+      "object_roles": {
+          "admin_role": {
+              "description": "Can manage all aspects of the workflow job template",
+              "name": "Admin",
+              "id": 260
+          },
+          "execute_role": {
+              "description": "May run the workflow job template",
+              "name": "Execute",
+              "id": 261
+          },
+          "read_role": {
+              "description": "May view settings for the workflow job template",
+              "name": "Read",
+              "id": 262
+          },
+          "approval_role": {
+              "description": "Can approve or deny a workflow approval node",
+              "name": "Approve",
+              "id": 263
+          }
+      },
+      "user_capabilities": {
+          "edit": true,
+          "delete": true,
+          "start": true,
+          "schedule": true,
+          "copy": true
+      },
+      "labels": {
+          "count": 2,
+          "results": [
+              {
+                  "id": 104,
+                  "name": "L_10o0"
+              },
+              {
+                  "id": 105,
+                  "name": "L_20o0"
+              }
+          ]
+      },
+      "recent_jobs": [
+          {
+              "id": 226,
+              "status": "failed",
+              "finished": "2020-04-08T21:30:44.282245Z",
+              "canceled_on": null,
+              "type": "workflow_job"
+          }
+      ]
+  },
+  "created": "2020-04-07T16:38:02.856877Z",
+  "modified": "2020-04-13T20:53:53.761355Z",
+  "name": "Mock Workflow",
+  "description": "Mock WF Description",
+  "last_job_run": "2020-04-08T21:30:44.282245Z",
+  "last_job_failed": true,
+  "next_job_run": null,
+  "status": "failed",
+  "extra_vars": "---\nmock: data",
+  "organization": 3,
+  "survey_enabled": false,
+  "allow_simultaneous": true,
+  "ask_variables_on_launch": false,
+  "inventory": 7,
+  "limit": "hosts1,hosts2",
+  "scm_branch": "/bar/",
+  "ask_inventory_on_launch": true,
+  "ask_scm_branch_on_launch": true,
+  "ask_limit_on_launch": true,
+  "webhook_service": "github",
+  "webhook_credential": 8
+}

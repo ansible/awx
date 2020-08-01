@@ -1,7 +1,7 @@
 const path = require('path');
 const webpackConfig = require('./webpack.spec');
 
-process.env.CHROME_BIN = require('puppeteer').executablePath();
+process.env.CHROME_BIN = process.env.CHROME_BIN || require('puppeteer').executablePath();
 
 const SRC_PATH = path.resolve(__dirname, '../../client/src');
 const NODE_MODULES = path.resolve(__dirname, '../../node_modules');

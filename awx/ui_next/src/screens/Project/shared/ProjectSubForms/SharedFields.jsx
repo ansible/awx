@@ -2,20 +2,20 @@ import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import CredentialLookup from '@components/Lookup/CredentialLookup';
-import FormField, { CheckboxField } from '@components/FormField';
-import { required } from '@util/validators';
 import { FormGroup, Title } from '@patternfly/react-core';
+import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
+import FormField, { CheckboxField } from '../../../../components/FormField';
+import { required } from '../../../../util/validators';
 import {
   FormCheckboxLayout,
   FormFullWidthLayout,
-} from '@components/FormLayout';
+} from '../../../../components/FormLayout';
 
 export const UrlFormField = withI18n()(({ i18n, tooltip }) => (
   <FormField
     id="project-scm-url"
     isRequired
-    label={i18n._(t`SCM URL`)}
+    label={i18n._(t`Source Control URL`)}
     name="scm_url"
     tooltip={tooltip}
     tooltipMaxWidth="350px"
@@ -32,7 +32,7 @@ export const BranchFormField = withI18n()(({ i18n, label }) => (
     label={label}
     tooltip={i18n._(t`Branch to checkout. In addition to branches,
         you can input tags, commit hashes, and arbitrary refs. Some
-        commit hashes and refs may not be availble unless you also
+        commit hashes and refs may not be available unless you also
         provide a custom refspec.`)}
   />
 ));
@@ -44,7 +44,7 @@ export const ScmCredentialFormField = withI18n()(
     return (
       <CredentialLookup
         credentialTypeId={credential.typeId}
-        label={i18n._(t`SCM Credential`)}
+        label={i18n._(t`Source Control Credential`)}
         value={credential.value}
         onChange={value => {
           onCredentialSelection('scm', value);
@@ -94,7 +94,7 @@ export const ScmTypeOptions = withI18n()(
               name="allow_override"
               label={i18n._(t`Allow Branch Override`)}
               tooltip={i18n._(
-                t`Allow changing the SCM branch or revision in a job
+                t`Allow changing the Source Control branch or revision in a job
                     template that uses this project.`
               )}
             />
@@ -104,7 +104,9 @@ export const ScmTypeOptions = withI18n()(
 
       {scmUpdateOnLaunch && (
         <>
-          <Title size="md">{i18n._(t`Option Details`)}</Title>
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Option Details`)}
+          </Title>
           <FormField
             id="project-cache-timeout"
             name="scm_update_cache_timeout"

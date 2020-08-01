@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_cancel
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: Cancel an Ansible Tower Job.
 description:
     - Cancel Ansible Tower jobs. See
@@ -33,12 +32,6 @@ options:
         - Fail loudly if the I(job_id) can not be canceled
       default: False
       type: bool
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -68,10 +61,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(
-        argument_spec=argument_spec,
-        supports_check_mode=True,
-    )
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     job_id = module.params.get('job_id')

@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { DataList, Button as _Button } from '@patternfly/react-core';
-import ContentLoading from '@components/ContentLoading';
-import ContentEmpty from '@components/ContentEmpty';
-import AlertModal from '@components/AlertModal';
+import { useRouteMatch } from 'react-router-dom';
+import {
+  DataList,
+  Button as _Button,
+  Title,
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
+} from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import ContentLoading from '../../../components/ContentLoading';
+import AlertModal from '../../../components/AlertModal';
+import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
 import SurveyListItem from './SurveyListItem';
 import SurveyToolbar from './SurveyToolbar';
@@ -22,8 +31,11 @@ function SurveyList({
   toggleSurvey,
   updateSurvey,
   deleteSurvey,
+  canEdit,
   i18n,
 }) {
+  const match = useRouteMatch();
+
   const questions = survey?.spec || [];
   const [selected, setSelected] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -77,13 +89,6 @@ function SurveyList({
   let content;
   if (isLoading) {
     content = <ContentLoading />;
-  } else if (!questions || questions?.length <= 0) {
-    content = (
-      <ContentEmpty
-        title={i18n._(t`No Survey Questions Found`)}
-        message={i18n._(t`Please add survey questions.`)}
-      />
-    );
   } else {
     content = (
       <DataList aria-label={i18n._(t`Survey List`)}>
@@ -97,6 +102,7 @@ function SurveyList({
             onSelect={() => handleSelect(question)}
             onMoveUp={moveUp}
             onMoveDown={moveDown}
+            canEdit={canEdit}
           />
         ))}
         {isPreviewModalOpen && (
@@ -112,7 +118,7 @@ function SurveyList({
           variant="primary"
           aria-label={i18n._(t`Preview`)}
         >
-          Preview
+          {i18n._(t`Preview`)}
         </Button>
       </DataList>
     );
@@ -161,6 +167,20 @@ function SurveyList({
       </AlertModal>
     );
   }
+  if (!questions || questions?.length <= 0) {
+    return (
+      <EmptyState variant="full">
+        <EmptyStateIcon icon={CubesIcon} />
+        <Title size="lg" headingLevel="h3">
+          {i18n._(t`No survey questions found.`)}
+        </Title>
+        <EmptyStateBody>
+          {i18n._(t`Please add survey questions.`)}
+        </EmptyStateBody>
+        <ToolbarAddButton isDisabled={!canEdit} linkTo={`${match.url}/add`} />
+      </EmptyState>
+    );
+  }
   return (
     <>
       <SurveyToolbar
@@ -169,6 +189,7 @@ function SurveyList({
         surveyEnabled={surveyEnabled}
         onToggleSurvey={toggleSurvey}
         isDeleteDisabled={selected?.length === 0}
+        canEdit={canEdit}
         onToggleDeleteModal={() => setIsDeleteModalOpen(true)}
       />
       {content}

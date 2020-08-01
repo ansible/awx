@@ -1,15 +1,13 @@
 import React from 'react';
-
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { sleep } from '@testUtils/testUtils';
-
-import { NotificationTemplatesAPI } from '@api';
-
+import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
+import { NotificationTemplatesAPI } from '../../api';
 import NotificationList from './NotificationList';
 
-jest.mock('@api');
+jest.mock('../../api');
 
 describe('<NotificationList />', () => {
+  let wrapper;
   const data = {
     count: 2,
     results: [
@@ -58,218 +56,207 @@ describe('<NotificationList />', () => {
     },
   });
 
-  beforeEach(() => {
-    NotificationTemplatesAPI.read.mockReturnValue({ data });
-    MockModelAPI.readNotificationTemplatesSuccess.mockReturnValue({
-      data: { results: [{ id: 1 }] },
+  NotificationTemplatesAPI.read.mockReturnValue({ data });
+
+  MockModelAPI.readNotificationTemplatesSuccess.mockReturnValue({
+    data: { results: [{ id: 1 }] },
+  });
+
+  MockModelAPI.readNotificationTemplatesError.mockReturnValue({
+    data: { results: [{ id: 2 }] },
+  });
+
+  MockModelAPI.readNotificationTemplatesStarted.mockReturnValue({
+    data: { results: [{ id: 3 }] },
+  });
+
+  beforeEach(async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <NotificationList
+          id={1}
+          canToggleNotifications
+          apiModel={MockModelAPI}
+        />
+      );
     });
-    MockModelAPI.readNotificationTemplatesError.mockReturnValue({
-      data: { results: [{ id: 2 }] },
-    });
-    MockModelAPI.readNotificationTemplatesStarted.mockReturnValue({
-      data: { results: [{ id: 3 }] },
-    });
+    wrapper.update();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    wrapper.unmount();
   });
 
-  test('initially renders succesfully', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-    const dataList = wrapper.find('PaginatedDataList');
-    expect(dataList).toHaveLength(1);
-    expect(dataList.prop('items')).toEqual(data.results);
+  test('initially renders succesfully', () => {
+    expect(wrapper.find('PaginatedDataList')).toHaveLength(1);
   });
 
-  test('should render list fetched of items', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-
+  test('should render list fetched of items', () => {
     expect(NotificationTemplatesAPI.read).toHaveBeenCalled();
-    expect(wrapper.find('NotificationList').state('notifications')).toEqual(
-      data.results
-    );
-    const items = wrapper.find('NotificationListItem');
-    expect(items).toHaveLength(3);
-    expect(items.at(0).prop('successTurnedOn')).toEqual(true);
-    expect(items.at(0).prop('errorTurnedOn')).toEqual(false);
-    expect(items.at(0).prop('startedTurnedOn')).toEqual(false);
-    expect(items.at(1).prop('successTurnedOn')).toEqual(false);
-    expect(items.at(1).prop('errorTurnedOn')).toEqual(true);
-    expect(items.at(1).prop('startedTurnedOn')).toEqual(false);
-    expect(items.at(2).prop('successTurnedOn')).toEqual(false);
-    expect(items.at(2).prop('errorTurnedOn')).toEqual(false);
-    expect(items.at(2).prop('startedTurnedOn')).toEqual(true);
+    expect(NotificationTemplatesAPI.readOptions).toHaveBeenCalled();
+    expect(MockModelAPI.readNotificationTemplatesSuccess).toHaveBeenCalled();
+    expect(MockModelAPI.readNotificationTemplatesError).toHaveBeenCalled();
+    expect(MockModelAPI.readNotificationTemplatesStarted).toHaveBeenCalled();
+    expect(wrapper.find('NotificationListItem').length).toBe(3);
+    expect(
+      wrapper.find('input#notification-1-success-toggle').props().checked
+    ).toBe(true);
+    expect(
+      wrapper.find('input#notification-1-error-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-1-started-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-2-success-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-2-error-toggle').props().checked
+    ).toBe(true);
+    expect(
+      wrapper.find('input#notification-2-started-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-3-success-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-3-error-toggle').props().checked
+    ).toBe(false);
+    expect(
+      wrapper.find('input#notification-3-started-toggle').props().checked
+    ).toBe(true);
   });
 
   test('should enable success notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-
     expect(
-      wrapper.find('NotificationList').state('successTemplateIds')
-    ).toEqual([1]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(1)
-      .find('Switch[aria-label="Toggle notification success"]')
-      .prop('onChange')();
+      wrapper.find('input#notification-2-success-toggle').props().checked
+    ).toBe(false);
+    await act(async () => {
+      wrapper.find('Switch#notification-2-success-toggle').prop('onChange')();
+    });
+    wrapper.update();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       2,
       'success'
     );
-    await sleep(0);
-    wrapper.update();
     expect(
-      wrapper.find('NotificationList').state('successTemplateIds')
-    ).toEqual([1, 2]);
+      wrapper.find('input#notification-2-success-toggle').props().checked
+    ).toBe(true);
   });
 
   test('should enable error notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
+    expect(
+      wrapper.find('input#notification-1-error-toggle').props().checked
+    ).toBe(false);
+    await act(async () => {
+      wrapper.find('Switch#notification-1-error-toggle').prop('onChange')();
+    });
     wrapper.update();
-
-    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
-      2,
-    ]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(0)
-      .find('Switch[aria-label="Toggle notification failure"]')
-      .prop('onChange')();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'error'
     );
-    await sleep(0);
-    wrapper.update();
-    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
-      2,
-      1,
-    ]);
+    expect(
+      wrapper.find('input#notification-1-error-toggle').props().checked
+    ).toBe(true);
   });
 
   test('should enable start notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-
     expect(
-      wrapper.find('NotificationList').state('startedTemplateIds')
-    ).toEqual([3]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(0)
-      .find('Switch[aria-label="Toggle notification start"]')
-      .prop('onChange')();
+      wrapper.find('input#notification-1-started-toggle').props().checked
+    ).toBe(false);
+    await act(async () => {
+      wrapper.find('Switch#notification-1-started-toggle').prop('onChange')();
+    });
+    wrapper.update();
     expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'started'
     );
-    await sleep(0);
-    wrapper.update();
     expect(
-      wrapper.find('NotificationList').state('startedTemplateIds')
-    ).toEqual([3, 1]);
+      wrapper.find('input#notification-1-started-toggle').props().checked
+    ).toBe(true);
   });
 
   test('should disable success notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-
     expect(
-      wrapper.find('NotificationList').state('successTemplateIds')
-    ).toEqual([1]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(0)
-      .find('Switch[aria-label="Toggle notification success"]')
-      .prop('onChange')();
+      wrapper.find('input#notification-1-success-toggle').props().checked
+    ).toBe(true);
+    await act(async () => {
+      wrapper.find('Switch#notification-1-success-toggle').prop('onChange')();
+    });
+    wrapper.update();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,
       1,
       'success'
     );
-    await sleep(0);
-    wrapper.update();
     expect(
-      wrapper.find('NotificationList').state('successTemplateIds')
-    ).toEqual([]);
+      wrapper.find('input#notification-1-success-toggle').props().checked
+    ).toBe(false);
   });
 
   test('should disable error notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
+    expect(
+      wrapper.find('input#notification-2-error-toggle').props().checked
+    ).toBe(true);
+    await act(async () => {
+      wrapper.find('Switch#notification-2-error-toggle').prop('onChange')();
+    });
     wrapper.update();
-
-    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual([
-      2,
-    ]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(1)
-      .find('Switch[aria-label="Toggle notification failure"]')
-      .prop('onChange')();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,
       2,
       'error'
     );
-    await sleep(0);
-    wrapper.update();
-    expect(wrapper.find('NotificationList').state('errorTemplateIds')).toEqual(
-      []
-    );
+    expect(
+      wrapper.find('input#notification-2-error-toggle').props().checked
+    ).toBe(false);
   });
 
   test('should disable start notification', async () => {
-    const wrapper = mountWithContexts(
-      <NotificationList id={1} canToggleNotifications apiModel={MockModelAPI} />
-    );
-    await sleep(0);
-    wrapper.update();
-
     expect(
-      wrapper.find('NotificationList').state('startedTemplateIds')
-    ).toEqual([3]);
-    const items = wrapper.find('NotificationListItem');
-    items
-      .at(2)
-      .find('Switch[aria-label="Toggle notification start"]')
-      .prop('onChange')();
+      wrapper.find('input#notification-3-started-toggle').props().checked
+    ).toBe(true);
+    await act(async () => {
+      wrapper.find('Switch#notification-3-started-toggle').prop('onChange')();
+    });
+    wrapper.update();
     expect(MockModelAPI.disassociateNotificationTemplate).toHaveBeenCalledWith(
       1,
       3,
       'started'
     );
-    await sleep(0);
-    wrapper.update();
     expect(
-      wrapper.find('NotificationList').state('startedTemplateIds')
-    ).toEqual([]);
+      wrapper.find('input#notification-3-started-toggle').props().checked
+    ).toBe(false);
+  });
+
+  test('should throw toggle error', async () => {
+    MockModelAPI.associateNotificationTemplate.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+          },
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+    expect(wrapper.find('ErrorDetail').length).toBe(0);
+    await act(async () => {
+      wrapper.find('Switch#notification-1-started-toggle').prop('onChange')();
+    });
+    wrapper.update();
+    expect(MockModelAPI.associateNotificationTemplate).toHaveBeenCalledWith(
+      1,
+      1,
+      'started'
+    );
+    expect(wrapper.find('ErrorDetail').length).toBe(1);
   });
 });

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { ProjectsAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import PaginatedDataList from '@components/PaginatedDataList';
-import DataListToolbar from '@components/DataListToolbar';
-import CheckboxListItem from '@components/CheckboxListItem';
+import { ProjectsAPI } from '../../../../../../api';
+import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
+import PaginatedDataList from '../../../../../../components/PaginatedDataList';
+import DataListToolbar from '../../../../../../components/DataListToolbar';
+import CheckboxListItem from '../../../../../../components/CheckboxListItem';
 
 const QS_CONFIG = getQSConfig('projects', {
   page: 1,
@@ -15,29 +16,32 @@ const QS_CONFIG = getQSConfig('projects', {
   order_by: 'name',
 });
 
-function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState([]);
+function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
+  const location = useLocation();
+
+  const {
+    result: { projects, count },
+    error,
+    isLoading,
+    request: fetchProjects,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const results = await ProjectsAPI.read(params);
+      return {
+        projects: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      projects: [],
+      count: 0,
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setProjects([]);
-      setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await ProjectsAPI.read(params);
-        setProjects(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [history.location]);
+    fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <PaginatedDataList
@@ -69,8 +73,9 @@ function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
         },
         {
           name: i18n._(t`Type`),
-          key: 'type',
+          key: 'scm_type',
           options: [
+            [``, i18n._(t`Manual`)],
             [`git`, i18n._(t`Git`)],
             [`hg`, i18n._(t`Mercurial`)],
             [`svn`, i18n._(t`Subversion`)],
@@ -78,15 +83,15 @@ function ProjectsList({ history, i18n, nodeResource, onUpdateNodeResource }) {
           ],
         },
         {
-          name: i18n._(t`SCM URL`),
+          name: i18n._(t`Source control URL`),
           key: 'scm_url',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
       ]}
@@ -109,4 +114,4 @@ ProjectsList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(ProjectsList));
+export default withI18n()(ProjectsList);

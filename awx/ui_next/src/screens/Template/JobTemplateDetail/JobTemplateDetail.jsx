@@ -1,35 +1,35 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
   Button,
   Chip,
-  ChipGroup,
   TextList,
   TextListItem,
   TextListItemVariants,
   TextListVariants,
+  Label,
 } from '@patternfly/react-core';
-import styled from 'styled-components';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import { CardBody, CardActionsRow } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import CredentialChip from '@components/CredentialChip';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import DeleteButton from '@components/DeleteButton';
-import ErrorDetail from '@components/ErrorDetail';
-import LaunchButton from '@components/LaunchButton';
-import { VariablesDetail } from '@components/CodeMirrorInput';
-import { JobTemplatesAPI } from '@api';
-
-const MissingDetail = styled(Detail)`
-  dd& {
-    color: red;
-  }
-`;
+import AlertModal from '../../../components/AlertModal';
+import { CardBody, CardActionsRow } from '../../../components/Card';
+import ChipGroup from '../../../components/ChipGroup';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import CredentialChip from '../../../components/CredentialChip';
+import {
+  Detail,
+  DetailList,
+  DeletedDetail,
+  UserDateDetail,
+} from '../../../components/DetailList';
+import DeleteButton from '../../../components/DeleteButton';
+import ErrorDetail from '../../../components/ErrorDetail';
+import LaunchButton from '../../../components/LaunchButton';
+import { VariablesDetail } from '../../../components/CodeMirrorInput';
+import { JobTemplatesAPI } from '../../../api';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
 
 function JobTemplateDetail({ i18n, template }) {
   const {
@@ -55,9 +55,11 @@ function JobTemplateDetail({ i18n, template }) {
     use_fact_cache,
     url,
     verbosity,
+    webhook_service,
+    related: { webhook_receiver },
+    webhook_key,
   } = template;
   const [contentError, setContentError] = useState(null);
-  const [deletionError, setDeletionError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(false);
   const [instanceGroups, setInstanceGroups] = useState([]);
   const { id: templateId } = useParams();
@@ -80,16 +82,18 @@ function JobTemplateDetail({ i18n, template }) {
     })();
   }, [templateId]);
 
-  const handleDelete = async () => {
-    setHasContentLoading(true);
-    try {
+  const {
+    request: deleteJobTemplate,
+    isLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
       await JobTemplatesAPI.destroy(templateId);
       history.push(`/templates`);
-    } catch (error) {
-      setDeletionError(error);
-    }
-    setHasContentLoading(false);
-  };
+    }, [templateId, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
 
   const canLaunch =
     summary_fields.user_capabilities && summary_fields.user_capabilities.start;
@@ -133,10 +137,6 @@ function JobTemplateDetail({ i18n, template }) {
     </TextList>
   );
 
-  const renderMissingDataDetail = value => (
-    <MissingDetail label={value} value={i18n._(t`Deleted`)} />
-  );
-
   const inventoryValue = (kind, id) => {
     const inventorykind = kind === 'smart' ? 'smart_inventory' : 'inventory';
 
@@ -145,7 +145,7 @@ function JobTemplateDetail({ i18n, template }) {
         <Link to={`/inventories/${inventorykind}/${id}/details`}>
           {summary_fields.inventory.name}
         </Link>
-        <span> {i18n._(t`(Prompt on Launch)`)}</span>
+        <span> {i18n._(t`(Prompt on launch)`)}</span>
       </Fragment>
     ) : (
       <Link to={`/inventories/${inventorykind}/${id}/details`}>
@@ -180,7 +180,7 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          renderMissingDataDetail(i18n._(t`Project`))
+          <DeletedDetail label={i18n._(t`Organization`)} />
         )}
         {summary_fields.inventory ? (
           <Detail
@@ -191,8 +191,9 @@ function JobTemplateDetail({ i18n, template }) {
             )}
           />
         ) : (
-          !ask_inventory_on_launch &&
-          renderMissingDataDetail(i18n._(t`Inventory`))
+          !ask_inventory_on_launch && (
+            <DeletedDetail label={i18n._(t`Inventory`)} />
+          )
         )}
         {summary_fields.project ? (
           <Detail
@@ -204,9 +205,12 @@ function JobTemplateDetail({ i18n, template }) {
             }
           />
         ) : (
-          renderMissingDataDetail(i18n._(t`Project`))
+          <DeletedDetail label={i18n._(t`Project`)} />
         )}
-        <Detail label={i18n._(t`SCM Branch`)} value={template.scm_branch} />
+        <Detail
+          label={i18n._(t`Source Control Branch`)}
+          value={template.scm_branch}
+        />
         <Detail label={i18n._(t`Playbook`)} value={playbook} />
         <Detail label={i18n._(t`Forks`)} value={forks || '0'} />
         <Detail label={i18n._(t`Limit`)} value={limit} />
@@ -242,6 +246,35 @@ function JobTemplateDetail({ i18n, template }) {
             />
           </React.Fragment>
         )}
+        {webhook_service && (
+          <Detail
+            label={i18n._(t`Webhook Service`)}
+            value={
+              webhook_service === 'github'
+                ? i18n._(t`GitHub`)
+                : i18n._(t`GitLab`)
+            }
+          />
+        )}
+        {webhook_receiver && (
+          <Detail
+            label={i18n._(t`Webhook URL`)}
+            value={`${document.location.origin}${webhook_receiver}`}
+          />
+        )}
+        <Detail label={i18n._(t`Webhook Key`)} value={webhook_key} />
+        {summary_fields.webhook_credential && (
+          <Detail
+            label={i18n._(t`Webhook Credential`)}
+            value={
+              <Link
+                to={`/credentials/${summary_fields.webhook_credential.id}/details`}
+              >
+                <Label>{summary_fields.webhook_credential.name}</Label>
+              </Link>
+            }
+          />
+        )}
         {renderOptionsField && (
           <Detail label={i18n._(t`Options`)} value={renderOptions} />
         )}
@@ -250,7 +283,10 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Credentials`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup
+                numChips={5}
+                totalChips={summary_fields.credentials.length}
+              >
                 {summary_fields.credentials.map(c => (
                   <CredentialChip key={c.id} credential={c} isReadOnly />
                 ))}
@@ -263,7 +299,10 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Labels`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup
+                numChips={5}
+                totalChips={summary_fields.labels.results.length}
+              >
                 {summary_fields.labels.results.map(l => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
@@ -278,7 +317,7 @@ function JobTemplateDetail({ i18n, template }) {
             fullWidth
             label={i18n._(t`Instance Groups`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={instanceGroups.length}>
                 {instanceGroups.map(ig => (
                   <Chip key={ig.id} isReadOnly>
                     {ig.name}
@@ -291,9 +330,9 @@ function JobTemplateDetail({ i18n, template }) {
         {job_tags && job_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Job tags`)}
+            label={i18n._(t`Job Tags`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={job_tags.split(',').length}>
                 {job_tags.split(',').map(jobTag => (
                   <Chip key={jobTag} isReadOnly>
                     {jobTag}
@@ -306,9 +345,9 @@ function JobTemplateDetail({ i18n, template }) {
         {skip_tags && skip_tags.length > 0 && (
           <Detail
             fullWidth
-            label={i18n._(t`Skip tags`)}
+            label={i18n._(t`Skip Tags`)}
             value={
-              <ChipGroup numChips={5}>
+              <ChipGroup numChips={5} totalChips={skip_tags.split(',').length}>
                 {skip_tags.split(',').map(skipTag => (
                   <Chip key={skipTag} isReadOnly>
                     {skipTag}
@@ -349,22 +388,23 @@ function JobTemplateDetail({ i18n, template }) {
             <DeleteButton
               name={name}
               modalTitle={i18n._(t`Delete Job Template`)}
-              onConfirm={handleDelete}
+              onConfirm={deleteJobTemplate}
+              isDisabled={isLoading}
             >
               {i18n._(t`Delete`)}
             </DeleteButton>
           )}
       </CardActionsRow>
       {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
-      {deletionError && (
+      {error && (
         <AlertModal
-          isOpen={deletionError}
+          isOpen={error}
           variant="error"
           title={i18n._(t`Error!`)}
-          onClose={() => setDeletionError(null)}
+          onClose={dismissError}
         >
           {i18n._(t`Failed to delete job template.`)}
-          <ErrorDetail error={deletionError} />
+          <ErrorDetail error={error} />
         </AlertModal>
       )}
     </CardBody>

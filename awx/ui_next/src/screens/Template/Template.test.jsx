@@ -1,14 +1,17 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { JobTemplatesAPI, OrganizationsAPI } from '@api';
 import { act } from 'react-dom/test-utils';
+import { JobTemplatesAPI, OrganizationsAPI } from '../../api';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import Template from './Template';
 import mockJobTemplateData from './shared/data.job_template.json';
 
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/Organizations');
+jest.mock('../../api/models/JobTemplates');
+jest.mock('../../api/models/Organizations');
 
 const mockMe = {
   is_super_user: true,
@@ -56,9 +59,9 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 6
+      el => el.length === 7
     );
-    expect(tabs.at(2).text()).toEqual('Notifications');
+    expect(tabs.at(3).text()).toEqual('Notifications');
     done();
   });
   test('notifications tab hidden with reduced permissions', async done => {
@@ -80,7 +83,7 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 5
+      el => el.length === 6
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();

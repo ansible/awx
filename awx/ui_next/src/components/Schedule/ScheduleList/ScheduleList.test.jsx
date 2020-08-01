@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { SchedulesAPI } from '@api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { SchedulesAPI } from '../../../api';
 import ScheduleList from './ScheduleList';
 import mockSchedules from '../data.schedules.json';
 
-jest.mock('@api/models/Schedules');
+jest.mock('../../../api/models/Schedules');
 
 SchedulesAPI.destroy = jest.fn();
 SchedulesAPI.update.mockResolvedValue({

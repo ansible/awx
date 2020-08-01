@@ -1,10 +1,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../../../contexts/Workflow';
 import LinkModal from './LinkModal';
 
 const dispatch = jest.fn();

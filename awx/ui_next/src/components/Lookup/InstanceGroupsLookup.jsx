@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { arrayOf, string, func, object, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
-import { InstanceGroupsAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import { FieldTooltip } from '@components/FormField';
-import OptionsList from '@components/OptionsList';
+import { InstanceGroupsAPI } from '../../api';
+import { getQSConfig, parseQueryString } from '../../util/qs';
+import { FieldTooltip } from '../FormField';
+import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
@@ -27,30 +28,35 @@ function InstanceGroupsLookup(props) {
     history,
     i18n,
   } = props;
-  const [instanceGroups, setInstanceGroups] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
+
+  const {
+    result: { instanceGroups, count },
+    request: fetchInstanceGroups,
+    error,
+    isLoading,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const { data } = await InstanceGroupsAPI.read(params);
+      return {
+        instanceGroups: data.results,
+        count: data.count,
+      };
+    }, [history.location]),
+    { instanceGroups: [], count: 0 }
+  );
 
   useEffect(() => {
-    (async () => {
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await InstanceGroupsAPI.read(params);
-        setInstanceGroups(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      }
-    })();
-  }, [history.location]);
+    fetchInstanceGroups();
+  }, [fetchInstanceGroups]);
 
   return (
     <FormGroup
       className={className}
       label={i18n._(t`Instance Groups`)}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
       fieldId="org-instance-groups"
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="org-instance-groups"
         header={i18n._(t`Instance Groups`)}
@@ -59,6 +65,7 @@ function InstanceGroupsLookup(props) {
         qsConfig={QS_CONFIG}
         multiple
         required={required}
+        isLoading={isLoading}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}

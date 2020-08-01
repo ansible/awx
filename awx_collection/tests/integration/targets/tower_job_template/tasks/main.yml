@@ -12,6 +12,8 @@
     jt1: "AWX-Collection-tests-tower_job_template-jt1-{{ test_id }}"
     jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
+    email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ test_id }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -45,6 +47,33 @@
   tower_label:
     name: "{{ lab1 }}"
     organization: Default
+
+- name: Add email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    username: user
+    password: s3cr3t
+    sender: tower@example.com
+    recipients:
+      - user1@example.com
+    host: smtp.example.com
+    port: 25
+    use_tls: false
+    use_ssl: false
+    state: present
+
+- name: Add webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    url: http://www.example.com/hook
+    headers:
+      X-Custom-Header: value123
+    state: present
+  register: result
 
 - name: Create Job Template 1
   tower_job_template:
@@ -130,10 +159,11 @@
 - name: Delete Job Template 1
   tower_job_template:
     name: "{{ jt1 }}"
-    project: "{{ proj1 }}"
-    inventory: Demo Inventory
     playbook: hello_world.yml
     job_type: run
+    project: "Does Not Exist"
+    inventory: "Does Not Exist"
+    webhook_credential: "Does Not Exist"
     state: absent
   register: result
 
@@ -240,6 +270,54 @@
     that:
       - "result is changed"
 
+- name: Add started notifications to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add started notifications to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add success notifications to Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_success:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove "on start" webhook notification from Job Template 2
+  tower_job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+
 - name: Delete Job Template 2
   tower_job_template:
     name: "{{ jt2 }}"
@@ -286,3 +364,15 @@
     state: absent
 
 # You can't delete a label directly so no cleanup needed
+
+- name: Delete email notification
+  tower_notification:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
+
+- name: Delete webhook notification
+  tower_notification:
+    name: "{{ webhook_not }}"
+    organization: Default
+    state: absent

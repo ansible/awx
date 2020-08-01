@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { oneOf, bool, number, string, func } from 'prop-types';
 import { Controlled as ReactCodeMirror } from 'react-codemirror2';
 import styled from 'styled-components';
@@ -67,6 +67,20 @@ function CodeMirrorInput({
   fullHeight,
   className,
 }) {
+  // Workaround for CodeMirror bug: If CodeMirror renders in a modal on the
+  // modal's initial render, it appears as an empty box due to mis-calculated
+  // element height. Forcing an initial render before mounting <CodeMirror>
+  // fixes this.
+  const [isInitialized, setIsInitialized] = useState(false);
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
+  if (!isInitialized) {
+    return <div />;
+  }
+
   return (
     <CodeMirror
       className={`pf-c-form-control ${className}`}

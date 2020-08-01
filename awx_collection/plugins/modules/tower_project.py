@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_project
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower projects
 description:
     - Create, update, or destroy Ansible Tower projects. See
@@ -56,7 +55,6 @@ options:
         - The refspec to use for the SCM resource.
       type: str
       default: ''
-      version_added: "3.7"
     scm_credential:
       description:
         - Name of the credential to use with this SCM resource.
@@ -77,29 +75,26 @@ options:
       type: bool
       default: 'no'
     scm_update_cache_timeout:
-      version_added: "2.8"
       description:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
       default: 0
-    scm_allow_override:
+    allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
       type: bool
-      version_added: "3.7"
+      aliases:
+        - scm_allow_override
     job_timeout:
-      version_added: "2.8"
       description:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
       default: 0
       type: int
     custom_virtualenv:
-      version_added: "2.8"
       description:
         - Local absolute file path containing a custom Python virtualenv to use
       type: str
-      required: False
       default: ''
     organization:
       description:
@@ -120,12 +115,21 @@ options:
           on the project may be successfully created
       type: bool
       default: True
-    tower_oauthtoken:
+    notification_templates_started:
       description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -178,27 +182,30 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
-        scm_type=dict(required=False, choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
-        scm_url=dict(required=False),
-        local_path=dict(required=False),
-        scm_branch=dict(required=False, default=''),
-        scm_refspec=dict(required=False, default=''),
-        scm_credential=dict(required=False),
-        scm_clean=dict(required=False, type='bool', default=False),
-        scm_delete_on_update=dict(required=False, type='bool', default=False),
-        scm_update_on_launch=dict(required=False, type='bool', default=False),
-        scm_update_cache_timeout=dict(required=False, type='int', default=0),
-        scm_allow_override=dict(required=False, type='bool'),
-        job_timeout=dict(required=False, type='int', default=0),
-        custom_virtualenv=dict(required=False, type='str'),
+        description=dict(),
+        scm_type=dict(choices=['manual', 'git', 'hg', 'svn', 'insights'], default='manual'),
+        scm_url=dict(),
+        local_path=dict(),
+        scm_branch=dict(default=''),
+        scm_refspec=dict(default=''),
+        scm_credential=dict(),
+        scm_clean=dict(type='bool', default=False),
+        scm_delete_on_update=dict(type='bool', default=False),
+        scm_update_on_launch=dict(type='bool', default=False),
+        scm_update_cache_timeout=dict(type='int', default=0),
+        allow_override=dict(type='bool', aliases=['scm_allow_override']),
+        job_timeout=dict(type='int', default=0),
+        custom_virtualenv=dict(),
         organization=dict(required=True),
-        state=dict(required=False, choices=['present', 'absent'], default='present'),
-        wait=dict(required=False, type='bool', default=True),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
+        state=dict(choices=['present', 'absent'], default='present'),
+        wait=dict(type='bool', default=True),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -215,7 +222,7 @@ def main():
     scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
-    scm_allow_override = module.params.get('scm_allow_override')
+    allow_override = module.params.get('allow_override')
     job_timeout = module.params.get('job_timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
@@ -234,6 +241,31 @@ def main():
             'organization': org_id
         }
     })
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(project)
+
+    # Attempt to look up associated field items the user specified.
+    association_fields = {}
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     # Create the data that gets sent for create and update
     project_fields = {
@@ -254,12 +286,12 @@ def main():
         project_fields['description'] = description
     if scm_credential is not None:
         project_fields['credential'] = scm_credential_id
-    if scm_allow_override is not None:
-        project_fields['scm_allow_override'] = scm_allow_override
+    if allow_override is not None:
+        project_fields['allow_override'] = allow_override
     if scm_type == '':
         project_fields['local_path'] = local_path
 
-    if state != 'absent' and (scm_update_cache_timeout != 0 and scm_update_on_launch is not True):
+    if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
 
     # If we are doing a not manual project, register our on_change method
@@ -268,12 +300,13 @@ def main():
     if wait and scm_type != '':
         on_change = wait_for_project_update
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(project)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing project, this will return on its own
-        module.create_or_update_if_needed(project, project_fields, endpoint='projects', item_type='project', on_create=on_change, on_update=on_change)
+    # If the state was present and we can let the module build or update the existing project, this will return on its own
+    module.create_or_update_if_needed(
+        project, project_fields,
+        endpoint='projects', item_type='project',
+        associations=association_fields,
+        on_create=on_change, on_update=on_change
+    )
 
 
 if __name__ == '__main__':

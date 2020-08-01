@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { Modal, Title } from '@patternfly/react-core';
 import {
@@ -7,6 +8,8 @@ import {
   InfoCircleIcon,
   TimesCircleIcon,
 } from '@patternfly/react-icons';
+import { withI18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 
 const Header = styled.div`
@@ -16,11 +19,14 @@ const Header = styled.div`
   }
 `;
 
-export default function AlertModal({
+function AlertModal({
+  i18n,
   isOpen = null,
   title,
+  label,
   variant,
   children,
+  i18nHash,
   ...props
 }) {
   const variantIcons = {
@@ -59,16 +65,19 @@ export default function AlertModal({
   const customHeader = (
     <Header>
       {variant ? variantIcons[variant] : null}
-      <Title size="2xl">{title}</Title>
+      <Title id="alert-modal-header-label" size="2xl" headingLevel="h2">
+        {title}
+      </Title>
     </Header>
   );
 
   return (
     <Modal
       header={customHeader}
-      isFooterLeftAligned
+      aria-label={label || i18n._(t`Alert modal`)}
+      aria-labelledby="alert-modal-header-label"
       isOpen={Boolean(isOpen)}
-      isSmall
+      variant="small"
       title={title}
       {...props}
     >
@@ -76,3 +85,5 @@ export default function AlertModal({
     </Modal>
   );
 }
+
+export default withI18n()(AlertModal);

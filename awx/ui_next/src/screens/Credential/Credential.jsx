@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
-import { Card, PageSection, CardActions } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import {
   Switch,
   useParams,
@@ -11,14 +12,12 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import { ResourceAccessList } from '@components/ResourceAccessList';
-import ContentError from '@components/ContentError';
-import RoutedTabs from '@components/RoutedTabs';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
+import ContentError from '../../components/ContentError';
+import RoutedTabs from '../../components/RoutedTabs';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
-import { CredentialsAPI } from '@api';
+import { CredentialsAPI } from '../../api';
 
 function Credential({ i18n, setBreadcrumb }) {
   const [credential, setCredential] = useState(null);
@@ -46,6 +45,16 @@ function Credential({ i18n, setBreadcrumb }) {
   }, [id, pathname, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Credentials`)}
+        </>
+      ),
+      link: `/credentials`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `/credentials/${id}/details`, id: 0 },
   ];
 
@@ -57,17 +66,10 @@ function Credential({ i18n, setBreadcrumb }) {
     });
   }
 
-  let cardHeader = hasContentLoading ? null : (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/credentials" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
 
   if (pathname.endsWith('edit') || pathname.endsWith('add')) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   if (!hasContentLoading && contentError) {
@@ -77,8 +79,10 @@ function Credential({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(`Credential not found.`)}{' '}
-                <Link to="/credentials">{i18n._(`View all Credentials.`)}</Link>
+                {i18n._(t`Credential not found.`)}{' '}
+                <Link to="/credentials">
+                  {i18n._(t`View all Credentials.`)}
+                </Link>
               </span>
             )}
           </ContentError>
@@ -90,7 +94,7 @@ function Credential({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
             from="/credentials/:id"
@@ -98,59 +102,43 @@ function Credential({ i18n, setBreadcrumb }) {
             exact
           />
           {credential && [
-            <Route
-              key="details"
-              path="/credentials/:id/details"
-              render={() => <CredentialDetail credential={credential} />}
-            />,
-            <Route
-              key="edit"
-              path="/credentials/:id/edit"
-              render={() => <CredentialEdit credential={credential} />}
-            />,
+            <Route key="details" path="/credentials/:id/details">
+              <CredentialDetail credential={credential} />
+            </Route>,
+            <Route key="edit" path="/credentials/:id/edit">
+              <CredentialEdit credential={credential} />
+            </Route>,
             credential.organization && (
-              <Route
-                key="access"
-                path="/credentials/:id/access"
-                render={() => (
-                  <ResourceAccessList
-                    resource={credential}
-                    apiModel={CredentialsAPI}
-                  />
-                )}
-              />
+              <Route key="access" path="/credentials/:id/access">
+                <ResourceAccessList
+                  resource={credential}
+                  apiModel={CredentialsAPI}
+                />
+              </Route>
             ),
-            <Route
-              key="not-found"
-              path="*"
-              render={() =>
-                !hasContentLoading && (
-                  <ContentError isNotFound>
-                    {match.params.id && (
-                      <Link to={`/credentials/${match.params.id}/details`}>
-                        {i18n._(`View Credential Details`)}
-                      </Link>
-                    )}
-                  </ContentError>
-                )
-              }
-            />,
-          ]}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
+            <Route key="not-found" path="*">
+              {!hasContentLoading && (
                 <ContentError isNotFound>
-                  {id && (
-                    <Link to={`/credentials/${id}/details`}>
-                      {i18n._(`View Credential Details`)}
+                  {match.params.id && (
+                    <Link to={`/credentials/${match.params.id}/details`}>
+                      {i18n._(t`View Credential Details`)}
                     </Link>
                   )}
                 </ContentError>
-              )
-            }
-          />
+              )}
+            </Route>,
+          ]}
+          <Route key="not-found" path="*">
+            {!hasContentLoading && (
+              <ContentError isNotFound>
+                {id && (
+                  <Link to={`/credentials/${id}/details`}>
+                    {i18n._(t`View Credential Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            )}
+          </Route>
         </Switch>
       </Card>
     </PageSection>

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_team
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower team.
 description:
     - Create, update, or destroy Ansible Tower teams. See
@@ -31,13 +30,10 @@ options:
     new_name:
       description:
         - To use when changing a team's name.
-      required: False
       type: str
-      version_added: "3.7"
     description:
       description:
         - The description to use for the team.
-      required: False
       type: str
     organization:
       description:
@@ -50,12 +46,6 @@ options:
       choices: ["present", "absent"]
       default: "present"
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -77,14 +67,14 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(required=False),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         organization=dict(required=True),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -104,6 +94,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(team)
+
     # Create the data that gets sent for create and update
     team_fields = {
         'name': new_name if new_name else name,
@@ -112,12 +106,8 @@ def main():
     if description is not None:
         team_fields['description'] = description
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(team)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing team, this will return on its own
-        module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
+    # If the state was present and we can let the module build or update the existing team, this will return on its own
+    module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,40 @@
+---
+- name: Template the collection galaxy.yml
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    collection_package: awx
+    collection_namespace: awx
+    collection_version: 0.0.1  # not for updating, pass in extra_vars
+    collection_source: "{{ playbook_dir }}/../"
+    collection_path: "{{ playbook_dir }}/../../awx_collection_build"
+  pre_tasks:
+    - file:
+        path: "{{ collection_path }}"
+        state: absent
+
+    - copy:
+        src: "{{ collection_source }}"
+        dest: "{{ collection_path }}"
+        remote_src: true
+
+  roles:
+    - template_galaxy
+
+  tasks:
+    - name: Make substitutions in source to sync with templates
+      set_fact:
+        collection_version_override: 0.0.1-devel
+
+    - name: Template the galaxy.yml source file (should be commited with your changes)
+      template:
+        src: "{{ collection_source }}/tools/roles/template_galaxy/templates/galaxy.yml.j2"
+        dest: "{{ collection_source }}/galaxy.yml"
+        force: true
+
+    - name: Template the README.md source file (should be commited with your changes)
+      template:
+        src: "{{ collection_source }}/tools/roles/template_galaxy/templates/README.md.j2"
+        dest: "{{ collection_source }}/README.md"
+        force: true

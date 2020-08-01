@@ -3,16 +3,40 @@ import { act } from 'react-dom/test-utils';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
+} from '../../../../../contexts/Workflow';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../../../testUtils/enzymeHelpers';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../../../../api';
 import NodeViewModal from './NodeViewModal';
 
-jest.mock('@api/models/JobTemplates');
-jest.mock('@api/models/WorkflowJobTemplates');
+jest.mock('../../../../../api/models/JobTemplates');
+jest.mock('../../../../../api/models/WorkflowJobTemplates');
 WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({});
-WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({});
+WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
+  data: {
+    id: 1,
+    type: 'workflow_job_template',
+    related: {
+      webhook_receiver: '/api/v2/job_templates/7/gitlab/',
+    },
+  },
+});
+WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
+  data: {
+    webhook_key: 'Pim3mRXT0',
+  },
+});
 JobTemplatesAPI.readLaunch.mockResolvedValue({});
+JobTemplatesAPI.readInstanceGroups.mockResolvedValue({});
+JobTemplatesAPI.readWebhookKey.mockResolvedValue({});
+JobTemplatesAPI.readDetail.mockResolvedValue({
+  data: {
+    id: 1,
+    type: 'job_template',
+  },
+});
 
 const dispatch = jest.fn();
 
@@ -64,7 +88,10 @@ describe('NodeViewModal', () => {
 
     test('should fetch workflow template launch data', () => {
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readDetail).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
       expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
+      expect(WorkflowJobTemplatesAPI.readWebhookKey).toHaveBeenCalledWith(1);
     });
 
     test('Close button dispatches as expected', () => {
@@ -95,7 +122,7 @@ describe('NodeViewModal', () => {
           id: 1,
           name: 'Mock Node',
           description: '',
-          type: 'job_template',
+          unified_job_type: 'job',
           created: '2019-08-08T19:24:05.344276Z',
           modified: '2019-08-08T19:24:18.162949Z',
         },
@@ -104,6 +131,7 @@ describe('NodeViewModal', () => {
 
     test('should fetch job template launch data', async () => {
       let wrapper;
+
       await act(async () => {
         wrapper = mountWithContexts(
           <WorkflowDispatchContext.Provider value={dispatch}>
@@ -115,7 +143,10 @@ describe('NodeViewModal', () => {
       });
       waitForLoaded(wrapper);
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readWebhookKey).not.toHaveBeenCalledWith();
       expect(JobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
+      expect(JobTemplatesAPI.readDetail).toHaveBeenCalledWith(1);
+      expect(JobTemplatesAPI.readInstanceGroups).toHaveBeenCalledTimes(1);
       wrapper.unmount();
       jest.clearAllMocks();
     });
@@ -167,6 +198,7 @@ describe('NodeViewModal', () => {
       waitForLoaded(wrapper);
       expect(WorkflowJobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
       expect(JobTemplatesAPI.readLaunch).not.toHaveBeenCalled();
+      expect(JobTemplatesAPI.readInstanceGroups).not.toHaveBeenCalled();
       wrapper.unmount();
       jest.clearAllMocks();
     });

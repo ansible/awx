@@ -11,12 +11,12 @@ import {
   List,
 } from 'react-virtualized';
 
-import AlertModal from '@components/AlertModal';
-import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import ErrorDetail from '@components/ErrorDetail';
-import StatusIcon from '@components/StatusIcon';
+import AlertModal from '../../../components/AlertModal';
+import { CardBody } from '../../../components/Card';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import ErrorDetail from '../../../components/ErrorDetail';
+import StatusIcon from '../../../components/StatusIcon';
 
 import JobEvent from './JobEvent';
 import JobEventSkeleton from './JobEventSkeleton';
@@ -30,7 +30,7 @@ import {
   WorkflowJobsAPI,
   InventoriesAPI,
   AdHocCommandsAPI,
-} from '@api';
+} from '../../../api';
 
 const HeaderTitle = styled.div`
   display: inline-flex;
@@ -62,6 +62,44 @@ const OutputFooter = styled.div`
   width: 75px;
   flex: 1;
 `;
+
+let ws;
+function connectJobSocket({ type, id }, onMessage) {
+  ws = new WebSocket(`wss://${window.location.host}/websocket/`);
+
+  ws.onopen = () => {
+    const xrftoken = `; ${document.cookie}`
+      .split('; csrftoken=')
+      .pop()
+      .split(';')
+      .shift();
+    const eventGroup = `${type}_events`;
+    ws.send(
+      JSON.stringify({
+        xrftoken,
+        groups: { jobs: ['summary', 'status_changed'], [eventGroup]: [id] },
+      })
+    );
+  };
+
+  ws.onmessage = e => {
+    onMessage(JSON.parse(e.data));
+  };
+
+  ws.onclose = e => {
+    // eslint-disable-next-line no-console
+    console.debug('Socket closed. Reconnecting...', e);
+    setTimeout(() => {
+      connectJobSocket({ type, id }, onMessage);
+    }, 1000);
+  };
+
+  ws.onerror = err => {
+    // eslint-disable-next-line no-console
+    console.debug('Socket error: ', err, 'Disconnecting...');
+    ws.close();
+  };
+}
 
 function range(low, high) {
   const numbers = [];
@@ -105,11 +143,22 @@ class JobOutput extends Component {
     this.isRowLoaded = this.isRowLoaded.bind(this);
     this.loadMoreRows = this.loadMoreRows.bind(this);
     this.scrollToRow = this.scrollToRow.bind(this);
+    this.monitorJobSocketCounter = this.monitorJobSocketCounter.bind(this);
   }
 
   componentDidMount() {
+    const { job } = this.props;
     this._isMounted = true;
     this.loadJobEvents();
+
+    connectJobSocket(job, data => {
+      if (data.counter && data.counter > this.jobSocketCounter) {
+        this.jobSocketCounter = data.counter;
+      } else if (data.final_counter && data.unified_job_id === job.id) {
+        this.jobSocketCounter = data.final_counter;
+      }
+    });
+    this.interval = setInterval(() => this.monitorJobSocketCounter(), 5000);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -131,7 +180,19 @@ class JobOutput extends Component {
   }
 
   componentWillUnmount() {
+    if (ws) {
+      ws.close();
+    }
+    clearInterval(this.interval);
     this._isMounted = false;
+  }
+
+  monitorJobSocketCounter() {
+    const { remoteRowCount } = this.state;
+    if (this.jobSocketCounter >= remoteRowCount) {
+      this._isMounted &&
+        this.setState({ remoteRowCount: this.jobSocketCounter + 1 });
+    }
   }
 
   async loadJobEvents() {
@@ -414,6 +475,7 @@ class JobOutput extends Component {
             variant="danger"
             onClose={() => this.setState({ deletionError: null })}
             title={i18n._(t`Job Delete Error`)}
+            label={i18n._(t`Job Delete Error`)}
           >
             <ErrorDetail error={deletionError} />
           </AlertModal>

@@ -1,16 +1,22 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import JobTemplateDetail from './JobTemplateDetail';
-import { JobTemplatesAPI } from '@api';
+import { JobTemplatesAPI } from '../../../api';
 import mockTemplate from '../shared/data.job_template.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInstanceGroups = {
   count: 5,
   data: {
-    results: [{ id: 1, name: 'IG1' }, { id: 2, name: 'IG2' }],
+    results: [
+      { id: 1, name: 'IG1' },
+      { id: 2, name: 'IG2' },
+    ],
   },
 };
 
@@ -30,7 +36,6 @@ describe('<JobTemplateDetail />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   test('should render successfully with missing summary fields', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
@@ -82,8 +87,8 @@ describe('<JobTemplateDetail />', () => {
     });
   });
 
-  test('should render SCM_Branch', async () => {
-    const SCMBranch = wrapper.find('Detail[label="SCM Branch"]');
+  test('should render Source Control Branch', async () => {
+    const SCMBranch = wrapper.find('Detail[label="Source Control Branch"]');
     expect(SCMBranch.prop('value')).toBe('Foo branch');
   });
 
@@ -137,5 +142,17 @@ describe('<JobTemplateDetail />', () => {
       'Modal[title="Error!"]',
       el => el.length === 0
     );
+  });
+  test('webhook fields should render properly', () => {
+    expect(wrapper.find('Detail[label="Webhook Service"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook Service"]').prop('value')).toBe(
+      'GitHub'
+    );
+    expect(wrapper.find('Detail[label="Webhook URL"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook URL"]').prop('value')).toContain(
+      'api/v2/job_templates/7/github/'
+    );
+    expect(wrapper.find('Detail[label="Webhook Key"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Webhook Credential"]').length).toBe(1);
   });
 });

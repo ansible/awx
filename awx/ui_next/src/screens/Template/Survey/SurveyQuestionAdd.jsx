@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 import SurveyQuestionForm from './SurveyQuestionForm';
 
 export default function SurveyQuestionAdd({ survey, updateSurvey }) {
@@ -17,6 +17,13 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
           )
         );
         return;
+      }
+      if (question.type === 'multiselect') {
+        question.default = question.default
+          .split('\n')
+          .filter(v => v !== '' || '\n')
+          .map(v => v.trim())
+          .join('\n');
       }
       const newSpec = survey.spec ? survey.spec.concat(question) : [question];
       await updateSurvey(newSpec);

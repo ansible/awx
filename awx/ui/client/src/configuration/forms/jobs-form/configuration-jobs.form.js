@@ -71,6 +71,9 @@ export default ['i18n', function(i18n) {
             AWX_COLLECTIONS_ENABLED: {
                 type: 'toggleSwitch',
             },
+            AWX_SHOW_PLAYBOOK_LINKS: {
+                type: 'toggleSwitch',
+            },
             PRIMARY_GALAXY_URL: {
                 type: 'text',
                 reset: 'PRIMARY_GALAXY_URL',

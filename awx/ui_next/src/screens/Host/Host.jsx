@@ -9,19 +9,17 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-
-import { TabbedCardHeader } from '@components/Card';
-import CardCloseButton from '@components/CardCloseButton';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import JobList from '@components/JobList';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
+import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
 import HostFacts from './HostFacts';
 import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
-import { HostsAPI } from '@api';
+import { HostsAPI } from '../../api';
 
 function Host({ i18n, setBreadcrumb }) {
   const [host, setHost] = useState(null);
@@ -47,6 +45,16 @@ function Host({ i18n, setBreadcrumb }) {
   }, [match.params.id, location, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Hosts`)}
+        </>
+      ),
+      link: `/hosts`,
+      id: 99,
+    },
     {
       name: i18n._(t`Details`),
       link: `${match.url}/details`,
@@ -86,8 +94,8 @@ function Host({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError?.response?.status === 404 && (
               <span>
-                {i18n._(`Host not found.`)}{' '}
-                <Link to="/hosts">{i18n._(`View all Hosts.`)}</Link>
+                {i18n._(t`Host not found.`)}{' '}
+                <Link to="/hosts">{i18n._(t`View all Hosts.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -96,17 +104,16 @@ function Host({ i18n, setBreadcrumb }) {
     );
   }
 
+  let showCardHeader = true;
+
+  if (location.pathname.endsWith('edit')) {
+    showCardHeader = false;
+  }
+
   return (
     <PageSection>
       <Card>
-        {location.pathname.endsWith('edit') ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo="/hosts" />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect from="/hosts/:id" to="/hosts/:id/details" exact />
           {host && [
@@ -129,7 +136,7 @@ function Host({ i18n, setBreadcrumb }) {
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${match.url}/details`}>
-                {i18n._(`View Host Details`)}
+                {i18n._(t`View Host Details`)}
               </Link>
             </ContentError>
           </Route>

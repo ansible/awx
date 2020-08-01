@@ -3,18 +3,21 @@ import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../testUtils/enzymeHelpers';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
-import { sleep } from '@testUtils/testUtils';
+import { sleep } from '../../../testUtils/testUtils';
 import {
   WorkflowJobTemplatesAPI,
   CredentialsAPI,
   OrganizationsAPI,
-} from '@api';
+} from '../../api';
 
-jest.mock('@api/models/WorkflowJobTemplates');
-jest.mock('@api/models/Credentials');
-jest.mock('@api/models/Organizations');
+jest.mock('../../api/models/WorkflowJobTemplates');
+jest.mock('../../api/models/Credentials');
+jest.mock('../../api/models/Organizations');
 
 describe('<WorkflowJobTemplate/>', () => {
   const mockMe = {
@@ -32,6 +35,7 @@ describe('<WorkflowJobTemplate/>', () => {
         created: '2015-07-07T17:21:26.429745Z',
         modified: '2019-08-11T19:47:37.980466Z',
         extra_vars: '',
+        webhook_service: 'github',
         summary_fields: {
           webhook_credential: { id: 1234567, name: 'Foo Webhook Credential' },
           created_by: { id: 1, username: 'Athena' },
@@ -48,6 +52,7 @@ describe('<WorkflowJobTemplate/>', () => {
               { name: 'Label 3', id: 3 },
             ],
           },
+          user_capabilities: {},
         },
         related: {
           webhook_key: '/api/v2/workflow_job_templates/57/webhook_key/',

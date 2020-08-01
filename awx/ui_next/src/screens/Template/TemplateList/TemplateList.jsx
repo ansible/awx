@@ -8,17 +8,17 @@ import {
   JobTemplatesAPI,
   UnifiedJobTemplatesAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+} from '../../../api';
+import AlertModal from '../../../components/AlertModal';
+import DatalistToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
-
-import AddDropDownButton from '@components/AddDropDownButton';
+} from '../../../components/PaginatedDataList';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useWsTemplates from './useWsTemplates';
+import AddDropDownButton from '../../../components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
 
 // The type value in const QS_CONFIG below does not have a space between job_template and
@@ -36,27 +36,27 @@ function TemplateList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { templates, count, jtActions, wfjtActions },
+    result: { results, count, jtActions, wfjtActions },
     error: contentError,
     isLoading,
     request: fetchTemplates,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const results = await Promise.all([
+      const responses = await Promise.all([
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
         WorkflowJobTemplatesAPI.readOptions(),
       ]);
       return {
-        templates: results[0].data.results,
-        count: results[0].data.count,
-        jtActions: results[1].data.actions,
-        wfjtActions: results[2].data.actions,
+        results: responses[0].data.results,
+        count: responses[0].data.count,
+        jtActions: responses[1].data.actions,
+        wfjtActions: responses[2].data.actions,
       };
     }, [location]),
     {
-      templates: [],
+      results: [],
       count: 0,
       jtActions: {},
       wfjtActions: {},
@@ -66,6 +66,8 @@ function TemplateList({ i18n }) {
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
+
+  const templates = useWsTemplates(results);
 
   const isAllSelected =
     selected.length === templates.length && selected.length > 0;
@@ -120,7 +122,7 @@ function TemplateList({ i18n }) {
 
   if (canAddJT) {
     addButtonOptions.push({
-      label: i18n._(t`Template`),
+      label: i18n._(t`Job Template`),
       url: `/templates/job_template/add/`,
     });
   }
@@ -152,6 +154,10 @@ function TemplateList({ i18n }) {
               name: i18n._(t`Name`),
               key: 'name',
               isDefault: true,
+            },
+            {
+              name: i18n._(t`Description`),
+              key: 'description',
             },
             {
               name: i18n._(t`Type`),
@@ -227,12 +233,14 @@ function TemplateList({ i18n }) {
               detailUrl={`/templates/${template.type}/${template.id}`}
               onSelect={() => handleSelect(template)}
               isSelected={selected.some(row => row.id === template.id)}
+              fetchTemplates={fetchTemplates}
             />
           )}
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
         />
       </Card>
       <AlertModal
+        aria-label={i18n._(t`Deletion Error`)}
         isOpen={deletionError}
         variant="error"
         title={i18n._(t`Error!`)}

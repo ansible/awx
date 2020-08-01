@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI, HostsAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI, HostsAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import InventoryHostList from './InventoryHostList';
 import mockInventory from '../shared/data.inventory.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockHosts = [
   {

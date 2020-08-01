@@ -5,15 +5,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Form, FormGroup } from '@patternfly/react-core';
-import FormField, {
-  FormSubmitError,
-  FieldTooltip,
-} from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import { VariablesField } from '@components/CodeMirrorInput';
-import { InventoryLookup } from '@components/Lookup';
-import { FormColumnLayout, FormFullWidthLayout } from '@components/FormLayout';
-import { required } from '@util/validators';
+import FormField, { FormSubmitError, FieldTooltip } from '../FormField';
+import FormActionGroup from '../FormActionGroup/FormActionGroup';
+import { VariablesField } from '../CodeMirrorInput';
+import { InventoryLookup } from '../Lookup';
+import { FormColumnLayout, FormFullWidthLayout } from '../FormLayout';
+import { required } from '../../util/validators';
 
 const InventoryLookupField = withI18n()(({ i18n, host }) => {
   const [inventory, setInventory] = useState(
@@ -28,14 +25,20 @@ const InventoryLookupField = withI18n()(({ i18n, host }) => {
   return (
     <FormGroup
       label={i18n._(t`Inventory`)}
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(
+            t`Select the inventory that this host will belong to.`
+          )}
+        />
+      }
       isRequired
       fieldId="inventory-lookup"
-      isValid={!inventoryMeta.touched || !inventoryMeta.error}
+      validated={
+        !inventoryMeta.touched || !inventoryMeta.error ? 'default' : 'error'
+      }
       helperTextInvalid={inventoryMeta.error}
     >
-      <FieldTooltip
-        content={i18n._(t`Select the inventory that this host will belong to.`)}
-      />
       <InventoryLookup
         value={inventory}
         onBlur={() => inventoryHelpers.setTouched()}

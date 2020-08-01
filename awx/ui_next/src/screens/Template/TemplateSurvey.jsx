@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Switch, Route, useParams } from 'react-router-dom';
+import { Switch, Route, useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '@api';
-import ContentError from '@components/ContentError';
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
-import useRequest, { useDismissableError } from '@util/useRequest';
+import { JobTemplatesAPI, WorkflowJobTemplatesAPI } from '../../api';
+import ContentError from '../../components/ContentError';
+import AlertModal from '../../components/AlertModal';
+import ErrorDetail from '../../components/ErrorDetail';
+import useRequest, { useDismissableError } from '../../util/useRequest';
 import { SurveyList, SurveyQuestionAdd, SurveyQuestionEdit } from './Survey';
 
-function TemplateSurvey({ template, i18n }) {
+function TemplateSurvey({ template, canEdit, i18n }) {
   const [surveyEnabled, setSurveyEnabled] = useState(template.survey_enabled);
 
   const { templateType } = useParams();
+  const location = useLocation();
+
   const {
     result: survey,
     request: fetchSurvey,
@@ -28,9 +30,10 @@ function TemplateSurvey({ template, i18n }) {
       return data;
     }, [template.id, templateType])
   );
+
   useEffect(() => {
     fetchSurvey();
-  }, [fetchSurvey]);
+  }, [fetchSurvey, location]);
 
   const { request: updateSurvey, error: updateError } = useRequest(
     useCallback(
@@ -82,12 +85,22 @@ function TemplateSurvey({ template, i18n }) {
   return (
     <>
       <Switch>
-        <Route path="/templates/:templateType/:id/survey/add">
-          <SurveyQuestionAdd survey={survey} updateSurvey={updateSurveySpec} />
-        </Route>
-        <Route path="/templates/:templateType/:id/survey/edit/:variable">
-          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurveySpec} />
-        </Route>
+        {canEdit && (
+          <Route path="/templates/:templateType/:id/survey/add">
+            <SurveyQuestionAdd
+              survey={survey}
+              updateSurvey={updateSurveySpec}
+            />
+          </Route>
+        )}
+        {canEdit && (
+          <Route path="/templates/:templateType/:id/survey/edit/:variable">
+            <SurveyQuestionEdit
+              survey={survey}
+              updateSurvey={updateSurveySpec}
+            />
+          </Route>
+        )}
         <Route path="/templates/:templateType/:id/survey" exact>
           <SurveyList
             isLoading={isLoading}
@@ -96,6 +109,7 @@ function TemplateSurvey({ template, i18n }) {
             toggleSurvey={toggleSurvey}
             updateSurvey={updateSurveySpec}
             deleteSurvey={deleteSurvey}
+            canEdit={canEdit}
           />
         </Route>
       </Switch>

@@ -45,7 +45,10 @@ from awx.main.utils import (
     get_search_fields,
     getattrd,
     get_object_or_400,
-    decrypt_field
+    decrypt_field,
+    get_awx_version,
+    get_licenser,
+    StubLicense
 )
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
@@ -156,11 +159,11 @@ class APIView(views.APIView):
             self.queries_before = len(connection.queries)
 
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
-        # they respect the proxy whitelist
+        # they respect the allowed proxy list
         if all([
-            settings.PROXY_IP_WHITELIST,
-            request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_WHITELIST,
-            request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_WHITELIST
+            settings.PROXY_IP_ALLOWED_LIST,
+            request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
+            request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_ALLOWED_LIST
         ]):
             for custom_header in settings.REMOTE_HOST_HEADERS:
                 if custom_header.startswith('HTTP_'):
@@ -197,6 +200,8 @@ class APIView(views.APIView):
                 logger.warning(status_msg)
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
+        response['X-API-Product-Version'] = get_awx_version()
+        response['X-API-Product-Name'] = 'AWX' if isinstance(get_licenser(), StubLicense) else 'Red Hat Ansible Tower'
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
             time_elapsed = time.time() - self.time_started
@@ -832,7 +837,7 @@ class CopyAPIView(GenericAPIView):
 
     @staticmethod
     def _decrypt_model_field_if_needed(obj, field_name, field_val):
-        if field_name in getattr(type(obj), 'REENCRYPTION_BLACKLIST_AT_COPY', []):
+        if field_name in getattr(type(obj), 'REENCRYPTION_BLOCKLIST_AT_COPY', []):
             return field_val
         if isinstance(obj, Credential) and field_name == 'inputs':
             for secret in obj.credential_type.secret_fields:
@@ -878,7 +883,7 @@ class CopyAPIView(GenericAPIView):
                 field_val = getattr(obj, field.name)
             except AttributeError:
                 continue
-            # Adjust copy blacklist fields here.
+            # Adjust copy blocked fields here.
             if field.name in fields_to_discard or field.name in [
                 'id', 'pk', 'polymorphic_ctype', 'unifiedjobtemplate_ptr', 'created_by', 'modified_by'
             ] or field.name.endswith('_role'):
@@ -975,7 +980,7 @@ class CopyAPIView(GenericAPIView):
         if hasattr(new_obj, 'admin_role') and request.user not in new_obj.admin_role.members.all():
             new_obj.admin_role.members.add(request.user)
         if sub_objs:
-            # store the copied object dict into memcached, because it's
+            # store the copied object dict into cache, because it's
             # often too large for postgres' notification bus
             # (which has a default maximum message size of 8k)
             key = 'deep-copy-{}'.format(str(uuid.uuid4()))

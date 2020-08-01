@@ -1,11 +1,30 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import JobTemplateAdd from './JobTemplateAdd';
-import { JobTemplatesAPI, LabelsAPI } from '@api';
+import {
+  CredentialsAPI,
+  CredentialTypesAPI,
+  JobTemplatesAPI,
+  LabelsAPI,
+  ProjectsAPI,
+} from '../../../api';
 
-jest.mock('@api');
+jest.mock('../../../api');
+CredentialsAPI.read.mockResolvedValue({
+  data: {
+    results: [],
+    count: 0,
+  },
+});
+CredentialTypesAPI.loadAllTypes.mockResolvedValue([]);
+ProjectsAPI.readPlaybooks.mockResolvedValue({
+  data: [],
+});
 
 const jobTemplateData = {
   allow_callbacks: false,
@@ -152,6 +171,8 @@ describe('<JobTemplateAdd />', () => {
       project: 2,
       playbook: 'Baz',
       inventory: 2,
+      webhook_credential: undefined,
+      webhook_service: '',
     });
   });
 
@@ -220,7 +241,9 @@ describe('<JobTemplateAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', el => el.length === 0);
-    wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    await act(async () => {
+      wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
+    });
     expect(history.location.pathname).toEqual('/templates');
   });
 });

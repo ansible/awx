@@ -3,7 +3,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
-from ansible.module_utils.six import PY2
+from ansible.module_utils.six import PY2, string_types
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.urllib.error import HTTPError
@@ -32,8 +32,31 @@ class ItemNotDefined(Exception):
 
 
 class TowerModule(AnsibleModule):
+    # This gets set by the make process so whatever is in here is irrelevant
+    _COLLECTION_VERSION = "0.0.1-devel"
+    _COLLECTION_TYPE = "awx"
+    # This maps the collections type (awx/tower) to the values returned by the API
+    # Those values can be found in awx/api/generics.py line 204
+    collection_to_version = {
+        'awx': 'AWX',
+        'tower': 'Red Hat Ansible Tower',
+    }
     url = None
-    honorred_settings = ('host', 'username', 'password', 'verify_ssl', 'oauth_token')
+    AUTH_ARGSPEC = dict(
+        tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
+        tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
+        tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
+        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
+        tower_oauthtoken=dict(type='raw', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
+        tower_config_file=dict(type='path', required=False, default=None),
+    )
+    short_params = {
+        'host': 'tower_host',
+        'username': 'tower_username',
+        'password': 'tower_password',
+        'verify_ssl': 'validate_certs',
+        'oauth_token': 'tower_oauthtoken',
+    }
     host = '127.0.0.1'
     username = None
     password = None
@@ -44,36 +67,48 @@ class TowerModule(AnsibleModule):
     cookie_jar = CookieJar()
     authenticated = False
     config_name = 'tower_cli.cfg'
+    ENCRYPTED_STRING = "$encrypted$"
+    version_checked = False
+    error_callback = None
+    warn_callback = None
 
-    def __init__(self, argument_spec, **kwargs):
-        args = dict(
-            tower_host=dict(required=False, fallback=(env_fallback, ['TOWER_HOST'])),
-            tower_username=dict(required=False, fallback=(env_fallback, ['TOWER_USERNAME'])),
-            tower_password=dict(no_log=True, required=False, fallback=(env_fallback, ['TOWER_PASSWORD'])),
-            validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['TOWER_VERIFY_SSL'])),
-            tower_oauthtoken=dict(type='str', no_log=True, required=False, fallback=(env_fallback, ['TOWER_OAUTH_TOKEN'])),
-            tower_config_file=dict(type='path', required=False, default=None),
-        )
-        args.update(argument_spec)
+    def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
+        full_argspec = {}
+        full_argspec.update(TowerModule.AUTH_ARGSPEC)
+        full_argspec.update(argument_spec)
         kwargs['supports_check_mode'] = True
+
+        self.error_callback = error_callback
+        self.warn_callback = warn_callback
 
         self.json_output = {'changed': False}
 
-        super(TowerModule, self).__init__(argument_spec=args, **kwargs)
+        if direct_params is not None:
+            self.params = direct_params
+        else:
+            super(TowerModule, self).__init__(argument_spec=full_argspec, **kwargs)
 
         self.load_config_files()
 
         # Parameters specified on command line will override settings in any config
-        if self.params.get('tower_host'):
-            self.host = self.params.get('tower_host')
-        if self.params.get('tower_username'):
-            self.username = self.params.get('tower_username')
-        if self.params.get('tower_password'):
-            self.password = self.params.get('tower_password')
-        if self.params.get('validate_certs') is not None:
-            self.verify_ssl = self.params.get('validate_certs')
+        for short_param, long_param in self.short_params.items():
+            direct_value = self.params.get(long_param)
+            if direct_value is not None:
+                setattr(self, short_param, direct_value)
+
+        # Perform magic depending on whether tower_oauthtoken is a string or a dict
         if self.params.get('tower_oauthtoken'):
-            self.oauth_token = self.params.get('tower_oauthtoken')
+            token_param = self.params.get('tower_oauthtoken')
+            if type(token_param) is dict:
+                if 'token' in token_param:
+                    self.oauth_token = self.params.get('tower_oauthtoken')['token']
+                else:
+                    self.fail_json(msg="The provided dict in tower_oauthtoken did not properly contain the token entry")
+            elif isinstance(token_param, string_types):
+                self.oauth_token = self.params.get('tower_oauthtoken')
+            else:
+                error_msg = "The provided tower_oauthtoken type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
+                self.fail_json(msg=error_msg)
 
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):
@@ -103,20 +138,12 @@ class TowerModule(AnsibleModule):
             local_dir = split(local_dir)[0]
             config_files.insert(2, join(local_dir, ".{0}".format(self.config_name)))
 
-        for config_file in config_files:
-            if exists(config_file) and not isdir(config_file):
-                # Only throw a formatting error if the file exists and is not a directory
-                try:
-                    self.load_config(config_file)
-                except ConfigFileException:
-                    self.fail_json('The config file {0} is not properly formatted'.format(config_file))
-
         # If we have a specified  tower config, load it
         if self.params.get('tower_config_file'):
-            duplicated_params = []
-            for direct_field in ('tower_host', 'tower_username', 'tower_password', 'validate_certs', 'tower_oauthtoken'):
-                if self.params.get(direct_field):
-                    duplicated_params.append(direct_field)
+            duplicated_params = [
+                fn for fn in self.AUTH_ARGSPEC
+                if fn != 'tower_config_file' and self.params.get(fn) is not None
+            ]
             if duplicated_params:
                 self.warn((
                     'The parameter(s) {0} were provided at the same time as tower_config_file. '
@@ -128,6 +155,14 @@ class TowerModule(AnsibleModule):
             except ConfigFileException as cfe:
                 # Since we were told specifically to load this we want it to fail if we have an error
                 self.fail_json(msg=cfe)
+        else:
+            for config_file in config_files:
+                if exists(config_file) and not isdir(config_file):
+                    # Only throw a formatting error if the file exists and is not a directory
+                    try:
+                        self.load_config(config_file)
+                    except ConfigFileException:
+                        self.fail_json(msg='The config file {0} is not properly formatted'.format(config_file))
 
     def load_config(self, config_path):
         # Validate the config file is an actual file
@@ -143,43 +178,50 @@ class TowerModule(AnsibleModule):
 
         # First try to yaml load the content (which will also load json)
         try:
-            config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
-            # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-            if type(config_data) is not dict:
-                raise AssertionError("The yaml config file is not properly formatted as a dict.")
+            try_config_parsing = True
+            if HAS_YAML:
+                try:
+                    config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
+                    # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
+                    if type(config_data) is not dict:
+                        raise AssertionError("The yaml config file is not properly formatted as a dict.")
+                    try_config_parsing = False
 
-        except(AttributeError, yaml.YAMLError, AssertionError):
-            # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
-            if '[general]' not in config_string:
-                config_string = '[general]{0}'.format(config_string)
+                except(AttributeError, yaml.YAMLError, AssertionError):
+                    try_config_parsing = True
 
-            config = ConfigParser()
+            if try_config_parsing:
+                # TowerCLI used to support a config file with a missing [general] section by prepending it if missing
+                if '[general]' not in config_string:
+                    config_string = '[general]\n{0}'.format(config_string)
 
-            try:
-                placeholder_file = StringIO(config_string)
-                # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
-                # This "if" removes the deprecation warning
-                if hasattr(config, 'read_file'):
-                    config.read_file(placeholder_file)
-                else:
-                    config.readfp(placeholder_file)
+                config = ConfigParser()
 
-                # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
-                config_data = {}
-                for honorred_setting in self.honorred_settings:
-                    try:
-                        config_data[honorred_setting] = config.get('general', honorred_setting)
-                    except (NoOptionError):
-                        pass
+                try:
+                    placeholder_file = StringIO(config_string)
+                    # py2 ConfigParser has readfp, that has been deprecated in favor of read_file in py3
+                    # This "if" removes the deprecation warning
+                    if hasattr(config, 'read_file'):
+                        config.read_file(placeholder_file)
+                    else:
+                        config.readfp(placeholder_file)
 
-            except Exception as e:
-                raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
+                    # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
+                    config_data = {}
+                    for honorred_setting in self.short_params:
+                        try:
+                            config_data[honorred_setting] = config.get('general', honorred_setting)
+                        except NoOptionError:
+                            pass
+
+                except Exception as e:
+                    raise ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e))
 
         except Exception as e:
             raise ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e))
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
-        for honorred_setting in self.honorred_settings:
+        for honorred_setting in self.short_params:
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
@@ -265,7 +307,14 @@ class TowerModule(AnsibleModule):
 
     def resolve_name_to_id(self, endpoint, name_or_id):
         # Try to resolve the object by name
-        response = self.get_endpoint(endpoint, **{'data': {'name': name_or_id}})
+        name_field = 'name'
+        if endpoint == 'users':
+            name_field = 'username'
+
+        response = self.get_endpoint(endpoint, **{'data': {name_field: name_or_id}})
+        if response['status_code'] == 400:
+            self.fail_json(msg="Unable to try and resolve {0} for {1} : {2}".format(endpoint, name_or_id, response['json']['detail']))
+
         if response['json']['count'] == 1:
             return response['json']['results'][0]['id']
         elif response['json']['count'] == 0:
@@ -299,9 +348,9 @@ class TowerModule(AnsibleModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to Tower (if we've not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
+        # Authenticate to Tower (if we don't have a token and if not already done so)
+        if not self.oauth_token and not self.authenticated:
+            # This method will set a cookie in the cookie jar for us and also an oauth_token
             self.authenticate(**kwargs)
         if self.oauth_token:
             # If we have a oauth token, we just use a bearer header
@@ -366,6 +415,26 @@ class TowerModule(AnsibleModule):
         finally:
             self.url = self.url._replace(query=None)
 
+        if not self.version_checked:
+            # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
+            # First try to get the headers in PY3 format and then drop down to PY2.
+            try:
+                tower_type = response.getheader('X-API-Product-Name', None)
+                tower_version = response.getheader('X-API-Product-Version', None)
+            except Exception:
+                tower_type = response.info().getheader('X-API-Product-Name', None)
+                tower_version = response.info().getheader('X-API-Product-Version', None)
+
+            if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != tower_type:
+                self.warn("You are using the {0} version of this collection but connecting to {1}".format(
+                    self._COLLECTION_TYPE, tower_type
+                ))
+            elif self._COLLECTION_VERSION != tower_version:
+                self.warn("You are running collection version {0} but connecting to tower version {1}".format(
+                    self._COLLECTION_VERSION, tower_version
+                ))
+            self.version_checked = True
+
         response_body = ''
         try:
             response_body = response.read()
@@ -426,15 +495,6 @@ class TowerModule(AnsibleModule):
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
 
-    def default_check_mode(self):
-        '''Execute check mode logic for Ansible Tower modules'''
-        if self.check_mode:
-            try:
-                result = self.get_endpoint('ping')
-                self.exit_json(**{'changed': True, 'tower_version': '{0}'.format(result['json']['version'])})
-            except(Exception) as excinfo:
-                self.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
-
     def delete_if_needed(self, existing_item, on_delete=None):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,
@@ -456,6 +516,14 @@ class TowerModule(AnsibleModule):
                 item_name = existing_item['name']
             elif 'username' in existing_item:
                 item_name = existing_item['username']
+            elif 'identifier' in existing_item:
+                item_name = existing_item['identifier']
+            elif item_type == 'o_auth2_access_token':
+                # An oauth2 token has no name, instead we will use its id for any of the messages
+                item_name = existing_item['id']
+            elif item_type == 'credential_input_source':
+                # An credential_input_source has no name, instead we will use its id for any of the messages
+                item_name = existing_item['id']
             else:
                 self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
@@ -567,6 +635,45 @@ class TowerModule(AnsibleModule):
         else:
             self.exit_json(**self.json_output)
 
+    def _encrypted_changed_warning(self, field, old, warning=False):
+        if not warning:
+            return
+        self.warn(
+            'The field {0} of {1} {2} has encrypted data and may inaccurately report task is changed.'.format(
+                field, old.get('type', 'unknown'), old.get('id', 'unknown')
+            ))
+
+    @staticmethod
+    def has_encrypted_values(obj):
+        """Returns True if JSON-like python content in obj has $encrypted$
+        anywhere in the data as a value
+        """
+        if isinstance(obj, dict):
+            for val in obj.values():
+                if TowerModule.has_encrypted_values(val):
+                    return True
+        elif isinstance(obj, list):
+            for val in obj:
+                if TowerModule.has_encrypted_values(val):
+                    return True
+        elif obj == TowerModule.ENCRYPTED_STRING:
+            return True
+        return False
+
+    def objects_could_be_different(self, old, new, field_set=None, warning=False):
+        if field_set is None:
+            field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
+        for field in field_set:
+            new_field = new.get(field, None)
+            old_field = old.get(field, None)
+            if old_field != new_field:
+                return True  # Something doesn't match
+            elif self.has_encrypted_values(new_field) or field not in new:
+                # case of 'field not in new' - user password write-only field that API will not display
+                self._encrypted_changed_warning(field, old, warning=warning)
+                return True
+        return False
+
     def update_if_needed(self, existing_item, new_item, on_update=None, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
@@ -587,6 +694,8 @@ class TowerModule(AnsibleModule):
                     item_name = existing_item['username']
                 elif item_type == 'workflow_job_template_node':
                     item_name = existing_item['identifier']
+                elif item_type == 'credential_input_source':
+                    item_name = existing_item['id']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']
@@ -594,22 +703,17 @@ class TowerModule(AnsibleModule):
                 self.fail_json(msg="Unable to process update of item due to missing data {0}".format(ke))
 
             # Check to see if anything within the item requires the item to be updated
-            needs_update = False
-            for field in new_item:
-                existing_field = existing_item.get(field, None)
-                new_field = new_item.get(field, None)
-                # If the two items don't match and we are not comparing '' to None
-                if existing_field != new_field and not (existing_field in (None, '') and new_field == ''):
-                    # Something doesn't match so let's update it
-                    needs_update = True
-                    break
+            needs_patch = self.objects_could_be_different(existing_item, new_item)
 
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
-            if needs_update:
+            if needs_patch:
                 response = self.patch_endpoint(item_url, **{'data': new_item})
                 if response['status_code'] == 200:
-                    self.json_output['changed'] = True
+                    # compare apples-to-apples, old API data to new API data
+                    # but do so considering the fields given in parameters
+                    self.json_output['changed'] = self.objects_could_be_different(
+                        existing_item, response['json'], field_set=new_item.keys(), warning=True)
                 elif 'json' in response and '__all__' in response['json']:
                     self.fail_json(msg=response['json']['__all__'])
                 else:
@@ -641,7 +745,7 @@ class TowerModule(AnsibleModule):
             return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
 
     def logout(self):
-        if self.oauth_token_id is not None and self.username and self.password:
+        if self.authenticated:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (
@@ -676,12 +780,21 @@ class TowerModule(AnsibleModule):
     def fail_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
-        super(TowerModule, self).fail_json(**kwargs)
+        if self.error_callback:
+            self.error_callback(**kwargs)
+        else:
+            super(TowerModule, self).fail_json(**kwargs)
 
     def exit_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
         super(TowerModule, self).exit_json(**kwargs)
+
+    def warn(self, warning):
+        if self.warn_callback is not None:
+            self.warn_callback(warning)
+        else:
+            super(TowerModule, self).warn(warning)
 
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:

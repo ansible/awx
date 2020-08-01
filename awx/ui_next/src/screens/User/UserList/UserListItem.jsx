@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React, { Fragment } from 'react';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
@@ -11,12 +12,12 @@ import {
   DataListItemRow,
   Tooltip,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 
 import { Link } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
+import DataListCell from '../../../components/DataListCell';
 
-import { User } from '@types';
+import { User } from '../../../types';
 
 class UserListItem extends React.Component {
   static propTypes = {

@@ -2,11 +2,22 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
-import { HostsAPI } from '@api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
+import { HostsAPI, InventoriesAPI } from '../../../api';
 import HostGroupsList from './HostGroupsList';
 
-jest.mock('@api');
+jest.mock('../../../api');
+
+const host = {
+  summary_fields: {
+    inventory: {
+      id: 1,
+    },
+  },
+};
 
 const mockGroups = [
   {
@@ -52,7 +63,7 @@ const mockGroups = [
         id: 1,
       },
       user_capabilities: {
-        delete: false,
+        delete: true,
         edit: false,
       },
     },
@@ -63,7 +74,7 @@ describe('<HostGroupsList />', () => {
   let wrapper;
 
   beforeEach(async () => {
-    HostsAPI.readGroups.mockResolvedValue({
+    HostsAPI.readAllGroups.mockResolvedValue({
       data: {
         count: mockGroups.length,
         results: mockGroups,
@@ -82,7 +93,9 @@ describe('<HostGroupsList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route path="/hosts/:id/groups" component={() => <HostGroupsList />} />,
+        <Route path="/hosts/:id/groups">
+          <HostGroupsList host={host} />
+        </Route>,
         {
           context: {
             router: { history, route: { location: history.location } },
@@ -93,12 +106,17 @@ describe('<HostGroupsList />', () => {
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
+
   test('initially renders successfully', () => {
     expect(wrapper.find('HostGroupsList').length).toBe(1);
   });
 
   test('should fetch groups from api and render them in the list', async () => {
-    expect(HostsAPI.readGroups).toHaveBeenCalled();
+    expect(HostsAPI.readAllGroups).toHaveBeenCalled();
     expect(wrapper.find('HostGroupItem').length).toBe(3);
   });
 
@@ -149,10 +167,108 @@ describe('<HostGroupsList />', () => {
   });
 
   test('should show content error when api throws error on initial render', async () => {
-    HostsAPI.readGroups.mockImplementation(() => Promise.reject(new Error()));
+    HostsAPI.readAllGroups.mockImplementation(() =>
+      Promise.reject(new Error())
+    );
     await act(async () => {
-      wrapper = mountWithContexts(<HostGroupsList />);
+      wrapper = mountWithContexts(<HostGroupsList host={host} />);
     });
     await waitForElement(wrapper, 'ContentError', el => el.length === 1);
+  });
+
+  test('should show add button according to permissions', async () => {
+    expect(wrapper.find('ToolbarAddButton').length).toBe(1);
+    HostsAPI.readGroupsOptions.mockResolvedValueOnce({
+      data: {
+        actions: {
+          GET: {},
+        },
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<HostGroupsList host={host} />);
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+  });
+
+  test('should show associate group modal when adding an existing group', () => {
+    wrapper.find('ToolbarAddButton').simulate('click');
+    expect(wrapper.find('AssociateModal').length).toBe(1);
+    wrapper.find('ModalBoxCloseButton').simulate('click');
+    expect(wrapper.find('AssociateModal').length).toBe(0);
+  });
+
+  test('should make expected api request when associating groups', async () => {
+    HostsAPI.associateGroup.mockResolvedValue();
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [{ id: 123, name: 'foo', url: '/api/v2/groups/123/' }],
+      },
+    });
+    await act(async () => {
+      wrapper.find('ToolbarAddButton').simulate('click');
+    });
+    await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    wrapper.update();
+    await act(async () => {
+      wrapper
+        .find('CheckboxListItem')
+        .first()
+        .invoke('onSelect')();
+    });
+    await act(async () => {
+      wrapper.find('button[aria-label="Save"]').simulate('click');
+    });
+    await waitForElement(wrapper, 'AssociateModal', el => el.length === 0);
+    expect(InventoriesAPI.readGroups).toHaveBeenCalledTimes(1);
+    expect(HostsAPI.associateGroup).toHaveBeenCalledTimes(1);
+  });
+
+  test('expected api calls are made for multi-disassociation', async () => {
+    expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(0);
+    expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('DataListCheck').length).toBe(3);
+    wrapper.find('DataListCheck').forEach(el => {
+      expect(el.props().checked).toBe(false);
+    });
+    await act(async () => {
+      wrapper.find('Checkbox#select-all').invoke('onChange')(true);
+    });
+    wrapper.update();
+    wrapper.find('DataListCheck').forEach(el => {
+      expect(el.props().checked).toBe(true);
+    });
+    wrapper.find('button[aria-label="Disassociate"]').simulate('click');
+    expect(wrapper.find('AlertModal Title').text()).toEqual(
+      'Disassociate group from host?'
+    );
+    await act(async () => {
+      wrapper
+        .find('button[aria-label="confirm disassociate"]')
+        .simulate('click');
+    });
+    expect(HostsAPI.disassociateGroup).toHaveBeenCalledTimes(3);
+    expect(HostsAPI.readAllGroups).toHaveBeenCalledTimes(2);
+  });
+
+  test('should show error modal for failed disassociation', async () => {
+    HostsAPI.disassociateGroup.mockRejectedValue(new Error());
+    await act(async () => {
+      wrapper.find('Checkbox#select-all').invoke('onChange')(true);
+    });
+    wrapper.update();
+    wrapper.find('button[aria-label="Disassociate"]').simulate('click');
+    expect(wrapper.find('AlertModal Title').text()).toEqual(
+      'Disassociate group from host?'
+    );
+    await act(async () => {
+      wrapper
+        .find('button[aria-label="confirm disassociate"]')
+        .simulate('click');
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertModal ErrorDetail').length).toBe(1);
   });
 });

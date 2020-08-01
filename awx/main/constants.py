@@ -10,8 +10,7 @@ __all__ = [
     'ANSI_SGR_PATTERN', 'CAN_CANCEL', 'ACTIVE_STATES', 'STANDARD_INVENTORY_UPDATE_ENV'
 ]
 
-
-CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'cloudforms', 'tower')
+CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'tower')
 SCHEDULEABLE_PROVIDERS = CLOUD_PROVIDERS + ('custom', 'scm',)
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')), ('su', _('Su')), ('pbrun', _('Pbrun')), ('pfexec', _('Pfexec')),
@@ -32,17 +31,17 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
 CENSOR_VALUE = '************'
-ENV_BLACKLIST = frozenset((
+ENV_BLOCKLIST = frozenset((
     'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
     'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
     'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'MAX_EVENT_RES',
     'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
     'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS',
-    'AWX_HOST', 'PROJECT_REVISION'
+    'AWX_HOST', 'PROJECT_REVISION', 'SUPERVISOR_WEB_CONFIG_PATH'
 ))
 
 # loggers that may be called in process of emitting a log
-LOGGER_BLACKLIST = (
+LOGGER_BLOCKLIST = (
     'awx.main.utils.handlers',
     'awx.main.utils.formatters',
     'awx.main.utils.filters',

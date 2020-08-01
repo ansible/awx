@@ -1,22 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '@api';
-import { ConfigContext } from '@contexts/Config';
-import AnsibleSelect from '@components/AnsibleSelect';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import FormField, { FormSubmitError } from '@components/FormField';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
-import { InstanceGroupsLookup } from '@components/Lookup/';
-import { getAddedAndRemoved } from '@util/lists';
-import { required, minMaxValue } from '@util/validators';
-import { FormColumnLayout } from '@components/FormLayout';
+import { OrganizationsAPI } from '../../../api';
+import { ConfigContext } from '../../../contexts/Config';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import FormField, { FormSubmitError } from '../../../components/FormField';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import { InstanceGroupsLookup } from '../../../components/Lookup';
+import { getAddedAndRemoved } from '../../../util/lists';
+import { required, minMaxValue } from '../../../util/validators';
+import { FormColumnLayout } from '../../../components/FormLayout';
 
 function OrganizationFormFields({
   i18n,
@@ -206,4 +205,4 @@ OrganizationForm.contextTypes = {
 };
 
 export { OrganizationForm as _OrganizationForm };
-export default withI18n()(withRouter(OrganizationForm));
+export default withI18n()(OrganizationForm);

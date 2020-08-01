@@ -3,13 +3,13 @@
 
 from copy import copy
 import json
-import time
 import logging
 import traceback
 import socket
 from datetime import datetime
 
-
+from dateutil.tz import tzutc
+from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 
 
@@ -92,17 +92,12 @@ class LogstashFormatterBase(logging.Formatter):
         }
 
     @classmethod
-    def format_timestamp(cls, time):
-        tstamp = datetime.utcfromtimestamp(time)
-        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
-
-    @classmethod
     def format_exception(cls, exc_info):
         return ''.join(traceback.format_exception(*exc_info)) if exc_info else ''
 
     @classmethod
     def serialize(cls, message):
-        return bytes(json.dumps(message), 'utf-8')
+        return json.dumps(message, cls=DjangoJSONEncoder) + '\n'
 
 
 class LogstashFormatter(LogstashFormatterBase):
@@ -132,14 +127,14 @@ class LogstashFormatter(LogstashFormatterBase):
                 pass  # best effort here, if it's not valid JSON, then meh
             return raw_data
         elif kind == 'system_tracking':
-            data = copy(raw_data['ansible_facts'])
+            data = copy(raw_data.get('ansible_facts', {}))
         else:
             data = copy(raw_data)
         if isinstance(data, str):
             data = json.loads(data)
         data_for_log = {}
 
-        if kind == 'job_events':
+        if kind == 'job_events' and raw_data.get('python_objects', {}).get('job_event'):
             job_event = raw_data['python_objects']['job_event']
             for field_object in job_event._meta.fields:
 
@@ -157,9 +152,6 @@ class LogstashFormatter(LogstashFormatterBase):
 
                 try:
                     data_for_log[key] = getattr(job_event, fd)
-                    if fd in ['created', 'modified'] and data_for_log[key] is not None:
-                        time_float = time.mktime(data_for_log[key].timetuple())
-                        data_for_log[key] = self.format_timestamp(time_float)
                 except Exception as e:
                     data_for_log[key] = 'Exception `{}` producing field'.format(e)
 
@@ -173,10 +165,10 @@ class LogstashFormatter(LogstashFormatterBase):
                 data['ansible_python'].pop('version_info', None)
 
             data_for_log['ansible_facts'] = data
-            data_for_log['ansible_facts_modified'] = raw_data['ansible_facts_modified']
-            data_for_log['inventory_id'] = raw_data['inventory_id']
-            data_for_log['host_name'] = raw_data['host_name']
-            data_for_log['job_id'] = raw_data['job_id']
+            data_for_log['ansible_facts_modified'] = raw_data.get('ansible_facts_modified')
+            data_for_log['inventory_id'] = raw_data.get('inventory_id')
+            data_for_log['host_name'] = raw_data.get('host_name')
+            data_for_log['job_id'] = raw_data.get('job_id')
         elif kind == 'performance':
             def convert_to_type(t, val):
                 if t is float:
@@ -231,10 +223,12 @@ class LogstashFormatter(LogstashFormatterBase):
         return fields
 
     def format(self, record):
+        stamp = datetime.utcfromtimestamp(record.created)
+        stamp = stamp.replace(tzinfo=tzutc())
         message = {
             # Field not included, but exist in related logs
             # 'path': record.pathname
-            '@timestamp': self.format_timestamp(record.created),
+            '@timestamp': stamp,
             'message': record.getMessage(),
             'host': self.host,
 
@@ -250,4 +244,7 @@ class LogstashFormatter(LogstashFormatterBase):
         if record.exc_info:
             message.update(self.get_debug_fields(record))
 
+        if settings.LOG_AGGREGATOR_TYPE == 'splunk':
+            # splunk messages must have a top level "event" key
+            message = {'event': message}
         return self.serialize(message)

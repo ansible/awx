@@ -4,8 +4,8 @@ import { number, shape } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import AlertModal from '@components/AlertModal';
-import ErrorDetail from '@components/ErrorDetail';
+import AlertModal from '../AlertModal';
+import ErrorDetail from '../ErrorDetail';
 import {
   AdHocCommandsAPI,
   InventorySourcesAPI,
@@ -14,8 +14,8 @@ import {
   ProjectsAPI,
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
-import LaunchPrompt from '@components/LaunchPrompt';
+} from '../../api';
+import LaunchPrompt from '../LaunchPrompt';
 
 function canLaunchWithoutPrompt(launchData) {
   return (
@@ -71,7 +71,7 @@ class LaunchButton extends React.Component {
       const { data: launchConfig } = await readLaunch;
 
       if (canLaunchWithoutPrompt(launchConfig)) {
-        this.launchWithParams(null);
+        this.launchWithParams({});
       } else {
         this.setState({
           showLaunchPrompt: true,
@@ -88,8 +88,8 @@ class LaunchButton extends React.Component {
       const { history, resource } = this.props;
       const jobPromise =
         resource.type === 'workflow_job_template'
-          ? WorkflowJobTemplatesAPI.launch(resource.id, params)
-          : JobTemplatesAPI.launch(resource.id, params);
+          ? WorkflowJobTemplatesAPI.launch(resource.id, params || {})
+          : JobTemplatesAPI.launch(resource.id, params || {});
 
       const { data: job } = await jobPromise;
       history.push(

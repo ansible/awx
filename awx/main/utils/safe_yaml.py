@@ -36,7 +36,7 @@ def safe_dump(x, safe_dict=None):
     _unless_ they've been deemed "trusted" (meaning, they likely were set/added
     by a user with a high level of privilege).
 
-    This function allows you to pass in a trusted `safe_dict` to whitelist 
+    This function allows you to pass in a trusted `safe_dict` to allow
     certain extra vars so that they are _not_ marked as `!unsafe` in the
     resulting YAML.  Anything _not_ in this dict will automatically be
     `!unsafe`.

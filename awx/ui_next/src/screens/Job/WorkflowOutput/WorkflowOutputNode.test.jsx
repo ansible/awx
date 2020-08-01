@@ -1,6 +1,6 @@
 import React from 'react';
-import { WorkflowStateContext } from '@contexts/Workflow';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { WorkflowStateContext } from '../../../contexts/Workflow';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import WorkflowOutputNode from './WorkflowOutputNode';
 
 const nodeWithJT = {
@@ -73,7 +73,7 @@ describe('WorkflowOutputNode', () => {
       </svg>
     );
     expect(wrapper.contains(<p>Automation JT</p>)).toEqual(true);
-    expect(wrapper.find('WorkflowOutputNode__Elapsed').text()).toBe('00:00:07');
+    expect(wrapper.find('WorkflowOutputNode Elapsed').text()).toBe('00:00:07');
   });
   test('node contents displayed correctly when Job Template deleted', () => {
     const wrapper = mountWithContexts(
@@ -88,7 +88,7 @@ describe('WorkflowOutputNode', () => {
       </svg>
     );
     expect(wrapper.contains(<p>Automation JT 2</p>)).toEqual(true);
-    expect(wrapper.find('WorkflowOutputNode__Elapsed').text()).toBe('00:00:07');
+    expect(wrapper.find('WorkflowOutputNode Elapsed').text()).toBe('00:00:07');
   });
   test('node contents displayed correctly when Job deleted', () => {
     const wrapper = mountWithContexts(

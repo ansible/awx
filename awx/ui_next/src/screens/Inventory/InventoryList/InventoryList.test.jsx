@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { InventoriesAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { InventoriesAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import InventoryList from './InventoryList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockInventories = [
   {
@@ -119,6 +119,7 @@ const mockInventories = [
 ];
 
 describe('<InventoryList />', () => {
+  let debug;
   beforeEach(() => {
     InventoriesAPI.read.mockResolvedValue({
       data: {
@@ -135,10 +136,13 @@ describe('<InventoryList />', () => {
         },
       },
     });
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    global.console.debug = debug;
   });
 
   test('should load and render inventories', async () => {
@@ -279,7 +283,7 @@ describe('<InventoryList />', () => {
     });
     wrapper.update();
 
-    const modal = wrapper.find('Modal');
+    const modal = wrapper.find('Modal[aria-label="Deletion Error"]');
     expect(modal).toHaveLength(1);
     expect(modal.prop('title')).toEqual('Error!');
   });

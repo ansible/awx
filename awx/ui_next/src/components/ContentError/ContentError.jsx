@@ -10,8 +10,8 @@ import {
   EmptyStateBody,
 } from '@patternfly/react-core';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
-import { RootAPI } from '@api';
-import ErrorDetail from '@components/ErrorDetail';
+import { RootAPI } from '../../api';
+import ErrorDetail from '../ErrorDetail';
 
 async function logout() {
   await RootAPI.logout();
@@ -35,7 +35,7 @@ function ContentError({ error, children, isNotFound, i18n }) {
       ) : (
         <EmptyState variant="full">
           <EmptyStateIcon icon={ExclamationTriangleIcon} />
-          <Title size="lg">
+          <Title size="lg" headingLevel="h3">
             {is404 ? i18n._(t`Not Found`) : i18n._(t`Something went wrong...`)}
           </Title>
           <EmptyStateBody>

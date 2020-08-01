@@ -108,11 +108,6 @@ def workflow_job_template_factory():
 
 
 @pytest.fixture
-def get_ssh_version(mocker):
-    return mocker.patch('awx.main.tasks.get_ssh_version', return_value='OpenSSH_6.9p1, LibreSSL 2.1.8')
-
-
-@pytest.fixture
 def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_factory):
     return job_template_with_survey_passwords_factory(persisted=False)
 
@@ -136,8 +131,8 @@ def mock_cache():
 
 def pytest_runtest_teardown(item, nextitem):
     # clear Django cache at the end of every test ran
-    # NOTE: this should not be memcache, see test_cache in test_env.py
-    # this is a local test cache, so we want every test to start with empty cache
+    # NOTE: this should not be memcache (as it is deprecated), nor should it be redis.
+    # This is a local test cache, so we want every test to start with an empty cache
     cache.clear()
 
 

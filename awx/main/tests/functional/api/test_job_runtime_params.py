@@ -304,7 +304,7 @@ def test_job_launch_with_default_creds(machine_credential, vault_credential, dep
 @pytest.mark.django_db
 def test_job_launch_JT_enforces_unique_credentials_kinds(machine_credential, credentialtype_aws, deploy_jobtemplate):
     """
-    JT launching should require that extra_credentials have distinct CredentialTypes
+    JT launching should require that credentials have distinct CredentialTypes
     """
     creds = []
     for i in range(2):
@@ -483,25 +483,26 @@ def test_job_launch_pass_with_prompted_vault_password(machine_credential, vault_
 
 
 @pytest.mark.django_db
-def test_job_launch_JT_with_credentials(machine_credential, credential, net_credential, deploy_jobtemplate):
+def test_job_launch_JT_with_credentials(machine_credential, credential, net_credential, kube_credential, deploy_jobtemplate):
     deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.save()
 
-    kv = dict(credentials=[credential.pk, net_credential.pk, machine_credential.pk])
+    kv = dict(credentials=[credential.pk, net_credential.pk, machine_credential.pk, kube_credential.pk])
     serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
     assert validated, serializer.errors
 
-    kv['credentials'] = [credential, net_credential, machine_credential]  # convert to internal value
+    kv['credentials'] = [credential, net_credential, machine_credential, kube_credential]  # convert to internal value
     prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(
         _exclude_errors=['required', 'prompts'], **kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     creds = job_obj.credentials.all()
-    assert len(creds) == 3
+    assert len(creds) == 4
     assert credential in creds
     assert net_credential in creds
     assert machine_credential in creds
+    assert kube_credential in creds
 
 
 @pytest.mark.django_db

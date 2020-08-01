@@ -150,7 +150,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default=None,
         editable=False,
         related_name='%(class)s_as_next_schedule+',
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
     )
     status = models.CharField(
         max_length=32,
@@ -413,9 +413,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         if 'extra_vars' in validated_kwargs:
             unified_job.handle_extra_data(validated_kwargs['extra_vars'])
 
-        if not getattr(self, '_deprecated_credential_launch', False):
-            # Create record of provided prompts for relaunch and rescheduling
-            unified_job.create_config_from_prompts(kwargs, parent=self)
+        # Create record of provided prompts for relaunch and rescheduling
+        unified_job.create_config_from_prompts(kwargs, parent=self)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
@@ -587,7 +586,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         null=True,
         default=None,
         editable=False,
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
     )
     dependent_jobs = models.ManyToManyField(
         'self',
@@ -707,7 +706,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         null=True,
         default=None,
         on_delete=polymorphic.SET_NULL,
-        help_text=_('The Rampart/Instance group the job was run under'),
+        help_text=_('The Instance group the job was run under'),
     )
     organization = models.ForeignKey(
         'Organization',
@@ -962,6 +961,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def event_class(self):
         raise NotImplementedError()
+
+    @property
+    def job_type_name(self):
+        return self.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
 
     @property
     def result_stdout_text(self):
@@ -1222,7 +1225,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
-        websocket_data = dict(type=self.get_real_instance_class()._meta.verbose_name.replace(' ', '_'))
+        websocket_data = dict(type=self.job_type_name)
         if self.spawned_by_workflow:
             websocket_data.update(dict(workflow_job_id=self.workflow_job_id,
                                        workflow_node_id=self.workflow_node_id))

@@ -1,64 +1,61 @@
-FROM centos:8
+{% if build_dev|bool %}
+### This file is generated from
+### installer/roles/image_build/templates/Dockerfile.j2
+###
+### DO NOT EDIT
+###
+{% endif %}
+
+# Locations - set globally to be used across stages
+ARG VENV_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/venv"
+ARG COLLECTION_BASE="{% if not build_dev|bool %}/var/lib/awx{% endif %}/vendor/awx_ansible_collections"
+
+# Build container
+FROM centos:8 as builder
+
+ARG VENV_BASE
+ARG COLLECTION_BASE
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 USER root
 
-# sync with installer/roles/image_build/templates/Dockerfile.j2
+# Install build dependencies
 RUN dnf -y update && \
-  dnf -y install epel-release 'dnf-command(config-manager)' && \
-  dnf module -y enable 'postgresql:10' && \
-  dnf config-manager --set-enabled PowerTools && \
-  dnf -y install acl \
-  ansible \
-  bubblewrap \
-  curl \
-  diffutils \
-  dnf-utils \
-  gcc \
-  gcc-c++ \
-  gettext \
-  git-core \
-  glibc-langpack-en \
-  krb5-workstation \
-  libcurl-devel \
-  libffi-devel \
-  libstdc++.so.6 \
-  libtool-ltdl-devel \
-  libcgroup-tools \
-  make \
-  mercurial \
-  nginx \
-  nodejs \
-  nss \
-  openldap-devel \
-  openssh-server \
-  patch \
-  @postgresql:10 \
-  postgresql-devel \
-  python3-devel \
-  python3-libselinux \
-  python3-pip \
-  python3-psycopg2 \
-  python3-setuptools \
-  python3-pycurl \
-  rsync \
-  subversion \
-  sudo \
-  swig \
-  tmux \
-  unzip \
-  vim-minimal \
-  which \
-  xmlsec1 \
-  xmlsec1-devel \
-  xmlsec1-openssl \
-  xmlsec1-openssl-devel
-
-ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
-RUN chmod +x /tini
+    dnf -y install epel-release 'dnf-command(config-manager)' && \
+    dnf module -y enable 'postgresql:10' && \
+    dnf config-manager --set-enabled PowerTools && \
+    dnf -y install ansible \
+    gcc \
+    gcc-c++ \
+    gettext \
+    git-core \
+    glibc-langpack-en \
+    libcurl-devel \
+    libffi-devel \
+    libstdc++.so.6 \
+    libtool-ltdl-devel \
+    make \
+    nodejs \
+    nss \
+    openldap-devel \
+    patch \
+    @postgresql:10 \
+    postgresql-devel \
+    python3-devel \
+    python3-pip \
+    python3-psycopg2 \
+    python3-setuptools \
+    swig \
+    unzip \
+    xmlsec1-devel \
+    xmlsec1-openssl-devel
 
 RUN python3 -m ensurepip && pip3 install "virtualenv < 20"
-RUN pip3 install supervisor
 
+# Install & build requirements
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 ADD requirements/requirements_ansible.txt \
@@ -67,70 +64,187 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
+    requirements/collections_requirements.yml \
     /tmp/requirements/
-RUN cd /tmp && VENV_BASE="/var/lib/awx/venv" make requirements_awx requirements_ansible_py3
 
-RUN dnf -y remove *-devel \
-  gcc \
-  gcc-c++ \
-  nodejs
+RUN cd /tmp && make requirements_awx requirements_ansible_py3
+RUN cd /tmp && make requirements_collections
 
-# makes postgres available for data migrations when upgrading
-RUN export PATH=/usr/pgsql-10/bin:$PATH
+{% if build_dev|bool %}
+ADD requirements/requirements_dev.txt /tmp/requirements
+RUN cd /tmp && make requirements_awx_dev requirements_ansible_dev
+{% endif %}
+{% if not build_dev|bool %}
+COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
+RUN mkdir -p -m 755 /var/lib/awx && echo "{{ awx_version }}" > /var/lib/awx/.tower_version && \
+    OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
+{% endif %}
 
-RUN dnf -y clean all
-RUN rm -rf /root/.cache
+# Final container(s)
+FROM centos:8
+
+ARG VENV_BASE
+ARG COLLECTION_BASE
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
-RUN rm -rf /tmp/*
+USER root
 
-RUN echo "{{ awx_version }}" > /var/lib/awx/.tower_version
-COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
-RUN OFFICIAL=yes /var/lib/awx/venv/awx/bin/pip install /tmp/{{ awx_sdist_file }}
+{% if build_dev|bool %}
+# Install development/test requirements
+RUN dnf -y install \
+    gtk3 \
+    alsa-lib \
+    libX11-xcb \
+    libXScrnSaver \
+    strace \
+    vim \
+    nmap-ncat \
+    nodejs \
+    nss \
+    make \
+    patch \
+    tmux \
+    wget \
+    diffutils \
+    unzip && \
+    npm install -g n && n 10.15.0 && dnf remove -y nodejs
+{% endif %}
 
-ADD settings.py /etc/tower/settings.py
-ADD supervisor.conf /supervisor.conf
-ADD supervisor_task.conf /supervisor_task.conf
-ADD launch_awx.sh /usr/bin/launch_awx.sh
-ADD launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD config-watcher /usr/bin/config-watcher
-RUN chmod +rx /usr/bin/launch_awx.sh && \
-    chmod +rx /usr/bin/launch_awx_task.sh && \
-    chmod +rx /usr/bin/config-watcher
+# Install runtime requirements
+RUN dnf -y update && \
+    dnf -y install https://github.com/krallin/tini/releases/download/v0.18.0/tini_0.18.0.rpm && \
+    dnf -y install epel-release 'dnf-command(config-manager)' && \
+    dnf module -y enable 'postgresql:10' && \
+    dnf config-manager --set-enabled PowerTools && \
+    dnf -y install acl \
+    ansible \
+    bubblewrap \
+    git-core \
+    glibc-langpack-en \
+    krb5-workstation \
+    libcgroup-tools \
+    mercurial \
+    nginx \
+    @postgresql:10 \
+    python3-devel \
+    python3-libselinux \
+    python3-pip \
+    python3-psycopg2 \
+    python3-setuptools \
+    rsync \
+    subversion \
+    sudo \
+    vim-minimal \
+    which \
+    xmlsec1-openssl && \
+    dnf -y --repofrompath gcloud,https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64 \
+       --setopt gcloud.gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg \
+      install kubectl && \
+    dnf -y install centos-release-stream && dnf -y install "rsyslog >= 8.1911.0" && dnf -y remove centos-release-stream && \
+    dnf -y clean all
+
+RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if build_dev|bool %}flake8{% endif %}
+
+RUN rm -rf /root/.cache && rm -rf /tmp/*
 
 # Install OpenShift CLI
 RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
     tar -xz --strip-components=1 --wildcards --no-anchored 'oc'
 
-ADD google-cloud-sdk.repo /etc/yum.repos.d/
-RUN dnf install -y kubectl
+# Copy app from builder
+{%if build_dev|bool %}
+COPY --from=builder /venv /venv
+COPY --from=builder /vendor /vendor
+RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
+        -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost" && \
+    openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt && \
+    chmod 640 /etc/nginx/nginx.{csr,key,crt}
+{% else %}
+COPY --from=builder /var/lib/awx /var/lib/awx
+RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
+{% endif %}
 
-RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chgrp root
-RUN find /var/lib/awx -not -path '/var/lib/awx/venv*' | xargs chmod g+w
+# Create default awx rsyslog config
+ADD {% if build_dev|bool %}installer/roles/image_build/files/{% endif %}rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 
-# Pre-create things that we need to write to
-RUN for dir in /home/awx /var/log/tower /var/log/nginx /var/lib/nginx; \
-  do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
+## File mappings
+{% if build_dev|bool %}
+ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
+ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
+ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
+ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
+ADD tools/docker-compose/start_tests.sh /start_tests.sh
+ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
+ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
+ADD tools/scripts/awx-python /usr/bin/awx-python
+{% else %}
+ADD launch_awx.sh /usr/bin/launch_awx.sh
+ADD launch_awx_task.sh /usr/bin/launch_awx_task.sh
+ADD settings.py /etc/tower/settings.py
+ADD supervisor.conf /etc/supervisord.conf
+ADD supervisor_task.conf /etc/supervisord_task.conf
+ADD config-watcher /usr/bin/config-watcher
+{% endif %}
 
-RUN for file in /etc/passwd /var/run/nginx.pid; \
-  do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
+# Pre-create things we need to access
+RUN for dir in \
+      /var/lib/awx \
+      /var/lib/awx/rsyslog \
+      /var/lib/awx/rsyslog/conf.d \
+      /var/run/awx-rsyslog \
+      /var/log/tower \
+      /var/log/nginx \
+      /var/run/supervisor \
+      /var/lib/nginx ; \
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    for file in \
+      /etc/passwd ; \
+    do touch $file ; chmod g+rw $file ; chgrp root $file ; done
 
-# https://github.com/ansible/awx/issues/5224
-RUN chmod u+s /usr/bin/bwrap
+# Adjust any remaining permissions
+RUN chmod u+s /usr/bin/bwrap ; \
+    chgrp -R root ${COLLECTION_BASE} ; \
+    chmod -R g+rw ${COLLECTION_BASE}
 
-VOLUME /var/lib/nginx
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+{% if build_dev|bool %}
+RUN for dir in \
+      /venv \
+      /venv/awx/lib/python3.6 \
+      /var/lib/awx/projects \
+      /var/lib/awx/rsyslog \
+      /var/run/awx-rsyslog \
+      /.ansible \
+      /vendor ; \
+    do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
+    for file in \
+      /var/run/nginx.pid \
+      /venv/awx/lib/python3.6/site-packages/awx.egg-link ; \
+    do touch $file ; chmod g+rw $file ; done
+{% endif %}
 
-ENV HOME=/home/awx
-WORKDIR ${HOME}
+{% if not build_dev|bool %}
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
+{% endif %}
+
+ENV HOME="/var/lib/awx"
+ENV PATH="/usr/pgsql-10/bin:${PATH}"
+
+{% if build_dev|bool %}
+EXPOSE 8043 8013 8080 22
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
+{% else %}
 USER 1000
 EXPOSE 8052
 
-ENTRYPOINT ["/tini", "--"]
+ENTRYPOINT ["tini", "--"]
 CMD /usr/bin/launch_awx.sh
+VOLUME /var/lib/nginx
+{% endif %}

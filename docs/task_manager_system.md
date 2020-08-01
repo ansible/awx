@@ -26,7 +26,7 @@ Empirically, the periodic task manager has been effective in the past and will c
  * Detect finished workflow jobs
  * Spawn next workflow jobs if needed
  * For each pending job, start with the oldest created job
-   * If the job is not blocked, and there is capacity in the instance group queue, then mark it as `waiting` and submit the job to RabbitMQ.
+   * If the job is not blocked, and there is capacity in the instance group queue, then mark it as `waiting` and submit the job.
 
 
 ### Job Lifecycle

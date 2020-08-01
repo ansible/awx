@@ -30,12 +30,6 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# Production should only use minified JS for UI.
-USE_MINIFIED_JS = True
-
-# URL used by inventory script and callback plugin to access API.
-INTERNAL_API_URL = 'http://127.0.0.1:80'
-
 # Absolute filesystem path to the directory for job status stdout
 # This directory should not be web-accessible
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
@@ -55,6 +49,7 @@ AWX_ISOLATED_USERNAME = 'awx'
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'  # noqa
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'  # noqa
 LOGGING['handlers']['dispatcher']['filename'] = '/var/log/tower/dispatcher.log'  # noqa
+LOGGING['handlers']['wsbroadcast']['filename'] = '/var/log/tower/wsbroadcast.log'  # noqa
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'  # noqa
 LOGGING['handlers']['management_playbooks']['filename'] = '/var/log/tower/management_playbooks.log'  # noqa
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'  # noqa

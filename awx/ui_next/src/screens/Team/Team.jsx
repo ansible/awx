@@ -9,14 +9,15 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
-import CardCloseButton from '@components/CardCloseButton';
-import { TabbedCardHeader } from '@components/Card';
-import RoutedTabs from '@components/RoutedTabs';
-import ContentError from '@components/ContentError';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
+import RoutedTabs from '../../components/RoutedTabs';
+import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
-import { TeamsAPI } from '@api';
+import { TeamsAPI } from '../../api';
+import TeamAccessList from './TeamRoles';
+import { ResourceAccessList } from '../../components/ResourceAccessList';
 
 function Team({ i18n, setBreadcrumb }) {
   const [team, setTeam] = useState(null);
@@ -40,22 +41,25 @@ function Team({ i18n, setBreadcrumb }) {
   }, [id, setBreadcrumb, location]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Teams`)}
+        </>
+      ),
+      link: `/teams`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `/teams/${id}/details`, id: 0 },
-    { name: i18n._(t`Users`), link: `/teams/${id}/users`, id: 1 },
-    { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 2 },
+    { name: i18n._(t`Access`), link: `/teams/${id}/access`, id: 1 },
+    { name: i18n._(t`Roles`), link: `/teams/${id}/roles`, id: 2 },
   ];
 
-  let cardHeader = (
-    <TabbedCardHeader>
-      <RoutedTabs tabsArray={tabsArray} />
-      <CardActions>
-        <CardCloseButton linkTo="/teams" />
-      </CardActions>
-    </TabbedCardHeader>
-  );
+  let showCardHeader = true;
 
   if (location.pathname.endsWith('edit')) {
-    cardHeader = null;
+    showCardHeader = false;
   }
 
   if (!hasContentLoading && contentError) {
@@ -65,8 +69,8 @@ function Team({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response.status === 404 && (
               <span>
-                {i18n._(`Team not found.`)}{' '}
-                <Link to="/teams">{i18n._(`View all Teams.`)}</Link>
+                {i18n._(t`Team not found.`)}{' '}
+                <Link to="/teams">{i18n._(t`View all Teams.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -78,7 +82,7 @@ function Team({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        {cardHeader}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect from="/teams/:id" to="/teams/:id/details" exact />
           {team && (
@@ -87,38 +91,31 @@ function Team({ i18n, setBreadcrumb }) {
             </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/edit"
-              render={() => <TeamEdit team={team} />}
-            />
+            <Route path="/teams/:id/edit">
+              <TeamEdit team={team} />
+            </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/users"
-              render={() => <span>Coming soon :)</span>}
-            />
+            <Route path="/teams/:id/access">
+              <ResourceAccessList resource={team} apiModel={TeamsAPI} />
+            </Route>
           )}
           {team && (
-            <Route
-              path="/teams/:id/access"
-              render={() => <span>Coming soon :)</span>}
-            />
+            <Route path="/teams/:id/roles">
+              <TeamAccessList />
+            </Route>
           )}
-          <Route
-            key="not-found"
-            path="*"
-            render={() =>
-              !hasContentLoading && (
-                <ContentError isNotFound>
-                  {id && (
-                    <Link to={`/teams/${id}/details`}>
-                      {i18n._(`View Team Details`)}
-                    </Link>
-                  )}
-                </ContentError>
-              )
-            }
-          />
+          <Route key="not-found" path="*">
+            {!hasContentLoading && (
+              <ContentError isNotFound>
+                {id && (
+                  <Link to={`/teams/${id}/details`}>
+                    {i18n._(t`View Team Details`)}
+                  </Link>
+                )}
+              </ContentError>
+            )}
+          </Route>
         </Switch>
       </Card>
     </PageSection>

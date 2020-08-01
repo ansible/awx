@@ -1,8 +1,4 @@
 import React, { useContext, useRef, useState } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -14,12 +10,16 @@ import {
   PlusIcon,
   TrashAltIcon,
 } from '@patternfly/react-icons';
-import { constants as wfConstants } from '@components/Workflow/WorkflowUtils';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../contexts/Workflow';
+import { constants as wfConstants } from '../../../components/Workflow/WorkflowUtils';
 import {
   WorkflowActionTooltip,
   WorkflowActionTooltipItem,
   WorkflowNodeTypeLetter,
-} from '@components/Workflow';
+} from '../../../components/Workflow';
 
 const NodeG = styled.g`
   pointer-events: ${props => (props.noPointerEvents ? 'none' : 'initial')};

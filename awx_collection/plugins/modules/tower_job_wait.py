@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_job_wait
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: Wait for Ansible Tower job to finish.
 description:
@@ -49,12 +48,6 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish.
       type: int
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -127,7 +120,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     job_id = module.params.get('job_id')
@@ -147,7 +140,7 @@ def main():
             interval = abs((min_interval + max_interval) / 2)
         module.deprecate(
             msg="Min and max interval have been deprecated, please use interval instead; interval will be set to {0}".format(interval),
-            version="3.7"
+            version="ansible.tower:4.0.0"
         )
 
     # Attempt to look up job based on the provided id

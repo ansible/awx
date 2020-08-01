@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
-import { WorkflowJobTemplatesAPI } from '@api';
-import { getQSConfig, parseQueryString } from '@util/qs';
-import PaginatedDataList from '@components/PaginatedDataList';
-import DataListToolbar from '@components/DataListToolbar';
-import CheckboxListItem from '@components/CheckboxListItem';
+import { WorkflowJobTemplatesAPI } from '../../../../../../api';
+import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
+import PaginatedDataList from '../../../../../../components/PaginatedDataList';
+import DataListToolbar from '../../../../../../components/DataListToolbar';
+import CheckboxListItem from '../../../../../../components/CheckboxListItem';
 
 const QS_CONFIG = getQSConfig('workflow_job_templates', {
   page: 1,
@@ -16,35 +17,37 @@ const QS_CONFIG = getQSConfig('workflow_job_templates', {
 });
 
 function WorkflowJobTemplatesList({
-  history,
   i18n,
   nodeResource,
   onUpdateNodeResource,
 }) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [workflowJobTemplates, setWorkflowJobTemplates] = useState([]);
+  const location = useLocation();
+
+  const {
+    result: { workflowJobTemplates, count },
+    error,
+    isLoading,
+    request: fetchWorkflowJobTemplates,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const results = await WorkflowJobTemplatesAPI.read(params, {
+        role_level: 'execute_role',
+      });
+      return {
+        workflowJobTemplates: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      workflowJobTemplates: [],
+      count: 0,
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setWorkflowJobTemplates([]);
-      setCount(0);
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await WorkflowJobTemplatesAPI.read(params, {
-          role_level: 'execute_role',
-        });
-        setWorkflowJobTemplates(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [history.location]);
+    fetchWorkflowJobTemplates();
+  }, [fetchWorkflowJobTemplates]);
 
   return (
     <PaginatedDataList
@@ -75,19 +78,19 @@ function WorkflowJobTemplatesList({
           isDefault: true,
         },
         {
-          name: i18n._(t`Organization (Name)`),
+          name: i18n._(t`Organization (name)`),
           key: 'organization__name',
         },
         {
-          name: i18n._(t`Inventory (Name)`),
+          name: i18n._(t`Inventory (name)`),
           key: 'inventory__name',
         },
         {
-          name: i18n._(t`Created By (Username)`),
+          name: i18n._(t`Created by (username)`),
           key: 'created_by__username',
         },
         {
-          name: i18n._(t`Modified By (Username)`),
+          name: i18n._(t`Modified by (username)`),
           key: 'modified_by__username',
         },
       ]}
@@ -110,4 +113,4 @@ WorkflowJobTemplatesList.defaultProps = {
   nodeResource: null,
 };
 
-export default withI18n()(withRouter(WorkflowJobTemplatesList));
+export default withI18n()(WorkflowJobTemplatesList);

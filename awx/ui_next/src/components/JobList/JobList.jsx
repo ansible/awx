@@ -4,15 +4,14 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
 import { Card } from '@patternfly/react-core';
-import AlertModal from '@components/AlertModal';
-import DatalistToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
-import PaginatedDataList, {
-  ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import { getQSConfig, parseQueryString } from '@util/qs';
+import AlertModal from '../AlertModal';
+import DatalistToolbar from '../DataListToolbar';
+import ErrorDetail from '../ErrorDetail';
+import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
+import useRequest, { useDeleteItems } from '../../util/useRequest';
+import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
+import useWsJobs from './useWsJobs';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -21,49 +20,55 @@ import {
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
-} from '@api';
-
-const QS_CONFIG = getQSConfig(
-  'job',
-  {
-    page: 1,
-    page_size: 20,
-    order_by: '-finished',
-  },
-  ['page', 'page_size']
-);
+} from '../../api';
 
 function JobList({ i18n, defaultParams, showTypeColumn = false }) {
+  const QS_CONFIG = getQSConfig(
+    'job',
+    {
+      page: 1,
+      page_size: 20,
+      order_by: '-finished',
+      not__launch_type: 'sync',
+      ...defaultParams,
+    },
+    ['id', 'page', 'page_size']
+  );
+
   const [selected, setSelected] = useState([]);
   const location = useLocation();
-
   const {
-    result: { jobs, itemCount },
+    result: { results, count },
     error: contentError,
     isLoading,
     request: fetchJobs,
   } = useRequest(
-    useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
-
-      const {
-        data: { count, results },
-      } = await UnifiedJobsAPI.read({ ...params, ...defaultParams });
-
-      return {
-        itemCount: count,
-        jobs: results,
-      };
-    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
-    {
-      jobs: [],
-      itemCount: 0,
-    }
+    useCallback(
+      async () => {
+        const params = parseQueryString(QS_CONFIG, location.search);
+        const { data } = await UnifiedJobsAPI.read({ ...params });
+        return data;
+      },
+      [location] // eslint-disable-line react-hooks/exhaustive-deps
+    ),
+    { results: [], count: 0 }
   );
-
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  // TODO: update QS_CONFIG to be safe for deps array
+  const fetchJobsById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await UnifiedJobsAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const jobs = useWsJobs(results, fetchJobsById, QS_CONFIG);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {
@@ -125,8 +130,8 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={jobs}
-          itemCount={itemCount}
-          pluralizedItemName="Jobs"
+          itemCount={count}
+          pluralizedItemName={i18n._(t`Jobs`)}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
@@ -147,7 +152,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               name: i18n._(t`Job Type`),
               key: `type`,
               options: [
-                [`project_update`, i18n._(t`SCM Update`)],
+                [`project_update`, i18n._(t`Source Control Update`)],
                 [`inventory_update`, i18n._(t`Inventory Sync`)],
                 [`job`, i18n._(t`Playbook Run`)],
                 [`ad_hoc_command`, i18n._(t`Command`)],

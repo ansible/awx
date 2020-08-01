@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_inventory_source
 author: "Adrien Fleury (@fleu42)"
-version_added: "2.7"
 short_description: create, update, or destroy Ansible Tower inventory source.
 description:
     - Create, update, or destroy Ansible Tower inventory source. See
@@ -31,9 +30,7 @@ options:
     new_name:
       description:
         - A new name for this assets (will rename the asset)
-      required: False
       type: str
-      version_added: "3.7"
     description:
       description:
         - The description to use for the inventory source.
@@ -46,9 +43,8 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom" ]
       type: str
-      required: False
     source_path:
       description:
         - For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
@@ -57,7 +53,6 @@ options:
       description:
         - Inventory script to be used when group type is C(custom).
       type: str
-      required: False
     source_vars:
       description:
         - The variables or environment fields to apply to this source type.
@@ -82,18 +77,14 @@ options:
       description:
         - Delete child groups and hosts not found in source.
       type: bool
-      default: 'no'
     overwrite_vars:
       description:
         - Override vars in child groups and hosts with those from external source.
       type: bool
     custom_virtualenv:
-      version_added: "2.9"
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      required: False
-      default: ''
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
       type: int
@@ -105,7 +96,6 @@ options:
       description:
         - Refresh inventory data from its source each time a job is run.
       type: bool
-      default: 'no'
     update_cache_timeout:
       description:
         - Time in seconds to consider an inventory sync to be current.
@@ -123,12 +113,21 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    tower_oauthtoken:
+    notification_templates_started:
       description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -153,17 +152,17 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        new_name=dict(type='str'),
-        description=dict(required=False),
+        new_name=dict(),
+        description=dict(),
         inventory=dict(required=True),
         #
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
-                             "azure_rm", "vmware", "satellite6", "cloudforms",
-                             "openstack", "rhv", "tower", "custom"], required=False),
+                             "azure_rm", "vmware", "satellite6",
+                             "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
-        source_script=dict(required=False),
+        source_script=dict(),
         source_vars=dict(type='dict'),
         credential=dict(),
         source_regions=dict(),
@@ -171,13 +170,16 @@ def main():
         group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(type='str', default=''),
+        custom_virtualenv=dict(),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
-        source_project=dict(type='str'),
+        source_project=dict(),
         update_on_project_update=dict(type='bool'),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -201,6 +203,31 @@ def main():
             'inventory': inventory_id,
         }
     })
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory_source)
+
+    # Attempt to look up associated field items the user specified.
+    association_fields = {}
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     # Create the data that gets sent for create and update
     inventory_source_fields = {
@@ -227,7 +254,7 @@ def main():
     # Layer in all remaining optional information
     for field_name in OPTIONAL_VARS:
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             inventory_source_fields[field_name] = field_val
 
     # Attempt to JSON encode source vars
@@ -238,12 +265,12 @@ def main():
     if state == 'present' and not inventory_source and not inventory_source_fields['source']:
         module.fail_json(msg="If creating a new inventory source, the source param must be present")
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(inventory_source)
-    elif state == 'present':
-        # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
-        module.create_or_update_if_needed(inventory_source, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source')
+    # If the state was present we can let the module build or update the existing inventory_source, this will return on its own
+    module.create_or_update_if_needed(
+        inventory_source, inventory_source_fields,
+        endpoint='inventory_sources', item_type='inventory source',
+        associations=association_fields
+    )
 
 
 if __name__ == '__main__':

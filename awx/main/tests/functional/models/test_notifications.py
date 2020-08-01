@@ -12,6 +12,7 @@ from awx.api.serializers import UnifiedJobSerializer
 
 class TestJobNotificationMixin(object):
     CONTEXT_STRUCTURE = {'job': {'allow_simultaneous': bool,
+                                 'artifacts': {},
                                  'custom_virtualenv': str,
                                  'controller_node': str,
                                  'created': datetime.datetime,
@@ -105,7 +106,10 @@ class TestJobNotificationMixin(object):
                         assert isinstance(obj[key], dict)
                         check_structure(expected_structure[key], obj[key])
                     else:
-                        assert isinstance(obj[key], expected_structure[key])
+                        if key == 'job_explanation':
+                            assert isinstance(str(obj[key]), expected_structure[key])
+                        else:
+                            assert isinstance(obj[key], expected_structure[key])
         kwargs = {}
         if JobClass is InventoryUpdate:
             kwargs['inventory_source'] = inventory_source

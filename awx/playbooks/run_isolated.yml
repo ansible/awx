@@ -9,6 +9,8 @@
   gather_facts: false
   vars:
     secret: "{{ lookup('pipe', 'cat ' + src + '/env/ssh_key') }}"
+  collections:
+    - ansible.posix
 
   tasks:
     - name: synchronize job environment with isolated host
@@ -25,6 +27,7 @@
         dest: "{{ dest }}"
         set_remote_user: false
         rsync_opts:
+          - "--blocking-io"
           - "--rsh=$RSH"
       environment:
         RSH: "oc rsh --config={{ ansible_kubectl_config }}"

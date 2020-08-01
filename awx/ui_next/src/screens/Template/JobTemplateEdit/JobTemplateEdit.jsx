@@ -1,12 +1,12 @@
 /* eslint react/no-unused-state: 0 */
 import React, { Component } from 'react';
 import { withRouter, Redirect } from 'react-router-dom';
-import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import { JobTemplatesAPI, ProjectsAPI } from '@api';
-import { JobTemplate } from '@types';
-import { getAddedAndRemoved } from '@util/lists';
+import { CardBody } from '../../../components/Card';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import { JobTemplatesAPI, ProjectsAPI } from '../../../api';
+import { JobTemplate } from '../../../types';
+import { getAddedAndRemoved } from '../../../util/lists';
 import JobTemplateForm from '../shared/JobTemplateForm';
 
 const loadRelatedProjectPlaybooks = async project =>
@@ -100,18 +100,19 @@ class JobTemplateEdit extends Component {
       instanceGroups,
       initialInstanceGroups,
       credentials,
+      webhook_credential,
+      webhook_key,
+      webhook_url,
       ...remainingValues
     } = values;
 
     this.setState({ formSubmitError: null });
     remainingValues.project = values.project.id;
+    remainingValues.webhook_credential = webhook_credential?.id || null;
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
-        this.submitLabels(
-          labels,
-          values.project.summary_fields.organization.id
-        ),
+        this.submitLabels(labels, template?.organization),
         this.submitInstanceGroups(instanceGroups, initialInstanceGroups),
         this.submitCredentials(credentials),
       ]);

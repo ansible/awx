@@ -1,11 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { TeamsAPI } from '@api';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { TeamsAPI } from '../../../api';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 
 import TeamList from './TeamList';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockAPITeamList = {
   data: {

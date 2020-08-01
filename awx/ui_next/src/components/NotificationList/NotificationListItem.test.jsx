@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import NotificationListItem from './NotificationListItem';
 
 describe('<NotificationListItem canToggleNotifications />', () => {
@@ -55,7 +55,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       .find('DataListCell')
       .at(1)
       .find('div');
-    expect(typeCell.text()).toBe('Slack');
+    expect(typeCell.text()).toContain('Slack');
   });
 
   test('handles start click when toggle is on', () => {

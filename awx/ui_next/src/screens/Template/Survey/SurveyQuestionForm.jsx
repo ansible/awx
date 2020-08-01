@@ -4,16 +4,21 @@ import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
-import { FormColumnLayout } from '@components/FormLayout';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import { FormColumnLayout } from '../../../components/FormLayout';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
   CheckboxField,
   PasswordField,
   FormSubmitError,
   FieldTooltip,
-} from '@components/FormField';
-import AnsibleSelect from '@components/AnsibleSelect';
-import { required, noWhiteSpace, combine } from '@util/validators';
+} from '../../../components/FormField';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import {
+  required,
+  noWhiteSpace,
+  combine,
+  maxLength,
+} from '../../../util/validators';
 
 function AnswerTypeField({ i18n }) {
   const [field] = useField({
@@ -24,16 +29,18 @@ function AnswerTypeField({ i18n }) {
   return (
     <FormGroup
       label={i18n._(t`Answer Type`)}
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(
+            t`Choose an answer type or format you want as the prompt for the user.
+          Refer to the Ansible Tower Documentation for more additional
+          information about each option.`
+          )}
+        />
+      }
       isRequired
       fieldId="question-answer-type"
     >
-      <FieldTooltip
-        content={i18n._(
-          t`Choose an answer type or format you want as the prompt for the user.
-          Refer to the Ansible Tower Documentation for more additional
-          information about each option.`
-        )}
-      />
       <AnsibleSelect
         id="question-type"
         {...field}
@@ -66,6 +73,20 @@ function SurveyQuestionForm({
   submitError,
   i18n,
 }) {
+  const defaultIsNotAvailable = choices => {
+    return defaultValue => {
+      let errorMessage;
+      const found = [...defaultValue].every(dA => choices.indexOf(dA) > -1);
+
+      if (!found) {
+        errorMessage = i18n._(
+          t`Default choice must be answered from the choices listed.`
+        );
+      }
+      return errorMessage;
+    };
+  };
+
   return (
     <Formik
       initialValues={{
@@ -116,7 +137,7 @@ function SurveyQuestionForm({
             <CheckboxField
               id="question-required"
               name="required"
-              label="Required"
+              label={i18n._(t`Required`)}
             />
           </FormColumnLayout>
           <FormColumnLayout>
@@ -156,6 +177,7 @@ function SurveyQuestionForm({
               <FormField
                 id="question-default"
                 name="default"
+                validate={maxLength(formik.values.max, i18n)}
                 type={formik.values.type === 'text' ? 'text' : 'number'}
                 label={i18n._(t`Default answer`)}
               />
@@ -183,11 +205,16 @@ function SurveyQuestionForm({
                   type="textarea"
                   label={i18n._(t`Multiple Choice Options`)}
                   validate={required(null, i18n)}
+                  tooltip={i18n._(
+                    t`Each answer choice must be on a separate line.`
+                  )}
                   isRequired
+                  rows="10"
                 />
                 <FormField
                   id="question-default"
                   name="default"
+                  validate={defaultIsNotAvailable(formik.values.choices, i18n)}
                   type={
                     formik.values.type === 'multiplechoice'
                       ? 'text'

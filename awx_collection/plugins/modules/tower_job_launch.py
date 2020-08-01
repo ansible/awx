@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_job_launch
 author: "Wayne Witzel III (@wwitzel3)"
-version_added: "2.3"
 short_description: Launch an Ansible Job.
 description:
     - Launch an Ansible Tower jobs. See
@@ -64,35 +63,24 @@ options:
         - A specific of the SCM project to run the template on.
         - This is only applicable if your project allows for branch override.
       type: str
-      version_added: "3.7"
     skip_tags:
       description:
         - Specific tags to skip from the playbook.
       type: list
       elements: str
-      version_added: "3.7"
     verbosity:
       description:
         - Verbosity level for this job run
       type: int
       choices: [ 0, 1, 2, 3, 4, 5 ]
-      version_added: "3.7"
     diff_mode:
       description:
         - Show the changes made by Ansible tasks where supported
       type: bool
-      version_added: "3.7"
     credential_passwords:
       description:
         - Passwords for credentials which are set to prompt on launch
       type: dict
-      version_added: "3.7"
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -142,23 +130,23 @@ from ..module_utils.tower_api import TowerModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(type='str', required=True, aliases=['job_template']),
-        job_type=dict(type='str', choices=['run', 'check']),
-        inventory=dict(type='str', default=None),
+        name=dict(required=True, aliases=['job_template']),
+        job_type=dict(choices=['run', 'check']),
+        inventory=dict(default=None),
         # Credentials will be a str instead of a list for backwards compatability
         credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
         limit=dict(),
         tags=dict(type='list', elements='str'),
-        extra_vars=dict(type='dict', required=False),
-        scm_branch=dict(type='str', required=False),
-        skip_tags=dict(type='list', required=False, elements='str'),
-        verbosity=dict(type='int', required=False, choices=[0, 1, 2, 3, 4, 5]),
-        diff_mode=dict(type='bool', required=False),
-        credential_passwords=dict(type='dict', required=False),
+        extra_vars=dict(type='dict'),
+        scm_branch=dict(),
+        skip_tags=dict(type='list', elements='str'),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
+        diff_mode=dict(type='bool'),
+        credential_passwords=dict(type='dict'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     optional_args = {}
     # Extract our parameters

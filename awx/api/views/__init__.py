@@ -12,7 +12,7 @@ import socket
 import sys
 import time
 from base64 import b64encode
-from collections import OrderedDict, Iterable
+from collections import OrderedDict
 
 
 # Django
@@ -2337,70 +2337,24 @@ class JobTemplateLaunch(RetrieveAPIView):
         old field structure to launch endpoint
         TODO: delete this method with future API version changes
         '''
-        ignored_fields = {}
         modern_data = data.copy()
 
         id_fd = '{}_id'.format('inventory')
         if 'inventory' not in modern_data and id_fd in modern_data:
             modern_data['inventory'] = modern_data[id_fd]
 
-        # Automatically convert legacy launch credential arguments into a list of `.credentials`
-        if 'credentials' in modern_data and 'extra_credentials' in modern_data:
-            raise ParseError({"error": _(
-                "'credentials' cannot be used in combination with 'extra_credentials'."
-            )})
-
-        if 'extra_credentials' in modern_data:
-            # make a list of the current credentials
-            existing_credentials = obj.credentials.all()
-            template_credentials = list(existing_credentials)  # save copy of existing
-            new_credentials = []
-            if 'extra_credentials' in modern_data:
-                existing_credentials = [
-                    cred for cred in existing_credentials
-                    if cred.credential_type.kind not in ('cloud', 'net')
-                ]
-                prompted_value = modern_data.pop('extra_credentials')
-
-                # validate type, since these are not covered by a serializer
-                if not isinstance(prompted_value, Iterable):
-                    msg = _(
-                        "Incorrect type. Expected a list received {}."
-                    ).format(prompted_value.__class__.__name__)
-                    raise ParseError({'extra_credentials': [msg], 'credentials': [msg]})
-
-                # add the deprecated credential specified in the request
-                if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, str):
-                    prompted_value = [prompted_value]
-
-                # If user gave extra_credentials, special case to use exactly
-                # the given list without merging with JT credentials
-                if prompted_value:
-                    obj._deprecated_credential_launch = True  # signal to not merge credentials
-                new_credentials.extend(prompted_value)
-
-            # combine the list of "new" and the filtered list of "old"
-            new_credentials.extend([cred.pk for cred in existing_credentials])
-            if new_credentials:
-                # If provided list doesn't contain the pre-existing credentials
-                # defined on the template, add them back here
-                for cred_obj in template_credentials:
-                    if cred_obj.pk not in new_credentials:
-                        new_credentials.append(cred_obj.pk)
-                modern_data['credentials'] = new_credentials
-
         # credential passwords were historically provided as top-level attributes
         if 'credential_passwords' not in modern_data:
             modern_data['credential_passwords'] = data.copy()
 
-        return (modern_data, ignored_fields)
+        return modern_data
 
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
         try:
-            modern_data, ignored_fields = self.modernize_launch_payload(
+            modern_data = self.modernize_launch_payload(
                 data=request.data, obj=obj
             )
         except ParseError as exc:
@@ -2409,8 +2363,6 @@ class JobTemplateLaunch(RetrieveAPIView):
         serializer = self.serializer_class(data=modern_data, context={'template': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        ignored_fields.update(serializer._ignored_fields)
 
         if not request.user.can_access(models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
             raise PermissionDenied()
@@ -2427,11 +2379,11 @@ class JobTemplateLaunch(RetrieveAPIView):
             data = OrderedDict()
             if isinstance(new_job, models.WorkflowJob):
                 data['workflow_job'] = new_job.id
-                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
+                data['ignored_fields'] = self.sanitize_for_response(serializer._ignored_fields)
                 data.update(serializers.WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             else:
                 data['job'] = new_job.id
-                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
+                data['ignored_fields'] = self.sanitize_for_response(serializer._ignored_fields)
                 data.update(serializers.JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             headers = {'Location': new_job.get_absolute_url(request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
@@ -2705,26 +2657,10 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
             return {"error": _("Cannot assign multiple {credential_type} credentials.").format(
                 credential_type=sub.unique_hash(display=True))}
         kind = sub.credential_type.kind
-        if kind not in ('ssh', 'vault', 'cloud', 'net'):
+        if kind not in ('ssh', 'vault', 'cloud', 'net', 'kubernetes'):
             return {'error': _('Cannot assign a Credential of kind `{}`.').format(kind)}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
-
-
-class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
-
-    deprecated = True
-
-    def get_queryset(self):
-        sublist_qs = super(JobTemplateExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
-        return sublist_qs
-
-    def is_valid_relation(self, parent, sub, created=False):
-        valid = super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
-        if sub.credential_type.kind not in ('cloud', 'net'):
-            return {'error': _('Extra credentials must be network or cloud.')}
-        return valid
 
 
 class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
@@ -3541,16 +3477,6 @@ class JobCredentialsList(SubListAPIView):
     serializer_class = serializers.CredentialSerializer
     parent_model = models.Job
     relationship = 'credentials'
-
-
-class JobExtraCredentialsList(JobCredentialsList):
-
-    deprecated = True
-
-    def get_queryset(self):
-        sublist_qs = super(JobExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
-        return sublist_qs
 
 
 class JobLabelList(SubListAPIView):

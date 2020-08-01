@@ -1,23 +1,30 @@
+import 'styled-components/macro';
 import React, { useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Schedule } from '@types';
-import { Chip, ChipGroup, Title } from '@patternfly/react-core';
-import { CardBody } from '@components/Card';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import CredentialChip from '@components/CredentialChip';
-import { DetailList, Detail, UserDateDetail } from '@components/DetailList';
-import { ScheduleOccurrences, ScheduleToggle } from '@components/Schedule';
-import { formatDateString } from '@util/dates';
-import useRequest from '@util/useRequest';
-import { SchedulesAPI } from '@api';
+import { Chip, Title, Button } from '@patternfly/react-core';
+import { Schedule } from '../../../types';
+import AlertModal from '../../AlertModal';
+import { CardBody, CardActionsRow } from '../../Card';
+import ContentError from '../../ContentError';
+import ContentLoading from '../../ContentLoading';
+import CredentialChip from '../../CredentialChip';
+import { DetailList, Detail, UserDateDetail } from '../../DetailList';
+import ScheduleOccurrences from '../ScheduleOccurrences';
+import ScheduleToggle from '../ScheduleToggle';
+import { formatDateString } from '../../../util/dates';
+import useRequest, { useDismissableError } from '../../../util/useRequest';
+import { SchedulesAPI } from '../../../api';
+import DeleteButton from '../../DeleteButton';
+import ErrorDetail from '../../ErrorDetail';
+import ChipGroup from '../../ChipGroup';
 
 const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
+  grid-column: 1 / -1;
 `;
 
 function ScheduleDetail({ schedule, i18n }) {
@@ -42,10 +49,27 @@ function ScheduleDetail({ schedule, i18n }) {
     timezone,
   } = schedule;
 
+  const history = useHistory();
+  const { pathname } = useLocation();
+  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+
+  const {
+    request: deleteSchedule,
+    isLoading: isDeleteLoading,
+    error: deleteError,
+  } = useRequest(
+    useCallback(async () => {
+      await SchedulesAPI.destroy(id);
+      history.push(`${pathRoot}schedules`);
+    }, [id, history, pathRoot])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
+
   const {
     result: [credentials, preview],
     isLoading,
-    error,
+    error: readContentError,
     request: fetchCredentialsAndPreview,
   } = useRequest(
     useCallback(async () => {
@@ -83,8 +107,8 @@ function ScheduleDetail({ schedule, i18n }) {
     return <ContentLoading />;
   }
 
-  if (error) {
-    return <ContentError error={error} />;
+  if (readContentError) {
+    return <ContentError error={readContentError} />;
   }
 
   return (
@@ -117,7 +141,7 @@ function ScheduleDetail({ schedule, i18n }) {
         />
         {showPromptedFields && (
           <>
-            <PromptTitle size="md" css="grid-column: 1 / -1;">
+            <PromptTitle headingLevel="h2">
               {i18n._(t`Prompted Fields`)}
             </PromptTitle>
             <Detail label={i18n._(t`Job Type`)} value={job_type} />
@@ -137,7 +161,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
+            <Detail
+              label={i18n._(t`Source Control Branch`)}
+              value={scm_branch}
+            />
             <Detail label={i18n._(t`Limit`)} value={limit} />
             {typeof diff_mode === 'boolean' && (
               <Detail
@@ -150,7 +177,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Credentials`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup numChips={5} totalChips={credentials.length}>
                     {credentials.map(c => (
                       <CredentialChip key={c.id} credential={c} isReadOnly />
                     ))}
@@ -163,7 +190,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Job Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={job_tags.split(',').length}
+                  >
                     {job_tags.split(',').map(jobTag => (
                       <Chip key={jobTag} isReadOnly>
                         {jobTag}
@@ -178,7 +208,10 @@ function ScheduleDetail({ schedule, i18n }) {
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
                 value={
-                  <ChipGroup numChips={5}>
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={skip_tags.split(',').length}
+                  >
                     {skip_tags.split(',').map(skipTag => (
                       <Chip key={skipTag} isReadOnly>
                         {skipTag}
@@ -191,6 +224,38 @@ function ScheduleDetail({ schedule, i18n }) {
           </>
         )}
       </DetailList>
+      <CardActionsRow>
+        {summary_fields?.user_capabilities?.edit && (
+          <Button
+            aria-label={i18n._(t`Edit`)}
+            component={Link}
+            to={pathname.replace('details', 'edit')}
+          >
+            {i18n._(t`Edit`)}
+          </Button>
+        )}
+        {summary_fields?.user_capabilities?.delete && (
+          <DeleteButton
+            name={name}
+            modalTitle={i18n._(t`Delete Schedule`)}
+            onConfirm={deleteSchedule}
+            isDisabled={isDeleteLoading}
+          >
+            {i18n._(t`Delete`)}
+          </DeleteButton>
+        )}
+      </CardActionsRow>
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {i18n._(t`Failed to delete schedule.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }

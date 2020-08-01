@@ -6,8 +6,8 @@ import {
   DataListItemCells,
   TextContent,
 } from '@patternfly/react-core';
-import DataListCell from '@components/DataListCell';
 import styled from 'styled-components';
+import DataListCell from '../DataListCell';
 
 const DetailWrapper = styled(TextContent)`
   display: grid;

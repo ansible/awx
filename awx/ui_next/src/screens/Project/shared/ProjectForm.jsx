@@ -4,20 +4,23 @@ import PropTypes from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
-import { Config } from '@contexts/Config';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
-import AnsibleSelect from '@components/AnsibleSelect';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import FormActionGroup from '@components/FormActionGroup/FormActionGroup';
+import { Config } from '../../../contexts/Config';
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
+import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import FormField, {
   FieldTooltip,
   FormSubmitError,
-} from '@components/FormField';
-import OrganizationLookup from '@components/Lookup/OrganizationLookup';
-import { CredentialTypesAPI, ProjectsAPI } from '@api';
-import { required } from '@util/validators';
-import { FormColumnLayout, SubFormLayout } from '@components/FormLayout';
+} from '../../../components/FormField';
+import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
+import { CredentialTypesAPI, ProjectsAPI } from '../../../api';
+import { required } from '../../../util/validators';
+import {
+  FormColumnLayout,
+  SubFormLayout,
+} from '../../../components/FormLayout';
 import {
   GitSubForm,
   HgSubForm,
@@ -169,8 +172,10 @@ function ProjectFormFields({
         fieldId="project-scm-type"
         helperTextInvalid={scmTypeMeta.error}
         isRequired
-        isValid={!scmTypeMeta.touched || !scmTypeMeta.error}
-        label={i18n._(t`SCM Type`)}
+        validated={
+          !scmTypeMeta.touched || !scmTypeMeta.error ? 'default' : 'error'
+        }
+        label={i18n._(t`Source Control Credential Type`)}
       >
         <AnsibleSelect
           {...scmTypeField}
@@ -179,7 +184,7 @@ function ProjectFormFields({
             {
               value: '',
               key: '',
-              label: i18n._(t`Choose an SCM Type`),
+              label: i18n._(t`Choose a Source Control Type`),
               isDisabled: true,
             },
             ...scmTypeOptions.map(([value, label]) => {
@@ -201,7 +206,9 @@ function ProjectFormFields({
       </FormGroup>
       {formik.values.scm_type !== '' && (
         <SubFormLayout>
-          <Title size="md">{i18n._(t`Type Details`)}</Title>
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Type Details`)}
+          </Title>
           <FormColumnLayout>
             {
               {
@@ -252,11 +259,13 @@ function ProjectFormFields({
             <FormGroup
               fieldId="project-custom-virtualenv"
               label={i18n._(t`Ansible Environment`)}
-            >
-              <FieldTooltip
-                content={i18n._(t`Select the playbook to be executed by
+              labelIcon={
+                <FieldTooltip
+                  content={i18n._(t`Select the playbook to be executed by
                 this job.`)}
-              />
+                />
+              }
+            >
               <AnsibleSelect
                 id="project-custom-virtualenv"
                 data={[

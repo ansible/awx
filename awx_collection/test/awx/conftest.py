@@ -15,7 +15,7 @@ from requests.models import Response
 import pytest
 
 from awx.main.tests.functional.conftest import _request
-from awx.main.models import Organization, Project, Inventory, Credential, CredentialType
+from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType
 
 try:
     import tower_cli  # noqa
@@ -108,6 +108,7 @@ def run_module(request, collection_import):
             sanitize_dict(py_data)
             resp._content = bytes(json.dumps(django_response.data), encoding='utf8')
             resp.status_code = django_response.status_code
+            resp.headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': '0.0.1-devel'}
 
             if request.config.getoption('verbose') > 0:
                 logger.info(
@@ -120,7 +121,11 @@ def run_module(request, collection_import):
 
         def new_open(self, method, url, **kwargs):
             r = new_request(self, method, url, **kwargs)
-            return mock.MagicMock(read=mock.MagicMock(return_value=r._content), status=r.status_code)
+            m = mock.MagicMock(read=mock.MagicMock(return_value=r._content),
+                               status=r.status_code,
+                               getheader=mock.MagicMock(side_effect=r.headers.get)
+                               )
+            return m
 
         stdout_buffer = io.StringIO()
         # Requies specific PYTHONPATH, see docs
@@ -163,6 +168,8 @@ def run_module(request, collection_import):
             raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
         # A module exception should never be a test expectation
         if 'exception' in result:
+            if "ModuleNotFoundError: No module named 'tower_cli'" in result['exception']:
+                pytest.skip('The tower-cli library is needed to run this test, module no longer supported.')
             raise Exception('Module encountered error:\n{0}'.format(result['exception']))
         return result
 
@@ -215,6 +222,16 @@ def inventory(organization):
 
 
 @pytest.fixture
+def job_template(project, inventory):
+    return JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        inventory=inventory,
+        playbook='helloworld.yml'
+    )
+
+
+@pytest.fixture
 def machine_credential(organization):
     ssh_type = CredentialType.defaults['ssh']()
     ssh_type.save()
@@ -239,12 +256,12 @@ def silence_deprecation():
     """The deprecation warnings are stored in a global variable
     they will create cross-test interference. Use this to turn them off.
     """
-    with mock.patch('ansible.module_utils.basic.AnsibleModule.deprecate'):
-        yield
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.deprecate') as this_mock:
+        yield this_mock
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def silence_warning():
     """Warnings use global variable, same as deprecations."""
-    with mock.patch('ansible.module_utils.basic.AnsibleModule.warn'):
-        yield
+    with mock.patch('ansible.module_utils.basic.AnsibleModule.warn') as this_mock:
+        yield this_mock

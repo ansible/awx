@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { string, func, bool, number } from 'prop-types';
 import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { yamlToJson, jsonToYaml, isJson } from '@util/yaml';
-import MultiButtonToggle from '@components/MultiButtonToggle';
+import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
+import MultiButtonToggle from '../MultiButtonToggle';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
 
@@ -35,7 +35,7 @@ function VariablesInput(props) {
 
   return (
     <div className={`pf-c-form__group ${className || ''}`}>
-      <Split gutter="sm">
+      <Split hasGutter>
         <SplitItem>
           <label htmlFor={id} className="pf-c-form__label">
             {label}
@@ -43,7 +43,10 @@ function VariablesInput(props) {
         </SplitItem>
         <SplitItemRight>
           <MultiButtonToggle
-            buttons={[[YAML_MODE, 'YAML'], [JSON_MODE, 'JSON']]}
+            buttons={[
+              [YAML_MODE, 'YAML'],
+              [JSON_MODE, 'JSON'],
+            ]}
             value={mode}
             onChange={newMode => {
               try {

@@ -16,6 +16,7 @@ class JobTemplates extends SchedulesMixin(
     this.disassociateLabel = this.disassociateLabel.bind(this);
     this.readCredentials = this.readCredentials.bind(this);
     this.readAccessList = this.readAccessList.bind(this);
+    this.readWebhookKey = this.readWebhookKey.bind(this);
   }
 
   launch(id, data) {
@@ -81,6 +82,14 @@ class JobTemplates extends SchedulesMixin(
 
   destroySurvey(id) {
     return this.http.delete(`${this.baseUrl}${id}/survey_spec/`);
+  }
+
+  readWebhookKey(id) {
+    return this.http.get(`${this.baseUrl}${id}/webhook_key/`);
+  }
+
+  updateWebhookKey(id) {
+    return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
   }
 }
 

@@ -10,18 +10,23 @@ function FormSubmitError({ error }) {
     if (!error) {
       return;
     }
-    if (error?.response?.data && typeof error.response.data === 'object') {
+    if (
+      error?.response?.data &&
+      typeof error.response.data === 'object' &&
+      Object.keys(error.response.data).length > 0
+    ) {
       const errorMessages = error.response.data;
       setErrors(errorMessages);
-      if (errorMessages.__all__) {
-        setErrorMessage(errorMessages.__all__);
-      } else if (errorMessages.detail) {
-        setErrorMessage(errorMessages.detail);
-      } else if (errorMessages.resources_needed_to_start) {
-        setErrorMessage(errorMessages.resources_needed_to_start);
-      } else {
-        setErrorMessage(null);
-      }
+
+      let messages = [];
+      Object.values(error.response.data).forEach(value => {
+        if (Array.isArray(value)) {
+          messages = messages.concat(value);
+        } else {
+          messages.push(value);
+        }
+      });
+      setErrorMessage(messages.length > 0 ? messages : null);
     } else {
       /* eslint-disable-next-line no-console */
       console.error(error);

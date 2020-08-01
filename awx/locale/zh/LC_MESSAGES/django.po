@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-14 19:56+0000\n"
+"POT-Creation-Date: 2020-05-28 21:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,7 +89,7 @@ msgstr "未授权用户重定向到的登录 URL。如果为空，则会将用�
 
 #: awx/api/exceptions.py:20
 msgid "Resource is being used by running jobs."
-msgstr "运行的任务正在使用资源。"
+msgstr "运行的作业正在使用资源。"
 
 #: awx/api/fields.py:81
 #, python-brace-format
@@ -117,72 +117,74 @@ msgstr "不允许对 %s 进行过滤。"
 msgid "Loops not allowed in filters, detected on field {}."
 msgstr "过滤器中不允许使用循环，在字段 {} 上检测到。"
 
-#: awx/api/filters.py:145
+#: awx/api/filters.py:160
 msgid "Query string field name not provided."
 msgstr "没有提供查询字符串字段名称。"
 
-#: awx/api/filters.py:172
+#: awx/api/filters.py:192
 #, python-brace-format
 msgid "Invalid {field_name} id: {field_id}"
 msgstr "无效的 {field_name} ID：{field_id}"
 
-#: awx/api/filters.py:304
+#: awx/api/filters.py:333
 msgid ""
 "Cannot apply role_level filter to this list because its model does not use "
 "roles for access control."
 msgstr "无法将 role_level 过滤器应用到此列表，因为其模型不使用角色来进行访问控制。"
 
-#: awx/api/generics.py:177
+#: awx/api/generics.py:182
 msgid ""
 "You did not use correct Content-Type in your HTTP request. If you are using "
 "our REST API, the Content-Type must be application/json"
 msgstr "您没有在 HTTP 请求中使用正确的 Content-Type。如果您使用的是 REST API，Content-Type 必须是 application/json"
 
-#: awx/api/generics.py:604 awx/api/generics.py:666
+#: awx/api/generics.py:623 awx/api/generics.py:685
 msgid "\"id\" field must be an integer."
 msgstr "“id”字段必须是整数。"
 
-#: awx/api/generics.py:663
+#: awx/api/generics.py:682
 msgid "\"id\" is required to disassociate"
 msgstr "需要“id”才能解除关联"
 
-#: awx/api/generics.py:714
+#: awx/api/generics.py:733
 msgid "{} 'id' field is missing."
 msgstr "{} 'id' 字段缺失。"
 
-#: awx/api/metadata.py:56
+#: awx/api/metadata.py:58
 msgid "Database ID for this {}."
 msgstr "此 {} 的数据库 ID。"
 
-#: awx/api/metadata.py:57
+#: awx/api/metadata.py:59
 msgid "Name of this {}."
 msgstr "此 {} 的名称。"
 
-#: awx/api/metadata.py:58
+#: awx/api/metadata.py:60
 msgid "Optional description of this {}."
 msgstr "此 {} 的可选描述。"
 
-#: awx/api/metadata.py:59
+#: awx/api/metadata.py:61
 msgid "Data type for this {}."
 msgstr "此 {} 的数据类型。"
 
-#: awx/api/metadata.py:60
+#: awx/api/metadata.py:62
 msgid "URL for this {}."
 msgstr "此 {} 的 URL。"
 
-#: awx/api/metadata.py:61
+#: awx/api/metadata.py:63
 msgid "Data structure with URLs of related resources."
 msgstr "包含相关资源的 URL 的数据结构。"
 
-#: awx/api/metadata.py:62
-msgid "Data structure with name/description for related resources."
-msgstr "包含相关资源的名称/描述的数据结构。"
+#: awx/api/metadata.py:64
+msgid ""
+"Data structure with name/description for related resources.  The output for "
+"some objects may be limited for performance reasons."
+msgstr "相关资源的名称/描述的数据结构。由于性能的原因，一些对象的输出可能会有所限制。"
 
-#: awx/api/metadata.py:63
+#: awx/api/metadata.py:66
 msgid "Timestamp when this {} was created."
 msgstr "创建此 {} 时的时间戳。"
 
-#: awx/api/metadata.py:64
+#: awx/api/metadata.py:67
 msgid "Timestamp when this {} was last modified."
 msgstr "最后一次修改 {} 时的时间戳。"
 
@@ -197,867 +199,870 @@ msgid ""
 "Possible cause: trailing comma."
 msgstr "JSON 解析错误 - %s 可能的原因：结尾逗号。"
 
-#: awx/api/serializers.py:174
+#: awx/api/serializers.py:169
 msgid ""
 "The original object is already named {}, a copy from it cannot have the same "
 "name."
 msgstr "原始对象已经命名为 {}，从中复制的对象不能有相同的名称。"
 
-#: awx/api/serializers.py:307
+#: awx/api/serializers.py:302
 #, python-format
 msgid "Cannot use dictionary for %s"
 msgstr "无法将字典用于 %s"
 
-#: awx/api/serializers.py:321
+#: awx/api/serializers.py:316
 msgid "Playbook Run"
 msgstr "Playbook 运行"
 
-#: awx/api/serializers.py:322
+#: awx/api/serializers.py:317
 msgid "Command"
 msgstr "命令"
 
-#: awx/api/serializers.py:323 awx/main/models/unified_jobs.py:537
+#: awx/api/serializers.py:318 awx/main/models/unified_jobs.py:547
 msgid "SCM Update"
 msgstr "SCM 更新"
 
-#: awx/api/serializers.py:324
+#: awx/api/serializers.py:319
 msgid "Inventory Sync"
 msgstr "清单同步"
 
-#: awx/api/serializers.py:325
+#: awx/api/serializers.py:320
 msgid "Management Job"
-msgstr "管理任务"
+msgstr "管理作业"
 
-#: awx/api/serializers.py:326
+#: awx/api/serializers.py:321
 msgid "Workflow Job"
-msgstr "工作流任务"
+msgstr "工作流作业"
 
-#: awx/api/serializers.py:327
+#: awx/api/serializers.py:322
 msgid "Workflow Template"
 msgstr "工作流模板"
 
-#: awx/api/serializers.py:328
+#: awx/api/serializers.py:323
 msgid "Job Template"
-msgstr "任务模板"
+msgstr "作业模板"
 
-#: awx/api/serializers.py:713
+#: awx/api/serializers.py:709
 msgid ""
 "Indicates whether all of the events generated by this unified job have been "
 "saved to the database."
-msgstr "表明该统一任务生成的所有事件是否已保存到数据库中。"
+msgstr "表明该统一作业生成的所有事件是否已保存到数据库中。"
 
-#: awx/api/serializers.py:882
+#: awx/api/serializers.py:878
 msgid "Write-only field used to change the password."
 msgstr "用于更改密码只写字段。"
 
-#: awx/api/serializers.py:884
+#: awx/api/serializers.py:880
 msgid "Set if the account is managed by an external service"
 msgstr "设定帐户是否由外部服务管理"
 
-#: awx/api/serializers.py:908
+#: awx/api/serializers.py:907
 msgid "Password required for new User."
 msgstr "新用户需要密码。"
 
-#: awx/api/serializers.py:993
+#: awx/api/serializers.py:992
 #, python-format
 msgid "Unable to change %s on user managed by LDAP."
 msgstr "无法对 LDAP 管理的用户更改 %s。"
 
-#: awx/api/serializers.py:1089
+#: awx/api/serializers.py:1088
 msgid "Must be a simple space-separated string with allowed scopes {}."
 msgstr "必须是一个使用允许范围 {} 的以空格分隔的简单字符串。"
 
-#: awx/api/serializers.py:1187
+#: awx/api/serializers.py:1186
 msgid "Authorization Grant Type"
 msgstr "授权授予类型"
 
-#: awx/api/serializers.py:1189 awx/main/credential_plugins/azure_kv.py:20
-#: awx/main/models/credential/__init__.py:959
+#: awx/api/serializers.py:1188 awx/main/credential_plugins/azure_kv.py:30
+#: awx/main/models/credential/__init__.py:960
 msgid "Client Secret"
 msgstr "客户端机密"
 
-#: awx/api/serializers.py:1192
+#: awx/api/serializers.py:1191
 msgid "Client Type"
 msgstr "客户端类型"
 
-#: awx/api/serializers.py:1195
+#: awx/api/serializers.py:1194
 msgid "Redirect URIs"
 msgstr "重定向 URI"
 
-#: awx/api/serializers.py:1198
+#: awx/api/serializers.py:1197
 msgid "Skip Authorization"
 msgstr "跳过授权"
 
-#: awx/api/serializers.py:1295
+#: awx/api/serializers.py:1303
 msgid "Cannot change max_hosts."
 msgstr "无法更改 max_hosts。"
 
-#: awx/api/serializers.py:1328
+#: awx/api/serializers.py:1336
 msgid "This path is already being used by another manual project."
 msgstr "此路径已经被另一个手动项目使用。"
 
-#: awx/api/serializers.py:1330
+#: awx/api/serializers.py:1338
 msgid "SCM refspec can only be used with git projects."
 msgstr "SCM refspec 只能用于 git 项目。"
 
-#: awx/api/serializers.py:1413
+#: awx/api/serializers.py:1415
 msgid ""
 "One or more job templates depend on branch override behavior for this "
 "project (ids: {})."
-msgstr "一个或多个任务模板依赖于此项目的分支覆写行为（ids：{}）。"
+msgstr "一个或多个作业模板依赖于此项目的分支覆写行为（ids：{}）。"
 
-#: awx/api/serializers.py:1420
-msgid "Organization is missing"
-msgstr "缺少机构"
-
-#: awx/api/serializers.py:1424
+#: awx/api/serializers.py:1422
 msgid "Update options must be set to false for manual projects."
 msgstr "手动项目必须将更新选项设置为 false。"
 
-#: awx/api/serializers.py:1430
+#: awx/api/serializers.py:1428
 msgid "Array of playbooks available within this project."
 msgstr "此项目中可用的 playbook 数组。"
 
-#: awx/api/serializers.py:1449
+#: awx/api/serializers.py:1447
 msgid ""
 "Array of inventory files and directories available within this project, not "
 "comprehensive."
 msgstr "此项目中可用的清单文件和目录数组，不全面。"
 
-#: awx/api/serializers.py:1497 awx/api/serializers.py:3037
-#: awx/api/serializers.py:3249
+#: awx/api/serializers.py:1495 awx/api/serializers.py:3048
+#: awx/api/serializers.py:3260
 msgid "A count of hosts uniquely assigned to each status."
 msgstr "分配给每个状态的唯一主机数量。"
 
-#: awx/api/serializers.py:1500 awx/api/serializers.py:3040
+#: awx/api/serializers.py:1498 awx/api/serializers.py:3051
 msgid "A count of all plays and tasks for the job run."
-msgstr "任务运行中的所有 play 和任务数量。"
+msgstr "作业运行中的所有 play 和作业数量。"
 
-#: awx/api/serializers.py:1554 awx/api/serializers.py:1774
-msgid "This field has been deprecated and will be removed in a future release"
-msgstr "此字段已弃用，并将在以后的发行版本中删除。"
-
-#: awx/api/serializers.py:1632
+#: awx/api/serializers.py:1625
 msgid "Smart inventories must specify host_filter"
 msgstr "智能清单必须指定 host_filter"
 
-#: awx/api/serializers.py:1717
+#: awx/api/serializers.py:1713
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr "无效的端口规格：%s"
 
-#: awx/api/serializers.py:1728
+#: awx/api/serializers.py:1724
 msgid "Cannot create Host for Smart Inventory"
 msgstr "无法为智能清单创建主机"
 
-#: awx/api/serializers.py:1811
+#: awx/api/serializers.py:1808
 msgid "Invalid group name."
 msgstr "无效的组名称。"
 
-#: awx/api/serializers.py:1816
+#: awx/api/serializers.py:1813
 msgid "Cannot create Group for Smart Inventory"
 msgstr "无法为智能清单创建组"
 
-#: awx/api/serializers.py:1891
+#: awx/api/serializers.py:1888
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr "脚本必须以 hashbang 序列开头：即... #!/usr/bin/env python"
 
-#: awx/api/serializers.py:1920
+#: awx/api/serializers.py:1917
 msgid "Cloud credential to use for inventory updates."
 msgstr "用于库存更新的云凭证。"
 
-#: awx/api/serializers.py:1941
+#: awx/api/serializers.py:1938
 msgid "`{}` is a prohibited environment variable"
 msgstr "`{}` 是禁止的环境变量"
 
-#: awx/api/serializers.py:1952
+#: awx/api/serializers.py:1949
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr "如果 'source' 是 'custom'，则必须提供 'source_script'。"
 
-#: awx/api/serializers.py:1958
+#: awx/api/serializers.py:1955
 msgid "Must provide an inventory."
 msgstr "必须提供清单。"
 
-#: awx/api/serializers.py:1962
+#: awx/api/serializers.py:1959
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr "'source_script' 与清单不属于同一机构。"
 
-#: awx/api/serializers.py:1964
+#: awx/api/serializers.py:1961
 msgid "'source_script' doesn't exist."
 msgstr "'source_script' 不存在。"
 
-#: awx/api/serializers.py:2071
+#: awx/api/serializers.py:2063
 msgid "Cannot use manual project for SCM-based inventory."
 msgstr "无法在基于 SCM 的清单中使用手动项目。"
 
-#: awx/api/serializers.py:2076
+#: awx/api/serializers.py:2068
 msgid "Setting not compatible with existing schedules."
 msgstr "设置与现有计划不兼容。"
 
-#: awx/api/serializers.py:2081
+#: awx/api/serializers.py:2073
 msgid "Cannot create Inventory Source for Smart Inventory"
 msgstr "无法为智能清单创建清单源"
 
-#: awx/api/serializers.py:2132
+#: awx/api/serializers.py:2121
+msgid "Project required for scm type sources."
+msgstr "scm 类型源所需的项目。"
+
+#: awx/api/serializers.py:2130
 #, python-format
 msgid "Cannot set %s if not SCM type."
 msgstr "如果不是 SCM 类型，则无法设置 %s。"
 
-#: awx/api/serializers.py:2202
+#: awx/api/serializers.py:2200
 msgid "The project used for this job."
-msgstr "用于此任务的项目。"
+msgstr "用于此作业的项目。"
 
-#: awx/api/serializers.py:2457
+#: awx/api/serializers.py:2455
 msgid "Modifications not allowed for managed credential types"
 msgstr "不允许对受管凭证类型进行修改"
 
-#: awx/api/serializers.py:2462
+#: awx/api/serializers.py:2467
 msgid ""
 "Modifications to inputs are not allowed for credential types that are in use"
 msgstr "对于正在使用的凭证类型，不允许对输入进行修改"
 
-#: awx/api/serializers.py:2468
+#: awx/api/serializers.py:2472
 #, python-format
 msgid "Must be 'cloud' or 'net', not %s"
 msgstr "必须为 'cloud' 或 'net'，不能为 %s"
 
-#: awx/api/serializers.py:2474
+#: awx/api/serializers.py:2478
 msgid "'ask_at_runtime' is not supported for custom credentials."
 msgstr "自定义凭证不支持 'ask_at_runtime'。"
 
-#: awx/api/serializers.py:2522
+#: awx/api/serializers.py:2526
 msgid "Credential Type"
 msgstr "凭证类型"
 
-#: awx/api/serializers.py:2603
+#: awx/api/serializers.py:2607
 msgid ""
 "You cannot change the credential type of the credential, as it may break the "
 "functionality of the resources using it."
 msgstr "您无法更改凭证的凭证类型，因为它可能会破坏使用该凭证的资源的功能。"
 
-#: awx/api/serializers.py:2615
+#: awx/api/serializers.py:2619
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
 msgstr "用于将用户添加到所有者角色的只写字段。如果提供，则不给出团队或机构。只在创建时有效。"
 
-#: awx/api/serializers.py:2620
+#: awx/api/serializers.py:2624
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
 msgstr "用于将团队添加到所有者角色的只写字段。如果提供，则不给出用户或机构。只在创建时有效。"
 
-#: awx/api/serializers.py:2625
+#: awx/api/serializers.py:2629
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not "
 "give either user or team."
 msgstr "从机构角色继承权限。如果在创建时提供，则不给出用户或团队。"
 
-#: awx/api/serializers.py:2641
+#: awx/api/serializers.py:2645
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr "缺少 'user' 、'team' 或 'organization'。"
 
-#: awx/api/serializers.py:2658
+#: awx/api/serializers.py:2662
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr "在分配给团队之前，必须设置凭证机构并匹配"
 
-#: awx/api/serializers.py:2786
+#: awx/api/serializers.py:2793
 msgid "This field is required."
 msgstr "此字段是必需的。"
 
-#: awx/api/serializers.py:2795
+#: awx/api/serializers.py:2802
 msgid "Playbook not found for project."
 msgstr "未找到用于项目的 playbook。"
 
-#: awx/api/serializers.py:2797
+#: awx/api/serializers.py:2804
 msgid "Must select playbook for project."
 msgstr "必须为项目选择 playbook。"
 
-#: awx/api/serializers.py:2799 awx/api/serializers.py:2801
+#: awx/api/serializers.py:2806 awx/api/serializers.py:2808
 msgid "Project does not allow overriding branch."
 msgstr "项目不允许覆写分支。"
 
-#: awx/api/serializers.py:2838
+#: awx/api/serializers.py:2845
 msgid "Must be a Personal Access Token."
 msgstr "必须是一个个人访问令牌。"
 
-#: awx/api/serializers.py:2841
+#: awx/api/serializers.py:2848
 msgid "Must match the selected webhook service."
 msgstr "必须与所选 Webhook 服务匹配。"
 
-#: awx/api/serializers.py:2908
+#: awx/api/serializers.py:2919
 msgid "Cannot enable provisioning callback without an inventory set."
 msgstr "无法在没有清单集的情况下启用部署回调。"
 
-#: awx/api/serializers.py:2911
+#: awx/api/serializers.py:2922
 msgid "Must either set a default value or ask to prompt on launch."
 msgstr "必须设置默认值或要求启动时提示。"
 
-#: awx/api/serializers.py:2913 awx/main/models/jobs.py:289
+#: awx/api/serializers.py:2924 awx/main/models/jobs.py:299
 msgid "Job Templates must have a project assigned."
-msgstr "任务模板必须分配有一个项目。"
+msgstr "作业模板必须分配有一个项目。"
 
-#: awx/api/serializers.py:3081
+#: awx/api/serializers.py:3092
 msgid "No change to job limit"
-msgstr "任务限制没有发生改变"
+msgstr "作业限制没有发生改变"
 
-#: awx/api/serializers.py:3082
+#: awx/api/serializers.py:3093
 msgid "All failed and unreachable hosts"
 msgstr "所有失败且无法访问的主机"
 
-#: awx/api/serializers.py:3097
+#: awx/api/serializers.py:3108
 msgid "Missing passwords needed to start: {}"
 msgstr "缺少启动时所需的密码：{}"
 
-#: awx/api/serializers.py:3116
+#: awx/api/serializers.py:3127
 msgid "Relaunch by host status not available until job finishes running."
-msgstr "在任务结束运行前，按主机状态重新启动不可用。"
+msgstr "在作业结束运行前，按主机状态重新启动不可用。"
 
-#: awx/api/serializers.py:3130
+#: awx/api/serializers.py:3141
 msgid "Job Template Project is missing or undefined."
-msgstr "任务模板项目缺失或未定义。"
+msgstr "作业模板项目缺失或未定义。"
 
-#: awx/api/serializers.py:3132
+#: awx/api/serializers.py:3143
 msgid "Job Template Inventory is missing or undefined."
-msgstr "任务模板清单缺失或未定义。"
+msgstr "作业模板清单缺失或未定义。"
 
-#: awx/api/serializers.py:3170
+#: awx/api/serializers.py:3181
 msgid "Unknown, job may have been ran before launch configurations were saved."
-msgstr "未知，在保存启动配置前任务可能已经运行。"
+msgstr "未知，在保存启动配置前作业可能已经运行。"
 
-#: awx/api/serializers.py:3241 awx/main/tasks.py:2691 awx/main/tasks.py:2709
+#: awx/api/serializers.py:3252 awx/main/tasks.py:2800 awx/main/tasks.py:2818
 msgid "{} are prohibited from use in ad hoc commands."
 msgstr "{} 被禁止在临时命令中使用。"
 
-#: awx/api/serializers.py:3329 awx/api/views/__init__.py:4250
+#: awx/api/serializers.py:3340 awx/api/views/__init__.py:4243
 #, python-brace-format
 msgid ""
 "Standard Output too large to display ({text_size} bytes), only download "
 "supported for sizes over {supported_size} bytes."
 msgstr "标准输出太大，无法显示（{text_size} 字节），超过 {supported_size} 字节的大小只支持下载。"
 
-#: awx/api/serializers.py:3638
+#: awx/api/serializers.py:3653
 msgid "Provided variable {} has no database value to replace with."
 msgstr "提供的变量 {} 没有要替换的数据库值。"
 
-#: awx/api/serializers.py:3656
-#, python-brace-format
-msgid "\"$encrypted$ is a reserved keyword, may not be used for {var_name}.\""
-msgstr "\"$encrypted$ 是一个保留关键字，可能无法用于 {var_name}。\""
+#: awx/api/serializers.py:3671
+msgid "\"$encrypted$ is a reserved keyword, may not be used for {}.\""
+msgstr "\"$encrypted$ 是一个保留的关键字，可能不能用于 {}\""
 
-#: awx/api/serializers.py:4157
+#: awx/api/serializers.py:4078
+msgid "A project is required to run a job."
+msgstr "运行一个作业时需要一个项目。"
+
+#: awx/api/serializers.py:4080
+msgid "Missing a revision to run due to failed project update."
+msgstr "由于项目更新失败，缺少运行的修订版本。"
+
+#: awx/api/serializers.py:4084
 msgid "The inventory associated with this Job Template is being deleted."
-msgstr "与此任务模板关联的清单将被删除。"
+msgstr "与此作业模板关联的清单将被删除。"
 
-#: awx/api/serializers.py:4159 awx/api/serializers.py:4275
+#: awx/api/serializers.py:4086 awx/api/serializers.py:4202
 msgid "The provided inventory is being deleted."
 msgstr "提供的清单将被删除。"
 
-#: awx/api/serializers.py:4167
+#: awx/api/serializers.py:4094
 msgid "Cannot assign multiple {} credentials."
 msgstr "无法分配多个 {} 凭证。"
 
-#: awx/api/serializers.py:4171
+#: awx/api/serializers.py:4098
 msgid "Cannot assign a Credential of kind `{}`"
 msgstr "无法分配类型为 `{}` 的凭证"
 
-#: awx/api/serializers.py:4184
+#: awx/api/serializers.py:4111
 msgid ""
 "Removing {} credential at launch time without replacement is not supported. "
 "Provided list lacked credential(s): {}."
 msgstr "不支持在不替换的情况下在启动时删除 {} 凭证。提供的列表缺少凭证：{}。"
 
-#: awx/api/serializers.py:4273
+#: awx/api/serializers.py:4200
 msgid "The inventory associated with this Workflow is being deleted."
 msgstr "与此 Workflow 关联的清单将被删除。"
 
-#: awx/api/serializers.py:4344
+#: awx/api/serializers.py:4271
 msgid "Message type '{}' invalid, must be either 'message' or 'body'"
 msgstr "消息类型 '{}' 无效，必须是 'message' 或 'body'"
 
-#: awx/api/serializers.py:4350
+#: awx/api/serializers.py:4277
 msgid "Expected string for '{}', found {}, "
 msgstr "'{}' 的预期字符串，找到 {}，"
 
-#: awx/api/serializers.py:4354
+#: awx/api/serializers.py:4281
 msgid "Messages cannot contain newlines (found newline in {} event)"
 msgstr "消息不能包含新行（在 {} 事件中找到新行）"
 
-#: awx/api/serializers.py:4360
+#: awx/api/serializers.py:4287
 msgid "Expected dict for 'messages' field, found {}"
 msgstr "'messages' 字段的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4364
+#: awx/api/serializers.py:4291
 msgid ""
 "Event '{}' invalid, must be one of 'started', 'success', 'error', or "
 "'workflow_approval'"
 msgstr "事件 '{}' 无效，必须是 'started'、'success'、'error' 或 'workflow_approval' 之一"
 
-#: awx/api/serializers.py:4370
+#: awx/api/serializers.py:4297
 msgid "Expected dict for event '{}', found {}"
 msgstr "事件 '{}' 的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4375
+#: awx/api/serializers.py:4302
 msgid ""
 "Workflow Approval event '{}' invalid, must be one of 'running', 'approved', "
 "'timed_out', or 'denied'"
 msgstr "工作流批准事件 '{}' 无效，必须是 'running'、'approved'、'timed_out' 或 'denied' 之一。"
 
-#: awx/api/serializers.py:4382
+#: awx/api/serializers.py:4309
 msgid "Expected dict for workflow approval event '{}', found {}"
 msgstr "工作流批准事件 '{}' 的预期字典，找到 {}"
 
-#: awx/api/serializers.py:4409
+#: awx/api/serializers.py:4336
 msgid "Unable to render message '{}': {}"
 msgstr "无法呈现消息 '{}'：{}"
 
-#: awx/api/serializers.py:4411
+#: awx/api/serializers.py:4338
 msgid "Field '{}' unavailable"
 msgstr "字段 '{}' 不可用"
 
-#: awx/api/serializers.py:4413
+#: awx/api/serializers.py:4340
 msgid "Security error due to field '{}'"
 msgstr "因为字段 '{}' 导致安全错误"
 
-#: awx/api/serializers.py:4433
+#: awx/api/serializers.py:4360
 msgid "Webhook body for '{}' should be a json dictionary. Found type '{}'."
 msgstr "'{}' 的 Webhook 正文应该是 json 字典。找到类型 '{}'。"
 
-#: awx/api/serializers.py:4436
+#: awx/api/serializers.py:4363
 msgid "Webhook body for '{}' is not a valid json dictionary ({})."
 msgstr "'{}' 的 Webhook 正文不是有效的 json 字典 ({})。"
 
-#: awx/api/serializers.py:4454
+#: awx/api/serializers.py:4381
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr "通知配置缺少所需字段：notification_type"
 
-#: awx/api/serializers.py:4481
+#: awx/api/serializers.py:4408
 msgid "No values specified for field '{}'"
 msgstr "没有为字段 '{}' 指定值"
 
-#: awx/api/serializers.py:4486
+#: awx/api/serializers.py:4413
 msgid "HTTP method must be either 'POST' or 'PUT'."
 msgstr "HTTP 方法必须是 'POST' 或 'PUT'。"
 
-#: awx/api/serializers.py:4488
+#: awx/api/serializers.py:4415
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "通知配置缺少所需字段：{}。"
 
-#: awx/api/serializers.py:4491
+#: awx/api/serializers.py:4418
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "配置字段 '{}' 类型错误，预期为 {}。"
 
-#: awx/api/serializers.py:4508
+#: awx/api/serializers.py:4435
 msgid "Notification body"
 msgstr "通知正文"
 
-#: awx/api/serializers.py:4588
+#: awx/api/serializers.py:4515
 msgid ""
 "Valid DTSTART required in rrule. Value should start with: DTSTART:"
 "YYYYMMDDTHHMMSSZ"
 msgstr "rrule 中需要有效的 DTSTART。值应该以 DTSTART:YYYMMDDTHHMMSSZ 开头"
 
-#: awx/api/serializers.py:4590
+#: awx/api/serializers.py:4517
 msgid ""
 "DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ."
 msgstr "DTSTART 不能是一个不带时区的日期时间。指定 ;TZINFO= 或 YYYMMDDTHHMMSSZ。"
 
-#: awx/api/serializers.py:4592
+#: awx/api/serializers.py:4519
 msgid "Multiple DTSTART is not supported."
 msgstr "不支持多个 DTSTART。"
 
-#: awx/api/serializers.py:4594
+#: awx/api/serializers.py:4521
 msgid "RRULE required in rrule."
 msgstr "rrule 中需要 RRULE。"
 
-#: awx/api/serializers.py:4596
+#: awx/api/serializers.py:4523
 msgid "Multiple RRULE is not supported."
 msgstr "不支持多个 RRULE。"
 
-#: awx/api/serializers.py:4598
+#: awx/api/serializers.py:4525
 msgid "INTERVAL required in rrule."
 msgstr "rrule 需要 INTERVAL。"
 
-#: awx/api/serializers.py:4600
+#: awx/api/serializers.py:4527
 msgid "SECONDLY is not supported."
 msgstr "不支持 SECONDLY。"
 
-#: awx/api/serializers.py:4602
+#: awx/api/serializers.py:4529
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "不支持多个 BYMONTHDAY。"
 
-#: awx/api/serializers.py:4604
+#: awx/api/serializers.py:4531
 msgid "Multiple BYMONTHs not supported."
 msgstr "不支持多个 BYMONTH。"
 
-#: awx/api/serializers.py:4606
+#: awx/api/serializers.py:4533
 msgid "BYDAY with numeric prefix not supported."
 msgstr "不支持带有数字前缀的 BYDAY。"
 
-#: awx/api/serializers.py:4608
+#: awx/api/serializers.py:4535
 msgid "BYYEARDAY not supported."
 msgstr "不支持 BYYEARDAY。"
 
-#: awx/api/serializers.py:4610
+#: awx/api/serializers.py:4537
 msgid "BYWEEKNO not supported."
 msgstr "不支持 BYWEEKNO。"
 
-#: awx/api/serializers.py:4612
+#: awx/api/serializers.py:4539
 msgid "RRULE may not contain both COUNT and UNTIL"
 msgstr "RRULE 可能不包含 COUNT 和 UNTIL"
 
-#: awx/api/serializers.py:4616
+#: awx/api/serializers.py:4543
 msgid "COUNT > 999 is unsupported."
 msgstr "不支持 COUNT > 999。"
 
-#: awx/api/serializers.py:4620
+#: awx/api/serializers.py:4549
 msgid "rrule parsing failed validation: {}"
 msgstr "rrule 解析失败验证：{}"
 
-#: awx/api/serializers.py:4682
+#: awx/api/serializers.py:4611
 msgid "Inventory Source must be a cloud resource."
 msgstr "清单源必须是云资源。"
 
-#: awx/api/serializers.py:4684
+#: awx/api/serializers.py:4613
 msgid "Manual Project cannot have a schedule set."
 msgstr "手动项目不能有计划集。"
 
-#: awx/api/serializers.py:4687
+#: awx/api/serializers.py:4616
 msgid ""
 "Inventory sources with `update_on_project_update` cannot be scheduled. "
 "Schedule its source project `{}` instead."
 msgstr "无法调度带有 `update_on_project_update` 的清单源。改为调度其源项目 `{}`。"
 
-#: awx/api/serializers.py:4697
+#: awx/api/serializers.py:4626
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance"
-msgstr "处于运行状态或等待状态的针对此实例的任务计数"
+msgstr "处于运行状态或等待状态的针对此实例的作业计数"
 
-#: awx/api/serializers.py:4702
+#: awx/api/serializers.py:4631
 msgid "Count of all jobs that target this instance"
-msgstr "所有针对此实例的任务计数"
+msgstr "所有针对此实例的作业计数"
 
-#: awx/api/serializers.py:4735
+#: awx/api/serializers.py:4664
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
-msgstr "处于运行状态或等待状态的针对此实例组的任务计数"
+msgstr "处于运行状态或等待状态的针对此实例组的作业计数"
 
-#: awx/api/serializers.py:4740
+#: awx/api/serializers.py:4669
 msgid "Count of all jobs that target this instance group"
-msgstr "所有针对此实例组的任务计数"
+msgstr "所有针对此实例组的作业计数"
 
-#: awx/api/serializers.py:4745
+#: awx/api/serializers.py:4674
 msgid "Indicates whether instance group controls any other group"
 msgstr "指明实例组是否控制任何其他组"
 
-#: awx/api/serializers.py:4749
+#: awx/api/serializers.py:4678
 msgid ""
 "Indicates whether instances in this group are isolated.Isolated groups have "
 "a designated controller group."
 msgstr "指明此组中的实例是否被隔离。隔离的组具有指定的控制器组。"
 
-#: awx/api/serializers.py:4754
+#: awx/api/serializers.py:4683
 msgid ""
 "Indicates whether instances in this group are containerized.Containerized "
 "groups have a designated Openshift or Kubernetes cluster."
 msgstr "指明此组中的实例是否容器化。容器化的组具有指定的 Openshift 或 Kubernetes 集群。"
 
-#: awx/api/serializers.py:4762
+#: awx/api/serializers.py:4691
 msgid "Policy Instance Percentage"
 msgstr "策略实例百分比"
 
-#: awx/api/serializers.py:4763
+#: awx/api/serializers.py:4692
 msgid ""
 "Minimum percentage of all instances that will be automatically assigned to "
 "this group when new instances come online."
 msgstr "新实例上线时将自动分配给此组的所有实例的最小百分比。"
 
-#: awx/api/serializers.py:4768
+#: awx/api/serializers.py:4697
 msgid "Policy Instance Minimum"
 msgstr "策略实例最小值"
 
-#: awx/api/serializers.py:4769
+#: awx/api/serializers.py:4698
 msgid ""
 "Static minimum number of Instances that will be automatically assign to this "
 "group when new instances come online."
 msgstr "新实例上线时自动分配给此组的静态最小实例数量。"
 
-#: awx/api/serializers.py:4774
+#: awx/api/serializers.py:4703
 msgid "Policy Instance List"
 msgstr "策略实例列表"
 
-#: awx/api/serializers.py:4775
+#: awx/api/serializers.py:4704
 msgid "List of exact-match Instances that will be assigned to this group"
 msgstr "将分配给此组的完全匹配实例的列表"
 
-#: awx/api/serializers.py:4801
+#: awx/api/serializers.py:4730
 msgid "Duplicate entry {}."
 msgstr "重复条目 {}。"
 
-#: awx/api/serializers.py:4803
+#: awx/api/serializers.py:4732
 msgid "{} is not a valid hostname of an existing instance."
 msgstr "{} 不是现有实例的有效主机名。"
 
-#: awx/api/serializers.py:4805 awx/api/views/mixin.py:101
+#: awx/api/serializers.py:4734 awx/api/views/mixin.py:98
 msgid ""
 "Isolated instances may not be added or removed from instances groups via the "
 "API."
 msgstr "可能无法通过 API 为实例组添加或删除隔离的实例。"
 
-#: awx/api/serializers.py:4807 awx/api/views/mixin.py:105
+#: awx/api/serializers.py:4736 awx/api/views/mixin.py:102
 msgid "Isolated instance group membership may not be managed via the API."
 msgstr "可能无法通过 API 管理隔离的实例组成员资格。"
 
-#: awx/api/serializers.py:4809 awx/api/serializers.py:4814
-#: awx/api/serializers.py:4819
+#: awx/api/serializers.py:4738 awx/api/serializers.py:4743
+#: awx/api/serializers.py:4748
 msgid "Containerized instances may not be managed via the API"
 msgstr "可能无法通过 API 管理容器化实例"
 
-#: awx/api/serializers.py:4824
+#: awx/api/serializers.py:4753
 msgid "tower instance group name may not be changed."
 msgstr "可能不会更改 tower 实例组名称。"
 
-#: awx/api/serializers.py:4829
+#: awx/api/serializers.py:4758
 msgid "Only Kubernetes credentials can be associated with an Instance Group"
 msgstr "只有 Kubernetes 凭证可以与实例组关联"
 
-#: awx/api/serializers.py:4868
+#: awx/api/serializers.py:4797
 msgid ""
 "When present, shows the field name of the role or relationship that changed."
 msgstr "存在时，显示更改的角色或关系的字段名称。"
 
-#: awx/api/serializers.py:4870
+#: awx/api/serializers.py:4799
 msgid ""
 "When present, shows the model on which the role or relationship was defined."
 msgstr "存在时，显示定义角色或关系的模型。"
 
-#: awx/api/serializers.py:4903
+#: awx/api/serializers.py:4832
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "创建、更新或删除对象时新值和更改值的概述"
 
-#: awx/api/serializers.py:4905
+#: awx/api/serializers.py:4834
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr "对于创建、更新和删除事件，这是受影响的对象类型。对于关联和解除关联事件，这是与对象 2 关联或解除关联的对象类型。"
 
-#: awx/api/serializers.py:4908
+#: awx/api/serializers.py:4837
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr "创建、更新和删除事件未填充。对于关联和解除关联事件，这是对象 1 要关联的对象类型。"
 
-#: awx/api/serializers.py:4911
+#: awx/api/serializers.py:4840
 msgid "The action taken with respect to the given object(s)."
 msgstr "对给定对象执行的操作。"
 
-#: awx/api/views/__init__.py:180
+#: awx/api/views/__init__.py:181
 msgid "Dashboard"
 msgstr "仪表板"
 
-#: awx/api/views/__init__.py:275
+#: awx/api/views/__init__.py:271
 msgid "Dashboard Jobs Graphs"
-msgstr "仪表板任务图形"
+msgstr "仪表板作业图形"
 
-#: awx/api/views/__init__.py:311
+#: awx/api/views/__init__.py:307
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr "未知时期 \"%s\""
 
-#: awx/api/views/__init__.py:325
+#: awx/api/views/__init__.py:321
 msgid "Instances"
 msgstr "实例"
 
-#: awx/api/views/__init__.py:333
+#: awx/api/views/__init__.py:329
 msgid "Instance Detail"
 msgstr "实例详情"
 
-#: awx/api/views/__init__.py:350
+#: awx/api/views/__init__.py:346
 msgid "Instance Jobs"
-msgstr "实例任务"
+msgstr "实例作业"
 
-#: awx/api/views/__init__.py:364
+#: awx/api/views/__init__.py:360
 msgid "Instance's Instance Groups"
 msgstr "实例的实例组"
 
-#: awx/api/views/__init__.py:373
+#: awx/api/views/__init__.py:369
 msgid "Instance Groups"
 msgstr "实例组"
 
-#: awx/api/views/__init__.py:381
+#: awx/api/views/__init__.py:377
 msgid "Instance Group Detail"
 msgstr "实例组详情"
 
-#: awx/api/views/__init__.py:396
+#: awx/api/views/__init__.py:392
 msgid "Isolated Groups can not be removed from the API"
 msgstr "无法从 API 中删除隔离的组"
 
-#: awx/api/views/__init__.py:398
+#: awx/api/views/__init__.py:394
 msgid ""
 "Instance Groups acting as a controller for an Isolated Group can not be "
 "removed from the API"
 msgstr "无法从 API 中删除作为隔离组控制器的实例组"
 
-#: awx/api/views/__init__.py:404
+#: awx/api/views/__init__.py:400
 msgid "Instance Group Running Jobs"
-msgstr "实例组的运行任务"
+msgstr "实例组的运行作业"
 
-#: awx/api/views/__init__.py:413
+#: awx/api/views/__init__.py:409
 msgid "Instance Group's Instances"
 msgstr "实例组的实例"
 
-#: awx/api/views/__init__.py:423
+#: awx/api/views/__init__.py:419
 msgid "Schedules"
 msgstr "计划"
 
-#: awx/api/views/__init__.py:437
+#: awx/api/views/__init__.py:433
 msgid "Schedule Recurrence Rule Preview"
 msgstr "计划重复规则预览"
 
-#: awx/api/views/__init__.py:484
+#: awx/api/views/__init__.py:480
 msgid "Cannot assign credential when related template is null."
 msgstr "当相关模板为 null 时无法分配凭证。"
 
-#: awx/api/views/__init__.py:489
+#: awx/api/views/__init__.py:485
 msgid "Related template cannot accept {} on launch."
 msgstr "相关的模板无法在启动时接受 {}。"
 
-#: awx/api/views/__init__.py:491
+#: awx/api/views/__init__.py:487
 msgid ""
 "Credential that requires user input on launch cannot be used in saved launch "
 "configuration."
 msgstr "在启动时需要用户输入的凭证不能用于保存的启动配置。"
 
-#: awx/api/views/__init__.py:497
+#: awx/api/views/__init__.py:493
 msgid "Related template is not configured to accept credentials on launch."
 msgstr "相关的模板未配置为在启动时接受凭证。"
 
-#: awx/api/views/__init__.py:499
+#: awx/api/views/__init__.py:495
 #, python-brace-format
 msgid ""
 "This launch configuration already provides a {credential_type} credential."
 msgstr "此启动配置已经提供了 {credential_type} 凭证。"
 
-#: awx/api/views/__init__.py:502
+#: awx/api/views/__init__.py:498
 #, python-brace-format
 msgid "Related template already uses {credential_type} credential."
 msgstr "相关的模板已使用 {credential_type} 凭证。"
 
-#: awx/api/views/__init__.py:520
+#: awx/api/views/__init__.py:516
 msgid "Schedule Jobs List"
-msgstr "计划任务列表"
+msgstr "调度作业列表"
 
-#: awx/api/views/__init__.py:603 awx/api/views/__init__.py:4459
+#: awx/api/views/__init__.py:600 awx/api/views/__init__.py:4452
 msgid ""
 "You cannot assign an Organization participation role as a child role for a "
 "Team."
 msgstr "您不能分配机构参与角色作为团队的子角色。"
 
-#: awx/api/views/__init__.py:607 awx/api/views/__init__.py:4473
+#: awx/api/views/__init__.py:604 awx/api/views/__init__.py:4466
 msgid "You cannot grant system-level permissions to a team."
 msgstr "您不能为团队授予系统级别权限。"
 
-#: awx/api/views/__init__.py:614 awx/api/views/__init__.py:4465
+#: awx/api/views/__init__.py:611 awx/api/views/__init__.py:4458
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr "您不能在机构字段未设置或属于不同机构时为团队授予凭证访问权限"
 
-#: awx/api/views/__init__.py:716
+#: awx/api/views/__init__.py:713
 msgid "Project Schedules"
 msgstr "项目计划"
 
-#: awx/api/views/__init__.py:727
+#: awx/api/views/__init__.py:724
 msgid "Project SCM Inventory Sources"
 msgstr "项目 SCM 清单源"
 
-#: awx/api/views/__init__.py:828
+#: awx/api/views/__init__.py:825
 msgid "Project Update Events List"
 msgstr "项目更新事件列表"
 
-#: awx/api/views/__init__.py:842
+#: awx/api/views/__init__.py:839
 msgid "System Job Events List"
-msgstr "系统任务事件列表"
+msgstr "系统作业事件列表"
 
-#: awx/api/views/__init__.py:876
+#: awx/api/views/__init__.py:873
 msgid "Project Update SCM Inventory Updates"
 msgstr "项目更新 SCM 清单更新"
 
-#: awx/api/views/__init__.py:920
+#: awx/api/views/__init__.py:918
 msgid "Me"
 msgstr "我"
 
-#: awx/api/views/__init__.py:928
+#: awx/api/views/__init__.py:927
 msgid "OAuth 2 Applications"
 msgstr "OAuth 2 应用"
 
-#: awx/api/views/__init__.py:937
+#: awx/api/views/__init__.py:936
 msgid "OAuth 2 Application Detail"
 msgstr "OAuth 2 应用详情"
 
-#: awx/api/views/__init__.py:950
+#: awx/api/views/__init__.py:949
 msgid "OAuth 2 Application Tokens"
 msgstr "OAuth 2 应用令牌"
 
-#: awx/api/views/__init__.py:972
+#: awx/api/views/__init__.py:971
 msgid "OAuth2 Tokens"
 msgstr "OAuth2 令牌"
 
-#: awx/api/views/__init__.py:981
+#: awx/api/views/__init__.py:980
 msgid "OAuth2 User Tokens"
 msgstr "OAuth2 用户令牌"
 
-#: awx/api/views/__init__.py:993
+#: awx/api/views/__init__.py:992
 msgid "OAuth2 User Authorized Access Tokens"
 msgstr "OAuth2 用户授权访问令牌"
 
-#: awx/api/views/__init__.py:1008
+#: awx/api/views/__init__.py:1007
 msgid "Organization OAuth2 Applications"
 msgstr "机构 OAuth2 应用"
 
-#: awx/api/views/__init__.py:1020
+#: awx/api/views/__init__.py:1019
 msgid "OAuth2 Personal Access Tokens"
 msgstr "OAuth2 个人访问令牌"
 
-#: awx/api/views/__init__.py:1035
+#: awx/api/views/__init__.py:1034
 msgid "OAuth Token Detail"
 msgstr "OAuth 令牌详情"
 
-#: awx/api/views/__init__.py:1097 awx/api/views/__init__.py:4426
+#: awx/api/views/__init__.py:1096 awx/api/views/__init__.py:4419
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr "您不能为不在凭证机构中的用户授予凭证访问权限"
 
-#: awx/api/views/__init__.py:1101 awx/api/views/__init__.py:4430
+#: awx/api/views/__init__.py:1100 awx/api/views/__init__.py:4423
 msgid "You cannot grant private credential access to another user"
 msgstr "您不能为其他用户授予私有凭证访问权限"
 
-#: awx/api/views/__init__.py:1199
+#: awx/api/views/__init__.py:1198
 #, python-format
 msgid "Cannot change %s."
 msgstr "无法更改 %s。"
 
-#: awx/api/views/__init__.py:1205
+#: awx/api/views/__init__.py:1204
 msgid "Cannot delete user."
 msgstr "无法删除用户。"
 
-#: awx/api/views/__init__.py:1229
+#: awx/api/views/__init__.py:1228
 msgid "Deletion not allowed for managed credential types"
 msgstr "不允许删除受管凭证类型"
 
-#: awx/api/views/__init__.py:1231
+#: awx/api/views/__init__.py:1230
 msgid "Credential types that are in use cannot be deleted"
 msgstr "无法删除正在使用中的凭证类型"
 
@@ -1065,317 +1070,317 @@ msgstr "无法删除正在使用中的凭证类型"
 msgid "External Credential Test"
 msgstr "外部凭证测试"
 
-#: awx/api/views/__init__.py:1407
+#: awx/api/views/__init__.py:1408
 msgid "Credential Input Source Detail"
 msgstr "凭证输入源详情"
 
-#: awx/api/views/__init__.py:1415 awx/api/views/__init__.py:1423
+#: awx/api/views/__init__.py:1416 awx/api/views/__init__.py:1424
 msgid "Credential Input Sources"
 msgstr "凭证输入源"
 
-#: awx/api/views/__init__.py:1438
+#: awx/api/views/__init__.py:1439
 msgid "External Credential Type Test"
 msgstr "外部凭证类型测试"
 
-#: awx/api/views/__init__.py:1496
+#: awx/api/views/__init__.py:1497
 msgid "The inventory for this host is already being deleted."
 msgstr "此主机的清单已经被删除。"
 
-#: awx/api/views/__init__.py:1612
+#: awx/api/views/__init__.py:1614
 msgid "SSLError while trying to connect to {}"
 msgstr "尝试连接到 {} 时出现 SSLError"
 
-#: awx/api/views/__init__.py:1614
+#: awx/api/views/__init__.py:1616
 msgid "Request to {} timed out."
 msgstr "请求 {} 超时。"
 
-#: awx/api/views/__init__.py:1616
+#: awx/api/views/__init__.py:1618
 msgid "Unknown exception {} while trying to GET {}"
 msgstr "尝试 GET {} 时出现未知异常 {}"
 
-#: awx/api/views/__init__.py:1620
+#: awx/api/views/__init__.py:1622
 msgid ""
 "Unauthorized access. Please check your Insights Credential username and "
 "password."
 msgstr "未授权访问。请检查您的 Insights 用户名和密码。"
 
-#: awx/api/views/__init__.py:1624
+#: awx/api/views/__init__.py:1626
 msgid ""
 "Failed to access the Insights API at URL {}. Server responded with {} status "
 "code and message {}"
 msgstr "无法通过 URL {} 访问 Insights API。服务器以 {} 状态代码和消息 {} 作为响应"
 
-#: awx/api/views/__init__.py:1633
+#: awx/api/views/__init__.py:1635
 msgid "Expected JSON response from Insights at URL {} but instead got {}"
 msgstr "访问 URL {} 时来自 Insights 的预期 JSON 响应，但实际为 {}"
 
-#: awx/api/views/__init__.py:1663
+#: awx/api/views/__init__.py:1653
 msgid "Could not translate Insights system ID {} into an Insights platform ID."
 msgstr "无法将 Insights 系统 ID {} 转换为 Insights 平台 ID。"
 
-#: awx/api/views/__init__.py:1705
+#: awx/api/views/__init__.py:1695
 msgid "This host is not recognized as an Insights host."
 msgstr "此主机不被识别为 Insights 主机。"
 
-#: awx/api/views/__init__.py:1713
+#: awx/api/views/__init__.py:1703
 msgid "The Insights Credential for \"{}\" was not found."
 msgstr "未找到 \"{}\" 的 Insights 凭证。"
 
-#: awx/api/views/__init__.py:1792
+#: awx/api/views/__init__.py:1782
 msgid "Cyclical Group association."
 msgstr "周期性组关联。"
 
-#: awx/api/views/__init__.py:1958
+#: awx/api/views/__init__.py:1948
 msgid "Inventory subset argument must be a string."
 msgstr "清单子集参数必须是字符串。"
 
-#: awx/api/views/__init__.py:1962
+#: awx/api/views/__init__.py:1952
 msgid "Subset does not use any supported syntax."
 msgstr "子集未使用任何支持的语法。"
 
-#: awx/api/views/__init__.py:2012
+#: awx/api/views/__init__.py:2002
 msgid "Inventory Source List"
 msgstr "清单源列表"
 
-#: awx/api/views/__init__.py:2024
+#: awx/api/views/__init__.py:2014
 msgid "Inventory Sources Update"
 msgstr "清单源更新"
 
-#: awx/api/views/__init__.py:2057
+#: awx/api/views/__init__.py:2047
 msgid "Could not start because `can_update` returned False"
 msgstr "无法启动，因为 `can_update` 返回 False"
 
-#: awx/api/views/__init__.py:2065
+#: awx/api/views/__init__.py:2055
 msgid "No inventory sources to update."
 msgstr "没有需要更新的清单源。"
 
-#: awx/api/views/__init__.py:2087
+#: awx/api/views/__init__.py:2077
 msgid "Inventory Source Schedules"
 msgstr "清单源计划"
 
-#: awx/api/views/__init__.py:2114
+#: awx/api/views/__init__.py:2104
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr "只有源是 {} 之一时才能分配通知模板。"
 
-#: awx/api/views/__init__.py:2212
+#: awx/api/views/__init__.py:2202
 msgid "Source already has credential assigned."
 msgstr "源已经分配有凭证。"
 
-#: awx/api/views/__init__.py:2360
+#: awx/api/views/__init__.py:2350
 msgid "'credentials' cannot be used in combination with 'extra_credentials'."
 msgstr "'credentials' 无法与 'extra_credentials' 结合使用。"
 
-#: awx/api/views/__init__.py:2378
+#: awx/api/views/__init__.py:2368
 msgid "Incorrect type. Expected a list received {}."
 msgstr "类型不正确。预期为列表，收到的是 {}。"
 
-#: awx/api/views/__init__.py:2476
+#: awx/api/views/__init__.py:2466
 msgid "Job Template Schedules"
-msgstr "任务模板计划"
+msgstr "作业模板计划"
 
-#: awx/api/views/__init__.py:2525
+#: awx/api/views/__init__.py:2515
 msgid "Field '{}' is missing from survey spec."
 msgstr "问卷调查规格中缺少字段 '{}'。"
 
-#: awx/api/views/__init__.py:2527
+#: awx/api/views/__init__.py:2517
 msgid "Expected {} for field '{}', received {} type."
 msgstr "字段 '{}' 预期为 {}，收到的是 {} 类型。"
 
-#: awx/api/views/__init__.py:2531
+#: awx/api/views/__init__.py:2521
 msgid "'spec' doesn't contain any items."
 msgstr "'spec' 不包含任何项。"
 
-#: awx/api/views/__init__.py:2545
+#: awx/api/views/__init__.py:2535
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "问卷调查问题 %s 不是 json 对象。"
 
-#: awx/api/views/__init__.py:2548
+#: awx/api/views/__init__.py:2538
 #, python-brace-format
 msgid "'{field_name}' missing from survey question {idx}"
-msgstr "'{field_name}在问卷调查中缺少 {idx}"
+msgstr "问卷调查问题 {idx} 中缺少 '{field_name}'"
 
-#: awx/api/views/__init__.py:2558
+#: awx/api/views/__init__.py:2548
 #, python-brace-format
 msgid "'{field_name}' in survey question {idx} expected to be {type_label}."
-msgstr "'{field_name}' in survey question {idx} expected to be {type_label}。"
+msgstr "问卷调查问题 {idx} 中的 '{field_name}' 预期为 {type_label}。"
 
-#: awx/api/views/__init__.py:2562
+#: awx/api/views/__init__.py:2552
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
-msgstr "'variable' '%(item)s' duplicated in survey questions %(survey)s。"
+msgstr "问卷调查问题 %(survey)s 中的 'variable' '%(item)s' 重复。"
 
-#: awx/api/views/__init__.py:2572
+#: awx/api/views/__init__.py:2562
 #, python-brace-format
 msgid ""
 "'{survey_item[type]}' in survey question {idx} is not one of "
 "'{allowed_types}' allowed question types."
-msgstr "'{survey_item[type]}' 在问卷调查中 {idx} 不是{allowed_types}' 允许的问题类型之一。"
+msgstr "问卷调查问题 {idx} 中的 '{survey_item[type]}' 不是 '{allowed_types}' 允许的问题类型之一。"
 
-#: awx/api/views/__init__.py:2582
+#: awx/api/views/__init__.py:2572
 #, python-brace-format
 msgid ""
 "Default value {survey_item[default]} in survey question {idx} expected to be "
 "{type_label}."
-msgstr "{idx} 预期 {survey_item[default]} 问卷调查中的默认值为 {type_label}。"
+msgstr "问卷调查问题 {idx} 中的默认值 {survey_item[default]} 预期为 {type_label}。"
+
+#: awx/api/views/__init__.py:2582
+#, python-brace-format
+msgid "The {min_or_max} limit in survey question {idx} expected to be integer."
+msgstr "问卷调查问题 {idx} 中的 {min_or_max} 限制预期为整数。"
 
 #: awx/api/views/__init__.py:2592
 #, python-brace-format
-msgid "The {min_or_max} limit in survey question {idx} expected to be integer."
-msgstr "调查中的 {min_or_max} 限制 {idx} 是整数的。"
-
-#: awx/api/views/__init__.py:2602
-#, python-brace-format
 msgid "Survey question {idx} of type {survey_item[type]} must specify choices."
-msgstr "类型调查 {idx} 问题 {survey_item[type]} 必须指定选项。"
+msgstr "类型为 {survey_item[type]} 的问卷调查问题 {idx} 必须指定选择。"
 
-#: awx/api/views/__init__.py:2616
+#: awx/api/views/__init__.py:2606
 msgid "Multiple Choice (Single Select) can only have one default value."
 msgstr "多项选择（单选）只能有一个默认值。"
 
-#: awx/api/views/__init__.py:2620
+#: awx/api/views/__init__.py:2610
 msgid "Default choice must be answered from the choices listed."
 msgstr "默认的选择必须从列出的选择中回答。"
 
-#: awx/api/views/__init__.py:2629
+#: awx/api/views/__init__.py:2619
 #, python-brace-format
 msgid ""
 "$encrypted$ is a reserved keyword for password question defaults, survey "
 "question {idx} is type {survey_item[type]}."
-msgstr "$encrypted$ 是密码问题默认值的保留关键字，问卷调查问题 {idx} 是类型 {survey_item[type]}。"
+msgstr "$encrypted$ 是密码问题默认值的保留关键字，问卷调查问题 {idx} 的类型是 {survey_item[type]}。"
 
-#: awx/api/views/__init__.py:2643
+#: awx/api/views/__init__.py:2633
 #, python-brace-format
 msgid ""
 "$encrypted$ is a reserved keyword, may not be used for new default in "
 "position {idx}."
-msgstr "$encrypted$ 是一个保留关键字，无法用于位置 {idx} 中的新默认值。"
+msgstr "$encrypted$ 是一个保留关键字，可能无法用于位置 {idx} 中的新默认值。"
 
-#: awx/api/views/__init__.py:2715
+#: awx/api/views/__init__.py:2705
 #, python-brace-format
 msgid "Cannot assign multiple {credential_type} credentials."
 msgstr "无法分配多个 {credential_type} 凭证。"
 
-#: awx/api/views/__init__.py:2719
+#: awx/api/views/__init__.py:2709
 msgid "Cannot assign a Credential of kind `{}`."
 msgstr "无法分配种类为 `{}` 的凭证。"
 
-#: awx/api/views/__init__.py:2736
+#: awx/api/views/__init__.py:2726
 msgid "Extra credentials must be network or cloud."
 msgstr "额外凭证必须是网络或云。"
 
-#: awx/api/views/__init__.py:2758
+#: awx/api/views/__init__.py:2748
 msgid "Maximum number of labels for {} reached."
 msgstr "已达到 {} 的最大标签数。"
 
-#: awx/api/views/__init__.py:2881
+#: awx/api/views/__init__.py:2871
 msgid "No matching host could be found!"
 msgstr "无法找到匹配的主机！"
 
-#: awx/api/views/__init__.py:2884
+#: awx/api/views/__init__.py:2874
 msgid "Multiple hosts matched the request!"
 msgstr "多个主机与请求匹配！"
 
-#: awx/api/views/__init__.py:2889
+#: awx/api/views/__init__.py:2879
 msgid "Cannot start automatically, user input required!"
 msgstr "无法自动启动，需要用户输入！"
 
-#: awx/api/views/__init__.py:2897
+#: awx/api/views/__init__.py:2887
 msgid "Host callback job already pending."
-msgstr "主机回调任务已经待处理。"
+msgstr "主机回调作业已经待处理。"
 
-#: awx/api/views/__init__.py:2913 awx/api/views/__init__.py:3674
+#: awx/api/views/__init__.py:2903 awx/api/views/__init__.py:3664
 msgid "Error starting job!"
-msgstr "启动任务出错！"
+msgstr "启动作业出错！"
 
-#: awx/api/views/__init__.py:3037 awx/api/views/__init__.py:3057
+#: awx/api/views/__init__.py:3027 awx/api/views/__init__.py:3047
 msgid "Cycle detected."
 msgstr "检测到循环。"
 
-#: awx/api/views/__init__.py:3049
+#: awx/api/views/__init__.py:3039
 msgid "Relationship not allowed."
 msgstr "不允许使用关系。"
 
-#: awx/api/views/__init__.py:3278
+#: awx/api/views/__init__.py:3268
 msgid "Cannot relaunch slice workflow job orphaned from job template."
-msgstr "无法重新启动从任务模板中孤立的分片工作流任务。"
+msgstr "无法重新启动从作业模板中孤立的分片工作流作业。"
 
-#: awx/api/views/__init__.py:3280
+#: awx/api/views/__init__.py:3270
 msgid "Cannot relaunch sliced workflow job after slice count has changed."
-msgstr "分片计数发生变化后无法重新启动分片工作流任务。"
+msgstr "分片计数发生变化后无法重新启动分片工作流作业。"
 
-#: awx/api/views/__init__.py:3313
+#: awx/api/views/__init__.py:3303
 msgid "Workflow Job Template Schedules"
-msgstr "工作流任务模板计划"
+msgstr "工作流作业模板计划"
 
-#: awx/api/views/__init__.py:3456 awx/api/views/__init__.py:4094
+#: awx/api/views/__init__.py:3446 awx/api/views/__init__.py:4087
 msgid "Superuser privileges needed."
 msgstr "需要超级用户权限。"
 
-#: awx/api/views/__init__.py:3489
+#: awx/api/views/__init__.py:3479
 msgid "System Job Template Schedules"
-msgstr "系统任务模板计划"
+msgstr "系统作业模板计划"
 
-#: awx/api/views/__init__.py:3657
+#: awx/api/views/__init__.py:3647
 #, python-brace-format
 msgid "Wait until job finishes before retrying on {status_value} hosts."
-msgstr "在 {status_value} 主机上重试前等待任务完成。"
+msgstr "在 {status_value} 主机上重试前等待作业完成。"
 
-#: awx/api/views/__init__.py:3662
+#: awx/api/views/__init__.py:3652
 #, python-brace-format
 msgid "Cannot retry on {status_value} hosts, playbook stats not available."
 msgstr "无法在 {status_value} 主机上重试，playbook 统计数据不可用。"
 
-#: awx/api/views/__init__.py:3667
+#: awx/api/views/__init__.py:3657
 #, python-brace-format
 msgid "Cannot relaunch because previous job had 0 {status_value} hosts."
-msgstr "无法重新启动，因为以前的任务有 0 个 {status_value} 主机。"
+msgstr "无法重新启动，因为以前的作业有 0 个 {status_value} 主机。"
 
-#: awx/api/views/__init__.py:3696
+#: awx/api/views/__init__.py:3686
 msgid "Cannot create schedule because job requires credential passwords."
-msgstr "无法创建计划，因为任务需要凭证密码。"
+msgstr "无法创建计划，因为作业需要凭证密码。"
 
-#: awx/api/views/__init__.py:3701
+#: awx/api/views/__init__.py:3691
 msgid "Cannot create schedule because job was launched by legacy method."
-msgstr "无法创建计划，因为任务是由旧方法启动的。"
+msgstr "无法创建计划，因为作业是由旧方法启动的。"
 
-#: awx/api/views/__init__.py:3703
+#: awx/api/views/__init__.py:3693
 msgid "Cannot create schedule because a related resource is missing."
 msgstr "无法创建计划，因为缺少相关资源。"
 
-#: awx/api/views/__init__.py:3758
+#: awx/api/views/__init__.py:3748
 msgid "Job Host Summaries List"
-msgstr "任务主机摘要列表"
+msgstr "作业主机摘要列表"
 
-#: awx/api/views/__init__.py:3812
+#: awx/api/views/__init__.py:3802
 msgid "Job Event Children List"
-msgstr "任务事件子级列表"
+msgstr "作业事件子级列表"
 
-#: awx/api/views/__init__.py:3828
+#: awx/api/views/__init__.py:3818
 msgid "Job Event Hosts List"
-msgstr "任务事件主机列表"
+msgstr "作业事件主机列表"
 
-#: awx/api/views/__init__.py:3837
+#: awx/api/views/__init__.py:3833
 msgid "Job Events List"
-msgstr "任务事件列表"
+msgstr "作业事件列表"
 
-#: awx/api/views/__init__.py:4051
+#: awx/api/views/__init__.py:4044
 msgid "Ad Hoc Command Events List"
 msgstr "临时命令事件列表"
 
-#: awx/api/views/__init__.py:4296
+#: awx/api/views/__init__.py:4289
 msgid "Delete not allowed while there are pending notifications"
 msgstr "在有待处理的通知时不允许删除"
 
-#: awx/api/views/__init__.py:4304
+#: awx/api/views/__init__.py:4297
 msgid "Notification Template Test"
 msgstr "通知模板测试"
 
-#: awx/api/views/__init__.py:4564 awx/api/views/__init__.py:4579
+#: awx/api/views/__init__.py:4557 awx/api/views/__init__.py:4572
 msgid "User does not have permission to approve or deny this workflow."
 msgstr "用户没有批准或拒绝此工作流的权限。"
 
-#: awx/api/views/__init__.py:4566 awx/api/views/__init__.py:4581
+#: awx/api/views/__init__.py:4559 awx/api/views/__init__.py:4574
 msgid "This workflow step has already been approved or denied."
 msgstr "此工作流步骤已经被批准或拒绝。"
 
@@ -1396,79 +1401,87 @@ msgstr "{0}"
 msgid "Metrics"
 msgstr "指标"
 
-#: awx/api/views/mixin.py:49
+#: awx/api/views/mixin.py:46
 msgid "Cannot delete job resource when associated workflow job is running."
-msgstr "关联的工作流任务正在运行时无法删除任务资源。"
+msgstr "关联的工作流作业正在运行时无法删除作业资源。"
 
-#: awx/api/views/mixin.py:54
+#: awx/api/views/mixin.py:51
 msgid "Cannot delete running job resource."
-msgstr "无法删除正在运行的任务资源。"
+msgstr "无法删除正在运行的作业资源。"
 
-#: awx/api/views/mixin.py:59
+#: awx/api/views/mixin.py:56
 msgid "Job has not finished processing events."
-msgstr "任务还没有完成处理事件。"
+msgstr "作业还没有完成处理事件。"
 
-#: awx/api/views/mixin.py:156
+#: awx/api/views/mixin.py:153
 msgid "Related job {} is still processing events."
-msgstr "相关的任务 {} 仍在处理事件。"
+msgstr "相关的作业 {} 仍在处理事件。"
 
-#: awx/api/views/root.py:47 awx/templates/rest_framework/api.html:28
+#: awx/api/views/root.py:49 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: awx/api/views/root.py:57 awx/templates/rest_framework/api.html:4
+#: awx/api/views/root.py:59 awx/templates/rest_framework/api.html:4
 msgid "AWX REST API"
 msgstr "AWX REST API"
 
-#: awx/api/views/root.py:70
+#: awx/api/views/root.py:72
 msgid "API OAuth 2 Authorization Root"
 msgstr "API OAuth 2 授权根"
 
-#: awx/api/views/root.py:137
+#: awx/api/views/root.py:139
 msgid "Version 2"
 msgstr "版本 2"
 
-#: awx/api/views/root.py:146
+#: awx/api/views/root.py:148
 msgid "Ping"
 msgstr "Ping"
 
-#: awx/api/views/root.py:178 awx/api/views/root.py:217 awx/conf/apps.py:10
+#: awx/api/views/root.py:180 awx/api/views/root.py:225 awx/conf/apps.py:10
 msgid "Configuration"
 msgstr "配置"
 
-#: awx/api/views/root.py:199 awx/api/views/root.py:300
+#: awx/api/views/root.py:202 awx/api/views/root.py:308
 msgid "Invalid License"
 msgstr "无效许可证"
 
-#: awx/api/views/root.py:204
+#: awx/api/views/root.py:207
 msgid "The provided credentials are invalid (HTTP 401)."
 msgstr "提供的凭证无效 (HTTP 401)。"
 
-#: awx/api/views/root.py:276
+#: awx/api/views/root.py:209
+msgid "Unable to connect to proxy server."
+msgstr "无法连接到代理服务器。"
+
+#: awx/api/views/root.py:211
+msgid "Could not connect to subscription service."
+msgstr "无法连接订阅服务。"
+
+#: awx/api/views/root.py:284
 msgid "Invalid license data"
 msgstr "无效的许可证数据"
 
-#: awx/api/views/root.py:278
+#: awx/api/views/root.py:286
 msgid "Missing 'eula_accepted' property"
 msgstr "缺少 'eula_accepted' 属性"
 
-#: awx/api/views/root.py:282
+#: awx/api/views/root.py:290
 msgid "'eula_accepted' value is invalid"
 msgstr "'eula_accepted' 值无效"
 
-#: awx/api/views/root.py:285
+#: awx/api/views/root.py:293
 msgid "'eula_accepted' must be True"
 msgstr "'eula_accepted' 必须为 True"
 
-#: awx/api/views/root.py:292
+#: awx/api/views/root.py:300
 msgid "Invalid JSON"
 msgstr "无效的 JSON"
 
-#: awx/api/views/root.py:310
+#: awx/api/views/root.py:319
 msgid "Invalid license"
 msgstr "无效的许可证"
 
-#: awx/api/views/root.py:318
+#: awx/api/views/root.py:327
 msgid "Failed to remove license."
 msgstr "删除许可证失败。"
 
@@ -1602,7 +1615,7 @@ msgstr "Cow 选择"
 
 #: awx/conf/conf.py:53
 msgid "Select which cow to use with cowsay when running jobs."
-msgstr "选择在运行任务时要用于 cowsay 的 cow。"
+msgstr "选择在运行作业时要用于 cowsay 的 cow。"
 
 #: awx/conf/conf.py:54 awx/conf/conf.py:75
 msgid "Cows"
@@ -1624,37 +1637,37 @@ msgstr "设置示例"
 msgid "Example setting which can be different for each user."
 msgstr "每个用户之间可以各不相同的设置示例。"
 
-#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:52
+#: awx/conf/conf.py:92 awx/conf/registry.py:81 awx/conf/views.py:56
 msgid "User"
 msgstr "用户"
 
-#: awx/conf/fields.py:62 awx/sso/fields.py:618
+#: awx/conf/fields.py:63 awx/sso/fields.py:595
 #, python-brace-format
 msgid ""
 "Expected None, True, False, a string or list of strings but got {input_type} "
 "instead."
 msgstr "预期为 None、True、False、字符串或字符串列表，但实际为 {input_type}。"
 
-#: awx/conf/fields.py:103
+#: awx/conf/fields.py:104
 #, python-brace-format
 msgid "Expected list of strings but got {input_type} instead."
 msgstr "预期为字符串列表，但实际为 {input_type}。"
 
-#: awx/conf/fields.py:104
+#: awx/conf/fields.py:105
 #, python-brace-format
 msgid "{path} is not a valid path choice."
 msgstr "{path} 不是有效的路径选择。"
 
-#: awx/conf/fields.py:127
+#: awx/conf/fields.py:149
 msgid "Enter a valid URL"
 msgstr "输入有效的 URL"
 
-#: awx/conf/fields.py:161
+#: awx/conf/fields.py:187
 #, python-brace-format
 msgid "\"{input}\" is not a valid string."
 msgstr "\"{input}\" 不是有效字符串。"
 
-#: awx/conf/fields.py:176
+#: awx/conf/fields.py:202
 #, python-brace-format
 msgid "Expected a list of tuples of max length 2 but got {input_type} instead."
 msgstr "预期为最大长度为 2 的元组列表，但实际为 {input_type}。"
@@ -1714,10 +1727,11 @@ msgstr "此值已在设置文件中手动设置。"
 #: awx/conf/tests/unit/test_settings.py:430
 #: awx/conf/tests/unit/test_settings.py:466 awx/main/conf.py:24
 #: awx/main/conf.py:33 awx/main/conf.py:43 awx/main/conf.py:53
-#: awx/main/conf.py:62 awx/main/conf.py:74 awx/main/conf.py:87
-#: awx/main/conf.py:100 awx/main/conf.py:125 awx/main/conf.py:138
-#: awx/main/conf.py:151 awx/main/conf.py:163 awx/main/conf.py:171
-#: awx/main/conf.py:182 awx/main/conf.py:414 awx/main/conf.py:794
+#: awx/main/conf.py:65 awx/main/conf.py:78 awx/main/conf.py:91
+#: awx/main/conf.py:116 awx/main/conf.py:129 awx/main/conf.py:142
+#: awx/main/conf.py:154 awx/main/conf.py:162 awx/main/conf.py:173
+#: awx/main/conf.py:405 awx/main/conf.py:830 awx/main/conf.py:840
+#: awx/main/conf.py:852
 msgid "System"
 msgstr "系统"
 
@@ -1726,122 +1740,116 @@ msgstr "系统"
 msgid "OtherSystem"
 msgstr "OtherSystem"
 
-#: awx/conf/views.py:44
+#: awx/conf/views.py:48
 msgid "Setting Categories"
 msgstr "设置类别"
 
-#: awx/conf/views.py:66
+#: awx/conf/views.py:70
 msgid "Setting Detail"
 msgstr "设置详情"
 
-#: awx/conf/views.py:157
+#: awx/conf/views.py:162
 msgid "Logging Connectivity Test"
 msgstr "日志记录连接测试"
 
-#: awx/main/access.py:67
+#: awx/main/access.py:66
 #, python-format
 msgid "Required related field %s for permission check."
 msgstr "权限检查需要相关字段 %s。"
 
-#: awx/main/access.py:83
+#: awx/main/access.py:82
 #, python-format
 msgid "Bad data found in related field %s."
 msgstr "相关字段 %s 中找到错误数据。"
 
-#: awx/main/access.py:330
+#: awx/main/access.py:331
 msgid "License is missing."
 msgstr "缺少许可证。"
 
-#: awx/main/access.py:332
+#: awx/main/access.py:333
 msgid "License has expired."
 msgstr "许可证已过期。"
 
-#: awx/main/access.py:340
+#: awx/main/access.py:341
 #, python-format
 msgid "License count of %s instances has been reached."
 msgstr "已达到 %s 实例的许可证计数。"
 
-#: awx/main/access.py:342
+#: awx/main/access.py:343
 #, python-format
 msgid "License count of %s instances has been exceeded."
 msgstr "已超过 %s 实例的许可证计数。"
 
-#: awx/main/access.py:344
+#: awx/main/access.py:345
 msgid "Host count exceeds available instances."
 msgstr "主机计数超过可用实例。"
 
-#: awx/main/access.py:362 awx/main/access.py:371
+#: awx/main/access.py:363 awx/main/access.py:372
 #, python-format
 msgid ""
 "You have already reached the maximum number of %s hosts allowed for your "
 "organization. Contact your System Administrator for assistance."
 msgstr "您已经达到您的机构允许的最大 %s 主机数。请联系系统管理员寻求帮助。"
 
-#: awx/main/access.py:935
+#: awx/main/access.py:927
 msgid "Unable to change inventory on a host."
 msgstr "无法更改主机上的清单。"
 
-#: awx/main/access.py:956 awx/main/access.py:998
+#: awx/main/access.py:948 awx/main/access.py:990
 msgid "Cannot associate two items from different inventories."
 msgstr "无法将两个项与不同的清单关联。"
 
-#: awx/main/access.py:986
+#: awx/main/access.py:978
 msgid "Unable to change inventory on a group."
 msgstr "无法更改组上的清单。"
 
-#: awx/main/access.py:1272
+#: awx/main/access.py:1264
 msgid "Unable to change organization on a team."
 msgstr "无法更改团队上的机构。"
 
-#: awx/main/access.py:1288
+#: awx/main/access.py:1280
 msgid "The {} role cannot be assigned to a team"
 msgstr "无法为团队分配 {} 角色"
 
-#: awx/main/access.py:1487
+#: awx/main/access.py:1474
 msgid "Insufficient access to Job Template credentials."
-msgstr "对任务模板凭证的访问权限不足。"
+msgstr "对作业模板凭证的访问权限不足。"
 
-#: awx/main/access.py:1672 awx/main/access.py:2101
+#: awx/main/access.py:1639 awx/main/access.py:2063
 msgid "Job was launched with secret prompts provided by another user."
-msgstr "任务是使用其他用户提供的机密提示启动的。"
+msgstr "作业是使用其他用户提供的机密提示启动的。"
 
-#: awx/main/access.py:1685
-msgid "Job has been orphaned from its job template."
-msgstr "任务已从其任务模板中孤立。"
+#: awx/main/access.py:1648
+msgid "Job has been orphaned from its job template and organization."
+msgstr "作业已从其作业模板和机构中孤立。"
 
-#: awx/main/access.py:1687
-msgid "Job was launched with unknown prompted fields."
-msgstr "任务启动时显示未知的提示字段。"
+#: awx/main/access.py:1650
+msgid "Job was launched with prompted fields you do not have access to."
+msgstr "作业启动时带有您无法访问的提示字段。"
 
-#: awx/main/access.py:1689
-msgid "Job was launched with prompted fields."
-msgstr "任务启动时显示提示字段。"
+#: awx/main/access.py:1652
+msgid ""
+"Job was launched with unknown prompted fields. Organization admin "
+"permissions required."
+msgstr "作业以未知的提示字段启动。需要机构管理员权限。"
 
-#: awx/main/access.py:1691
-msgid " Organization level permissions required."
-msgstr "需要机构级别权限。"
-
-#: awx/main/access.py:1693
-msgid " You do not have permission to related resources."
-msgstr "您没有相关资源的权限。"
-
-#: awx/main/access.py:2091
+#: awx/main/access.py:2053
 msgid "Workflow Job was launched with unknown prompts."
-msgstr "工作流任务启动时显示未知提示。"
+msgstr "工作流作业启动时显示未知提示。"
 
-#: awx/main/access.py:2103
+#: awx/main/access.py:2065
 msgid "Job was launched with prompts you lack access to."
-msgstr "任务启动时显示您无法访问的提示。"
+msgstr "作业启动时显示您无法访问的提示。"
 
-#: awx/main/access.py:2105
+#: awx/main/access.py:2067
 msgid "Job was launched with prompts no longer accepted."
-msgstr "任务启动时显示不再接受的提示。"
+msgstr "作业启动时显示不再接受的提示。"
 
-#: awx/main/access.py:2117
+#: awx/main/access.py:2079
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."
-msgstr "您没有权限访问重新启动所需的工作流任务资源。"
+msgstr "您没有权限访问重新启动所需的工作流作业资源。"
 
 #: awx/main/apps.py:8
 msgid "Main"
@@ -1886,29 +1894,21 @@ msgid ""
 "using an LDAP or SAML integration."
 msgstr "控制机构管理员是否具有创建和管理用户和团队的权限。如果您使用 LDAP 或 SAML 集成，您可能需要禁用此功能。"
 
-#: awx/main/conf.py:60
-msgid "Enable Administrator Alerts"
-msgstr "启用管理员提醒"
-
-#: awx/main/conf.py:61
-msgid "Email Admin users for system events that may require attention."
-msgstr "用于可能需要关注的系统事件的电子邮件管理员用户。"
-
-#: awx/main/conf.py:71
+#: awx/main/conf.py:62
 msgid "Base URL of the Tower host"
 msgstr "Tower 主机的基本 URL"
 
-#: awx/main/conf.py:72
+#: awx/main/conf.py:63
 msgid ""
 "This setting is used by services like notifications to render a valid url to "
 "the Tower host."
 msgstr "此设置供通知类的服务用来为 Tower 主机呈现有效的 URL。"
 
-#: awx/main/conf.py:81
+#: awx/main/conf.py:72
 msgid "Remote Host Headers"
 msgstr "远程主机标头"
 
-#: awx/main/conf.py:82
+#: awx/main/conf.py:73
 msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
@@ -1916,11 +1916,11 @@ msgid ""
 "Adminstrator guide for more details."
 msgstr "为确定远程主机名或 IP 而搜索的 HTTP 标头和元键。如果位于反向代理后端，请将其他项添加到此列表，如 \"HTTP_X_FORWARDED_FOR\"。请参阅管理员指南的“代理支持”部分以了解更多详情。"
 
-#: awx/main/conf.py:94
+#: awx/main/conf.py:85
 msgid "Proxy IP Whitelist"
 msgstr "代理 IP 白名单"
 
-#: awx/main/conf.py:95
+#: awx/main/conf.py:86
 msgid ""
 "If Tower is behind a reverse proxy/load balancer, use this setting to "
 "whitelist the proxy IP addresses from which Tower should trust custom "
@@ -1929,313 +1929,313 @@ msgid ""
 "unconditionally')"
 msgstr "如果 Tower 位于反向代理/负载均衡器后端，则使用此设置可将 Tower 应该信任自定义 REMOTE_HOST_HEADERS 标头值的代理服务器 IP 地址列入白名单。如果此设置为空列表（默认设置），则将无条件地信任由 REMOTE_HOST_HEADERS 指定的标头。"
 
-#: awx/main/conf.py:121
+#: awx/main/conf.py:112
 msgid "License"
 msgstr "许可证"
 
-#: awx/main/conf.py:122
+#: awx/main/conf.py:113
 msgid ""
 "The license controls which features and functionality are enabled. Use /api/"
 "v2/config/ to update or change the license."
 msgstr "许可证控制启用哪些特性和功能。使用 /api/v2/config/ 来更新或更改许可证。"
 
-#: awx/main/conf.py:136
+#: awx/main/conf.py:127
 msgid "Red Hat customer username"
 msgstr "红帽客户用户名"
 
-#: awx/main/conf.py:137
+#: awx/main/conf.py:128
 msgid ""
 "This username is used to retrieve license information and to send Automation "
 "Analytics"
 msgstr "此用户名用于检索许可证信息并发送自动化分析"
 
-#: awx/main/conf.py:149
+#: awx/main/conf.py:140
 msgid "Red Hat customer password"
 msgstr "红帽客户密码"
 
-#: awx/main/conf.py:150
+#: awx/main/conf.py:141
 msgid ""
 "This password is used to retrieve license information and to send Automation "
 "Analytics"
 msgstr "此密码用于检索许可证信息并发送自动化分析"
 
-#: awx/main/conf.py:161
+#: awx/main/conf.py:152
 msgid "Automation Analytics upload URL."
 msgstr "自动化分析上传 URL。"
 
-#: awx/main/conf.py:162
+#: awx/main/conf.py:153
 msgid ""
 "This setting is used to to configure data collection for the Automation "
 "Analytics dashboard"
 msgstr "此设置用于为自动化分析仪表板配置数据收集"
 
-#: awx/main/conf.py:170
+#: awx/main/conf.py:161
 msgid "Unique identifier for an AWX/Tower installation"
 msgstr "AWX/Tower 安装的唯一标识符"
 
-#: awx/main/conf.py:179
+#: awx/main/conf.py:170
 msgid "Custom virtual environment paths"
 msgstr "自定义虚拟环境路径"
 
-#: awx/main/conf.py:180
+#: awx/main/conf.py:171
 msgid ""
 "Paths where Tower will look for custom virtual environments (in addition to /"
 "var/lib/awx/venv/). Enter one path per line."
 msgstr "（除了 /var/lib/awx/venv/ 之外）Tower 将在这些路径查找自定义虚拟环境。每行输入一个路径。"
 
-#: awx/main/conf.py:190
+#: awx/main/conf.py:181
 msgid "Ansible Modules Allowed for Ad Hoc Jobs"
-msgstr "允许用于临时任务的 Ansible 模块"
+msgstr "允许用于临时作业的 Ansible 模块"
 
-#: awx/main/conf.py:191
+#: awx/main/conf.py:182
 msgid "List of modules allowed to be used by ad-hoc jobs."
-msgstr "允许供临时任务使用的模块列表。"
+msgstr "允许供临时作业使用的模块列表。"
 
-#: awx/main/conf.py:192 awx/main/conf.py:214 awx/main/conf.py:223
-#: awx/main/conf.py:234 awx/main/conf.py:244 awx/main/conf.py:254
-#: awx/main/conf.py:265 awx/main/conf.py:276 awx/main/conf.py:287
-#: awx/main/conf.py:299 awx/main/conf.py:308 awx/main/conf.py:321
-#: awx/main/conf.py:334 awx/main/conf.py:346 awx/main/conf.py:357
-#: awx/main/conf.py:368 awx/main/conf.py:380 awx/main/conf.py:392
-#: awx/main/conf.py:403 awx/main/conf.py:423 awx/main/conf.py:433
-#: awx/main/conf.py:443 awx/main/conf.py:459 awx/main/conf.py:472
-#: awx/main/conf.py:486 awx/main/conf.py:500 awx/main/conf.py:512
-#: awx/main/conf.py:522 awx/main/conf.py:533 awx/main/conf.py:543
-#: awx/main/conf.py:554 awx/main/conf.py:564 awx/main/conf.py:574
-#: awx/main/conf.py:586 awx/main/conf.py:598 awx/main/conf.py:610
-#: awx/main/conf.py:624
+#: awx/main/conf.py:183 awx/main/conf.py:205 awx/main/conf.py:214
+#: awx/main/conf.py:225 awx/main/conf.py:235 awx/main/conf.py:245
+#: awx/main/conf.py:256 awx/main/conf.py:267 awx/main/conf.py:278
+#: awx/main/conf.py:290 awx/main/conf.py:299 awx/main/conf.py:312
+#: awx/main/conf.py:325 awx/main/conf.py:337 awx/main/conf.py:348
+#: awx/main/conf.py:359 awx/main/conf.py:371 awx/main/conf.py:383
+#: awx/main/conf.py:394 awx/main/conf.py:414 awx/main/conf.py:424
+#: awx/main/conf.py:434 awx/main/conf.py:450 awx/main/conf.py:463
+#: awx/main/conf.py:477 awx/main/conf.py:491 awx/main/conf.py:503
+#: awx/main/conf.py:513 awx/main/conf.py:524 awx/main/conf.py:534
+#: awx/main/conf.py:545 awx/main/conf.py:555 awx/main/conf.py:565
+#: awx/main/conf.py:577 awx/main/conf.py:589 awx/main/conf.py:601
+#: awx/main/conf.py:615 awx/main/conf.py:627
 msgid "Jobs"
-msgstr "任务"
+msgstr "作业"
 
-#: awx/main/conf.py:201
+#: awx/main/conf.py:192
 msgid "Always"
 msgstr "始终"
 
-#: awx/main/conf.py:202
+#: awx/main/conf.py:193
 msgid "Never"
 msgstr "永不"
 
-#: awx/main/conf.py:203
+#: awx/main/conf.py:194
 msgid "Only On Job Template Definitions"
-msgstr "仅在任务模板定义中"
+msgstr "仅在作业模板定义中"
 
-#: awx/main/conf.py:206
+#: awx/main/conf.py:197
 msgid "When can extra variables contain Jinja templates?"
 msgstr "额外变量何时可以包含 Jinja 模板？"
 
-#: awx/main/conf.py:208
+#: awx/main/conf.py:199
 msgid ""
 "Ansible allows variable substitution via the Jinja2 templating language for "
 "--extra-vars. This poses a potential security risk where Tower users with "
 "the ability to specify extra vars at job launch time can use Jinja2 "
 "templates to run arbitrary Python.  It is recommended that this value be set "
 "to \"template\" or \"never\"."
-msgstr "Ansible 允许通过 Jinja2 模板语言为 --extra-vars 替换变量。这会带来潜在的安全风险，因为能够在任务启动时指定额外变量的 Tower 用户可使用 Jinja2 模板来运行任意 Python。建议将此值设为 \"template\" 或 \"never\"。"
+msgstr "Ansible 允许通过 Jinja2 模板语言为 --extra-vars 替换变量。这会带来潜在的安全风险，因为能够在作业启动时指定额外变量的 Tower 用户可使用 Jinja2 模板来运行任意 Python。建议将此值设为 \"template\" 或 \"never\"。"
 
-#: awx/main/conf.py:221
+#: awx/main/conf.py:212
 msgid "Enable job isolation"
-msgstr "启用任务隔离"
+msgstr "启用作业隔离"
 
-#: awx/main/conf.py:222
+#: awx/main/conf.py:213
 msgid ""
 "Isolates an Ansible job from protected parts of the system to prevent "
 "exposing sensitive information."
-msgstr "将 Ansible 任务与系统受保护的部分隔离，以防止公开敏感信息。"
+msgstr "将 Ansible 作业与系统受保护的部分隔离，以防止公开敏感信息。"
 
-#: awx/main/conf.py:230
+#: awx/main/conf.py:221
 msgid "Job execution path"
-msgstr "任务执行路径"
+msgstr "作业执行路径"
 
-#: awx/main/conf.py:231
+#: awx/main/conf.py:222
 msgid ""
 "The directory in which Tower will create new temporary directories for job "
 "execution and isolation (such as credential files and custom inventory "
 "scripts)."
-msgstr "Tower 将在此目录下为任务执行和隔离创建新临时目录（如凭证文件和自定义清单脚本）。"
+msgstr "Tower 将在此目录下为作业执行和隔离创建新临时目录（如凭证文件和自定义清单脚本）。"
 
-#: awx/main/conf.py:242
+#: awx/main/conf.py:233
 msgid "Paths to hide from isolated jobs"
-msgstr "向隔离任务隐藏的路径"
+msgstr "向隔离作业隐藏的路径"
 
-#: awx/main/conf.py:243
+#: awx/main/conf.py:234
 msgid ""
 "Additional paths to hide from isolated processes. Enter one path per line."
 msgstr "向隔离进程隐藏的其他路径。每行输入一个路径。"
 
-#: awx/main/conf.py:252
+#: awx/main/conf.py:243
 msgid "Paths to expose to isolated jobs"
-msgstr "向隔离任务公开的路径"
+msgstr "向隔离作业公开的路径"
 
-#: awx/main/conf.py:253
+#: awx/main/conf.py:244
 msgid ""
 "Whitelist of paths that would otherwise be hidden to expose to isolated "
 "jobs. Enter one path per line."
-msgstr "要向隔离任务公开的原本隐藏的路径白名单。每行输入一个路径。"
+msgstr "要向隔离作业公开的原本隐藏的路径白名单。每行输入一个路径。"
 
-#: awx/main/conf.py:263
+#: awx/main/conf.py:254
 msgid "Verbosity level for isolated node management tasks"
 msgstr "隔离节点管理任务的详细程度"
 
-#: awx/main/conf.py:264
+#: awx/main/conf.py:255
 msgid ""
 "This can be raised to aid in debugging connection issues for isolated task "
 "execution"
 msgstr "可以提高此设置来帮助对隔离任务执行中的连接问题进行调试。"
 
-#: awx/main/conf.py:274
+#: awx/main/conf.py:265
 msgid "Isolated status check interval"
 msgstr "隔离状态检查间隔"
 
-#: awx/main/conf.py:275
+#: awx/main/conf.py:266
 msgid ""
 "The number of seconds to sleep between status checks for jobs running on "
 "isolated instances."
 msgstr "在隔离实例中运行的任务的状态检查间休眠的秒数。"
 
-#: awx/main/conf.py:284
+#: awx/main/conf.py:275
 msgid "Isolated launch timeout"
 msgstr "隔离启动超时"
 
-#: awx/main/conf.py:285
+#: awx/main/conf.py:276
 msgid ""
 "The timeout (in seconds) for launching jobs on isolated instances.  This "
 "includes the time needed to copy source control files (playbooks) to the "
 "isolated instance."
-msgstr "在隔离的实例中启动任务的超时时间（以秒为单位）。这包括将源控制文件 (playbook) 复制到隔离实例所需的时间。"
+msgstr "在隔离的实例中启动作业的超时时间（以秒为单位）。这包括将源控制文件 (playbook) 复制到隔离实例所需的时间。"
 
-#: awx/main/conf.py:296
+#: awx/main/conf.py:287
 msgid "Isolated connection timeout"
 msgstr "隔离连接超时"
 
-#: awx/main/conf.py:297
+#: awx/main/conf.py:288
 msgid ""
 "Ansible SSH connection timeout (in seconds) to use when communicating with "
 "isolated instances. Value should be substantially greater than expected "
 "network latency."
 msgstr "与隔离的实例通信时使用的 Ansible SSH 连接超时（以秒为单位）。值应显著大于预期的网络延迟。"
 
-#: awx/main/conf.py:306
+#: awx/main/conf.py:297
 msgid "Isolated host key checking"
 msgstr "隔离主机密钥检查"
 
-#: awx/main/conf.py:307
+#: awx/main/conf.py:298
 msgid ""
 "When set to True, AWX will enforce strict host key checking for "
 "communication with isolated nodes."
 msgstr "当设置为 True 时，AWX 将针对与隔离的节点进行通信实行严格的主机密钥检查。"
 
-#: awx/main/conf.py:317
+#: awx/main/conf.py:308
 msgid "Generate RSA keys for isolated instances"
 msgstr "为隔离的实例生成 RSA 密钥"
 
-#: awx/main/conf.py:318
+#: awx/main/conf.py:309
 msgid ""
 "If set, a random RSA key will be generated and distributed to isolated "
 "instances.  To disable this behavior and manage authentication for isolated "
 "instances outside of Tower, disable this setting."
 msgstr "如果设置，将生成随机 RSA 密钥并将其分发到隔离的实例。要禁用此行为并管理 Tower 之外的隔离实例的身份验证，请禁用此设置。"
 
-#: awx/main/conf.py:332 awx/main/conf.py:333
+#: awx/main/conf.py:323 awx/main/conf.py:324
 msgid "The RSA private key for SSH traffic to isolated instances"
 msgstr "到隔离实例的 SSH 流量的 RSA 私钥"
 
-#: awx/main/conf.py:344 awx/main/conf.py:345
+#: awx/main/conf.py:335 awx/main/conf.py:336
 msgid "The RSA public key for SSH traffic to isolated instances"
 msgstr "到隔离实例的 SSH 流量的 RSA 公钥"
 
-#: awx/main/conf.py:354
+#: awx/main/conf.py:345
 msgid "Enable detailed resource profiling on all playbook runs"
 msgstr "启用所有 playbook 运行的详细资源分析"
 
-#: awx/main/conf.py:355
+#: awx/main/conf.py:346
 msgid ""
 "If set, detailed resource profiling data will be collected on all jobs. This "
 "data can be gathered with `sosreport`."
-msgstr "如果设置，将收集所有任务的详细资源分析数据。这些数据可使用 `sosreport` 进行收集。"
+msgstr "如果设置，将收集所有作业的详细资源分析数据。这些数据可使用 `sosreport` 进行收集。"
 
-#: awx/main/conf.py:365
+#: awx/main/conf.py:356
 msgid "Interval (in seconds) between polls for cpu usage."
 msgstr "cpu 用量轮询间隔（以秒为单位）。"
 
-#: awx/main/conf.py:366
+#: awx/main/conf.py:357
 msgid ""
 "Interval (in seconds) between polls for cpu usage. Setting this lower than "
 "the default will affect playbook performance."
 msgstr "cpu 用量轮询间隔（以秒为单位）。此设置低于默认值会影响 playbook 性能。"
 
-#: awx/main/conf.py:377
+#: awx/main/conf.py:368
 msgid "Interval (in seconds) between polls for memory usage."
 msgstr "内存用量轮询间隔（以秒为单位）。"
 
-#: awx/main/conf.py:378
+#: awx/main/conf.py:369
 msgid ""
 "Interval (in seconds) between polls for memory usage. Setting this lower "
 "than the default will affect playbook performance."
 msgstr "内存用量轮询间隔（以秒为单位）。此设置低于默认值会影响 playbook 性能。"
 
-#: awx/main/conf.py:389
+#: awx/main/conf.py:380
 msgid "Interval (in seconds) between polls for PID count."
 msgstr "PID 计数轮询间隔（以秒为单位）。"
 
-#: awx/main/conf.py:390
+#: awx/main/conf.py:381
 msgid ""
 "Interval (in seconds) between polls for PID count. Setting this lower than "
 "the default will affect playbook performance."
 msgstr "PID 计数轮询间隔（以秒为单位）。此设置低于默认值会影响 playbook 的性能。"
 
-#: awx/main/conf.py:401
+#: awx/main/conf.py:392
 msgid "Extra Environment Variables"
 msgstr "额外环境变量"
 
-#: awx/main/conf.py:402
+#: awx/main/conf.py:393
 msgid ""
 "Additional environment variables set for playbook runs, inventory updates, "
 "project updates, and notification sending."
 msgstr "为 playbook 运行、库存更新、项目更新和通知发送设置的额外环境变量。"
 
-#: awx/main/conf.py:412
+#: awx/main/conf.py:403
 msgid "Gather data for Automation Analytics"
 msgstr "为自动化分析收集数据"
 
-#: awx/main/conf.py:413
+#: awx/main/conf.py:404
 msgid "Enables Tower to gather data on automation and send it to Red Hat."
 msgstr "允许 Tower 收集自动化数据并将其发送给红帽。"
 
-#: awx/main/conf.py:421
+#: awx/main/conf.py:412
 msgid "Run Project Updates With Higher Verbosity"
 msgstr "以更高的详细程度运行项目更新"
 
-#: awx/main/conf.py:422
+#: awx/main/conf.py:413
 msgid ""
 "Adds the CLI -vvv flag to ansible-playbook runs of project_update.yml used "
 "for project updates."
 msgstr "将 CLI -vvv 标记添加到用于项目更新的 project_update.yml 的 ansible-playbook 运行。"
 
-#: awx/main/conf.py:431
+#: awx/main/conf.py:422
 msgid "Enable Role Download"
 msgstr "启用角色下载"
 
-#: awx/main/conf.py:432
+#: awx/main/conf.py:423
 msgid ""
 "Allows roles to be dynamically downloaded from a requirements.yml file for "
 "SCM projects."
 msgstr "允许从 SCM 项目的 requirements.yml 文件中动态下载角色。"
 
-#: awx/main/conf.py:441
+#: awx/main/conf.py:432
 msgid "Enable Collection(s) Download"
 msgstr "启用集合下载"
 
-#: awx/main/conf.py:442
+#: awx/main/conf.py:433
 msgid ""
 "Allows collections to be dynamically downloaded from a requirements.yml file "
 "for SCM projects."
 msgstr "允许从 SCM 项目的 requirements.yml 文件中动态下载集合。"
 
-#: awx/main/conf.py:452
+#: awx/main/conf.py:443
 msgid "Primary Galaxy Server URL"
 msgstr "主 Galaxy 服务器 URL"
 
-#: awx/main/conf.py:454
+#: awx/main/conf.py:445
 msgid ""
 "For organizations that run their own Galaxy service, this gives the option "
 "to specify a host as the primary galaxy server. Requirements will be "
@@ -2244,146 +2244,146 @@ msgid ""
 "left blank, it will default to galaxy.ansible.com."
 msgstr "对于运行其自己的 Galaxy 服务的机构，这提供了将主机指定为主 galaxy 服务器的选项。如果特定角色或集合可用，则需要从主服务器下载这些要求。如果内容在主服务器中不可用，或者此字段留空，则默认为 galaxy.ansible.com。"
 
-#: awx/main/conf.py:468
+#: awx/main/conf.py:459
 msgid "Primary Galaxy Server Username"
 msgstr "主 Galaxy 服务器用户名"
 
-#: awx/main/conf.py:469
+#: awx/main/conf.py:460
 msgid ""
 "For using a galaxy server at higher precedence than the public Ansible "
 "Galaxy. The username to use for basic authentication against the Galaxy "
 "instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN."
 msgstr "适用于以高于公共 Ansible Galaxy 的优先级使用 galaxy 服务器的情况。用于针对 Galaxy 实例进行基本身份验证的用户名，与 PRIMARY_GALAXY_TOKEN 相互排斥。"
 
-#: awx/main/conf.py:482
+#: awx/main/conf.py:473
 msgid "Primary Galaxy Server Password"
 msgstr "主 Galaxy 服务器密码"
 
-#: awx/main/conf.py:483
+#: awx/main/conf.py:474
 msgid ""
 "For using a galaxy server at higher precedence than the public Ansible "
 "Galaxy. The password to use for basic authentication against the Galaxy "
 "instance, this is mutually exclusive with PRIMARY_GALAXY_TOKEN."
 msgstr "适用于以高于公共 Ansible Galaxy 的优先级使用 galaxy 服务器的情况。用于针对 Galaxy 实例进行基本身份验证的密码，与 PRIMARY_GALAXY_TOKEN 相互排斥。"
 
-#: awx/main/conf.py:496
+#: awx/main/conf.py:487
 msgid "Primary Galaxy Server Token"
 msgstr "主 Galaxy 服务器令牌"
 
-#: awx/main/conf.py:497
+#: awx/main/conf.py:488
 msgid ""
 "For using a galaxy server at higher precedence than the public Ansible "
 "Galaxy. The token to use for connecting with the Galaxy instance, this is "
 "mutually exclusive with corresponding username and password settings."
 msgstr "适用于以高于公共 Ansible Galaxy 的优先级使用 galaxy 服务器的情况。用于连接 Galaxy 实例的令牌，与对应的用户名和密码设置相互排斥。"
 
-#: awx/main/conf.py:509
+#: awx/main/conf.py:500
 msgid "Primary Galaxy Authentication URL"
 msgstr "主 Galaxy 身份验证 URL"
 
-#: awx/main/conf.py:510
+#: awx/main/conf.py:501
 msgid ""
 "For using a galaxy server at higher precedence than the public Ansible "
 "Galaxy. The token_endpoint of a Keycloak server."
 msgstr "适用于以高于公共 Ansible Galaxy 的优先级使用 galaxy 服务器的情况。Keycloak 服务器的 token_endpoint。"
 
-#: awx/main/conf.py:520
+#: awx/main/conf.py:511
 msgid "Allow Access to Public Galaxy"
 msgstr "允许访问公共 Galaxy"
 
-#: awx/main/conf.py:521
+#: awx/main/conf.py:512
 msgid ""
 "Allow or deny access to the public Ansible Galaxy during project updates."
 msgstr "在项目更新期间允许或拒绝访问公共 Ansible Galaxy。"
 
-#: awx/main/conf.py:530
+#: awx/main/conf.py:521
 msgid "Ignore Ansible Galaxy SSL Certificate Verification"
 msgstr "忽略 Ansible Galaxy SSL 证书验证"
 
-#: awx/main/conf.py:531
+#: awx/main/conf.py:522
 msgid ""
 "If set to true, certificate validation will not be done wheninstalling "
 "content from any Galaxy server."
 msgstr "如果设为 true，则在从任何 Galaxy 服务器安装内容时将不执行证书验证。"
 
-#: awx/main/conf.py:541
+#: awx/main/conf.py:532
 msgid "Standard Output Maximum Display Size"
 msgstr "标准输出最大显示大小"
 
-#: awx/main/conf.py:542
+#: awx/main/conf.py:533
 msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
 msgstr "要求下载输出前显示的最大标准输出大小（以字节为单位）。"
 
-#: awx/main/conf.py:551
+#: awx/main/conf.py:542
 msgid "Job Event Standard Output Maximum Display Size"
-msgstr "任务事件标准输出最大显示大小"
+msgstr "作业事件标准输出最大显示大小"
 
-#: awx/main/conf.py:553
+#: awx/main/conf.py:544
 msgid ""
 "Maximum Size of Standard Output in bytes to display for a single job or ad "
 "hoc command event. `stdout` will end with `…` when truncated."
-msgstr "为单个任务或临时命令事件显示的最大标准输出大小（以字节为单位）。`stdout` 在截断时会以 `…` 结束。"
+msgstr "为单个作业或临时命令事件显示的最大标准输出大小（以字节为单位）。`stdout` 在截断时会以 `…` 结束。"
 
-#: awx/main/conf.py:562
+#: awx/main/conf.py:553
 msgid "Maximum Scheduled Jobs"
-msgstr "最多调度任务"
+msgstr "最多调度作业"
 
-#: awx/main/conf.py:563
+#: awx/main/conf.py:554
 msgid ""
 "Maximum number of the same job template that can be waiting to run when "
 "launching from a schedule before no more are created."
-msgstr "从计划启动时可以等待运行的同一任务模板的最大数量，此后不再创建更多模板。"
+msgstr "从计划启动时可以等待运行的同一作业模板的最大数量，此后不再创建更多模板。"
 
-#: awx/main/conf.py:572
+#: awx/main/conf.py:563
 msgid "Ansible Callback Plugins"
 msgstr "Ansible 回调插件"
 
-#: awx/main/conf.py:573
+#: awx/main/conf.py:564
 msgid ""
 "List of paths to search for extra callback plugins to be used when running "
 "jobs. Enter one path per line."
-msgstr "用于搜索供运行任务时使用的额外回调插件的路径列表。每行输入一个路径。"
+msgstr "用于搜索供运行作业时使用的额外回调插件的路径列表。每行输入一个路径。"
 
-#: awx/main/conf.py:583
+#: awx/main/conf.py:574
 msgid "Default Job Timeout"
-msgstr "默认任务超时"
+msgstr "默认作业超时"
 
-#: awx/main/conf.py:584
+#: awx/main/conf.py:575
 msgid ""
 "Maximum time in seconds to allow jobs to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual job "
 "template will override this."
-msgstr "允许运行任务的最长时间（以秒为单位）。使用 0 值表示不应应用超时。在单个任务模板中设置的超时会覆写此值。"
+msgstr "允许运行作业的最长时间（以秒为单位）。使用 0 值表示不应应用超时。在单个作业模板中设置的超时会覆写此值。"
 
-#: awx/main/conf.py:595
+#: awx/main/conf.py:586
 msgid "Default Inventory Update Timeout"
 msgstr "默认清单更新超时"
 
-#: awx/main/conf.py:596
+#: awx/main/conf.py:587
 msgid ""
 "Maximum time in seconds to allow inventory updates to run. Use value of 0 to "
 "indicate that no timeout should be imposed. A timeout set on an individual "
 "inventory source will override this."
 msgstr "允许运行清单更新的最长时间（以秒为单位）。使用 0 值表示不应应用超时。在单个清单源中设置的超时会覆写此值。"
 
-#: awx/main/conf.py:607
+#: awx/main/conf.py:598
 msgid "Default Project Update Timeout"
 msgstr "默认项目更新超时"
 
-#: awx/main/conf.py:608
+#: awx/main/conf.py:599
 msgid ""
 "Maximum time in seconds to allow project updates to run. Use value of 0 to "
 "indicate that no timeout should be imposed. A timeout set on an individual "
 "project will override this."
 msgstr "允许运行项目更新的最长时间（以秒为单位）。使用 0 值表示不应应用超时。在单个项目中设置的超时会覆写此值。"
 
-#: awx/main/conf.py:619
+#: awx/main/conf.py:610
 msgid "Per-Host Ansible Fact Cache Timeout"
 msgstr "每个主机 Ansible 事实缓存超时"
 
-#: awx/main/conf.py:620
+#: awx/main/conf.py:611
 msgid ""
 "Maximum time, in seconds, that stored Ansible facts are considered valid "
 "since the last time they were modified. Only valid, non-stale, facts will be "
@@ -2392,62 +2392,74 @@ msgid ""
 "timeout should be imposed."
 msgstr "存储的 Ansible 事实自上次修改后被视为有效的最长时间（以秒为单位）。只有有效且未过时的事实才会被 playbook 访问。注意，这不会影响从数据库中删除 ansible_facts。使用 0 值表示不应应用超时。"
 
-#: awx/main/conf.py:633
+#: awx/main/conf.py:624
+msgid "Maximum number of forks per job."
+msgstr "每个作业的最大 fork 数量。"
+
+#: awx/main/conf.py:625
+msgid ""
+"Saving a Job Template with more than this number of forks will result in an "
+"error. When set to 0, no limit is applied."
+msgstr "在保存作业模板时带有比这个数量更多的 fork 会出错。如果设置为 0，则代表没有限制。"
+
+#: awx/main/conf.py:636
 msgid "Logging Aggregator"
 msgstr "日志记录聚合器"
 
-#: awx/main/conf.py:634
+#: awx/main/conf.py:637
 msgid "Hostname/IP where external logs will be sent to."
 msgstr "外部日志发送到的主机名/IP。"
 
-#: awx/main/conf.py:635 awx/main/conf.py:646 awx/main/conf.py:658
-#: awx/main/conf.py:668 awx/main/conf.py:680 awx/main/conf.py:695
-#: awx/main/conf.py:707 awx/main/conf.py:716 awx/main/conf.py:726
-#: awx/main/conf.py:738 awx/main/conf.py:749 awx/main/conf.py:761
-#: awx/main/conf.py:774 awx/main/conf.py:784
+#: awx/main/conf.py:638 awx/main/conf.py:649 awx/main/conf.py:661
+#: awx/main/conf.py:671 awx/main/conf.py:683 awx/main/conf.py:698
+#: awx/main/conf.py:710 awx/main/conf.py:719 awx/main/conf.py:729
+#: awx/main/conf.py:741 awx/main/conf.py:752 awx/main/conf.py:764
+#: awx/main/conf.py:777 awx/main/conf.py:787 awx/main/conf.py:799
+#: awx/main/conf.py:810 awx/main/conf.py:820
 msgid "Logging"
 msgstr "日志记录"
 
-#: awx/main/conf.py:643
+#: awx/main/conf.py:646
 msgid "Logging Aggregator Port"
 msgstr "日志记录聚合器端口"
 
-#: awx/main/conf.py:644
+#: awx/main/conf.py:647
 msgid ""
 "Port on Logging Aggregator to send logs to (if required and not provided in "
 "Logging Aggregator)."
 msgstr "将日志发送到的日志记录聚合器上的端口（如果需要且未在日志聚合器中提供）。"
 
-#: awx/main/conf.py:656
+#: awx/main/conf.py:659
 msgid "Logging Aggregator Type"
 msgstr "日志记录聚合器类型"
 
-#: awx/main/conf.py:657
+#: awx/main/conf.py:660
 msgid "Format messages for the chosen log aggregator."
 msgstr "所选日志聚合器的格式消息。"
 
-#: awx/main/conf.py:666
+#: awx/main/conf.py:669
 msgid "Logging Aggregator Username"
 msgstr "日志记录聚合器用户名"
 
-#: awx/main/conf.py:667
-msgid "Username for external log aggregator (if required)."
-msgstr "外部日志聚合器的用户名（如果需要）。"
+#: awx/main/conf.py:670
+msgid "Username for external log aggregator (if required; HTTP/s only)."
+msgstr "外部日志聚合器的用户名（如果需要。只支持 HTTP/s）。"
 
-#: awx/main/conf.py:678
+#: awx/main/conf.py:681
 msgid "Logging Aggregator Password/Token"
 msgstr "日志记录聚合器密码/令牌"
 
-#: awx/main/conf.py:679
+#: awx/main/conf.py:682
 msgid ""
-"Password or authentication token for external log aggregator (if required)."
-msgstr "外部日志聚合器的密码或身份验证令牌（如果需要）。"
+"Password or authentication token for external log aggregator (if required; "
+"HTTP/s only)."
+msgstr "外部日志聚合器的密码或身份验证令牌（如果需要。HTTP/s）。"
 
-#: awx/main/conf.py:688
+#: awx/main/conf.py:691
 msgid "Loggers Sending Data to Log Aggregator Form"
 msgstr "将数据发送到日志聚合器表单的日志记录器"
 
-#: awx/main/conf.py:689
+#: awx/main/conf.py:692
 msgid ""
 "List of loggers that will send HTTP logs to the collector, these can include "
 "any or all of: \n"
@@ -2458,14 +2470,14 @@ msgid ""
 msgstr "将 HTTP 日志发送到收集器的日志记录器列表，其中包括以下任意一种或全部：\n"
 "awx - 服务日志\n"
 "activity_stream - 活动流记录\n"
-"job_events - Ansible 任务事件的回调数据\n"
-"system_tracking - 从扫描任务收集的事实。"
+"job_events - Ansible 作业事件的回调数据\n"
+"system_tracking - 从扫描作业收集的事实。"
 
-#: awx/main/conf.py:702
+#: awx/main/conf.py:705
 msgid "Log System Tracking Facts Individually"
 msgstr "单独记录系统跟踪事实"
 
-#: awx/main/conf.py:703
+#: awx/main/conf.py:706
 msgid ""
 "If set, system tracking facts will be sent for each package, service, or "
 "other item found in a scan, allowing for greater search query granularity. "
@@ -2473,47 +2485,47 @@ msgid ""
 "efficiency in fact processing."
 msgstr "如果设置，则会为扫描中找到的每个软件包、服务或其他项发送系统跟踪事实，以便提高搜索查询的粒度。如果未设置，则将以单一字典形式发送事实，从而提高事实处理的效率。"
 
-#: awx/main/conf.py:714
+#: awx/main/conf.py:717
 msgid "Enable External Logging"
 msgstr "启用外部日志记录"
 
-#: awx/main/conf.py:715
+#: awx/main/conf.py:718
 msgid "Enable sending logs to external log aggregator."
 msgstr "启用将日志发送到外部日志聚合器。"
 
-#: awx/main/conf.py:724
+#: awx/main/conf.py:727
 msgid "Cluster-wide Tower unique identifier."
 msgstr "集群范围的 Tower 唯一标识符。"
 
-#: awx/main/conf.py:725
+#: awx/main/conf.py:728
 msgid "Useful to uniquely identify Tower instances."
 msgstr "用于唯一标识 Tower 实例。"
 
-#: awx/main/conf.py:734
+#: awx/main/conf.py:737
 msgid "Logging Aggregator Protocol"
 msgstr "日志记录聚合器协议"
 
-#: awx/main/conf.py:735
+#: awx/main/conf.py:738
 msgid ""
 "Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS "
 "unless http:// is explicitly used in the Logging Aggregator hostname."
 msgstr "用于与日志聚合器通信的协议。HTTPS/HTTP 假设 HTTPS，除非在日志记录聚合器主机名中明确使用 http://。"
 
-#: awx/main/conf.py:745
+#: awx/main/conf.py:748
 msgid "TCP Connection Timeout"
 msgstr "TCP 连接超时"
 
-#: awx/main/conf.py:746
+#: awx/main/conf.py:749
 msgid ""
 "Number of seconds for a TCP connection to external log aggregator to "
 "timeout. Applies to HTTPS and TCP log aggregator protocols."
 msgstr "与外部日志聚合器的 TCP 连接超时的秒数。适用于 HTTPS 和 TCP 日志聚合器协议。"
 
-#: awx/main/conf.py:756
+#: awx/main/conf.py:759
 msgid "Enable/disable HTTPS certificate verification"
 msgstr "启用/禁用 HTTPS 证书验证"
 
-#: awx/main/conf.py:757
+#: awx/main/conf.py:760
 msgid ""
 "Flag to control enable/disable of certificate verification when "
 "LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, Tower's log handler will "
@@ -2521,11 +2533,11 @@ msgid ""
 "connection."
 msgstr "当 LOG_aggregator_PROTOCOL 为 \"https\" 时，用来控制证书启用/禁用证书验证的标记。如果启用，Tower 的日志处理程序会在建立连接前验证外部日志聚合器发送的证书。"
 
-#: awx/main/conf.py:769
+#: awx/main/conf.py:772
 msgid "Logging Aggregator Level Threshold"
 msgstr "日志记录聚合器级别阈值"
 
-#: awx/main/conf.py:770
+#: awx/main/conf.py:773
 msgid ""
 "Level threshold used by log handler. Severities from lowest to highest are "
 "DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe than the "
@@ -2533,11 +2545,11 @@ msgid ""
 "anlytics ignore this setting)"
 msgstr "日志处理程序使用的级别阈值。从最低到最高的严重性为：DEBUG、INFO、WARNING、ERROR、CRITICAL。日志处理程序会忽略严重性低于阈值的消息。（类别 awx.anlytics 下的消息会忽略此设置）"
 
-#: awx/main/conf.py:782
+#: awx/main/conf.py:785
 msgid "Enabled external log aggregation auditing"
 msgstr "启用外部日志聚合审核"
 
-#: awx/main/conf.py:783
+#: awx/main/conf.py:786
 msgid ""
 "When enabled, all external logs emitted by Tower will also be written to /"
 "var/log/tower/external.log.  This is an experimental setting intended to be "
@@ -2545,42 +2557,91 @@ msgid ""
 "change in the future)."
 msgstr "启用后，Tower 发出的所有外部日志也会写入 /var/log/tower/external.log。这是一个实验性设置，用于调试外部日志聚合问题（将来可能会有变化）。"
 
-#: awx/main/conf.py:792
+#: awx/main/conf.py:795
+msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgstr "外部日志聚合的最大磁盘持久性存储（以 GB 为单位）"
+
+#: awx/main/conf.py:796
+msgid ""
+"Amount of data to store (in gigabytes) during an outage of the external log "
+"aggregator (defaults to 1). Equivalent to the rsyslogd queue.maxdiskspace "
+"setting."
+msgstr "外部日志聚合器停机时要保存的数据量（以 GB 为单位）（默认为 1)，与 rsyslogd queue.maxdiskspace 设置相同。"
+
+#: awx/main/conf.py:806
+msgid "File system location for rsyslogd disk persistence"
+msgstr "rsyslogd 磁盘持久存储在文件系统中的位置"
+
+#: awx/main/conf.py:807
+msgid ""
+"Location to persist logs that should be retried after an outage of the "
+"external log aggregator (defaults to /var/lib/awx). Equivalent to the "
+"rsyslogd queue.spoolDirectory setting."
+msgstr "在外部日志聚合器停止工作后，重试的持久性日志的位置（默认为 /var/lib/awx)。与 rsyslogd queue.spoolDirectory  的设置相同。"
+
+#: awx/main/conf.py:817
+msgid "Enable rsyslogd debugging"
+msgstr "启用 rsyslogd 调试"
+
+#: awx/main/conf.py:818
+msgid ""
+"Enabled high verbosity debugging for rsyslogd.  Useful for debugging "
+"connection issues for external log aggregation."
+msgstr "为 rsyslogd 启用高度详细调试。用于调试外部日志聚合的连接问题。"
+
+#: awx/main/conf.py:828
 msgid "Message Durability"
 msgstr "消息持续时间"
 
-#: awx/main/conf.py:793
+#: awx/main/conf.py:829
 msgid ""
 "When set (the default), underlying queues will be persisted to disk.  "
 "Disable this to enable higher message bus throughput."
 msgstr "如果设置（默认值），底层队列将保留到磁盘中。禁用此设置可启用更高消息总线吞吐量。"
 
-#: awx/main/conf.py:813 awx/sso/conf.py:1239
-msgid "\n"
-msgstr ""
+#: awx/main/conf.py:838
+msgid "Last gather date for Automation Analytics."
+msgstr "为自动化分析收集的最新数据"
 
-#: awx/main/conf.py:845
+#: awx/main/conf.py:848
+msgid "Automation Analytics Gather Interval"
+msgstr "自动化分析收集间隔"
+
+#: awx/main/conf.py:849
+msgid "Interval (in seconds) between data gathering."
+msgstr "收集数据间的间隔（以秒为单位）。"
+
+#: awx/main/conf.py:871 awx/sso/conf.py:1239
+msgid "\n"
+msgstr "\n"
+
+#: awx/main/conf.py:892
+msgid ""
+"A URL for Primary Galaxy must be defined before disabling public Galaxy."
+msgstr "在禁用公共 Galaxy 之前，必须定义主 Galaxy 的 URL。"
+
+#: awx/main/conf.py:912
 msgid "Cannot provide field if PRIMARY_GALAXY_URL is not set."
 msgstr "如果未设置 PRIMARY_Galaxy_URL，则无法提供字段。"
 
-#: awx/main/conf.py:858
+#: awx/main/conf.py:925
 #, python-brace-format
 msgid ""
 "Galaxy server settings are not available until Ansible {min_version}, you "
 "are running {current_version}."
 msgstr "在 Ansible {min_version} 之前，Galaxy 服务器设置不可用，您正在运行 {current_version}。"
 
-#: awx/main/conf.py:867
+#: awx/main/conf.py:934
 msgid ""
 "Setting Galaxy token and authentication URL is mutually exclusive with "
 "username and password."
 msgstr "设置 Galaxy 令牌和验证 URL 与用户名和密码相互排斥。"
 
-#: awx/main/conf.py:870
+#: awx/main/conf.py:937
 msgid "If authenticating via username and password, both must be provided."
 msgstr "如果通过用户名和密码进行身份验证，则必须提供两者。"
 
-#: awx/main/conf.py:876
+#: awx/main/conf.py:943
 msgid ""
 "If authenticating via token, both token and authentication URL must be "
 "provided."
@@ -2664,8 +2725,8 @@ msgstr "对象查询"
 
 #: awx/main/credential_plugins/aim.py:46
 msgid ""
-"Lookup query for the object. Ex: \"Safe=TestSafe;Object=testAccountName123\""
-msgstr "对象的查找查询。示例：\"Safe=TestSafe;Object=testAccountName123\""
+"Lookup query for the object. Ex: Safe=TestSafe;Object=testAccountName123"
+msgstr "对象的查找查询。例如：\"Safe=TestSafe;Object=testAccountName123\""
 
 #: awx/main/credential_plugins/aim.py:49
 msgid "Object Query Format"
@@ -2681,34 +2742,42 @@ msgid ""
 "policy."
 msgstr "对象请求原因。只有对象策略要求时才需要此设置。"
 
-#: awx/main/credential_plugins/azure_kv.py:11
+#: awx/main/credential_plugins/azure_kv.py:21
 msgid "Vault URL (DNS Name)"
 msgstr "Vault URL（DNS 名称）"
 
-#: awx/main/credential_plugins/azure_kv.py:16
-#: awx/main/models/credential/__init__.py:955
+#: awx/main/credential_plugins/azure_kv.py:26
+#: awx/main/models/credential/__init__.py:956
 msgid "Client ID"
 msgstr "客户端 ID"
 
-#: awx/main/credential_plugins/azure_kv.py:25
-#: awx/main/models/credential/__init__.py:964
+#: awx/main/credential_plugins/azure_kv.py:35
+#: awx/main/models/credential/__init__.py:965
 msgid "Tenant ID"
 msgstr "租户 ID"
 
-#: awx/main/credential_plugins/azure_kv.py:30
+#: awx/main/credential_plugins/azure_kv.py:39
+msgid "Cloud Environment"
+msgstr "云环境"
+
+#: awx/main/credential_plugins/azure_kv.py:40
+msgid "Specify which azure cloud environment to use."
+msgstr "指定要使用的云环境。"
+
+#: awx/main/credential_plugins/azure_kv.py:46
 msgid "Secret Name"
 msgstr "机密名称"
 
-#: awx/main/credential_plugins/azure_kv.py:32
+#: awx/main/credential_plugins/azure_kv.py:48
 msgid "The name of the secret to look up."
 msgstr "要查找的机密的名称。"
 
-#: awx/main/credential_plugins/azure_kv.py:35
+#: awx/main/credential_plugins/azure_kv.py:51
 #: awx/main/credential_plugins/conjur.py:47
 msgid "Secret Version"
 msgstr "机密版本"
 
-#: awx/main/credential_plugins/azure_kv.py:37
+#: awx/main/credential_plugins/azure_kv.py:53
 #: awx/main/credential_plugins/conjur.py:49
 #: awx/main/credential_plugins/hashivault.py:67
 msgid ""
@@ -2724,22 +2793,22 @@ msgstr "Conjur URL"
 msgid "API Key"
 msgstr "API 密钥"
 
-#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1250
+#: awx/main/credential_plugins/conjur.py:28 awx/main/models/inventory.py:1018
 msgid "Account"
 msgstr "帐户"
 
 #: awx/main/credential_plugins/conjur.py:32
-#: awx/main/models/credential/__init__.py:597
-#: awx/main/models/credential/__init__.py:653
-#: awx/main/models/credential/__init__.py:711
-#: awx/main/models/credential/__init__.py:784
-#: awx/main/models/credential/__init__.py:833
-#: awx/main/models/credential/__init__.py:859
-#: awx/main/models/credential/__init__.py:886
-#: awx/main/models/credential/__init__.py:946
-#: awx/main/models/credential/__init__.py:1019
-#: awx/main/models/credential/__init__.py:1050
-#: awx/main/models/credential/__init__.py:1100
+#: awx/main/models/credential/__init__.py:598
+#: awx/main/models/credential/__init__.py:654
+#: awx/main/models/credential/__init__.py:712
+#: awx/main/models/credential/__init__.py:785
+#: awx/main/models/credential/__init__.py:834
+#: awx/main/models/credential/__init__.py:860
+#: awx/main/models/credential/__init__.py:887
+#: awx/main/models/credential/__init__.py:947
+#: awx/main/models/credential/__init__.py:1020
+#: awx/main/models/credential/__init__.py:1051
+#: awx/main/models/credential/__init__.py:1101
 msgid "Username"
 msgstr "用户名"
 
@@ -2764,8 +2833,8 @@ msgid "The URL to the HashiCorp Vault"
 msgstr "HashiCorp Vault 的 URL"
 
 #: awx/main/credential_plugins/hashivault.py:25
-#: awx/main/models/credential/__init__.py:985
-#: awx/main/models/credential/__init__.py:1002
+#: awx/main/models/credential/__init__.py:986
+#: awx/main/models/credential/__init__.py:1003
 msgid "Token"
 msgstr "令牌"
 
@@ -2811,7 +2880,7 @@ msgid ""
 msgstr "kv 机密后端的名称（如果留空，将使用机密路径的第一个分段）。"
 
 #: awx/main/credential_plugins/hashivault.py:60
-#: awx/main/models/inventory.py:1255
+#: awx/main/models/inventory.py:1023
 msgid "Key Name"
 msgstr "密钥名称"
 
@@ -2845,160 +2914,127 @@ msgid ""
 "be signed for."
 msgstr "应该为之签署证书的有效主体（用户名或主机名）。"
 
-#: awx/main/fields.py:66
+#: awx/main/fields.py:67
 #, python-brace-format
 msgid "'{value}' is not one of ['{allowed_values}']"
 msgstr "'{value}' 不是 ['{allowed_values}'] 之一"
 
-#: awx/main/fields.py:430
+#: awx/main/fields.py:439
 #, python-brace-format
 msgid "{type} provided in relative path {path}, expected {expected_type}"
-msgstr "{type} 在相对路径中提供 {path}，预期 {expected_type}"
+msgstr "{path} 在相对路径中提供了 {type}，预期为 {expected_type}"
 
-#: awx/main/fields.py:435
+#: awx/main/fields.py:444
 #, python-brace-format
 msgid "{type} provided, expected {expected_type}"
 msgstr "提供了 {type}，预期为 {expected_type}"
 
-#: awx/main/fields.py:440
+#: awx/main/fields.py:449
 #, python-brace-format
 msgid "Schema validation error in relative path {path} ({error})"
 msgstr "相对路径 {path} ({error}) 中的模式验证错误"
 
-#: awx/main/fields.py:549
+#: awx/main/fields.py:558
 #, python-format
 msgid "required for %s"
 msgstr "为 %s 所需"
 
-#: awx/main/fields.py:623
+#: awx/main/fields.py:632
 msgid "secret values must be of type string, not {}"
 msgstr "机密值必须是字符串类型，不能是 {}"
 
-#: awx/main/fields.py:658
+#: awx/main/fields.py:667
 #, python-format
 msgid "cannot be set unless \"%s\" is set"
 msgstr "无法设置，除非设置了 \"%s\""
 
-#: awx/main/fields.py:693
+#: awx/main/fields.py:702
 msgid "must be set when SSH key is encrypted."
 msgstr "必须在 SSH 密钥加密时设置。"
 
-#: awx/main/fields.py:701
+#: awx/main/fields.py:710
 msgid "should not be set when SSH key is not encrypted."
 msgstr "不应在 SSH 密钥没有加密时设置。"
 
-#: awx/main/fields.py:760
+#: awx/main/fields.py:769
 msgid "'dependencies' is not supported for custom credentials."
 msgstr "'dependencies' 不支持用于自定义凭证。"
 
-#: awx/main/fields.py:774
+#: awx/main/fields.py:783
 msgid "\"tower\" is a reserved field name"
 msgstr "\"tower\" 是保留字段名称"
 
-#: awx/main/fields.py:781
+#: awx/main/fields.py:790
 #, python-format
 msgid "field IDs must be unique (%s)"
 msgstr "字段 ID 必须是唯一的 (%s)"
 
-#: awx/main/fields.py:796
+#: awx/main/fields.py:805
 msgid "{} is not a {}"
 msgstr "{} 不是 {}"
 
-#: awx/main/fields.py:802
+#: awx/main/fields.py:811
 #, python-brace-format
 msgid "{sub_key} not allowed for {element_type} type ({element_id})"
 msgstr "{sub_key} 不允许用于 {element_type} 类型 ({element_id})"
 
-#: awx/main/fields.py:860
+#: awx/main/fields.py:869
 msgid ""
 "Environment variable {} may affect Ansible configuration so its use is not "
 "allowed in credentials."
 msgstr "环境变量 {} 可能会影响 Ansible 配置，因此在凭证中不允许使用它。"
 
-#: awx/main/fields.py:866
+#: awx/main/fields.py:875
 msgid "Environment variable {} is blacklisted from use in credentials."
 msgstr "环境变量 {} 列入了禁止在凭证中使用的黑名单。"
 
-#: awx/main/fields.py:894
+#: awx/main/fields.py:903
 msgid ""
 "Must define unnamed file injector in order to reference `tower.filename`."
 msgstr "必须定义未命名的文件注入程序，以便引用 `tower.filename`。"
 
-#: awx/main/fields.py:901
+#: awx/main/fields.py:910
 msgid "Cannot directly reference reserved `tower` namespace container."
 msgstr "无法直接引用保留的 `tower` 命名空间容器。"
 
-#: awx/main/fields.py:911
+#: awx/main/fields.py:920
 msgid "Must use multi-file syntax when injecting multiple files"
 msgstr "在注入多个文件时必须使用多文件语法"
 
-#: awx/main/fields.py:931
+#: awx/main/fields.py:940
 #, python-brace-format
 msgid "{sub_key} uses an undefined field ({error_msg})"
 msgstr "{sub_key} 使用了未定义字段 ({error_msg})"
 
-#: awx/main/fields.py:938
+#: awx/main/fields.py:947
 #, python-brace-format
 msgid ""
 "Syntax error rendering template for {sub_key} inside of {type} ({error_msg})"
-msgstr "语法错误渲染 {type} （{error_msg}） {sub_key} 中的模板"
+msgstr "为 {type} 内的 {sub_key} 呈现模板时出现语法错误 ({error_msg})"
 
-#: awx/main/middleware.py:166
+#: awx/main/middleware.py:118
 msgid "Formats of all available named urls"
 msgstr "所有可用命名 url 的格式"
 
-#: awx/main/middleware.py:167
+#: awx/main/middleware.py:119
 msgid ""
 "Read-only list of key-value pairs that shows the standard format of all "
 "available named URLs."
 msgstr "键值对的只读列表，显示所有可用命名 URL 的标准格式。"
 
-#: awx/main/middleware.py:169 awx/main/middleware.py:179
+#: awx/main/middleware.py:121 awx/main/middleware.py:131
 msgid "Named URL"
 msgstr "命名 URL"
 
-#: awx/main/middleware.py:176
+#: awx/main/middleware.py:128
 msgid "List of all named url graph nodes."
 msgstr "所有命名 url 图形节点的列表。"
 
-#: awx/main/middleware.py:177
+#: awx/main/middleware.py:129
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use "
 "this list to programmatically generate named URLs for resources"
 msgstr "键值对的只读列表，显示命名 URL 图形拓扑。使用此列表以编程方式为资源生成命名 URL。"
-
-#: awx/main/migrations/_reencrypt.py:25 awx/main/models/notifications.py:42
-msgid "Email"
-msgstr "电子邮件"
-
-#: awx/main/migrations/_reencrypt.py:26 awx/main/models/notifications.py:43
-msgid "Slack"
-msgstr "Slack"
-
-#: awx/main/migrations/_reencrypt.py:27 awx/main/models/notifications.py:44
-msgid "Twilio"
-msgstr "Twilio"
-
-#: awx/main/migrations/_reencrypt.py:28 awx/main/models/notifications.py:45
-msgid "Pagerduty"
-msgstr "Pagerduty"
-
-#: awx/main/migrations/_reencrypt.py:29 awx/main/models/notifications.py:47
-msgid "HipChat"
-msgstr "HipChat"
-
-#: awx/main/migrations/_reencrypt.py:30 awx/main/models/notifications.py:49
-msgid "Mattermost"
-msgstr "Mattermost"
-
-#: awx/main/migrations/_reencrypt.py:31 awx/main/models/notifications.py:48
-#: awx/main/models/unified_jobs.py:535
-msgid "Webhook"
-msgstr "Webhook"
-
-#: awx/main/migrations/_reencrypt.py:32 awx/main/models/notifications.py:51
-msgid "IRC"
-msgstr "IRC"
 
 #: awx/main/models/activity_stream.py:28
 msgid "Entity Created"
@@ -3060,524 +3096,522 @@ msgstr "检查"
 msgid "Scan"
 msgstr "扫描"
 
-#: awx/main/models/credential/__init__.py:95
+#: awx/main/models/credential/__init__.py:96
 msgid ""
 "Specify the type of credential you want to create. Refer to the Ansible "
 "Tower documentation for details on each type."
 msgstr "指定您要创建的凭证类型。有关每种类型的详情，请参阅 Ansible Tower 文档。"
 
-#: awx/main/models/credential/__init__.py:109
-#: awx/main/models/credential/__init__.py:352
+#: awx/main/models/credential/__init__.py:110
+#: awx/main/models/credential/__init__.py:353
 msgid ""
 "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower "
 "documentation for example syntax."
 msgstr "使用 JSON 或 YAML 语法进行输入。示例语法请参阅 Ansible Tower 文档。"
 
-#: awx/main/models/credential/__init__.py:324
-#: awx/main/models/credential/__init__.py:593
+#: awx/main/models/credential/__init__.py:325
+#: awx/main/models/credential/__init__.py:594
 msgid "Machine"
 msgstr "机器"
 
-#: awx/main/models/credential/__init__.py:325
-#: awx/main/models/credential/__init__.py:679
+#: awx/main/models/credential/__init__.py:326
+#: awx/main/models/credential/__init__.py:680
 msgid "Vault"
 msgstr "Vault"
 
-#: awx/main/models/credential/__init__.py:326
-#: awx/main/models/credential/__init__.py:706
+#: awx/main/models/credential/__init__.py:327
+#: awx/main/models/credential/__init__.py:707
 msgid "Network"
 msgstr "网络"
 
-#: awx/main/models/credential/__init__.py:327
-#: awx/main/models/credential/__init__.py:648
+#: awx/main/models/credential/__init__.py:328
+#: awx/main/models/credential/__init__.py:649
 msgid "Source Control"
 msgstr "源控制"
 
-#: awx/main/models/credential/__init__.py:328
+#: awx/main/models/credential/__init__.py:329
 msgid "Cloud"
 msgstr "云"
 
-#: awx/main/models/credential/__init__.py:329
+#: awx/main/models/credential/__init__.py:330
 msgid "Personal Access Token"
 msgstr "个人访问令牌"
 
-#: awx/main/models/credential/__init__.py:330
-#: awx/main/models/credential/__init__.py:1014
+#: awx/main/models/credential/__init__.py:331
+#: awx/main/models/credential/__init__.py:1015
 msgid "Insights"
 msgstr "Insights"
 
-#: awx/main/models/credential/__init__.py:331
+#: awx/main/models/credential/__init__.py:332
 msgid "External"
 msgstr "外部"
 
-#: awx/main/models/credential/__init__.py:332
+#: awx/main/models/credential/__init__.py:333
 msgid "Kubernetes"
 msgstr "Kubernetes"
 
-#: awx/main/models/credential/__init__.py:358
+#: awx/main/models/credential/__init__.py:359
 msgid ""
 "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower "
 "documentation for example syntax."
 msgstr "使用 JSON 或 YAML 语法输入注入程序。示例语法请参阅 Ansible Tower 文档。"
 
-#: awx/main/models/credential/__init__.py:427
+#: awx/main/models/credential/__init__.py:428
 #, python-format
 msgid "adding %s credential type"
 msgstr "添加 %s 凭证类型"
 
-#: awx/main/models/credential/__init__.py:601
-#: awx/main/models/credential/__init__.py:657
-#: awx/main/models/credential/__init__.py:715
-#: awx/main/models/credential/__init__.py:837
-#: awx/main/models/credential/__init__.py:863
-#: awx/main/models/credential/__init__.py:890
-#: awx/main/models/credential/__init__.py:950
-#: awx/main/models/credential/__init__.py:1023
-#: awx/main/models/credential/__init__.py:1054
-#: awx/main/models/credential/__init__.py:1104
+#: awx/main/models/credential/__init__.py:602
+#: awx/main/models/credential/__init__.py:658
+#: awx/main/models/credential/__init__.py:716
+#: awx/main/models/credential/__init__.py:838
+#: awx/main/models/credential/__init__.py:864
+#: awx/main/models/credential/__init__.py:891
+#: awx/main/models/credential/__init__.py:951
+#: awx/main/models/credential/__init__.py:1024
+#: awx/main/models/credential/__init__.py:1055
+#: awx/main/models/credential/__init__.py:1105
 msgid "Password"
 msgstr "密码"
 
-#: awx/main/models/credential/__init__.py:607
-#: awx/main/models/credential/__init__.py:720
+#: awx/main/models/credential/__init__.py:608
+#: awx/main/models/credential/__init__.py:721
 msgid "SSH Private Key"
 msgstr "SSH 私钥"
 
-#: awx/main/models/credential/__init__.py:614
+#: awx/main/models/credential/__init__.py:615
 msgid "Signed SSH Certificate"
 msgstr "签名的 SSH 证书"
 
-#: awx/main/models/credential/__init__.py:620
-#: awx/main/models/credential/__init__.py:669
-#: awx/main/models/credential/__init__.py:727
+#: awx/main/models/credential/__init__.py:621
+#: awx/main/models/credential/__init__.py:670
+#: awx/main/models/credential/__init__.py:728
 msgid "Private Key Passphrase"
 msgstr "私钥密码"
 
-#: awx/main/models/credential/__init__.py:626
+#: awx/main/models/credential/__init__.py:627
 msgid "Privilege Escalation Method"
 msgstr "权限升级方法"
 
-#: awx/main/models/credential/__init__.py:628
+#: awx/main/models/credential/__init__.py:629
 msgid ""
 "Specify a method for \"become\" operations. This is equivalent to specifying "
 "the --become-method Ansible parameter."
 msgstr "指定 \"become\" 操作的方法。这等同于指定 --become-method Ansible 参数。"
 
-#: awx/main/models/credential/__init__.py:633
+#: awx/main/models/credential/__init__.py:634
 msgid "Privilege Escalation Username"
 msgstr "权限升级用户名"
 
-#: awx/main/models/credential/__init__.py:637
+#: awx/main/models/credential/__init__.py:638
 msgid "Privilege Escalation Password"
 msgstr "权限升级密码"
 
-#: awx/main/models/credential/__init__.py:662
+#: awx/main/models/credential/__init__.py:663
 msgid "SCM Private Key"
 msgstr "SCM 私钥"
 
-#: awx/main/models/credential/__init__.py:684
+#: awx/main/models/credential/__init__.py:685
 msgid "Vault Password"
 msgstr "Vault 密码"
 
-#: awx/main/models/credential/__init__.py:690
+#: awx/main/models/credential/__init__.py:691
 msgid "Vault Identifier"
 msgstr "Vault 标识符"
 
-#: awx/main/models/credential/__init__.py:693
+#: awx/main/models/credential/__init__.py:694
 msgid ""
 "Specify an (optional) Vault ID. This is equivalent to specifying the --vault-"
 "id Ansible parameter for providing multiple Vault passwords.  Note: this "
 "feature only works in Ansible 2.4+."
 msgstr "指定（可选）Vault ID。这等同于为提供多个 Vault 密码指定 --vault-id Ansible 参数。请注意：此功能只在 Ansible 2.4+ 中有效。"
 
-#: awx/main/models/credential/__init__.py:732
+#: awx/main/models/credential/__init__.py:733
 msgid "Authorize"
 msgstr "授权"
 
-#: awx/main/models/credential/__init__.py:736
+#: awx/main/models/credential/__init__.py:737
 msgid "Authorize Password"
 msgstr "授权密码"
 
-#: awx/main/models/credential/__init__.py:750
+#: awx/main/models/credential/__init__.py:751
 msgid "Amazon Web Services"
 msgstr "Amazon Web Services"
 
-#: awx/main/models/credential/__init__.py:755
+#: awx/main/models/credential/__init__.py:756
 msgid "Access Key"
 msgstr "访问密钥"
 
-#: awx/main/models/credential/__init__.py:759
+#: awx/main/models/credential/__init__.py:760
 msgid "Secret Key"
 msgstr "机密密钥"
 
-#: awx/main/models/credential/__init__.py:764
+#: awx/main/models/credential/__init__.py:765
 msgid "STS Token"
 msgstr "STS 令牌"
 
-#: awx/main/models/credential/__init__.py:767
+#: awx/main/models/credential/__init__.py:768
 msgid ""
 "Security Token Service (STS) is a web service that enables you to request "
 "temporary, limited-privilege credentials for AWS Identity and Access "
 "Management (IAM) users."
 msgstr "安全令牌服务 (STS) 是一个 Web 服务，让您可以为 AWS 身份和访问管理 (IAM) 用户请求临时的有限权限凭证。"
 
-#: awx/main/models/credential/__init__.py:779 awx/main/models/inventory.py:1065
+#: awx/main/models/credential/__init__.py:780 awx/main/models/inventory.py:833
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: awx/main/models/credential/__init__.py:788
+#: awx/main/models/credential/__init__.py:789
 msgid "Password (API Key)"
 msgstr "密码（API 密钥）"
 
-#: awx/main/models/credential/__init__.py:793
-#: awx/main/models/credential/__init__.py:1045
+#: awx/main/models/credential/__init__.py:794
+#: awx/main/models/credential/__init__.py:1046
 msgid "Host (Authentication URL)"
 msgstr "主机（身份验证 URL）"
 
-#: awx/main/models/credential/__init__.py:795
+#: awx/main/models/credential/__init__.py:796
 msgid ""
 "The host to authenticate with.  For example, https://openstack.business.com/"
 "v2.0/"
 msgstr "要进行身份验证的主机。例如：https://openstack.business.com/v_2.0/"
 
-#: awx/main/models/credential/__init__.py:799
+#: awx/main/models/credential/__init__.py:800
 msgid "Project (Tenant Name)"
 msgstr "项目（租户名称）"
 
-#: awx/main/models/credential/__init__.py:803
+#: awx/main/models/credential/__init__.py:804
 msgid "Domain Name"
 msgstr "域名"
 
-#: awx/main/models/credential/__init__.py:805
+#: awx/main/models/credential/__init__.py:806
 msgid ""
 "OpenStack domains define administrative boundaries. It is only needed for "
 "Keystone v3 authentication URLs. Refer to Ansible Tower documentation for "
 "common scenarios."
 msgstr "OpenStack 域定义了管理边界。只有 Keystone v3 身份验证 URL 需要域。常见的情景请参阅 Ansible Tower 文档。"
 
-#: awx/main/models/credential/__init__.py:811
-#: awx/main/models/credential/__init__.py:1109
-#: awx/main/models/credential/__init__.py:1143
+#: awx/main/models/credential/__init__.py:812
+#: awx/main/models/credential/__init__.py:1110
+#: awx/main/models/credential/__init__.py:1144
 msgid "Verify SSL"
 msgstr "验证 SSL"
 
-#: awx/main/models/credential/__init__.py:822 awx/main/models/inventory.py:1062
+#: awx/main/models/credential/__init__.py:823 awx/main/models/inventory.py:830
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: awx/main/models/credential/__init__.py:827
+#: awx/main/models/credential/__init__.py:828
 msgid "VCenter Host"
 msgstr "vCenter 主机"
 
-#: awx/main/models/credential/__init__.py:829
+#: awx/main/models/credential/__init__.py:830
 msgid ""
 "Enter the hostname or IP address that corresponds to your VMware vCenter."
 msgstr "输入与 VMware vCenter 对应的主机名或 IP 地址。"
 
-#: awx/main/models/credential/__init__.py:848 awx/main/models/inventory.py:1063
+#: awx/main/models/credential/__init__.py:849 awx/main/models/inventory.py:831
 msgid "Red Hat Satellite 6"
 msgstr "红帽卫星 6"
 
-#: awx/main/models/credential/__init__.py:853
+#: awx/main/models/credential/__init__.py:854
 msgid "Satellite 6 URL"
 msgstr "卫星 6 URL"
 
-#: awx/main/models/credential/__init__.py:855
+#: awx/main/models/credential/__init__.py:856
 msgid ""
 "Enter the URL that corresponds to your Red Hat Satellite 6 server. For "
 "example, https://satellite.example.org"
 msgstr "输入与您的红帽卫星 6 服务器对应的 URL。例如：https://satellite.example.org"
 
-#: awx/main/models/credential/__init__.py:874 awx/main/models/inventory.py:1064
+#: awx/main/models/credential/__init__.py:875 awx/main/models/inventory.py:832
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: awx/main/models/credential/__init__.py:879
+#: awx/main/models/credential/__init__.py:880
 msgid "CloudForms URL"
 msgstr "CloudForms URL"
 
-#: awx/main/models/credential/__init__.py:881
+#: awx/main/models/credential/__init__.py:882
 msgid ""
 "Enter the URL for the virtual machine that corresponds to your CloudForms "
 "instance. For example, https://cloudforms.example.org"
 msgstr "输入与您的 CloudForms 实例对应的虚拟机的 URL。例如：https://cloudforms.example.org"
 
-#: awx/main/models/credential/__init__.py:901 awx/main/models/inventory.py:1060
+#: awx/main/models/credential/__init__.py:902 awx/main/models/inventory.py:828
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: awx/main/models/credential/__init__.py:906
+#: awx/main/models/credential/__init__.py:907
 msgid "Service Account Email Address"
 msgstr "服务账户电子邮件地址"
 
-#: awx/main/models/credential/__init__.py:908
+#: awx/main/models/credential/__init__.py:909
 msgid ""
 "The email address assigned to the Google Compute Engine service account."
 msgstr "分配给 Google Compute Engine 服务账户的电子邮件地址。"
 
-#: awx/main/models/credential/__init__.py:914
+#: awx/main/models/credential/__init__.py:915
 msgid ""
 "The Project ID is the GCE assigned identification. It is often constructed "
 "as three words or two words followed by a three-digit number. Examples: "
 "project-id-000 and another-project-id"
 msgstr "项目 ID 是 GCE 分配的标识。它通常由两三个单词构成，后跟三位数字。示例：project-id-000 和 another-project-id"
 
-#: awx/main/models/credential/__init__.py:920
+#: awx/main/models/credential/__init__.py:921
 msgid "RSA Private Key"
 msgstr "RSA 私钥"
 
-#: awx/main/models/credential/__init__.py:925
+#: awx/main/models/credential/__init__.py:926
 msgid ""
 "Paste the contents of the PEM file associated with the service account email."
 msgstr "粘贴与服务账户电子邮件关联的 PEM 文件的内容。"
 
-#: awx/main/models/credential/__init__.py:935 awx/main/models/inventory.py:1061
+#: awx/main/models/credential/__init__.py:936 awx/main/models/inventory.py:829
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: awx/main/models/credential/__init__.py:940
+#: awx/main/models/credential/__init__.py:941
 msgid "Subscription ID"
 msgstr "订阅 ID"
 
-#: awx/main/models/credential/__init__.py:942
+#: awx/main/models/credential/__init__.py:943
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr "订阅 ID 是一个 Azure 构造函数，它映射到一个用户名。"
 
-#: awx/main/models/credential/__init__.py:968
+#: awx/main/models/credential/__init__.py:969
 msgid "Azure Cloud Environment"
 msgstr "Azure 云环境"
 
-#: awx/main/models/credential/__init__.py:970
+#: awx/main/models/credential/__init__.py:971
 msgid ""
 "Environment variable AZURE_CLOUD_ENVIRONMENT when using Azure GovCloud or "
 "Azure stack."
 msgstr "使用 Azure GovCloud 或 Azure 堆栈时的环境变量 Azure_CLOUD_ENVIRONMENT。"
 
-#: awx/main/models/credential/__init__.py:980
+#: awx/main/models/credential/__init__.py:981
 msgid "GitHub Personal Access Token"
 msgstr "GitHub 个人访问令牌"
 
-#: awx/main/models/credential/__init__.py:988
+#: awx/main/models/credential/__init__.py:989
 msgid "This token needs to come from your profile settings in GitHub"
 msgstr "此令牌需要来自您在 GitHub 中的配置文件设置"
 
-#: awx/main/models/credential/__init__.py:997
+#: awx/main/models/credential/__init__.py:998
 msgid "GitLab Personal Access Token"
 msgstr "GitLab 个人访问令牌"
 
-#: awx/main/models/credential/__init__.py:1005
+#: awx/main/models/credential/__init__.py:1006
 msgid "This token needs to come from your profile settings in GitLab"
 msgstr "此令牌需要来自您在 GitLab 中的配置文件设置"
 
-#: awx/main/models/credential/__init__.py:1040
-#: awx/main/models/inventory.py:1066
+#: awx/main/models/credential/__init__.py:1041 awx/main/models/inventory.py:834
 msgid "Red Hat Virtualization"
 msgstr "红帽虚拟化"
 
-#: awx/main/models/credential/__init__.py:1047
+#: awx/main/models/credential/__init__.py:1048
 msgid "The host to authenticate with."
 msgstr "要进行验证的主机。"
 
-#: awx/main/models/credential/__init__.py:1059
+#: awx/main/models/credential/__init__.py:1060
 msgid "CA File"
 msgstr "CA 文件"
 
-#: awx/main/models/credential/__init__.py:1061
+#: awx/main/models/credential/__init__.py:1062
 msgid "Absolute file path to the CA file to use (optional)"
 msgstr "要使用的 CA 文件的绝对文件路径（可选）"
 
-#: awx/main/models/credential/__init__.py:1090
-#: awx/main/models/inventory.py:1067
+#: awx/main/models/credential/__init__.py:1091 awx/main/models/inventory.py:835
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
-#: awx/main/models/credential/__init__.py:1095
+#: awx/main/models/credential/__init__.py:1096
 msgid "Ansible Tower Hostname"
 msgstr "Ansible Tower 主机名"
 
-#: awx/main/models/credential/__init__.py:1097
+#: awx/main/models/credential/__init__.py:1098
 msgid "The Ansible Tower base URL to authenticate with."
 msgstr "要进行身份验证的 Ansible Tower 基本 URL。"
 
-#: awx/main/models/credential/__init__.py:1129
+#: awx/main/models/credential/__init__.py:1130
 msgid "OpenShift or Kubernetes API Bearer Token"
 msgstr "OpenShift 或 Kubernetes API 持有者令牌"
 
-#: awx/main/models/credential/__init__.py:1133
+#: awx/main/models/credential/__init__.py:1134
 msgid "OpenShift or Kubernetes API Endpoint"
 msgstr "OpenShift 或 Kubernetes API 端点"
 
-#: awx/main/models/credential/__init__.py:1135
+#: awx/main/models/credential/__init__.py:1136
 msgid "The OpenShift or Kubernetes API Endpoint to authenticate with."
 msgstr "要进行身份验证的 OpenShift 或 Kubernetes API 端点。"
 
-#: awx/main/models/credential/__init__.py:1138
-msgid "API authentication bearer token."
-msgstr "API 身份验证持有者令牌。"
+#: awx/main/models/credential/__init__.py:1139
+msgid "API authentication bearer token"
+msgstr "API 身份验证持有者令牌"
 
-#: awx/main/models/credential/__init__.py:1148
+#: awx/main/models/credential/__init__.py:1149
 msgid "Certificate Authority data"
 msgstr "证书颁发机构数据"
 
-#: awx/main/models/credential/__init__.py:1187
+#: awx/main/models/credential/__init__.py:1190
 msgid "Target must be a non-external credential"
 msgstr "目标必须是非外部凭证"
 
-#: awx/main/models/credential/__init__.py:1192
+#: awx/main/models/credential/__init__.py:1195
 msgid "Source must be an external credential"
 msgstr "源必须是外部凭证"
 
-#: awx/main/models/credential/__init__.py:1199
+#: awx/main/models/credential/__init__.py:1202
 msgid "Input field must be defined on target credential (options are {})."
 msgstr "输入字段必须在目标凭证上定义（选项为 {}）。"
 
-#: awx/main/models/events.py:105 awx/main/models/events.py:660
+#: awx/main/models/events.py:152 awx/main/models/events.py:674
 msgid "Host Failed"
 msgstr "主机故障"
 
-#: awx/main/models/events.py:106
+#: awx/main/models/events.py:153
 msgid "Host Started"
 msgstr "主机已启动"
 
-#: awx/main/models/events.py:107 awx/main/models/events.py:661
+#: awx/main/models/events.py:154 awx/main/models/events.py:675
 msgid "Host OK"
 msgstr "主机正常"
 
-#: awx/main/models/events.py:108
+#: awx/main/models/events.py:155
 msgid "Host Failure"
 msgstr "主机故障"
 
-#: awx/main/models/events.py:109 awx/main/models/events.py:667
+#: awx/main/models/events.py:156 awx/main/models/events.py:681
 msgid "Host Skipped"
 msgstr "主机已跳过"
 
-#: awx/main/models/events.py:110 awx/main/models/events.py:662
+#: awx/main/models/events.py:157 awx/main/models/events.py:676
 msgid "Host Unreachable"
 msgstr "主机无法访问"
 
-#: awx/main/models/events.py:111 awx/main/models/events.py:125
+#: awx/main/models/events.py:158 awx/main/models/events.py:172
 msgid "No Hosts Remaining"
 msgstr "没有剩余主机"
 
-#: awx/main/models/events.py:112
+#: awx/main/models/events.py:159
 msgid "Host Polling"
 msgstr "主机轮询"
 
-#: awx/main/models/events.py:113
+#: awx/main/models/events.py:160
 msgid "Host Async OK"
 msgstr "主机异步正常"
 
-#: awx/main/models/events.py:114
+#: awx/main/models/events.py:161
 msgid "Host Async Failure"
 msgstr "主机同步故障"
 
-#: awx/main/models/events.py:115
+#: awx/main/models/events.py:162
 msgid "Item OK"
 msgstr "项正常"
 
-#: awx/main/models/events.py:116
+#: awx/main/models/events.py:163
 msgid "Item Failed"
 msgstr "项故障"
 
-#: awx/main/models/events.py:117
+#: awx/main/models/events.py:164
 msgid "Item Skipped"
 msgstr "项已跳过"
 
-#: awx/main/models/events.py:118
+#: awx/main/models/events.py:165
 msgid "Host Retry"
 msgstr "主机重试"
 
-#: awx/main/models/events.py:120
+#: awx/main/models/events.py:167
 msgid "File Difference"
 msgstr "文件差异"
 
-#: awx/main/models/events.py:121
+#: awx/main/models/events.py:168
 msgid "Playbook Started"
 msgstr "Playbook 已启动"
 
-#: awx/main/models/events.py:122
+#: awx/main/models/events.py:169
 msgid "Running Handlers"
 msgstr "正在运行的处理程序"
 
-#: awx/main/models/events.py:123
+#: awx/main/models/events.py:170
 msgid "Including File"
 msgstr "包含文件"
 
-#: awx/main/models/events.py:124
+#: awx/main/models/events.py:171
 msgid "No Hosts Matched"
 msgstr "未匹配主机"
 
-#: awx/main/models/events.py:126
+#: awx/main/models/events.py:173
 msgid "Task Started"
 msgstr "任务已启动"
 
-#: awx/main/models/events.py:128
+#: awx/main/models/events.py:175
 msgid "Variables Prompted"
 msgstr "提示变量"
 
-#: awx/main/models/events.py:129
+#: awx/main/models/events.py:176
 msgid "Gathering Facts"
 msgstr "收集事实"
 
-#: awx/main/models/events.py:130
+#: awx/main/models/events.py:177
 msgid "internal: on Import for Host"
 msgstr "内部：导入主机时"
 
-#: awx/main/models/events.py:131
+#: awx/main/models/events.py:178
 msgid "internal: on Not Import for Host"
 msgstr "内部：不为主机导入时"
 
-#: awx/main/models/events.py:132
+#: awx/main/models/events.py:179
 msgid "Play Started"
 msgstr "Play 已启动"
 
-#: awx/main/models/events.py:133
+#: awx/main/models/events.py:180
 msgid "Playbook Complete"
 msgstr "Playbook 完成"
 
-#: awx/main/models/events.py:137 awx/main/models/events.py:677
+#: awx/main/models/events.py:184 awx/main/models/events.py:691
 msgid "Debug"
 msgstr "调试"
 
-#: awx/main/models/events.py:138 awx/main/models/events.py:678
+#: awx/main/models/events.py:185 awx/main/models/events.py:692
 msgid "Verbose"
 msgstr "详细"
 
-#: awx/main/models/events.py:139 awx/main/models/events.py:679
+#: awx/main/models/events.py:186 awx/main/models/events.py:693
 msgid "Deprecated"
 msgstr "已弃用"
 
-#: awx/main/models/events.py:140 awx/main/models/events.py:680
+#: awx/main/models/events.py:187 awx/main/models/events.py:694
 msgid "Warning"
 msgstr "警告"
 
-#: awx/main/models/events.py:141 awx/main/models/events.py:681
+#: awx/main/models/events.py:188 awx/main/models/events.py:695
 msgid "System Warning"
 msgstr "系统警告"
 
-#: awx/main/models/events.py:142 awx/main/models/events.py:682
-#: awx/main/models/unified_jobs.py:73
+#: awx/main/models/events.py:189 awx/main/models/events.py:696
+#: awx/main/models/unified_jobs.py:75
 msgid "Error"
 msgstr "错误"
 
-#: awx/main/models/ha.py:168
+#: awx/main/models/ha.py:175
 msgid "Instances that are members of this InstanceGroup"
 msgstr "属于此实例组成员的实例"
 
-#: awx/main/models/ha.py:173
+#: awx/main/models/ha.py:180
 msgid "Instance Group to remotely control this group."
 msgstr "远程控制此组的实例组。"
 
-#: awx/main/models/ha.py:193
+#: awx/main/models/ha.py:200
 msgid "Percentage of Instances to automatically assign to this group"
 msgstr "自动分配给此组的实例百分比"
 
-#: awx/main/models/ha.py:197
+#: awx/main/models/ha.py:204
 msgid ""
 "Static minimum number of Instances to automatically assign to this group"
 msgstr "自动分配给此组的静态最小实例数量"
 
-#: awx/main/models/ha.py:202
+#: awx/main/models/ha.py:209
 msgid ""
 "List of exact-match Instances that will always be automatically assigned to "
 "this group"
@@ -3629,436 +3663,374 @@ msgstr "此字段已弃用，并将在以后的发行版本中删除。此清单
 
 #: awx/main/models/inventory.py:129
 msgid ""
-"This field is deprecated and will be removed in a future release. Number of "
-"groups in this inventory with active failures."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。此清单中有活跃故障的组数。"
-
-#: awx/main/models/inventory.py:135
-msgid ""
 "This field is deprecated and will be removed in a future release. Flag "
 "indicating whether this inventory has any external inventory sources."
 msgstr "此字段已弃用，并将在以后的发行版本中删除。表示此清单是否有任何外部清单源的标记。"
 
-#: awx/main/models/inventory.py:141
+#: awx/main/models/inventory.py:135
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr "在此清单中配置的外部清单源总数。"
 
-#: awx/main/models/inventory.py:146
+#: awx/main/models/inventory.py:140
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr "此清单中有故障的外部清单源数量。"
 
-#: awx/main/models/inventory.py:153
+#: awx/main/models/inventory.py:147
 msgid "Kind of inventory being represented."
 msgstr "所代表的清单种类。"
 
-#: awx/main/models/inventory.py:159
+#: awx/main/models/inventory.py:153
 msgid "Filter that will be applied to the hosts of this inventory."
 msgstr "将应用到此清单的主机的过滤器。"
 
-#: awx/main/models/inventory.py:187
+#: awx/main/models/inventory.py:181
 msgid ""
 "Credentials to be used by hosts belonging to this inventory when accessing "
 "Red Hat Insights API."
 msgstr "访问红帽 Insights API 时供属于此清单的主机使用的凭证。"
 
-#: awx/main/models/inventory.py:196
+#: awx/main/models/inventory.py:190
 msgid "Flag indicating the inventory is being deleted."
 msgstr "指示正在删除清单的标记。"
 
-#: awx/main/models/inventory.py:251
+#: awx/main/models/inventory.py:245
 msgid "Could not parse subset as slice specification."
 msgstr "无法将子集作为分片规格来解析。"
 
-#: awx/main/models/inventory.py:255
+#: awx/main/models/inventory.py:249
 msgid "Slice number must be less than total number of slices."
 msgstr "分片数量必须小于分片总数。"
 
-#: awx/main/models/inventory.py:257
+#: awx/main/models/inventory.py:251
 msgid "Slice number must be 1 or higher."
 msgstr "分片数量必须为 1 或更高。"
 
-#: awx/main/models/inventory.py:517
+#: awx/main/models/inventory.py:388
 msgid "Assignment not allowed for Smart Inventory"
 msgstr "智能清单不允许分配"
 
-#: awx/main/models/inventory.py:519 awx/main/models/projects.py:166
+#: awx/main/models/inventory.py:390 awx/main/models/projects.py:166
 msgid "Credential kind must be 'insights'."
 msgstr "凭证种类必须是 'inights'。"
 
-#: awx/main/models/inventory.py:604
+#: awx/main/models/inventory.py:475
 msgid "Is this host online and available for running jobs?"
-msgstr "此主机是否在线，并可用于运行任务？"
+msgstr "此主机是否在线，并可用于运行作业？"
 
-#: awx/main/models/inventory.py:610
+#: awx/main/models/inventory.py:481
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr "远程清单源用来唯一标识主机的值"
 
-#: awx/main/models/inventory.py:615
+#: awx/main/models/inventory.py:486
 msgid "Host variables in JSON or YAML format."
 msgstr "JSON 或 YAML 格式的主机变量。"
 
-#: awx/main/models/inventory.py:637
-msgid ""
-"This field is deprecated and will be removed in a future release. Flag "
-"indicating whether the last job failed for this host."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。指示此主机的最后一个任务是否失败的标记。"
-
-#: awx/main/models/inventory.py:643
-msgid ""
-"This field is deprecated and will be removed in a future release. Flag "
-"indicating whether this host was created/updated from any external inventory "
-"sources."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。指示此主机是否从任何外部清单源中创建/更新的标记。"
-
-#: awx/main/models/inventory.py:650
+#: awx/main/models/inventory.py:509
 msgid "Inventory source(s) that created or modified this host."
 msgstr "创建或修改此主机的清单源。"
 
-#: awx/main/models/inventory.py:655
+#: awx/main/models/inventory.py:514
 msgid "Arbitrary JSON structure of most recent ansible_facts, per-host."
 msgstr "每个主机最近的 ansible_facts 的任意 JSON 结构。"
 
-#: awx/main/models/inventory.py:661
+#: awx/main/models/inventory.py:520
 msgid "The date and time ansible_facts was last modified."
 msgstr "最后修改 ansible_facts 的日期和时间。"
 
-#: awx/main/models/inventory.py:668
+#: awx/main/models/inventory.py:527
 msgid "Red Hat Insights host unique identifier."
 msgstr "红帽 Insights 主机唯一标识符。"
 
-#: awx/main/models/inventory.py:810
+#: awx/main/models/inventory.py:641
 msgid "Group variables in JSON or YAML format."
 msgstr "JSON 或 YAML 格式的组变量。"
 
-#: awx/main/models/inventory.py:816
+#: awx/main/models/inventory.py:647
 msgid "Hosts associated directly with this group."
 msgstr "与此组直接关联的主机。"
 
-#: awx/main/models/inventory.py:821
-msgid ""
-"This field is deprecated and will be removed in a future release. Total "
-"number of hosts directly or indirectly in this group."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。直接或间接属于此组的主机总数。"
-
-#: awx/main/models/inventory.py:827
-msgid ""
-"This field is deprecated and will be removed in a future release. Flag "
-"indicating whether this group has any hosts with active failures."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。指示此组是否包含任何有活跃故障的主机的标记。"
-
-#: awx/main/models/inventory.py:833
-msgid ""
-"This field is deprecated and will be removed in a future release. Number of "
-"hosts in this group with active failures."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。此组中有活跃故障的主机数量。"
-
-#: awx/main/models/inventory.py:839
-msgid ""
-"This field is deprecated and will be removed in a future release. Total "
-"number of child groups contained within this group."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。此组中包含的子组总数。"
-
-#: awx/main/models/inventory.py:845
-msgid ""
-"This field is deprecated and will be removed in a future release. Number of "
-"child groups within this group that have active failures."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。此组中有活跃故障的子组数量。"
-
-#: awx/main/models/inventory.py:851
-msgid ""
-"This field is deprecated and will be removed in a future release. Flag "
-"indicating whether this group was created/updated from any external "
-"inventory sources."
-msgstr "此字段已弃用，并将在以后的发行版本中删除。指示此组是否从任何外部清单源中创建/更新的标记。"
-
-#: awx/main/models/inventory.py:858
+#: awx/main/models/inventory.py:653
 msgid "Inventory source(s) that created or modified this group."
 msgstr "创建或修改此组的清单源。"
 
-#: awx/main/models/inventory.py:1056 awx/main/models/projects.py:53
-#: awx/main/models/unified_jobs.py:529
-msgid "Manual"
-msgstr "手动"
-
-#: awx/main/models/inventory.py:1057
+#: awx/main/models/inventory.py:825
 msgid "File, Directory or Script"
 msgstr "文件、目录或脚本"
 
-#: awx/main/models/inventory.py:1058
+#: awx/main/models/inventory.py:826
 msgid "Sourced from a Project"
 msgstr "源于项目"
 
-#: awx/main/models/inventory.py:1059
+#: awx/main/models/inventory.py:827
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
-#: awx/main/models/inventory.py:1068
+#: awx/main/models/inventory.py:836
 msgid "Custom Script"
 msgstr "自定义脚本"
 
-#: awx/main/models/inventory.py:1185
+#: awx/main/models/inventory.py:953
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "YAML 或 JSON 格式的清单源变量。"
 
-#: awx/main/models/inventory.py:1196
+#: awx/main/models/inventory.py:964
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
 msgstr "以逗号分隔的过滤器表达式列表（仅限 EC2）。当任何过滤器匹配时会导入主机。"
 
-#: awx/main/models/inventory.py:1202
+#: awx/main/models/inventory.py:970
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr "限制从清单源自动创建的组（仅限 EC2）。"
 
-#: awx/main/models/inventory.py:1206
+#: awx/main/models/inventory.py:974
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr "从远程清单源覆盖本地组和主机。"
 
-#: awx/main/models/inventory.py:1210
+#: awx/main/models/inventory.py:978
 msgid "Overwrite local variables from remote inventory source."
 msgstr "从远程清单源覆盖本地变量。"
 
-#: awx/main/models/inventory.py:1215 awx/main/models/jobs.py:153
+#: awx/main/models/inventory.py:983 awx/main/models/jobs.py:154
 #: awx/main/models/projects.py:135
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr "取消任务前运行的时间（以秒为单位）。"
 
-#: awx/main/models/inventory.py:1248
+#: awx/main/models/inventory.py:1016
 msgid "Image ID"
 msgstr "镜像 ID"
 
-#: awx/main/models/inventory.py:1249
+#: awx/main/models/inventory.py:1017
 msgid "Availability Zone"
 msgstr "可用性区域"
 
-#: awx/main/models/inventory.py:1251
+#: awx/main/models/inventory.py:1019
 msgid "Instance ID"
 msgstr "实例 ID"
 
-#: awx/main/models/inventory.py:1252
+#: awx/main/models/inventory.py:1020
 msgid "Instance State"
 msgstr "实例状态"
 
-#: awx/main/models/inventory.py:1253
+#: awx/main/models/inventory.py:1021
 msgid "Platform"
 msgstr "平台"
 
-#: awx/main/models/inventory.py:1254
+#: awx/main/models/inventory.py:1022
 msgid "Instance Type"
 msgstr "实例类型"
 
-#: awx/main/models/inventory.py:1256
+#: awx/main/models/inventory.py:1024
 msgid "Region"
 msgstr "区域"
 
-#: awx/main/models/inventory.py:1257
+#: awx/main/models/inventory.py:1025
 msgid "Security Group"
 msgstr "安全组"
 
-#: awx/main/models/inventory.py:1258
+#: awx/main/models/inventory.py:1026
 msgid "Tags"
 msgstr "标签"
 
-#: awx/main/models/inventory.py:1259
+#: awx/main/models/inventory.py:1027
 msgid "Tag None"
 msgstr "标签 None"
 
-#: awx/main/models/inventory.py:1260
+#: awx/main/models/inventory.py:1028
 msgid "VPC ID"
 msgstr "VPC ID"
 
-#: awx/main/models/inventory.py:1328
+#: awx/main/models/inventory.py:1096
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr "基于云的清单源（如 %s）需要匹配的云服务的凭证。"
 
-#: awx/main/models/inventory.py:1334
+#: awx/main/models/inventory.py:1102
 msgid "Credential is required for a cloud source."
 msgstr "云源需要凭证。"
 
-#: awx/main/models/inventory.py:1337
+#: awx/main/models/inventory.py:1105
 msgid ""
 "Credentials of type machine, source control, insights and vault are "
 "disallowed for custom inventory sources."
 msgstr "对于自定义清单源，不允许使用机器、源控制、insights 和 vault 类型的凭证。"
 
-#: awx/main/models/inventory.py:1342
+#: awx/main/models/inventory.py:1110
 msgid ""
 "Credentials of type insights and vault are disallowed for scm inventory "
 "sources."
 msgstr "对于 scm 清单源，不允许使用 insights 和 vault 类型的凭证。"
 
-#: awx/main/models/inventory.py:1402
+#: awx/main/models/inventory.py:1170
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr "无效的 %(source)s 区域：%(region)s"
 
-#: awx/main/models/inventory.py:1426
+#: awx/main/models/inventory.py:1194
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr "无效的过滤器表达式：%(filter)s"
 
-#: awx/main/models/inventory.py:1447
+#: awx/main/models/inventory.py:1215
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr "选择的组无效：%(choice)s"
 
-#: awx/main/models/inventory.py:1483
+#: awx/main/models/inventory.py:1243
 msgid "Project containing inventory file used as source."
 msgstr "包含用作源的清单文件的项目。"
 
-#: awx/main/models/inventory.py:1652
-#, python-format
-msgid ""
-"Unable to configure this item for cloud sync. It is already managed by %s."
-msgstr "无法为云同步配置此项。它已经由 %s 管理。"
-
-#: awx/main/models/inventory.py:1662
+#: awx/main/models/inventory.py:1416
 msgid ""
 "More than one SCM-based inventory source with update on project update per-"
 "inventory not allowed."
 msgstr "不允许多个基于 SCM 的清单源按清单在项目更新时更新。"
 
-#: awx/main/models/inventory.py:1669
+#: awx/main/models/inventory.py:1423
 msgid ""
 "Cannot update SCM-based inventory source on launch if set to update on "
 "project update. Instead, configure the corresponding source project to "
 "update on launch."
 msgstr "如果设置为在项目更新时更新，则无法在启动时更新基于 SCM 的清单源。应将对应的源项目配置为在启动时更新。"
 
-#: awx/main/models/inventory.py:1675
+#: awx/main/models/inventory.py:1429
 msgid "Cannot set source_path if not SCM type."
 msgstr "如果不是 SCM 类型，则无法设置 source_path。"
 
-#: awx/main/models/inventory.py:1718
+#: awx/main/models/inventory.py:1472
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr "此项目更新中的清单文件用于清单更新。"
 
-#: awx/main/models/inventory.py:1831
+#: awx/main/models/inventory.py:1583
 msgid "Inventory script contents"
 msgstr "清单脚本内容"
 
-#: awx/main/models/inventory.py:1836
+#: awx/main/models/inventory.py:1588
 msgid "Organization owning this inventory script"
 msgstr "拥有此清单脚本的机构"
 
-#: awx/main/models/jobs.py:73
+#: awx/main/models/jobs.py:74
 msgid ""
 "If enabled, textual changes made to any templated files on the host are "
 "shown in the standard output"
 msgstr "如果启用，标准输出中会显示对主机上任何模板文件进行的文本更改。"
 
-#: awx/main/models/jobs.py:105
+#: awx/main/models/jobs.py:106
 msgid ""
 "Branch to use in job run. Project default used if blank. Only allowed if "
 "project allow_override field is set to true."
-msgstr "要在任务运行中使用的分支。如果为空，则使用项目默认值。只有项目 allow_override 字段设置为 true 时才允许使用。"
+msgstr "要在作业运行中使用的分支。如果为空，则使用项目默认值。只有项目 allow_override 字段设置为 true 时才允许使用。"
 
-#: awx/main/models/jobs.py:158
+#: awx/main/models/jobs.py:159
 msgid ""
 "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts "
 "at the end of a playbook run to the database and caching facts for use by "
 "Ansible."
 msgstr "如果启用，Tower 将充当 Ansible 事实缓存插件；将 playbook 末尾的事实保留到数据库，并缓存事实以供 Ansible 使用。"
 
-#: awx/main/models/jobs.py:254
+#: awx/main/models/jobs.py:260
 msgid ""
 "The number of jobs to slice into at runtime. Will cause the Job Template to "
 "launch a workflow if value is greater than 1."
-msgstr "要在运行时分片的任务数量。如果值大于 1，将导致任务模板启动工作流。"
+msgstr "要在运行时分片的作业数量。如果值大于 1，将导致作业模板启动工作流。"
 
-#: awx/main/models/jobs.py:287
+#: awx/main/models/jobs.py:297
 msgid "Job Template must provide 'inventory' or allow prompting for it."
-msgstr "任务模板必须提供“清单”或允许相关提示。"
+msgstr "作业模板必须提供“清单”或允许相关提示。"
 
-#: awx/main/models/jobs.py:413
+#: awx/main/models/jobs.py:308
+#, python-brace-format
+msgid "Maximum number of forks ({settings.MAX_FORKS}) exceeded."
+msgstr "超过了最大 fork 数量 ({settings.MAX_FORKS}) 。"
+
+#: awx/main/models/jobs.py:463
 msgid "Project is missing."
 msgstr "项目缺失。"
 
-#: awx/main/models/jobs.py:417
+#: awx/main/models/jobs.py:467
 msgid "Project does not allow override of branch."
 msgstr "项目不允许覆写分支。"
 
-#: awx/main/models/jobs.py:427 awx/main/models/workflow.py:518
+#: awx/main/models/jobs.py:477 awx/main/models/workflow.py:545
 msgid "Field is not configured to prompt on launch."
 msgstr "字段没有配置为启动时提示。"
 
-#: awx/main/models/jobs.py:433
+#: awx/main/models/jobs.py:483
 msgid "Saved launch configurations cannot provide passwords needed to start."
 msgstr "保存的启动配置无法提供启动所需的密码。"
 
-#: awx/main/models/jobs.py:441
+#: awx/main/models/jobs.py:491
 msgid "Job Template {} is missing or undefined."
-msgstr "任务模板 {} 缺失或未定义。"
+msgstr "作业模板 {} 缺失或未定义。"
 
-#: awx/main/models/jobs.py:524 awx/main/models/projects.py:285
-#: awx/main/models/projects.py:491
+#: awx/main/models/jobs.py:574 awx/main/models/projects.py:278
+#: awx/main/models/projects.py:497
 msgid "SCM Revision"
 msgstr "SCM 修订"
 
-#: awx/main/models/jobs.py:525
+#: awx/main/models/jobs.py:575
 msgid "The SCM Revision from the Project used for this job, if available"
-msgstr "用于此任务的项目中的 SCM 修订（如果可用）"
+msgstr "用于此作业的项目中的 SCM 修订（如果可用）"
 
-#: awx/main/models/jobs.py:533
+#: awx/main/models/jobs.py:583
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
-msgstr "用于确保 playbook 可用于任务运行的 SCM 刷新任务"
+msgstr "用于确保 playbook 可用于作业运行的 SCM 刷新任务"
 
-#: awx/main/models/jobs.py:538
+#: awx/main/models/jobs.py:588
 msgid ""
 "If part of a sliced job, the ID of the inventory slice operated on. If not "
 "part of sliced job, parameter is not used."
-msgstr "如果是分片任务的一部分，则为所操作的清单分片的 ID。如果不是分片任务的一部分，则不使用参数。"
+msgstr "如果是分片作业的一部分，则为所操作的清单分片的 ID。如果不是分片作业的一部分，则不使用参数。"
 
-#: awx/main/models/jobs.py:544
+#: awx/main/models/jobs.py:594
 msgid ""
 "If ran as part of sliced jobs, the total number of slices. If 1, job is not "
 "part of a sliced job."
-msgstr "如果作为分片任务的一部分运行，则为分片总数。如果为 1，则任务不是分片任务的一部分。"
+msgstr "如果作为分片作业的一部分运行，则为分片总数。如果为 1，则作业不是分片作业的一部分。"
 
-#: awx/main/models/jobs.py:626
+#: awx/main/models/jobs.py:676
 #, python-brace-format
 msgid "{status_value} is not a valid status option."
 msgstr "{status_value} 不是有效的状态选项。"
 
-#: awx/main/models/jobs.py:874
+#: awx/main/models/jobs.py:926
 msgid ""
 "Inventory applied as a prompt, assuming job template prompts for inventory"
-msgstr "作为提示而应用的清单，假定任务模板提示提供清单"
+msgstr "作为提示而应用的清单，假定作业模板提示提供清单"
 
-#: awx/main/models/jobs.py:1030
+#: awx/main/models/jobs.py:1085
 msgid "job host summaries"
-msgstr "任务主机摘要"
+msgstr "作业主机摘要"
 
-#: awx/main/models/jobs.py:1104
+#: awx/main/models/jobs.py:1144
 msgid "Remove jobs older than a certain number of days"
-msgstr "删除超过特定天数的任务"
+msgstr "删除超过特定天数的作业"
 
-#: awx/main/models/jobs.py:1105
+#: awx/main/models/jobs.py:1145
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "删除比特定天数旧的活动流条目"
 
-#: awx/main/models/jobs.py:1106
+#: awx/main/models/jobs.py:1146
 msgid "Removes expired browser sessions from the database"
 msgstr "从数据库中删除已过期的浏览器会话"
 
-#: awx/main/models/jobs.py:1107
+#: awx/main/models/jobs.py:1147
 msgid "Removes expired OAuth 2 access tokens and refresh tokens"
 msgstr "删除已过期的 OAuth 2 访问令牌并刷新令牌"
 
-#: awx/main/models/jobs.py:1177
+#: awx/main/models/jobs.py:1217
 #, python-brace-format
 msgid "Variables {list_of_keys} are not allowed for system jobs."
-msgstr "系统任务不允许使用变量 {list_of_keys}。"
+msgstr "系统作业不允许使用变量 {list_of_keys}。"
 
-#: awx/main/models/jobs.py:1193
+#: awx/main/models/jobs.py:1233
 msgid "days must be a positive integer."
 msgstr "天必须为正整数。"
 
@@ -4097,102 +4069,138 @@ msgstr "将状态发回服务 API 的个人访问令牌"
 msgid "Unique identifier of the event that triggered this webhook"
 msgstr "触发此 Webhook 的事件的唯一标识符"
 
+#: awx/main/models/notifications.py:42
+msgid "Email"
+msgstr "电子邮件"
+
+#: awx/main/models/notifications.py:43
+msgid "Slack"
+msgstr "Slack"
+
+#: awx/main/models/notifications.py:44
+msgid "Twilio"
+msgstr "Twilio"
+
+#: awx/main/models/notifications.py:45
+msgid "Pagerduty"
+msgstr "Pagerduty"
+
 #: awx/main/models/notifications.py:46
 msgid "Grafana"
 msgstr "Grafana"
+
+#: awx/main/models/notifications.py:47
+msgid "HipChat"
+msgstr "HipChat"
+
+#: awx/main/models/notifications.py:48 awx/main/models/unified_jobs.py:545
+msgid "Webhook"
+msgstr "Webhook"
+
+#: awx/main/models/notifications.py:49
+msgid "Mattermost"
+msgstr "Mattermost"
 
 #: awx/main/models/notifications.py:50
 msgid "Rocket.Chat"
 msgstr "Rocket.Chat"
 
+#: awx/main/models/notifications.py:51
+msgid "IRC"
+msgstr "IRC"
+
 #: awx/main/models/notifications.py:82
 msgid "Optional custom messages for notification template."
 msgstr "通知模板的可选自定义消息。"
 
-#: awx/main/models/notifications.py:212 awx/main/models/unified_jobs.py:68
+#: awx/main/models/notifications.py:212 awx/main/models/unified_jobs.py:70
 msgid "Pending"
 msgstr "待处理"
 
-#: awx/main/models/notifications.py:213 awx/main/models/unified_jobs.py:71
+#: awx/main/models/notifications.py:213 awx/main/models/unified_jobs.py:73
 msgid "Successful"
 msgstr "成功"
 
-#: awx/main/models/notifications.py:214 awx/main/models/unified_jobs.py:72
+#: awx/main/models/notifications.py:214 awx/main/models/unified_jobs.py:74
 msgid "Failed"
 msgstr "失败"
 
-#: awx/main/models/notifications.py:468
+#: awx/main/models/notifications.py:467
 msgid "status must be either running, succeeded or failed"
 msgstr "状态必须是正在运行、成功或失败"
 
-#: awx/main/models/oauth.py:29
+#: awx/main/models/oauth.py:33
 msgid "application"
 msgstr "应用"
 
-#: awx/main/models/oauth.py:36
+#: awx/main/models/oauth.py:40
 msgid "Confidential"
 msgstr "机密"
 
-#: awx/main/models/oauth.py:37
+#: awx/main/models/oauth.py:41
 msgid "Public"
 msgstr "公开"
 
-#: awx/main/models/oauth.py:43
+#: awx/main/models/oauth.py:47
 msgid "Authorization code"
 msgstr "授权代码"
 
-#: awx/main/models/oauth.py:44
+#: awx/main/models/oauth.py:48
 msgid "Resource owner password-based"
 msgstr "基于资源所有者密码"
 
-#: awx/main/models/oauth.py:59
+#: awx/main/models/oauth.py:63
 msgid "Organization containing this application."
 msgstr "包含此应用的机构。"
 
-#: awx/main/models/oauth.py:68
+#: awx/main/models/oauth.py:72
 msgid ""
 "Used for more stringent verification of access to an application when "
 "creating a token."
 msgstr "用于在创建令牌时更严格地验证对应用的访问。"
 
-#: awx/main/models/oauth.py:73
+#: awx/main/models/oauth.py:77
 msgid ""
 "Set to Public or Confidential depending on how secure the client device is."
 msgstr "根据客户端设备的安全情况，设置为公共或机密。"
 
-#: awx/main/models/oauth.py:77
+#: awx/main/models/oauth.py:81
 msgid ""
 "Set True to skip authorization step for completely trusted applications."
 msgstr "设为 True 可为完全可信的应用跳过授权步骤。"
 
-#: awx/main/models/oauth.py:82
+#: awx/main/models/oauth.py:86
 msgid ""
 "The Grant type the user must use for acquire tokens for this application."
 msgstr "用户必须用来获取此应用令牌的授予类型。"
 
-#: awx/main/models/oauth.py:90
+#: awx/main/models/oauth.py:94
 msgid "access token"
 msgstr "访问令牌"
 
-#: awx/main/models/oauth.py:99
+#: awx/main/models/oauth.py:103
 msgid "The user representing the token owner"
 msgstr "代表令牌所有者的用户"
 
-#: awx/main/models/oauth.py:113
+#: awx/main/models/oauth.py:117
 msgid ""
 "Allowed scopes, further restricts user's permissions. Must be a simple space-"
 "separated string with allowed scopes ['read', 'write']."
 msgstr "允许的范围，进一步限制用户的权限。必须是带有允许范围 ['read', 'write'] 的简单空格分隔字符串。"
 
-#: awx/main/models/oauth.py:132
+#: awx/main/models/oauth.py:140
 msgid ""
 "OAuth2 Tokens cannot be created by users associated with an external "
 "authentication provider ({})"
 msgstr "OAuth2 令牌不能由与外部身份验证提供商 ({}) 关联的用户创建"
 
-#: awx/main/models/organization.py:52
+#: awx/main/models/organization.py:51
 msgid "Maximum number of hosts allowed to be managed by this organization."
 msgstr "允许由此机构管理的最大主机数。"
+
+#: awx/main/models/projects.py:53 awx/main/models/unified_jobs.py:539
+msgid "Manual"
+msgstr "手动"
 
 #: awx/main/models/projects.py:54
 msgid "Git"
@@ -4276,44 +4284,52 @@ msgstr "凭证种类必须是 'scm'。"
 msgid "Invalid credential."
 msgstr "无效凭证。"
 
-#: awx/main/models/projects.py:266
+#: awx/main/models/projects.py:259
 msgid "Update the project when a job is launched that uses the project."
-msgstr "当使用项目的任务启动时更新项目。"
+msgstr "当使用项目的作业启动时更新项目。"
 
-#: awx/main/models/projects.py:271
+#: awx/main/models/projects.py:264
 msgid ""
 "The number of seconds after the last project update ran that a new project "
 "update will be launched as a job dependency."
-msgstr "最后一次项目更新运行后等待的秒数，此后将启动一个新项目更新作为任务依赖项。"
+msgstr "最后一次项目更新运行后等待的秒数，此后将启动一个新项目更新作为作业依赖项。"
 
-#: awx/main/models/projects.py:276
+#: awx/main/models/projects.py:269
 msgid ""
 "Allow changing the SCM branch or revision in a job template that uses this "
 "project."
-msgstr "允许在使用此项目的任务模板中更改 SCM 分支或修订版本。"
+msgstr "允许在使用此项目的作业模板中更改 SCM 分支或修订版本。"
 
-#: awx/main/models/projects.py:286
+#: awx/main/models/projects.py:279
 msgid "The last revision fetched by a project update"
 msgstr "项目更新获取的最后修订版本"
 
-#: awx/main/models/projects.py:293
+#: awx/main/models/projects.py:286
 msgid "Playbook Files"
 msgstr "Playbook 文件"
 
-#: awx/main/models/projects.py:294
+#: awx/main/models/projects.py:287
 msgid "List of playbooks found in the project"
 msgstr "项目中找到的 playbook 列表"
 
-#: awx/main/models/projects.py:301
+#: awx/main/models/projects.py:294
 msgid "Inventory Files"
 msgstr "清单文件"
 
-#: awx/main/models/projects.py:302
+#: awx/main/models/projects.py:295
 msgid ""
 "Suggested list of content that could be Ansible inventory in the project"
 msgstr "可作为项目中的 Ansible 清单的建议内容列表"
 
-#: awx/main/models/projects.py:492
+#: awx/main/models/projects.py:332
+msgid "Organization cannot be changed when in use by job templates."
+msgstr "当作业使用时不能更改机构。"
+
+#: awx/main/models/projects.py:490
+msgid "Parts of the project update playbook that will be run."
+msgstr "将要运行的项目更新 playbook 的部分。"
+
+#: awx/main/models/projects.py:498
 msgid ""
 "The SCM Revision discovered by this update for the given project and branch."
 msgstr "此更新针对给定项目和分支发现的 SCM 修订。"
@@ -4348,7 +4364,7 @@ msgstr "凭证管理员"
 
 #: awx/main/models/rbac.py:42
 msgid "Job Template Admin"
-msgstr "任务模板管理员"
+msgstr "作业模板管理员"
 
 #: awx/main/models/rbac.py:43
 msgid "Workflow Admin"
@@ -4422,7 +4438,7 @@ msgstr "可以管理 %s 的所有凭证"
 #: awx/main/models/rbac.py:62
 #, python-format
 msgid "Can manage all job templates of the %s"
-msgstr "可以管理 %s 的所有任务模板"
+msgstr "可以管理 %s 的所有作业模板"
 
 #: awx/main/models/rbac.py:63
 #, python-format
@@ -4466,7 +4482,7 @@ msgstr "可更新 %s"
 #: awx/main/models/rbac.py:73
 #, python-format
 msgid "Can use the %s in a job template"
-msgstr "可以使用任务模板中的 %s"
+msgstr "可以使用作业模板中的 %s"
 
 #: awx/main/models/rbac.py:74
 msgid "Can approve or deny a workflow approval node"
@@ -4502,148 +4518,184 @@ msgstr "代表计划 iCal 重复规则的值。"
 msgid "The next time that the scheduled action will run."
 msgstr "调度的操作下次运行的时间。"
 
-#: awx/main/models/unified_jobs.py:67
+#: awx/main/models/unified_jobs.py:69
 msgid "New"
 msgstr "新"
 
-#: awx/main/models/unified_jobs.py:69
+#: awx/main/models/unified_jobs.py:71
 msgid "Waiting"
 msgstr "等待"
 
-#: awx/main/models/unified_jobs.py:70
+#: awx/main/models/unified_jobs.py:72
 msgid "Running"
 msgstr "运行中"
 
-#: awx/main/models/unified_jobs.py:74
+#: awx/main/models/unified_jobs.py:76
 msgid "Canceled"
 msgstr "已取消"
 
-#: awx/main/models/unified_jobs.py:78
+#: awx/main/models/unified_jobs.py:80
 msgid "Never Updated"
 msgstr "永不更新"
 
-#: awx/main/models/unified_jobs.py:82
+#: awx/main/models/unified_jobs.py:84
 msgid "OK"
 msgstr "确定"
 
-#: awx/main/models/unified_jobs.py:83
+#: awx/main/models/unified_jobs.py:85
 msgid "Missing"
 msgstr "缺少"
 
-#: awx/main/models/unified_jobs.py:87
+#: awx/main/models/unified_jobs.py:89
 msgid "No External Source"
 msgstr "没有外部源"
 
-#: awx/main/models/unified_jobs.py:94
+#: awx/main/models/unified_jobs.py:96
 msgid "Updating"
 msgstr "更新"
 
-#: awx/main/models/unified_jobs.py:456
+#: awx/main/models/unified_jobs.py:167
+msgid "The organization used to determine access to this template."
+msgstr "用于决定访问此模板的机构。"
+
+#: awx/main/models/unified_jobs.py:466
 msgid "Field is not allowed on launch."
 msgstr "启动时不允许使用字段。"
 
-#: awx/main/models/unified_jobs.py:484
+#: awx/main/models/unified_jobs.py:494
 #, python-brace-format
 msgid ""
 "Variables {list_of_keys} provided, but this template cannot accept variables."
 msgstr "提供了 {list_of_keys} 变量，但此模板无法接受变量。"
 
-#: awx/main/models/unified_jobs.py:530
+#: awx/main/models/unified_jobs.py:540
 msgid "Relaunch"
 msgstr "重新启动"
 
-#: awx/main/models/unified_jobs.py:531
+#: awx/main/models/unified_jobs.py:541
 msgid "Callback"
 msgstr "回调"
 
-#: awx/main/models/unified_jobs.py:532
+#: awx/main/models/unified_jobs.py:542
 msgid "Scheduled"
 msgstr "已调度"
 
-#: awx/main/models/unified_jobs.py:533
+#: awx/main/models/unified_jobs.py:543
 msgid "Dependency"
 msgstr "依赖项"
 
-#: awx/main/models/unified_jobs.py:534
+#: awx/main/models/unified_jobs.py:544
 msgid "Workflow"
 msgstr "工作流"
 
-#: awx/main/models/unified_jobs.py:536
+#: awx/main/models/unified_jobs.py:546
 msgid "Sync"
 msgstr "同步"
 
-#: awx/main/models/unified_jobs.py:591
+#: awx/main/models/unified_jobs.py:601
 msgid "The node the job executed on."
-msgstr "执行任务的节点。"
+msgstr "执行作业的节点。"
 
-#: awx/main/models/unified_jobs.py:597
+#: awx/main/models/unified_jobs.py:607
 msgid "The instance that managed the isolated execution environment."
 msgstr "管理隔离执行环境的实例。"
 
-#: awx/main/models/unified_jobs.py:624
+#: awx/main/models/unified_jobs.py:634
 msgid "The date and time the job was queued for starting."
-msgstr "任务加入启动队列的日期和时间。"
+msgstr "作业加入启动队列的日期和时间。"
 
-#: awx/main/models/unified_jobs.py:630
+#: awx/main/models/unified_jobs.py:639
+msgid ""
+"If True, the task manager has already processed potential dependencies for "
+"this job."
+msgstr "如果为 True，则任务管理器已处理了此作业的潜在依赖关系。"
+
+#: awx/main/models/unified_jobs.py:645
 msgid "The date and time the job finished execution."
-msgstr "任务完成执行的日期和时间。"
+msgstr "作业完成执行的日期和时间。"
 
-#: awx/main/models/unified_jobs.py:637
-msgid "Elapsed time in seconds that the job ran."
-msgstr "任务运行所经过的时间（以秒为单位）。"
+#: awx/main/models/unified_jobs.py:652
+msgid "The date and time when the cancel request was sent."
+msgstr "发送取消请求的日期和时间。"
 
 #: awx/main/models/unified_jobs.py:659
+msgid "Elapsed time in seconds that the job ran."
+msgstr "作业运行所经过的时间（以秒为单位）。"
+
+#: awx/main/models/unified_jobs.py:681
 msgid ""
 "A status field to indicate the state of the job if it wasn't able to run and "
 "capture stdout"
-msgstr "当无法运行和捕获 stdout 时指示任务状态的状态字段"
+msgstr "当无法运行和捕获 stdout 时指示作业状态的状态字段"
 
-#: awx/main/models/unified_jobs.py:688
-msgid "The Rampart/Instance group the job was run under"
-msgstr "运行任务的 Rampart/实例组"
+#: awx/main/models/unified_jobs.py:710
+msgid "The Instance group the job was run under"
+msgstr "作业在其下运行的实例组"
 
-#: awx/main/models/workflow.py:207
+#: awx/main/models/unified_jobs.py:718
+msgid "The organization used to determine access to this unified job."
+msgstr "用于决定访问这个统一作业的机构。"
+
+#: awx/main/models/workflow.py:85
+msgid ""
+"If enabled then the node will only run if all of the parent nodes have met "
+"the criteria to reach this node"
+msgstr "如果启用，则节点仅在所有父节点都满足了访问该节点的条件时才运行"
+
+#: awx/main/models/workflow.py:154
+msgid ""
+"An identifier for this node that is unique within its workflow. It is copied "
+"to workflow job nodes corresponding to this node."
+msgstr "此节点的标识符在其工作流中是唯一的。它被复制到与该节点对应的工作流作业节点上。"
+
+#: awx/main/models/workflow.py:229
 msgid ""
 "Indicates that a job will not be created when True. Workflow runtime "
 "semantics will mark this True if the node is in a path that will decidedly "
 "not be ran. A value of False means the node may not run."
-msgstr "True 表示不会创建任务。如果节点位于肯定不会运行的路径中，则 Workflow 运行时语义会将此值标记为 True。False 值表示节点可能无法运行。"
+msgstr "True 表示不会创建作业。如果节点位于肯定不会运行的路径中，则 Workflow 运行时语义会将此值标记为 True。False 值表示节点可能无法运行。"
 
-#: awx/main/models/workflow.py:248
+#: awx/main/models/workflow.py:236
+msgid ""
+"An identifier coresponding to the workflow job template node that this node "
+"was created from."
+msgstr "一个标识符，针对此节点从中创建的工作流作业模板节点。"
+
+#: awx/main/models/workflow.py:282
 #, python-brace-format
 msgid ""
 "Bad launch configuration starting template {template_pk} as part of workflow "
 "{workflow_pk}. Errors:\n"
 "{error_text}"
-msgstr "错误启动配置启动模板 {template_pk} 作为 workflow 的一部分 {workflow_pk}. 错误：\n"
+msgstr "工作流 {workflow_pk} 中的错误启动配置启动模板 {template_pk}。错误：\n"
 "{error_text}"
 
-#: awx/main/models/workflow.py:568
+#: awx/main/models/workflow.py:595
 msgid ""
 "If automatically created for a sliced job run, the job template the workflow "
 "job was created from."
-msgstr "如果为分片任务运行自动创建，则为用于创建工作流任务的任务模板。"
+msgstr "如果为分片作业运行自动创建，则为用于创建工作流作业的作业模板。"
 
-#: awx/main/models/workflow.py:660 awx/main/models/workflow.py:694
+#: awx/main/models/workflow.py:687 awx/main/models/workflow.py:721
 msgid ""
 "The amount of time (in seconds) before the approval node expires and fails."
 msgstr "批准节点过期并失败前的时间（以秒为单位）。"
 
-#: awx/main/models/workflow.py:698
+#: awx/main/models/workflow.py:725
 msgid ""
 "Shows when an approval node (with a timeout assigned to it) has timed out."
 msgstr "显示批准节点（为其分配了超时）超时的时间。"
 
-#: awx/main/notifications/grafana_backend.py:49
+#: awx/main/notifications/grafana_backend.py:86
 msgid "Error converting time {} or timeEnd {} to int."
 msgstr "将时间 {} 或 timeEnd {} 转换为 int 时出错。"
 
-#: awx/main/notifications/grafana_backend.py:51
+#: awx/main/notifications/grafana_backend.py:88
 msgid "Error converting time {} and/or timeEnd {} to int."
 msgstr "将时间 {} 和/或 timeEnd {} 转换为 int 时出错。"
 
-#: awx/main/notifications/grafana_backend.py:64
-#: awx/main/notifications/grafana_backend.py:66
+#: awx/main/notifications/grafana_backend.py:102
+#: awx/main/notifications/grafana_backend.py:104
 msgid "Error sending notification grafana: {}"
 msgstr "发送通知 grafana 时出错：{}"
 
@@ -4669,7 +4721,7 @@ msgid "Exception connecting to PagerDuty: {}"
 msgstr "连接到 PagerDuty 时出现异常：{}"
 
 #: awx/main/notifications/pagerduty_backend.py:73
-#: awx/main/notifications/slack_backend.py:57
+#: awx/main/notifications/slack_backend.py:58
 #: awx/main/notifications/twilio_backend.py:48
 msgid "Exception sending messages: {}"
 msgstr "发送消息时出现异常：{}"
@@ -4688,132 +4740,124 @@ msgstr "连接到 Twilio 时出现异常：{}"
 msgid "Error sending notification webhook: {}"
 msgstr "发送通知 Webhook 时出错：{}"
 
-#: awx/main/scheduler/dag_workflow.py:148
+#: awx/main/scheduler/dag_workflow.py:170
 #, python-brace-format
 msgid ""
-"No error handle path for workflow job node(s) [{node_status}] workflow job "
-"node(s) missing unified job template and error handle path [{no_ufjt}]."
-msgstr "工作流任务节点没有错误处理路径 [{node_status}] 工作流任务节点缺少统一任务模板和错误处理路径 [{no_ufjt}]。"
+"No error handling path for workflow job node(s) [{node_status}]. Workflow "
+"job node(s) missing unified job template and error handling path [{no_ufjt}]."
+msgstr "工作流作业节点没有错误处理路径 [{node_status}]。工作流作业节点缺少统一作业模板和错误处理路径 [{no_ufjt}]。"
 
-#: awx/main/scheduler/task_manager.py:132
+#: awx/main/scheduler/task_manager.py:118
 msgid ""
 "Workflow Job spawned from workflow could not start because it would result "
 "in recursion (spawn order, most recent first: {})"
-msgstr "从工作流生成的工作流任务可能无法启动，因为它会导致递归（生成顺序，最近最先：{}）"
+msgstr "从工作流生成的工作流作业可能无法启动，因为它会导致递归（生成顺序，最近最先：{}）"
 
-#: awx/main/scheduler/task_manager.py:140
+#: awx/main/scheduler/task_manager.py:126
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
-msgstr "从工作流生成的任务可能无法启动，因为它缺少了相关资源，如项目或清单"
+msgstr "从工作流生成的作业可能无法启动，因为它缺少了相关资源，如项目或清单"
 
-#: awx/main/scheduler/task_manager.py:149
+#: awx/main/scheduler/task_manager.py:135
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
-msgstr "从工作流生成的任务可能无法启动，因为它不处于正确的状态或需要手动凭证。"
+msgstr "从工作流生成的作业可能无法启动，因为它不处于正确的状态或需要手动凭证。"
 
-#: awx/main/scheduler/task_manager.py:190
+#: awx/main/scheduler/task_manager.py:176
 msgid "No error handling paths found, marking workflow as failed"
 msgstr "未找到错误处理路径，将工作流标记为失败"
 
-#: awx/main/scheduler/task_manager.py:564
+#: awx/main/scheduler/task_manager.py:508
 #, python-brace-format
 msgid "The approval node {name} ({pk}) has expired after {timeout} seconds."
 msgstr "批准节点 {name} ({pk}) 已在 {timeout} 秒后过期。"
 
-#: awx/main/tasks.py:371
-msgid "Ansible Tower host usage over 90%"
-msgstr "Ansible Tower 主机使用率超过 90%"
-
-#: awx/main/tasks.py:376
-msgid "Ansible Tower license will expire soon"
-msgstr "Ansible Tower 许可证将很快过期"
-
-#: awx/main/tasks.py:988
+#: awx/main/tasks.py:1049
 msgid "Invalid virtual environment selected: {}"
 msgstr "选择了无效的虚拟环境：{}"
 
-#: awx/main/tasks.py:1749
+#: awx/main/tasks.py:1853
 msgid "Job could not start because it does not have a valid inventory."
-msgstr "任务无法启动，因为它没有有效的清单。"
+msgstr "作业无法启动，因为它没有有效的清单。"
 
-#: awx/main/tasks.py:1753
+#: awx/main/tasks.py:1857
 msgid "Job could not start because it does not have a valid project."
-msgstr "任务无法启动，因为它没有有效的项目。"
+msgstr "作业无法启动，因为它没有有效的项目。"
 
-#: awx/main/tasks.py:1758
+#: awx/main/tasks.py:1862
 msgid ""
 "The project revision for this job template is unknown due to a failed update."
-msgstr "由于更新失败，此任务模板的项目修订版本未知。"
+msgstr "由于更新失败，此作业模板的项目修订版本未知。"
 
-#: awx/main/tests/unit/scheduler/test_dag_workflow.py:215
-#: awx/main/tests/unit/scheduler/test_dag_workflow.py:243
-#: awx/main/tests/unit/scheduler/test_dag_workflow.py:250
+#: awx/main/tests/unit/scheduler/test_dag_workflow.py:470
+#: awx/main/tests/unit/scheduler/test_dag_workflow.py:498
+#: awx/main/tests/unit/scheduler/test_dag_workflow.py:505
 msgid ""
-"No error handle path for workflow job node(s) [({},{})] workflow job node(s) "
-"missing unified job template and error handle path []."
-msgstr "工作流任务节点没有错误处理路径 [({},{})] 工作流任务节点缺少统一任务模板和错误处理路径 []。"
+"No error handling path for workflow job node(s) [({},{})]. Workflow job "
+"node(s) missing unified job template and error handling path []."
+msgstr "工作流作业节点没有错误处理路径 [({},{})]。工作流作业节点缺少统一作业模板和错误处理路径 []。"
 
-#: awx/main/tests/unit/scheduler/test_dag_workflow.py:225
-#: awx/main/tests/unit/scheduler/test_dag_workflow.py:236
+#: awx/main/tests/unit/scheduler/test_dag_workflow.py:480
+#: awx/main/tests/unit/scheduler/test_dag_workflow.py:491
 msgid ""
-"No error handle path for workflow job node(s) [] workflow job node(s) "
-"missing unified job template and error handle path [{}]."
-msgstr "工作流任务节点没有错误处理路径 [] 工作流任务节点缺少统一任务模板和错误处理路径 [{}]。"
+"No error handling path for workflow job node(s) []. Workflow job node(s) "
+"missing unified job template and error handling path [{}]."
+msgstr "工作流作业节点没有错误处理路径 []。工作流作业节点缺少统一作业模板和错误处理路径 [{}]。"
 
-#: awx/main/utils/common.py:83
+#: awx/main/utils/common.py:87
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "无法将 \"%s\" 转换为布尔值"
 
-#: awx/main/utils/common.py:258
+#: awx/main/utils/common.py:261
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "不受支持的 SCM 类型 \"%s\""
 
-#: awx/main/utils/common.py:265 awx/main/utils/common.py:277
-#: awx/main/utils/common.py:296
+#: awx/main/utils/common.py:268 awx/main/utils/common.py:280
+#: awx/main/utils/common.py:299
 #, python-format
 msgid "Invalid %s URL"
 msgstr "无效的 %s URL"
 
-#: awx/main/utils/common.py:267 awx/main/utils/common.py:306
+#: awx/main/utils/common.py:270 awx/main/utils/common.py:309
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "不受支持的 %s URL"
 
-#: awx/main/utils/common.py:308
+#: awx/main/utils/common.py:311
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "用于 file:// URL的主机 \"%s\" 不受支持"
 
-#: awx/main/utils/common.py:310
+#: awx/main/utils/common.py:313
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "%s URL 需要主机"
 
-#: awx/main/utils/common.py:328
+#: awx/main/utils/common.py:331
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "用户名必须是 \"git\" 以供 SSH 访问 %s。"
 
-#: awx/main/utils/common.py:334
+#: awx/main/utils/common.py:337
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "用户名必须是 \"hg\" 以供 SSH 访问 %s。"
 
-#: awx/main/utils/common.py:660
+#: awx/main/utils/common.py:668
 #, python-brace-format
 msgid "Input type `{data_type}` is not a dictionary"
 msgstr "输入类型 `{data_type}` 不是字典"
 
-#: awx/main/utils/common.py:693
+#: awx/main/utils/common.py:701
 #, python-brace-format
 msgid "Variables not compatible with JSON standard (error: {json_error})"
 msgstr "与 JSON 标准不兼容的变量（错误：{json_error}）"
 
-#: awx/main/utils/common.py:699
+#: awx/main/utils/common.py:707
 #, python-brace-format
 msgid ""
 "Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error})."
@@ -4925,287 +4969,287 @@ msgstr "服务器错误"
 msgid "A server error has occurred."
 msgstr "发生服务器错误。"
 
-#: awx/settings/defaults.py:741
+#: awx/settings/defaults.py:683
 msgid "US East (Northern Virginia)"
 msgstr "美国东部（北弗吉尼亚）"
 
-#: awx/settings/defaults.py:742
+#: awx/settings/defaults.py:684
 msgid "US East (Ohio)"
 msgstr "美国东部（俄亥俄）"
 
-#: awx/settings/defaults.py:743
+#: awx/settings/defaults.py:685
 msgid "US West (Oregon)"
 msgstr "美国西部（俄勒冈）"
 
-#: awx/settings/defaults.py:744
+#: awx/settings/defaults.py:686
 msgid "US West (Northern California)"
 msgstr "美国西部（北加利福尼亚）"
 
-#: awx/settings/defaults.py:745
+#: awx/settings/defaults.py:687
 msgid "Canada (Central)"
 msgstr "加拿大（中部）"
 
-#: awx/settings/defaults.py:746
+#: awx/settings/defaults.py:688
 msgid "EU (Frankfurt)"
 msgstr "欧盟（法兰克福）"
 
-#: awx/settings/defaults.py:747
+#: awx/settings/defaults.py:689
 msgid "EU (Ireland)"
 msgstr "欧盟（爱尔兰）"
 
-#: awx/settings/defaults.py:748
+#: awx/settings/defaults.py:690
 msgid "EU (London)"
 msgstr "欧盟（伦敦）"
 
-#: awx/settings/defaults.py:749
+#: awx/settings/defaults.py:691
 msgid "Asia Pacific (Singapore)"
 msgstr "亚太（新加坡）"
 
-#: awx/settings/defaults.py:750
+#: awx/settings/defaults.py:692
 msgid "Asia Pacific (Sydney)"
 msgstr "亚太（悉尼）"
 
-#: awx/settings/defaults.py:751
+#: awx/settings/defaults.py:693
 msgid "Asia Pacific (Tokyo)"
 msgstr "亚太（东京）"
 
-#: awx/settings/defaults.py:752
+#: awx/settings/defaults.py:694
 msgid "Asia Pacific (Seoul)"
 msgstr "亚太（首尔）"
 
-#: awx/settings/defaults.py:753
+#: awx/settings/defaults.py:695
 msgid "Asia Pacific (Mumbai)"
 msgstr "亚太（孟买）"
 
-#: awx/settings/defaults.py:754
+#: awx/settings/defaults.py:696
 msgid "South America (Sao Paulo)"
 msgstr "南美（圣保罗）"
 
-#: awx/settings/defaults.py:755
+#: awx/settings/defaults.py:697
 msgid "US West (GovCloud)"
 msgstr "美国西部 (GovCloud)"
 
-#: awx/settings/defaults.py:756
+#: awx/settings/defaults.py:698
 msgid "China (Beijing)"
 msgstr "中国（北京）"
 
-#: awx/settings/defaults.py:805
+#: awx/settings/defaults.py:747
 msgid "US East 1 (B)"
 msgstr "美国东部 1 (B)"
 
-#: awx/settings/defaults.py:806
+#: awx/settings/defaults.py:748
 msgid "US East 1 (C)"
 msgstr "美国东部 1 (C)"
 
-#: awx/settings/defaults.py:807
+#: awx/settings/defaults.py:749
 msgid "US East 1 (D)"
 msgstr "美国东部 1 (D)"
 
-#: awx/settings/defaults.py:808
+#: awx/settings/defaults.py:750
 msgid "US East 4 (A)"
 msgstr "美国东部 4 (A)"
 
-#: awx/settings/defaults.py:809
+#: awx/settings/defaults.py:751
 msgid "US East 4 (B)"
 msgstr "美国东部 4 (B)"
 
-#: awx/settings/defaults.py:810
+#: awx/settings/defaults.py:752
 msgid "US East 4 (C)"
 msgstr "美国东部 4 (C)"
 
-#: awx/settings/defaults.py:811
+#: awx/settings/defaults.py:753
 msgid "US Central (A)"
 msgstr "美国中部 (A)"
 
-#: awx/settings/defaults.py:812
+#: awx/settings/defaults.py:754
 msgid "US Central (B)"
 msgstr "美国中部 (B)"
 
-#: awx/settings/defaults.py:813
+#: awx/settings/defaults.py:755
 msgid "US Central (C)"
 msgstr "美国中部 (C)"
 
-#: awx/settings/defaults.py:814
+#: awx/settings/defaults.py:756
 msgid "US Central (F)"
 msgstr "美国中部 (F)"
 
-#: awx/settings/defaults.py:815
+#: awx/settings/defaults.py:757
 msgid "US West (A)"
 msgstr "美国西部 (A)"
 
-#: awx/settings/defaults.py:816
+#: awx/settings/defaults.py:758
 msgid "US West (B)"
 msgstr "美国西部 (B)"
 
-#: awx/settings/defaults.py:817
+#: awx/settings/defaults.py:759
 msgid "US West (C)"
 msgstr "美国西部 (C)"
 
-#: awx/settings/defaults.py:818
+#: awx/settings/defaults.py:760
 msgid "Europe West 1 (B)"
 msgstr "西欧 1 (B)"
 
-#: awx/settings/defaults.py:819
+#: awx/settings/defaults.py:761
 msgid "Europe West 1 (C)"
 msgstr "西欧 1 (C)"
 
-#: awx/settings/defaults.py:820
+#: awx/settings/defaults.py:762
 msgid "Europe West 1 (D)"
 msgstr "西欧 1 (D)"
 
-#: awx/settings/defaults.py:821
+#: awx/settings/defaults.py:763
 msgid "Europe West 2 (A)"
 msgstr "西欧 2 (A)"
 
-#: awx/settings/defaults.py:822
+#: awx/settings/defaults.py:764
 msgid "Europe West 2 (B)"
 msgstr "西欧 2 (B)"
 
-#: awx/settings/defaults.py:823
+#: awx/settings/defaults.py:765
 msgid "Europe West 2 (C)"
 msgstr "西欧 2 (C)"
 
-#: awx/settings/defaults.py:824
+#: awx/settings/defaults.py:766
 msgid "Asia East (A)"
 msgstr "东亚 (A)"
 
-#: awx/settings/defaults.py:825
+#: awx/settings/defaults.py:767
 msgid "Asia East (B)"
 msgstr "东亚 (B)"
 
-#: awx/settings/defaults.py:826
+#: awx/settings/defaults.py:768
 msgid "Asia East (C)"
 msgstr "东亚 (C)"
 
-#: awx/settings/defaults.py:827
+#: awx/settings/defaults.py:769
 msgid "Asia Southeast (A)"
 msgstr "东南亚 (A)"
 
-#: awx/settings/defaults.py:828
+#: awx/settings/defaults.py:770
 msgid "Asia Southeast (B)"
 msgstr "东南亚 (B)"
 
-#: awx/settings/defaults.py:829
+#: awx/settings/defaults.py:771
 msgid "Asia Northeast (A)"
 msgstr "亚州东北部 (A)"
 
-#: awx/settings/defaults.py:830
+#: awx/settings/defaults.py:772
 msgid "Asia Northeast (B)"
 msgstr "亚州东北部 (B)"
 
-#: awx/settings/defaults.py:831
+#: awx/settings/defaults.py:773
 msgid "Asia Northeast (C)"
 msgstr "亚州东北部 (C)"
 
-#: awx/settings/defaults.py:832
+#: awx/settings/defaults.py:774
 msgid "Australia Southeast (A)"
 msgstr "澳洲东南部 (A)"
 
-#: awx/settings/defaults.py:833
+#: awx/settings/defaults.py:775
 msgid "Australia Southeast (B)"
 msgstr "澳洲东南部 (B)"
 
-#: awx/settings/defaults.py:834
+#: awx/settings/defaults.py:776
 msgid "Australia Southeast (C)"
 msgstr "澳洲东南部 (C)"
 
-#: awx/settings/defaults.py:856
+#: awx/settings/defaults.py:798
 msgid "US East"
 msgstr "美国东部"
 
-#: awx/settings/defaults.py:857
+#: awx/settings/defaults.py:799
 msgid "US East 2"
 msgstr "美国东部 2"
 
-#: awx/settings/defaults.py:858
+#: awx/settings/defaults.py:800
 msgid "US Central"
 msgstr "美国中部"
 
-#: awx/settings/defaults.py:859
+#: awx/settings/defaults.py:801
 msgid "US North Central"
 msgstr "美国中北部"
 
-#: awx/settings/defaults.py:860
+#: awx/settings/defaults.py:802
 msgid "US South Central"
 msgstr "美国中南部"
 
-#: awx/settings/defaults.py:861
+#: awx/settings/defaults.py:803
 msgid "US West Central"
 msgstr "美国中西部"
 
-#: awx/settings/defaults.py:862
+#: awx/settings/defaults.py:804
 msgid "US West"
 msgstr "美国西部"
 
-#: awx/settings/defaults.py:863
+#: awx/settings/defaults.py:805
 msgid "US West 2"
 msgstr "美国西部 2"
 
-#: awx/settings/defaults.py:864
+#: awx/settings/defaults.py:806
 msgid "Canada East"
 msgstr "加拿大东部"
 
-#: awx/settings/defaults.py:865
+#: awx/settings/defaults.py:807
 msgid "Canada Central"
 msgstr "加拿大中部"
 
-#: awx/settings/defaults.py:866
+#: awx/settings/defaults.py:808
 msgid "Brazil South"
 msgstr "巴西南部"
 
-#: awx/settings/defaults.py:867
+#: awx/settings/defaults.py:809
 msgid "Europe North"
 msgstr "北欧"
 
-#: awx/settings/defaults.py:868
+#: awx/settings/defaults.py:810
 msgid "Europe West"
 msgstr "西欧"
 
-#: awx/settings/defaults.py:869
+#: awx/settings/defaults.py:811
 msgid "UK West"
 msgstr "英国西部"
 
-#: awx/settings/defaults.py:870
+#: awx/settings/defaults.py:812
 msgid "UK South"
 msgstr "英国南部"
 
-#: awx/settings/defaults.py:871
+#: awx/settings/defaults.py:813
 msgid "Asia East"
 msgstr "东亚"
 
-#: awx/settings/defaults.py:872
+#: awx/settings/defaults.py:814
 msgid "Asia Southeast"
 msgstr "东南亚"
 
-#: awx/settings/defaults.py:873
+#: awx/settings/defaults.py:815
 msgid "Australia East"
 msgstr "澳洲东部"
 
-#: awx/settings/defaults.py:874
+#: awx/settings/defaults.py:816
 msgid "Australia Southeast"
 msgstr "澳洲东南部"
 
-#: awx/settings/defaults.py:875
+#: awx/settings/defaults.py:817
 msgid "India West"
 msgstr "印度西部"
 
-#: awx/settings/defaults.py:876
+#: awx/settings/defaults.py:818
 msgid "India South"
 msgstr "印度南部"
 
-#: awx/settings/defaults.py:877
+#: awx/settings/defaults.py:819
 msgid "Japan East"
 msgstr "日本东部"
 
-#: awx/settings/defaults.py:878
+#: awx/settings/defaults.py:820
 msgid "Japan West"
 msgstr "日本西部"
 
-#: awx/settings/defaults.py:879
+#: awx/settings/defaults.py:821
 msgid "Korea Central"
 msgstr "韩国中部"
 
-#: awx/settings/defaults.py:880
+#: awx/settings/defaults.py:822
 msgid "Korea South"
 msgstr "韩国南部"
 
@@ -5726,7 +5770,7 @@ msgstr "您的 Azure AD 应用的 OAuth2 密钥（客户端 ID）。"
 
 #: awx/sso/conf.py:878
 msgid "Azure AD OAuth2 Secret"
-msgstr "Azure AD OAuth2 Secret"
+msgstr "Azure AD OAuth2 机密"
 
 #: awx/sso/conf.py:879
 msgid "The OAuth2 secret (Client Secret) from your Azure AD application."
@@ -5897,65 +5941,65 @@ msgstr "SAML 团队属性映射"
 msgid "Used to translate user team membership into Tower."
 msgstr "用于将用户团队成员资格转换为 Tower。"
 
-#: awx/sso/fields.py:82
+#: awx/sso/fields.py:81
 msgid "Invalid field."
 msgstr "无效字段。"
 
-#: awx/sso/fields.py:273
+#: awx/sso/fields.py:250
 #, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "无效的连接选项：{invalid_options}。"
 
-#: awx/sso/fields.py:357
+#: awx/sso/fields.py:334
 msgid "Base"
 msgstr "基本"
 
-#: awx/sso/fields.py:358
+#: awx/sso/fields.py:335
 msgid "One Level"
 msgstr "一个级别"
 
-#: awx/sso/fields.py:359
+#: awx/sso/fields.py:336
 msgid "Subtree"
 msgstr "子树"
 
-#: awx/sso/fields.py:377
+#: awx/sso/fields.py:354
 #, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr "预期为三个项的列表，但实际为 {length}。"
 
-#: awx/sso/fields.py:378
+#: awx/sso/fields.py:355
 #, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr "预期为 LDAPSearch 实例，但实际为 {input_type}。"
 
-#: awx/sso/fields.py:414
+#: awx/sso/fields.py:391
 #, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
 msgstr "预期为 LDAPSearch 或 LDAPSearchUnion 实例，但实际为 {input_type}。"
 
-#: awx/sso/fields.py:452
+#: awx/sso/fields.py:429
 #, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "无效的用户属性：{invalid_attrs}。"
 
-#: awx/sso/fields.py:470
+#: awx/sso/fields.py:447
 #, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr "预期为 LDAPGroupType 实例，但实际为 {input_type}。"
 
-#: awx/sso/fields.py:510
+#: awx/sso/fields.py:487
 #, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "无效的密钥：{invalid_keys}。"
 
-#: awx/sso/fields.py:536
+#: awx/sso/fields.py:513
 #, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "无效的用户标记：\"{invalid_flag}\"。"
 
-#: awx/sso/fields.py:690
+#: awx/sso/fields.py:667
 #, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr "用于机构信息的语言代码无效：{invalid_lang_codes}。"
@@ -5972,7 +6016,7 @@ msgstr "您的帐户不活跃"
 #: awx/sso/validators.py:20 awx/sso/validators.py:46
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
-msgstr "DN 必须包含 \"%%(user)s\" 占位符用于用户名：%s"
+msgstr "DN 必须包含 \"%%\" 占位符用于用户名：%s"
 
 #: awx/sso/validators.py:27
 #, python-format
@@ -6054,12 +6098,12 @@ msgstr "要设置自定义徽标，请提供一个您创建的文件。要使自
 
 #: awx/ui/conf.py:58
 msgid "Max Job Events Retrieved by UI"
-msgstr "UI 检索的最大任务事件数"
+msgstr "UI 检索的最大作业事件数"
 
 #: awx/ui/conf.py:59
 msgid ""
 "Maximum number of job events for the UI to retrieve within a single request."
-msgstr "UI 在单个请求中检索的最大任务事件数。"
+msgstr "UI 在单个请求中检索的最大作业事件数。"
 
 #: awx/ui/conf.py:68
 msgid "Enable Live Updates in the UI"

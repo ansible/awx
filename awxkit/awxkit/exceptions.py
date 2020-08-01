@@ -101,3 +101,8 @@ class UnexpectedAWXState(Common):
 class IsMigrating(Common):
 
     pass
+
+
+class ImportExportError(Exception):
+
+    pass

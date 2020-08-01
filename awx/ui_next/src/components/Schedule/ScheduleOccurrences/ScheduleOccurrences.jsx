@@ -1,12 +1,13 @@
+import 'styled-components/macro';
 import React, { useState } from 'react';
 import { shape } from 'prop-types';
 import styled from 'styled-components';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { formatDateString, formatDateStringUTC } from '@util/dates';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
-import { DetailName, DetailValue } from '@components/DetailList';
-import MultiButtonToggle from '@components/MultiButtonToggle';
+import { formatDateString, formatDateStringUTC } from '../../../util/dates';
+import { DetailName, DetailValue } from '../../DetailList';
+import MultiButtonToggle from '../../MultiButtonToggle';
 
 const OccurrencesLabel = styled.div`
   display: inline-block;
@@ -35,7 +36,7 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
         fullWidth
         css="grid-column: 1 / -1"
       >
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <OccurrencesLabel>
               <span>{i18n._(t`Occurrences`)}</span>
@@ -44,7 +45,10 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, i18n }) {
           </SplitItem>
           <SplitItem>
             <MultiButtonToggle
-              buttons={[['local', 'Local'], ['utc', 'UTC']]}
+              buttons={[
+                ['local', 'Local'],
+                ['utc', 'UTC'],
+              ]}
               value={mode}
               onChange={newMode => setMode(newMode)}
             />

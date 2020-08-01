@@ -4,7 +4,7 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import { func, string } from 'prop-types';
 import { Title } from '@patternfly/react-core';
-import SelectableCard from '@components/SelectableCard';
+import SelectableCard from '../../../../../components/SelectableCard';
 
 const Grid = styled.div`
   display: grid;

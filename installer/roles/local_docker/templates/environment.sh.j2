@@ -6,7 +6,5 @@ DATABASE_PASSWORD={{ pg_password|default('awxpass')|quote }}
 {% if pg_admin_password is defined %}
 DATABASE_ADMIN_PASSWORD={{ pg_admin_password|quote }}
 {% endif %}
-MEMCACHED_HOST={{ memcached_hostname|default('memcached') }}
-MEMCACHED_PORT={{ memcached_port|default('11211')|quote }}
 AWX_ADMIN_USER={{ admin_user|quote }}
 AWX_ADMIN_PASSWORD={{ admin_password|quote }}

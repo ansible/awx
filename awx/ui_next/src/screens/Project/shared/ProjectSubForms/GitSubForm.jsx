@@ -1,7 +1,8 @@
+import 'styled-components/macro';
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import FormField from '@components/FormField';
+import FormField from '../../../../components/FormField';
 import {
   UrlFormField,
   BranchFormField,
@@ -20,7 +21,7 @@ const GitSubForm = ({
       i18n={i18n}
       tooltip={
         <span>
-          {i18n._(t`Example URLs for GIT SCM include:`)}
+          {i18n._(t`Example URLs for GIT Source Control include:`)}
           <ul css="margin: 10px 0 10px 20px">
             <li>https://github.com/ansible/ansible.git</li>
             <li>git@github.com:ansible/ansible.git</li>
@@ -35,10 +36,13 @@ const GitSubForm = ({
         </span>
       }
     />
-    <BranchFormField i18n={i18n} label={i18n._(t`SCM Branch/Tag/Commit`)} />
+    <BranchFormField
+      i18n={i18n}
+      label={i18n._(t`Source Control Branch/Tag/Commit`)}
+    />
     <FormField
       id="project-scm-refspec"
-      label={i18n._(t`SCM Refspec`)}
+      label={i18n._(t`Source Control Refspec`)}
       name="scm_refspec"
       type="text"
       tooltipMaxWidth="400px"

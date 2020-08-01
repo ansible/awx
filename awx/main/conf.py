@@ -80,11 +80,11 @@ register(
 )
 
 register(
-    'PROXY_IP_WHITELIST',
+    'PROXY_IP_ALLOWED_LIST',
     field_class=fields.StringListField,
-    label=_('Proxy IP Whitelist'),
+    label=_('Proxy IP Allowed List'),
     help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
-                "to whitelist the proxy IP addresses from which Tower should trust "
+                "to configure the proxy IP addresses from which Tower should trust "
                 "custom REMOTE_HOST_HEADERS header values. "
                 "If this setting is an empty list (the default), the headers specified by "
                 "REMOTE_HOST_HEADERS will be trusted unconditionally')"),
@@ -241,21 +241,9 @@ register(
     field_class=fields.StringListField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
+    help_text=_('List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
-)
-
-register(
-    'AWX_ISOLATED_VERBOSITY',
-    field_class=fields.IntegerField,
-    min_value=0,
-    max_value=5,
-    label=_('Verbosity level for isolated node management tasks'),
-    help_text=_('This can be raised to aid in debugging connection issues for isolated task execution'),
-    category=_('Jobs'),
-    category_slug='jobs',
-    default=0
 )
 
 register(
@@ -431,6 +419,19 @@ register(
     default=True,
     label=_('Enable Collection(s) Download'),
     help_text=_('Allows collections to be dynamically downloaded from a requirements.yml file for SCM projects.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_SHOW_PLAYBOOK_LINKS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Follow symlinks'),
+    help_text=_(
+        'Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead '
+        'to infinite recursion if a link points to a parent directory of itself.'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -667,7 +668,7 @@ register(
     allow_blank=True,
     default='',
     label=_('Logging Aggregator Username'),
-    help_text=_('Username for external log aggregator (if required).'),
+    help_text=_('Username for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
     required=False,
@@ -679,7 +680,7 @@ register(
     default='',
     encrypted=True,
     label=_('Logging Aggregator Password/Token'),
-    help_text=_('Password or authentication token for external log aggregator (if required).'),
+    help_text=_('Password or authentication token for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
     required=False,
@@ -778,25 +779,39 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_AGGREGATOR_AUDIT',
+    'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
+    field_class=fields.IntegerField,
+    default=1,
+    min_value=1,
+    label=_('Maximum disk persistance for external log aggregation (in GB)'),
+    help_text=_('Amount of data to store (in gigabytes) during an outage of '
+                'the external log aggregator (defaults to 1). '
+                'Equivalent to the rsyslogd queue.maxdiskspace setting.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
+    field_class=fields.CharField,
+    default='/var/lib/awx',
+    label=_('File system location for rsyslogd disk persistence'),
+    help_text=_('Location to persist logs that should be retried after an outage '
+                'of the external log aggregator (defaults to /var/lib/awx). '
+                'Equivalent to the rsyslogd queue.spoolDirectory setting.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_RSYSLOGD_DEBUG',
     field_class=fields.BooleanField,
-    allow_null=True,
     default=False,
-    label=_('Enabled external log aggregation auditing'),
-    help_text=_('When enabled, all external logs emitted by Tower will also be written to /var/log/tower/external.log.  This is an experimental setting intended to be used for debugging external log aggregation issues (and may be subject to change in the future).'),  # noqa
+    label=_('Enable rsyslogd debugging'),
+    help_text=_('Enabled high verbosity debugging for rsyslogd.  '
+                'Useful for debugging connection issues for external log aggregation.'),
     category=_('Logging'),
     category_slug='logging',
 )
 
-
-register(
-    'BROKER_DURABILITY',
-    field_class=fields.BooleanField,
-    label=_('Message Durability'),
-    help_text=_('When set (the default), underlying queues will be persisted to disk.  Disable this to enable higher message bus throughput.'),
-    category=_('System'),
-    category_slug='system',
-)
 
 
 register(

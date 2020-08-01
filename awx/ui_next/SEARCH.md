@@ -2,7 +2,7 @@
 
 ## UX Considerations
 
-Historically, the code that powers search in the AngularJS version of the AWX/Tower UI is very complex and prone to bugs.  In order to reduce that complexity, we've made some UX desicions to help make the code easier to maintain.
+Historically, the code that powers search in the AngularJS version of the AWX/Tower UI is very complex and prone to bugs.  In order to reduce that complexity, we've made some UX decisions to help make the code easier to maintain.
 
 **ALL query params namespaced and in url bar**
 

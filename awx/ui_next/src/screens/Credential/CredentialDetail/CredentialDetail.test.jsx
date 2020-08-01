@@ -1,11 +1,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { CredentialsAPI, CredentialTypesAPI } from '@api';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import { CredentialsAPI, CredentialTypesAPI } from '../../../api';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import CredentialDetail from './CredentialDetail';
 import { mockCredentials, mockCredentialType } from '../shared';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 const mockCredential = mockCredentials.results[0];
 

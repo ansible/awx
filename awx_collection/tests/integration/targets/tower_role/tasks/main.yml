@@ -33,7 +33,7 @@
       - "result is changed"
 
 - name: Create a workflow
-  tower_workflow_template:
+  tower_workflow_job_template:
     name: test-role-workflow
     organization: Default
     state: present

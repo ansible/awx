@@ -1,0 +1,1 @@
+This dir must pre-exist and be owned by the user you are launching awx dev env as. If the dir does not exist before launching the awx dev environment then docker will create the dir and it will be owned by root. Since we start our awx dev environment with user: ${CURRENT_UID} the rsyslog process will be unable to create a config file in a directory owned by root.

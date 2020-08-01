@@ -29,11 +29,15 @@ awx/ui/client/languages
 awx/ui/templates/ui/index.html
 awx/ui/templates/ui/installing.html
 awx/ui_next/node_modules/
+awx/ui_next/src/locales/
 awx/ui_next/coverage/
-awx/ui_next/build/locales/_build
+awx/ui_next/build
+awx/ui_next/.env.local
+rsyslog.pid
 /tower-license
 /tower-license/**
 tools/prometheus/data
+tools/docker-compose/Dockerfile
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
@@ -137,8 +141,8 @@ use_dev_supervisor.txt
 # Ansible module tests
 /awx_collection_test_venv/
 /awx_collection/*.tar.gz
-/awx_collection/galaxy.yml
 /sanity/
+/awx_collection_build/
 
 .idea/*
 *.unison.tmp

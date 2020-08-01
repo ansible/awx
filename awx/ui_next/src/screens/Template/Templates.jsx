@@ -3,8 +3,8 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Route, withRouter, Switch } from 'react-router-dom';
 
-import { Config } from '@contexts/Config';
-import Breadcrumbs from '@components/Breadcrumbs/Breadcrumbs';
+import { Config } from '../../contexts/Config';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import { TemplateList } from './TemplateList';
 import Template from './Template';
 import WorkflowJobTemplate from './WorkflowJobTemplate';
@@ -69,6 +69,8 @@ class Templates extends Component {
         schedule.id}`]: `${schedule && schedule.name}`,
       [`/templates/${template.type}/${template.id}/schedules/${schedule &&
         schedule.id}/details`]: i18n._(t`Schedule Details`),
+      [`/templates/${template.type}/${template.id}/schedules/${schedule &&
+        schedule.id}/edit`]: i18n._(t`Edit Details`),
     };
     this.setState({ breadcrumbConfig });
   };
@@ -80,14 +82,12 @@ class Templates extends Component {
       <>
         <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
         <Switch>
-          <Route
-            path={`${match.path}/job_template/add`}
-            render={() => <JobTemplateAdd />}
-          />
-          <Route
-            path={`${match.path}/workflow_job_template/add`}
-            render={() => <WorkflowJobTemplateAdd />}
-          />
+          <Route path={`${match.path}/job_template/add`}>
+            <JobTemplateAdd />
+          </Route>
+          <Route path={`${match.path}/workflow_job_template/add`}>
+            <WorkflowJobTemplateAdd />
+          </Route>
           <Route
             path={`${match.path}/job_template/:id`}
             render={({ match: newRouteMatch }) => (
@@ -119,7 +119,9 @@ class Templates extends Component {
               </Config>
             )}
           />
-          <Route path={`${match.path}`} render={() => <TemplateList />} />
+          <Route path={`${match.path}`}>
+            <TemplateList />
+          </Route>
         </Switch>
       </>
     );

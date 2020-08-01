@@ -126,7 +126,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
     'custom_inventory_script': DEFAULT_SUMMARY_FIELDS,
-    'source_script': ('name', 'description'),
+    'source_script': DEFAULT_SUMMARY_FIELDS,
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
     'instance_group': ('id', 'name', 'controller_id', 'is_containerized'),
@@ -806,7 +806,9 @@ class UnifiedJobSerializer(BaseSerializer):
                 td = now() - obj.started
                 ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
-
+        # Because this string is saved in the db in the source language,
+        # it must be marked for translation after it is pulled from the db, not when set
+        ret['job_explanation'] = _(obj.job_explanation)
         return ret
 
 
@@ -1695,6 +1697,7 @@ class HostSerializer(BaseSerializerWithVariables):
         d.setdefault('recent_jobs', [{
             'id': j.job.id,
             'name': j.job.job_template.name if j.job.job_template is not None else "",
+            'type': j.job.job_type_name,
             'status': j.job.status,
             'finished': j.job.finished,
         } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
@@ -1729,6 +1732,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
     def validate(self, attrs):
         name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         host, port = self._get_host_port_from_name(name)
 
         if port:
@@ -1737,7 +1741,9 @@ class HostSerializer(BaseSerializerWithVariables):
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
-
+        if Group.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Group with that name already exists.'))
+            
         return super(HostSerializer, self).validate(attrs)
 
     def to_representation(self, obj):
@@ -1802,6 +1808,13 @@ class GroupSerializer(BaseSerializerWithVariables):
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         return res
+
+    def validate(self, attrs):
+        name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
+        inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
+        if Host.objects.filter(name=name, inventory=inventory).exists():
+            raise serializers.ValidationError(_('A Host with that name already exists.'))
+        return super(GroupSerializer, self).validate(attrs)
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
@@ -1934,7 +1947,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def validate_source_vars(self, value):
         ret = vars_validate_or_raise(value)
         for env_k in parse_yaml_or_json(value):
-            if env_k in settings.INV_ENV_VARIABLE_BLACKLIST:
+            if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
         return ret
 
@@ -2306,6 +2319,7 @@ class RoleSerializer(BaseSerializer):
             content_model = obj.content_type.model_class()
             ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
             ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
+            ret['summary_fields']['resource_id'] = obj.object_id
 
         return ret
 
@@ -2641,8 +2655,16 @@ class CredentialSerializerCreate(CredentialSerializer):
                     owner_fields.add(field)
                 else:
                     attrs.pop(field)
+
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
+
+        if len(owner_fields) > 1:
+            received = ", ".join(sorted(owner_fields))
+            raise serializers.ValidationError({"detail": _(
+                "Only one of 'user', 'team', or 'organization' should be provided, "
+                "received {} fields.".format(received)
+            )})
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
@@ -2756,16 +2778,11 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if obj.organization_id:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id})
         if isinstance(obj, UnifiedJobTemplate):
-            res['extra_credentials'] = self.reverse(
-                'api:job_template_extra_credentials_list',
-                kwargs={'pk': obj.pk}
-            )
             res['credentials'] = self.reverse(
                 'api:job_template_credentials_list',
                 kwargs={'pk': obj.pk}
             )
         elif isinstance(obj, UnifiedJob):
-            res['extra_credentials'] = self.reverse('api:job_extra_credentials_list', kwargs={'pk': obj.pk})
             res['credentials'] = self.reverse('api:job_credentials_list', kwargs={'pk': obj.pk})
 
         return res
@@ -2825,7 +2842,7 @@ class JobTemplateMixin(object):
         return [{
             'id': x.id, 'status': x.status, 'finished': x.finished, 'canceled_on': x.canceled_on,
             # Make type consistent with API top-level key, for instance workflow_job
-            'type': x.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
+            'type': x.job_type_name
         } for x in optimized_qs[:10]]
 
     def get_summary_fields(self, obj):
@@ -2934,7 +2951,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
         all_creds = []
         # Organize credential data into multitude of deprecated fields
-        extra_creds = []
         if obj.pk:
             for cred in obj.credentials.all():
                 summarized_cred = {
@@ -2945,10 +2961,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                     'cloud': cred.credential_type.kind == 'cloud'
                 }
                 all_creds.append(summarized_cred)
-                if cred.credential_type.kind in ('cloud', 'net'):
-                    extra_creds.append(summarized_cred)
-        if self.is_detail_view:
-            summary_fields['extra_credentials'] = extra_creds
         summary_fields['credentials'] = all_creds
         return summary_fields
 
@@ -3023,7 +3035,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         summary_fields = super(JobSerializer, self).get_summary_fields(obj)
         all_creds = []
         # Organize credential data into multitude of deprecated fields
-        extra_creds = []
         if obj.pk:
             for cred in obj.credentials.all():
                 summarized_cred = {
@@ -3034,10 +3045,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     'cloud': cred.credential_type.kind == 'cloud'
                 }
                 all_creds.append(summarized_cred)
-                if cred.credential_type.kind in ('cloud', 'net'):
-                    extra_creds.append(summarized_cred)
-        if self.is_detail_view:
-            summary_fields['extra_credentials'] = extra_creds
         summary_fields['credentials'] = all_creds
         return summary_fields
 
@@ -3611,9 +3618,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         elif self.instance:
             ujt = self.instance.unified_job_template
         if ujt is None:
-            if 'workflow_job_template' in attrs:
-                return {'workflow_job_template': attrs['workflow_job_template']}
-            return {}
+            ret = {}
+            for fd in ('workflow_job_template', 'identifier', 'all_parents_must_converge'):
+                if fd in attrs:
+                    ret[fd] = attrs[fd]
+            return ret
 
         # build additional field survey_passwords to track redacted variables
         password_dict = {}
@@ -3666,7 +3675,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                         attrs.get('survey_passwords', {}).pop(key, None)
                     else:
                         errors.setdefault('extra_vars', []).append(
-                            _('"$encrypted$ is a reserved keyword, may not be used for {var_name}."'.format(key))
+                            _('"$encrypted$ is a reserved keyword, may not be used for {}."'.format(key))
                         )
 
         # Launch configs call extra_vars extra_data for historical reasons
@@ -3897,15 +3906,23 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         return UriCleaner.remove_sensitive(obj.stdout)
 
     def get_event_data(self, obj):
-        try:
-            return json.loads(
-                UriCleaner.remove_sensitive(
-                    json.dumps(obj.event_data)
+        # the project update playbook uses the git, hg, or svn modules
+        # to clone repositories, and those modules are prone to printing
+        # raw SCM URLs in their stdout (which *could* contain passwords)
+        # attempt to detect and filter HTTP basic auth passwords in the stdout
+        # of these types of events
+        if obj.event_data.get('task_action') in ('git', 'hg', 'svn'):
+            try:
+                return json.loads(
+                    UriCleaner.remove_sensitive(
+                        json.dumps(obj.event_data)
+                    )
                 )
-            )
-        except Exception:
-            logger.exception("Failed to sanitize event_data")
-            return {}
+            except Exception:
+                logger.exception("Failed to sanitize event_data")
+                return {}
+        else:
+            return obj.event_data
 
 
 class AdHocCommandEventSerializer(BaseSerializer):
@@ -4083,7 +4100,8 @@ class JobLaunchSerializer(BaseSerializer):
                 errors.setdefault('credentials', []).append(_(
                     'Cannot assign multiple {} credentials.'
                 ).format(cred.unique_hash(display=True)))
-            if cred.credential_type.kind not in ('ssh', 'vault', 'cloud', 'net'):
+            if cred.credential_type.kind not in ('ssh', 'vault', 'cloud',
+                                                 'net', 'kubernetes'):
                 errors.setdefault('credentials', []).append(_(
                     'Cannot assign a Credential of kind `{}`'
                 ).format(cred.credential_type.kind))
@@ -4646,6 +4664,8 @@ class InstanceSerializer(BaseSerializer):
 
 
 class InstanceGroupSerializer(BaseSerializer):
+
+    show_capabilities = ['edit', 'delete']
 
     committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()

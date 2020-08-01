@@ -16,6 +16,7 @@ const BarSegment = styled.div`
   background-color: ${props => props.color || 'inherit'};
   flex-grow: ${props => props.count || 0};
 `;
+BarSegment.displayName = 'BarSegment';
 
 const TooltipContent = styled.div`
   align-items: center;

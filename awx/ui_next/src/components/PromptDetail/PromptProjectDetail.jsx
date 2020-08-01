@@ -1,12 +1,13 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Config } from '@contexts/Config';
 import { List, ListItem } from '@patternfly/react-core';
+import { Link } from 'react-router-dom';
+import { Config } from '../../contexts/Config';
 
-import { Detail } from '@components/DetailList';
-import CredentialChip from '@components/CredentialChip';
-import { toTitleCase } from '@util/strings';
+import { Detail, DeletedDetail } from '../DetailList';
+import CredentialChip from '../CredentialChip';
+import { toTitleCase } from '../../util/strings';
 
 function PromptProjectDetail({ i18n, resource }) {
   const {
@@ -49,16 +50,30 @@ function PromptProjectDetail({ i18n, resource }) {
 
   return (
     <>
+      {summary_fields?.organization ? (
+        <Detail
+          label={i18n._(t`Organization`)}
+          value={
+            <Link
+              to={`/organizations/${summary_fields.organization.id}/details`}
+            >
+              {summary_fields?.organization.name}
+            </Link>
+          }
+        />
+      ) : (
+        <DeletedDetail label={i18n._(t`Organization`)} />
+      )}
       <Detail
-        label={i18n._(t`SCM Type`)}
+        label={i18n._(t`Source Control Type`)}
         value={scm_type === '' ? i18n._(t`Manual`) : toTitleCase(scm_type)}
       />
-      <Detail label={i18n._(t`SCM URL`)} value={scm_url} />
-      <Detail label={i18n._(t`SCM Branch`)} value={scm_branch} />
-      <Detail label={i18n._(t`SCM Refspec`)} value={scm_refspec} />
+      <Detail label={i18n._(t`Source Control URL`)} value={scm_url} />
+      <Detail label={i18n._(t`Source Control Branch`)} value={scm_branch} />
+      <Detail label={i18n._(t`Source Control Refspec`)} value={scm_refspec} />
       {summary_fields?.credential?.id && (
         <Detail
-          label={i18n._(t`SCM Credential`)}
+          label={i18n._(t`Source Control Credential`)}
           value={
             <CredentialChip
               key={resource.summary_fields.credential.id}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
 import { act } from 'react-dom/test-utils';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import SurveyQuestionForm from './SurveyQuestionForm';
 
 const question = {
@@ -224,5 +224,68 @@ describe('<SurveyQuestionForm />', () => {
     expect(
       wrapper.find('FormField#question-default input').prop('type')
     ).toEqual('number');
+  });
+  test('should not throw validation error', async () => {
+    let wrapper;
+
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyQuestionForm
+          question={question}
+          handleSubmit={noop}
+          handleCancel={noop}
+        />
+      );
+    });
+    await selectType(wrapper, 'multiselect');
+    await act(async () =>
+      wrapper.find('TextArea#question-options').prop('onChange')('a \n b', {
+        target: { value: 'a \n b', name: 'choices' },
+      })
+    );
+    await act(async () =>
+      wrapper.find('TextArea#question-default').prop('onChange')('b \n a', {
+        target: { value: 'b \n a', name: 'default' },
+      })
+    );
+    wrapper.find('FormField#question-default').prop('validate')('b \n a', {});
+    wrapper.update();
+    expect(
+      wrapper
+        .find('FormGroup[fieldId="question-default"]')
+        .prop('helperTextInvalid')
+    ).toBe(undefined);
+  });
+
+  test('should throw validation error', async () => {
+    let wrapper;
+
+    act(() => {
+      wrapper = mountWithContexts(
+        <SurveyQuestionForm
+          question={question}
+          handleSubmit={noop}
+          handleCancel={noop}
+        />
+      );
+    });
+    await selectType(wrapper, 'multiselect');
+    await act(async () =>
+      wrapper.find('TextArea#question-options').prop('onChange')('a \n b', {
+        target: { value: 'a \n b', name: 'choices' },
+      })
+    );
+    await act(async () =>
+      wrapper.find('TextArea#question-default').prop('onChange')('c', {
+        target: { value: 'c', name: 'default' },
+      })
+    );
+    wrapper.find('FormField#question-default').prop('validate')('c', {});
+    wrapper.update();
+    expect(
+      wrapper
+        .find('FormGroup[fieldId="question-default"]')
+        .prop('helperTextInvalid')
+    ).toBe('Default choice must be answered from the choices listed.');
   });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
+import { mountWithContexts } from '../../../../../testUtils/enzymeHelpers';
 import { OutputToolbar } from '.';
 import mockJobData from '../../shared/data.job.json';
 

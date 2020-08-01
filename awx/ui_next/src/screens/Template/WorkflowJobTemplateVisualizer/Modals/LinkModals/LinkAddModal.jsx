@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-import { WorkflowDispatchContext } from '@contexts/Workflow';
-import { BaseSizes, Title, TitleLevel } from '@patternfly/react-core';
+import { Title } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { WorkflowDispatchContext } from '../../../../../contexts/Workflow';
 import LinkModal from './LinkModal';
 
 function LinkAddModal({ i18n }) {
@@ -10,7 +10,7 @@ function LinkAddModal({ i18n }) {
   return (
     <LinkModal
       header={
-        <Title headingLevel={TitleLevel.h1} size={BaseSizes['2xl']}>
+        <Title headingLevel="h1" size="xl">
           {i18n._(t`Add Link`)}
         </Title>
       }

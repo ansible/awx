@@ -1,22 +1,22 @@
 import React, { useContext, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { Button, Modal } from '@patternfly/react-core';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
+} from '../../../../../contexts/Workflow';
 
-import { Button, Modal } from '@patternfly/react-core';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
-import PromptDetail from '@components/PromptDetail';
-import useRequest from '@util/useRequest';
+import ContentError from '../../../../../components/ContentError';
+import ContentLoading from '../../../../../components/ContentLoading';
+import PromptDetail from '../../../../../components/PromptDetail';
+import useRequest from '../../../../../util/useRequest';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
   ProjectsAPI,
   WorkflowJobTemplatesAPI,
-} from '@api';
+} from '../../../../../api';
 
 function getNodeType(node) {
   const ujtType = node.type || node.unified_job_type;
@@ -71,7 +71,22 @@ function NodeViewModal({ i18n }) {
     request: fetchNodeDetail,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
+      let { data } = await nodeAPI?.readDetail(unifiedJobTemplate.id);
+
+      if (data?.type === 'job_template') {
+        const {
+          data: { results = [] },
+        } = await JobTemplatesAPI.readInstanceGroups(data.id);
+        data = Object.assign(data, { instance_groups: results });
+      }
+
+      if (data?.related?.webhook_receiver) {
+        const {
+          data: { webhook_key },
+        } = await nodeAPI?.readWebhookKey(data.id);
+        data = Object.assign(data, { webhook_key });
+      }
+
       return data;
     }, [nodeAPI, unifiedJobTemplate.id]),
     null
@@ -116,10 +131,10 @@ function NodeViewModal({ i18n }) {
 
   return (
     <Modal
-      isLarge
+      variant="large"
       isOpen
-      isFooterLeftAligned
       title={unifiedJobTemplate.name}
+      aria-label={i18n._(t`Workflow node view modal`)}
       onClose={() => dispatch({ type: 'SET_NODE_TO_VIEW', value: null })}
       actions={[
         <Button

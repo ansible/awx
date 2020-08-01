@@ -16,7 +16,6 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: tower_inventory
-version_added: "2.3"
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: create, update, or destroy Ansible Tower inventory.
 description:
@@ -40,19 +39,16 @@ options:
     variables:
       description:
         - Inventory variables.
-      required: False
       type: dict
     kind:
       description:
         - The kind field. Cannot be modified after created.
       default: ""
       choices: ["", "smart"]
-      version_added: "2.7"
       type: str
     host_filter:
       description:
         -  The host_filter field. Only useful when C(kind=smart).
-      version_added: "2.7"
       type: str
     state:
       description:
@@ -60,12 +56,6 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    tower_oauthtoken:
-      description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -89,16 +79,16 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
-        description=dict(required=False),
+        description=dict(),
         organization=dict(required=True),
-        variables=dict(type='dict', required=False),
+        variables=dict(type='dict'),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -120,6 +110,10 @@ def main():
         }
     })
 
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(inventory)
+
     # Create the data that gets sent for create and update
     inventory_fields = {
         'name': name,
@@ -132,16 +126,12 @@ def main():
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(inventory)
-    elif state == 'present':
-        # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
-        if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
-            module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
+    # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
+    if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+        module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
-        # If the state was present and we can let the module build or update the existing inventory, this will return on its own
-        module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
+    # If the state was present and we can let the module build or update the existing inventory, this will return on its own
+    module.create_or_update_if_needed(inventory, inventory_fields, endpoint='inventories', item_type='inventory')
 
 
 if __name__ == '__main__':

@@ -17,7 +17,6 @@ DOCUMENTATION = '''
 ---
 module: tower_workflow_job_template
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.3"
 short_description: create, update, or destroy Ansible Tower workflow job templates.
 description:
     - Create, update, or destroy Ansible Tower workflow job templates.
@@ -32,69 +31,56 @@ options:
     new_name:
       description:
         - Setting this option will change the existing name.
-      required: False
       type: str
     description:
       description:
         - Optional description of this workflow job template.
-      required: False
       type: str
     extra_vars:
       description:
         - Variables which will be made available to jobs ran inside the workflow.
-      required: False
       type: dict
     organization:
       description:
         - Organization the workflow job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
-      required: False
       type: str
     allow_simultaneous:
       description:
         - Allow simultaneous runs of the workflow job template.
-      required: False
       type: bool
     ask_variables_on_launch:
       description:
         - Prompt user for C(extra_vars) on launch.
-      required: False
       type: bool
     inventory:
       description:
         - Inventory applied as a prompt, assuming job template prompts for inventory
-      required: False
       type: str
     limit:
       description:
         - Limit applied as a prompt, assuming job template prompts for limit
-      required: False
       type: str
     scm_branch:
       description:
         - SCM branch applied as a prompt, assuming job template prompts for SCM branch
-      required: False
       type: str
     ask_inventory_on_launch:
       description:
         - Prompt user for inventory on launch of this workflow job template
-      required: False
       type: bool
     ask_scm_branch_on_launch:
       description:
         - Prompt user for SCM branch on launch of this workflow job template
-      required: False
       type: bool
     ask_limit_on_launch:
       description:
         - Prompt user for limit on launch of this workflow job template
-      required: False
       type: bool
     webhook_service:
       description:
         - Service that webhook requests will be accepted from
-      required: False
       type: str
       choices:
         - github
@@ -102,7 +88,6 @@ options:
     webhook_credential:
       description:
         - Personal Access Token for posting back the status to the service API
-      required: False
       type: str
     survey_enabled:
       description:
@@ -113,7 +98,6 @@ options:
       description:
         - The definition of the survey associated to the workflow.
       type: dict
-      required: false
     state:
       description:
         - Desired state of the resource.
@@ -122,12 +106,26 @@ options:
         - absent
       default: "present"
       type: str
-    tower_oauthtoken:
+    notification_templates_started:
       description:
-        - The Tower OAuth token to use.
-      required: False
-      type: str
-      version_added: "3.7"
+        - list of notifications to send on start
+      type: list
+      elements: str
+    notification_templates_success:
+      description:
+        - list of notifications to send on success
+      type: list
+      elements: str
+    notification_templates_error:
+      description:
+        - list of notifications to send on error
+      type: list
+      elements: str
+    notification_templates_approvals:
+      description:
+        - list of notifications to send on start
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -153,28 +151,32 @@ def update_survey(module, last_request):
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True, type='str'),
-        new_name=dict(type='str'),
-        description=dict(type='str'),
+        name=dict(required=True),
+        new_name=dict(),
+        description=dict(),
         extra_vars=dict(type='dict'),
-        organization=dict(type='str'),
+        organization=dict(),
         survey=dict(type='dict'),  # special handling
         survey_enabled=dict(type='bool'),
         allow_simultaneous=dict(type='bool'),
         ask_variables_on_launch=dict(type='bool'),
-        inventory=dict(type='str'),
-        limit=dict(type='str'),
-        scm_branch=dict(type='str'),
+        inventory=dict(),
+        limit=dict(),
+        scm_branch=dict(),
         ask_inventory_on_launch=dict(type='bool'),
         ask_scm_branch_on_launch=dict(type='bool'),
         ask_limit_on_launch=dict(type='bool'),
-        webhook_service=dict(type='str', choices=['github', 'gitlab']),
-        webhook_credential=dict(type='str'),
+        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_credential=dict(),
+        notification_templates_started=dict(type="list", elements='str'),
+        notification_templates_success=dict(type="list", elements='str'),
+        notification_templates_error=dict(type="list", elements='str'),
+        notification_templates_approvals=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -190,16 +192,20 @@ def main():
         organization_id = module.resolve_name_to_id('organizations', organization)
         search_fields['organization'] = new_fields['organization'] = organization_id
 
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+
     inventory = module.params.get('inventory')
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventory', inventory)
+        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     webhook_credential = module.params.get('webhook_credential')
     if webhook_credential:
         new_fields['webhook_credential'] = module.resolve_name_to_id('webhook_credential', webhook_credential)
-
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_templates', **{'data': search_fields})
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else name
@@ -215,6 +221,32 @@ def main():
     if 'extra_vars' in new_fields:
         new_fields['extra_vars'] = json.dumps(new_fields['extra_vars'])
 
+    association_fields = {}
+
+    notifications_start = module.params.get('notification_templates_started')
+    if notifications_start is not None:
+        association_fields['notification_templates_started'] = []
+        for item in notifications_start:
+            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_success = module.params.get('notification_templates_success')
+    if notifications_success is not None:
+        association_fields['notification_templates_success'] = []
+        for item in notifications_success:
+            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_error = module.params.get('notification_templates_error')
+    if notifications_error is not None:
+        association_fields['notification_templates_error'] = []
+        for item in notifications_error:
+            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+
+    notifications_approval = module.params.get('notification_templates_approvals')
+    if notifications_approval is not None:
+        association_fields['notification_templates_approvals'] = []
+        for item in notifications_approval:
+            association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
+
     on_change = None
     new_spec = module.params.get('survey')
     if new_spec:
@@ -224,18 +256,17 @@ def main():
             existing_spec = module.get_endpoint(spec_endpoint)
         if new_spec != existing_spec:
             module.json_output['changed'] = True
+            if existing_item and module.has_encrypted_values(existing_spec):
+                module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
             on_change = update_survey
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item, new_fields,
-            endpoint='workflow_job_templates', item_type='workflow_job_template',
-            on_create=on_change, on_update=on_change
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item, new_fields,
+        endpoint='workflow_job_templates', item_type='workflow_job_template',
+        associations=association_fields,
+        on_create=on_change, on_update=on_change
+    )
 
 
 if __name__ == '__main__':

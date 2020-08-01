@@ -657,10 +657,10 @@ function(SettingsUtils, i18n, $rootScope) {
                                 query += '&credential_type__namespace=ssh&role_level=use_role';
                                 break;
                             case 'scm_credential':
-                                query += '&redential_type__namespace=scm&role_level=use_role';
+                                query += '&credential_type__namespace=scm&role_level=use_role';
                                 break;
                             case 'network_credential':
-                                query += '&redential_type__namespace=net&role_level=use_role';
+                                query += '&credential_type__namespace=net&role_level=use_role';
                                 break;
                             case 'cloud_credential':
                                 query += '&cloud=true&role_level=use_role';

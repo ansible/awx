@@ -9,15 +9,18 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
 ---
 module: tower_send
+deprecated:
+  removed_in: "14.0.0"
+  why: Deprecated in favor of upcoming C(_import) module.
+  alternative: Once published, use M(tower_import) instead.
 author: "John Westcott IV (@john-westcott-iv)"
-version_added: "2.8"
 short_description: Send assets to Ansible Tower.
 description:
     - Send assets to Ansible Tower. See
@@ -27,19 +30,16 @@ options:
       description:
         - The assets to import.
         - This can be the output of tower_receive or loaded from a file
-      required: False
       type: str
     files:
       description:
         - List of files to import.
-      required: False
       default: []
       type: list
       elements: str
     prevent:
       description:
         - A list of asset types to prevent import for
-      required: false
       default: []
       type: list
       elements: str
@@ -47,7 +47,6 @@ options:
       description:
         - The password management option to use.
         - The prompt option is not supported.
-      required: false
       default: 'default'
       choices: ["default", "random"]
       type: str
@@ -60,7 +59,7 @@ requirements:
   - six.moves.StringIO
   - sys
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_legacy
 '''
 
 EXAMPLES = '''
@@ -98,15 +97,15 @@ except ImportError:
 
 def main():
     argument_spec = dict(
-        assets=dict(required=False),
-        files=dict(required=False, default=[], type='list', elements='str'),
-        prevent=dict(required=False, default=[], type='list', elements='str'),
-        password_management=dict(required=False, default='default', choices=['default', 'random']),
+        assets=dict(),
+        files=dict(default=[], type='list', elements='str'),
+        prevent=dict(default=[], type='list', elements='str'),
+        password_management=dict(default='default', choices=['default', 'random']),
     )
 
     module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
 
-    module.deprecate(msg="This module is being moved to a different collection. Instead of awx.awx it will be migrated into awx.tower_cli", version="3.7")
+    module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI import command", version="awx.awx:14.0.0")
 
     if not HAS_TOWER_CLI:
         module.fail_json(msg='ansible-tower-cli required for this module')

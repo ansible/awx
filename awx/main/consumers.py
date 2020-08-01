@@ -95,19 +95,17 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
         except Exception:
-            # TODO: log ip of connected client
-            logger.warn("Broadcast client failed to authorize for reason.")
+            logger.warn(f"client '{self.channel_name}' failed to authorize against the broadcast endpoint.")
             await self.close()
             return
 
-        # TODO: log ip of connected client
-        logger.info(f"Broadcast client connected.")
         await self.accept()
         await self.channel_layer.group_add(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
+        logger.info(f"client '{self.channel_name}' joined the broadcast group.")
 
     async def disconnect(self, code):
-        # TODO: log ip of disconnected client
-        logger.info("Client disconnected")
+        logger.info(f"client '{self.channel_name}' disconnected from the broadcast group.")
+        await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
 
     async def internal_message(self, event):
         await self.send(event['text'])
@@ -131,6 +129,14 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             await self.accept()
             await self.send_json({"close": True})
             await self.close()
+
+    async def disconnect(self, code):
+        current_groups = set(self.scope['session'].pop('groups') if 'groups' in self.scope['session'] else [])
+        for group_name in current_groups:
+            await self.channel_layer.group_discard(
+                group_name,
+                self.channel_name,
+            )
 
     @database_sync_to_async
     def user_can_see_object_id(self, user_access, oid):
@@ -189,7 +195,6 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                     group_name,
                     self.channel_name
                 )
-            logger.debug(f"Channel {self.channel_name} left groups {old_groups} and joined {new_groups_exclusive}")
             self.scope['session']['groups'] = new_groups
             await self.send_json({
                 "groups_current": list(new_groups),

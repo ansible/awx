@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { bool, func, node, number, string, oneOfType } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { CredentialsAPI } from '@api';
-import { Credential } from '@types';
-import { getQSConfig, parseQueryString, mergeParams } from '@util/qs';
-import { FieldTooltip } from '@components/FormField';
 import { FormGroup } from '@patternfly/react-core';
-import Lookup from '@components/Lookup';
-import OptionsList from '@components/OptionsList';
+import { CredentialsAPI } from '../../api';
+import { Credential } from '../../types';
+import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
+import { FieldTooltip } from '../FormField';
+import Lookup from './Lookup';
+import OptionsList from '../OptionsList';
+import useRequest from '../../util/useRequest';
 import LookupErrorMessage from './shared/LookupErrorMessage';
 
 const QS_CONFIG = getQSConfig('credentials', {
@@ -26,31 +27,56 @@ function CredentialLookup({
   onChange,
   required,
   credentialTypeId,
+  credentialTypeKind,
+  credentialTypeNamespace,
   value,
   history,
   i18n,
   tooltip,
 }) {
-  const [credentials, setCredentials] = useState([]);
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
+  const {
+    result: { count, credentials },
+    error,
+    request: fetchCredentials,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const typeIdParams = credentialTypeId
+        ? { credential_type: credentialTypeId }
+        : {};
+      const typeKindParams = credentialTypeKind
+        ? { credential_type__kind: credentialTypeKind }
+        : {};
+      const typeNamespaceParams = credentialTypeNamespace
+        ? { credential_type__namespace: credentialTypeNamespace }
+        : {};
+
+      const { data } = await CredentialsAPI.read(
+        mergeParams(params, {
+          ...typeIdParams,
+          ...typeKindParams,
+          ...typeNamespaceParams,
+        })
+      );
+      return {
+        count: data.count,
+        credentials: data.results,
+      };
+    }, [
+      credentialTypeId,
+      credentialTypeKind,
+      credentialTypeNamespace,
+      history.location.search,
+    ]),
+    {
+      count: 0,
+      credentials: [],
+    }
+  );
 
   useEffect(() => {
-    (async () => {
-      const params = parseQueryString(QS_CONFIG, history.location.search);
-      try {
-        const { data } = await CredentialsAPI.read(
-          mergeParams(params, { credential_type: credentialTypeId })
-        );
-        setCredentials(data.results);
-        setCount(data.count);
-      } catch (err) {
-        if (setError) {
-          setError(err);
-        }
-      }
-    })();
-  }, [credentialTypeId, history.location.search]);
+    fetchCredentials();
+  }, [fetchCredentials]);
 
   // TODO: replace credential type search with REST-based grabbing of cred types
 
@@ -58,11 +84,11 @@ function CredentialLookup({
     <FormGroup
       fieldId="credential"
       isRequired={required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={label}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
       helperTextInvalid={helperTextInvalid}
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="credential"
         header={label}
@@ -111,8 +137,29 @@ function CredentialLookup({
   );
 }
 
+function idOrKind(props, propName, componentName) {
+  let error;
+  if (
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeId') &&
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeKind')
+  )
+    error = new Error(
+      `Either "credentialTypeId" or "credentialTypeKind" is required`
+    );
+  if (
+    !Object.prototype.hasOwnProperty.call(props, 'credentialTypeId') &&
+    typeof props[propName] !== 'string'
+  ) {
+    error = new Error(
+      `Invalid prop '${propName}' '${props[propName]}' supplied to '${componentName}'.`
+    );
+  }
+  return error;
+}
+
 CredentialLookup.propTypes = {
-  credentialTypeId: oneOfType([number, string]).isRequired,
+  credentialTypeId: oneOfType([number, string]),
+  credentialTypeKind: idOrKind,
   helperTextInvalid: node,
   isValid: bool,
   label: string.isRequired,
@@ -123,6 +170,8 @@ CredentialLookup.propTypes = {
 };
 
 CredentialLookup.defaultProps = {
+  credentialTypeId: '',
+  credentialTypeKind: '',
   helperTextInvalid: '',
   isValid: true,
   onBlur: () => {},

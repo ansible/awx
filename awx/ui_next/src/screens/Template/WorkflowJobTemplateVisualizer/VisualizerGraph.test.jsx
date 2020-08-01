@@ -1,6 +1,6 @@
 import React from 'react';
-import { mountWithContexts } from '@testUtils/enzymeHelpers';
-import { WorkflowStateContext } from '@contexts/Workflow';
+import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
+import { WorkflowStateContext } from '../../../contexts/Workflow';
 import VisualizerGraph from './VisualizerGraph';
 
 const workflowContext = {

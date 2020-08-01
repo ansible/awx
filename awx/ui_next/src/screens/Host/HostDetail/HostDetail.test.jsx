@@ -1,12 +1,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithContexts, waitForElement } from '@testUtils/enzymeHelpers';
+import {
+  mountWithContexts,
+  waitForElement,
+} from '../../../../testUtils/enzymeHelpers';
 import HostDetail from './HostDetail';
-import { HostsAPI } from '@api';
+import { HostsAPI } from '../../../api';
 
 import mockHost from '../data.host.json';
 
-jest.mock('@api');
+jest.mock('../../../api');
 
 describe('<HostDetail />', () => {
   let wrapper;
@@ -73,12 +76,19 @@ describe('<HostDetail />', () => {
     beforeAll(() => {
       const readOnlyHost = { ...mockHost };
       readOnlyHost.summary_fields.user_capabilities.edit = false;
+      readOnlyHost.summary_fields.recent_jobs = [];
 
       wrapper = mountWithContexts(<HostDetail host={mockHost} />);
     });
 
     afterAll(() => {
       wrapper.unmount();
+    });
+
+    test('should hide activity stream when there are no recent jobs', async () => {
+      expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
+        0
+      );
     });
 
     test('should hide edit button for users without edit permission', async () => {

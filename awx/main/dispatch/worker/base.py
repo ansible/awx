@@ -8,6 +8,7 @@ import sys
 import redis
 import json
 import psycopg2
+import time
 from uuid import UUID
 from queue import Empty as QueueEmpty
 
@@ -34,6 +35,7 @@ class WorkerSignalHandler:
 
     def __init__(self):
         self.kill_now = False
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
         signal.signal(signal.SIGINT, self.exit_gracefully)
 
     def exit_gracefully(self, *args, **kwargs):
@@ -116,13 +118,23 @@ class AWXConsumerRedis(AWXConsumerBase):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
 
-        queue = redis.Redis.from_url(settings.BROKER_URL)
+        time_to_sleep = 1
         while True:
-            res = queue.blpop(self.queues)
-            res = json.loads(res[1])
-            self.process_task(res)
-            if self.should_stop:
-                return
+            queue = redis.Redis.from_url(settings.BROKER_URL)
+            while True:
+                try:
+                    res = queue.blpop(self.queues)
+                    time_to_sleep = 1
+                    res = json.loads(res[1])
+                    self.process_task(res)
+                except redis.exceptions.RedisError:
+                    time_to_sleep = min(time_to_sleep * 2, 30)
+                    logger.exception(f"encountered an error communicating with redis. Reconnect attempt in {time_to_sleep} seconds")
+                    time.sleep(time_to_sleep)
+                except (json.JSONDecodeError, KeyError):
+                    logger.exception("failed to decode JSON message from redis")
+                if self.should_stop:
+                    return
 
 
 class AWXConsumerPG(AWXConsumerBase):

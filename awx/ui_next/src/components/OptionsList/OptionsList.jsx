@@ -15,10 +15,10 @@ import SelectedList from '../SelectedList';
 import PaginatedDataList from '../PaginatedDataList';
 import CheckboxListItem from '../CheckboxListItem';
 import DataListToolbar from '../DataListToolbar';
-import { QSConfig, SearchColumns, SortColumns } from '@types';
+import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const ModalList = styled.div`
-  .pf-c-data-toolbar__content {
+  .pf-c-toolbar__content {
     padding: 0 !important;
   }
 `;

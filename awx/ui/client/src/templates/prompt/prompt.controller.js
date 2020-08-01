@@ -55,7 +55,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings', '$f
                         vm.promptDataClone.prompts.credentials.credentialTypeOptions = [];
                         response.data.results.forEach((credentialTypeRow => {
                             vm.promptDataClone.prompts.credentials.credentialTypes[credentialTypeRow.id] = credentialTypeRow.kind;
-                            if(credentialTypeRow.kind.match(/^(cloud|net|ssh|vault)$/)) {
+                            if(credentialTypeRow.kind.match(/^(cloud|net|ssh|vault|kubernetes)$/)) {
                                 if(credentialTypeRow.kind === 'ssh') {
                                     vm.promptDataClone.prompts.credentials.credentialKind = credentialTypeRow.id.toString();
                                 }

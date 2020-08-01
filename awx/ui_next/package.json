@@ -1,38 +1,39 @@
 {
-  "name": "awx-react",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.jsx",
-  "scripts": {
-    "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "TZ='UTC' jest --coverage",
-    "test-watch": "TZ='UTC' jest --watch",
-    "lint": "eslint --ext .js --ext .jsx .",
-    "add-locale": "lingui add-locale",
-    "extract-strings": "lingui extract",
-    "compile-strings": "lingui compile",
-    "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\"",
-    "prettier-check": "prettier --check \"src/**/*.{js,jsx,scss}\""
+  "name": "ui_next",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "10.x"
   },
-  "keywords": [],
-  "author": "",
-  "license": "Apache",
+  "dependencies": {
+    "@lingui/react": "^2.9.1",
+    "@patternfly/patternfly": "^4.23.3",
+    "@patternfly/react-core": "^4.32.1",
+    "@patternfly/react-icons": "^4.5.0",
+    "ansi-to-html": "^0.6.11",
+    "axios": "^0.18.1",
+    "codemirror": "^5.47.0",
+    "d3": "^5.12.0",
+    "dagre": "^0.8.4",
+    "formik": "^2.1.2",
+    "has-ansi": "^3.0.0",
+    "html-entities": "^1.2.1",
+    "js-yaml": "^3.13.1",
+    "prop-types": "^15.6.2",
+    "react": "^16.13.1",
+    "react-codemirror2": "^6.0.0",
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.1.2",
+    "react-virtualized": "^9.21.1",
+    "rrule": "^2.6.4",
+    "styled-components": "^4.2.0"
+  },
   "devDependencies": {
-    "@babel/core": "^7.8.3",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/polyfill": "^7.0.0",
-    "@babel/preset-env": "^7.8.3",
-    "@babel/preset-react": "^7.0.0",
-    "@lingui/cli": "^2.7.4",
-    "@lingui/macro": "^2.7.2",
+    "@babel/polyfill": "^7.8.7",
+    "@lingui/cli": "^2.9.1",
+    "@lingui/macro": "^2.9.1",
     "@nteract/mockument": "^1.0.4",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^10.0.1",
-    "babel-jest": "^25.1.0",
-    "babel-loader": "^8.0.6",
-    "babel-plugin-macros": "^2.4.2",
-    "babel-plugin-styled-components": "^1.10.0",
-    "css-loader": "^1.0.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
@@ -44,40 +45,48 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-react-hooks": "^2.2.0",
-    "file-loader": "^2.0.0",
-    "history": "^4.9.0",
-    "jest": "^25.1.0",
-    "node-sass": "^4.13.1",
+    "http-proxy-middleware": "^1.0.3",
+    "jest-websocket-mock": "^2.0.2",
+    "mock-socket": "^9.0.3",
     "prettier": "^1.18.2",
-    "react-hot-loader": "^4.3.3",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.14"
+    "react-scripts": "^3.4.1"
   },
-  "dependencies": {
-    "@lingui/react": "^2.7.2",
-    "@patternfly/patternfly": "^2.66.0",
-    "@patternfly/react-core": "^3.140.11",
-    "@patternfly/react-icons": "^3.15.4",
-    "@patternfly/react-tokens": "^2.8.4",
-    "ansi-to-html": "^0.6.11",
-    "axios": "^0.18.1",
-    "codemirror": "^5.47.0",
-    "d3": "^5.12.0",
-    "dagre": "^0.8.4",
-    "formik": "^2.1.2",
-    "has-ansi": "^3.0.0",
-    "html-entities": "^1.2.1",
-    "js-yaml": "^3.13.1",
-    "prop-types": "^15.6.2",
-    "react": "^16.13.0",
-    "react-codemirror2": "^6.0.0",
-    "react-dom": "^16.13.0",
-    "react-router-dom": "^5.1.2",
-    "react-virtualized": "^9.21.1",
-    "rrule": "^2.6.4",
-    "styled-components": "^4.2.0"
+  "scripts": {
+    "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
+    "build": "react-scripts build",
+    "test": "TZ='UTC' react-scripts test --coverage --watchAll=false",
+    "test-watch": "TZ='UTC' react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint --ext .js --ext .jsx .",
+    "add-locale": "lingui add-locale",
+    "extract-strings": "lingui extract",
+    "compile-strings": "lingui compile",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,scss}\"",
+    "prettier-check": "prettier --check \"src/**/*.{js,jsx,scss}\""
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "testUtils/**/*.{js,jsx}"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/locales",
+      "index.js"
+    ]
   }
 }

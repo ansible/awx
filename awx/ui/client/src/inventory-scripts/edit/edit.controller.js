@@ -17,7 +17,7 @@ export default ['Rest', 'Wait',
             data = inventory_scriptData,
             id = inventory_scriptData.id,
             form = InventoryScriptsForm,
-            master = {},
+            main = {},
             url = GetBasePath('inventory_scripts');
 
         init();
@@ -35,14 +35,14 @@ export default ['Rest', 'Wait',
             for (fld in form.fields) {
                 if (data[fld]) {
                     $scope[fld] = data[fld];
-                    master[fld] = data[fld];
+                    main[fld] = data[fld];
                 }
 
                 if (form.fields[fld].sourceModel && data.summary_fields &&
                     data.summary_fields[form.fields[fld].sourceModel]) {
                     $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                    main[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                 }
             }

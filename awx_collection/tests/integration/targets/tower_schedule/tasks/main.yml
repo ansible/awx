@@ -1,0 +1,88 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: generate random string for project
+  set_fact:
+    sched1: "AWX-Collection-tests-tower_schedule-sched1-{{ test_id }}"
+
+- name: Try to create without an rrule
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    enabled: true
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - result is failed
+      - "'Unable to create schedule {{ sched1 }}' in result.msg"
+
+- name: Create with options that the JT does not support
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+    description: "This hopefully will not work"
+    extra_data:
+      some: var
+    inventory: Demo Inventory
+    scm_branch: asdf1234
+    job_type: run
+    job_tags: other_tags
+    skip_tags: some_tags
+    limit: node1
+    diff_mode: true
+    verbosity: 4
+    enabled: true
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - result is failed
+      - "'Unable to create schedule {{ sched1 }}' in result.msg"
+
+- name: Build a real schedule
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Rebuild the same schedule
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    unified_job_template: "Demo Job Template"
+    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+  register: result
+
+- assert:
+    that:
+      - result is not changed
+
+- name: Disable a schedule
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: present
+    enabled: "false"
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete the schedule
+  tower_schedule:
+    name: "{{ sched1 }}"
+    state: absent

@@ -1,7 +1,9 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
-import { Schedule, ScheduleAdd, ScheduleList } from '@components/Schedule';
+import Schedule from './Schedule';
+import ScheduleAdd from './ScheduleAdd';
+import ScheduleList from './ScheduleList';
 
 function Schedules({
   createSchedule,
@@ -14,32 +16,21 @@ function Schedules({
 
   return (
     <Switch>
-      <Route
-        path={`${match.path}/add`}
-        render={() => <ScheduleAdd createSchedule={createSchedule} />}
-      />
-      <Route
-        key="details"
-        path={`${match.path}/:scheduleId`}
-        render={() => (
-          <Schedule
-            unifiedJobTemplate={unifiedJobTemplate}
-            setBreadcrumb={setBreadcrumb}
-          />
-        )}
-      />
-      <Route
-        key="list"
-        path={`${match.path}`}
-        render={() => {
-          return (
-            <ScheduleList
-              loadSchedules={loadSchedules}
-              loadScheduleOptions={loadScheduleOptions}
-            />
-          );
-        }}
-      />
+      <Route path={`${match.path}/add`}>
+        <ScheduleAdd createSchedule={createSchedule} />
+      </Route>
+      <Route key="details" path={`${match.path}/:scheduleId`}>
+        <Schedule
+          unifiedJobTemplate={unifiedJobTemplate}
+          setBreadcrumb={setBreadcrumb}
+        />
+      </Route>
+      <Route key="list" path={`${match.path}`}>
+        <ScheduleList
+          loadSchedules={loadSchedules}
+          loadScheduleOptions={loadScheduleOptions}
+        />
+      </Route>
     </Switch>
   );
 }

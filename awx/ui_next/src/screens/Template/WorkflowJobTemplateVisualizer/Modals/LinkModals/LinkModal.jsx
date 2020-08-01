@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
-import {
-  WorkflowDispatchContext,
-  WorkflowStateContext,
-} from '@contexts/Workflow';
 import { Button, FormGroup, Modal } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func } from 'prop-types';
-import AnsibleSelect from '@components/AnsibleSelect';
+import {
+  WorkflowDispatchContext,
+  WorkflowStateContext,
+} from '../../../../../contexts/Workflow';
+import AnsibleSelect from '../../../../../components/AnsibleSelect';
 
 function LinkModal({ header, i18n, onConfirm }) {
   const dispatch = useContext(WorkflowDispatchContext);
@@ -20,8 +20,8 @@ function LinkModal({ header, i18n, onConfirm }) {
       width={600}
       header={header}
       isOpen
-      isFooterLeftAligned
       title={i18n._(t`Workflow Link`)}
+      aria-label={i18n._(t`Workflow link modal`)}
       onClose={() => dispatch({ type: 'CANCEL_LINK_MODAL' })}
       actions={[
         <Button

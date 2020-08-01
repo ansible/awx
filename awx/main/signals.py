@@ -150,9 +150,9 @@ def rbac_activity_stream(instance, sender, **kwargs):
 
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
-    for l in instance.labels.all():
-        if l.is_candidate_for_detach():
-            l.delete()
+    for label in instance.labels.all():
+        if label.is_candidate_for_detach():
+            label.delete()
 
 
 def save_related_job_templates(sender, instance, **kwargs):
@@ -393,7 +393,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
                 '{} ({})'.format(c.name, c.id)
                 for c in instance.credentials.iterator()
             ]
-            changes['labels'] = [l.name for l in instance.labels.iterator()]
+            changes['labels'] = [label.name for label in instance.labels.iterator()]
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:

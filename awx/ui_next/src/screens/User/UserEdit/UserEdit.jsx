@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-import { CardBody } from '@components/Card';
+import { CardBody } from '../../../components/Card';
 import UserForm from '../shared/UserForm';
-import { UsersAPI } from '@api';
+import { UsersAPI } from '../../../api';
 
-function UserEdit({ user, history }) {
+function UserEdit({ user }) {
   const [formSubmitError, setFormSubmitError] = useState(null);
+
+  const history = useHistory();
 
   const handleSubmit = async values => {
     setFormSubmitError(null);
@@ -34,4 +36,4 @@ function UserEdit({ user, history }) {
   );
 }
 
-export default withI18n()(withRouter(UserEdit));
+export default withI18n()(UserEdit);

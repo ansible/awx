@@ -6,14 +6,14 @@ import { CardBody as PFCardBody } from '@patternfly/react-core';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
-} from '@contexts/Workflow';
-import { layoutGraph } from '@components/Workflow/WorkflowUtils';
-import ContentError from '@components/ContentError';
-import ContentLoading from '@components/ContentLoading';
+} from '../../../contexts/Workflow';
+import { layoutGraph } from '../../../components/Workflow/WorkflowUtils';
+import ContentError from '../../../components/ContentError';
+import ContentLoading from '../../../components/ContentLoading';
 import workflowReducer, {
   initReducer,
-} from '@components/Workflow/workflowReducer';
-import { WorkflowJobsAPI } from '@api';
+} from '../../../components/Workflow/workflowReducer';
+import { WorkflowJobsAPI } from '../../../api';
 import WorkflowOutputGraph from './WorkflowOutputGraph';
 import WorkflowOutputToolbar from './WorkflowOutputToolbar';
 

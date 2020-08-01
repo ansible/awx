@@ -1,8 +1,11 @@
+import json
 import os
+import sys
 
 from awxkit import api, config
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
+from awxkit.api.pages.api import EXPORTABLE_RESOURCES
 from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
@@ -102,7 +105,7 @@ class Login(CustomCommand):
         else:
             fmt = client.get_config('format')
             if fmt == 'human':
-                print('export TOWER_TOKEN={}'.format(token))
+                print('export TOWER_OAUTH_TOKEN={}'.format(token))
             else:
                 print(to_str(FORMATTERS[fmt]({'token': token}, '.')).strip())
 
@@ -121,6 +124,51 @@ class Config(CustomCommand):
             'use_sessions': config.use_sessions,
             'credentials': config.credentials,
         }
+
+
+class Import(CustomCommand):
+    name = 'import'
+    help_text = 'import resources into Tower'
+
+    def handle(self, client, parser):
+        if client.help:
+            parser.print_help()
+            raise SystemExit()
+
+        data = json.load(sys.stdin)
+
+        client.authenticate()
+        client.v2.import_assets(data)
+
+        return {}
+
+
+class Export(CustomCommand):
+    name = 'export'
+    help_text = 'export resources from Tower'
+
+    def extend_parser(self, parser):
+        resources = parser.add_argument_group('resources')
+
+        for resource in EXPORTABLE_RESOURCES:
+            # This parsing pattern will result in 3 different possible outcomes:
+            # 1) the resource flag is not used at all, which will result in the attr being None
+            # 2) the resource flag is used with no argument, which will result in the attr being ''
+            # 3) the resource flag is used with an argument, and the attr will be that argument's value
+            resources.add_argument('--{}'.format(resource), nargs='?', const='')
+
+    def handle(self, client, parser):
+        self.extend_parser(parser)
+
+        if client.help:
+            parser.print_help()
+            raise SystemExit()
+
+        parsed = parser.parse_known_args()[0]
+        kwargs = {resource: getattr(parsed, resource, None) for resource in EXPORTABLE_RESOURCES}
+
+        client.authenticate()
+        return client.v2.export_assets(**kwargs)
 
 
 def parse_resource(client, skip_deprecated=False):

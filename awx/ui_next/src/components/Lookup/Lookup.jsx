@@ -14,48 +14,27 @@ import {
   Button,
   ButtonVariant,
   Chip,
-  ChipGroup,
-  InputGroup as PFInputGroup,
+  InputGroup,
   Modal,
 } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import ChipGroup from '../ChipGroup';
 
 import reducer, { initReducer } from './shared/reducer';
-import { QSConfig } from '@types';
-
-const SearchButton = styled(Button)`
-  ::after {
-    border: var(--pf-c-button--BorderWidth) solid
-      var(--pf-global--BorderColor--200);
-  }
-`;
-SearchButton.displayName = 'SearchButton';
-
-const InputGroup = styled(PFInputGroup)`
-  ${props =>
-    props.multiple &&
-    `
-    --pf-c-form-control--Height: 90px;
-    overflow-y: auto;
-  `}
-`;
+import { QSConfig } from '../../types';
 
 const ChipHolder = styled.div`
-  --pf-c-form-control--BorderTopColor: var(--pf-global--BorderColor--200);
-  --pf-c-form-control--BorderRightColor: var(--pf-global--BorderColor--200);
   --pf-c-form-control--Height: auto;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
 `;
-
 function Lookup(props) {
   const {
     id,
     header,
     onChange,
     onBlur,
+    isLoading,
     value,
     multiple,
     required,
@@ -119,16 +98,17 @@ function Lookup(props) {
   return (
     <Fragment>
       <InputGroup onBlur={onBlur}>
-        <SearchButton
+        <Button
           aria-label="Search"
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
-          variant={ButtonVariant.tertiary}
+          variant={ButtonVariant.control}
+          isDisabled={isLoading}
         >
           <SearchIcon />
-        </SearchButton>
+        </Button>
         <ChipHolder className="pf-c-form-control">
-          <ChipGroup numChips={5}>
+          <ChipGroup numChips={5} totalChips={items.length}>
             {items.map(item =>
               renderItemChip({
                 item,
@@ -140,9 +120,9 @@ function Lookup(props) {
         </ChipHolder>
       </InputGroup>
       <Modal
-        isFooterLeftAligned
-        isLarge
+        variant="large"
         title={i18n._(t`Select ${header || i18n._(t`Items`)}`)}
+        aria-label={i18n._(t`Lookup modal`)}
         isOpen={isModalOpen}
         onClose={closeModal}
         actions={[

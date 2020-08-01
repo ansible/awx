@@ -123,7 +123,7 @@ class SimpleDAG(object):
         self.root_nodes.discard(to_obj_ord)
 
         if from_obj_ord is None and to_obj_ord is None:
-            raise LookupError("From object {} and to object not found".format(from_obj, to_obj))
+            raise LookupError("From object {} and to object {} not found".format(from_obj, to_obj))
         elif from_obj_ord is None:
             raise LookupError("From object not found {}".format(from_obj))
         elif to_obj_ord is None:
@@ -152,8 +152,8 @@ class SimpleDAG(object):
             return self._get_children_by_label(this_ord, label)
         else:
             nodes = []
-            for l in self.node_from_edges_by_label.keys():
-                nodes.extend(self._get_children_by_label(this_ord, l))
+            for label_obj in self.node_from_edges_by_label.keys():
+                nodes.extend(self._get_children_by_label(this_ord, label_obj))
             return nodes
 
     def _get_parents_by_label(self, node_index, label):
@@ -168,8 +168,8 @@ class SimpleDAG(object):
             return self._get_parents_by_label(this_ord, label)
         else:
             nodes = []
-            for l in self.node_to_edges_by_label.keys():
-                nodes.extend(self._get_parents_by_label(this_ord, l))
+            for label_obj in self.node_to_edges_by_label.keys():
+                nodes.extend(self._get_parents_by_label(this_ord, label_obj))
             return nodes
 
     def get_root_nodes(self):

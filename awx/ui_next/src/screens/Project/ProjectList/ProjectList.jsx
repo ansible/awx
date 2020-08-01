@@ -4,16 +4,17 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
-import { ProjectsAPI } from '@api';
-import useRequest, { useDeleteItems } from '@util/useRequest';
-import AlertModal from '@components/AlertModal';
-import DataListToolbar from '@components/DataListToolbar';
-import ErrorDetail from '@components/ErrorDetail';
+import { ProjectsAPI } from '../../../api';
+import useRequest, { useDeleteItems } from '../../../util/useRequest';
+import AlertModal from '../../../components/AlertModal';
+import DataListToolbar from '../../../components/DataListToolbar';
+import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarAddButton,
   ToolbarDeleteButton,
-} from '@components/PaginatedDataList';
-import { getQSConfig, parseQueryString } from '@util/qs';
+} from '../../../components/PaginatedDataList';
+import useWsProjects from './useWsProjects';
+import { getQSConfig, parseQueryString } from '../../../util/qs';
 
 import ProjectListItem from './ProjectListItem';
 
@@ -29,7 +30,7 @@ function ProjectList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { projects, itemCount, actions },
+    result: { results, itemCount, actions },
     error: contentError,
     isLoading,
     request: fetchProjects,
@@ -41,13 +42,13 @@ function ProjectList({ i18n }) {
         ProjectsAPI.readOptions(),
       ]);
       return {
-        projects: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
       };
     }, [location]),
     {
-      projects: [],
+      results: [],
       itemCount: 0,
       actions: {},
     }
@@ -56,6 +57,8 @@ function ProjectList({ i18n }) {
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  const projects = useWsProjects(results);
 
   const isAllSelected =
     selected.length === projects.length && selected.length > 0;
@@ -115,7 +118,7 @@ function ProjectList({ i18n }) {
               },
               {
                 name: i18n._(t`Type`),
-                key: 'type',
+                key: 'scm_type',
                 options: [
                   [``, i18n._(t`Manual`)],
                   [`git`, i18n._(t`Git`)],
@@ -125,7 +128,7 @@ function ProjectList({ i18n }) {
                 ],
               },
               {
-                name: i18n._(t`SCM URL`),
+                name: i18n._(t`Source Control URL`),
                 key: 'scm_url',
               },
               {
@@ -170,6 +173,7 @@ function ProjectList({ i18n }) {
             )}
             renderItem={o => (
               <ProjectListItem
+                fetchProjects={fetchProjects}
                 key={o.id}
                 project={o}
                 detailUrl={`${match.url}/${o.id}`}
@@ -188,6 +192,7 @@ function ProjectList({ i18n }) {
       <AlertModal
         isOpen={deletionError}
         variant="error"
+        aria-label={i18n._(t`Deletion Error`)}
         title={i18n._(t`Error!`)}
         onClose={clearDeletionError}
       >

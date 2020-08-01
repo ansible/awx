@@ -1,13 +1,22 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
-import { main } from './index';
+import ReactDOM from 'react-dom';
+import App from './App';
 
-const render = template => mount(<MemoryRouter>{template}</MemoryRouter>);
+jest.mock('react-dom', () => ({ render: jest.fn() }));
+
+const div = document.createElement('div');
+div.setAttribute('id', 'app');
+document.body.appendChild(div);
+
+require('./index.jsx');
 
 describe('index.jsx', () => {
-  test('index.jsx loads without issue', () => {
-    const wrapper = main(render);
-    expect(wrapper.find('RootProvider')).toHaveLength(1);
+  it('renders ok', () => {
+    expect(ReactDOM.render).toHaveBeenCalledWith(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+      div
+    );
   });
 });
