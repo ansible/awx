@@ -1,0 +1,7 @@
+{
+    "ACTIVITY_STREAM_ENABLED": true,
+    "REMOTE_HOST_HEADERS": [
+        "HTTP_X_FORWARDED_FOR"
+    ],
+    "TOWER_URL_BASE": "https://towerhost.example.com"
+}

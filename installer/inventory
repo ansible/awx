@@ -139,6 +139,12 @@ secret_key=awxsecret
 # it manages from the docker host, you can set this to turn it into a volume for the container.
 #project_data_dir=/var/lib/awx/projects
 
+# Controls if custom settings (overrides) are deployed during installation.
+# For a complete list of settings: `awx settings list -f json`.
+# See inventory/settings.example.json for an example; the settings defined
+# in this file will be `PATCH`ed in.
+#custom_settings_file=/path/to/your/custom_settings.json
+
 # AWX custom virtual environment folder. Only usable for local install.
 #custom_venv_dir=/opt/my-envs/
 

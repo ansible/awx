@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ kubernetes_deployment_name }}-settings-job
+  namespace: {{ kubernetes_namespace }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ kubernetes_deployment_name }}-settings
+        image: alpine:latest
+        command: ["/bin/ash", "-c"]
+        args:
+          - apk add curl;
+            curl -v -u '{{ admin_user }}:{{ admin_password }}' -XPATCH -d@/tmp/{{ kubernetes_deployment_name }}-settings.json -H 'Content-type:application/json' http://{{ kubernetes_deployment_name}}-web-svc/api/v2/settings/all/;
+        env:
+          - name: TOWER_HOST
+            value: http://{{ kubernetes_deployment_name }}-web-svc
+          - name: TOWER_USERNAME
+            value: {{ admin_user }}
+          - name: TOWER_PASSWORD
+            value: {{ admin_password }}
+        volumeMounts:
+          - name:  settings
+            mountPath: /tmp/
+      volumes:
+        - name: settings
+          configMap:
+            name: {{ kubernetes_deployment_name }}-settings
+            items:
+              - key: {{ custom_settings_file | basename }}
+                path: {{ kubernetes_deployment_name }}-settings.json
+      restartPolicy: Never

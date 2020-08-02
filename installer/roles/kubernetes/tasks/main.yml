@@ -289,3 +289,45 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ replicas | default(kubernetes_deployment_replica_size) }}
+
+- name: Check if settings configmap exists
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      get configmap {{ kubernetes_namespace }}-settings
+  when:
+    - custom_settings_file is file
+  register: settings_configmap_exists
+  failed_when: false
+
+- name: Delete settings configmap if it exists
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete configmap {{ kubernetes_namespace }}-settings
+  when:
+    - custom_settings_file is file
+    - settings_configmap_exists.rc == 0
+
+- name: Create settings configmap
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      create configmap {{ kubernetes_namespace }}-settings --from-file {{ custom_settings_file }}
+  when:
+    - custom_settings_file is file
+
+- name: Render settings_job template
+  set_fact:
+    "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"
+  with_items:
+    - 'settings_job'
+  no_log: true
+  when:
+    - custom_settings_file is file
+
+- name: Apply settings_job
+  shell: |
+    echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
+  with_items:
+    - "{{ settings_job }}"
+  no_log: true
+  when:
+    - custom_settings_file is file
