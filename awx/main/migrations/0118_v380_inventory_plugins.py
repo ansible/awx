@@ -5,6 +5,8 @@ import json
 
 from django.db import migrations
 
+from awx.main.models.inventory import InventorySourceOptions
+
 from ._inventory_source_vars import FrozenInjectors
 
 
@@ -12,8 +14,20 @@ logger = logging.getLogger('awx.main.migrations')
 BACKUP_FILENAME = '/tmp/tower_migration_inventory_source_vars.json'
 
 
+class InventorySourceOptionsWrapper(InventorySourceOptions):
+    '''
+    InventorySource inherits from InventorySourceOptions but that is not
+    "recorded" by Django's app registry model tracking. This will, effectively,
+    reintroduce the inheritance.
+    '''
+    def __init__(self, *args, **kw):
+        self.target = kw.pop('target')
+        super().__init__(self, *args, **kw)
+    def __getattr__(self, attr):
+        return getattr(self.target, attr)
+
+
 def _get_inventory_sources(InventorySource):
-    # TODO: Maybe pull the list of cloud sources from code
     return InventorySource.objects.filter(source__in=['ec2', 'gce', 'azure_rm', 'vmware', 'satellite6', 'openstack', 'rhv', 'tower'])
 
 
@@ -22,7 +36,7 @@ def inventory_source_vars_forward(apps, schema_editor):
     source_vars_backup = dict()
 
     for inv_source_obj in _get_inventory_sources(InventorySource):
-        # TODO: Log error if this is false, it shouldn't be false
+        inv_source_obj = InventorySourceOptionsWrapper(target=inv_source_obj)
         if inv_source_obj.source in FrozenInjectors:
             source_vars_backup[inv_source_obj.id] = dict(inv_source_obj.source_vars_dict)
             with open(BACKUP_FILENAME, 'w') as fh:
