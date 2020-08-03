@@ -72,7 +72,7 @@ from ansible.errors import AnsibleParserError, AnsibleOptionsError
 from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def handle_error(**kwargs):
@@ -104,12 +104,12 @@ class InventoryModule(BaseInventoryPlugin):
 
         # Defer processing of params to logic shared with the modules
         module_params = {}
-        for plugin_param, module_param in TowerModule.short_params.items():
+        for plugin_param, module_param in TowerAPIModule.short_params.items():
             opt_val = self.get_option(plugin_param)
             if opt_val is not None:
                 module_params[module_param] = opt_val
 
-        module = TowerModule(
+        module = TowerAPIModule(
             argument_spec={}, direct_params=module_params,
             error_callback=handle_error, warn_callback=self.warn_callback
         )

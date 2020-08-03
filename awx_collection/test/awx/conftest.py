@@ -10,7 +10,7 @@ from contextlib import redirect_stdout, suppress
 from unittest import mock
 import logging
 
-from requests.models import Response
+from requests.models import Response, PreparedRequest
 
 import pytest
 
@@ -23,6 +23,11 @@ try:
 except ImportError:
     HAS_TOWER_CLI = False
 
+try:
+    import awxkit
+    HAS_AWX_KIT = True
+except ImportError:
+    HAS_AWX_KIT = False
 
 logger = logging.getLogger('awx.main.tests')
 
@@ -90,7 +95,8 @@ def run_module(request, collection_import):
             if 'params' in kwargs and method == 'GET':
                 # query params for GET are handled a bit differently by
                 # tower-cli and python requests as opposed to REST framework APIRequestFactory
-                kwargs_copy.setdefault('data', {})
+                if not kwargs_copy.get('data'):
+                    kwargs_copy['data'] = {}
                 if isinstance(kwargs['params'], dict):
                     kwargs_copy['data'].update(kwargs['params'])
                 elif isinstance(kwargs['params'], list):
@@ -117,6 +123,8 @@ def run_module(request, collection_import):
                     request_user.username, resp.status_code
                 )
 
+            resp.request = PreparedRequest()
+            resp.request.prepare(method=method, url=url)
             return resp
 
         def new_open(self, method, url, **kwargs):
@@ -142,11 +150,22 @@ def run_module(request, collection_import):
         def mock_load_params(self):
             self.params = module_params
 
-        with mock.patch.object(resource_module.TowerModule, '_load_params', new=mock_load_params):
+        if getattr(resource_module, 'TowerAWXKitModule', None):
+            resource_class = resource_module.TowerAWXKitModule
+        elif getattr(resource_module, 'TowerAPIModule', None):
+            resource_class = resource_module.TowerAPIModule
+        elif getattr(resource_module, 'TowerLegacyModule', None):
+            resource_class = resource_module.TowerLegacyModule
+        else:
+            raise("The module has neither a TowerLegacyModule, TowerAWXKitModule or a TowerAPIModule")
+
+        with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests
             with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
                 if HAS_TOWER_CLI:
                     tower_cli_mgr = mock.patch('tower_cli.api.Session.request', new=new_request)
+                elif HAS_AWX_KIT:
+                    tower_cli_mgr = mock.patch('awxkit.api.client.requests.Session.request', new=new_request)
                 else:
                     tower_cli_mgr = suppress()
                 with tower_cli_mgr:

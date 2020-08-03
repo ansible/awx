@@ -62,11 +62,11 @@ EXAMPLES = '''
 '''
 
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
-    module = TowerModule(argument_spec={})
+    module = TowerAPIModule(argument_spec={})
     namespace = {
         'awx': 'awx',
         'tower': 'ansible'

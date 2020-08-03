@@ -91,7 +91,7 @@ def tower_check_mode(module):
             module.fail_json(changed=False, msg='Failed check mode: {0}'.format(excinfo))
 
 
-class TowerModule(AnsibleModule):
+class TowerLegacyModule(AnsibleModule):
     def __init__(self, argument_spec, **kwargs):
         args = dict(
             tower_host=dict(),
@@ -110,7 +110,7 @@ class TowerModule(AnsibleModule):
             ('tower_config_file', 'validate_certs'),
         ))
 
-        super(TowerModule, self).__init__(argument_spec=args, **kwargs)
+        super(TowerLegacyModule, self).__init__(argument_spec=args, **kwargs)
 
         if not HAS_TOWER_CLI:
             self.fail_json(msg=missing_required_lib('ansible-tower-cli'),
