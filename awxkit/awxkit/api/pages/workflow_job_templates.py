@@ -15,6 +15,27 @@ class WorkflowJobTemplate(HasCopy, HasCreate, HasNotifications, HasSurvey, Unifi
     optional_dependencies = [Organization]
     NATURAL_KEY = ('organization', 'name')
 
+    @property
+    def related(self):
+        """Augment the related namespace with the inventory.
+
+        This provides a workaround for API instances that do not provide
+        a reference to this workflow's associated inventory, if defined,
+        in the related namespace.
+
+        See issue #7798.
+        """
+        related_data = self.__getattr__('related')
+        if 'inventory' not in related_data:
+            inventory_id = self.json['inventory']
+            if inventory_id:
+                endpoint_url = '/api/v2/inventories/{}/'.format(inventory_id)
+                related_data['inventory'] = page.TentativePage(
+                    endpoint_url,
+                    self.connection
+                )
+        return related_data
+
     def launch(self, payload={}):
         """Launch using related->launch endpoint."""
         # get related->launch
