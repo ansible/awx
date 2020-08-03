@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -22,6 +23,7 @@ const NameLabel = styled.b`
 `;
 
 function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
+  const { id } = useParams();
   const labelId = `check-action-${token.id}`;
   return (
     <DataListItem key={token.id} aria-labelledby={labelId} id={`${token.id}`}>
@@ -41,7 +43,9 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
               {token.summary_fields?.application?.name ? (
                 <span>
                   <NameLabel>{i18n._(t`Application`)}</NameLabel>
-                  {token.summary_fields.application.name}
+                  <Link to={`/users/${id}/tokens/${token.id}/details`}>
+                    {token.summary_fields.application.name}
+                  </Link>
                 </span>
               ) : (
                 i18n._(t`Personal access token`)
