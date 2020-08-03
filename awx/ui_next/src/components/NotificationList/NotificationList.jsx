@@ -17,7 +17,13 @@ const QS_CONFIG = getQSConfig('notification', {
   order_by: 'name',
 });
 
-function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
+function NotificationList({
+  apiModel,
+  canToggleNotifications,
+  id,
+  i18n,
+  showApprovalsToggle,
+}) {
   const location = useLocation();
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [toggleError, setToggleError] = useState(null);
@@ -27,6 +33,7 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
     result: {
       notifications,
       itemCount,
+      approvalsTemplateIds,
       startedTemplateIds,
       successTemplateIds,
       errorTemplateIds,
@@ -71,7 +78,7 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         apiModel.readNotificationTemplatesError(id, idMatchParams),
       ]);
 
-      return {
+      const rtnObj = {
         notifications: notificationsResults,
         itemCount: notificationsCount,
         startedTemplateIds: startedTemplates.results.map(st => st.id),
@@ -79,10 +86,27 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         errorTemplateIds: errorTemplates.results.map(e => e.id),
         typeLabels: labels,
       };
-    }, [apiModel, id, location]),
+
+      if (showApprovalsToggle) {
+        const {
+          data: approvalsTemplates,
+        } = await apiModel.readNotificationTemplatesApprovals(
+          id,
+          idMatchParams
+        );
+        rtnObj.approvalsTemplateIds = approvalsTemplates.results.map(
+          st => st.id
+        );
+      } else {
+        rtnObj.approvalsTemplateIds = [];
+      }
+
+      return rtnObj;
+    }, [apiModel, id, location, showApprovalsToggle]),
     {
       notifications: [],
       itemCount: 0,
+      approvalsTemplateIds: [],
       startedTemplateIds: [],
       successTemplateIds: [],
       errorTemplateIds: [],
@@ -186,10 +210,12 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
             detailUrl={`/notifications/${notification.id}`}
             canToggleNotifications={canToggleNotifications && !isToggleLoading}
             toggleNotification={handleNotificationToggle}
+            approvalsTurnedOn={approvalsTemplateIds.includes(notification.id)}
             errorTurnedOn={errorTemplateIds.includes(notification.id)}
             startedTurnedOn={startedTemplateIds.includes(notification.id)}
             successTurnedOn={successTemplateIds.includes(notification.id)}
             typeLabels={typeLabels}
+            showApprovalsToggle={showApprovalsToggle}
           />
         )}
       />
@@ -212,6 +238,11 @@ NotificationList.propTypes = {
   apiModel: shape({}).isRequired,
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
+  showApprovalsToggle: bool,
+};
+
+NotificationList.defaultProps = {
+  showApprovalsToggle: false,
 };
 
 export default withI18n()(NotificationList);

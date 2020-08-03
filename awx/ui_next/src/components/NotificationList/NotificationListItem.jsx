@@ -17,25 +17,25 @@ const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 16px;
-  grid-template-columns: repeat(3, max-content);
+  grid-template-columns: ${props => `repeat(${props.columns}, max-content)`};
 `;
 const Label = styled.b`
   margin-right: 20px;
 `;
 
-function NotificationListItem(props) {
-  const {
-    canToggleNotifications,
-    notification,
-    detailUrl,
-    startedTurnedOn,
-    successTurnedOn,
-    errorTurnedOn,
-    toggleNotification,
-    i18n,
-    typeLabels,
-  } = props;
-
+function NotificationListItem({
+  canToggleNotifications,
+  notification,
+  detailUrl,
+  approvalsTurnedOn,
+  startedTurnedOn,
+  successTurnedOn,
+  errorTurnedOn,
+  toggleNotification,
+  i18n,
+  typeLabels,
+  showApprovalsToggle,
+}) {
   return (
     <DataListItem
       aria-labelledby={`items-list-item-${notification.id}`}
@@ -66,7 +66,25 @@ function NotificationListItem(props) {
           aria-label="actions"
           aria-labelledby={`items-list-item-${notification.id}`}
           id={`items-list-item-${notification.id}`}
+          columns={showApprovalsToggle ? 4 : 3}
         >
+          {showApprovalsToggle && (
+            <Switch
+              id={`notification-${notification.id}-approvals-toggle`}
+              label={i18n._(t`Approval`)}
+              labelOff={i18n._(t`Approval`)}
+              isChecked={approvalsTurnedOn}
+              isDisabled={!canToggleNotifications}
+              onChange={() =>
+                toggleNotification(
+                  notification.id,
+                  approvalsTurnedOn,
+                  'approvals'
+                )
+              }
+              aria-label={i18n._(t`Toggle notification approvals`)}
+            />
+          )}
           <Switch
             id={`notification-${notification.id}-started-toggle`}
             label={i18n._(t`Start`)}
@@ -114,17 +132,21 @@ NotificationListItem.propTypes = {
   }).isRequired,
   canToggleNotifications: bool.isRequired,
   detailUrl: string.isRequired,
+  approvalsTurnedOn: bool,
   errorTurnedOn: bool,
   startedTurnedOn: bool,
   successTurnedOn: bool,
   toggleNotification: func.isRequired,
   typeLabels: shape().isRequired,
+  showApprovalsToggle: bool,
 };
 
 NotificationListItem.defaultProps = {
+  approvalsTurnedOn: false,
   errorTurnedOn: false,
   startedTurnedOn: false,
   successTurnedOn: false,
+  showApprovalsToggle: false,
 };
 
 export default withI18n()(NotificationListItem);
