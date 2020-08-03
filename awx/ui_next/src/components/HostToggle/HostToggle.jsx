@@ -8,7 +8,7 @@ import ErrorDetail from '../ErrorDetail';
 import useRequest from '../../util/useRequest';
 import { HostsAPI } from '../../api';
 
-function HostToggle({ host, onToggle, className, i18n }) {
+function HostToggle({ host, isDisabled = false, onToggle, className, i18n }) {
   const [isEnabled, setIsEnabled] = useState(host.enabled);
   const [showError, setShowError] = useState(false);
 
@@ -54,7 +54,11 @@ function HostToggle({ host, onToggle, className, i18n }) {
           label={i18n._(t`On`)}
           labelOff={i18n._(t`Off`)}
           isChecked={isEnabled}
-          isDisabled={isLoading || !host.summary_fields.user_capabilities.edit}
+          isDisabled={
+            isLoading ||
+            isDisabled ||
+            !host.summary_fields.user_capabilities.edit
+          }
           onChange={toggleHost}
           aria-label={i18n._(t`Toggle host`)}
         />
