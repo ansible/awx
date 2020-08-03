@@ -25,7 +25,6 @@ import {
 import {
   AzureSubForm,
   CloudFormsSubForm,
-  CustomScriptSubForm,
   EC2SubForm,
   GCESubForm,
   OpenStackSubForm,
@@ -173,7 +172,6 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
               {
                 azure_rm: <AzureSubForm sourceOptions={sourceOptions} />,
                 cloudforms: <CloudFormsSubForm />,
-                custom: <CustomScriptSubForm />,
                 ec2: <EC2SubForm sourceOptions={sourceOptions} />,
                 gce: <GCESubForm sourceOptions={sourceOptions} />,
                 openstack: <OpenStackSubForm />,

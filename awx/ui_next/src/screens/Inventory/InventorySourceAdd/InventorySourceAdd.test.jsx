@@ -52,7 +52,6 @@ describe('<InventorySourceAdd />', () => {
               ['openstack', 'OpenStack'],
               ['rhv', 'Red Hat Virtualization'],
               ['tower', 'Ansible Tower'],
-              ['custom', 'Custom Script'],
             ],
           },
         },

@@ -7,7 +7,6 @@ import Dashboard from './screens/Dashboard';
 import Hosts from './screens/Host';
 import InstanceGroups from './screens/InstanceGroup';
 import Inventory from './screens/Inventory';
-import InventoryScripts from './screens/InventoryScript';
 import { Jobs } from './screens/Job';
 import ManagementJobs from './screens/ManagementJob';
 import NotificationTemplates from './screens/NotificationTemplate';
@@ -78,11 +77,6 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Hosts`),
           path: '/hosts',
           screen: Hosts,
-        },
-        {
-          title: i18n._(t`Inventory Scripts`),
-          path: '/inventory_scripts',
-          screen: InventoryScripts,
         },
       ],
     },

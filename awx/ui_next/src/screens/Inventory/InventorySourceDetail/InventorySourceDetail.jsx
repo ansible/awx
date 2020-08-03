@@ -50,7 +50,6 @@ function InventorySourceDetail({ inventorySource, i18n }) {
       modified_by,
       organization,
       source_project,
-      source_script,
       user_capabilities,
     },
   } = inventorySource;
@@ -219,10 +218,6 @@ function InventorySourceDetail({ inventorySource, i18n }) {
         <Detail
           label={i18n._(t`Inventory file`)}
           value={source_path === '' ? i18n._(t`/ (project root)`) : source_path}
-        />
-        <Detail
-          label={i18n._(t`Custom inventory script`)}
-          value={source_script?.name}
         />
         <Detail label={i18n._(t`Verbosity`)} value={VERBOSITY[verbosity]} />
         <Detail

@@ -27,7 +27,6 @@ InventorySourcesAPI.readOptions.mockResolvedValue({
             ['openstack', 'OpenStack'],
             ['rhv', 'Red Hat Virtualization'],
             ['tower', 'Ansible Tower'],
-            ['custom', 'Custom Script'],
           ],
         },
       },
@@ -63,7 +62,6 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Ansible environment', '/venv/custom');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory file', 'foo');
-    assertDetail(wrapper, 'Custom inventory script', 'Mock Script');
     assertDetail(wrapper, 'Verbosity', '2 (Debug)');
     assertDetail(wrapper, 'Cache timeout', '2 seconds');
     expect(
