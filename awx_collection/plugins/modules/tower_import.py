@@ -38,6 +38,10 @@ EXAMPLES = '''
 - name: Import all tower assets
   tower_import:
     assets: "{{ export_output.assets }}"
+
+- name: Import orgs from a json file
+  tower_import:
+    assets: "{{ lookup('file', 'org.json') | from_json() }}"
 '''
 
 from ..module_utils.tower_awxkit import TowerAWXKitModule
