@@ -2,10 +2,11 @@
 
 import logging
 import json
+import yaml
 
 from django.db import migrations
 
-from awx.main.models.inventory import InventorySourceOptions
+from awx.main.models.base import VarsDictProperty
 
 from ._inventory_source_vars import FrozenInjectors
 
@@ -14,29 +15,23 @@ logger = logging.getLogger('awx.main.migrations')
 BACKUP_FILENAME = '/tmp/tower_migration_inventory_source_vars.json'
 
 
-class InventorySourceOptionsWrapper(InventorySourceOptions):
-    '''
-    InventorySource inherits from InventorySourceOptions but that is not
-    "recorded" by Django's app registry model tracking. This will, effectively,
-    reintroduce the inheritance.
-    '''
-    def __init__(self, *args, **kw):
-        self.target = kw.pop('target')
-        super().__init__(self, *args, **kw)
-    def __getattr__(self, attr):
-        return getattr(self.target, attr)
-
-
 def _get_inventory_sources(InventorySource):
     return InventorySource.objects.filter(source__in=['ec2', 'gce', 'azure_rm', 'vmware', 'satellite6', 'openstack', 'rhv', 'tower'])
 
 
 def inventory_source_vars_forward(apps, schema_editor):
     InventorySource = apps.get_model("main", "InventorySource")
+    '''
+    The Django app registry does not keep track of model inheritance. The
+    source_vars_dict property comes from InventorySourceOptions via inheritance.
+    This adds that property. Luckily, other properteries and functionality from
+    InventorySourceOptions is not needed by the injector logic.
+    '''
+    setattr(InventorySource, 'source_vars_dict', VarsDictProperty('source_vars'))
     source_vars_backup = dict()
 
     for inv_source_obj in _get_inventory_sources(InventorySource):
-        inv_source_obj = InventorySourceOptionsWrapper(target=inv_source_obj)
+
         if inv_source_obj.source in FrozenInjectors:
             source_vars_backup[inv_source_obj.id] = dict(inv_source_obj.source_vars_dict)
             with open(BACKUP_FILENAME, 'w') as fh:
@@ -44,11 +39,12 @@ def inventory_source_vars_forward(apps, schema_editor):
 
             injector = FrozenInjectors[inv_source_obj.source]()
             new_inv_source_vars = injector.inventory_as_dict(inv_source_obj, None)
-            inv_source_obj.source_vars = new_inv_source_vars
+            inv_source_obj.source_vars = yaml.dump(new_inv_source_vars)
             inv_source_obj.save()
 
 
 def inventory_source_vars_backward(apps, schema_editor):
+    InventorySource = apps.get_model("main", "InventorySource")
     try:
         with open(BACKUP_FILENAME, 'r') as fh:
             source_vars_backup = json.load(fh)
@@ -56,7 +52,7 @@ def inventory_source_vars_backward(apps, schema_editor):
         print(f"Rollback file not found {BACKUP_FILENAME}")
         return
 
-    for inv_source_obj in _get_inventory_sources():
+    for inv_source_obj in _get_inventory_sources(InventorySource):
         if inv_source_obj.id in source_vars_backup:
             inv_source_obj.source_vars = source_vars_backup[inv_source_obj.id]
             inv_source_obj.save()
