@@ -30,57 +30,46 @@ options:
     organizations:
       description:
         - organization name to export
-      default: ''
       type: str
     user:
       description:
         - user name to export
-      default: ''
       type: str
     team:
       description:
         - team name to export
-      default: ''
       type: str
     credential_type:
       description:
         - credential type name to export
-      default: ''
       type: str
     credential:
       description:
         - credential name to export
-      default: ''
       type: str
     notification_template:
       description:
         - notification template name to export
-      default: ''
       type: str
     inventory_script:
       description:
         - inventory script name to export
-      default: ''
       type: str
     inventory:
       description:
         - inventory name to export
-      default: ''
       type: str
     project:
       description:
         - project name to export
-      default: ''
       type: str
     job_template:
       description:
         - job template name to export
-      default: ''
       type: str
     workflow:
       description:
         - workflow name to export
-      default: ''
       type: str
 requirements:
   - "awxkit >= 9.3.0"
@@ -132,15 +121,15 @@ def main():
     module.json_output['changed'] = False
 
     # The exporter code currently works like the following:
-    #   Empty list == all assets of that type
-    #   string = just one asset of that type (by name)
-    #   None = skip asset type
+    #   Empty string == all assets of that type
+    #   Non-Empty string = just one asset of that type (by name or ID)
+    #   Asset type not present or None = skip asset type (unless everything is None, then export all)
     # Here we are going to setup a dict of values to export
     export_args = {}
     for resource in EXPORTABLE_RESOURCES:
         if module.params.get('all') or module.params.get(resource) == 'all':
-            # If we are exporting everything or we got the keyword "all" we pass in an empty list for this asset type
-            export_args[resource] = []
+            # If we are exporting everything or we got the keyword "all" we pass in an empty string for this asset type
+            export_args[resource] = ''
         else:
             # Otherwise we take either the string or None (if the parameter was not passed) to get one or no items
             export_args[resource] = module.params.get(resource)
