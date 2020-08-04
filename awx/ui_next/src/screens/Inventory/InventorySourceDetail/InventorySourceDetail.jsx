@@ -39,6 +39,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
     update_on_launch,
     update_on_project_update,
     verbosity,
+    enabled_var,
+    enabled_value,
+    host_filter,
     summary_fields: {
       created_by,
       credentials,
@@ -220,6 +223,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
           label={i18n._(t`Cache timeout`)}
           value={`${update_cache_timeout} ${i18n._(t`seconds`)}`}
         />
+        <Detail label={i18n._(t`Host Filter`)} value={host_filter} />
+        <Detail label={i18n._(t`Enabled Variable`)} value={enabled_var} />
+        <Detail label={i18n._(t`Enabled Value`)} value={enabled_value} />
         {credentials?.length > 0 && (
           <Detail
             fullWidth

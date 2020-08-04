@@ -154,3 +154,44 @@ export const OptionsField = withI18n()(
     );
   }
 );
+
+export const EnabledVarField = withI18n()(({ i18n }) => {
+  return (
+    <FormField
+      id="inventory-enabled-var"
+      label={i18n._(t`Enabled Variable`)}
+      tooltip={i18n._(t`Retrieve the enabled state from the given dict of host variables.
+        The enabled variable may be specified using dot notation, e.g: 'foo.bar'`)}
+      name="enabled_var"
+      type="text"
+    />
+  );
+});
+
+export const EnabledValueField = withI18n()(({ i18n }) => {
+  return (
+    <FormField
+      id="inventory-enabled-value"
+      label={i18n._(t`Enabled Value`)}
+      tooltip={i18n._(
+        t`If the enabled variable matches this value, the host will be enabled on import.`
+      )}
+      name="enabled_value"
+      type="text"
+    />
+  );
+});
+
+export const HostFilterField = withI18n()(({ i18n }) => {
+  return (
+    <FormField
+      id="host-filter"
+      label={i18n._(t`Host Filter`)}
+      tooltip={i18n._(
+        t`Regular expression where only matching hosts will be imported.`
+      )}
+      name="host_filter"
+      type="text"
+    />
+  );
+});

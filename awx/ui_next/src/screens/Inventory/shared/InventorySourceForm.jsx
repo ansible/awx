@@ -86,6 +86,9 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
         update_on_launch: false,
         update_on_project_update: false,
         verbosity: 1,
+        enabled_var: '',
+        enabled_value: '',
+        host_filter: '',
       };
       Object.keys(defaults).forEach(label => {
         setFieldValue(label, defaults[label]);
@@ -209,6 +212,9 @@ const InventorySourceForm = ({
     update_on_launch: source?.update_on_launch || false,
     update_on_project_update: source?.update_on_project_update || false,
     verbosity: source?.verbosity || 1,
+    enabled_var: source?.enabled_var || '',
+    enabled_value: source?.enabled_value || '',
+    host_filter: source?.host_filter || '',
   };
 
   const {
