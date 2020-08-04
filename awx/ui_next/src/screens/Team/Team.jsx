@@ -17,7 +17,7 @@ import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import { TeamsAPI } from '../../api';
-import TeamAccessList from './TeamRoles';
+import TeamRolesList from './TeamRoles';
 import { ResourceAccessList } from '../../components/ResourceAccessList';
 
 function Team({ i18n, setBreadcrumb }) {
@@ -104,9 +104,7 @@ function Team({ i18n, setBreadcrumb }) {
           {team && (
             <Route path="/teams/:id/roles">
               <Config>
-                {({ me }) => (
-                  <>{me && <TeamAccessList me={me} team={team} />}</>
-                )}
+                {({ me }) => <>{me && <TeamRolesList me={me} team={team} />}</>}
               </Config>
             </Route>
           )}
