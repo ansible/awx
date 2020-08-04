@@ -1,11 +1,11 @@
 ---
-- name: Authenticate with Docker registry if registry password given
+- name: Authenticate with Docker registry if registry given and username/password given
   docker_login:
-    registry: "{{ docker_registry }}"
-    username: "{{ docker_registry_username }}"
-    password: "{{ docker_registry_password }}"
+    registry: "{{ lookup('env', 'DOCKER_REGISTRY')          or docker_registry }}"
+    username: "{{ lookup('env', 'DOCKER_REGISTRY_USERNAME') or docker_registry_username }}"
+    password: "{{ lookup('env', 'DOCKER_REGISTRY_PASSWORD') or docker_registry_password }}"
     reauthorize: true
-  when: docker_registry is defined and docker_registry_password is defined
+  when: docker_registry is defined and (docker_registry_username or docker_registry_password is defined)
   delegate_to: localhost
 
 - name: Remove local images to ensure proper push behavior
