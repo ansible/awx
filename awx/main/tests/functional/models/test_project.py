@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from awx.main.models import Project
+from awx.main.models import Project, Credential, CredentialType
 from awx.main.models.organization import Organization
 
 
@@ -57,3 +57,31 @@ def test_foreign_key_change_changes_modified_by(project, organization):
 def test_project_related_jobs(project):
     update = project.create_unified_job()
     assert update.id in [u.id for u in project._get_related_jobs()]
+
+
+@pytest.mark.django_db
+def test_galaxy_credentials(project):
+    org = project.organization
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+    for i in range(5):
+        cred = Credential.objects.create(
+            name=f'Ansible Galaxy {i + 1}',
+            organization=org,
+            credential_type=galaxy,
+            inputs={
+                'url': 'https://galaxy.ansible.com/'
+            }
+        )
+        cred.save()
+        org.galaxy_credentials.add(cred)
+
+    assert [
+        cred.name for cred in org.galaxy_credentials.all()
+    ] == [
+        'Ansible Galaxy 1',
+        'Ansible Galaxy 2',
+        'Ansible Galaxy 3',
+        'Ansible Galaxy 4',
+        'Ansible Galaxy 5',
+    ]

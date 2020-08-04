@@ -331,6 +331,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('insights', _('Insights')),
         ('external', _('External')),
         ('kubernetes', _('Kubernetes')),
+        ('galaxy', _('Galaxy/Automation Hub')),
     )
 
     kind = models.CharField(
@@ -1169,6 +1170,38 @@ ManagedCredentialType(
             'multiline': True,
         }],
         'required': ['host', 'bearer_token'],
+    }
+)
+
+
+ManagedCredentialType(
+    namespace='galaxy_api_token',
+    kind='galaxy',
+    name=ugettext_noop('Ansible Galaxy Automation Hub API Token'),
+    inputs={
+        'fields': [{
+            'id': 'url',
+            'label': ugettext_noop('Galaxy Server URL'),
+            'type': 'string',
+            'help_text': ugettext_noop('The URL of the galaxy instance to connect to.')
+        },{
+            'id': 'auth_url',
+            'label': ugettext_noop('Auth Server URL'),
+            'type': 'string',
+            'help_text': ugettext_noop(
+                'The URL of a Keycloak server token_endpoint, if using '
+                'SSO auth.'
+            )
+        },{
+            'id': 'token',
+            'label': ugettext_noop('API Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop(
+                'A token to use for authentication against the Galaxy instance.'
+            )
+        }],
+        'required': ['url'],
     }
 )
 

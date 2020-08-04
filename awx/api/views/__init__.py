@@ -124,6 +124,7 @@ from awx.api.views.organization import ( # noqa
     OrganizationNotificationTemplatesSuccessList,
     OrganizationNotificationTemplatesApprovalList,
     OrganizationInstanceGroupsList,
+    OrganizationGalaxyCredentialsList,
     OrganizationAccessList,
     OrganizationObjectRolesList,
 )

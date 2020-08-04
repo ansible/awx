@@ -74,31 +74,6 @@ export default ['i18n', function(i18n) {
             AWX_SHOW_PLAYBOOK_LINKS: {
                 type: 'toggleSwitch',
             },
-            PRIMARY_GALAXY_URL: {
-                type: 'text',
-                reset: 'PRIMARY_GALAXY_URL',
-            },
-            PRIMARY_GALAXY_USERNAME: {
-                type: 'text',
-                reset: 'PRIMARY_GALAXY_USERNAME',
-            },
-            PRIMARY_GALAXY_PASSWORD: {
-                type: 'sensitive',
-                hasShowInputButton: true,
-                reset: 'PRIMARY_GALAXY_PASSWORD',
-            },
-            PRIMARY_GALAXY_TOKEN: {
-                type: 'sensitive',
-                hasShowInputButton: true,
-                reset: 'PRIMARY_GALAXY_TOKEN',
-            },
-            PRIMARY_GALAXY_AUTH_URL: {
-                type: 'text',
-                reset: 'PRIMARY_GALAXY_AUTH_URL',
-            },
-            PUBLIC_GALAXY_ENABLED: {
-                type: 'toggleSwitch',
-            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',

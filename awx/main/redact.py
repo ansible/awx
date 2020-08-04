@@ -1,8 +1,6 @@
 import re
 import urllib.parse as urlparse
 
-from django.conf import settings
-
 REPLACE_STR = '$encrypted$'
 
 
@@ -13,11 +11,13 @@ class UriCleaner(object):
     @staticmethod
     def remove_sensitive(cleartext):
         # exclude_list contains the items that will _not_ be redacted
-        exclude_list = [settings.PUBLIC_GALAXY_SERVER['url']]
-        if settings.PRIMARY_GALAXY_URL:
-            exclude_list += [settings.PRIMARY_GALAXY_URL]
-        if settings.FALLBACK_GALAXY_SERVERS:
-            exclude_list += [server['url'] for server in settings.FALLBACK_GALAXY_SERVERS]
+        # TODO: replace this with the server URLs from proj.org.credentials
+        exclude_list = []
+        #exclude_list = [settings.PUBLIC_GALAXY_SERVER['url']]
+        #if settings.PRIMARY_GALAXY_URL:
+        #    exclude_list += [settings.PRIMARY_GALAXY_URL]
+        #if settings.FALLBACK_GALAXY_SERVERS:
+        #    exclude_list += [server['url'] for server in settings.FALLBACK_GALAXY_SERVERS]
         redactedtext = cleartext
         text_index = 0
         while True:

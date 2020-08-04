@@ -9,7 +9,7 @@ from django.conf import settings
 import pytest
 
 # AWX
-from awx.main.models import ProjectUpdate
+from awx.main.models import ProjectUpdate, CredentialType, Credential
 from awx.api.versioning import reverse
 
 
@@ -288,3 +288,90 @@ def test_organization_delete_with_active_jobs(delete, admin, organization, organ
 
     assert resp.data['error'] == u"Resource is being used by running jobs."
     assert resp_sorted == expect_sorted
+
+
+@pytest.mark.django_db
+def test_galaxy_credential_association_forbidden(alice, organization, post):
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+
+    cred = Credential.objects.create(
+        credential_type=galaxy,
+        name='Public Galaxy',
+        organization=organization,
+        inputs={
+            'url': 'https://galaxy.ansible.com/'
+        }
+    )
+    url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
+    post(
+        url,
+        {'associate': True, 'id': cred.pk},
+        user=alice,
+        expect=403
+    )
+
+
+@pytest.mark.django_db
+def test_galaxy_credential_type_enforcement(admin, organization, post):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+
+    cred = Credential.objects.create(
+        credential_type=ssh,
+        name='SSH Credential',
+        organization=organization,
+    )
+    url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
+    resp = post(
+        url,
+        {'associate': True, 'id': cred.pk},
+        user=admin,
+        expect=400
+    )
+    assert resp.data['msg'] == 'Credential must be a Galaxy credential, not Machine.'
+
+
+@pytest.mark.django_db
+def test_galaxy_credential_association(alice, admin, organization, post, get):
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+
+    for i in range(5):
+        cred = Credential.objects.create(
+            credential_type=galaxy,
+            name=f'Public Galaxy {i + 1}',
+            organization=organization,
+            inputs={
+                'url': 'https://galaxy.ansible.com/'
+            }
+        )
+        url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.id})
+        post(
+            url,
+            {'associate': True, 'id': cred.pk},
+            user=admin,
+            expect=204
+        )
+    resp = get(url, user=admin)
+    assert [cred['name'] for cred in resp.data['results']] == [
+        'Public Galaxy 1',
+        'Public Galaxy 2',
+        'Public Galaxy 3',
+        'Public Galaxy 4',
+        'Public Galaxy 5',
+    ]
+
+    post(
+        url,
+        {'disassociate': True, 'id': Credential.objects.get(name='Public Galaxy 3').pk},
+        user=admin,
+        expect=204
+    )
+    resp = get(url, user=admin)
+    assert [cred['name'] for cred in resp.data['results']] == [
+        'Public Galaxy 1',
+        'Public Galaxy 2',
+        'Public Galaxy 4',
+        'Public Galaxy 5',
+    ]

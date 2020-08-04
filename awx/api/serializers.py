@@ -1269,6 +1269,7 @@ class OrganizationSerializer(BaseSerializer):
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
+            galaxy_credentials = self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
         ))
         return res
 

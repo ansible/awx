@@ -51,7 +51,7 @@ import ansible_runner
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV, GALAXY_SERVER_FIELDS
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
 from awx.main.redact import UriCleaner
 from awx.main.models import (
@@ -2027,35 +2027,24 @@ class RunProjectUpdate(BaseTask):
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
-        # Set up the public Galaxy server, if enabled
-        galaxy_configured = False
-        if settings.PUBLIC_GALAXY_ENABLED:
-            galaxy_servers = [settings.PUBLIC_GALAXY_SERVER]  # static setting
-        else:
-            galaxy_configured = True
-            galaxy_servers = []
-        # Set up fallback Galaxy servers, if configured
-        if settings.FALLBACK_GALAXY_SERVERS:
-            galaxy_configured = True
-            galaxy_servers = settings.FALLBACK_GALAXY_SERVERS + galaxy_servers
-        # Set up the primary Galaxy server, if configured
-        if settings.PRIMARY_GALAXY_URL:
-            galaxy_configured = True
-            galaxy_servers = [{'id': 'primary_galaxy'}] + galaxy_servers
-            for key in GALAXY_SERVER_FIELDS:
-                value = getattr(settings, 'PRIMARY_GALAXY_{}'.format(key.upper()))
-                if value:
-                    galaxy_servers[0][key] = value
-        if galaxy_configured:
-            for server in galaxy_servers:
-                for key in GALAXY_SERVER_FIELDS:
-                    if not server.get(key):
-                        continue
-                    env_key = ('ANSIBLE_GALAXY_SERVER_{}_{}'.format(server.get('id', 'unnamed'), key)).upper()
-                    env[env_key] = server[key]
-            if galaxy_servers:
-                # now set the precedence of galaxy servers
-                env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join([server.get('id', 'unnamed') for server in galaxy_servers])
+
+        # build out env vars for Galaxy credentials (in order)
+        galaxy_server_list = []
+        for i, cred in enumerate(
+            project_update.project.organization.galaxy_credentials.all()
+        ):
+            env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
+            auth_url = cred.get_input('auth_url', default=None)
+            token = cred.get_input('token', default=None)
+            if token:
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
+            if auth_url:
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
+            galaxy_server_list.append(f'server{i}')
+
+        if galaxy_server_list:
+            env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
+
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
