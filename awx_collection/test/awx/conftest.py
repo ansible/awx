@@ -24,7 +24,10 @@ except ImportError:
     HAS_TOWER_CLI = False
 
 try:
-    import awxkit
+    # Because awxkit will be a directory at the root of this makefile and we are using python3, import awxkit will work even if its not installed.
+    # However, awxkit will not contain api whih causes a stack failure down on line 170 when we try to mock it.
+    # So here we are importing awxkit.api to prevent that. Then you only get an error on tests for awxkit functionality.
+    import awxkit.api
     HAS_AWX_KIT = True
 except ImportError:
     HAS_AWX_KIT = False
