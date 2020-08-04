@@ -458,7 +458,8 @@ register(
     required=False,
     allow_blank=True,
     label=_('Primary Galaxy Server Username'),
-    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+    help_text=_('(This setting is deprecated and will be removed in a future release) '
+                'For using a galaxy server at higher precedence than the public Ansible Galaxy. '
                 'The username to use for basic authentication against the Galaxy instance, '
                 'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
     category=_('Jobs'),
@@ -472,7 +473,8 @@ register(
     required=False,
     allow_blank=True,
     label=_('Primary Galaxy Server Password'),
-    help_text=_('For using a galaxy server at higher precedence than the public Ansible Galaxy. '
+    help_text=_('(This setting is deprecated and will be removed in a future release) '
+                'For using a galaxy server at higher precedence than the public Ansible Galaxy. '
                 'The password to use for basic authentication against the Galaxy instance, '
                 'this is mutually exclusive with PRIMARY_GALAXY_TOKEN.'),
     category=_('Jobs'),
