@@ -58,13 +58,13 @@ describe('<UserTokenDetail/>', () => {
     expect(wrapper.find('Detail[label="Description"]').prop('value')).toBe(
       'cdfsg'
     );
-    expect(wrapper.find('Detail[label="Scope"]').prop('value')).toBe('read');
-    expect(wrapper.find('Detail[label="Created"]').prop('value')).toBe(
-      '6/23/2020, 7:56:38 PM'
+    expect(wrapper.find('Detail[label="Scope"]').prop('value')).toBe('Read');
+    expect(wrapper.find('UserDateDetail[label="Created"]').prop('date')).toBe(
+      '2020-06-23T19:56:38.422053Z'
     );
-    expect(wrapper.find('Detail[label="Last Modified"]').prop('value')).toBe(
-      '6/23/2020, 7:56:38 PM'
-    );
+    expect(
+      wrapper.find('UserDateDetail[label="Last Modified"]').prop('date')
+    ).toBe('2020-06-23T19:56:38.441353Z');
     expect(wrapper.find('Button[aria-label="Edit"]').length).toBe(1);
     expect(wrapper.find('Button[aria-label="Delete"]').length).toBe(1);
   });

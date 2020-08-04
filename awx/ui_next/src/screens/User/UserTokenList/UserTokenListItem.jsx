@@ -11,7 +11,7 @@ import {
 import styled from 'styled-components';
 import { toTitleCase } from '../../../util/strings';
 
-import { formatDateStringUTC } from '../../../util/dates';
+import { formatDateString } from '../../../util/dates';
 import DataListCell from '../../../components/DataListCell';
 
 const Label = styled.b`
@@ -48,7 +48,9 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
                   </Link>
                 </span>
               ) : (
-                i18n._(t`Personal access token`)
+                <Link to={`/users/${id}/tokens/${token.id}/details`}>
+                  {i18n._(t`Personal access token`)}
+                </Link>
               )}
             </DataListCell>,
             <DataListCell aria-label={i18n._(t`scope`)} key={token.scope}>
@@ -57,7 +59,7 @@ function UserTokenListItem({ i18n, token, isSelected, onSelect }) {
             </DataListCell>,
             <DataListCell aria-label={i18n._(t`expiration`)} key="expiration">
               <Label>{i18n._(t`Expires`)}</Label>
-              {formatDateStringUTC(token.expires)}
+              {formatDateString(token.expires)}
             </DataListCell>,
           ]}
         />
