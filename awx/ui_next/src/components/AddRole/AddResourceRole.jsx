@@ -172,15 +172,15 @@ class AddResourceRole extends React.Component {
     const userSortColumns = [
       {
         name: i18n._(t`Username`),
-        key: 'username__icontains',
+        key: 'username',
       },
       {
         name: i18n._(t`First Name`),
-        key: 'first_name__icontains',
+        key: 'first_name',
       },
       {
         name: i18n._(t`Last Name`),
-        key: 'last_name__icontains',
+        key: 'last_name',
       },
     ];
 
