@@ -2611,6 +2611,17 @@ class CredentialSerializer(BaseSerializer):
                 ret.remove(field)
         return ret
 
+    def validate_organization(self, org):
+        if (
+            self.instance and
+            self.instance.credential_type.kind == 'galaxy' and
+            org is None
+        ):
+            raise serializers.ValidationError(_(
+                "Galaxy credentials must be owned by an Organization."
+            ))
+        return org
+
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
             for related_objects in (
@@ -2674,6 +2685,14 @@ class CredentialSerializerCreate(CredentialSerializer):
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
+
+        if (
+            attrs['credential_type'].kind == 'galaxy' and
+            list(owner_fields) != ['organization']
+        ):
+            raise serializers.ValidationError({"organization": _(
+                "Galaxy credentials must be owned by an Organization."
+            )})
 
         return super(CredentialSerializerCreate, self).validate(attrs)
 
