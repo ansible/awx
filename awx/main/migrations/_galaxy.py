@@ -4,6 +4,7 @@ import logging
 
 from awx.main.utils.encryption import encrypt_field, decrypt_field
 
+from django.conf import settings
 from django.utils.timezone import now
 
 from awx.main.models import CredentialType as ModernCredentialType
@@ -69,6 +70,41 @@ def migrate_galaxy_settings(apps, schema_editor):
                 cred.inputs['token'] = encrypt_field(cred, 'token')
                 cred.save()
             org.galaxy_credentials.add(cred)
+
+        fallback_servers = getattr(settings, 'FALLBACK_GALAXY_SERVERS', [])
+        for fallback in fallback_servers:
+            url = fallback.get('url', None)
+            auth_url = fallback.get('auth_url', None)
+            username = fallback.get('username', None)
+            password = fallback.get('password', None)
+            token = fallback.get('token', None)
+            if username or password:
+                logger.error(
+                    f'Specifying HTTP basic auth for the Ansible Galaxy API '
+                    f'({url}) is no longer supported. '
+                    'Please provide an API token instead after your upgrade '
+                    'has completed',
+                )
+            inputs = {'url': url}
+            if token:
+                inputs['token'] = token
+            if auth_url:
+                inputs['auth_url'] = auth_url
+            cred = Credential(
+                created=now(),
+                modified=now(),
+                name=f'Ansible Galaxy ({url})',
+                organization=org,
+                credential_type=galaxy_type,
+                inputs=inputs
+            )
+            cred.save()
+            if token:
+                # encrypt based on the primary key from the prior save
+                cred.inputs['token'] = encrypt_field(cred, 'token')
+                cred.save()
+            org.galaxy_credentials.add(cred)
+
         if public_galaxy_enabled:
             # If public Galaxy was enabled, make a credential for it
             cred = Credential(

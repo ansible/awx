@@ -1,5 +1,6 @@
 import importlib
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 import pytest
 
@@ -76,3 +77,35 @@ def test_multiple_galaxies():
 
         assert creds[1].name == 'Ansible Galaxy'
         assert creds[1].inputs['url'] == 'https://galaxy.ansible.com/'
+
+
+@pytest.mark.django_db
+def test_fallback_galaxies():
+    org = Organization.objects.create()
+    assert org.galaxy_credentials.count() == 0
+    Setting.objects.create(key='PRIMARY_GALAXY_URL', value='https://example.org/')
+    Setting.objects.create(key='PRIMARY_GALAXY_AUTH_URL', value='https://auth.example.org/')
+    Setting.objects.create(key='PRIMARY_GALAXY_TOKEN', value='secret123')
+    try:
+        settings.FALLBACK_GALAXY_SERVERS = [{
+            'id': 'abc123',
+            'url': 'https://some-other-galaxy.example.org/',
+            'auth_url': 'https://some-other-galaxy.sso.example.org/',
+            'username': 'user',
+            'password': 'pass',
+            'token': 'fallback123',
+        }]
+        galaxy.migrate_galaxy_settings(apps, None)
+    finally:
+        settings.FALLBACK_GALAXY_SERVERS = []
+    assert org.galaxy_credentials.count() == 3
+    creds = org.galaxy_credentials.all()
+    assert creds[0].name == 'Private Galaxy (https://example.org/)'
+    assert creds[0].inputs['url'] == 'https://example.org/'
+    assert creds[1].name == 'Ansible Galaxy (https://some-other-galaxy.example.org/)'
+    assert creds[1].inputs['url'] == 'https://some-other-galaxy.example.org/'
+    assert creds[1].inputs['auth_url'] == 'https://some-other-galaxy.sso.example.org/'
+    assert creds[1].inputs['token'].startswith('$encrypted$')
+    assert creds[1].get_input('token') == 'fallback123'
+    assert creds[2].name == 'Ansible Galaxy'
+    assert creds[2].inputs['url'] == 'https://galaxy.ansible.com/'
