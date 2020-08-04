@@ -157,6 +157,7 @@ function Search({
         {searchOptions.length > 0 ? (
           <Select
             variant={SelectVariant.single}
+            className="simpleKeySelect"
             aria-label={i18n._(t`Simple key select`)}
             onToggle={setIsSearchDropdownOpen}
             onSelect={handleDropdownSelect}

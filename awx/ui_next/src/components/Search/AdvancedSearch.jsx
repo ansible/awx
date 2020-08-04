@@ -82,6 +82,7 @@ function AdvancedSearch({
     <AdvancedGroup>
       <Select
         aria-label={i18n._(t`Set type select`)}
+        className="setTypeSelect"
         variant={SelectVariant.typeahead}
         typeAheadAriaLabel={i18n._(t`Set type typeahead`)}
         onToggle={setIsPrefixDropdownOpen}
@@ -123,6 +124,7 @@ function AdvancedSearch({
       </Select>
       <Select
         aria-label={i18n._(t`Key select`)}
+        className="keySelect"
         variant={SelectVariant.typeahead}
         typeAheadAriaLabel={i18n._(t`Key typeahead`)}
         onToggle={setIsKeyDropdownOpen}
@@ -143,6 +145,7 @@ function AdvancedSearch({
       </Select>
       <Select
         aria-label={i18n._(t`Lookup select`)}
+        className="lookupSelect"
         variant={SelectVariant.typeahead}
         typeAheadAriaLabel={i18n._(t`Lookup typeahead`)}
         onToggle={setIsLookupDropdownOpen}
