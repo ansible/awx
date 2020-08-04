@@ -1366,7 +1366,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 running = self.celery_task_id in ControlDispatcher(
                     'dispatcher', self.controller_node or self.execution_node
                 ).running(timeout=timeout)
-            except socket.timeout:
+            except (socket.timeout, RuntimeError):
                 logger.error('could not reach dispatcher on {} within {}s'.format(
                     self.execution_node, timeout
                 ))
