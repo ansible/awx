@@ -25,7 +25,7 @@
 
     - name: Export all tower assets
       tower_export:
-        all: True
+        all: true
       register: all_assets
 
     - assert:

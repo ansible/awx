@@ -33,7 +33,7 @@
         that:
           - import_output is changed
 
-    - name: "Import something again (awxkit is not idempotent, this tests a filure)"
+    - name: "Import something again (awxkit is not idempotent, this tests a failure)"
       tower_import:
         assets:
           organizations:
@@ -51,7 +51,7 @@
                 name: "Default"
                 type: "organization"
       register: import_output
-      ignore_errors: True
+      ignore_errors: true
     
     - assert:
         that:
