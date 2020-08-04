@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -14,18 +14,21 @@ function NotificationTemplates({ i18n }) {
     '/notification_templates/add': i18n._(t`Create New Notification Template`),
   });
 
-  const updateBreadcrumbConfig = notification => {
-    const { id } = notification;
-    setBreadcrumbConfig({
-      '/notification_templates': i18n._(t`Notification Templates`),
-      '/notification_templates/add': i18n._(
-        t`Create New Notification Template`
-      ),
-      [`/notification_templates/${id}`]: notification.name,
-      [`/notification_templates/${id}/edit`]: i18n._(t`Edit Details`),
-      [`/notification_templates/${id}/details`]: i18n._(t`Details`),
-    });
-  };
+  const updateBreadcrumbConfig = useCallback(
+    notification => {
+      const { id } = notification;
+      setBreadcrumbConfig({
+        '/notification_templates': i18n._(t`Notification Templates`),
+        '/notification_templates/add': i18n._(
+          t`Create New Notification Template`
+        ),
+        [`/notification_templates/${id}`]: notification.name,
+        [`/notification_templates/${id}/edit`]: i18n._(t`Edit Details`),
+        [`/notification_templates/${id}/details`]: i18n._(t`Details`),
+      });
+    },
+    [i18n]
+  );
 
   return (
     <>

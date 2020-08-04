@@ -18,8 +18,9 @@ function NotificationTemplate({ i18n, setBreadcrumb }) {
   } = useRequest(
     useCallback(async () => {
       const { data } = await NotificationTemplatesAPI.readDetail(templateId);
+      setBreadcrumb(data);
       return data;
-    }, [templateId]),
+    }, [templateId, setBreadcrumb]),
     null
   );
 
@@ -49,7 +50,12 @@ function NotificationTemplate({ i18n, setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        <NotificationTemplateDetail template={template} isLoading={isLoading} />
+        {template && (
+          <NotificationTemplateDetail
+            template={template}
+            isLoading={isLoading}
+          />
+        )}
       </Card>
     </PageSection>
   );
