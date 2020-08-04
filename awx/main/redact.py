@@ -10,14 +10,6 @@ class UriCleaner(object):
 
     @staticmethod
     def remove_sensitive(cleartext):
-        # exclude_list contains the items that will _not_ be redacted
-        # TODO: replace this with the server URLs from proj.org.credentials
-        exclude_list = []
-        #exclude_list = [settings.PUBLIC_GALAXY_SERVER['url']]
-        #if settings.PRIMARY_GALAXY_URL:
-        #    exclude_list += [settings.PRIMARY_GALAXY_URL]
-        #if settings.FALLBACK_GALAXY_SERVERS:
-        #    exclude_list += [server['url'] for server in settings.FALLBACK_GALAXY_SERVERS]
         redactedtext = cleartext
         text_index = 0
         while True:
@@ -25,10 +17,6 @@ class UriCleaner(object):
             if not match:
                 break
             uri_str = match.group(1)
-            # Do not redact items from the exclude list
-            if any(uri_str.startswith(exclude_uri) for exclude_uri in exclude_list):
-                text_index = match.start() + len(uri_str)
-                continue
             try:
                 # May raise a ValueError if invalid URI for one reason or another
                 o = urlparse.urlsplit(uri_str)
