@@ -21,7 +21,7 @@ import JobList from '../../components/JobList';
 
 import InstanceGroupDetails from './InstanceGroupDetails';
 import InstanceGroupEdit from './InstanceGroupEdit';
-import Instances from './Instances';
+import InstanceList from './Instances/InstanceList';
 
 function InstanceGroup({ i18n, setBreadcrumb }) {
   const { id } = useParams();
@@ -123,7 +123,7 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
                   <InstanceGroupDetails instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/:id/instances">
-                  <Instances />
+                  <InstanceList />
                 </Route>
                 <Route path="/instance_groups/:id/jobs">
                   <JobList

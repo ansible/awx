@@ -6,7 +6,13 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
-function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
+function ToolbarAddButton({
+  linkTo,
+  onClick,
+  i18n,
+  isDisabled,
+  defaultLabel = i18n._(t`Add`),
+}) {
   const { isKebabified } = useKebabifiedMenu();
 
   if (!linkTo && !onClick) {
@@ -14,6 +20,7 @@ function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
       'ToolbarAddButton requires either `linkTo` or `onClick` prop'
     );
   }
+
   if (isKebabified) {
     return (
       <DropdownItem
@@ -23,28 +30,28 @@ function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
         to={linkTo}
         onClick={!onClick ? undefined : onClick}
       >
-        {i18n._(t`Add`)}
+        {defaultLabel}
       </DropdownItem>
     );
   }
   if (linkTo) {
     return (
-      <Tooltip content={i18n._(t`Add`)} position="top">
+      <Tooltip content={defaultLabel} position="top">
         <Button
           isDisabled={isDisabled}
           component={Link}
           to={linkTo}
           variant="primary"
-          aria-label={i18n._(t`Add`)}
+          aria-label={defaultLabel}
         >
-          {i18n._(t`Add`)}
+          {defaultLabel}
         </Button>
       </Tooltip>
     );
   }
   return (
-    <Button variant="primary" aria-label={i18n._(t`Add`)} onClick={onClick}>
-      {i18n._(t`Add`)}
+    <Button variant="primary" aria-label={defaultLabel} onClick={onClick}>
+      {defaultLabel}
     </Button>
   );
 }
