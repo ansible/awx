@@ -194,6 +194,9 @@ export default ['$state', 'ConfigData', '$scope', 'SourcesFormDefinition', 'Pars
                 verbosity: $scope.verbosity.value,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
                 custom_virtualenv: $scope.custom_virtualenv || null,
+                enabled_var: $scope.enabled_var,
+                enabled_value: $scope.enabled_value,
+                host_filter: $scope.host_filter
             };
 
             if ($scope.source) {

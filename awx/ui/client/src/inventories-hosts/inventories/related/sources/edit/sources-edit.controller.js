@@ -233,6 +233,8 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
         $scope.formSave = function() {
             var params;
 
+            console.log($scope);
+
             params = {
                 id: inventorySourceData.id,
                 name: $scope.name,
@@ -246,6 +248,9 @@ export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
                 update_cache_timeout: $scope.update_cache_timeout || 0,
                 verbosity: $scope.verbosity.value,
                 custom_virtualenv: $scope.custom_virtualenv || null,
+                enabled_var: $scope.enabled_var,
+                enabled_value: $scope.enabled_value,
+                host_filter: $scope.host_filter
             };
 
             if ($scope.source) {

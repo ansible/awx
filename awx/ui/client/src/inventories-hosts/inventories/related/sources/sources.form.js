@@ -300,6 +300,36 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'
             },
+            host_filter: {
+                label: i18n._("Host Filter"),
+                type: 'text',
+                dataTitle: i18n._('Host Filter'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Regular expression where only matching hosts will be imported.") + "</p>",
+                dataContainer: 'body',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
+            enabled_var: {
+                label: i18n._("Enabled Variable"),
+                type: 'text',
+                dataTitle: i18n._('Enabled Variable'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified using dot notation, e.g: 'foo.bar'") + "</p>",
+                dataContainer: 'body',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
+            enabled_value: {
+                label: i18n._("Enabled Value"),
+                type: 'text',
+                dataTitle: i18n._('Enabled Value'),
+                dataPlacement: 'right',
+                awPopOver: "<p>" + i18n._("If the enabled variable matches this value, the host will be enabled on import.") + "</p>",
+                dataContainer: 'body',
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+                subForm: 'sourceSubForm'
+            },
             checkbox_group: {
                 label: i18n._('Update Options'),
                 type: 'checkbox_group',
