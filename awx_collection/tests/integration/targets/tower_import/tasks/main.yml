@@ -52,7 +52,7 @@
                 type: "organization"
       register: import_output
       ignore_errors: true
-    
+
     - assert:
         that:
           - import_output is failed
