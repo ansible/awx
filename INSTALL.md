@@ -558,7 +558,7 @@ $ cd installer
 $ ansible-playbook -i inventory install.yml
 ```
 
-If you're pushing built images to a repository, then use the `-e` option to pass the registry password as follows, replacing *password* with the password of the username assigned to `docker_registry_username` (note that you will also need to remove `dockerhub_base` and `dockerhub_version` from the inventory file):
+If you're pushing built images to a repository, then use the `-e` option to pass the registry password as follows (or, set the `$DOCKER_REGISTRY`, `$DOCKER_REGISTRY_USERNAME` and `$DOCKER_REGISTRY_PASSWORD` environment variables accordingly), replacing *password* with the password of the username assigned to `docker_registry_username` (note that you will also need to remove `dockerhub_base` and `dockerhub_version` from the inventory file):
 
 ```bash
 # Set the working directory to installer
