@@ -1177,13 +1177,13 @@ ManagedCredentialType(
 ManagedCredentialType(
     namespace='galaxy_api_token',
     kind='galaxy',
-    name=ugettext_noop('Ansible Galaxy Automation Hub API Token'),
+    name=ugettext_noop('Ansible Galaxy/Automation Hub API Token'),
     inputs={
         'fields': [{
             'id': 'url',
             'label': ugettext_noop('Galaxy Server URL'),
             'type': 'string',
-            'help_text': ugettext_noop('The URL of the galaxy instance to connect to.')
+            'help_text': ugettext_noop('The URL of the Galaxy instance to connect to.')
         },{
             'id': 'auth_url',
             'label': ugettext_noop('Auth Server URL'),
