@@ -11,6 +11,7 @@ import {
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
+import { Config } from '../../contexts/Config';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import TeamDetail from './TeamDetail';
@@ -102,7 +103,11 @@ function Team({ i18n, setBreadcrumb }) {
           )}
           {team && (
             <Route path="/teams/:id/roles">
-              <TeamAccessList />
+              <Config>
+                {({ me }) => (
+                  <>{me && <TeamAccessList me={me} team={team} />}</>
+                )}
+              </Config>
             </Route>
           )}
           <Route key="not-found" path="*">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { TeamsAPI, RolesAPI } from '../../../api';
+import { TeamsAPI, RolesAPI, UsersAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
@@ -9,13 +9,74 @@ import TeamRolesList from './TeamRolesList';
 
 jest.mock('../../../api/models/Teams');
 jest.mock('../../../api/models/Roles');
+jest.mock('../../../api/models/Users');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    id: 18,
-  }),
-}));
+const me = {
+  id: 1,
+};
+
+const team = {
+  id: 18,
+  type: 'team',
+  url: '/api/v2/teams/1/',
+  related: {
+    created_by: '/api/v2/users/1/',
+    modified_by: '/api/v2/users/1/',
+    projects: '/api/v2/teams/1/projects/',
+    users: '/api/v2/teams/1/users/',
+    credentials: '/api/v2/teams/1/credentials/',
+    roles: '/api/v2/teams/1/roles/',
+    object_roles: '/api/v2/teams/1/object_roles/',
+    activity_stream: '/api/v2/teams/1/activity_stream/',
+    access_list: '/api/v2/teams/1/access_list/',
+    organization: '/api/v2/organizations/1/',
+  },
+  summary_fields: {
+    organization: {
+      id: 1,
+      name: 'Default',
+      description: '',
+    },
+    created_by: {
+      id: 1,
+      username: 'admin',
+      first_name: '',
+      last_name: '',
+    },
+    modified_by: {
+      id: 1,
+      username: 'admin',
+      first_name: '',
+      last_name: '',
+    },
+    object_roles: {
+      admin_role: {
+        description: 'Can manage all aspects of the team',
+        name: 'Admin',
+        id: 33,
+      },
+      member_role: {
+        description: 'User is a member of the team',
+        name: 'Member',
+        id: 34,
+      },
+      read_role: {
+        description: 'May view settings for the team',
+        name: 'Read',
+        id: 35,
+      },
+    },
+    user_capabilities: {
+      edit: false,
+      delete: false,
+    },
+  },
+  created: '2020-07-22T18:21:54.233411Z',
+  modified: '2020-07-22T18:21:54.233442Z',
+  name: 'a team',
+  description: '',
+  organization: 1,
+};
 
 const roles = {
   data: {
@@ -89,11 +150,21 @@ const roles = {
     count: 5,
   },
 };
-const options = {
-  data: { actions: { POST: { id: 1, disassociate: true } } },
-};
+
 describe('<TeamRolesList />', () => {
   let wrapper;
+
+  beforeEach(() => {
+    UsersAPI.readAdminOfOrganizations.mockResolvedValue({
+      count: 1,
+      results: [
+        {
+          id: 1,
+          name: 'Foo Org',
+        },
+      ],
+    });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -101,20 +172,18 @@ describe('<TeamRolesList />', () => {
   });
   test('should render properly', async () => {
     TeamsAPI.readRoles.mockResolvedValue(roles);
-    TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
     expect(wrapper.find('TeamRolesList').length).toBe(1);
   });
 
   test('should create proper detailUrl', async () => {
     TeamsAPI.readRoles.mockResolvedValue(roles);
-    TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
 
@@ -134,9 +203,10 @@ describe('<TeamRolesList />', () => {
       '/inventories/smart_inventory/77/details'
     );
   });
-  test('should not render add button', async () => {
-    TeamsAPI.readRoleOptions.mockResolvedValueOnce({
-      data: {},
+  test('should not render add button when user cannot edit team and is not an admin of the org', async () => {
+    UsersAPI.readAdminOfOrganizations.mockResolvedValueOnce({
+      count: 0,
+      results: [],
     });
 
     TeamsAPI.readRoles.mockResolvedValue({
@@ -160,8 +230,9 @@ describe('<TeamRolesList />', () => {
         count: 1,
       },
     });
+
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -172,10 +243,9 @@ describe('<TeamRolesList />', () => {
 
   test('should render disassociate modal', async () => {
     TeamsAPI.readRoles.mockResolvedValue(roles);
-    TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -225,10 +295,9 @@ describe('<TeamRolesList />', () => {
         },
       })
     );
-    TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
     waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
@@ -282,10 +351,9 @@ describe('<TeamRolesList />', () => {
         count: 1,
       },
     });
-    TeamsAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<TeamRolesList />);
+      wrapper = mountWithContexts(<TeamRolesList me={me} team={team} />);
     });
 
     waitForElement(
