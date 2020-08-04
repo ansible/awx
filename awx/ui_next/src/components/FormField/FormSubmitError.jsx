@@ -2,6 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { Alert } from '@patternfly/react-core';
 
+const findErrorStrings = (obj, messages = []) => {
+  if (typeof obj === 'string') {
+    messages.push(obj);
+  } else if (typeof obj === 'object') {
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        messages.push(value);
+      } else if (Array.isArray(value)) {
+        value.forEach(arrValue => {
+          messages = findErrorStrings(arrValue, messages);
+        });
+      } else if (typeof value === 'object') {
+        messages = findErrorStrings(value, messages);
+      }
+    });
+  }
+  return messages;
+};
+
 function FormSubmitError({ error }) {
   const [errorMessage, setErrorMessage] = useState(null);
   const { setErrors } = useFormikContext();
@@ -18,14 +38,7 @@ function FormSubmitError({ error }) {
       const errorMessages = error.response.data;
       setErrors(errorMessages);
 
-      let messages = [];
-      Object.values(error.response.data).forEach(value => {
-        if (Array.isArray(value)) {
-          messages = messages.concat(value);
-        } else {
-          messages.push(value);
-        }
-      });
+      const messages = findErrorStrings(error.response.data);
       setErrorMessage(messages.length > 0 ? messages : null);
     } else {
       /* eslint-disable-next-line no-console */
