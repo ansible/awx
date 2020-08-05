@@ -1158,13 +1158,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             raise ValidationError(_("Cannot set source_path if not SCM type."))
         return self.source_path
 
-    def clean_source_vars(self):
-        injector = self.injectors.get(self.source)
-        source_vars = dict(self.source_vars_dict) # make a copy
-        if injector and self.source_vars_dict.get('plugin', '') != injector.get_proper_name():
-            source_vars['plugin'] = injector.get_proper_name()
-        return json.dumps(source_vars)
-
     '''
     RelatedJobsMixin
     '''
@@ -1369,13 +1362,21 @@ class PluginFileInjector(object):
         """Returns a string that is the content for the inventory file for the inventory plugin
         """
         return yaml.safe_dump(
-            inventory_update.source_vars_dict,
+            self.inventory_as_dict(inventory_update, private_data_dir),
             default_flow_style=False,
             width=1000
         )
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
-        return inventory_update.source_vars_dict
+        source_vars = dict(inventory_update.source_vars_dict) # make a copy
+        proper_name = self.get_proper_name()
+        '''
+        None conveys that we should use the user-provided plugin.
+        Note that a plugin value of '' should still be overridden.
+        '''
+        if proper_name is not None:
+            source_vars['plugin'] = proper_name
+        return source_vars
 
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
         injector_env = self.get_plugin_env(inventory_update, private_data_dir, private_data_files)
@@ -1463,6 +1464,7 @@ class gce(PluginFileInjector):
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super().inventory_as_dict(inventory_update, private_data_dir)
         credential = inventory_update.get_cloud_credential()
+        # TODO: Align precedence of ENV vs. inventory config w/ Ansible behavior
         ret['projects'] = [credential.get_input('project', default='')]
         return ret
 

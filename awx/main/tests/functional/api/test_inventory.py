@@ -457,38 +457,6 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('source,source_var_actual,source_var_expected,description', [
-    ('ec2', {'plugin': 'blah'}, {'plugin': 'amazon.aws.aws_ec2'}, 'source plugin mismatch'),
-    ('ec2', {'plugin': 'amazon.aws.aws_ec2'}, {'plugin': 'amazon.aws.aws_ec2'}, 'valid plugin'),
-])
-def test_inventory_source_vars_source_plugin_ok(post, inventory, admin_user, source, source_var_actual, source_var_expected, description):
-    r = post(reverse('api:inventory_source_list'),
-             {'name': 'new inv src', 'source_vars': json.dumps(source_var_actual), 'inventory': inventory.pk, 'source': source},
-             admin_user, expect=201)
-
-    assert r.data['source_vars'] == json.dumps(source_var_expected)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('source_var_actual,description', [
-    ({'plugin': 'namespace.collection.script'}, 'scm source type source_vars are ignored valid'),
-    ({'plugin': 'namespace.collection.script'}, 'scm source type source_vars are ignored invalid'),
-    ({'plugin': ''}, 'scm source type source_vars are ignored blank'),
-    ({}, 'scm source type source_vars are ignored non-existent'),
-])
-def test_inventory_source_vars_source_plugin_scm_ok(post, inventory, admin_user, project, source_var_actual, description):
-    r = post(reverse('api:inventory_source_list'),
-             {'name': 'new inv src',
-              'source_vars': json.dumps(source_var_actual),
-              'inventory': inventory.pk,
-              'source': 'scm',
-              'source_project': project.id,},
-             admin_user, expect=201)
-
-    assert r.data['source_vars'] == json.dumps(source_var_actual)
-
-
-@pytest.mark.django_db
 @pytest.mark.parametrize('role,expect', [
     ('admin_role', 200),
     ('use_role', 403),
