@@ -140,6 +140,8 @@ function UserTokenList({ i18n }) {
             key: 'modified',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}
