@@ -48,7 +48,7 @@ export default
             } else {
                 $scope.title = i18n._("License Management");
             }
-
+            // What if I POST the file as a field in the License data JSON?
             $scope.license = config;
             $scope.license.version = config.version.split('-')[0];
             $scope.time = {};

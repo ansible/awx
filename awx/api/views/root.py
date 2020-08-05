@@ -234,15 +234,11 @@ class ApiV2ConfigView(APIView):
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
-        if request.user.is_superuser or request.user.is_system_auditor:
-            license_data = get_license(show_key=True)
-        else:
-            license_data = get_license(show_key=False)
-        if not license_data.get('valid_key', False):
-            license_data = {}
-        if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
-            # FIXME: Make the final setting value dependent on the feature?
-            license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
+        # if request.user.is_superuser or request.user.is_system_auditor:
+        #     license_data = get_license()
+        # if not license_data.get('valid_key', False):
+        #     license_data = {}
+        license_data = settings.LICENSE
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
