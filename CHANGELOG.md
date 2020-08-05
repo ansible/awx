@@ -2,11 +2,31 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 14.0.0 (Aug TBD, 2020)
+## 14.0.0 (Aug 6, 2020)
+- As part of our commitment to inclusivity in open source, we recently took some time to audit AWX's source code and user interface and replace certain terminology with more inclusive language.  Strictly speaking, this isn't a bug or a feature, but we think it's important and worth calling attention to:
+    * https://github.com/ansible/awx/commit/78229f58715fbfbf88177e54031f532543b57acc
+    * https://www.redhat.com/en/blog/making-open-source-more-inclusive-eradicating-problematic-language
+- Installing roles and collections via requirements.yml as part of Project Updates now requires at least Ansible 2.9 - https://github.com/ansible/awx/issues/7769
+- Deprecated the use of the `PRIMARY_GALAXY_USERNAME` and `PRIMARY_GALAXY_PASSWORD` settings. We recommend using tokens to access Galaxy or Automation Hub.
+- Added local caching for downloaded roles and collections so they are not re-downloaded on nodes where they are up to date with the project - https://github.com/ansible/awx/issues/5518
+- Added the ability to associate K8S/OpenShift credentials to Job Template for playbook interaction with the `community.kubernetes` collection - https://github.com/ansible/awx/issues/5735
+- Added the ability to include HTML in the Custom Login Info presented on the login page - https://github.com/ansible/awx/issues/7600
 - Fixed https://access.redhat.com/security/cve/cve-2020-14327 - Server-side request forgery on credentials
 - Fixed https://access.redhat.com/security/cve/cve-2020-14328 - Server-side request forgery on webhooks
 - Fixed https://access.redhat.com/security/cve/cve-2020-14329 - Sensitive data exposure on labels
 - Fixed https://access.redhat.com/security/cve/cve-2020-14337 - Named URLs allow for testing the presence or absence of objects
+- Fixed a number of bugs in the user interface related to an upgrade of jQuery:
+     * https://github.com/ansible/awx/issues/7530
+     * https://github.com/ansible/awx/issues/7546
+     * https://github.com/ansible/awx/issues/7534
+     * https://github.com/ansible/awx/issues/7606
+- Fixed a bug that caused the `-f yaml` flag of the AWX CLI to not print properly formatted YAML - https://github.com/ansible/awx/issues/7795
+- Fixed a bug in the installer that caused errors when `docker_registry_password` was set - https://github.com/ansible/awx/issues/7695
+- Fixed a permissions error that prevented certain users from starting AWX services - https://github.com/ansible/awx/issues/7545
+- Fixed a bug that allows superusers to run unsafe Jinja code when defining custom Credential Types - https://github.com/ansible/awx/pull/7584/
+- Fixed a bug that prevented users from creating (or editing) custom Credential Types containing boolean fields - https://github.com/ansible/awx/issues/7483
+- Fixed a bug that prevented users with postgres usernames containing uppercase letters from restoring backups succesfully - https://github.com/ansible/awx/pull/7519
+- Fixed a bug which allowed the creation (in the Tower API) of Groups and Hosts with the same name - https://github.com/ansible/awx/issues/4680
 
 ## 13.0.0 (Jun 23, 2020)
 - Added import and export commands to the official AWX CLI, replacing send and receive from the old tower-cli (https://github.com/ansible/awx/pull/6125).
@@ -21,7 +41,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Moved to a single container image build instead of separate awx_web and awx_task images. The container image is just `awx` (https://github.com/ansible/awx/pull/7228)
 - Official AWX container image builds now use a two-stage container build process that notably reduces the size of our published images (https://github.com/ansible/awx/pull/7017)
 - Removed support for HipChat notifications ([EoL announcement](https://www.atlassian.com/partnerships/slack/faq#faq-98b17ca3-247f-423b-9a78-70a91681eff0)); all previously-created HipChat notification templates will be deleted due to this removal.
-- Fixed a bug which broke AWX installations with oc version 4.3 (https://github.com/ansible/awx/pull/6948/files)
+- Fixed a bug which broke AWX installations with oc version 4.3 (https://github.com/ansible/awx/pull/6948/)
 - Fixed a performance issue that caused notable delay of stdout processing for playbooks run against large numbers of hosts (https://github.com/ansible/awx/issues/6991)
 - Fixed a bug that caused CyberArk AIM credential plugin looks to hang forever in some environments (https://github.com/ansible/awx/issues/6986)
 - Fixed a bug that caused ANY/ALL converage settings not to properly save when editing approval nodes in the UI (https://github.com/ansible/awx/issues/6998)
