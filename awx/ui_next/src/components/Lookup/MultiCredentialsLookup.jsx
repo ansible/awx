@@ -181,8 +181,8 @@ function MultiCredentialsLookup(props) {
                   key: 'name',
                 },
               ]}
-              toolbarSearchableKeys={searchableKeys}
-              toolbarRelatedSearchableKeys={relatedSearchableKeys}
+              searchableKeys={searchableKeys}
+              relatedSearchableKeys={relatedSearchableKeys}
               multiple={isVault}
               header={i18n._(t`Credentials`)}
               name="credentials"

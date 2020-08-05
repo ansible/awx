@@ -139,8 +139,8 @@ function CredentialLookup({
                 key: 'name',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}

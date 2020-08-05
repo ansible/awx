@@ -95,30 +95,23 @@ function AdvancedSearch({
       >
         <SelectOption
           key="and"
-          value={i18n._(t`and`)}
+          value="and"
           description={i18n._(
             t`Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected.`
           )}
         />
         <SelectOption
           key="or"
-          value={i18n._(t`or`)}
+          value="or"
           description={i18n._(
             t`Returns results that satisfy this one or any other filters.`
           )}
         />
         <SelectOption
           key="not"
-          value={i18n._(t`not`)}
+          value="not"
           description={i18n._(
             t`Returns results that have values other than this one as well as other filters.`
-          )}
-        />
-        <SelectOption
-          key="or_not"
-          value={i18n._(t`or/not`)}
-          description={i18n._(
-            t`Returns results that have values other than this one or any other filters.`
           )}
         />
       </Select>

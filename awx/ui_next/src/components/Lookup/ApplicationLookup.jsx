@@ -101,8 +101,8 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
                 key: 'description',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="application"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}

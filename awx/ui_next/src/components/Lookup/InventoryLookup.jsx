@@ -88,8 +88,8 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
                 key: 'name',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
             header={i18n._(t`Inventory`)}
             name="inventory"

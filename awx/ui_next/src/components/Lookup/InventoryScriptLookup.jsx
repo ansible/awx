@@ -125,8 +125,8 @@ function InventoryScriptLookup({
                 key: 'name',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
           />
         )}
       />

@@ -95,8 +95,8 @@ function InventoryStep({ i18n }) {
           key: 'name',
         },
       ]}
-      toolbarSearchableKeys={searchableKeys}
-      toolbarRelatedSearchableKeys={relatedSearchableKeys}
+      searchableKeys={searchableKeys}
+      relatedSearchableKeys={relatedSearchableKeys}
       header={i18n._(t`Inventory`)}
       name="inventory"
       qsConfig={QS_CONFIG}

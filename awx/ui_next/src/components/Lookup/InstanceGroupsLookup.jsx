@@ -100,8 +100,8 @@ function InstanceGroupsLookup(props) {
                 key: 'name',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             multiple={state.multiple}
             header={i18n._(t`Instance Groups`)}
             name="instanceGroups"
