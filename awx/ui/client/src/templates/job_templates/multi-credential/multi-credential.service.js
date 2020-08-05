@@ -46,6 +46,52 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
             });
     };
 
+    this.saveRelatedSequentially = ({ related }, credentials) => {
+        Rest.setUrl(related.credentials);
+        return Rest
+            .get()
+            .then(res => {
+                const { data: { results = [] } } = res;
+                const updatedCredentialIds = (credentials || []).map(({ id }) => id);
+                const currentCredentialIds = results.map(({ id }) => id);
+                const credentialIdsToAssociate = [];
+                const credentialIdsToDisassociate = [];
+                let disassociateRemainingIds = false;
+
+                currentCredentialIds.forEach((currentId, position) => {
+                    if (!disassociateRemainingIds && updatedCredentialIds[position] !== currentId) {
+                        disassociateRemainingIds = true;
+                    }
+
+                    if (disassociateRemainingIds) {
+                        credentialIdsToDisassociate.push(currentId);
+                    }
+                });
+
+                updatedCredentialIds.forEach(updatedId => {
+                    if (credentialIdsToDisassociate.includes(updatedId)) {
+                        credentialIdsToAssociate.push(updatedId);
+                    } else if (!currentCredentialIds.includes(updatedId)) {
+                        credentialIdsToAssociate.push(updatedId);
+                    }
+                });
+
+                let disassociationPromise = Promise.resolve();
+                credentialIdsToDisassociate.forEach(id => {
+                    disassociationPromise = disassociationPromise.then(() => disassociate({ related }, id));
+                });
+
+                return disassociationPromise
+                    .then(() => {
+                        let associationPromise = Promise.resolve();
+                        credentialIdsToAssociate.forEach(id => {
+                            associationPromise = associationPromise.then(() => associate({ related }, id));
+                        });
+                        return associationPromise;
+                    });
+            });
+    };
+
     this.getRelated = ({ related }, params = { permitted: [] }) => {
         Rest.setUrl(related.credentials);
         return Rest
