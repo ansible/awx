@@ -32,6 +32,18 @@ def migrate_galaxy_settings(apps, schema_editor):
         # ...UNLESS this behavior was explicitly disabled via this setting
         public_galaxy_enabled = False
 
+    public_galaxy_credential = Credential(
+        created=now(),
+        modified=now(),
+        name='Ansible Galaxy',
+        managed_by_tower=True,
+        credential_type=galaxy_type,
+        inputs = {
+            'url': 'https://galaxy.ansible.com/'
+        }
+    )
+    public_galaxy_credential.save()
+
     for org in Organization.objects.all():
         if private_galaxy_url and private_galaxy_url.value:
             # If a setting exists for a private Galaxy URL, make a credential for it
@@ -106,16 +118,5 @@ def migrate_galaxy_settings(apps, schema_editor):
             org.galaxy_credentials.add(cred)
 
         if public_galaxy_enabled:
-            # If public Galaxy was enabled, make a credential for it
-            cred = Credential(
-                created=now(),
-                modified=now(),
-                name='Ansible Galaxy',
-                organization=org,
-                credential_type=galaxy_type,
-                inputs = {
-                    'url': 'https://galaxy.ansible.com/'
-                }
-            )
-            cred.save()
-            org.galaxy_credentials.add(cred)
+            # If public Galaxy was enabled, associate it to the org
+            org.galaxy_credentials.add(public_galaxy_credential)

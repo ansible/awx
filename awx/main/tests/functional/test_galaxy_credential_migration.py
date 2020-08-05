@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 import pytest
 
-from awx.main.models import Organization
+from awx.main.models import Credential, Organization
 from awx.conf.models import Setting
 from awx.main.migrations import _galaxy as galaxy
 
@@ -77,6 +77,10 @@ def test_multiple_galaxies():
 
         assert creds[1].name == 'Ansible Galaxy'
         assert creds[1].inputs['url'] == 'https://galaxy.ansible.com/'
+
+    public_galaxy_creds = Credential.objects.filter(name='Ansible Galaxy')
+    assert public_galaxy_creds.count() == 1
+    assert public_galaxy_creds.first().managed_by_tower is True
 
 
 @pytest.mark.django_db

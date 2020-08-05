@@ -2537,10 +2537,11 @@ class CredentialTypeSerializer(BaseSerializer):
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
+    managed_by_tower = serializers.ReadOnlyField()
 
     class Meta:
         model = Credential
-        fields = ('*', 'organization', 'credential_type', 'inputs', 'kind', 'cloud', 'kubernetes')
+        fields = ('*', 'organization', 'credential_type', 'managed_by_tower', 'inputs', 'kind', 'cloud', 'kubernetes')
         extra_kwargs = {
             'credential_type': {
                 'label': _('Credential Type'),
@@ -2603,6 +2604,13 @@ class CredentialSerializer(BaseSerializer):
             })
 
         return summary_dict
+
+    def validate(self, attrs):
+        if self.instance and self.instance.managed_by_tower:
+            raise PermissionDenied(
+                detail=_("Modifications not allowed for managed credentials")
+            )
+        return super(CredentialSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
         ret = super(CredentialSerializer, self).get_validation_exclusions(obj)

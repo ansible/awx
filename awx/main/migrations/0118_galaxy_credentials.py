@@ -42,5 +42,10 @@ class Migration(migrations.Migration):
             name='galaxy_credentials',
             field=awx.main.fields.OrderedManyToManyField(blank=True, related_name='organization_galaxy_credentials', through='main.OrganizationGalaxyCredentialMembership', to='main.Credential'),
         ),
+        migrations.AddField(
+            model_name='credential',
+            name='managed_by_tower',
+            field=models.BooleanField(default=False, editable=False),
+        ),
         migrations.RunPython(galaxy.migrate_galaxy_settings)
     ]

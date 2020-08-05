@@ -96,6 +96,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         help_text=_('Specify the type of credential you want to create. Refer '
                     'to the Ansible Tower documentation for details on each type.')
     )
+    managed_by_tower = models.BooleanField(
+        default=False,
+        editable=False
+    )
     organization = models.ForeignKey(
         'Organization',
         null=True,
