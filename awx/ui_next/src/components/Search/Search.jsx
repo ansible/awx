@@ -43,7 +43,17 @@ function Search({
 }) {
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
-    columns.find(col => col.isDefault).key
+    (() => {
+      const defaultColumn = columns.filter(col => col.isDefault);
+
+      if (defaultColumn.length !== 1) {
+        throw new Error(
+          'One (and only one) searchColumn must be marked isDefault: true'
+        );
+      }
+
+      return defaultColumn[0]?.key;
+    })()
   );
   const [searchValue, setSearchValue] = useState('');
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
