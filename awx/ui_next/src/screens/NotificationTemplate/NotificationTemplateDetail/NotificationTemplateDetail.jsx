@@ -1,5 +1,5 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import {
   Button,
@@ -28,26 +28,27 @@ import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import LaunchButton from '../../../components/LaunchButton';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
-import { JobTemplatesAPI } from '../../../api';
+import { NotificationTemplatesAPI } from '../../../api';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
-
-const TYPES = {
-  email: 'Email',
-  grafana: 'Grafana',
-  irc: 'IRC',
-  mattermost: 'Mattermost',
-  pagerduty: 'Pagerduty',
-  rocketchat: 'Rocket.Chat',
-  slack: 'Slack',
-  twilio: 'Twilio',
-  webhook: 'Webhook',
-};
+import { NOTIFICATION_TYPES } from '../constants';
 
 function NotificationTemplateDetail({ i18n, template }) {
+  const history = useHistory();
+
   const {
     notification_configuration: configuration,
     summary_fields,
   } = template;
+
+  const { request: deleteTemplate, isLoading, error: deleteError } = useRequest(
+    useCallback(async () => {
+      await NotificationTemplatesAPI.destroy(template.id);
+      history.push(`/notification_templates`);
+    }, [template.id, history])
+  );
+
+  const { error, dismissError } = useDismissableError(deleteError);
+
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -78,7 +79,8 @@ function NotificationTemplateDetail({ i18n, template }) {
         <Detail
           label={i18n._(t`Notification Type`)}
           value={
-            TYPES[template.notification_type] || template.notification_type
+            NOTIFICATION_TYPES[template.notification_type] ||
+            template.notification_type
           }
           dataCy="nt-detail-type"
         />
@@ -265,7 +267,107 @@ function NotificationTemplateDetail({ i18n, template }) {
             />
           </>
         )}
+        {template.notification_type === 'slack' && (
+          <>
+            <Detail
+              label={i18n._(t`Destination Channels`)}
+              value={configuration.channels} // array
+              dataCy="nt-detail-slack-channels"
+            />
+            <Detail
+              label={i18n._(t`Notification Color`)}
+              value={configuration.hex_color}
+              dataCy="nt-detail-slack-color"
+            />
+          </>
+        )}
+        {template.notification_type === 'twilio' && (
+          <>
+            <Detail
+              label={i18n._(t`Source Phone Number`)}
+              value={configuration.from_number}
+              dataCy="nt-detail-twilio-source-phone"
+            />
+            <Detail
+              label={i18n._(t`Destination SMS Number`)}
+              value={configuration.to_numbers} // array
+              dataCy="nt-detail-twilio-destination-numbers"
+            />
+            <Detail
+              label={i18n._(t`Account SID`)}
+              value={configuration.account_sid}
+              dataCy="nt-detail-twilio-account-sid"
+            />
+          </>
+        )}
+        {template.notification_type === 'webhook' && (
+          <>
+            <Detail
+              label={i18n._(t`Username`)}
+              value={configuration.username}
+              dataCy="nt-detail-webhook-password"
+            />
+            <Detail
+              label={i18n._(t`Target URL`)}
+              value={configuration.url}
+              dataCy="nt-detail-webhook-url"
+            />
+            <Detail
+              label={i18n._(t`Disable SSL Verification`)}
+              value={
+                configuration.disable_ssl_verification
+                  ? i18n._(t`True`)
+                  : i18n._(t`False`)
+              }
+              dataCy="nt-detail-disable-ssl"
+            />
+            <Detail
+              label={i18n._(t`HTTP Method`)}
+              value={configuration.http_method}
+              dataCy="nt-detail-webhook-http-method"
+            />
+            {/* <Detail
+              label={i18n._(t`HTTP Headers`)}
+              value={configuration.headers}
+              dataCy="nt-detail-webhook-headers"
+            /> */}
+          </>
+        )}
       </DetailList>
+      <CardActionsRow>
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.edit && (
+            <Button
+              component={Link}
+              to={`/notification_templates/${template.id}/edit`}
+              aria-label={i18n._(t`Edit`)}
+            >
+              {i18n._(t`Edit`)}
+            </Button>
+          )}
+        {summary_fields.user_capabilities &&
+          summary_fields.user_capabilities.delete && (
+            <DeleteButton
+              name={template.name}
+              modalTitle={i18n._(t`Delete Notification`)}
+              onConfirm={deleteTemplate}
+              isDisabled={isLoading}
+            >
+              {i18n._(t`Delete`)}
+            </DeleteButton>
+          )}
+      </CardActionsRow>
+      {error && (
+        <AlertModal
+          isOpen={error}
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissError}
+        >
+          {i18n._(t`Failed to delete notification.`)}
+          <ErrorDetail error={error} />
+        </AlertModal>
+      )}
     </CardBody>
   );
 }

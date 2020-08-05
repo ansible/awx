@@ -1,4 +1,4 @@
-import NotificationTemplatesList from './NotificationTemplateList';
+import NotificationTemplateList from './NotificationTemplateList';
 
-export default NotificationTemplatesList;
-export { default as NotificationTemplatesListItem } from './NotificationTemplateListItem';
+export default NotificationTemplateList;
+export { default as NotificationTemplateListItem } from './NotificationTemplateListItem';

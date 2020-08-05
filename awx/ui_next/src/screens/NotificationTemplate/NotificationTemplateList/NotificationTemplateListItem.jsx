@@ -14,6 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
 import DataListCell from '../../../components/DataListCell';
+import { NOTIFICATION_TYPES } from '../constants';
 
 const DataListAction = styled(_DataListAction)`
   align-items: center;
@@ -49,7 +50,8 @@ function NotificationTemplateListItem({
               </Link>
             </DataListCell>,
             <DataListCell key="type">
-              {template.notification_type}
+              {NOTIFICATION_TYPES[template.notification_type] ||
+                template.notification_type}
             </DataListCell>,
           ]}
         />

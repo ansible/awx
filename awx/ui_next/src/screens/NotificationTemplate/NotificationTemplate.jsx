@@ -2,14 +2,27 @@ import React, { useEffect, useCallback } from 'react';
 import { t } from '@lingui/macro';
 import { withI18n } from '@lingui/react';
 import { Card, PageSection } from '@patternfly/react-core';
-import { Link, useParams } from 'react-router-dom';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import {
+  Link,
+  Switch,
+  Route,
+  Redirect,
+  useParams,
+  useRouteMatch,
+  useLocation,
+} from 'react-router-dom';
 import useRequest from '../../util/useRequest';
+import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import { NotificationTemplatesAPI } from '../../api';
 import NotificationTemplateDetail from './NotificationTemplateDetail';
+import NotificationTemplateEdit from './NotificationTemplateEdit';
 
-function NotificationTemplate({ i18n, setBreadcrumb }) {
+function NotificationTemplate({ setBreadcrumb, i18n }) {
   const { id: templateId } = useParams();
+  const match = useRouteMatch();
+  const location = useLocation();
   const {
     result: template,
     isLoading,
@@ -47,15 +60,51 @@ function NotificationTemplate({ i18n, setBreadcrumb }) {
     );
   }
 
+  const showCardHeader = !isLoading && !location.pathname.endsWith('edit');
+  const tabs = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Notifications`)}
+        </>
+      ),
+      link: `/notification_templates`,
+      id: 99,
+    },
+    {
+      name: i18n._(t`Details`),
+      link: `${match.url}/details`,
+      id: 0,
+    },
+  ];
   return (
     <PageSection>
       <Card>
-        {template && (
-          <NotificationTemplateDetail
-            template={template}
-            isLoading={isLoading}
+        {showCardHeader && <RoutedTabs tabsArray={tabs} />}
+        <Switch>
+          <Redirect
+            from="/notification_templates/:id"
+            to="/notification_templates/:id/details"
+            exact
           />
-        )}
+          {template && (
+            <>
+              <Route path="/notification_templates/:id/edit">
+                <NotificationTemplateEdit
+                  template={template}
+                  isLoading={isLoading}
+                />
+              </Route>
+              <Route path="/notification_templates/:id/details">
+                <NotificationTemplateDetail
+                  template={template}
+                  isLoading={isLoading}
+                />
+              </Route>
+            </>
+          )}
+        </Switch>
       </Card>
     </PageSection>
   );
