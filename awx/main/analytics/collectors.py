@@ -305,9 +305,9 @@ def events_table(since, full_path, until, **kwargs):
                               main_jobevent.event_data::json->'res'->'warnings' AS warnings,
                               main_jobevent.event_data::json->'res'->'deprecations' AS deprecations
                               FROM main_jobevent 
-                              WHERE (main_jobevent.created > {} AND main_jobevent.created <= {})
+                              WHERE (main_jobevent.created > '{}' AND main_jobevent.created <= '{}')
                               ORDER BY main_jobevent.id ASC) TO STDOUT WITH CSV HEADER
-                   '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
+                   '''.format(since.isoformat(),until.isoformat())
     return _copy_table(table='events', query=events_query, path=full_path)
 
 
@@ -340,11 +340,11 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
                                  LEFT JOIN main_inventory ON main_job.inventory_id = main_inventory.id
                                  LEFT JOIN main_organization ON main_organization.id = main_unifiedjob.organization_id
-                                 WHERE ((main_unifiedjob.created > {0} AND main_unifiedjob.created <= {1})
-                                       OR (main_unifiedjob.finished > {0} AND main_unifiedjob.finished <= {1}))
+                                 WHERE ((main_unifiedjob.created > '{0}' AND main_unifiedjob.created <= '{1}')
+                                       OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER
-                        '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
+                        '''.format(since.isoformat(),until.isoformat())
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
@@ -401,9 +401,9 @@ def workflow_job_node_table(since, full_path, until, **kwargs):
                                      FROM main_workflowjobnode_always_nodes
                                      GROUP BY from_workflowjobnode_id
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
-                                 WHERE (main_workflowjobnode.modified > {} AND main_workflowjobnode.modified <= {})
+                                 WHERE (main_workflowjobnode.modified > '{}' AND main_workflowjobnode.modified <= '{}')
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER
-                              '''.format(since.strftime("'%Y-%m-%d %H:%M:%S'"),until.strftime("'%Y-%m-%d %H:%M:%S'"))
+                              '''.format(since.isoformat(),until.isoformat())
     return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
 

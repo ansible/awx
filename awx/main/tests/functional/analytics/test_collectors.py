@@ -1,6 +1,7 @@
 import pytest
 import tempfile
 import os
+import re
 import shutil
 import csv
 
@@ -27,7 +28,7 @@ def sqlite_copy_expert(request):
 
     def write_stdout(self, sql, fd):
         # Would be cool if we instead properly disected the SQL query and verified
-        # it that way. But instead, we just take the nieve approach here.
+        # it that way. But instead, we just take the naive approach here.
         sql = sql.strip()
         assert sql.startswith("COPY (")
         assert sql.endswith(") TO STDOUT WITH CSV HEADER")
@@ -36,6 +37,10 @@ def sqlite_copy_expert(request):
         sql = sql.replace(") TO STDOUT WITH CSV HEADER", "")
         # sqlite equivalent
         sql = sql.replace("ARRAY_AGG", "GROUP_CONCAT")
+        # SQLite doesn't support isoformatted dates, because that would be useful
+        sql = sql.replace("+00:00", "")
+        i = re.compile(r'(?P<date>\d\d\d\d-\d\d-\d\d)T')
+        sql = i.sub(r'\g<date> ', sql)
 
         # Remove JSON style queries
         # TODO: could replace JSON style queries with sqlite kind of equivalents
