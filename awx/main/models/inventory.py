@@ -1464,8 +1464,9 @@ class gce(PluginFileInjector):
     def inventory_as_dict(self, inventory_update, private_data_dir):
         ret = super().inventory_as_dict(inventory_update, private_data_dir)
         credential = inventory_update.get_cloud_credential()
-        # TODO: Align precedence of ENV vs. inventory config w/ Ansible behavior
-        ret['projects'] = [credential.get_input('project', default='')]
+        # InventorySource.source_vars take precedence over ENV vars
+        if 'projects' not in ret:
+            ret['projects'] = [credential.get_input('project', default='')]
         return ret
 
 
