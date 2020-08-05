@@ -71,7 +71,29 @@ angular.module('Organizations', [
                                         });
                                     });
 
-                            }]
+                            }],
+                            defaultGalaxyCredential: ['Rest', 'GetBasePath', 'ProcessErrors',
+                                function(Rest, GetBasePath, ProcessErrors){
+                                    Rest.setUrl(GetBasePath('credentials'));
+                                    return Rest.get({
+                                        params: {
+                                            credential_type__kind: 'galaxy',
+                                            managed_by_tower: true
+                                        }
+                                    })
+                                    .then(({data}) => {
+                                        if (data.results.length > 0) {
+                                            return data.results;
+                                        }
+                                    })
+                                    .catch(({data, status}) => {
+                                        ProcessErrors(null, data, status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get default Galaxy credential. GET returned ' +
+                                                'status: ' + status
+                                        });
+                                    });
+                            }],
                         },
                         edit: {
                             ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {

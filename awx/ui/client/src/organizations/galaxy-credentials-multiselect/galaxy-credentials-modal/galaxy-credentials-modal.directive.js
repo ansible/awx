@@ -49,7 +49,7 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             credentialList.well = false;
                             credentialList.multiSelect = true;
                             credentialList.multiSelectPreview = {
-                                selectedRows: 'igTags',
+                                selectedRows: 'credTags',
                                 availableRows: 'credentials'
                             };
                             credentialList.fields.name.ngClick = "linkoutCredential(credential)";
@@ -70,10 +70,10 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             if ($scope.galaxyCredentials) {
                                 $scope.galaxyCredentials = $scope.galaxyCredentials.map( (item) => {
                                     item.isSelected = true;
-                                    if (!$scope.igTags) {
-                                        $scope.igTags = [];
+                                    if (!$scope.credTags) {
+                                        $scope.credTags = [];
                                     }
-                                    $scope.igTags.push(item);
+                                    $scope.credTags.push(item);
                                     return item;
                                 });
                             }
@@ -83,7 +83,7 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
 
                     $scope.$watch('credentials', function(){
                         angular.forEach($scope.credentials, function(credentialRow) {
-                            angular.forEach($scope.igTags, function(selectedCredential){
+                            angular.forEach($scope.credTags, function(selectedCredential){
                                 if(selectedCredential.id === credentialRow.id) {
                                     credentialRow.isSelected = true;
                                 }
@@ -97,12 +97,12 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
             $scope.$on("selectedOrDeselected", function(e, value) {
                 let item = value.value;
                 if (value.isSelected) {
-                    if(!$scope.igTags) {
-                        $scope.igTags = [];
+                    if(!$scope.credTags) {
+                        $scope.credTags = [];
                     }
-                    $scope.igTags.push(item);
+                    $scope.credTags.push(item);
                 } else {
-                    _.remove($scope.igTags, { id: item.id });
+                    _.remove($scope.credTags, { id: item.id });
                 }
             });
 
@@ -115,7 +115,7 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
             };
 
             $scope.saveForm = function() {
-                $scope.galaxyCredentials = $scope.igTags;
+                $scope.galaxyCredentials = $scope.credTags;
                 $scope.destroyModal();
             };
         }]

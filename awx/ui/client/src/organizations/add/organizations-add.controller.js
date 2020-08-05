@@ -6,10 +6,10 @@
 
 export default ['$scope', '$rootScope', '$location', '$stateParams', 'OrganizationForm', 
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2', 
-    '$state','InstanceGroupsService', 'ConfigData', 'MultiCredentialService',
+    '$state','InstanceGroupsService', 'ConfigData', 'MultiCredentialService', 'defaultGalaxyCredential',
     function($scope, $rootScope, $location, $stateParams, OrganizationForm, 
         GenerateForm, Rest, Alert, ProcessErrors, GetBasePath, Wait, CreateSelect2, 
-        $state, InstanceGroupsService, ConfigData, MultiCredentialService) {
+        $state, InstanceGroupsService, ConfigData, MultiCredentialService, defaultGalaxyCredential) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -38,6 +38,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Organizati
 
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
+
+            $scope.credentials = defaultGalaxyCredential || [];
         }
 
         // Save
