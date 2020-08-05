@@ -130,8 +130,8 @@ function ProjectLookup({
                 key: 'name',
               },
             ]}
-            toolbarSearchableKeys={searchableKeys}
-            toolbarRelatedSearchableKeys={relatedSearchableKeys}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             options={projects}
             optionCount={count}
             multiple={state.multiple}
