@@ -2479,13 +2479,16 @@ class NotificationAccess(BaseAccess):
 
 class LabelAccess(BaseAccess):
     '''
-    I can see/use a Label if I have permission to associated organization
+    I can see/use a Label if I have permission to associated organization, or to a JT that the label is on
     '''
     model = Label
     prefetch_related = ('modified_by', 'created_by', 'organization',)
 
     def filtered_queryset(self):
-        return self.model.objects.all()
+        return self.model.objects.filter(
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role')) |
+            Q(unifiedjobtemplate_labels__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        )
 
     @check_superuser
     def can_add(self, data):

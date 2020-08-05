@@ -72,8 +72,8 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                               headers=self.headers,
                               verify=(not self.disable_ssl_verification))
             if r.status_code >= 400:
-                logger.error(smart_text(_("Error sending notification webhook: {}").format(r.text)))
+                logger.error(smart_text(_("Error sending notification webhook: {}").format(r.status_code)))
                 if not self.fail_silently:
-                    raise Exception(smart_text(_("Error sending notification webhook: {}").format(r.text)))
+                    raise Exception(smart_text(_("Error sending notification webhook: {}").format(r.status_code)))
             sent_messages += 1
         return sent_messages
