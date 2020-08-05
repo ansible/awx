@@ -12,6 +12,8 @@ from rest_framework.fields import FloatField
 
 # Tower
 from awx.conf import fields, register, register_validate
+from awx.main.validators import validate_private_key, validate_certificate
+
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -326,6 +328,31 @@ register(
     help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
+)
+
+register(
+    'ENTITLEMENT_PUBLIC_CERT',
+    field_class=fields.CharField,
+    allow_blank=True,
+    required=True,
+    validators=[validate_certificate],
+    label=_('RHSM Entitlement Public Certificate'),
+    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com.'),
+    category=_('SYSTEM'),
+    category_slug='system',
+)
+
+register(
+    'ENTITLEMENT_PRIVATE_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    required=True,
+    validators=[validate_private_key],
+    label=_('SAML Service Provider Private Key'),
+    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com.'),
+    category=_('SYSTEM'),
+    category_slug='system',
+    encrypted=True,
 )
 
 register(

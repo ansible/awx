@@ -6,13 +6,11 @@ __all__ = ['get_license']
 
 
 def _get_validated_license_data():
-    from awx.main.utils.common import get_licenser
-    return get_licenser().validate()
+    from awx.main.utils.licensing import Licenser
+    return Licenser().validate()
 
 
-def get_license(show_key=False):
+def get_license():
     """Return a dictionary representing the active license on this Tower instance."""
     license_data = _get_validated_license_data()
-    if not show_key:
-        license_data.pop('license_key', None)
     return license_data

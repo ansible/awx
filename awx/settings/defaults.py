@@ -667,6 +667,11 @@ EC2_ENABLED_VALUE = 'running'
 EC2_INSTANCE_ID_VAR = 'ec2_id'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
+# Entitlements
+ENTITLEMENT_PUBLIC_CERT = ''
+ENTITLEMENT_PRIVATE_KEY = ''
+
+
 # ------------
 # -- VMware --
 # ------------

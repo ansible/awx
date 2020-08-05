@@ -47,9 +47,8 @@ from awx.main.utils import (
     get_object_or_400,
     decrypt_field,
     get_awx_version,
-    get_licenser,
-    StubLicense
 )
+from awx.main.utils.licensing import Licenser
 from awx.main.utils.db import get_all_field_names
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
@@ -225,7 +224,8 @@ class APIView(views.APIView):
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
-        response['X-API-Product-Name'] = 'AWX' if isinstance(get_licenser(), StubLicense) else 'Red Hat Ansible Tower'
+        # currently, this violates atomic transactions when hitting the `api/v2/config` endpoint. 
+        # response['X-API-Product-Name'] = 'AWX' if Licenser().validate().get('license_type') is 'open' else 'Red Hat Ansible Tower'
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
             time_elapsed = time.time() - self.time_started
