@@ -2117,6 +2117,16 @@ class RunProjectUpdate(BaseTask):
                 raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+
+        galaxy_creds_are_defined = project_update.project.organization.galaxy_credentials.exists()
+        if not galaxy_creds_are_defined and (
+            settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
+        ):
+            logger.debug(
+                'Galaxy role/collection syncing is enabled, but no '
+                f'credentials are configured for {project_update.project.organization}.'
+            )
+
         extra_vars.update({
             'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
             'local_path': os.path.basename(project_update.project.local_path),
@@ -2127,8 +2137,8 @@ class RunProjectUpdate(BaseTask):
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'roles_enabled': settings.AWX_ROLES_ENABLED,
-            'collections_enabled': settings.AWX_COLLECTIONS_ENABLED,
+            'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
+            'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
         })
         # apply custom refspec from user for PR refs and the like
         if project_update.scm_refspec:

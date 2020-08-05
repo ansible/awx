@@ -66,7 +66,8 @@ def patch_Organization():
     credentials_mock = mock.Mock(**{
         'all': lambda: _credentials,
         'add': _credentials.append,
-        'spec_set': ['all', 'add'],
+        'exists': lambda: len(_credentials) > 0,
+        'spec_set': ['all', 'add', 'exists'],
     })
     with mock.patch.object(Organization, 'galaxy_credentials', credentials_mock):
         yield
@@ -1799,7 +1800,7 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     def project_update(self):
         org = Organization(pk=1)
         proj = Project(pk=1, organization=org)
-        project_update = ProjectUpdate(pk=1, project=proj)
+        project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
         project_update.websocket_emit_status = mock.Mock()
         return project_update
 
@@ -1820,19 +1821,38 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             assert 'ANSIBLE_GALAXY_IGNORE' not in env
 
     def test_galaxy_credentials_empty(self, private_data_dir, project_update):
-        task = tasks.RunProjectUpdate()
+
+        class RunProjectUpdate(tasks.RunProjectUpdate):
+            __vars__ = {}
+
+            def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
+                self.__vars__ = extra_vars
+
+        task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
+        task.build_extra_vars_file(project_update, private_data_dir)
+        assert task.__vars__['roles_enabled'] is False
+        assert task.__vars__['collections_enabled'] is False
         for k in env:
             assert not k.startswith('ANSIBLE_GALAXY_SERVER')
 
     def test_single_public_galaxy(self, private_data_dir, project_update):
+        class RunProjectUpdate(tasks.RunProjectUpdate):
+            __vars__ = {}
+
+            def _write_extra_vars_file(self, private_data_dir, extra_vars, *kw):
+                self.__vars__ = extra_vars
+
         credential_type = CredentialType.defaults['galaxy_api_token']()
         public_galaxy = Credential(pk=1, credential_type=credential_type, inputs={
             'url': 'https://galaxy.ansible.com/',
         })
         project_update.project.organization.galaxy_credentials.add(public_galaxy)
-        task = tasks.RunProjectUpdate()
+        task = RunProjectUpdate()
         env = task.build_env(project_update, private_data_dir)
+        task.build_extra_vars_file(project_update, private_data_dir)
+        assert task.__vars__['roles_enabled'] is True
+        assert task.__vars__['collections_enabled'] is True
         assert sorted([
             (k, v) for k, v in env.items()
             if k.startswith('ANSIBLE_GALAXY')
