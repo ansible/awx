@@ -2,6 +2,12 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 14.0.0 (Aug TBD, 2020)
+- Fixed https://access.redhat.com/security/cve/cve-2020-14327 - Server-side request forgery on credentials
+- Fixed https://access.redhat.com/security/cve/cve-2020-14328 - Server-side request forgery on webhooks
+- Fixed https://access.redhat.com/security/cve/cve-2020-14329 - Sensitive data exposure on labels
+- Fixed https://access.redhat.com/security/cve/cve-2020-14337 - Named URLs allow for testing the presence or absence of objects
+
 ## 13.0.0 (Jun 23, 2020)
 - Added import and export commands to the official AWX CLI, replacing send and receive from the old tower-cli (https://github.com/ansible/awx/pull/6125).
 - Removed scripts as a means of running inventory updates of built-in types (https://github.com/ansible/awx/pull/6911)
