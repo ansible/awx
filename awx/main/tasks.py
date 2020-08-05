@@ -23,6 +23,7 @@ import fcntl
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse as urlparse
+import shlex
 
 # Django
 from django.conf import settings
@@ -2559,23 +2560,18 @@ class RunInventoryUpdate(BaseTask):
         args.extend(['--venv', inventory_update.ansible_virtualenv_path])
 
         src = inventory_update.source
-        # Add several options to the shell arguments based on the
-        # inventory-source-specific setting in the AWX configuration.
-        # These settings are "per-source"; it's entirely possible that
-        # they will be different between cloud providers if an AWX user
-        # actively uses more than one.
-        if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
-            args.extend(['--enabled-var',
-                        getattr(settings, '%s_ENABLED_VAR' % src.upper())])
-        if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
-            args.extend(['--enabled-value',
-                        getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
-        if getattr(settings, '%s_GROUP_FILTER' % src.upper(), False):
-            args.extend(['--group-filter',
-                         getattr(settings, '%s_GROUP_FILTER' % src.upper())])
-        if getattr(settings, '%s_HOST_FILTER' % src.upper(), False):
-            args.extend(['--host-filter',
-                         getattr(settings, '%s_HOST_FILTER' % src.upper())])
+        if inventory_update.enabled_var:
+            args.extend(['--enabled-var', shlex.quote(inventory_update.enabled_var)])
+            args.extend(['--enabled-value', shlex.quote(inventory_update.enabled_value)])
+        else:
+            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
+                args.extend(['--enabled-var',
+                            getattr(settings, '%s_ENABLED_VAR' % src.upper())])
+            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
+                args.extend(['--enabled-value',
+                            getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
+        if inventory_update.host_filter:
+            args.extend(['--host-filter', shlex.quote(inventory_update.host_filter)])
         if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
             args.append('--exclude-empty-groups')
         if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):

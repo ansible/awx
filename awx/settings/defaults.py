@@ -669,59 +669,32 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 # -- Amazon EC2 --
 # ----------------
-
-# Inventory variable name/values for determining if host is active/enabled.
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-
-# Inventory variable name containing unique instance ID.
 EC2_INSTANCE_ID_VAR = 'ec2_id'
-
-# Filter for allowed group/host names when importing inventory from EC2.
-EC2_GROUP_FILTER = r'^.+$'
-EC2_HOST_FILTER = r'^.+$'
 EC2_EXCLUDE_EMPTY_GROUPS = True
-
 
 # ------------
 # -- VMware --
 # ------------
-# Inventory variable name/values for determining whether a host is
-# active in vSphere.
 VMWARE_ENABLED_VAR = 'guest.gueststate'
 VMWARE_ENABLED_VALUE = 'running'
-
-# Inventory variable name containing the unique instance ID.
 VMWARE_INSTANCE_ID_VAR = 'config.instanceUuid, config.instanceuuid'
-
-# Filter for allowed group and host names when importing inventory
-# from VMware.
-VMWARE_GROUP_FILTER = r'^.+$'
-VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
 
 VMWARE_VALIDATE_CERTS = False
+
 # ---------------------------
 # -- Google Compute Engine --
 # ---------------------------
-
-# Inventory variable name/value for determining whether a host is active
-# in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
 GCE_ENABLED_VALUE = 'running'
-
-# Filter for allowed group and host names when importing inventory from
-# Google Compute Engine.
-GCE_GROUP_FILTER = r'^.+$'
-GCE_HOST_FILTER = r'^.+$'
 GCE_EXCLUDE_EMPTY_GROUPS = True
 GCE_INSTANCE_ID_VAR = 'gce_id'
 
 # --------------------------------------
 # -- Microsoft Azure Resource Manager --
 # --------------------------------------
-AZURE_RM_GROUP_FILTER = r'^.+$'
-AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'
 AZURE_RM_ENABLED_VALUE = 'running'
 AZURE_RM_INSTANCE_ID_VAR = 'id'
@@ -732,8 +705,6 @@ AZURE_RM_EXCLUDE_EMPTY_GROUPS = True
 # ---------------------
 OPENSTACK_ENABLED_VAR = 'status'
 OPENSTACK_ENABLED_VALUE = 'ACTIVE'
-OPENSTACK_GROUP_FILTER = r'^.+$'
-OPENSTACK_HOST_FILTER = r'^.+$'
 OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 
@@ -742,8 +713,6 @@ OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 # ---------------------
 RHV_ENABLED_VAR = 'status'
 RHV_ENABLED_VALUE = 'up'
-RHV_GROUP_FILTER = r'^.+$'
-RHV_HOST_FILTER = r'^.+$'
 RHV_EXCLUDE_EMPTY_GROUPS = True
 RHV_INSTANCE_ID_VAR = 'id'
 
@@ -752,8 +721,6 @@ RHV_INSTANCE_ID_VAR = 'id'
 # ---------------------
 TOWER_ENABLED_VAR = 'remote_tower_enabled'
 TOWER_ENABLED_VALUE = 'true'
-TOWER_GROUP_FILTER = r'^.+$'
-TOWER_HOST_FILTER = r'^.+$'
 TOWER_EXCLUDE_EMPTY_GROUPS = True
 TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 
@@ -762,8 +729,6 @@ TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
-SATELLITE6_GROUP_FILTER = r'^.+$'
-SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
@@ -773,8 +738,6 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # ---------------------
 #CUSTOM_ENABLED_VAR =
 #CUSTOM_ENABLED_VALUE =
-CUSTOM_GROUP_FILTER = r'^.+$'
-CUSTOM_HOST_FILTER = r'^.+$'
 CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 #CUSTOM_INSTANCE_ID_VAR =
 
@@ -783,8 +746,6 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 # ---------------------
 #SCM_ENABLED_VAR =
 #SCM_ENABLED_VALUE =
-SCM_GROUP_FILTER = r'^.+$'
-SCM_HOST_FILTER = r'^.+$'
 SCM_EXCLUDE_EMPTY_GROUPS = False
 #SCM_INSTANCE_ID_VAR =
 

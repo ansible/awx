@@ -4,7 +4,7 @@ import logging
 import json
 import yaml
 
-from django.db import migrations
+from django.db import migrations, models
 
 from awx.main.models.base import VarsDictProperty
 
@@ -89,5 +89,35 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='inventoryupdate',
             name='source_regions',
+        ),
+        migrations.AddField(
+            model_name='inventorysource',
+            name='enabled_value',
+            field=models.TextField(blank=True, default='', help_text='Only used when enabled_var is set. Value when the host is considered enabled. For example if enabled_var="status.power_state"and enabled_value="powered_on" with host variables:{   "status": {     "power_state": "powered_on",     "created": "2020-08-04T18:13:04+00:00",     "healthy": true    },    "name": "foobar",    "ip_address": "192.168.2.1"}The host would be marked enabled. If power_state where any value other than powered_on then the host would be disabled when imported into Tower. If the key is not found then the host will be enabled'),
+        ),
+        migrations.AddField(
+            model_name='inventorysource',
+            name='enabled_var',
+            field=models.TextField(blank=True, default='', help_text='Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified as "foo.bar", in which case the lookup will traverse into nested dicts, equivalent to: from_dict.get("foo", {}).get("bar", default)'),
+        ),
+        migrations.AddField(
+            model_name='inventorysource',
+            name='host_filter',
+            field=models.TextField(blank=True, default='', help_text='Regex where only matching hosts will be imported into Tower.'),
+        ),
+        migrations.AddField(
+            model_name='inventoryupdate',
+            name='enabled_value',
+            field=models.TextField(blank=True, default='', help_text='Only used when enabled_var is set. Value when the host is considered enabled. For example if enabled_var="status.power_state"and enabled_value="powered_on" with host variables:{   "status": {     "power_state": "powered_on",     "created": "2020-08-04T18:13:04+00:00",     "healthy": true    },    "name": "foobar",    "ip_address": "192.168.2.1"}The host would be marked enabled. If power_state where any value other than powered_on then the host would be disabled when imported into Tower. If the key is not found then the host will be enabled'),
+        ),
+        migrations.AddField(
+            model_name='inventoryupdate',
+            name='enabled_var',
+            field=models.TextField(blank=True, default='', help_text='Retrieve the enabled state from the given dict of host variables. The enabled variable may be specified as "foo.bar", in which case the lookup will traverse into nested dicts, equivalent to: from_dict.get("foo", {}).get("bar", default)'),
+        ),
+        migrations.AddField(
+            model_name='inventoryupdate',
+            name='host_filter',
+            field=models.TextField(blank=True, default='', help_text='Regex where only matching hosts will be imported into Tower.'),
         ),
     ]
