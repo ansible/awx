@@ -58,7 +58,7 @@ export default ['NotificationsList', 'i18n',
                 credential: {
                     label: i18n._('Galaxy Credentials'),
                     type: 'custom',
-                    awPopOver: "<p>" + i18n._("Select Galaxy credentials. The selection order sets precedence for the sync and lookup of the content") + "</p>",
+                    awPopOver: "<p>" + i18n._("Select Galaxy credentials. The selection order sets the order in which Tower will download roles/collections using `ansible-galaxy`.") + "</p>",
                     dataTitle: i18n._('Galaxy Credentials'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
