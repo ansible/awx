@@ -9,7 +9,6 @@ import useRequest from '../../../util/useRequest';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import ContentError from '../../ContentError';
-import { required } from '../../../util/validators';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
@@ -20,7 +19,6 @@ const QS_CONFIG = getQSConfig('inventory', {
 function InventoryStep({ i18n }) {
   const [field, , helpers] = useField({
     name: 'inventory',
-    validate: required(null, i18n),
   });
   const history = useHistory();
 
