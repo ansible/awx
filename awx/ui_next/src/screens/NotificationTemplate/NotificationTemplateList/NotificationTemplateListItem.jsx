@@ -1,3 +1,4 @@
+import 'styled-components/macro';
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
@@ -14,6 +15,7 @@ import {
 } from '@patternfly/react-core';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
 import DataListCell from '../../../components/DataListCell';
+import StatusLabel from '../../../components/StatusLabel';
 import { NOTIFICATION_TYPES } from '../constants';
 
 const DataListAction = styled(_DataListAction)`
@@ -33,6 +35,8 @@ function NotificationTemplateListItem({
   const sendTestNotification = () => {};
   const labelId = `template-name-${template.id}`;
 
+  const lastNotification = template.summary_fields?.recent_notifications[0];
+
   return (
     <DataListItem key={template.id} aria-labelledby={labelId} id={template.id}>
       <DataListItemRow>
@@ -49,13 +53,28 @@ function NotificationTemplateListItem({
                 <b>{template.name}</b>
               </Link>
             </DataListCell>,
+            <DataListCell>
+              {lastNotification && (
+                <StatusLabel status={lastNotification.status} />
+              )}
+            </DataListCell>,
             <DataListCell key="type">
+              <strong css="margin-right: 24px">{i18n._(t`Type`)}</strong>
               {NOTIFICATION_TYPES[template.notification_type] ||
                 template.notification_type}
             </DataListCell>,
           ]}
         />
         <DataListAction aria-label="actions" aria-labelledby={labelId}>
+          <Tooltip content={i18n._(t`Test Notification`)} position="top">
+            <Button
+              aria-label={i18n._(t`Test Notification`)}
+              variant="plain"
+              onClick={sendTestNotification}
+            >
+              <BellIcon />
+            </Button>
+          </Tooltip>
           {template.summary_fields.user_capabilities.edit ? (
             <Tooltip
               content={i18n._(t`Edit Notification Template`)}
@@ -73,15 +92,6 @@ function NotificationTemplateListItem({
           ) : (
             <div />
           )}
-          <Tooltip content={i18n._(t`Test Notification`)} position="top">
-            <Button
-              aria-label={i18n._(t`Test Notification`)}
-              variant="plain"
-              onClick={sendTestNotification}
-            >
-              <BellIcon />
-            </Button>
-          </Tooltip>
         </DataListAction>
       </DataListItemRow>
     </DataListItem>
