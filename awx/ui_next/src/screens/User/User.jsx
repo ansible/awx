@@ -127,7 +127,7 @@ function User({ i18n, setBreadcrumb, me }) {
             </Route>
             {user && (
               <Route path="/users/:id/access">
-                <UserAccessList />
+                <UserAccessList user={user} />
               </Route>
             )}
             <Route path="/users/:id/tokens">

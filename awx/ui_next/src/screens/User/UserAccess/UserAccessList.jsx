@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -29,8 +29,7 @@ const QS_CONFIG = getQSConfig('roles', {
 // TODO Figure out how to best conduct a search of this list.
 // Since we only have a role ID in the top level of each role object
 // we can't really search using the normal search parameters.
-function UserAccessList({ i18n }) {
-  const { id } = useParams();
+function UserAccessList({ i18n, user }) {
   const { search } = useLocation();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
@@ -51,11 +50,11 @@ function UserAccessList({ i18n }) {
           data: { actions },
         },
       ] = await Promise.all([
-        UsersAPI.readRoles(id, params),
-        UsersAPI.readRoleOptions(id),
+        UsersAPI.readRoles(user.id, params),
+        UsersAPI.readOptions(),
       ]);
       return { roleCount: count, roles: results, options: actions };
-    }, [id, search]),
+    }, [user.id, search]),
     {
       roles: [],
       roleCount: 0,
@@ -75,14 +74,15 @@ function UserAccessList({ i18n }) {
       setRoleToDisassociate(null);
       await RolesAPI.disassociateUserRole(
         roleToDisassociate.id,
-        parseInt(id, 10)
+        parseInt(user.id, 10)
       );
-    }, [roleToDisassociate, id]),
+    }, [roleToDisassociate, user.id]),
     { qsConfig: QS_CONFIG, fetchItems: fetchRoles }
   );
 
   const canAdd =
-    options && Object.prototype.hasOwnProperty.call(options, 'POST');
+    user?.summary_fields?.user_capabilities?.edit ||
+    (options && Object.prototype.hasOwnProperty.call(options, 'POST'));
 
   const saveRoles = () => {
     setIsWizardOpen(false);
@@ -170,7 +170,7 @@ function UserAccessList({ i18n }) {
                         setIsWizardOpen(true);
                       }}
                     >
-                      Add
+                      {i18n._(t`Add`)}
                     </Button>,
                   ]
                 : []),
@@ -198,7 +198,7 @@ function UserAccessList({ i18n }) {
             <Button
               key="disassociate"
               variant="danger"
-              aria-label={i18n._(t`confirm disassociate`)}
+              aria-label={i18n._(t`Confirm disassociate`)}
               onClick={() => disassociateRole()}
             >
               {i18n._(t`Disassociate`)}
