@@ -191,6 +191,19 @@
     that:
       - result is changed
 
+- name: Check for inputs idempotency (when "inputs" is blank)
+  tower_credential:
+    name: "{{ ssh_cred_name2 }}"
+    organization: Default
+    state: present
+    credential_type: Machine
+    description: An example SSH credential
+  register: result
+
+- assert:
+    that:
+      - result is not changed
+
 - name: Create a valid SSH credential from lookup source (old school)
   tower_credential:
     name: "{{ ssh_cred_name3 }}"

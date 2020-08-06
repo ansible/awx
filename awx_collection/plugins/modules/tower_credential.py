@@ -384,19 +384,25 @@ def main():
         team_id = module.resolve_name_to_id('teams', team)
 
     # Create credential input from legacy inputs
+    has_inputs = False
     credential_inputs = {}
     for legacy_input in OLD_INPUT_NAMES:
         if module.params.get(legacy_input) is not None:
+            has_inputs = True
             credential_inputs[legacy_input] = module.params.get(legacy_input)
+
     if inputs:
+        has_inputs = True
         credential_inputs.update(inputs)
 
     # Create the data that gets sent for create and update
     credential_fields = {
         'name': new_name if new_name else name,
         'credential_type': cred_type_id,
-        'inputs': credential_inputs,
     }
+    if has_inputs:
+        credential_fields['inputs'] = credential_inputs
+
     if description:
         credential_fields['description'] = description
     if organization:
