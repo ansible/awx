@@ -58,9 +58,9 @@ import logging
 # In this module we don't use EXPORTABLE_RESOURCES, we just want to validate that our installed awxkit has import/export
 try:
     from awxkit.api.pages.api import EXPORTABLE_RESOURCES
-    HAS_EXPORTABLE_RESOURCES=True
+    HAS_EXPORTABLE_RESOURCES = True
 except ImportError:
-    HAS_EXPORTABLE_RESOURCES=False
+    HAS_EXPORTABLE_RESOURCES = False
 
 def main():
     argument_spec = dict(

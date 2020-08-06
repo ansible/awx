@@ -97,9 +97,9 @@ from ..module_utils.tower_awxkit import TowerAWXKitModule
 
 try:
     from awxkit.api.pages.api import EXPORTABLE_RESOURCES
-    HAS_EXPORTABLE_RESOURCES=True
+    HAS_EXPORTABLE_RESOURCES = True
 except ImportError:
-    HAS_EXPORTABLE_RESOURCES=False
+    HAS_EXPORTABLE_RESOURCES = False
 
 
 def main():
