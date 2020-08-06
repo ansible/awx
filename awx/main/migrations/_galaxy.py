@@ -14,9 +14,12 @@ logger = logging.getLogger('awx.main.migrations')
 
 
 def migrate_galaxy_settings(apps, schema_editor):
+    Organization = apps.get_model('main', 'Organization')
+    if Organization.objects.count() == 0:
+        # nothing to migrate
+        return
     set_current_apps(apps)
     ModernCredentialType.setup_tower_managed_defaults()
-    Organization = apps.get_model('main', 'Organization')
     CredentialType = apps.get_model('main', 'CredentialType')
     Credential = apps.get_model('main', 'Credential')
     Setting = apps.get_model('conf', 'Setting')

@@ -42,6 +42,16 @@ class Command(BaseCommand):
                                               },
                                               created_by=superuser)
                 c.admin_role.members.add(superuser)
+                public_galaxy_credential = Credential(
+                    name='Ansible Galaxy',
+                    managed_by_tower=True,
+                    credential_type=CredentialType.objects.get(kind='galaxy'),
+                    inputs = {
+                        'url': 'https://galaxy.ansible.com/'
+                    }
+                )
+                public_galaxy_credential.save()
+                o.galaxy_credentials.add(public_galaxy_credential)
                 i = Inventory.objects.create(name='Demo Inventory',
                                              organization=o,
                                              created_by=superuser)
