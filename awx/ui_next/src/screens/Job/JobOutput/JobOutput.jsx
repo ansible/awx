@@ -122,6 +122,7 @@ class JobOutput extends Component {
       remoteRowCount: 0,
       isHostModalOpen: false,
       hostEvent: {},
+      collapsedTaskUuids: [],
     };
 
     this.cache = new CellMeasurerCache({
@@ -139,6 +140,7 @@ class JobOutput extends Component {
     this.handleScrollLast = this.handleScrollLast.bind(this);
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
+    this.handleTaskToggle = this.handleTaskToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.isRowLoaded = this.isRowLoaded.bind(this);
     this.loadMoreRows = this.loadMoreRows.bind(this);
@@ -280,8 +282,28 @@ class JobOutput extends Component {
     });
   }
 
+  handleTaskToggle(task_uuid) {
+    if (!task_uuid) return;
+
+    const { collapsedTaskUuids } = this.state;
+
+    if (collapsedTaskUuids.includes(task_uuid)) {
+      this.setState({
+        collapsedTaskUuids: collapsedTaskUuids.filter(u => u !== task_uuid),
+      });
+    } else {
+      this.setState({
+        collapsedTaskUuids: collapsedTaskUuids.concat(task_uuid),
+      });
+    }
+
+    this.cache.clearAll();
+    this.listRef.recomputeRowHeights();
+    this.listRef.forceUpdateGrid();
+  }
+
   rowRenderer({ index, parent, key, style }) {
-    const { results } = this.state;
+    const { results, collapsedTaskUuids } = this.state;
 
     const isHostEvent = jobEvent => {
       const { event, event_data, host, type } = jobEvent;
@@ -300,6 +322,37 @@ class JobOutput extends Component {
       return isHost;
     };
 
+    const uuid = results[index]?.uuid;
+    const taskUuid = results[index]?.event_data?.task_uuid;
+    const isCollapsed = collapsedTaskUuids.includes(taskUuid);
+
+    let cellContent = null;
+
+    if (!isCollapsed || uuid === taskUuid) {
+      cellContent = results[index] ? (
+        <JobEvent
+          isClickable={isHostEvent(results[index])}
+          onJobEventClick={() => this.handleHostEventClick(results[index])}
+          className="row"
+          style={style}
+          onTaskToggle={() => this.handleTaskToggle(taskUuid)}
+          isCollapsed={isCollapsed}
+          {...results[index]}
+        />
+      ) : (
+        <JobEventSkeleton
+          className="row"
+          style={style}
+          counter={index}
+          contentLength={80}
+        />
+      );
+    } else {
+      cellContent = (
+        <div style={{ lineHeight: 0, height: 0, visibility: 'hidden' }} />
+      );
+    }
+
     return (
       <CellMeasurer
         key={key}
@@ -308,22 +361,7 @@ class JobOutput extends Component {
         rowIndex={index}
         columnIndex={0}
       >
-        {results[index] ? (
-          <JobEvent
-            isClickable={isHostEvent(results[index])}
-            onJobEventClick={() => this.handleHostEventClick(results[index])}
-            className="row"
-            style={style}
-            {...results[index]}
-          />
-        ) : (
-          <JobEventSkeleton
-            className="row"
-            style={style}
-            counter={index}
-            contentLength={80}
-          />
-        )}
+        {cellContent}
       </CellMeasurer>
     );
   }
@@ -436,6 +474,7 @@ class JobOutput extends Component {
           onScrollLast={this.handleScrollLast}
           onScrollNext={this.handleScrollNext}
           onScrollPrevious={this.handleScrollPrevious}
+          onPlusClick={this.handlePlusClick}
         />
         <OutputWrapper>
           <InfiniteLoader
