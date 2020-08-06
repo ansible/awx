@@ -213,7 +213,6 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             <DatalistToolbar
               {...props}
               showSelectAll
-              showExpandCollapse
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}

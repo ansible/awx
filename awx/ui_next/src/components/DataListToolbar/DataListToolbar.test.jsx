@@ -36,7 +36,6 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         qsConfig={QS_CONFIG}
         isAllSelected={false}
-        showExpandCollapse
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
@@ -272,7 +271,6 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         qsConfig={QS_CONFIG}
         isAllSelected
-        showExpandCollapse
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}

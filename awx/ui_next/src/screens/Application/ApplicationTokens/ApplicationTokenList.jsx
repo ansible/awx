@@ -120,7 +120,6 @@ function ApplicationTokenList({ i18n }) {
           <DatalistToolbar
             {...props}
             showSelectAll
-            showExpandCollapse
             isAllSelected={isAllSelected}
             onSelectAll={isSelected =>
               setSelected(isSelected ? [...tokens] : [])
