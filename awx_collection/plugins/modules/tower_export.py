@@ -31,43 +31,43 @@ options:
       description:
         - organization name to export
       type: str
-    user:
+    users:
       description:
         - user name to export
       type: str
-    team:
+    teams:
       description:
         - team name to export
       type: str
-    credential_type:
+    credential_types:
       description:
         - credential type name to export
       type: str
-    credential:
+    credentials:
       description:
         - credential name to export
       type: str
-    notification_template:
+    notification_templates:
       description:
         - notification template name to export
       type: str
-    inventory_script:
+    inventory_sources:
       description:
-        - inventory script name to export
+        - inventory soruce to export
       type: str
     inventory:
       description:
         - inventory name to export
       type: str
-    project:
+    projects:
       description:
         - project name to export
       type: str
-    job_template:
+    job_templates:
       description:
         - job template name to export
       type: str
-    workflow:
+    workflow_job_templates:
       description:
         - workflow name to export
       type: str
@@ -110,7 +110,7 @@ def main():
     # We are not going to raise an error here because the __init__ method of TowerAWXKitModule will do that for us
     if HAS_EXPORTABLE_RESOURCES:
         for resource in EXPORTABLE_RESOURCES:
-            argument_spec[resource] = dict()
+            argument_spec[resource] = dict(type='str')
 
     module = TowerAWXKitModule(argument_spec=argument_spec)
 
