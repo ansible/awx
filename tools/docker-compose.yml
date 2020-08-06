@@ -15,6 +15,7 @@ services:
       SDB_PORT: 7899
       AWX_GROUP_QUEUES: tower
     ports:
+      - "2222:2222"
       - "8888:8888"
       - "8080:8080"
       - "8013:8013"
