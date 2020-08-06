@@ -32,6 +32,7 @@ services:
       - "./redis/redis_socket_ha_1:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
+      - "2222:2222"
       - "5899-5999:5899-5999"
   awx-2:
     user: ${CURRENT_UID}
@@ -51,6 +52,7 @@ services:
       - "./redis/redis_socket_ha_2:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
+      - "2223:2222"
       - "7899-7999:7899-7999"
   awx-3:
     user: ${CURRENT_UID}
@@ -70,6 +72,7 @@ services:
       - "./redis/redis_socket_ha_3:/var/run/redis/"
       - "./docker-compose/supervisor.conf:/etc/supervisord.conf"
     ports:
+      - "2224:2222"
       - "8899-8999:8899-8999"
   redis_1:
     user: ${CURRENT_UID}
