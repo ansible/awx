@@ -135,6 +135,11 @@ RUN python3 -m ensurepip && pip3 install "virtualenv < 20" supervisor {% if buil
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
+# Install Receptor
+RUN cd /usr/local/bin && \
+    curl -L http://nightlies.testing.ansible.com/receptor/receptor --output receptor && \
+    chmod a+x receptor
+
 # Install OpenShift CLI
 RUN cd /usr/local/bin && \
     curl -L https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz | \
@@ -216,6 +221,7 @@ RUN for dir in \
       /var/log/nginx \
       /var/lib/postgresql \
       /var/run/supervisor \
+      /var/run/receptor \
       /var/lib/nginx ; \
     do mkdir -m 0775 -p $dir ; chmod g+rw $dir ; chgrp root $dir ; done && \
     for file in \
