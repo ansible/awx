@@ -13,11 +13,7 @@ import NotificationTemplates from './screens/NotificationTemplate';
 import Organizations from './screens/Organization';
 import Projects from './screens/Project';
 import Schedules from './screens/Schedule';
-import AuthSettings from './screens/AuthSetting';
-import JobsSettings from './screens/JobsSetting';
-import SystemSettings from './screens/SystemSetting';
-import UISettings from './screens/UISetting';
-import License from './screens/License';
+import Settings from './screens/Setting';
 import Teams from './screens/Team';
 import Templates from './screens/Template';
 import Users from './screens/User';
@@ -134,32 +130,12 @@ function getRouteConfig(i18n) {
     },
     {
       groupTitle: i18n._(t`Settings`),
-      groupId: 'settings_group',
+      groupId: 'settings',
       routes: [
         {
-          title: i18n._(t`Authentication`),
-          path: '/auth_settings',
-          screen: AuthSettings,
-        },
-        {
-          title: i18n._(t`Jobs`),
-          path: '/jobs_settings',
-          screen: JobsSettings,
-        },
-        {
-          title: i18n._(t`System`),
-          path: '/system_settings',
-          screen: SystemSettings,
-        },
-        {
-          title: i18n._(t`User Interface`),
-          path: '/ui_settings',
-          screen: UISettings,
-        },
-        {
-          title: i18n._(t`License`),
-          path: '/license',
-          screen: License,
+          title: i18n._(t`Settings`),
+          path: '/settings',
+          screen: Settings,
         },
       ],
     },
