@@ -215,7 +215,6 @@ class TowerModule(AnsibleModule):
                 else:
                     setattr(self, honorred_setting, config_data[honorred_setting])
 
-
     def logout(self):
         # This method is intended to be overridden
         pass

@@ -10,6 +10,7 @@ from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 import re
 from json import loads, dumps
 
+
 class TowerAPIModule(TowerModule):
     # TODO: Move the collection version check into tower_module.py
     # This gets set by the make process so whatever is in here is irrelevant
@@ -27,7 +28,8 @@ class TowerAPIModule(TowerModule):
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super(TowerAPIModule, self).__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
+        super(TowerAPIModule, self).__init__(argument_spec=argument_spec, direct_params=direct_params,
+                                             error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
     @staticmethod

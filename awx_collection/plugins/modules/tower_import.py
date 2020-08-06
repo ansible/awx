@@ -62,6 +62,7 @@ try:
 except ImportError:
     HAS_EXPORTABLE_RESOURCES = False
 
+
 def main():
     argument_spec = dict(
         assets=dict(type='dict', required=True)
