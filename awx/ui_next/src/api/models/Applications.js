@@ -11,6 +11,10 @@ class Applications extends Base {
       params,
     });
   }
+
+  readTokenOptions(appId) {
+    return this.http.options(`${this.baseUrl}${appId}/tokens/`);
+  }
 }
 
 export default Applications;

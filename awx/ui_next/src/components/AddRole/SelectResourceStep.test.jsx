@@ -13,7 +13,7 @@ describe('<SelectResourceStep />', () => {
   const searchColumns = [
     {
       name: 'Username',
-      key: 'username',
+      key: 'username__icontains',
       isDefault: true,
     },
   ];

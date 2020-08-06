@@ -27,26 +27,40 @@ function InventoryStep({ i18n }) {
   const {
     isLoading,
     error,
-    result: { inventories, count },
+    result: { inventories, count, actions, relatedSearchFields },
     request: fetchInventories,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const { data } = await InventoriesAPI.read(params);
+      const [{ data }, actionsResponse] = await Promise.all([
+        InventoriesAPI.read(params),
+        InventoriesAPI.readOptions(),
+      ]);
       return {
         inventories: data.results,
         count: data.count,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [history.location]),
     {
       count: 0,
       inventories: [],
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   if (isLoading) {
     return <ContentLoading />;
@@ -63,16 +77,16 @@ function InventoryStep({ i18n }) {
       searchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Created By (Username)`),
-          key: 'created_by__username',
+          key: 'created_by__username__icontains',
         },
         {
           name: i18n._(t`Modified By (Username)`),
-          key: 'modified_by__username',
+          key: 'modified_by__username__icontains',
         },
       ]}
       sortColumns={[
@@ -81,6 +95,8 @@ function InventoryStep({ i18n }) {
           key: 'name',
         },
       ]}
+      searchableKeys={searchableKeys}
+      relatedSearchableKeys={relatedSearchableKeys}
       header={i18n._(t`Inventory`)}
       name="inventory"
       qsConfig={QS_CONFIG}

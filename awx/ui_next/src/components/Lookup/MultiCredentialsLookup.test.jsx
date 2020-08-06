@@ -43,6 +43,15 @@ describe('<MultiCredentialsLookup />', () => {
         count: 3,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
   afterEach(() => {

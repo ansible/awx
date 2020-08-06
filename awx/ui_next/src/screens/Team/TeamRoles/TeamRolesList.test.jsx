@@ -164,6 +164,13 @@ describe('<TeamRolesList />', () => {
         },
       ],
     });
+
+    TeamsAPI.readRoleOptions.mockResolvedValue({
+      data: {
+        actions: { GET: {} },
+        related_search_fields: [],
+      },
+    });
   });
 
   afterEach(() => {

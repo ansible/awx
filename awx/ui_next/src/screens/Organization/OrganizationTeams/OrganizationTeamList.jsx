@@ -53,16 +53,16 @@ function OrganizationTeamList({ id, i18n }) {
       toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Created by (username)`),
-          key: 'created_by__username',
+          key: 'created_by__username__icontains',
         },
         {
           name: i18n._(t`Modified by (username)`),
-          key: 'modified_by__username',
+          key: 'modified_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[

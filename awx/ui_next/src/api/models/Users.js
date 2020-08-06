@@ -60,6 +60,10 @@ class Users extends Base {
       params,
     });
   }
+
+  readTokenOptions(userId) {
+    return this.http.options(`${this.baseUrl}${userId}/tokens/`);
+  }
 }
 
 export default Users;

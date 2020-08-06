@@ -123,8 +123,15 @@ const tokens = {
 
 describe('<UserTokenList />', () => {
   let wrapper;
-  test('should mount properly, and fetch tokens', async () => {
+
+  beforeEach(() => {
     UsersAPI.readTokens.mockResolvedValue(tokens);
+    UsersAPI.readTokenOptions.mockResolvedValue({
+      data: { related_search_fields: [] },
+    });
+  });
+
+  test('should mount properly, and fetch tokens', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });
@@ -137,7 +144,6 @@ describe('<UserTokenList />', () => {
   });
 
   test('edit button should be disabled', async () => {
-    UsersAPI.readTokens.mockResolvedValue(tokens);
     await act(async () => {
       wrapper = mountWithContexts(<UserTokenList />);
     });

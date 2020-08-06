@@ -16,7 +16,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={50}
         qsConfig={qsConfig}
-        searchColumns={[{ name: 'foo', key: 'foo', isDefault: true }]}
+        searchColumns={[
+          { name: 'foo', key: 'foo__icontains', isDefault: true },
+        ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
         renderToolbar={renderToolbarFn}
       />
@@ -33,7 +35,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={7}
         qsConfig={qsConfig}
-        searchColumns={[{ name: 'foo', key: 'foo', isDefault: true }]}
+        searchColumns={[
+          { name: 'foo', key: 'foo__icontains', isDefault: true },
+        ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
       />,
       { context: { router: { history } } }
@@ -56,7 +60,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={7}
         qsConfig={qsConfig}
-        searchColumns={[{ name: 'foo', key: 'foo', isDefault: true }]}
+        searchColumns={[
+          { name: 'foo', key: 'foo__icontains', isDefault: true },
+        ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
       />,
       { context: { router: { history } } }
@@ -77,7 +83,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={7}
         qsConfig={qsConfig}
-        searchColumns={[{ name: 'foo', key: 'foo', isDefault: true }]}
+        searchColumns={[
+          { name: 'foo', key: 'foo__icontains', isDefault: true },
+        ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
       />,
       { context: { router: { history } } }
@@ -100,7 +108,9 @@ describe('ListHeader', () => {
       <ListHeader
         itemCount={7}
         qsConfig={qsConfig}
-        searchColumns={[{ name: 'foo', key: 'foo', isDefault: true }]}
+        searchColumns={[
+          { name: 'foo', key: 'foo__icontains', isDefault: true },
+        ]}
         sortColumns={[{ name: 'foo', key: 'foo' }]}
       />,
       { context: { router: { history } } }

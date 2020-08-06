@@ -38,7 +38,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const [selected, setSelected] = useState([]);
   const location = useLocation();
   const {
-    result: { results, count },
+    result: { results, count, actions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchJobs,
@@ -46,12 +46,27 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     useCallback(
       async () => {
         const params = parseQueryString(QS_CONFIG, location.search);
-        const { data } = await UnifiedJobsAPI.read({ ...params });
-        return data;
+        const [response, actionsResponse] = await Promise.all([
+          UnifiedJobsAPI.read({ ...params }),
+          UnifiedJobsAPI.readOptions(),
+        ]);
+        return {
+          results: response.data.results,
+          count: response.data.count,
+          actions: actionsResponse.data.actions,
+          relatedSearchFields: (
+            actionsResponse?.data?.related_search_fields || []
+          ).map(val => val.slice(0, -8)),
+        };
       },
       [location] // eslint-disable-line react-hooks/exhaustive-deps
     ),
-    { results: [], count: 0 }
+    {
+      results: [],
+      count: 0,
+      actions: {},
+      relatedSearchFields: [],
+    }
   );
   useEffect(() => {
     fetchJobs();
@@ -123,6 +138,11 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     }
   };
 
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
+
   return (
     <>
       <Card>
@@ -137,7 +157,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
@@ -146,11 +166,11 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             },
             {
               name: i18n._(t`Label Name`),
-              key: 'labels__name',
+              key: 'labels__name__icontains',
             },
             {
               name: i18n._(t`Job Type`),
-              key: `type`,
+              key: `or__type`,
               options: [
                 [`project_update`, i18n._(t`Source Control Update`)],
                 [`inventory_update`, i18n._(t`Inventory Sync`)],
@@ -162,7 +182,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             },
             {
               name: i18n._(t`Launched By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Status`),
@@ -209,6 +229,8 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               key: 'started',
             },
           ]}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
             <DatalistToolbar
               {...props}

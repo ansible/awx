@@ -70,20 +70,20 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
       toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Playbook name`),
-          key: 'playbook',
+          key: 'playbook__icontains',
         },
         {
-          name: i18n._(t`Created by (username)`),
-          key: 'created_by__username',
+          name: i18n._(t`Created By (Username)`),
+          key: 'created_by__username__icontains',
         },
         {
-          name: i18n._(t`Modified by (username)`),
-          key: 'modified_by__username',
+          name: i18n._(t`Modified By (Username)`),
+          key: 'modified_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[

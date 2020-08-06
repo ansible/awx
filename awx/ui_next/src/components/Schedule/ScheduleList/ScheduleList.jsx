@@ -32,7 +32,7 @@ function ScheduleList({
   const location = useLocation();
 
   const {
-    result: { schedules, itemCount, actions },
+    result: { schedules, itemCount, actions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchSchedules,
@@ -49,12 +49,16 @@ function ScheduleList({
         schedules: results,
         itemCount: count,
         actions: scheduleActions.data.actions,
+        relatedSearchFields: (
+          scheduleActions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [location, loadSchedules, loadScheduleOptions]),
     {
       schedules: [],
       itemCount: 0,
       actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -102,6 +106,10 @@ function ScheduleList({
     actions &&
     Object.prototype.hasOwnProperty.call(actions, 'POST') &&
     !hideAddButton;
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <>
@@ -123,7 +131,7 @@ function ScheduleList({
         toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'name',
+            key: 'name__icontains',
             isDefault: true,
           },
         ]}
@@ -141,6 +149,8 @@ function ScheduleList({
             key: 'unified_job_template__polymorphic_ctype__model',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}
