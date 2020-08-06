@@ -35,11 +35,16 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Import all tower assets
+- name: Export all assets
+  tower_export:
+    all: True
+  registeR: export_output
+
+- name: Import all tower assets from our export
   tower_import:
     assets: "{{ export_output.assets }}"
 
-- name: Import orgs from a json file
+- name: Load data from a json file created by a command like awx export --organization Default
   tower_import:
     assets: "{{ lookup('file', 'org.json') | from_json() }}"
 '''
