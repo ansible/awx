@@ -220,10 +220,10 @@ def job_instance_counts(since, **kwargs):
 
 
 @register('query_info', '1.0', description=_('Metadata about the analytics collected'))
-def query_info(since, collection_type, **kwargs):
+def query_info(since, collection_type, until, **kwargs):
     query_info = {}
     query_info['last_run'] = str(since)
-    query_info['current_time'] = str(now())
+    query_info['current_time'] = str(until)
     query_info['collection_type'] = collection_type
     return query_info
 
