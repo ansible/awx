@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
@@ -14,8 +14,10 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
+import { NotificationTemplatesAPI } from '../../../api';
 import DataListCell from '../../../components/DataListCell';
 import StatusLabel from '../../../components/StatusLabel';
+import useRequest from '../../../util/useRequest';
 import { NOTIFICATION_TYPES } from '../constants';
 
 const DataListAction = styled(_DataListAction)`
@@ -32,10 +34,27 @@ function NotificationTemplateListItem({
   onSelect,
   i18n,
 }) {
-  const sendTestNotification = () => {};
-  const labelId = `template-name-${template.id}`;
+  const latestStatus = template.summary_fields?.recent_notifications[0]?.status;
+  const [status, setStatus] = useState(latestStatus);
 
-  const lastNotification = template.summary_fields?.recent_notifications[0];
+  useEffect(() => {
+    setStatus(latestStatus);
+  }, [latestStatus]);
+
+  const { request: sendTestNotification, isLoading, error } = useRequest(
+    useCallback(() => {
+      NotificationTemplatesAPI.test(template.id);
+      setStatus('pending');
+    }, [template.id])
+  );
+
+  useEffect(() => {
+    if (error) {
+      setStatus('error');
+    }
+  }, [error]);
+
+  const labelId = `template-name-${template.id}`;
 
   return (
     <DataListItem key={template.id} aria-labelledby={labelId} id={template.id}>
@@ -54,9 +73,7 @@ function NotificationTemplateListItem({
               </Link>
             </DataListCell>,
             <DataListCell>
-              {lastNotification && (
-                <StatusLabel status={lastNotification.status} />
-              )}
+              {status && <StatusLabel status={status} />}
             </DataListCell>,
             <DataListCell key="type">
               <strong css="margin-right: 24px">{i18n._(t`Type`)}</strong>
@@ -71,6 +88,7 @@ function NotificationTemplateListItem({
               aria-label={i18n._(t`Test Notification`)}
               variant="plain"
               onClick={sendTestNotification}
+              disabled={isLoading}
             >
               <BellIcon />
             </Button>

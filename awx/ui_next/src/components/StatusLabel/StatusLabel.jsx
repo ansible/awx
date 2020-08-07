@@ -62,6 +62,7 @@ StatusLabel.propTypes = {
     'error',
     'running',
     'pending',
+    'waiting',
     'canceled',
   ]).isRequired,
 };
