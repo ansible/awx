@@ -23,7 +23,7 @@ django-split-settings
 django-taggit
 djangorestframework
 djangorestframework-yaml
-GitPython
+GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
 jinja2
 jsonschema

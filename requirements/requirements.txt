@@ -43,7 +43,7 @@ djangorestframework==3.11.0  # via -r /awx_devel/requirements/requirements.in
 docutils==0.16            # via python-daemon
 future==0.16.0            # via django-radius
 gitdb==4.0.2              # via gitpython
-gitpython==3.1.0          # via -r /awx_devel/requirements/requirements.in
+gitpython==3.1.7          # via -r /awx_devel/requirements/requirements.in
 google-auth==1.11.3       # via kubernetes
 hiredis==1.0.1            # via aioredis
 hyperlink==19.0.0         # via twisted
