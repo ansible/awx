@@ -18,7 +18,7 @@ Previously, AWX leveraged RabbitMQ to deliver Ansible events that emanated from 
 
 AWX node(s) connect to every other node via the Websocket backplane. Authentication is accomplished via a shared secret that is exchanged via the http header `secret`. The shared secret payload consists of a a `secret`, containing the shared secret, and a `nonce` which is used to mitigate replay attack windows.
 
-Note that the nonce timestamp is considered valid if it is within `300` second threshold. This is to allow for machine clock scews.
+Note that the nonce timestamp is considered valid if it is within `300` second threshold. This is to allow for machine clock skews.
 ```
 {
     "secret": settings.BROADCAST_WEBSOCKET_SECRET,
