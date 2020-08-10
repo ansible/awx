@@ -9,6 +9,7 @@ import {
   Detail,
   DetailList,
   DeletedDetail,
+  ObjectDetail,
 } from '../../../components/DetailList';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
@@ -310,11 +311,12 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.http_method}
               dataCy="nt-detail-webhook-http-method"
             />
-            {/* <Detail
+            <ObjectDetail
               label={i18n._(t`HTTP Headers`)}
               value={configuration.headers}
+              rows="6"
               dataCy="nt-detail-webhook-headers"
-            /> */}
+            />
           </>
         )}
       </DetailList>
