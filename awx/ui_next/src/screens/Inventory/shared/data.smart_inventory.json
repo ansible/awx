@@ -80,7 +80,7 @@
   "description": "smart inv description",
   "organization": 1,
   "kind": "smart",
-  "host_filter": "search=local",
+  "host_filter": "name__icontains=local",
   "variables": "",
   "has_active_failures": false,
   "total_hosts": 1,

@@ -40,7 +40,7 @@ function OrganizationLookup({
         organizations: data.results,
         itemCount: data.count,
       };
-    }, [history.location]),
+    }, [history.location.search]),
     {
       organizations: [],
       itemCount: 0,
