@@ -268,9 +268,9 @@ class ApiV2(base.Base):
     def _assign_related(self):
         for _page, name, related_set in self._related:
             endpoint = _page.related[name]
-            if isinstance(related_set, dict):  # Relateds that are just json blobs, e.g. survey_spec
+            if isinstance(related_set, dict):  # Related that are just json blobs, e.g. survey_spec
                 endpoint.post(related_set)
-                return
+                continue
 
             if 'natural_key' not in related_set[0]:  # It is an attach set
                 # Try to impedance match
