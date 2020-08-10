@@ -34,7 +34,10 @@ function NotificationTemplateListItem({
   onSelect,
   i18n,
 }) {
-  const latestStatus = template.summary_fields?.recent_notifications[0]?.status;
+  const recentNotifications = template.summary_fields?.recent_notifications;
+  const latestStatus = recentNotifications
+    ? recentNotifications[0]?.status
+    : null;
   const [status, setStatus] = useState(latestStatus);
 
   useEffect(() => {
@@ -44,7 +47,7 @@ function NotificationTemplateListItem({
   const { request: sendTestNotification, isLoading, error } = useRequest(
     useCallback(() => {
       NotificationTemplatesAPI.test(template.id);
-      setStatus('pending');
+      setStatus('running');
     }, [template.id])
   );
 
@@ -72,11 +75,11 @@ function NotificationTemplateListItem({
                 <b>{template.name}</b>
               </Link>
             </DataListCell>,
-            <DataListCell>
+            <DataListCell key="status">
               {status && <StatusLabel status={status} />}
             </DataListCell>,
             <DataListCell key="type">
-              <strong css="margin-right: 24px">{i18n._(t`Type`)}</strong>
+              <strong>{i18n._(t`Type:`)}</strong>{' '}
               {NOTIFICATION_TYPES[template.notification_type] ||
                 template.notification_type}
             </DataListCell>,
