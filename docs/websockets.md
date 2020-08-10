@@ -1,18 +1,36 @@
 # Channels Overview
 
-Our channels/websocket implementation handles the communication between Tower API and updates in Tower UI.
+Our channels/websocket implementation handles the communication between AWX API and updates in AWX UI.
 
 ## Architecture
 
-Tower enlists the help of the `django-channels` library to create our communications layer. `django-channels` provides us with per-client messaging integration in our application by implementing the Asynchronous Server Gateway Interface (ASGI).
+AWX enlists the help of the `django-channels` library to create our communications layer. `django-channels` provides us with per-client messaging integration in our application by implementing the Asynchronous Server Gateway Interface (ASGI).
 
 To communicate between our different services we use websockets. Every AWX node is fully connected via a special websocket endpoint that forwards any local websocket data to all other nodes. Local websockets are backed by Redis, the channels2 default service.
 
-Inside Tower we use the `emit_channel_notification` function which places messages onto the queue. The messages are given an explicit event group and event type which we later use in our wire protocol to control message delivery to the client.
+Inside AWX we use the `emit_channel_notification` function which places messages onto the queue. The messages are given an explicit event group and event type which we later use in our wire protocol to control message delivery to the client.
+
+### Broadcast Backplane
+
+Previously, AWX leveraged RabbitMQ to deliver Ansible events that emanated from one AWX node to all other AWX nodes so that any client listening and subscribed to the Websockets could get events from any running playbook. We are since moved off of RabbitMQ and onto a per-node local Redis instance. To maintain the requirement that any Websocket connection can receive events from any playbook running on any AWX node we still need to deliver every event to every AWX node. AWX does this via a fully connected Websocket backplane. 
+
+#### Broadcast Backplane Token
+
+AWX node(s) connect to every other node via the Websocket backplane. Authentication is accomplished via a shared secret that is exchanged via the http header `secret`. The shared secret payload consists of a a `secret`, containing the shared secret, and a `nonce` which is used to mitigate replay attack windows.
+
+Note that the nonce timestamp is considered valid if it is within `300` second threshold. This is to allow for machine clock scews.
+```
+{
+    "secret": settings.BROADCAST_WEBSOCKET_SECRET,
+    "nonce": time.now()
+}
+```
+
+The payload is encrypted using `HMAC-SHA256` with `settings.BROADCAST_WEBSOCKET_SECRET` as the key. The final payload that is sent, including the http header, is of the form: `secret: nonce_plaintext:HMAC_SHA256({"secret": settings.BROADCAST_WEBSOCKET_SECRET, "nonce": nonce_plaintext})`.
 
 ## Protocol
 
-You can connect to the Tower channels implementation using any standard websocket library by pointing it to `/websocket`. You must
+You can connect to the AWX channels implementation using any standard websocket library by pointing it to `/websocket`. You must
 provide a valid Auth Token in the request URL.
 
 Once you've connected, you are not subscribed to any event groups. You subscribe by sending a `json` request that looks like the following:
@@ -35,7 +53,7 @@ These map to the event group and event type that the user is interested in. Send
 
 This section will specifically discuss deployment in the context of websockets and the path those requests take through the system.
 
-**Note:** The deployment of Tower changes slightly with the introduction of `django-channels` and websockets. There are some minor differences between production and development deployments that will be pointed out in this document, but the actual services that run the code and handle the requests are identical between the two environments.
+**Note:** The deployment of AWX changes slightly with the introduction of `django-channels` and websockets. There are some minor differences between production and development deployments that will be pointed out in this document, but the actual services that run the code and handle the requests are identical between the two environments.
 
 ### Services
 | Name        | Details |
