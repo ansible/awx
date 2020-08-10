@@ -65,4 +65,5 @@ class Labels(page.PageList, Label):
 
 page.register_page([resources.labels,
                     resources.job_labels,
-                    resources.job_template_labels], Labels)
+                    resources.job_template_labels,
+                    resources.workflow_job_template_labels], Labels)
