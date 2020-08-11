@@ -20,4 +20,3 @@
 - assert:
     that:
       - result is changed
-
