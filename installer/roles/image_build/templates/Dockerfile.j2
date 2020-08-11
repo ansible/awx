@@ -106,7 +106,9 @@ RUN dnf -y install \
     nss \
     make \
     patch \
+    tmux \
     wget \
+    diffutils \
     unzip && \
     npm install -g n && n 10.15.0 && dnf remove -y nodejs
 {% endif %}
@@ -135,7 +137,6 @@ RUN dnf -y update && \
     rsync \
     subversion \
     sudo \
-    tmux \
     vim-minimal \
     which \
     xmlsec1-openssl && \
@@ -213,6 +214,7 @@ RUN chmod u+s /usr/bin/bwrap ; \
 {% if build_dev|bool %}
 RUN for dir in \
       /venv \
+      /venv/awx/lib/python3.6 \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \

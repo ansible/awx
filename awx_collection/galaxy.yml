@@ -1,0 +1,38 @@
+# (********************************************************)
+# (*                                                      *)
+# (*             WARNING                                  *)
+# (*                                                      *)
+# (*  This file is managed by Ansible and not to be       *)
+# (*  edited directly! Instead modify:                    *)
+# (*  tools/roles/template_galaxy/templates/galaxy.yml.j2 *)
+# (*                                                      *)
+# (*  Changes to the base galaxy.yml file are refreshed   *)
+# (*  upon build of the collection                        *)
+# (********************************************************)
+---
+authors:
+  - AWX Project Contributors <awx-project@googlegroups.com>
+dependencies: {}
+description: Ansible content that interacts with the AWX or Ansible Tower API.
+documentation: https://github.com/ansible/awx/blob/devel/awx_collection/README.md
+homepage: https://www.ansible.com/
+issues: https://github.com/ansible/awx/issues?q=is%3Aissue+label%3Acomponent%3Aawx_collection
+license:
+  - GPL-3.0-only
+name: awx
+namespace: awx
+readme: README.md
+repository: https://github.com/ansible/awx
+tags:
+  - cloud
+  - infrastructure
+  - awx
+  - ansible
+  - automation
+version: 0.0.1-devel
+build_ignore:
+  - tools
+  - setup.cfg
+  - galaxy.yml.j2
+  - template_galaxy.yml
+  - '*.tar.gz'

@@ -28,13 +28,14 @@ function CredentialLookup({
   required,
   credentialTypeId,
   credentialTypeKind,
+  credentialTypeNamespace,
   value,
   history,
   i18n,
   tooltip,
 }) {
   const {
-    result: { count, credentials },
+    result: { count, credentials, actions, relatedSearchFields },
     error,
     request: fetchCredentials,
   } = useRequest(
@@ -46,18 +47,39 @@ function CredentialLookup({
       const typeKindParams = credentialTypeKind
         ? { credential_type__kind: credentialTypeKind }
         : {};
+      const typeNamespaceParams = credentialTypeNamespace
+        ? { credential_type__namespace: credentialTypeNamespace }
+        : {};
 
-      const { data } = await CredentialsAPI.read(
-        mergeParams(params, { ...typeIdParams, ...typeKindParams })
-      );
+      const [{ data }, actionsResponse] = await Promise.all([
+        CredentialsAPI.read(
+          mergeParams(params, {
+            ...typeIdParams,
+            ...typeKindParams,
+            ...typeNamespaceParams,
+          })
+        ),
+        CredentialsAPI.readOptions,
+      ]);
       return {
         count: data.count,
         credentials: data.results,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
-    }, [credentialTypeId, credentialTypeKind, history.location.search]),
+    }, [
+      credentialTypeId,
+      credentialTypeKind,
+      credentialTypeNamespace,
+      history.location.search,
+    ]),
     {
       count: 0,
       credentials: [],
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -65,17 +87,22 @@ function CredentialLookup({
     fetchCredentials();
   }, [fetchCredentials]);
 
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
+
   // TODO: replace credential type search with REST-based grabbing of cred types
 
   return (
     <FormGroup
       fieldId="credential"
       isRequired={required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={label}
+      labelIcon={tooltip && <FieldTooltip content={tooltip} />}
       helperTextInvalid={helperTextInvalid}
     >
-      {tooltip && <FieldTooltip content={tooltip} />}
       <Lookup
         id="credential"
         header={label}
@@ -94,16 +121,16 @@ function CredentialLookup({
             searchColumns={[
               {
                 name: i18n._(t`Name`),
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: i18n._(t`Created By (Username)`),
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: i18n._(t`Modified By (Username)`),
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[
@@ -112,6 +139,8 @@ function CredentialLookup({
                 key: 'name',
               },
             ]}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
             readOnly={!canDelete}
             name="credential"
             selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}

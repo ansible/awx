@@ -219,3 +219,27 @@ def test_credential(get, admin_user, credentialtype_ssh):
     url = reverse('api:credential_detail', kwargs={'pk': test_cred.pk})
     response = get(url, user=admin_user, expect=200)
     assert response.data['related']['named_url'].endswith('/test_cred++Machine+ssh++/')
+
+
+@pytest.mark.django_db
+def test_403_vs_404(get):
+    cindy = User.objects.create(
+        username='cindy',
+        password='test_user',
+        is_superuser=False
+    )
+    bob = User.objects.create(
+        username='bob',
+        password='test_user',
+        is_superuser=False
+    )
+
+    # bob cannot see cindy, pk lookup should be a 403
+    url = reverse('api:user_detail', kwargs={'pk': cindy.pk})
+    get(url, user=bob, expect=403)
+
+    # bob cannot see cindy, username lookup should be a 404
+    get('/api/v2/users/cindy/', user=bob, expect=404)
+
+    get(f'/api/v2/users/{cindy.pk}/', expect=401)
+    get('/api/v2/users/cindy/', expect=404)

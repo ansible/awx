@@ -88,4 +88,4 @@ main() {
 }
 
 # set EVAL=1 in case you want to source this script
-test "${EVAL:-0}" = "1" || main "${1:-}"
+test "${EVAL:-0}" -eq "1" || main "${1:-}"

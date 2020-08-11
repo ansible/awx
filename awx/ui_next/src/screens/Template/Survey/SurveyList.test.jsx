@@ -142,7 +142,7 @@ describe('<SurveyList />', () => {
 
     expect(
       wrapper
-        .find('DataToolbar')
+        .find('Toolbar')
         .find('Checkbox')
         .prop('isDisabled')
     ).toBe(true);
@@ -163,7 +163,7 @@ describe('Survey with no questions', () => {
         <SurveyList template={mockJobTemplateData} />
       );
     });
-    expect(wrapper.find('ContentEmpty').length).toBe(1);
+    expect(wrapper.find('EmptyState').length).toBe(1);
     expect(wrapper.find('SurveyListItem').length).toBe(0);
   });
 });

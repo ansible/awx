@@ -33,6 +33,7 @@ django-pglocks==1.0.4     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==2.1.2  # via -r /awx_devel/requirements/requirements.in
 django-qsstats-magic==1.1.0  # via -r /awx_devel/requirements/requirements.in
 django-radius==1.3.3      # via -r /awx_devel/requirements/requirements.in
+django-redis==4.5.0       # via -r /awx_devel/requirements/requirements.in
 django-solo==1.1.3        # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0  # via -r /awx_devel/requirements/requirements.in
 django-taggit==1.2.0      # via -r /awx_devel/requirements/requirements.in
@@ -42,7 +43,7 @@ djangorestframework==3.11.0  # via -r /awx_devel/requirements/requirements.in
 docutils==0.16            # via python-daemon
 future==0.16.0            # via django-radius
 gitdb==4.0.2              # via gitpython
-gitpython==3.1.0          # via -r /awx_devel/requirements/requirements.in
+gitpython==3.1.7          # via -r /awx_devel/requirements/requirements.in
 google-auth==1.11.3       # via kubernetes
 hiredis==1.0.1            # via aioredis
 hyperlink==19.0.0         # via twisted
@@ -59,7 +60,7 @@ jaraco.functools==3.0.0   # via irc, jaraco.text, tempora
 jaraco.logging==3.0.0     # via irc
 jaraco.stream==3.0.0      # via irc
 jaraco.text==3.2.0        # via irc, jaraco.collections
-jinja2==2.11.1            # via -r /awx_devel/requirements/requirements.in, openshift
+jinja2==2.11.2            # via -r /awx_devel/requirements/requirements.in, openshift
 jsonschema==3.2.0         # via -r /awx_devel/requirements/requirements.in
 kubernetes==11.0.0        # via openshift
 lockfile==0.12.2          # via python-daemon
@@ -93,14 +94,13 @@ pyrsistent==0.15.7        # via jsonschema
 python-daemon==2.2.4      # via ansible-runner
 python-dateutil==2.8.1    # via adal, kubernetes
 python-ldap==3.2.0        # via django-auth-ldap
-python-memcached==1.59    # via -r /awx_devel/requirements/requirements.in
 python-radius==1.0        # via -r /awx_devel/requirements/requirements.in
 python-string-utils==1.0.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.9.0       # via -r /awx_devel/requirements/requirements.in
 pytz==2019.3              # via django, irc, tempora, twilio
 pyyaml==5.3.1             # via -r /awx_devel/requirements/requirements.in, ansible-runner, djangorestframework-yaml, kubernetes
-redis==3.4.1              # via -r /awx_devel/requirements/requirements.in
+redis==3.4.1              # via -r /awx_devel/requirements/requirements.in, django-redis
 requests-oauthlib==1.3.0  # via kubernetes, msrest, social-auth-core
 requests==2.23.0          # via -r /awx_devel/requirements/requirements.in, adal, azure-keyvault, django-oauth-toolkit, kubernetes, msrest, requests-oauthlib, slackclient, social-auth-core, twilio
 rsa==4.0                  # via google-auth
@@ -108,7 +108,7 @@ ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via openshift
 schedule==0.6.0           # via -r /awx_devel/requirements/requirements.in
 service-identity==18.1.0  # via twisted
-six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, txaio, websocket-client
+six==1.14.0               # via ansible-runner, automat, cryptography, django-extensions, django-pglocks, google-auth, isodate, jaraco.collections, jaraco.logging, jaraco.text, jsonschema, kubernetes, openshift, pygerduty, pyopenssl, pyrad, pyrsistent, python-dateutil, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, twilio, txaio, websocket-client
 slackclient==1.1.2        # via -r /awx_devel/requirements/requirements.in
 smmap==3.0.1              # via gitdb
 social-auth-app-django==3.1.0  # via -r /awx_devel/requirements/requirements.in

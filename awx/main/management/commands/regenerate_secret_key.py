@@ -82,7 +82,7 @@ class Command(BaseCommand):
             OAuth2Application.objects.filter(pk=app.pk).update(client_secret=encrypted)
 
     def _settings(self):
-        # don't update memcached, the *actual* value isn't changing
+        # don't update the cache, the *actual* value isn't changing
         post_save.disconnect(on_post_save_setting, sender=Setting)
         for setting in Setting.objects.filter().order_by('pk'):
             if settings_registry.is_setting_encrypted(setting.key):

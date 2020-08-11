@@ -2,15 +2,14 @@
   "name": "ui_next",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "10.x"
+  },
   "dependencies": {
     "@lingui/react": "^2.9.1",
-    "@patternfly/patternfly": "^2.71.6",
-    "@patternfly/react-core": "^3.158.1",
-    "@patternfly/react-icons": "^3.15.17",
-    "@patternfly/react-tokens": "^2.8.14",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
+    "@patternfly/patternfly": "^4.23.3",
+    "@patternfly/react-core": "^4.32.1",
+    "@patternfly/react-icons": "^4.5.0",
     "ansi-to-html": "^0.6.11",
     "axios": "^0.18.1",
     "codemirror": "^5.47.0",
@@ -25,10 +24,32 @@
     "react-codemirror2": "^6.0.0",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.1",
     "react-virtualized": "^9.21.1",
     "rrule": "^2.6.4",
     "styled-components": "^4.2.0"
+  },
+  "devDependencies": {
+    "@babel/polyfill": "^7.8.7",
+    "@lingui/cli": "^2.9.1",
+    "@lingui/macro": "^2.9.1",
+    "@nteract/mockument": "^1.0.4",
+    "babel-core": "^7.0.0-bridge.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "enzyme-to-json": "^3.3.5",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^5.0.0",
+    "eslint-import-resolver-webpack": "0.11.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-react-hooks": "^2.2.0",
+    "http-proxy-middleware": "^1.0.3",
+    "jest-websocket-mock": "^2.0.2",
+    "mock-socket": "^9.0.3",
+    "prettier": "^1.18.2",
+    "react-scripts": "^3.4.1"
   },
   "scripts": {
     "start": "PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
@@ -55,26 +76,6 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "@babel/polyfill": "^7.8.7",
-    "@lingui/cli": "^2.9.1",
-    "@lingui/macro": "^2.9.1",
-    "@nteract/mockument": "^1.0.4",
-    "babel-core": "^7.0.0-bridge.0",
-    "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.14.0",
-    "enzyme-to-json": "^3.3.5",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^5.0.0",
-    "eslint-import-resolver-webpack": "0.11.1",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.1",
-    "eslint-plugin-react": "^7.11.1",
-    "eslint-plugin-react-hooks": "^2.2.0",
-    "http-proxy-middleware": "^1.0.3",
-    "prettier": "^1.18.2"
-  },
   "jest": {
     "snapshotSerializers": [
       "enzyme-to-json/serializer"
@@ -87,6 +88,5 @@
       "<rootDir>/src/locales",
       "index.js"
     ]
-  },
-  "proxy": "https://localhost:8043/websocket"
+  }
 }

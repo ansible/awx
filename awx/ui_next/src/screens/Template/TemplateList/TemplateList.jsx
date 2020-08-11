@@ -17,7 +17,7 @@ import PaginatedDataList, {
 } from '../../../components/PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
-
+import useWsTemplates from './useWsTemplates';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import TemplateListItem from './TemplateListItem';
 
@@ -36,36 +36,47 @@ function TemplateList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { templates, count, jtActions, wfjtActions },
+    result: { results, count, jtActions, wfjtActions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchTemplates,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const results = await Promise.all([
+      const responses = await Promise.all([
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
         WorkflowJobTemplatesAPI.readOptions(),
       ]);
       return {
-        templates: results[0].data.results,
-        count: results[0].data.count,
-        jtActions: results[1].data.actions,
-        wfjtActions: results[2].data.actions,
+        results: responses[0].data.results,
+        count: responses[0].data.count,
+        jtActions: responses[1].data.actions,
+        wfjtActions: responses[2].data.actions,
+        relatedSearchFields: [
+          ...(responses[1]?.data?.related_search_fields || []).map(val =>
+            val.slice(0, -8)
+          ),
+          ...(responses[2]?.data?.related_search_fields || []).map(val =>
+            val.slice(0, -8)
+          ),
+        ],
       };
     }, [location]),
     {
-      templates: [],
+      results: [],
       count: 0,
       jtActions: {},
       wfjtActions: {},
+      relatedSearchFields: [],
     }
   );
 
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
+
+  const templates = useWsTemplates(results);
 
   const isAllSelected =
     selected.length === templates.length && selected.length > 0;
@@ -116,11 +127,23 @@ function TemplateList({ i18n }) {
     jtActions && Object.prototype.hasOwnProperty.call(jtActions, 'POST');
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
+  // spreading Set() returns only unique keys
+  const relatedSearchableKeys = [...new Set(relatedSearchFields)] || [];
+  const searchableKeys = [
+    ...new Set([
+      ...Object.keys(jtActions?.GET || {}).filter(
+        key => jtActions.GET[key].filterable
+      ),
+      ...Object.keys(wfjtActions?.GET || {}).filter(
+        key => wfjtActions.GET[key].filterable
+      ),
+    ]),
+  ];
   const addButtonOptions = [];
 
   if (canAddJT) {
     addButtonOptions.push({
-      label: i18n._(t`Template`),
+      label: i18n._(t`Job Template`),
       url: `/templates/job_template/add/`,
     });
   }
@@ -150,16 +173,16 @@ function TemplateList({ i18n }) {
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
               name: i18n._(t`Description`),
-              key: 'description',
+              key: 'description__icontains',
             },
             {
               name: i18n._(t`Type`),
-              key: 'type',
+              key: 'or__type',
               options: [
                 [`job_template`, i18n._(t`Job Template`)],
                 [`workflow_job_template`, i18n._(t`Workflow Template`)],
@@ -167,15 +190,15 @@ function TemplateList({ i18n }) {
             },
             {
               name: i18n._(t`Playbook name`),
-              key: 'job_template__playbook',
+              key: 'job_template__playbook__icontains',
             },
             {
               name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username',
+              key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
@@ -204,11 +227,12 @@ function TemplateList({ i18n }) {
               key: 'type',
             },
           ]}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
               showSelectAll
-              showExpandCollapse
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}

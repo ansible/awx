@@ -66,9 +66,9 @@ describe('<AppContainer />', () => {
 
     // sidebar groups and route links
     expect(wrapper.find('NavExpandableGroup').length).toBe(2);
-    expect(wrapper.find('a[href="/#/foo"]').length).toBe(1);
-    expect(wrapper.find('a[href="/#/bar"]').length).toBe(1);
-    expect(wrapper.find('a[href="/#/fiz"]').length).toBe(1);
+    expect(wrapper.find('a[href="/foo"]').length).toBe(1);
+    expect(wrapper.find('a[href="/bar"]').length).toBe(1);
+    expect(wrapper.find('a[href="/fiz"]').length).toBe(1);
 
     expect(wrapper.find('#group_one').length).toBe(1);
     expect(wrapper.find('#group_two').length).toBe(1);

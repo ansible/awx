@@ -24,6 +24,7 @@ import ChipGroup from '../../ChipGroup';
 
 const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
+  grid-column: 1 / -1;
 `;
 
 function ScheduleDetail({ schedule, i18n }) {
@@ -140,7 +141,7 @@ function ScheduleDetail({ schedule, i18n }) {
         />
         {showPromptedFields && (
           <>
-            <PromptTitle size="md" css="grid-column: 1 / -1;">
+            <PromptTitle headingLevel="h2">
               {i18n._(t`Prompted Fields`)}
             </PromptTitle>
             <Detail label={i18n._(t`Job Type`)} value={job_type} />

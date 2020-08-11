@@ -62,5 +62,7 @@ requests
 requests-credssp==1.0.2   # For windows authentication awx/issues/1144
 # OpenStack
 openstacksdk==0.37.0
+# Openshift/k8s
+openshift>=0.11.0  # minimum version to pull in new pyyaml for CVE-2017-18342
 pip==19.3.1  # see upgrade blockers
 setuptools==41.6.0  # see upgrade blockers

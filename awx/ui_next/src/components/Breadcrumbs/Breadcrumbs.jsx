@@ -30,19 +30,21 @@ const Breadcrumbs = ({ breadcrumbConfig }) => {
   );
 };
 
-const Crumb = ({ breadcrumbConfig }) => {
+const Crumb = ({ breadcrumbConfig, showDivider }) => {
   const match = useRouteMatch();
   const crumb = breadcrumbConfig[match.url];
 
   let crumbElement = (
-    <BreadcrumbItem key={match.url}>
+    <BreadcrumbItem key={match.url} showDivider={showDivider}>
       <Link to={match.url}>{crumb}</Link>
     </BreadcrumbItem>
   );
 
   if (match.isExact) {
     crumbElement = (
-      <BreadcrumbHeading key="breadcrumb-heading">{crumb}</BreadcrumbHeading>
+      <BreadcrumbHeading key="breadcrumb-heading" showDivider={showDivider}>
+        {crumb}
+      </BreadcrumbHeading>
     );
   }
 
@@ -54,7 +56,7 @@ const Crumb = ({ breadcrumbConfig }) => {
     <Fragment>
       {crumbElement}
       <Route path={`${match.url}/:path`}>
-        <Crumb breadcrumbConfig={breadcrumbConfig} />
+        <Crumb breadcrumbConfig={breadcrumbConfig} showDivider />
       </Route>
     </Fragment>
   );

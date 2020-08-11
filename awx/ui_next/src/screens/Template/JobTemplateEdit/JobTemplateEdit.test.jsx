@@ -271,7 +271,8 @@ describe('<JobTemplateEdit />', () => {
     delete expected.id;
     delete expected.type;
     delete expected.related;
-    expected.webhook_url = `${window.location.origin}${mockJobTemplate.related.webhook_receiver}`;
+    delete expected.webhook_key;
+    delete expected.webhook_url;
     expect(JobTemplatesAPI.update).toHaveBeenCalledWith(1, expected);
     expect(JobTemplatesAPI.disassociateLabel).toHaveBeenCalledTimes(2);
     expect(JobTemplatesAPI.associateLabel).toHaveBeenCalledTimes(4);

@@ -96,6 +96,16 @@ UnifiedJobsAPI.read.mockResolvedValue({
   data: { count: 3, results: mockResults },
 });
 
+UnifiedJobsAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: {
+      GET: {},
+      POST: {},
+    },
+    related_search_fields: [],
+  },
+});
+
 function waitForLoaded(wrapper) {
   return waitForElement(
     wrapper,
@@ -105,6 +115,16 @@ function waitForLoaded(wrapper) {
 }
 
 describe('<JobList />', () => {
+  let debug;
+  beforeEach(() => {
+    debug = global.console.debug; // eslint-disable-line prefer-destructuring
+    global.console.debug = () => {};
+  });
+
+  afterEach(() => {
+    global.console.debug = debug;
+  });
+
   test('initially renders succesfully', async () => {
     let wrapper;
     await act(async () => {

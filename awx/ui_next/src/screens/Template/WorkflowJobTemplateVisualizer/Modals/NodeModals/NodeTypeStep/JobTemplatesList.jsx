@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { JobTemplatesAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
 import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
@@ -16,32 +17,33 @@ const QS_CONFIG = getQSConfig('job_templates', {
 });
 
 function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [jobTemplates, setJobTemplates] = useState([]);
-
   const location = useLocation();
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setJobTemplates([]);
-      setCount(0);
+  const {
+    result: { jobTemplates, count },
+    error,
+    isLoading,
+    request: fetchJobTemplates,
+  } = useRequest(
+    useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      try {
-        const { data } = await JobTemplatesAPI.read(params, {
-          role_level: 'execute_role',
-        });
-        setJobTemplates(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [location]);
+      const results = await JobTemplatesAPI.read(params, {
+        role_level: 'execute_role',
+      });
+      return {
+        jobTemplates: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      jobTemplates: [],
+      count: 0,
+    }
+  );
+
+  useEffect(() => {
+    fetchJobTemplates();
+  }, [fetchJobTemplates]);
 
   return (
     <PaginatedDataList
@@ -68,20 +70,20 @@ function JobTemplatesList({ i18n, nodeResource, onUpdateNodeResource }) {
       toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Playbook name`),
-          key: 'playbook',
+          key: 'playbook__icontains',
         },
         {
           name: i18n._(t`Created By (Username)`),
-          key: 'created_by__username',
+          key: 'created_by__username__icontains',
         },
         {
           name: i18n._(t`Modified By (Username)`),
-          key: 'modified_by__username',
+          key: 'modified_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[

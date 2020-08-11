@@ -117,7 +117,9 @@ function UserFormFields({ user, i18n }) {
         fieldId="user-type"
         helperTextInvalid={userTypeMeta.error}
         isRequired
-        isValid={!userTypeMeta.touched || !userTypeMeta.error}
+        validated={
+          !userTypeMeta.touched || !userTypeMeta.error ? 'default' : 'error'
+        }
         label={i18n._(t`User Type`)}
       >
         <AnsibleSelect

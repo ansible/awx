@@ -11,7 +11,7 @@ import tempfile
 from types import SimpleNamespace
 
 # Jinja2
-from jinja2 import Template
+from jinja2 import sandbox
 
 # Django
 from django.db import models
@@ -514,8 +514,11 @@ class CredentialType(CommonModelNameNotUnique):
         # If any file templates are provided, render the files and update the
         # special `tower` template namespace so the filename can be
         # referenced in other injectors
+
+        sandbox_env = sandbox.ImmutableSandboxedEnvironment()
+
         for file_label, file_tmpl in file_tmpls.items():
-            data = Template(file_tmpl).render(**namespace)
+            data = sandbox_env.from_string(file_tmpl).render(**namespace)
             _, path = tempfile.mkstemp(dir=private_data_dir)
             with open(path, 'w') as f:
                 f.write(data)
@@ -537,14 +540,14 @@ class CredentialType(CommonModelNameNotUnique):
             except ValidationError as e:
                 logger.error('Ignoring prohibited env var {}, reason: {}'.format(env_var, e))
                 continue
-            env[env_var] = Template(tmpl).render(**namespace)
-            safe_env[env_var] = Template(tmpl).render(**safe_namespace)
+            env[env_var] = sandbox_env.from_string(tmpl).render(**namespace)
+            safe_env[env_var] = sandbox_env.from_string(tmpl).render(**safe_namespace)
 
         if 'INVENTORY_UPDATE_ID' not in env:
             # awx-manage inventory_update does not support extra_vars via -e
             extra_vars = {}
             for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
-                extra_vars[var_name] = Template(tmpl).render(**namespace)
+                extra_vars[var_name] = sandbox_env.from_string(tmpl).render(**namespace)
 
             def build_extra_vars_file(vars, private_dir):
                 handle, path = tempfile.mkstemp(dir = private_dir)
@@ -1103,26 +1106,36 @@ ManagedCredentialType(
         }, {
             'id': 'username',
             'label': ugettext_noop('Username'),
-            'type': 'string'
+            'type': 'string',
+            'help_text': ugettext_noop('The Ansible Tower user to authenticate as.'
+                                       'This should not be set if an OAuth token is being used.')
         }, {
             'id': 'password',
             'label': ugettext_noop('Password'),
             'type': 'string',
             'secret': True,
         }, {
+            'id': 'oauth_token',
+            'label': ugettext_noop('OAuth Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': ugettext_noop('An OAuth token to use to authenticate to Tower with.'
+                                       'This should not be set if username/password are being used.')
+        }, {
             'id': 'verify_ssl',
             'label': ugettext_noop('Verify SSL'),
             'type': 'boolean',
             'secret': False
         }],
-        'required': ['host', 'username', 'password'],
+        'required': ['host'],
     },
     injectors={
         'env': {
             'TOWER_HOST': '{{host}}',
             'TOWER_USERNAME': '{{username}}',
             'TOWER_PASSWORD': '{{password}}',
-            'TOWER_VERIFY_SSL': '{{verify_ssl}}'
+            'TOWER_VERIFY_SSL': '{{verify_ssl}}',
+            'TOWER_OAUTH_TOKEN': '{{oauth_token}}'
         }
     },
 )

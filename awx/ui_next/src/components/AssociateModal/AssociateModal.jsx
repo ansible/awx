@@ -74,9 +74,9 @@ function AssociateModal({
   return (
     <Fragment>
       <Modal
-        isFooterLeftAligned
-        isLarge
+        variant="large"
         title={title}
+        aria-label={i18n._(t`Association modal`)}
         isOpen={isModalOpen}
         onClose={handleClose}
         actions={[
@@ -114,16 +114,16 @@ function AssociateModal({
           searchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
               name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username',
+              key: 'modified_by__username__icontains',
             },
           ]}
           sortColumns={[

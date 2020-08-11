@@ -108,7 +108,7 @@ def run_module(request, collection_import):
             sanitize_dict(py_data)
             resp._content = bytes(json.dumps(django_response.data), encoding='utf8')
             resp.status_code = django_response.status_code
-            resp.headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': 'devel'}
+            resp.headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': '0.0.1-devel'}
 
             if request.config.getoption('verbose') > 0:
                 logger.info(

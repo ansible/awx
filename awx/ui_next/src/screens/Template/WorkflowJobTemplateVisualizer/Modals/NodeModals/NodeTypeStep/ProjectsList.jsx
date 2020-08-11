@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { func, shape } from 'prop-types';
 import { ProjectsAPI } from '../../../../../../api';
 import { getQSConfig, parseQueryString } from '../../../../../../util/qs';
+import useRequest from '../../../../../../util/useRequest';
 import PaginatedDataList from '../../../../../../components/PaginatedDataList';
 import DataListToolbar from '../../../../../../components/DataListToolbar';
 import CheckboxListItem from '../../../../../../components/CheckboxListItem';
@@ -16,30 +17,31 @@ const QS_CONFIG = getQSConfig('projects', {
 });
 
 function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
-  const [count, setCount] = useState(0);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState([]);
-
   const location = useLocation();
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setProjects([]);
-      setCount(0);
+  const {
+    result: { projects, count },
+    error,
+    isLoading,
+    request: fetchProjects,
+  } = useRequest(
+    useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      try {
-        const { data } = await ProjectsAPI.read(params);
-        setProjects(data.results);
-        setCount(data.count);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [location]);
+      const results = await ProjectsAPI.read(params);
+      return {
+        projects: results.data.results,
+        count: results.data.count,
+      };
+    }, [location]),
+    {
+      projects: [],
+      count: 0,
+    }
+  );
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <PaginatedDataList
@@ -66,12 +68,12 @@ function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
       toolbarSearchColumns={[
         {
           name: i18n._(t`Name`),
-          key: 'name',
+          key: 'name__icontains',
           isDefault: true,
         },
         {
           name: i18n._(t`Type`),
-          key: 'scm_type',
+          key: 'or__scm_type',
           options: [
             [``, i18n._(t`Manual`)],
             [`git`, i18n._(t`Git`)],
@@ -82,15 +84,15 @@ function ProjectsList({ i18n, nodeResource, onUpdateNodeResource }) {
         },
         {
           name: i18n._(t`Source Control URL`),
-          key: 'scm_url',
+          key: 'scm_url__icontains',
         },
         {
           name: i18n._(t`Modified By (Username)`),
-          key: 'modified_by__username',
+          key: 'modified_by__username__icontains',
         },
         {
           name: i18n._(t`Created By (Username)`),
-          key: 'created_by__username',
+          key: 'created_by__username__icontains',
         },
       ]}
       toolbarSortColumns={[

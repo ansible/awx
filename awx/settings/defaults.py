@@ -94,6 +94,7 @@ USE_TZ = True
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ui', 'static'),
+    os.path.join(BASE_DIR, 'ui_next', 'build', 'static'),
     os.path.join(BASE_DIR, 'static'),
 )
 
@@ -162,13 +163,13 @@ ALLOWED_HOSTS = []
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
 # If Tower is behind a reverse proxy/load balancer, use this setting to
-# whitelist the proxy IP addresses from which Tower should trust custom
+# allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
 # REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
-# PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']
+# PROXY_IP_ALLOWED_LIST = ['10.0.1.100', '10.0.1.101']
 # If this setting is an empty list (the default), the headers specified by
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
-PROXY_IP_WHITELIST = []
+PROXY_IP_ALLOWED_LIST = []
 
 CUSTOM_VENV_PATHS = []
 
@@ -253,6 +254,7 @@ TEMPLATES = [
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'ui_next', 'build'),
         ],
     },
 ]
@@ -439,10 +441,11 @@ CELERYBEAT_SCHEDULE = {
 }
 
 # Django Caching Configuration
+DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'unix:/var/run/memcached/memcached.sock'
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'
     },
 }
 
@@ -663,7 +666,7 @@ AD_HOC_COMMANDS = [
     'win_user',
 ]
 
-INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
+INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 
 # ----------------
 # -- Amazon EC2 --
@@ -691,11 +694,6 @@ EC2_REGION_NAMES = {
     'cn-north-1': _('China (Beijing)'),
 }
 
-EC2_REGIONS_BLACKLIST = [
-    'us-gov-west-1',
-    'cn-north-1',
-]
-
 # Inventory variable name/values for determining if host is active/enabled.
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
@@ -712,15 +710,13 @@ EC2_EXCLUDE_EMPTY_GROUPS = True
 # ------------
 # -- VMware --
 # ------------
-VMWARE_REGIONS_BLACKLIST = []
-
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
 VMWARE_ENABLED_VAR = 'guest.gueststate'
 VMWARE_ENABLED_VALUE = 'running'
 
 # Inventory variable name containing the unique instance ID.
-VMWARE_INSTANCE_ID_VAR = 'config.instanceuuid'
+VMWARE_INSTANCE_ID_VAR = 'config.instanceUuid, config.instanceuuid'
 
 # Filter for allowed group and host names when importing inventory
 # from VMware.
@@ -768,8 +764,6 @@ GCE_REGION_CHOICES = [
     ('australia-southeast1-b', _('Australia Southeast (B)')),
     ('australia-southeast1-c', _('Australia Southeast (C)')),
 ]
-GCE_REGIONS_BLACKLIST = []
-
 # Inventory variable name/value for determining whether a host is active
 # in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
@@ -814,8 +808,6 @@ AZURE_RM_REGION_CHOICES = [
     ('koreacentral', _('Korea Central')),
     ('koreasouth', _('Korea South')),
 ]
-AZURE_RM_REGIONS_BLACKLIST = []
-
 AZURE_RM_GROUP_FILTER = r'^.+$'
 AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'
@@ -863,16 +855,6 @@ SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
-
-# ---------------------
-# ----- CloudForms -----
-# ---------------------
-CLOUDFORMS_ENABLED_VAR = 'cloudforms.power_state'
-CLOUDFORMS_ENABLED_VALUE = 'on'
-CLOUDFORMS_GROUP_FILTER = r'^.+$'
-CLOUDFORMS_HOST_FILTER = r'^.+$'
-CLOUDFORMS_EXCLUDE_EMPTY_GROUPS = True
-CLOUDFORMS_INSTANCE_ID_VAR = 'cloudforms.id'
 
 # ---------------------
 # ----- Custom -----

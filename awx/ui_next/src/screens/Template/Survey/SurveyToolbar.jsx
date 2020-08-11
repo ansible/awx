@@ -5,15 +5,17 @@ import { withI18n } from '@lingui/react';
 import styled from 'styled-components';
 
 import {
-  DataToolbar as _DataToolbar,
-  DataToolbarContent,
-  DataToolbarGroup,
-  DataToolbarItem,
-} from '@patternfly/react-core/dist/umd/experimental';
-import { Switch, Checkbox, Button } from '@patternfly/react-core';
+  Switch,
+  Checkbox,
+  Button,
+  Toolbar as _Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { ToolbarAddButton } from '../../../components/PaginatedDataList';
 
-const DataToolbar = styled(_DataToolbar)`
+const Toolbar = styled(_Toolbar)`
   margin-left: 52px;
 `;
 
@@ -30,9 +32,9 @@ function SurveyToolbar({
   isDeleteDisabled = !canEdit || isDeleteDisabled;
   const match = useRouteMatch();
   return (
-    <DataToolbar id="survey-toolbar">
-      <DataToolbarContent>
-        <DataToolbarItem>
+    <Toolbar id="survey-toolbar">
+      <ToolbarContent>
+        <ToolbarItem>
           <Checkbox
             isDisabled={!canEdit}
             isChecked={isAllSelected}
@@ -42,8 +44,8 @@ function SurveyToolbar({
             aria-label={i18n._(t`Select all`)}
             id="select-all"
           />
-        </DataToolbarItem>
-        <DataToolbarItem>
+        </ToolbarItem>
+        <ToolbarItem>
           <Switch
             aria-label={i18n._(t`Survey Toggle`)}
             id="survey-toggle"
@@ -53,15 +55,15 @@ function SurveyToolbar({
             isDisabled={!canEdit}
             onChange={() => onToggleSurvey(!surveyEnabled)}
           />
-        </DataToolbarItem>
-        <DataToolbarGroup>
-          <DataToolbarItem>
+        </ToolbarItem>
+        <ToolbarGroup>
+          <ToolbarItem>
             <ToolbarAddButton
               isDisabled={!canEdit}
               linkTo={`${match.url}/add`}
             />
-          </DataToolbarItem>
-          <DataToolbarItem>
+          </ToolbarItem>
+          <ToolbarItem>
             <Button
               variant="danger"
               isDisabled={isDeleteDisabled}
@@ -69,10 +71,10 @@ function SurveyToolbar({
             >
               {i18n._(t`Delete`)}
             </Button>
-          </DataToolbarItem>
-        </DataToolbarGroup>
-      </DataToolbarContent>
-    </DataToolbar>
+          </ToolbarItem>
+        </ToolbarGroup>
+      </ToolbarContent>
+    </Toolbar>
   );
 }
 

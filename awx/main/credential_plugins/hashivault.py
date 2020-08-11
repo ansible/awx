@@ -3,7 +3,7 @@ import os
 import pathlib
 from urllib.parse import urljoin
 
-from .plugin import CredentialPlugin, CertFiles
+from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
 import requests
 from django.utils.translation import ugettext_lazy as _
@@ -145,7 +145,10 @@ def kv_backend(**kwargs):
     cacert = kwargs.get('cacert', None)
     api_version = kwargs['api_version']
 
-    request_kwargs = {'timeout': 30}
+    request_kwargs = {
+        'timeout': 30,
+        'allow_redirects': False,
+    }
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
@@ -175,7 +178,7 @@ def kv_backend(**kwargs):
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
         response = sess.get(request_url, **request_kwargs)
-    response.raise_for_status()
+    raise_for_status(response)
 
     json = response.json()
     if api_version == 'v2':
@@ -198,7 +201,10 @@ def ssh_backend(**kwargs):
     role = kwargs['role']
     cacert = kwargs.get('cacert', None)
 
-    request_kwargs = {'timeout': 30}
+    request_kwargs = {
+        'timeout': 30,
+        'allow_redirects': False,
+    }
 
     request_kwargs['json'] = {'public_key': kwargs['public_key']}
     if kwargs.get('valid_principals'):
@@ -215,7 +221,7 @@ def ssh_backend(**kwargs):
         request_kwargs['verify'] = cert
         resp = sess.post(request_url, **request_kwargs)
 
-    resp.raise_for_status()
+    raise_for_status(resp)
     return resp.json()['data']['signed_key']
 
 

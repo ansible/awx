@@ -9,11 +9,10 @@ import {
   useRouteMatch,
   useLocation,
 } from 'react-router-dom';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import useRequest from '../../util/useRequest';
 import { UsersAPI } from '../../api';
-import { TabbedCardHeader } from '../../components/Card';
-import CardCloseButton from '../../components/CardCloseButton';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
 import RoutedTabs from '../../components/RoutedTabs';
@@ -24,7 +23,7 @@ import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
 import UserAccessList from './UserAccess/UserAccessList';
 
-function User({ i18n, setBreadcrumb }) {
+function User({ i18n, setBreadcrumb, me }) {
   const location = useLocation();
   const match = useRouteMatch('/users/:id');
   const userListUrl = `/users`;
@@ -52,6 +51,16 @@ function User({ i18n, setBreadcrumb }) {
   }, [user, setBreadcrumb]);
 
   const tabsArray = [
+    {
+      name: (
+        <>
+          <CaretLeftIcon />
+          {i18n._(t`Back to Users`)}
+        </>
+      ),
+      link: `/users`,
+      id: 99,
+    },
     { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
     {
       name: i18n._(t`Organizations`),
@@ -60,8 +69,20 @@ function User({ i18n, setBreadcrumb }) {
     },
     { name: i18n._(t`Teams`), link: `${match.url}/teams`, id: 2 },
     { name: i18n._(t`Access`), link: `${match.url}/access`, id: 3 },
-    { name: i18n._(t`Tokens`), link: `${match.url}/tokens`, id: 4 },
   ];
+
+  if (me?.id === Number(match.params.id)) {
+    tabsArray.push({
+      name: i18n._(t`Tokens`),
+      link: `${match.url}/tokens`,
+      id: 4,
+    });
+  }
+
+  let showCardHeader = true;
+  if (['edit', 'add'].some(name => location.pathname.includes(name))) {
+    showCardHeader = false;
+  }
 
   if (contentError) {
     return (
@@ -70,8 +91,8 @@ function User({ i18n, setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError.response && contentError.response.status === 404 && (
               <span>
-                {i18n._(`User not found.`)}{' '}
-                <Link to={userListUrl}>{i18n._(`View all Users.`)}</Link>
+                {i18n._(t`User not found.`)}{' '}
+                <Link to={userListUrl}>{i18n._(t`View all Users.`)}</Link>
               </span>
             )}
           </ContentError>
@@ -79,17 +100,11 @@ function User({ i18n, setBreadcrumb }) {
       </PageSection>
     );
   }
+
   return (
     <PageSection>
       <Card>
-        {['edit'].some(name => location.pathname.includes(name)) ? null : (
-          <TabbedCardHeader>
-            <RoutedTabs tabsArray={tabsArray} />
-            <CardActions>
-              <CardCloseButton linkTo={userListUrl} />
-            </CardActions>
-          </TabbedCardHeader>
-        )}
+        {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         {isLoading && <ContentLoading />}
         {!isLoading && user && (
           <Switch>
@@ -112,7 +127,7 @@ function User({ i18n, setBreadcrumb }) {
             </Route>
             {user && (
               <Route path="/users/:id/access">
-                <UserAccessList />
+                <UserAccessList user={user} />
               </Route>
             )}
             <Route path="/users/:id/tokens">
@@ -122,7 +137,7 @@ function User({ i18n, setBreadcrumb }) {
               <ContentError isNotFound>
                 {match.params.id && (
                   <Link to={`/users/${match.params.id}/details`}>
-                    {i18n._(`View User Details`)}
+                    {i18n._(t`View User Details`)}
                   </Link>
                 )}
               </ContentError>

@@ -131,11 +131,11 @@ describe('<WorkflowJobTemplateDetail/>', () => {
 
     const organization = wrapper
       .find('Detail[label="Organization"]')
-      .find('span');
+      .find('.pf-c-label__content');
     const inventory = wrapper.find('Detail[label="Inventory"]').find('a');
     const labels = wrapper
       .find('Detail[label="Labels"]')
-      .find('Chip[component="li"]');
+      .find('Chip[component="div"]');
     const sparkline = wrapper.find('Sparkline Link');
 
     expect(organization.text()).toBe('Org');

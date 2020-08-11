@@ -130,7 +130,6 @@ def format_yaml(output, fmt):
     return yaml.safe_dump(
         output,
         default_flow_style=False,
-        encoding='utf-8',
         allow_unicode=True
     )
 

@@ -7,7 +7,7 @@ import { t } from '@lingui/macro';
 import {
   Card as PFCard,
   CardBody as PFCardBody,
-  Expandable as PFExpandable,
+  ExpandableSection as PFExpandable,
 } from '@patternfly/react-core';
 import getErrorMessage from './getErrorMessage';
 

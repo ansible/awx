@@ -43,6 +43,15 @@ describe('<MultiCredentialsLookup />', () => {
         count: 3,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
   afterEach(() => {
@@ -81,7 +90,7 @@ describe('<MultiCredentialsLookup />', () => {
     });
     const chip = wrapper.find('CredentialChip');
     expect(chip).toHaveLength(5);
-    const button = chip.at(1).find('ChipButton');
+    const button = chip.at(1).find('Chip Button');
     await act(async () => {
       button.invoke('onClick')();
     });
@@ -104,7 +113,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -140,7 +152,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -180,7 +195,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -226,7 +244,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });
@@ -279,7 +300,10 @@ describe('<MultiCredentialsLookup />', () => {
         />
       );
     });
-    const searchButton = await waitForElement(wrapper, 'SearchButton');
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
     await act(async () => {
       searchButton.invoke('onClick')();
     });

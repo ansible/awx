@@ -56,6 +56,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
         />
       );
     });
+    await waitForElement(wrapper, 'PFWizard');
   });
   afterEach(() => {
     wrapper.unmount();
@@ -68,12 +69,12 @@ describe('<UserAndTeamAccessAdd/>', () => {
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select items from list"]')
+        .find('WizardNavItem[content="Select items from list"]')
         .prop('isDisabled')
     ).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select roles to apply"]')
+        .find('WizardNavItem[content="Select roles to apply"]')
         .prop('isDisabled')
     ).toBe(true);
     await act(async () =>
@@ -81,7 +82,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -90,16 +93,18 @@ describe('<UserAndTeamAccessAdd/>', () => {
     );
     wrapper.update();
     expect(
-      wrapper.find('WizardNavItem[text="Add resource type"]').prop('isDisabled')
-    ).toBe(false);
-    expect(
       wrapper
-        .find('WizardNavItem[text="Select items from list"]')
+        .find('WizardNavItem[content="Add resource type"]')
         .prop('isDisabled')
     ).toBe(false);
     expect(
       wrapper
-        .find('WizardNavItem[text="Select roles to apply"]')
+        .find('WizardNavItem[content="Select items from list"]')
+        .prop('isDisabled')
+    ).toBe(false);
+    expect(
+      wrapper
+        .find('WizardNavItem[content="Select roles to apply"]')
         .prop('isDisabled')
     ).toBe(true);
   });
@@ -113,7 +118,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );
@@ -187,7 +194,9 @@ describe('<UserAndTeamAccessAdd/>', () => {
         fetchItems: JobTemplatesAPI.read,
         label: 'Job template',
         selectedResource: 'jobTemplate',
-        searchColumns: [{ name: 'Name', key: 'name', isDefault: true }],
+        searchColumns: [
+          { name: 'Name', key: 'name__icontains', isDefault: true },
+        ],
         sortColumns: [{ name: 'Name', key: 'name' }],
       })
     );

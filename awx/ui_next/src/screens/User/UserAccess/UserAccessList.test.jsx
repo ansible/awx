@@ -10,12 +10,24 @@ import UserAccessList from './UserAccessList';
 jest.mock('../../../api/models/Users');
 jest.mock('../../../api/models/Roles');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    id: 18,
-  }),
-}));
+UsersAPI.readOptions.mockResolvedValue({
+  data: {
+    actions: { GET: {} },
+    related_search_fields: [],
+  },
+});
+
+const user = {
+  id: 18,
+  username: 'Foo User',
+  summary_fields: {
+    user_capabilities: {
+      edit: true,
+      delete: true,
+    },
+  },
+};
+
 const roles = {
   data: {
     results: [
@@ -88,21 +100,18 @@ const roles = {
     count: 5,
   },
 };
-const options = {
-  data: { actions: { POST: { id: 1, disassociate: true } } },
-};
+
 describe('<UserAccessList />', () => {
   let wrapper;
   afterEach(() => {
     jest.clearAllMocks();
-    // wrapper.unmount();
+    wrapper.unmount();
   });
   test('should render properly', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
 
     expect(wrapper.find('UserAccessList').length).toBe(1);
@@ -110,13 +119,12 @@ describe('<UserAccessList />', () => {
 
   test('should create proper detailUrl', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    wrapper.update();
 
     expect(wrapper.find(`Link#userRole-2`).prop('to')).toBe(
       '/templates/job_template/15/details'
@@ -134,9 +142,14 @@ describe('<UserAccessList />', () => {
       '/inventories/smart_inventory/77/details'
     );
   });
-  test('should not render add button', async () => {
+  test('should not render add button when user cannot create other users and user cannot edit this user', async () => {
     UsersAPI.readRoleOptions.mockResolvedValueOnce({
-      data: {},
+      data: {
+        actions: {
+          GET: {},
+        },
+        related_search_fields: [],
+      },
     });
 
     UsersAPI.readRoles.mockResolvedValue({
@@ -177,21 +190,33 @@ describe('<UserAccessList />', () => {
       },
     });
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(
+        <UserAccessList
+          user={{
+            ...user,
+            summary_fields: {
+              user_capabilities: {
+                edit: false,
+                delete: false,
+              },
+            },
+          }}
+        />
+      );
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    wrapper.update();
+
     expect(wrapper.find('Button[aria-label="Add resource roles"]').length).toBe(
       0
     );
   });
   test('should open and close wizard', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    wrapper.update();
     await act(async () =>
       wrapper.find('Button[aria-label="Add resource roles"]').prop('onClick')()
     );
@@ -205,13 +230,12 @@ describe('<UserAccessList />', () => {
   });
   test('should render disassociate modal', async () => {
     UsersAPI.readRoles.mockResolvedValue(roles);
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    wrapper.update();
 
     await act(async () =>
       wrapper.find('Chip[aria-label="Execute"]').prop('onClick')({
@@ -234,7 +258,7 @@ describe('<UserAccessList />', () => {
     ).toBe(1);
     await act(async () =>
       wrapper
-        .find('button[aria-label="confirm disassociate"]')
+        .find('button[aria-label="Confirm disassociate"]')
         .prop('onClick')()
     );
     expect(RolesAPI.disassociateUserRole).toBeCalledWith(4, 18);
@@ -257,13 +281,12 @@ describe('<UserAccessList />', () => {
         },
       })
     );
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
 
-    waitForElement(wrapper, 'ContentEmpty', el => el.length === 0);
+    wrapper.update();
 
     await act(async () =>
       wrapper.find('Chip[aria-label="Execute"]').prop('onClick')({
@@ -286,7 +309,7 @@ describe('<UserAccessList />', () => {
     ).toBe(1);
     await act(async () =>
       wrapper
-        .find('button[aria-label="confirm disassociate"]')
+        .find('button[aria-label="Confirm disassociate"]')
         .prop('onClick')()
     );
     wrapper.update();
@@ -313,10 +336,9 @@ describe('<UserAccessList />', () => {
         count: 1,
       },
     });
-    UsersAPI.readRoleOptions.mockResolvedValue(options);
 
     await act(async () => {
-      wrapper = mountWithContexts(<UserAccessList />);
+      wrapper = mountWithContexts(<UserAccessList user={user} />);
     });
 
     waitForElement(

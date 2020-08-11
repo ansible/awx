@@ -72,6 +72,23 @@ def test_invalid_kind_clean_insights_credential():
     assert json.dumps(str(e.value)) == json.dumps(str([u'Assignment not allowed for Smart Inventory']))
 
 
+@pytest.mark.parametrize('source_vars,validate_certs', [
+    ({'ssl_verify': True}, True),
+    ({'ssl_verify': False}, False),
+    ({'validate_certs': True}, True),
+    ({'validate_certs': False}, False)])
+def test_satellite_plugin_backwards_support_for_ssl_verify(source_vars, validate_certs):
+    injector = InventorySource.injectors['satellite6']('2.9')
+    inv_src = InventorySource(
+        name='satellite source', source='satellite6',
+        source_vars=source_vars
+    )
+
+    ret = injector.inventory_as_dict(inv_src, '/tmp/foo')
+    assert 'validate_certs' in ret
+    assert ret['validate_certs'] in (validate_certs, str(validate_certs))
+
+
 class TestControlledBySCM(): 
     def test_clean_source_path_valid(self):
         inv_src = InventorySource(source_path='/not_real/',

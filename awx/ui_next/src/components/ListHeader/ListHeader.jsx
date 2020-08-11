@@ -2,10 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  DataToolbar,
-  DataToolbarContent,
-} from '@patternfly/react-core/dist/umd/experimental';
+import { Toolbar, ToolbarContent } from '@patternfly/react-core';
 import DataListToolbar from '../DataListToolbar';
 
 import {
@@ -97,38 +94,45 @@ class ListHeader extends React.Component {
       emptyStateControls,
       itemCount,
       searchColumns,
+      searchableKeys,
+      relatedSearchableKeys,
       sortColumns,
       renderToolbar,
       qsConfig,
       location,
+      pagination,
     } = this.props;
     const params = parseQueryString(qsConfig, location.search);
     const isEmpty = itemCount === 0 && Object.keys(params).length === 0;
     return (
       <Fragment>
         {isEmpty ? (
-          <DataToolbar
+          <Toolbar
             id={`${qsConfig.namespace}-list-toolbar`}
             clearAllFilters={this.handleRemoveAll}
-            collapseListedFiltersBreakpoint="md"
+            collapseListedFiltersBreakpoint="lg"
           >
-            <DataToolbarContent>
+            <ToolbarContent>
               <EmptyStateControlsWrapper>
                 {emptyStateControls}
               </EmptyStateControlsWrapper>
-            </DataToolbarContent>
-          </DataToolbar>
+            </ToolbarContent>
+          </Toolbar>
         ) : (
           <Fragment>
             {renderToolbar({
+              itemCount,
               searchColumns,
               sortColumns,
+              searchableKeys,
+              relatedSearchableKeys,
               onSearch: this.handleSearch,
               onReplaceSearch: this.handleReplaceSearch,
               onSort: this.handleSort,
               onRemove: this.handleRemove,
               clearAllFilters: this.handleRemoveAll,
               qsConfig,
+              pagination,
             })}
           </Fragment>
         )}
@@ -141,12 +145,16 @@ ListHeader.propTypes = {
   itemCount: PropTypes.number.isRequired,
   qsConfig: QSConfig.isRequired,
   searchColumns: SearchColumns.isRequired,
+  searchableKeys: PropTypes.arrayOf(PropTypes.string),
+  relatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   sortColumns: SortColumns.isRequired,
   renderToolbar: PropTypes.func,
 };
 
 ListHeader.defaultProps = {
   renderToolbar: props => <DataListToolbar {...props} />,
+  searchableKeys: [],
+  relatedSearchableKeys: [],
 };
 
 export default withRouter(ListHeader);

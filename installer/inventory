@@ -20,11 +20,13 @@ dockerhub_base=ansible
 # Kubernetes Install
 # kubernetes_context=test-cluster
 # kubernetes_namespace=awx
+# kubernetes_web_svc_type=NodePort
 # Optional Kubernetes Variables
 # pg_image_registry=docker.io
 # pg_serviceaccount=awx
 # pg_volume_capacity=5
 # pg_persistence_storageClass=StorageClassName
+# pg_persistence_existingclaim=postgres_pvc
 # pg_cpu_limit=1000
 # pg_mem_limit=2
 
@@ -38,7 +40,7 @@ dockerhub_base=ansible
 # kubernetes_ingress_tls_secret=awx-cert
 
 # Kubernetes and Openshift Install Resource Requests
-# These are the request and limit values for a pod's container for task/web/redis/memcached/management.
+# These are the request and limit values for a pod's container for task/web/redis/management.
 # The total amount of requested resources for a pod is the sum of all
 # resources requested by all containers in the pod
 # A cpu_request of 1500 is 1.5 cores for the container to start out with.
@@ -54,8 +56,6 @@ dockerhub_base=ansible
 # web_mem_limit=2
 # redis_cpu_limit=1000
 # redis_mem_limit=3
-# memcached_cpu_limit=1000
-# memcached_mem_limit=2
 # management_cpu_limit=2000
 # management_mem_limit=2
 
@@ -157,3 +157,16 @@ secret_key=awxsecret
 
 # Docker compose explicit subnet. Set to avoid overlapping your existing LAN networks.
 #docker_compose_subnet="172.17.0.1/16"
+#
+# Allow for different docker logging drivers
+# By Default; the logger will be json-file, however you can override
+# that by uncommenting the docker_logger below.
+# Be aware that journald may rate limit your log messages if you choose it.
+# See: https://docs.docker.com/config/containers/logging/configure/
+# docker_logger=journald
+#
+
+# Add extra hosts to docker compose file. This might be necessary to
+# sneak in servernames. For exmaple for DMZ self-signed CA certificates.
+# Equivialent to using the --add-host parameter with "docker run".
+#docker_compose_extra_hosts="otherserver.local:192.168.0.1,ldap-server.local:192.168.0.2"

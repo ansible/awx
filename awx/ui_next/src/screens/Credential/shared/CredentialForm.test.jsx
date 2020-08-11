@@ -4,10 +4,18 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import machineCredential from './data.machineCredential.json';
 import gceCredential from './data.gceCredential.json';
 import scmCredential from './data.scmCredential.json';
-import credentialTypes from './data.credentialTypes.json';
+import credentialTypesArr from './data.credentialTypes.json';
 import CredentialForm from './CredentialForm';
 
 jest.mock('../../../api');
+
+const credentialTypes = credentialTypesArr.reduce(
+  (credentialTypesMap, credentialType) => {
+    credentialTypesMap[credentialType.id] = credentialType;
+    return credentialTypesMap;
+  },
+  {}
+);
 
 describe('<CredentialForm />', () => {
   let wrapper;
@@ -28,23 +36,19 @@ describe('<CredentialForm />', () => {
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Username"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);
+    expect(wrapper.find('input#credential-password').length).toBe(1);
     expect(wrapper.find('FormGroup[label="SSH Private Key"]').length).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Signed SSH Certificate"]').length
     ).toBe(1);
+    expect(wrapper.find('input#credential-ssh_key_unlock').length).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="Private Key Passphrase"]').length
-    ).toBe(1);
-    expect(
-      wrapper.find('FormGroup[label="Privelege Escalation Method"]').length
+      wrapper.find('FormGroup[label="Privilege Escalation Method"]').length
     ).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Privilege Escalation Username"]').length
     ).toBe(1);
-    expect(
-      wrapper.find('FormGroup[label="Privilege Escalation Password"]').length
-    ).toBe(1);
+    expect(wrapper.find('input#credential-become_password').length).toBe(1);
   };
 
   const sourceFieldExpects = () => {
@@ -55,7 +59,7 @@ describe('<CredentialForm />', () => {
     expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Username"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="SSH Private Key"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="SCM Private Key"]').length).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Private Key Passphrase"]').length
     ).toBe(1);
@@ -71,10 +75,10 @@ describe('<CredentialForm />', () => {
       wrapper.find('FormGroup[label="Service account JSON file"]').length
     ).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="Service account email address"]').length
+      wrapper.find('FormGroup[label="Service Account Email Address"]').length
     ).toBe(1);
     expect(wrapper.find('FormGroup[label="Project"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="RSA private key"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="RSA Private Key"]').length).toBe(1);
   };
 
   describe('Add', () => {
@@ -152,9 +156,9 @@ describe('<CredentialForm />', () => {
       gceFieldExpects();
       expect(wrapper.find('input#credential-username').prop('value')).toBe('');
       expect(wrapper.find('input#credential-project').prop('value')).toBe('');
-      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
-        ''
-      );
+      expect(
+        wrapper.find('textarea#credential-ssh_key_data').prop('value')
+      ).toBe('');
       await act(async () => {
         wrapper.find('FileUpload').invoke('onChange')({
           name: 'foo.json',
@@ -169,7 +173,9 @@ describe('<CredentialForm />', () => {
       expect(wrapper.find('input#credential-project').prop('value')).toBe(
         'test123'
       );
-      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
+      expect(
+        wrapper.find('textarea#credential-ssh_key_data').prop('value')
+      ).toBe(
         '-----BEGIN PRIVATE KEY-----\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n-----END PRIVATE KEY-----\n'
       );
     });
@@ -180,11 +186,17 @@ describe('<CredentialForm />', () => {
       wrapper.update();
       expect(wrapper.find('input#credential-username').prop('value')).toBe('');
       expect(wrapper.find('input#credential-project').prop('value')).toBe('');
-      expect(wrapper.find('textarea#credential-sshKeyData').prop('value')).toBe(
-        ''
-      );
+      expect(
+        wrapper.find('textarea#credential-ssh_key_data').prop('value')
+      ).toBe('');
     });
     test('should show error when error thrown parsing JSON', async () => {
+      await act(async () => {
+        await wrapper
+          .find('AnsibleSelect[id="credential_type"]')
+          .invoke('onChange')(null, 10);
+      });
+      wrapper.update();
       expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
         'Select a JSON formatted service account key to autopopulate the following fields.'
       );
@@ -195,7 +207,17 @@ describe('<CredentialForm />', () => {
         });
       });
       wrapper.update();
-      expect(wrapper.find('#credential-gce-file-helper').text()).toBe(
+      expect(
+        wrapper
+          .find('FormGroup[fieldId="credential-gce-file"]')
+          .prop('validated')
+      ).toBe('error');
+
+      expect(
+        wrapper
+          .find('FormGroup[fieldId="credential-gce-file"]')
+          .prop('helperTextInvalid')
+      ).toBe(
         'There was an error parsing the file. Please check the file formatting and try again.'
       );
     });

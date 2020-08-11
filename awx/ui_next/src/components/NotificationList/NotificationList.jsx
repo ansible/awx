@@ -1,15 +1,14 @@
-import React, { Component, Fragment } from 'react';
-import { number, shape, string, bool } from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useCallback, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { number, shape, bool } from 'prop-types';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import NotificationListItem from './NotificationListItem';
 import PaginatedDataList from '../PaginatedDataList';
 import { getQSConfig, parseQueryString } from '../../util/qs';
-
+import useRequest from '../../util/useRequest';
 import { NotificationTemplatesAPI } from '../../api';
 
 const QS_CONFIG = getQSConfig('notification', {
@@ -18,64 +17,49 @@ const QS_CONFIG = getQSConfig('notification', {
   order_by: 'name',
 });
 
-class NotificationList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      contentError: null,
-      hasContentLoading: true,
-      toggleError: false,
-      loadingToggleIds: [],
-      itemCount: 0,
-      notifications: [],
-      startedTemplateIds: [],
-      successTemplateIds: [],
-      errorTemplateIds: [],
-      typeLabels: null,
-    };
-    this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
-    this.handleNotificationErrorClose = this.handleNotificationErrorClose.bind(
-      this
-    );
-    this.loadNotifications = this.loadNotifications.bind(this);
-  }
+function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
+  const location = useLocation();
+  const [isToggleLoading, setIsToggleLoading] = useState(false);
+  const [toggleError, setToggleError] = useState(null);
 
-  componentDidMount() {
-    this.loadNotifications();
-  }
+  const {
+    result: fetchNotificationsResult,
+    result: {
+      notifications,
+      itemCount,
+      startedTemplateIds,
+      successTemplateIds,
+      errorTemplateIds,
+      typeLabels,
+    },
+    error: contentError,
+    isLoading,
+    request: fetchNotifications,
+    setValue,
+  } = useRequest(
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const [
+        {
+          data: { results: notificationsResults, count: notificationsCount },
+        },
+        {
+          data: { actions },
+        },
+      ] = await Promise.all([
+        NotificationTemplatesAPI.read(params),
+        NotificationTemplatesAPI.readOptions(),
+      ]);
 
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
-    if (location !== prevProps.location) {
-      this.loadNotifications();
-    }
-  }
+      const labels = actions.GET.notification_type.choices.reduce(
+        (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
+        {}
+      );
 
-  async loadNotifications() {
-    const { id, location, apiModel } = this.props;
-    const { typeLabels } = this.state;
-    const params = parseQueryString(QS_CONFIG, location.search);
-
-    const promises = [NotificationTemplatesAPI.read(params)];
-
-    if (!typeLabels) {
-      promises.push(NotificationTemplatesAPI.readOptions());
-    }
-
-    this.setState({ contentError: null, hasContentLoading: true });
-    try {
-      const {
-        data: { count: itemCount = 0, results: notifications = [] },
-      } = await NotificationTemplatesAPI.read(params);
-
-      const optionsResponse = await NotificationTemplatesAPI.readOptions();
-
-      let idMatchParams;
-      if (notifications.length > 0) {
-        idMatchParams = { id__in: notifications.map(n => n.id).join(',') };
-      } else {
-        idMatchParams = {};
-      }
+      const idMatchParams =
+        notificationsResults.length > 0
+          ? { id__in: notificationsResults.map(n => n.id).join(',') }
+          : {};
 
       const [
         { data: startedTemplates },
@@ -87,69 +71,35 @@ class NotificationList extends Component {
         apiModel.readNotificationTemplatesError(id, idMatchParams),
       ]);
 
-      const stateToUpdate = {
-        itemCount,
-        notifications,
+      return {
+        notifications: notificationsResults,
+        itemCount: notificationsCount,
         startedTemplateIds: startedTemplates.results.map(st => st.id),
         successTemplateIds: successTemplates.results.map(su => su.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
+        typeLabels: labels,
       };
-
-      if (!typeLabels) {
-        const {
-          data: {
-            actions: {
-              GET: {
-                notification_type: { choices },
-              },
-            },
-          },
-        } = optionsResponse;
-        // The structure of choices looks like [['slack', 'Slack'], ['email', 'Email'], ...]
-        stateToUpdate.typeLabels = choices.reduce(
-          (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
-          {}
-        );
-      }
-
-      this.setState(stateToUpdate);
-    } catch (err) {
-      this.setState({ contentError: err });
-    } finally {
-      this.setState({ hasContentLoading: false });
+    }, [apiModel, id, location]),
+    {
+      notifications: [],
+      itemCount: 0,
+      startedTemplateIds: [],
+      successTemplateIds: [],
+      errorTemplateIds: [],
+      typeLabels: {},
     }
-  }
+  );
 
-  async handleNotificationToggle(notificationId, isCurrentlyOn, status) {
-    const { id, apiModel } = this.props;
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
-    let stateArrayName;
-    if (status === 'success') {
-      stateArrayName = 'successTemplateIds';
-    } else if (status === 'error') {
-      stateArrayName = 'errorTemplateIds';
-    } else if (status === 'started') {
-      stateArrayName = 'startedTemplateIds';
-    }
-
-    let stateUpdateFunction;
-    if (isCurrentlyOn) {
-      // when switching off, remove the toggled notification id from the array
-      stateUpdateFunction = prevState => ({
-        [stateArrayName]: prevState[stateArrayName].filter(
-          i => i !== notificationId
-        ),
-      });
-    } else {
-      // when switching on, add the toggled notification id to the array
-      stateUpdateFunction = prevState => ({
-        [stateArrayName]: prevState[stateArrayName].concat(notificationId),
-      });
-    }
-
-    this.setState(({ loadingToggleIds }) => ({
-      loadingToggleIds: loadingToggleIds.concat([notificationId]),
-    }));
+  const handleNotificationToggle = async (
+    notificationId,
+    isCurrentlyOn,
+    status
+  ) => {
+    setIsToggleLoading(true);
     try {
       if (isCurrentlyOn) {
         await apiModel.disassociateNotificationTemplate(
@@ -157,128 +107,111 @@ class NotificationList extends Component {
           notificationId,
           status
         );
+        setValue({
+          ...fetchNotificationsResult,
+          [`${status}TemplateIds`]: fetchNotificationsResult[
+            `${status}TemplateIds`
+          ].filter(i => i !== notificationId),
+        });
       } else {
         await apiModel.associateNotificationTemplate(
           id,
           notificationId,
           status
         );
+        setValue({
+          ...fetchNotificationsResult,
+          [`${status}TemplateIds`]: fetchNotificationsResult[
+            `${status}TemplateIds`
+          ].concat(notificationId),
+        });
       }
-      this.setState(stateUpdateFunction);
     } catch (err) {
-      this.setState({ toggleError: err });
+      setToggleError(err);
     } finally {
-      this.setState(({ loadingToggleIds }) => ({
-        loadingToggleIds: loadingToggleIds.filter(
-          item => item !== notificationId
-        ),
-      }));
+      setIsToggleLoading(false);
     }
-  }
+  };
 
-  handleNotificationErrorClose() {
-    this.setState({ toggleError: false });
-  }
-
-  render() {
-    const { canToggleNotifications, i18n } = this.props;
-    const {
-      contentError,
-      hasContentLoading,
-      toggleError,
-      loadingToggleIds,
-      itemCount,
-      notifications,
-      startedTemplateIds,
-      successTemplateIds,
-      errorTemplateIds,
-      typeLabels,
-    } = this.state;
-
-    return (
-      <Fragment>
-        <PaginatedDataList
-          contentError={contentError}
-          hasContentLoading={hasContentLoading}
-          items={notifications}
-          itemCount={itemCount}
-          pluralizedItemName={i18n._(t`Notifications`)}
-          qsConfig={QS_CONFIG}
-          toolbarSearchColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-              isDefault: true,
-            },
-            {
-              name: i18n._(t`Type`),
-              key: 'type',
-              options: [
-                ['email', i18n._(t`Email`)],
-                ['grafana', i18n._(t`Grafana`)],
-                ['hipchat', i18n._(t`Hipchat`)],
-                ['irc', i18n._(t`IRC`)],
-                ['mattermost', i18n._(t`Mattermost`)],
-                ['pagerduty', i18n._(t`Pagerduty`)],
-                ['rocketchat', i18n._(t`Rocket.Chat`)],
-                ['slack', i18n._(t`Slack`)],
-                ['twilio', i18n._(t`Twilio`)],
-                ['webhook', i18n._(t`Webhook`)],
-              ],
-            },
-            {
-              name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username',
-            },
-            {
-              name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username',
-            },
-          ]}
-          toolbarSortColumns={[
-            {
-              name: i18n._(t`Name`),
-              key: 'name',
-            },
-          ]}
-          renderItem={notification => (
-            <NotificationListItem
-              key={notification.id}
-              notification={notification}
-              detailUrl={`/notifications/${notification.id}`}
-              canToggleNotifications={
-                canToggleNotifications &&
-                !loadingToggleIds.includes(notification.id)
-              }
-              toggleNotification={this.handleNotificationToggle}
-              errorTurnedOn={errorTemplateIds.includes(notification.id)}
-              startedTurnedOn={startedTemplateIds.includes(notification.id)}
-              successTurnedOn={successTemplateIds.includes(notification.id)}
-              typeLabels={typeLabels}
-            />
-          )}
-        />
+  return (
+    <>
+      <PaginatedDataList
+        contentError={contentError}
+        hasContentLoading={isLoading}
+        items={notifications}
+        itemCount={itemCount}
+        pluralizedItemName={i18n._(t`Notifications`)}
+        qsConfig={QS_CONFIG}
+        toolbarSearchColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: i18n._(t`Type`),
+            key: 'or__type',
+            options: [
+              ['email', i18n._(t`Email`)],
+              ['grafana', i18n._(t`Grafana`)],
+              ['hipchat', i18n._(t`Hipchat`)],
+              ['irc', i18n._(t`IRC`)],
+              ['mattermost', i18n._(t`Mattermost`)],
+              ['pagerduty', i18n._(t`Pagerduty`)],
+              ['rocketchat', i18n._(t`Rocket.Chat`)],
+              ['slack', i18n._(t`Slack`)],
+              ['twilio', i18n._(t`Twilio`)],
+              ['webhook', i18n._(t`Webhook`)],
+            ],
+          },
+          {
+            name: i18n._(t`Created By (Username)`),
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: i18n._(t`Modified By (Username)`),
+            key: 'modified_by__username__icontains',
+          },
+        ]}
+        toolbarSortColumns={[
+          {
+            name: i18n._(t`Name`),
+            key: 'name',
+          },
+        ]}
+        renderItem={notification => (
+          <NotificationListItem
+            key={notification.id}
+            notification={notification}
+            detailUrl={`/notifications/${notification.id}`}
+            canToggleNotifications={canToggleNotifications && !isToggleLoading}
+            toggleNotification={handleNotificationToggle}
+            errorTurnedOn={errorTemplateIds.includes(notification.id)}
+            startedTurnedOn={startedTemplateIds.includes(notification.id)}
+            successTurnedOn={successTemplateIds.includes(notification.id)}
+            typeLabels={typeLabels}
+          />
+        )}
+      />
+      {toggleError && (
         <AlertModal
           variant="error"
           title={i18n._(t`Error!`)}
-          isOpen={toggleError && loadingToggleIds.length === 0}
-          onClose={this.handleNotificationErrorClose}
+          isOpen={!isToggleLoading}
+          onClose={() => setToggleError(null)}
         >
           {i18n._(t`Failed to toggle notification.`)}
           <ErrorDetail error={toggleError} />
         </AlertModal>
-      </Fragment>
-    );
-  }
+      )}
+    </>
+  );
 }
 
 NotificationList.propTypes = {
+  apiModel: shape({}).isRequired,
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
-  location: shape({
-    search: string.isRequired,
-  }).isRequired,
 };
 
-export { NotificationList as _NotificationList };
-export default withI18n()(withRouter(NotificationList));
+export default withI18n()(NotificationList);

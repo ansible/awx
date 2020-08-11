@@ -4,15 +4,13 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 
 import CredentialTypes from './CredentialTypes';
 
-describe('<CredentialTypes />', () => {
+describe('<CredentialTypes/>', () => {
   let pageWrapper;
   let pageSections;
-  let title;
 
   beforeEach(() => {
     pageWrapper = mountWithContexts(<CredentialTypes />);
     pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
   });
 
   afterEach(() => {
@@ -21,9 +19,7 @@ describe('<CredentialTypes />', () => {
 
   test('initially renders without crashing', () => {
     expect(pageWrapper.length).toBe(1);
-    expect(pageSections.length).toBe(2);
-    expect(title.length).toBe(1);
-    expect(title.props().size).toBe('2xl');
+    expect(pageSections.length).toBe(1);
     expect(pageSections.first().props().variant).toBe('light');
   });
 });

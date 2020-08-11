@@ -1,26 +1,52 @@
-import React, { Component, Fragment } from 'react';
+import React, { useState, useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import {
-  PageSection,
-  PageSectionVariants,
-  Title,
-} from '@patternfly/react-core';
+import { Route, Switch } from 'react-router-dom';
 
-class CredentialTypes extends Component {
-  render() {
-    const { i18n } = this.props;
-    const { light } = PageSectionVariants;
+import CredentialTypeAdd from './CredentialTypeAdd';
+import CredentialTypeList from './CredentialTypeList';
+import CredentialType from './CredentialType';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
-    return (
-      <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">{i18n._(t`Credential Types`)}</Title>
-        </PageSection>
-        <PageSection />
-      </Fragment>
-    );
-  }
+function CredentialTypes({ i18n }) {
+  const [breadcrumbConfig, setBreadcrumbConfig] = useState({
+    '/credential_types': i18n._(t`Credential Types`),
+    '/credential_types/add': i18n._(t`Create new credential type`),
+  });
+
+  const buildBreadcrumbConfig = useCallback(
+    credentialTypes => {
+      if (!credentialTypes) {
+        return;
+      }
+      setBreadcrumbConfig({
+        '/credential_types': i18n._(t`Credential Types`),
+        '/credential_types/add': i18n._(t`Create new credential Type`),
+        [`/credential_types/${credentialTypes.id}`]: `${credentialTypes.name}`,
+        [`/credential_types/${credentialTypes.id}/edit`]: i18n._(
+          t`Edit details`
+        ),
+        [`/credential_types/${credentialTypes.id}/details`]: i18n._(t`Details`),
+      });
+    },
+    [i18n]
+  );
+  return (
+    <>
+      <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />
+      <Switch>
+        <Route path="/credential_types/add">
+          <CredentialTypeAdd />
+        </Route>
+        <Route path="/credential_types/:id">
+          <CredentialType setBreadcrumb={buildBreadcrumbConfig} />
+        </Route>
+        <Route path="/credential_types">
+          <CredentialTypeList />
+        </Route>
+      </Switch>
+    </>
+  );
 }
 
 export default withI18n()(CredentialTypes);

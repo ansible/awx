@@ -19,7 +19,7 @@ function WorkflowJobTemplateEdit({ template }) {
       webhook_key,
       ...templatePayload
     } = values;
-    templatePayload.inventory = inventory?.id;
+    templatePayload.inventory = inventory?.id || null;
     templatePayload.organization = organization?.id;
     templatePayload.webhook_credential = webhook_credential?.id || null;
 

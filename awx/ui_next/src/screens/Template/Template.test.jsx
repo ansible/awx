@@ -59,9 +59,9 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 6
+      el => el.length === 7
     );
-    expect(tabs.at(2).text()).toEqual('Notifications');
+    expect(tabs.at(3).text()).toEqual('Notifications');
     done();
   });
   test('notifications tab hidden with reduced permissions', async done => {
@@ -83,7 +83,7 @@ describe('<Template />', () => {
     const tabs = await waitForElement(
       wrapper,
       '.pf-c-tabs__item',
-      el => el.length === 5
+      el => el.length === 6
     );
     tabs.forEach(tab => expect(tab.text()).not.toEqual('Notifications'));
     done();

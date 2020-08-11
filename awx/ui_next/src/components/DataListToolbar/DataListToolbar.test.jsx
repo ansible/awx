@@ -25,7 +25,9 @@ describe('<DataListToolbar />', () => {
   const onSelectAll = jest.fn();
 
   test('it triggers the expected callbacks', () => {
-    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const searchColumns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+    ];
     const sortColumns = [{ name: 'Name', key: 'name' }];
     const search = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -36,7 +38,6 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         qsConfig={QS_CONFIG}
         isAllSelected={false}
-        showExpandCollapse
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
@@ -67,11 +68,12 @@ describe('<DataListToolbar />', () => {
 
   test('dropdown items sortable/searchable columns work', () => {
     const sortDropdownToggleSelector = 'button[id="awx-sort"]';
-    const searchDropdownToggleSelector = 'button[id="awx-search"]';
+    const searchDropdownToggleSelector =
+      'Select[aria-label="Simple key select"] SelectToggle';
     const sortDropdownMenuItems =
       'DropdownMenu > ul[aria-labelledby="awx-sort"]';
     const searchDropdownMenuItems =
-      'DropdownMenu > ul[aria-labelledby="awx-search"]';
+      'Select[aria-label="Simple key select"] SelectOption';
 
     const NEW_QS_CONFIG = {
       namespace: 'organization',
@@ -109,7 +111,7 @@ describe('<DataListToolbar />', () => {
     searchDropdownToggle.simulate('click');
     toolbar.update();
     let searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
-    expect(searchDropdownItems.length).toBe(1);
+    expect(searchDropdownItems.length).toBe(2);
     const mockedSortEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mountWithContexts(
@@ -145,7 +147,7 @@ describe('<DataListToolbar />', () => {
     toolbar.update();
 
     searchDropdownItems = toolbar.find(searchDropdownMenuItems).children();
-    expect(searchDropdownItems.length).toBe(1);
+    expect(searchDropdownItems.length).toBe(2);
 
     const mockedSearchEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSearchEvent);
@@ -272,7 +274,6 @@ describe('<DataListToolbar />', () => {
       <DataListToolbar
         qsConfig={QS_CONFIG}
         isAllSelected
-        showExpandCollapse
         searchColumns={searchColumns}
         sortColumns={sortColumns}
         onSearch={onSearch}
@@ -284,5 +285,32 @@ describe('<DataListToolbar />', () => {
     );
     const checkbox = toolbar.find('Checkbox');
     expect(checkbox.prop('isChecked')).toBe(true);
+  });
+
+  test('always adds advanced item to search column array', () => {
+    const searchColumns = [{ name: 'Name', key: 'name', isDefault: true }];
+    const sortColumns = [{ name: 'Name', key: 'name' }];
+
+    toolbar = mountWithContexts(
+      <DataListToolbar
+        qsConfig={QS_CONFIG}
+        searchColumns={searchColumns}
+        sortColumns={sortColumns}
+        onSearch={onSearch}
+        onReplaceSearch={onReplaceSearch}
+        onSort={onSort}
+        onSelectAll={onSelectAll}
+        additionalControls={[
+          <button key="1" id="test" type="button">
+            click
+          </button>,
+        ]}
+      />
+    );
+
+    const search = toolbar.find('Search');
+    expect(
+      search.prop('columns').filter(col => col.key === 'advanced').length
+    ).toBe(1);
   });
 });

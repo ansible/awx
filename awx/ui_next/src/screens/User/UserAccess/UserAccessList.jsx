@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
@@ -29,17 +29,16 @@ const QS_CONFIG = getQSConfig('roles', {
 // TODO Figure out how to best conduct a search of this list.
 // Since we only have a role ID in the top level of each role object
 // we can't really search using the normal search parameters.
-function UserAccessList({ i18n }) {
-  const { id } = useParams();
+function UserAccessList({ i18n, user }) {
   const { search } = useLocation();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-
   const [roleToDisassociate, setRoleToDisassociate] = useState(null);
+
   const {
     isLoading,
     request: fetchRoles,
     error,
-    result: { roleCount, roles, options },
+    result: { roleCount, roles, actions, relatedSearchFields },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
@@ -47,20 +46,28 @@ function UserAccessList({ i18n }) {
         {
           data: { results, count },
         },
-        {
-          data: { actions },
-        },
+        actionsResponse,
       ] = await Promise.all([
-        UsersAPI.readRoles(id, params),
-        UsersAPI.readRoleOptions(id),
+        UsersAPI.readRoles(user.id, params),
+        UsersAPI.readOptions(),
       ]);
-      return { roleCount: count, roles: results, options: actions };
-    }, [id, search]),
+      return {
+        roleCount: count,
+        roles: results,
+        actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+      };
+    }, [user.id, search]),
     {
       roles: [],
       roleCount: 0,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
+
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
@@ -75,14 +82,20 @@ function UserAccessList({ i18n }) {
       setRoleToDisassociate(null);
       await RolesAPI.disassociateUserRole(
         roleToDisassociate.id,
-        parseInt(id, 10)
+        parseInt(user.id, 10)
       );
-    }, [roleToDisassociate, id]),
+    }, [roleToDisassociate, user.id]),
     { qsConfig: QS_CONFIG, fetchItems: fetchRoles }
   );
 
   const canAdd =
-    options && Object.prototype.hasOwnProperty.call(options, 'POST');
+    user?.summary_fields?.user_capabilities?.edit ||
+    (actions && Object.prototype.hasOwnProperty.call(actions, 'POST'));
+
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   const saveRoles = () => {
     setIsWizardOpen(false);
@@ -132,16 +145,18 @@ function UserAccessList({ i18n }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Role`),
-            key: 'role_field',
+            key: 'role_field__icontains',
             isDefault: true,
           },
         ]}
         toolbarSortColumns={[
           {
-            name: i18n._(t`Name`),
+            name: i18n._(t`ID`),
             key: 'id',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={role => {
           return (
             <UserAccessListItem
@@ -170,7 +185,7 @@ function UserAccessList({ i18n }) {
                         setIsWizardOpen(true);
                       }}
                     >
-                      Add
+                      {i18n._(t`Add`)}
                     </Button>,
                   ]
                 : []),
@@ -198,7 +213,7 @@ function UserAccessList({ i18n }) {
             <Button
               key="disassociate"
               variant="danger"
-              aria-label={i18n._(t`confirm disassociate`)}
+              aria-label={i18n._(t`Confirm disassociate`)}
               onClick={() => disassociateRole()}
             >
               {i18n._(t`Disassociate`)}

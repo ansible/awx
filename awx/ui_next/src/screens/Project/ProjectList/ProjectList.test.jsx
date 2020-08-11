@@ -78,6 +78,7 @@ describe('<ProjectList />', () => {
           GET: {},
           POST: {},
         },
+        related_search_fields: [],
       },
     });
   });

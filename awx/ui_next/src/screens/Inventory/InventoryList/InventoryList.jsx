@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
-
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
 
@@ -13,8 +12,8 @@ import ErrorDetail from '../../../components/ErrorDetail';
 import PaginatedDataList, {
   ToolbarDeleteButton,
 } from '../../../components/PaginatedDataList';
-
 import { getQSConfig, parseQueryString } from '../../../util/qs';
+import useWsInventories from './useWsInventories';
 import AddDropDownButton from '../../../components/AddDropDownButton';
 import InventoryListItem from './InventoryListItem';
 
@@ -30,7 +29,7 @@ function InventoryList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { inventories, itemCount, actions },
+    result: { results, itemCount, actions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchInventories,
@@ -42,21 +41,36 @@ function InventoryList({ i18n }) {
         InventoriesAPI.readOptions(),
       ]);
       return {
-        inventories: response.data.results,
+        results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [location]),
     {
-      inventories: [],
+      results: [],
       itemCount: 0,
       actions: {},
+      relatedSearchFields: [],
     }
   );
 
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
+
+  const fetchInventoriesById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await InventoriesAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const inventories = useWsInventories(results, fetchInventoriesById);
 
   const isAllSelected =
     selected.length === inventories.length && selected.length > 0;
@@ -83,6 +97,10 @@ function InventoryList({ i18n }) {
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...inventories] : []);
@@ -125,16 +143,16 @@ function InventoryList({ i18n }) {
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
               name: i18n._(t`Created By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Modified By (Username)`),
-              key: 'modified_by__username',
+              key: 'modified_by__username__icontains',
             },
           ]}
           toolbarSortColumns={[
@@ -143,11 +161,12 @@ function InventoryList({ i18n }) {
               key: 'name',
             },
           ]}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
               showSelectAll
-              showExpandCollapse
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}

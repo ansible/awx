@@ -11,6 +11,7 @@ import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
 import useRequest, { useDeleteItems } from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
+import useWsJobs from './useWsJobs';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
@@ -36,34 +37,53 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
 
   const [selected, setSelected] = useState([]);
   const location = useLocation();
-
   const {
-    result: { jobs, itemCount },
+    result: { results, count, actions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchJobs,
   } = useRequest(
-    useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, location.search);
-
-      const {
-        data: { count, results },
-      } = await UnifiedJobsAPI.read({ ...params });
-
-      return {
-        itemCount: count,
-        jobs: results,
-      };
-    }, [location]), // eslint-disable-line react-hooks/exhaustive-deps
+    useCallback(
+      async () => {
+        const params = parseQueryString(QS_CONFIG, location.search);
+        const [response, actionsResponse] = await Promise.all([
+          UnifiedJobsAPI.read({ ...params }),
+          UnifiedJobsAPI.readOptions(),
+        ]);
+        return {
+          results: response.data.results,
+          count: response.data.count,
+          actions: actionsResponse.data.actions,
+          relatedSearchFields: (
+            actionsResponse?.data?.related_search_fields || []
+          ).map(val => val.slice(0, -8)),
+        };
+      },
+      [location] // eslint-disable-line react-hooks/exhaustive-deps
+    ),
     {
-      jobs: [],
-      itemCount: 0,
+      results: [],
+      count: 0,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
-
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  // TODO: update QS_CONFIG to be safe for deps array
+  const fetchJobsById = useCallback(
+    async ids => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      params.id__in = ids.join(',');
+      const { data } = await UnifiedJobsAPI.read(params);
+      return data.results;
+    },
+    [location.search] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const jobs = useWsJobs(results, fetchJobsById, QS_CONFIG);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
   const {
@@ -118,6 +138,11 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     }
   };
 
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
+
   return (
     <>
       <Card>
@@ -125,14 +150,14 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading}
           items={jobs}
-          itemCount={itemCount}
+          itemCount={count}
           pluralizedItemName={i18n._(t`Jobs`)}
           qsConfig={QS_CONFIG}
           onRowClick={handleSelect}
           toolbarSearchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: 'name__icontains',
               isDefault: true,
             },
             {
@@ -141,11 +166,11 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             },
             {
               name: i18n._(t`Label Name`),
-              key: 'labels__name',
+              key: 'labels__name__icontains',
             },
             {
               name: i18n._(t`Job Type`),
-              key: `type`,
+              key: `or__type`,
               options: [
                 [`project_update`, i18n._(t`Source Control Update`)],
                 [`inventory_update`, i18n._(t`Inventory Sync`)],
@@ -157,7 +182,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
             },
             {
               name: i18n._(t`Launched By (Username)`),
-              key: 'created_by__username',
+              key: 'created_by__username__icontains',
             },
             {
               name: i18n._(t`Status`),
@@ -204,11 +229,12 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
               key: 'started',
             },
           ]}
+          toolbarSearchableKeys={searchableKeys}
+          toolbarRelatedSearchableKeys={relatedSearchableKeys}
           renderToolbar={props => (
             <DatalistToolbar
               {...props}
               showSelectAll
-              showExpandCollapse
               isAllSelected={isAllSelected}
               onSelectAll={handleSelectAll}
               qsConfig={QS_CONFIG}

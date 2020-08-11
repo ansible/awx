@@ -52,4 +52,30 @@ describe('<FormSubmitError>', () => {
     expect(global.console.error).toHaveBeenCalledWith(error);
     global.console = realConsole;
   });
+
+  test('should display error message if field error is nested', async () => {
+    const error = {
+      response: {
+        data: {
+          name: 'There was an error with name',
+          inputs: {
+            url: 'Error with url',
+          },
+        },
+      },
+    };
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>{() => <FormSubmitError error={error} />}</Formik>
+      );
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('Alert').contains(<div>There was an error with name</div>)
+    ).toEqual(true);
+    expect(wrapper.find('Alert').contains(<div>Error with url</div>)).toEqual(
+      true
+    );
+  });
 });

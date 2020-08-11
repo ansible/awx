@@ -17,12 +17,13 @@ django-polymorphic
 django-pglocks
 django-qsstats-magic
 django-radius==1.3.3  # FIX auth does not work with later versions
+django-redis
 django-solo
 django-split-settings
 django-taggit
 djangorestframework
 djangorestframework-yaml
-GitPython
+GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
 jinja2
 jsonschema
@@ -33,7 +34,6 @@ prometheus_client
 psycopg2
 pygerduty
 pyparsing
-python-memcached
 python-radius
 python3-saml
 pyyaml>=5.3.1  # minimum version to pull in new pyyaml for CVE-2017-18342

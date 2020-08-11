@@ -136,7 +136,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
   test('details should render with the proper values with prompts', async () => {
-    SchedulesAPI.readCredentials.mockResolvedValueOnce({
+    SchedulesAPI.readCredentials.mockResolvedValue({
       data: {
         count: 2,
         results: [
@@ -182,6 +182,7 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
+    // await waitForElement(wrapper, 'Title', el => el.length > 0);
     expect(
       wrapper
         .find('Detail[label="Name"]')

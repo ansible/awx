@@ -31,7 +31,7 @@ function InventoryHostGroupsList({ i18n }) {
   const { search } = useLocation();
 
   const {
-    result: { groups, itemCount, actions },
+    result: { groups, itemCount, actions, relatedSearchFields },
     error: contentError,
     isLoading,
     request: fetchGroups,
@@ -53,11 +53,16 @@ function InventoryHostGroupsList({ i18n }) {
         groups: results,
         itemCount: count,
         actions: actionsResponse.data.actions,
+        relatedSearchFields: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
       };
     }, [hostId, search]), // eslint-disable-line react-hooks/exhaustive-deps
     {
       groups: [],
       itemCount: 0,
+      actions: {},
+      relatedSearchFields: [],
     }
   );
 
@@ -121,6 +126,10 @@ function InventoryHostGroupsList({ i18n }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+  const relatedSearchableKeys = relatedSearchFields || [];
+  const searchableKeys = Object.keys(actions?.GET || {}).filter(
+    key => actions.GET[key].filterable
+  );
 
   return (
     <>
@@ -134,16 +143,16 @@ function InventoryHostGroupsList({ i18n }) {
         toolbarSearchColumns={[
           {
             name: i18n._(t`Name`),
-            key: 'name',
+            key: 'name__icontains',
             isDefault: true,
           },
           {
             name: i18n._(t`Created By (Username)`),
-            key: 'created_by__username',
+            key: 'created_by__username__icontains',
           },
           {
             name: i18n._(t`Modified By (Username)`),
-            key: 'modified_by__username',
+            key: 'modified_by__username__icontains',
           },
         ]}
         toolbarSortColumns={[
@@ -152,6 +161,8 @@ function InventoryHostGroupsList({ i18n }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={item => (
           <InventoryHostGroupItem
             key={item.id}

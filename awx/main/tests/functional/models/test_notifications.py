@@ -12,6 +12,7 @@ from awx.api.serializers import UnifiedJobSerializer
 
 class TestJobNotificationMixin(object):
     CONTEXT_STRUCTURE = {'job': {'allow_simultaneous': bool,
+                                 'artifacts': {},
                                  'custom_virtualenv': str,
                                  'controller_node': str,
                                  'created': datetime.datetime,

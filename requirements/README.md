@@ -8,6 +8,8 @@ Commands should be run from inside the `./requirements` directory of the awx rep
 
 Make sure you have `patch, awk, python3, python2, python3-venv, python2-virtualenv, pip2, pip3` installed. The development container image should have all these.
 
+Even in the dev container, you may still have to dnf install `libpq-devel libcurl-devel`.
+
 ### Upgrading or Adding Select Libraries
 
 If you need to add or upgrade one targeted library, then modify `requirements.in`,

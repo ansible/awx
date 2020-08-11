@@ -31,6 +31,15 @@ describe('CredentialsStep', () => {
         count: 5,
       },
     });
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
   test('should load credentials', async () => {

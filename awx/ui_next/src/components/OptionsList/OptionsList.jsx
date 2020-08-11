@@ -18,7 +18,7 @@ import DataListToolbar from '../DataListToolbar';
 import { QSConfig, SearchColumns, SortColumns } from '../../types';
 
 const ModalList = styled.div`
-  .pf-c-data-toolbar__content {
+  .pf-c-toolbar__content {
     padding: 0 !important;
   }
 `;
@@ -30,6 +30,8 @@ function OptionsList({
   optionCount,
   searchColumns,
   sortColumns,
+  searchableKeys,
+  relatedSearchableKeys,
   multiple,
   header,
   name,
@@ -61,6 +63,8 @@ function OptionsList({
         qsConfig={qsConfig}
         toolbarSearchColumns={searchColumns}
         toolbarSortColumns={sortColumns}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         hasContentLoading={isLoading}
         onRowClick={selectItem}
         renderItem={item => (

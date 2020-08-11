@@ -15,7 +15,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
         let form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],
             defaultUrl = GetBasePath('projects'),
-            master = {};
+            main = {};
 
         init();
 
@@ -46,7 +46,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             GenerateForm.applyDefaults(form, $scope);
         }
 
-        GetProjectPath({ scope: $scope, master: master });
+        GetProjectPath({ scope: $scope, main: main });
 
         if ($scope.removeChoicesReady) {
             $scope.removeChoicesReady();
@@ -67,7 +67,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             });
 
             $scope.scmRequired = false;
-            master.scm_type = $scope.scm_type;
+            main.scm_type = $scope.scm_type;
         });
 
         // Load the list of options for Kind

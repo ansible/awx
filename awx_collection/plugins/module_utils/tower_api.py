@@ -33,7 +33,7 @@ class ItemNotDefined(Exception):
 
 class TowerModule(AnsibleModule):
     # This gets set by the make process so whatever is in here is irrelevant
-    _COLLECTION_VERSION = "devel"
+    _COLLECTION_VERSION = "0.0.1-devel"
     _COLLECTION_TYPE = "awx"
     # This maps the collections type (awx/tower) to the values returned by the API
     # Those values can be found in awx/api/generics.py line 204
@@ -521,6 +521,9 @@ class TowerModule(AnsibleModule):
             elif item_type == 'o_auth2_access_token':
                 # An oauth2 token has no name, instead we will use its id for any of the messages
                 item_name = existing_item['id']
+            elif item_type == 'credential_input_source':
+                # An credential_input_source has no name, instead we will use its id for any of the messages
+                item_name = existing_item['id']
             else:
                 self.fail_json(msg="Unable to process delete of {0} due to missing name".format(item_type))
 
@@ -691,6 +694,8 @@ class TowerModule(AnsibleModule):
                     item_name = existing_item['username']
                 elif item_type == 'workflow_job_template_node':
                     item_name = existing_item['identifier']
+                elif item_type == 'credential_input_source':
+                    item_name = existing_item['id']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']

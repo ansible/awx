@@ -43,7 +43,7 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "cloudforms", "openstack", "rhv", "tower", "custom" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "tower", "custom" ]
       type: str
     source_path:
       description:
@@ -77,7 +77,6 @@ options:
       description:
         - Delete child groups and hosts not found in source.
       type: bool
-      default: 'no'
     overwrite_vars:
       description:
         - Override vars in child groups and hosts with those from external source.
@@ -86,7 +85,6 @@ options:
       description:
         - Local absolute file path containing a custom Python virtualenv to use.
       type: str
-      default: ''
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
       type: int
@@ -98,7 +96,6 @@ options:
       description:
         - Refresh inventory data from its source each time a job is run.
       type: bool
-      default: 'no'
     update_cache_timeout:
       description:
         - Time in seconds to consider an inventory sync to be current.
@@ -162,7 +159,7 @@ def main():
         # How do we handle manual and file? Tower does not seem to be able to activate them
         #
         source=dict(choices=["scm", "ec2", "gce",
-                             "azure_rm", "vmware", "satellite6", "cloudforms",
+                             "azure_rm", "vmware", "satellite6",
                              "openstack", "rhv", "tower", "custom"]),
         source_path=dict(),
         source_script=dict(),
@@ -173,7 +170,7 @@ def main():
         group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
-        custom_virtualenv=dict(default=''),
+        custom_virtualenv=dict(),
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
@@ -257,7 +254,7 @@ def main():
     # Layer in all remaining optional information
     for field_name in OPTIONAL_VARS:
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             inventory_source_fields[field_name] = field_val
 
     # Attempt to JSON encode source vars

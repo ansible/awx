@@ -19,15 +19,18 @@ function Applications({ i18n }) {
       if (!application) {
         return;
       }
-
       setBreadcrumbConfig({
         '/applications': i18n._(t`Applications`),
         '/applications/add': i18n._(t`Create New Application`),
-        [`/application/${application.id}`]: `${application.name}`,
+        [`/applications/${application.id}`]: `${application.name}`,
+        [`/applications/${application.id}/edit`]: i18n._(t`Edit Details`),
+        [`/applications/${application.id}/details`]: i18n._(t`Details`),
+        [`/applications/${application.id}/tokens`]: i18n._(t`Tokens`),
       });
     },
     [i18n]
   );
+
   return (
     <>
       <Breadcrumbs breadcrumbConfig={breadcrumbConfig} />

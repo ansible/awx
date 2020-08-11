@@ -14,6 +14,8 @@ import time
 from base64 import b64encode
 from collections import OrderedDict
 
+from urllib3.exceptions import ConnectTimeoutError
+
 
 # Django
 from django.conf import settings
@@ -171,6 +173,15 @@ def api_exception_handler(exc, context):
         exc = ParseError(exc.args[0])
     if isinstance(context['view'], UnifiedJobStdout):
         context['view'].renderer_classes = [renderers.BrowsableAPIRenderer, JSONRenderer]
+    if isinstance(exc, APIException):
+        req = context['request']._request
+        if 'awx.named_url_rewritten' in req.environ and not str(getattr(exc, 'status_code', 0)).startswith('2'):
+            # if the URL was rewritten, and it's not a 2xx level status code,
+            # revert the request.path to its original value to avoid leaking
+            # any context about the existance of resources
+            req.path = req.environ['awx.named_url_rewritten']
+            if exc.status_code == 403:
+                exc = NotFound(detail=_('Not found.'))
     return exception_handler(exc, context)
 
 
@@ -1397,10 +1408,18 @@ class CredentialExternalTest(SubDetailAPIView):
             obj.credential_type.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
-            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            message = exc.__class__.__name__
+            args = getattr(exc, 'args', [])
+            for a in args:
+                if isinstance(
+                    getattr(a, 'reason', None),
+                    ConnectTimeoutError
+                ):
+                    message = str(a.reason)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
@@ -1449,10 +1468,18 @@ class CredentialTypeExternalTest(SubDetailAPIView):
             obj.plugin.backend(**backend_kwargs)
             return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}\n{}'.format(exc.response.status_code, exc.response.text)
+            message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
-            return Response({'inputs': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            message = exc.__class__.__name__
+            args = getattr(exc, 'args', [])
+            for a in args:
+                if isinstance(
+                    getattr(a, 'reason', None),
+                    ConnectTimeoutError
+                ):
+                    message = str(a.reason)
+            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostRelatedSearchMixin(object):
@@ -2657,7 +2684,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
             return {"error": _("Cannot assign multiple {credential_type} credentials.").format(
                 credential_type=sub.unique_hash(display=True))}
         kind = sub.credential_type.kind
-        if kind not in ('ssh', 'vault', 'cloud', 'net'):
+        if kind not in ('ssh', 'vault', 'cloud', 'net', 'kubernetes'):
             return {'error': _('Cannot assign a Credential of kind `{}`.').format(kind)}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)

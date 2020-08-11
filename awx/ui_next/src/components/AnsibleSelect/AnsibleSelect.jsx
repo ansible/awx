@@ -43,7 +43,7 @@ class AnsibleSelect extends React.Component {
         onChange={this.onSelectChange}
         onBlur={onBlur}
         aria-label={i18n._(t`Select Input`)}
-        isValid={isValid}
+        validated={isValid ? 'default' : 'error'}
         className={className}
         isDisabled={isDisabled}
       >

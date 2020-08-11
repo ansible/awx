@@ -16,6 +16,8 @@ function JobTemplateAdd() {
       initialInstanceGroups,
       credentials,
       webhook_credential,
+      webhook_key,
+      webhook_url,
       ...remainingValues
     } = values;
 

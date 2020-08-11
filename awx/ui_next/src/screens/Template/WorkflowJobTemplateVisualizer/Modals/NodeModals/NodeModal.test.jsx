@@ -4,7 +4,10 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from '../../../../../contexts/Workflow';
-import { mountWithContexts } from '../../../../../../testUtils/enzymeHelpers';
+import {
+  waitForElement,
+  mountWithContexts,
+} from '../../../../../../testUtils/enzymeHelpers';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
@@ -95,6 +98,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
     });
 
     afterAll(() => {
@@ -307,6 +311,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('project_sync');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(null, 'approval');
@@ -388,6 +393,7 @@ describe('NodeModal', () => {
           </WorkflowDispatchContext.Provider>
         );
       });
+      await waitForElement(wrapper, 'PFWizard');
       expect(wrapper.find('AnsibleSelect').prop('value')).toBe('approval');
       await act(async () => {
         wrapper.find('AnsibleSelect').prop('onChange')(

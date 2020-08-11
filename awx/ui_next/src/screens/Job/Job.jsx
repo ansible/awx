@@ -2,11 +2,10 @@ import React, { Component } from 'react';
 import { Route, withRouter, Switch, Redirect, Link } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Card, CardActions, PageSection } from '@patternfly/react-core';
+import { CaretLeftIcon } from '@patternfly/react-icons';
+import { Card, PageSection } from '@patternfly/react-core';
 import { JobsAPI } from '../../api';
-import { TabbedCardHeader } from '../../components/Card';
 import ContentError from '../../components/ContentError';
-import CardCloseButton from '../../components/CardCloseButton';
 import RoutedTabs from '../../components/RoutedTabs';
 
 import JobDetail from './JobDetail';
@@ -67,21 +66,24 @@ class Job extends Component {
     }
 
     const tabsArray = [
+      {
+        name: (
+          <>
+            <CaretLeftIcon />
+            {i18n._(t`Back to Jobs`)}
+          </>
+        ),
+        link: `/jobs`,
+        id: 99,
+      },
       { name: i18n._(t`Details`), link: `${match.url}/details`, id: 0 },
       { name: i18n._(t`Output`), link: `${match.url}/output`, id: 1 },
     ];
 
-    let cardHeader = (
-      <TabbedCardHeader>
-        <RoutedTabs tabsArray={tabsArray} />
-        <CardActions>
-          <CardCloseButton linkTo="/jobs" />
-        </CardActions>
-      </TabbedCardHeader>
-    );
+    let showCardHeader = true;
 
     if (!isInitialized) {
-      cardHeader = null;
+      showCardHeader = false;
     }
 
     if (!hasContentLoading && contentError) {
@@ -91,8 +93,8 @@ class Job extends Component {
             <ContentError error={contentError}>
               {contentError.response.status === 404 && (
                 <span>
-                  {i18n._(`The page you requested could not be found.`)}{' '}
-                  <Link to="/jobs">{i18n._(`View all Jobs.`)}</Link>
+                  {i18n._(t`The page you requested could not be found.`)}{' '}
+                  <Link to="/jobs">{i18n._(t`View all Jobs.`)}</Link>
                 </span>
               )}
             </ContentError>
@@ -117,7 +119,7 @@ class Job extends Component {
     return (
       <PageSection>
         <Card>
-          {cardHeader}
+          {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
           <Switch>
             <Redirect
               from="/jobs/:type/:id"
@@ -147,7 +149,7 @@ class Job extends Component {
                       <Link
                         to={`/jobs/${match.params.type}/${match.params.id}/details`}
                       >
-                        {i18n._(`View Job Details`)}
+                        {i18n._(t`View Job Details`)}
                       </Link>
                     </ContentError>
                   )}

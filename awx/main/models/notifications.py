@@ -262,25 +262,25 @@ class JobNotificationMixin(object):
                                'running': 'started',
                                'failed': 'error'}
     # Tree of fields that can be safely referenced in a notification message
-    JOB_FIELDS_WHITELIST = ['id', 'type', 'url', 'created', 'modified', 'name', 'description', 'job_type', 'playbook',
-                            'forks', 'limit', 'verbosity', 'job_tags', 'force_handlers', 'skip_tags', 'start_at_task',
-                            'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
-                            'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
-                            'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
-                            'approval_status', 'approval_node_name', 'workflow_url', 'scm_branch',
-                            {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark'
-                                                    'processed', 'rescued', 'ignored']},
-                            {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
-                                                               'total_hosts', 'hosts_with_active_failures', 'total_groups',
-                                                               'has_inventory_sources',
-                                                               'total_inventory_sources', 'inventory_sources_with_failures',
-                                                               'organization_id', 'kind']},
-                                                {'project': ['id', 'name', 'description', 'status', 'scm_type']},
-                                                {'job_template': ['id', 'name', 'description']},
-                                                {'unified_job_template': ['id', 'name', 'description', 'unified_job_type']},
-                                                {'instance_group': ['name', 'id']},
-                                                {'created_by': ['id', 'username', 'first_name', 'last_name']},
-                                                {'labels': ['count', 'results']}]}]
+    JOB_FIELDS_ALLOWED_LIST = ['id', 'type', 'url', 'created', 'modified', 'name', 'description', 'job_type', 'playbook',
+                               'forks', 'limit', 'verbosity', 'job_tags', 'force_handlers', 'skip_tags', 'start_at_task',
+                               'timeout', 'use_fact_cache', 'launch_type', 'status', 'failed', 'started', 'finished',
+                               'elapsed', 'job_explanation', 'execution_node', 'controller_node', 'allow_simultaneous',
+                               'scm_revision', 'diff_mode', 'job_slice_number', 'job_slice_count', 'custom_virtualenv',
+                               'approval_status', 'approval_node_name', 'workflow_url', 'scm_branch', 'artifacts',
+                               {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark'
+                                                       'processed', 'rescued', 'ignored']},
+                               {'summary_fields': [{'inventory': ['id', 'name', 'description', 'has_active_failures',
+                                                                  'total_hosts', 'hosts_with_active_failures', 'total_groups',
+                                                                  'has_inventory_sources',
+                                                                  'total_inventory_sources', 'inventory_sources_with_failures',
+                                                                  'organization_id', 'kind']},
+                                                   {'project': ['id', 'name', 'description', 'status', 'scm_type']},
+                                                   {'job_template': ['id', 'name', 'description']},
+                                                   {'unified_job_template': ['id', 'name', 'description', 'unified_job_type']},
+                                                   {'instance_group': ['name', 'id']},
+                                                   {'created_by': ['id', 'username', 'first_name', 'last_name']},
+                                                   {'labels': ['count', 'results']}]}]
 
     @classmethod
     def context_stub(cls):
@@ -288,6 +288,7 @@ class JobNotificationMixin(object):
         Context has the same structure as the context that will actually be used to render
         a notification message."""
         context = {'job': {'allow_simultaneous': False,
+                           'artifacts': {},
                            'controller_node': 'foo_controller',
                            'created': datetime.datetime(2018, 11, 13, 6, 4, 0, 0, tzinfo=datetime.timezone.utc),
                            'custom_virtualenv': 'my_venv',
@@ -377,8 +378,8 @@ class JobNotificationMixin(object):
 
     def context(self, serialized_job):
         """Returns a dictionary that can be used for rendering notification messages.
-        The context will contain whitelisted content retrieved from a serialized job object
-        (see JobNotificationMixin.JOB_FIELDS_WHITELIST), the job's friendly name,
+        The context will contain allowed content retrieved from a serialized job object
+        (see JobNotificationMixin.JOB_FIELDS_ALLOWED_LIST the job's friendly name,
         and a url to the job run."""
         job_context = {'host_status_counts': {}}
         summary = None
@@ -395,22 +396,22 @@ class JobNotificationMixin(object):
             'job_metadata': json.dumps(self.notification_data(), indent=4)
         }
 
-        def build_context(node, fields, whitelisted_fields):
-            for safe_field in whitelisted_fields:
+        def build_context(node, fields, allowed_fields):
+            for safe_field in allowed_fields:
                 if type(safe_field) is dict:
-                    field, whitelist_subnode = safe_field.copy().popitem()
+                    field, allowed_subnode = safe_field.copy().popitem()
                     # ensure content present in job serialization
                     if field not in fields:
                         continue
                     subnode = fields[field]
                     node[field] = {}
-                    build_context(node[field], subnode, whitelist_subnode)
+                    build_context(node[field], subnode, allowed_subnode)
                 else:
                     # ensure content present in job serialization
                     if safe_field not in fields:
                         continue
                     node[safe_field] = fields[safe_field]
-        build_context(context['job'], serialized_job, self.JOB_FIELDS_WHITELIST)
+        build_context(context['job'], serialized_job, self.JOB_FIELDS_ALLOWED_LIST)
 
         return context
 

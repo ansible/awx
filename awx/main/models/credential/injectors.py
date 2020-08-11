@@ -101,3 +101,17 @@ def openstack(cred, env, private_data_dir):
     f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     env['OS_CLIENT_CONFIG_FILE'] = path
+
+
+def kubernetes_bearer_token(cred, env, private_data_dir):
+    env['K8S_AUTH_HOST'] = cred.get_input('host', default='')
+    env['K8S_AUTH_API_KEY'] = cred.get_input('bearer_token', default='')
+    if cred.get_input('verify_ssl') and 'ssl_ca_cert' in cred.inputs:
+        env['K8S_AUTH_VERIFY_SSL'] = 'True'
+        handle, path = tempfile.mkstemp(dir=private_data_dir)
+        with os.fdopen(handle, 'w') as f:
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            f.write(cred.get_input('ssl_ca_cert'))
+        env['K8S_AUTH_SSL_CA_CERT'] = path
+    else:
+        env['K8S_AUTH_VERIFY_SSL'] = 'False'

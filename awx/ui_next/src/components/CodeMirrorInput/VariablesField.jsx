@@ -35,7 +35,7 @@ function VariablesField({
   return (
     <div className="pf-c-form__group">
       <FieldHeader>
-        <Split gutter="sm">
+        <Split hasGutter>
           <SplitItem>
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>

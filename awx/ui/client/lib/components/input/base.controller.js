@@ -12,7 +12,13 @@ function BaseInputController (strings) {
 
         scope.state._touched = false;
         scope.state._required = scope.state.required || false;
-        scope.state._isValid = scope.state._isValid || false;
+
+        if (scope.state.type === 'boolean') {
+            scope.state._isValid = scope.state._isValid || true;
+        } else {
+            scope.state._isValid = scope.state._isValid || false;
+        }
+
         scope.state._disabled = scope.state._disabled || false;
         scope.state._activeModel = scope.state._activeModel || '_value';
 
@@ -57,6 +63,10 @@ function BaseInputController (strings) {
 
             if (scope.state._value || scope.state._displayValue) {
                 scope.state._touched = true;
+            }
+
+            if (scope.state.type === 'boolean') {
+                return { isValid, message };
             }
 
             if (scope.state._required && (!scope.state._value || !scope.state._value[0]) &&

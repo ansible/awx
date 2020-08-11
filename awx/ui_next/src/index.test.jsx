@@ -12,6 +12,11 @@ require('./index.jsx');
 
 describe('index.jsx', () => {
   it('renders ok', () => {
-    expect(ReactDOM.render).toHaveBeenCalledWith(<App />, div);
+    expect(ReactDOM.render).toHaveBeenCalledWith(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+      div
+    );
   });
 });

@@ -61,7 +61,10 @@ def patch_Job():
 
 @pytest.fixture
 def job():
-    return Job(pk=1, id=1, project=Project(), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
+    return Job(
+        pk=1, id=1,
+        project=Project(local_path='/projects/_23_foo'),
+        inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
 
 
 @pytest.fixture
@@ -347,7 +350,7 @@ class TestExtraVarSanitation(TestJobExecution):
         assert extra_vars['msg'] == {'a': [self.UNSAFE]}
         assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
 
-    def test_whitelisted_jt_extra_vars(self, job, private_data_dir):
+    def test_allowed_jt_extra_vars(self, job, private_data_dir):
         job.job_template.extra_vars = job.extra_vars = json.dumps({'msg': self.UNSAFE})
         task = tasks.RunJob()
 
@@ -358,7 +361,7 @@ class TestExtraVarSanitation(TestJobExecution):
         assert extra_vars['msg'] == self.UNSAFE
         assert not hasattr(extra_vars['msg'], '__UNSAFE__')
 
-    def test_nested_whitelisted_vars(self, job, private_data_dir):
+    def test_nested_allowed_vars(self, job, private_data_dir):
         job.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
         job.job_template.extra_vars = job.extra_vars
         task = tasks.RunJob()
@@ -406,7 +409,9 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun():
 
     def test_generic_failure(self, patch_Job):
-        job = Job(status='running', inventory=Inventory(), project=Project())
+        job = Job(
+            status='running', inventory=Inventory(),
+            project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
 
         task = tasks.RunJob()
@@ -1036,6 +1041,43 @@ class TestJobCredentials(TestJobExecution):
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
+
+    @pytest.mark.parametrize("verify", (True, False))
+    def test_k8s_credential(self, job, private_data_dir, verify):
+        k8s = CredentialType.defaults['kubernetes_bearer_token']()
+        inputs = {
+            'host': 'https://example.org/',
+            'bearer_token': 'token123',
+        }
+        if verify:
+            inputs['verify_ssl'] = True
+            inputs['ssl_ca_cert'] = 'CERTDATA'
+        credential = Credential(
+            pk=1,
+            credential_type=k8s,
+            inputs = inputs,
+        )
+        credential.inputs['bearer_token'] = encrypt_field(credential, 'bearer_token')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, [], private_data_dir
+        )
+
+        assert env['K8S_AUTH_HOST'] == 'https://example.org/'
+        assert env['K8S_AUTH_API_KEY'] == 'token123'
+
+        if verify:
+            assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
+            cert = open(env['K8S_AUTH_SSL_CA_CERT'], 'r').read()
+            assert cert == 'CERTDATA'
+        else:
+            assert env['K8S_AUTH_VERIFY_SSL'] == 'False'
+            assert 'K8S_AUTH_SSL_CA_CERT' not in env
+
+        assert safe_env['K8S_AUTH_API_KEY'] == tasks.HIDDEN_PASSWORD
 
     def test_aws_cloud_credential(self, job, private_data_dir):
         aws = CredentialType.defaults['aws']()
@@ -1835,6 +1877,13 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+@pytest.fixture
+def mock_ansible_version():
+    with mock.patch('awx.main.tasks._get_ansible_version', mock.MagicMock(return_value='2.10')) as _fixture:
+        yield _fixture
+
+
+@pytest.mark.usefixtures("mock_ansible_version")
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self):
@@ -1852,17 +1901,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         assert 'AWS_ACCESS_KEY_ID' not in env
         assert 'AWS_SECRET_ACCESS_KEY' not in env
-        assert 'EC2_INI_PATH' in env
-
-        config = configparser.ConfigParser()
-        config.read(env['EC2_INI_PATH'])
-        assert 'ec2' in config.sections()
 
     @pytest.mark.parametrize('with_credential', [True, False])
     def test_custom_source(self, with_credential, mocker, inventory_update, private_data_dir):
@@ -1928,20 +1971,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        # force test to use the ec2 script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
-        assert 'EC2_INI_PATH' in env
-
-        config = configparser.ConfigParser()
-        config.read(env['EC2_INI_PATH'])
-        assert 'ec2' in config.sections()
 
         assert safe_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
@@ -1961,9 +1997,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = {}
         credentials = task.build_credentials_list(inventory_update)
@@ -1973,11 +2008,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential, env, safe_env, [], private_data_dir
                 )
 
-        config = configparser.ConfigParser()
-        config.read(env['VMWARE_INI_PATH'])
-        assert config.get('vmware', 'username') == 'bob'
-        assert config.get('vmware', 'password') == 'secret'
-        assert config.get('vmware', 'server') == 'https://example.org'
+        env["VMWARE_USER"] == "bob",
+        env["VMWARE_PASSWORD"] == "secret",
+        env["VMWARE_HOST"] == "https://example.org",
+        env["VMWARE_VALIDATE_CERTS"] == "False",
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker):
         task = tasks.RunInventoryUpdate()
@@ -2005,10 +2039,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_resource_group': 'no'
         }
 
-        # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -2017,15 +2049,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_TENANT'] == 'some-tenant'
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-
-        config = configparser.ConfigParser()
-        config.read(env['AZURE_INI_PATH'])
-        assert config.get('azure', 'include_powerstate') == 'yes'
-        assert config.get('azure', 'group_by_resource_group') == 'no'
-        assert config.get('azure', 'group_by_location') == 'yes'
-        assert 'group_by_security_group' not in config.items('azure')
-        assert config.get('azure', 'group_by_tag') == 'yes'
-        assert config.get('azure', 'locations') == 'north,south,east,west'
 
         assert safe_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
 
@@ -2055,10 +2078,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'group_by_security_group': 'no'
         }
 
-        # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -2067,14 +2088,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-        config = configparser.ConfigParser()
-        config.read(env['AZURE_INI_PATH'])
-        assert config.get('azure', 'include_powerstate') == 'yes'
-        assert config.get('azure', 'group_by_resource_group') == 'no'
-        assert config.get('azure', 'group_by_location') == 'yes'
-        assert config.get('azure', 'group_by_security_group') == 'no'
-        assert config.get('azure', 'group_by_tag') == 'yes'
-        assert 'locations' not in config.items('azure')
         assert safe_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_gce_source(self, inventory_update, private_data_dir, mocker):
@@ -2117,18 +2130,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
             assert json_data['client_email'] == 'bob'
             assert json_data['project_id'] == 'some-project'
-
-            config = configparser.ConfigParser()
-            config.read(env['GCE_INI_PATH'])
-            assert 'cache' in config.sections()
-            assert config.getint('cache', 'cache_max_age') == 0
-
-        # Change the initial version of the inventory plugin to force use of script
-        with mock.patch('awx.main.models.inventory.gce.initial_version', None):
-            run('')
-
-            inventory_update.source_regions = 'us-east-4'
-            run('us-east-4')
 
     def test_openstack_source(self, inventory_update, private_data_dir, mocker):
         task = tasks.RunInventoryUpdate()
@@ -2200,60 +2201,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             'satellite6_want_facts': False
         }
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
-
-        config = configparser.ConfigParser()
-        config.read(env['FOREMAN_INI_PATH'])
-        assert config.get('foreman', 'url') == 'https://example.org'
-        assert config.get('foreman', 'user') == 'bob'
-        assert config.get('foreman', 'password') == 'secret'
-        assert config.get('ansible', 'group_patterns') == '[a,b,c]'
-        assert config.get('ansible', 'group_prefix') == 'hey_'
-        assert config.get('ansible', 'want_hostcollections') == 'True'
-        assert config.get('ansible', 'want_ansible_ssh_host') == 'True'
-        assert config.get('ansible', 'rich_params') == 'True'
-        assert config.get('ansible', 'want_facts') == 'False'
-
-    def test_cloudforms_source(self, inventory_update, private_data_dir, mocker):
-        task = tasks.RunInventoryUpdate()
-        cloudforms = CredentialType.defaults['cloudforms']()
-        inventory_update.source = 'cloudforms'
-
-        def get_cred():
-            cred = Credential(
-                pk=1,
-                credential_type=cloudforms,
-                inputs = {
-                    'username': 'bob',
-                    'password': 'secret',
-                    'host': 'https://example.org'
-                }
-            )
-            cred.inputs['password'] = encrypt_field(
-                cred, 'password'
-            )
-            return cred
-        inventory_update.get_cloud_credential = get_cred
-        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-
-        inventory_update.source_vars = '{"prefer_ipv4": True}'
-
         private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
-        config = configparser.ConfigParser()
-        config.read(env['CLOUDFORMS_INI_PATH'])
-        assert config.get('cloudforms', 'url') == 'https://example.org'
-        assert config.get('cloudforms', 'username') == 'bob'
-        assert config.get('cloudforms', 'password') == 'secret'
-        assert config.get('cloudforms', 'ssl_verify') == 'false'
-        assert config.get('cloudforms', 'prefer_ipv4') == 'True'
-
-        cache_path = config.get('cache', 'path')
-        assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
-        assert os.path.isdir(cache_path)
+        env["FOREMAN_SERVER"] == "https://example.org",
+        env["FOREMAN_USER"] == "bob",
+        env["FOREMAN_PASSWORD"] == "secret",
 
     @pytest.mark.parametrize('verify', [True, False])
     def test_tower_source(self, verify, inventory_update, private_data_dir, mocker):
@@ -2275,16 +2228,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        # force tower inventory source to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            env = task.build_env(inventory_update, private_data_dir, False)
+        env = task.build_env(inventory_update, private_data_dir, False)
 
         safe_env = build_safe_env(env)
 
         assert env['TOWER_HOST'] == 'https://tower.example.org'
         assert env['TOWER_USERNAME'] == 'bob'
         assert env['TOWER_PASSWORD'] == 'secret'
-        assert env['TOWER_INVENTORY'] == '12345'
         if verify:
             assert env['TOWER_VERIFY_SSL'] == 'True'
         else:
@@ -2339,9 +2289,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         assert env['FOO'] == 'BAR'
 
@@ -2373,7 +2322,7 @@ def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
 
     ProjectUpdate = tasks.RunProjectUpdate()
 
-    with pytest.raises(OSError, message='dummy message'):
+    with pytest.raises(OSError):
         ProjectUpdate.acquire_lock(instance)
     assert logger.err.called_with("I/O error({0}) while trying to open lock file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
 
@@ -2399,7 +2348,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_
     fcntl_lockf.side_effect = err
 
     ProjectUpdate = tasks.RunProjectUpdate()
-    with pytest.raises(IOError, message='dummy message'):
+    with pytest.raises(IOError):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
     assert logger.err.called_with("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))

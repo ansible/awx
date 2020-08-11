@@ -81,14 +81,16 @@ const ManualSubForm = ({
         fieldId="project-local-path"
         helperTextInvalid={pathMeta.error}
         isRequired
-        isValid={!pathMeta.touched || !pathMeta.error}
+        validated={!pathMeta.touched || !pathMeta.error ? 'default' : 'error'}
         label={i18n._(t`Playbook Directory`)}
-      >
-        <FieldTooltip
-          content={i18n._(t`Select from the list of directories found in
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(t`Select from the list of directories found in
           the Project Base Path. Together the base path and the playbook
           directory provide the full path used to locate playbooks.`)}
-        />
+          />
+        }
+      >
         <AnsibleSelect
           {...pathField}
           id="local_path"

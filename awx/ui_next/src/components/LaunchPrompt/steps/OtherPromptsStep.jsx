@@ -101,13 +101,15 @@ function JobTypeField({ i18n }) {
     <FormGroup
       fieldId="propmt-job-type"
       label={i18n._(t`Job Type`)}
-      isValid={isValid}
-    >
-      <FieldTooltip
-        content={i18n._(t`For job templates, select run to execute the playbook.
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(t`For job templates, select run to execute the playbook.
       Select check to only check playbook syntax, test environment setup,
       and report problems without executing the playbook.`)}
-      />
+        />
+      }
+      validated={isValid ? 'default' : 'error'}
+    >
       <AnsibleSelect
         id="prompt-job-type"
         data={options}
@@ -132,13 +134,15 @@ function VerbosityField({ i18n }) {
   return (
     <FormGroup
       fieldId="prompt-verbosity"
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={i18n._(t`Verbosity`)}
-    >
-      <FieldTooltip
-        content={i18n._(t`Control the level of output ansible
+      labelIcon={
+        <FieldTooltip
+          content={i18n._(t`Control the level of output ansible
           will produce as the playbook executes.`)}
-      />
+        />
+      }
+    >
       <AnsibleSelect
         id="prompt-verbosity"
         data={options}
@@ -180,8 +184,11 @@ function ShowChangesToggle({ i18n }) {
 function TagField({ id, name, label, tooltip }) {
   const [field, , helpers] = useField(name);
   return (
-    <FormGroup fieldId={id} label={label}>
-      <FieldTooltip content={tooltip} />
+    <FormGroup
+      fieldId={id}
+      label={label}
+      labelIcon={<FieldTooltip content={tooltip} />}
+    >
       <TagMultiSelect value={field.value} onChange={helpers.setValue} />
     </FormGroup>
   );

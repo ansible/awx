@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { matchPath, Link, withRouter } from 'react-router-dom';
 import { NavExpandable, NavItem } from '@patternfly/react-core';
 
 class NavExpandableGroup extends Component {
   constructor(props) {
     super(props);
     const { routes } = this.props;
+    this.state = { isExpanded: false };
+
     // Extract a list of paths from the route params and store them for later. This creates
     // an array of url paths associated with any NavItem component rendered by this component.
     this.navItemPaths = routes.map(({ path }) => path);
-
+    this.handleExpand = this.handleExpand.bind(this);
     this.isActiveGroup = this.isActiveGroup.bind(this);
     this.isActivePath = this.isActivePath.bind(this);
   }
@@ -21,29 +23,41 @@ class NavExpandableGroup extends Component {
 
   isActivePath(path) {
     const { history } = this.props;
+    return Boolean(matchPath(history.location.pathname, { path }));
+  }
 
-    return history.location.pathname.startsWith(path);
+  handleExpand(e, isExpanded) {
+    this.setState({ isExpanded });
   }
 
   render() {
     const { groupId, groupTitle, routes } = this.props;
-    const isActive = this.isActiveGroup();
+    const { isExpanded } = this.state;
+
+    if (routes.length === 1) {
+      const [{ path }] = routes;
+      return (
+        <NavItem itemId={groupId} isActive={this.isActivePath(path)} key={path}>
+          <Link to={path}>{groupTitle}</Link>
+        </NavItem>
+      );
+    }
 
     return (
       <NavExpandable
-        isActive={isActive}
-        isExpanded={isActive}
+        isActive={this.isActiveGroup()}
+        isExpanded={isExpanded}
         groupId={groupId}
         title={groupTitle}
+        onExpand={this.handleExpand}
       >
         {routes.map(({ path, title }) => (
           <NavItem
             groupId={groupId}
             isActive={this.isActivePath(path)}
             key={path}
-            to={`/#${path}`}
           >
-            {title}
+            <Link to={path}>{title}</Link>
           </NavItem>
         ))}
       </NavExpandable>

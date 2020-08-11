@@ -96,10 +96,10 @@ function MultipleChoiceField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
+      labelIcon={<FieldTooltip content={question.question_description} />}
     >
-      <FieldTooltip content={question.question_description} />
       <AnsibleSelect
         id={id}
         isValid={isValid}
@@ -124,10 +124,10 @@ function MultiSelectField({ question }) {
       fieldId={id}
       helperTextInvalid={meta.error}
       isRequired={question.required}
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       label={question.question_name}
+      labelIcon={<FieldTooltip content={question.question_description} />}
     >
-      <FieldTooltip content={question.question_description} />
       <Select
         variant={SelectVariant.typeaheadMulti}
         id={id}
@@ -139,7 +139,7 @@ function MultiSelectField({ question }) {
             helpers.setValue(field.value.concat(option));
           }
         }}
-        isExpanded={isOpen}
+        isOpen={isOpen}
         selections={field.value}
       >
         {question.choices.split('\n').map(opt => (

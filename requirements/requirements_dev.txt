@@ -5,15 +5,14 @@ ipython==5.2.1
 unittest2
 pep8
 flake8
-pluggy==0.6.0
 pyflakes
-pytest==3.6.0
+pytest
 pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock==1.11.1
 pytest-timeout
-pytest-xdist<1.28.0
+pytest-xdist
 tox  # for awxkit
 logutils
 jupyter

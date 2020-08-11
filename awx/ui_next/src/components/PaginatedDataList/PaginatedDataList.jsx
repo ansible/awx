@@ -69,6 +69,8 @@ class PaginatedDataList extends React.Component {
       qsConfig,
       renderItem,
       toolbarSearchColumns,
+      toolbarSearchableKeys,
+      toolbarRelatedSearchableKeys,
       toolbarSortColumns,
       pluralizedItemName,
       showPageSizeOptions,
@@ -121,6 +123,28 @@ class PaginatedDataList extends React.Component {
       );
     }
 
+    const ToolbarPagination = (
+      <Pagination
+        isCompact
+        dropDirection="down"
+        itemCount={itemCount}
+        page={queryParams.page || 1}
+        perPage={queryParams.page_size}
+        perPageOptions={
+          showPageSizeOptions
+            ? [
+                { title: '5', value: 5 },
+                { title: '10', value: 10 },
+                { title: '20', value: 20 },
+                { title: '50', value: 50 },
+              ]
+            : []
+        }
+        onSetPage={this.handleSetPage}
+        onPerPageSelect={this.handleSetPageSize}
+      />
+    );
+
     return (
       <Fragment>
         <ListHeader
@@ -129,7 +153,10 @@ class PaginatedDataList extends React.Component {
           emptyStateControls={emptyStateControls}
           searchColumns={searchColumns}
           sortColumns={sortColumns}
+          searchableKeys={toolbarSearchableKeys}
+          relatedSearchableKeys={toolbarRelatedSearchableKeys}
           qsConfig={qsConfig}
+          pagination={ToolbarPagination}
         />
         {Content}
         {items.length ? (
@@ -170,6 +197,8 @@ PaginatedDataList.propTypes = {
   qsConfig: QSConfig.isRequired,
   renderItem: PropTypes.func,
   toolbarSearchColumns: SearchColumns,
+  toolbarSearchableKeys: PropTypes.arrayOf(PropTypes.string),
+  toolbarRelatedSearchableKeys: PropTypes.arrayOf(PropTypes.string),
   toolbarSortColumns: SortColumns,
   showPageSizeOptions: PropTypes.bool,
   renderToolbar: PropTypes.func,
@@ -182,6 +211,8 @@ PaginatedDataList.defaultProps = {
   hasContentLoading: false,
   contentError: null,
   toolbarSearchColumns: [],
+  toolbarSearchableKeys: [],
+  toolbarRelatedSearchableKeys: [],
   toolbarSortColumns: [],
   pluralizedItemName: 'Items',
   showPageSizeOptions: true,

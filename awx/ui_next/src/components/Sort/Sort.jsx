@@ -102,9 +102,16 @@ class Sort extends React.Component {
     const { up } = DropdownPosition;
     const { columns, i18n } = this.props;
     const { isSortDropdownOpen, sortKey, sortOrder, isNumeric } = this.state;
-    const [{ name: sortedColumnName }] = columns.filter(
-      ({ key }) => key === sortKey
-    );
+
+    const defaultSortedColumn = columns.find(({ key }) => key === sortKey);
+
+    if (!defaultSortedColumn) {
+      throw new Error(
+        'sortKey must match one of the column keys, check the sortColumns prop passed to <Sort />'
+      );
+    }
+
+    const sortedColumnName = defaultSortedColumn?.name;
 
     const sortDropdownItems = columns
       .filter(({ key }) => key !== sortKey)

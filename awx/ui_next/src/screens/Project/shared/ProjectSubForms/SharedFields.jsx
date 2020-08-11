@@ -104,7 +104,9 @@ export const ScmTypeOptions = withI18n()(
 
       {scmUpdateOnLaunch && (
         <>
-          <Title size="md">{i18n._(t`Option Details`)}</Title>
+          <Title size="md" headingLevel="h4">
+            {i18n._(t`Option Details`)}
+          </Title>
           <FormField
             id="project-cache-timeout"
             name="scm_update_cache_timeout"
