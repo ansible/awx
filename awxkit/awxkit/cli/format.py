@@ -40,7 +40,7 @@ def add_authentication_arguments(parser, env):
 
 
 def add_output_formatting_arguments(parser, env):
-    formatting = parser.add_argument_group('output formatting')
+    formatting = parser.add_argument_group('input/output formatting')
 
     formatting.add_argument(
         '-f',
@@ -49,7 +49,7 @@ def add_output_formatting_arguments(parser, env):
         choices=FORMATTERS.keys(),
         default=env.get('TOWER_FORMAT', 'json'),
         help=(
-            'specify an output format'
+            'specify a format for the input and output'
         ),
     )
     formatting.add_argument(

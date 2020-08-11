@@ -70,9 +70,10 @@ class CLI(object):
     subparsers = {}
     original_action = None
 
-    def __init__(self, stdout=sys.stdout, stderr=sys.stderr):
+    def __init__(self, stdout=sys.stdout, stderr=sys.stderr, stdin=sys.stdin):
         self.stdout = stdout
         self.stderr = stderr
+        self.stdin = stdin
 
     def get_config(self, key):
         """Helper method for looking up the value of a --conf.xyz flag"""
