@@ -21,20 +21,20 @@ description:
 options:
     name:
       description:
-        - The name of the workflow template to run.
+        - The name of the project to update.
       required: True
       type: str
       aliases:
         - project
     organization:
       description:
-        - Organization the workflow job template exists in.
+        - Organization the project exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     wait:
       description:
-        - Wait for the workflow to complete.
+        - Wait for the project to update.
       default: True
       type: bool
     interval:
@@ -45,14 +45,14 @@ options:
       type: float
     timeout:
       description:
-        - If waiting for the workflow to complete this will abort after this
+        - If waiting for the project to update this will abort after this
           amount of seconds
       type: int
 extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = '''
-job_info:
+project_info:
     description: dictionary containing information about the project updated
     returned: If project synced
     type: dict
@@ -60,12 +60,12 @@ job_info:
 
 
 EXAMPLES = '''
-- name: Launch a workflow with a timeout of 10 seconds
+- name: Launch a project with a timeout of 10 seconds
   tower_project_update:
     project: "Networking Project"
     timeout: 10
 
-- name: Launch a Workflow with extra_vars without waiting
+- name: Launch a Project with extra_vars without waiting
   tower_project_update:
     project: "Networking Project"
     wait: False
@@ -103,9 +103,9 @@ def main():
     project = module.get_one('projects', data=lookup_data)
 
     if project is None:
-        module.fail_json(msg="Unable to find workflow job template")
+        module.fail_json(msg="Unable to find project")
 
-    # Launch the job
+    # Update the project
     result = module.post_endpoint(project['related']['update'])
 
     if result['status_code'] != 202:
@@ -121,7 +121,7 @@ def main():
     # Grab our start time to compare against for the timeout
     start = time.time()
 
-    job_url = result['json']['url']
+    project_url = result['json']['url']
     while not result['json']['finished']:
         # If we are past our time out fail with a message
         if timeout and timeout < time.time() - start:
@@ -131,7 +131,7 @@ def main():
         # Put the process to sleep for our interval
         time.sleep(interval)
 
-        result = module.get_endpoint(job_url)
+        result = module.get_endpoint(project_url)
         module.json_output['status'] = result['json']['status']
 
     # If the update has failed, we want to raise a task failure for that so we get a non-zero response.
