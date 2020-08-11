@@ -2030,17 +2030,18 @@ class RunProjectUpdate(BaseTask):
 
         # build out env vars for Galaxy credentials (in order)
         galaxy_server_list = []
-        for i, cred in enumerate(
-            project_update.project.organization.galaxy_credentials.all()
-        ):
-            env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
-            auth_url = cred.get_input('auth_url', default=None)
-            token = cred.get_input('token', default=None)
-            if token:
-                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
-            if auth_url:
-                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
-            galaxy_server_list.append(f'server{i}')
+        if project_update.project.organization:
+            for i, cred in enumerate(
+                project_update.project.organization.galaxy_credentials.all()
+            ):
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
+                auth_url = cred.get_input('auth_url', default=None)
+                token = cred.get_input('token', default=None)
+                if token:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
+                if auth_url:
+                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
+                galaxy_server_list.append(f'server{i}')
 
         if galaxy_server_list:
             env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
@@ -2118,7 +2119,10 @@ class RunProjectUpdate(BaseTask):
         elif not scm_branch:
             scm_branch = {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
 
-        galaxy_creds_are_defined = project_update.project.organization.galaxy_credentials.exists()
+        galaxy_creds_are_defined = (
+            project_update.project.organization and
+            project_update.project.organization.galaxy_credentials.exists()
+        )
         if not galaxy_creds_are_defined and (
             settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED
         ):
