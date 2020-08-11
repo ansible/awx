@@ -10,10 +10,10 @@ import {
 } from '@patternfly/react-core';
 import { ToolbarAddButton } from '../PaginatedDataList';
 import { toTitleCase } from '../../util/strings';
-import { useKebabified } from '../../contexts/Kebabified';
+import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function AddDropDownButton({ dropdownItems, i18n }) {
-  const { isKebabified } = useKebabified();
+  const { isKebabified } = useKebabifiedMenu();
   const [isOpen, setIsOpen] = useState(false);
   const element = useRef(null);
 

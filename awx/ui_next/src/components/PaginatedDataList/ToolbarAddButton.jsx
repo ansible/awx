@@ -4,10 +4,10 @@ import { Link } from 'react-router-dom';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useKebabified } from '../../contexts/Kebabified';
+import { useKebabifiedMenu } from '../../contexts/Kebabified';
 
 function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
-  const { isKebabified } = useKebabified();
+  const { isKebabified } = useKebabifiedMenu();
 
   if (!linkTo && !onClick) {
     throw new Error(
