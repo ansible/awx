@@ -9,8 +9,8 @@ import {
   Detail,
   DetailList,
   DeletedDetail,
-  ObjectDetail,
 } from '../../../components/DetailList';
+import ObjectDetail from '../../../components/DetailList/ObjectDetail';
 import DeleteButton from '../../../components/DeleteButton';
 import ErrorDetail from '../../../components/ErrorDetail';
 import { NotificationTemplatesAPI } from '../../../api';
