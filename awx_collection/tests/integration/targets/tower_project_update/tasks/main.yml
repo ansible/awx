@@ -1,0 +1,23 @@
+---
+- name: Update a project without waiting
+  tower_project_update:
+    name: "AWX-Collection-tests-tower_job_template-proj-{{ test_id }}"
+    organization: Default
+    wait: False
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Update a project and wait
+  tower_project_update:
+    name: "AWX-Collection-tests-tower_job_template-proj-{{ test_id }}"
+    organization: Default
+    wait: True
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
