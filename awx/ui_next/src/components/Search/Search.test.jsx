@@ -36,7 +36,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -64,7 +69,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -95,7 +105,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -119,7 +134,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -150,7 +170,11 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>,
       { context: { router: { history } } }
@@ -197,6 +221,7 @@ describe('<Search />', () => {
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
+            onShowAdvancedSearch={jest.fn}
           />
         </ToolbarContent>
       </Toolbar>,
@@ -243,6 +268,7 @@ describe('<Search />', () => {
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
+            onShowAdvancedSearch={jest.fn}
           />
         </ToolbarContent>
       </Toolbar>,
@@ -277,7 +303,11 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>,
       { context: { router: { history } } }

@@ -1,14 +1,30 @@
 import React from 'react';
 import { string, func } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import { useKebabified } from '../../contexts/Kebabified';
 
 function ToolbarAddButton({ linkTo, onClick, i18n, isDisabled }) {
+  const { isKebabified } = useKebabified();
+
   if (!linkTo && !onClick) {
     throw new Error(
       'ToolbarAddButton requires either `linkTo` or `onClick` prop'
+    );
+  }
+  if (isKebabified) {
+    return (
+      <DropdownItem
+        key="add"
+        isDisabled={isDisabled}
+        component={linkTo ? Link : Button}
+        to={linkTo}
+        onClick={!onClick ? undefined : onClick}
+      >
+        {i18n._(t`Add`)}
+      </DropdownItem>
     );
   }
   if (linkTo) {
