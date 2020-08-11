@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { string, bool, func } from 'prop-types';
 import { withI18n } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import 'styled-components/macro';
 
 import {
@@ -67,7 +67,19 @@ function SmartInventoryHostListItem({
           aria-labelledby={labelId}
           id={labelId}
         >
-          <HostToggle isDisabled host={host} />
+          <HostToggle
+            isDisabled
+            host={host}
+            tooltip={
+              <Trans>
+                <b>Smart inventory hosts are read-only.</b>
+                <br />
+                Toggle indicates if a host is available and should be included
+                in running jobs. For hosts that are part of an external
+                inventory, this may be reset by the inventory sync process.
+              </Trans>
+            }
+          />
         </DataListAction>
       </DataListItemRow>
     </DataListItem>
