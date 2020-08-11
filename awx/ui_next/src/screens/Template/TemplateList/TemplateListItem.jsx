@@ -78,7 +78,7 @@ function TemplateListItem({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="divider">
+            <DataListCell key="name" id={labelId}>
               <span>
                 <Link to={`${detailUrl}`}>
                   <b>{template.name}</b>
@@ -105,11 +105,7 @@ function TemplateListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
-        >
+        <DataListAction aria-label="actions" aria-labelledby={labelId}>
           {canLaunch && template.type === 'job_template' && (
             <Tooltip content={i18n._(t`Launch Template`)} position="top">
               <LaunchButton resource={template}>
