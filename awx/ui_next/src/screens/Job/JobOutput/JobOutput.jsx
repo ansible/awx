@@ -123,6 +123,7 @@ class JobOutput extends Component {
       isHostModalOpen: false,
       hostEvent: {},
       collapsedTaskUuids: [],
+      collapsedPlayUuids: [],
     };
 
     this.cache = new CellMeasurerCache({
@@ -141,6 +142,7 @@ class JobOutput extends Component {
     this.handleScrollNext = this.handleScrollNext.bind(this);
     this.handleScrollPrevious = this.handleScrollPrevious.bind(this);
     this.handleTaskToggle = this.handleTaskToggle.bind(this);
+    this.handlePlayToggle = this.handlePlayToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.isRowLoaded = this.isRowLoaded.bind(this);
     this.loadMoreRows = this.loadMoreRows.bind(this);
@@ -302,8 +304,50 @@ class JobOutput extends Component {
     this.listRef.forceUpdateGrid();
   }
 
+  handlePlayToggle(play_uuid) {
+    const { collapsedPlayUuids, collapsedTaskUuids, results } = this.state;
+
+    const isCollapsing = !collapsedPlayUuids.includes(play_uuid);
+
+    if (isCollapsing) {
+      if (!collapsedPlayUuids.includes(play_uuid)) {
+        this.setState({
+          collapsedPlayUuids: collapsedPlayUuids.concat(play_uuid),
+        });
+      }
+
+      Object.values(results).forEach(result => {
+        if (result.event_level === 2) {
+          if (result.event_data.play_uuid === play_uuid) {
+            if (!collapsedTaskUuids.includes(result.uuid)) {
+              this.setState(currentState => {
+                return {
+                  collapsedTaskUuids: currentState.collapsedTaskUuids.concat(
+                    result.uuid
+                  ),
+                };
+              });
+            }
+          }
+        }
+      });
+    } else {
+      this.setState(currentState => {
+        return {
+          collapsedPlayUuids: currentState.collapsedPlayUuids.filter(
+            u => u !== play_uuid
+          ),
+        };
+      });
+    }
+
+    this.cache.clearAll();
+    this.listRef.recomputeRowHeights();
+    this.listRef.forceUpdateGrid();
+  }
+
   rowRenderer({ index, parent, key, style }) {
-    const { results, collapsedTaskUuids } = this.state;
+    const { results, collapsedTaskUuids, collapsedPlayUuids } = this.state;
 
     const isHostEvent = jobEvent => {
       const { event, event_data, host, type } = jobEvent;
@@ -324,19 +368,22 @@ class JobOutput extends Component {
 
     const uuid = results[index]?.uuid;
     const taskUuid = results[index]?.event_data?.task_uuid;
-    const isCollapsed = collapsedTaskUuids.includes(taskUuid);
+    const playUuid = results[index]?.event_data?.play_uuid;
+    const isTaskCollapsed = collapsedTaskUuids.includes(taskUuid);
+    const isPlayCollapsed = collapsedPlayUuids.includes(playUuid);
 
     let cellContent = null;
 
-    if (!isCollapsed || uuid === taskUuid) {
+    if (!isTaskCollapsed || (uuid === taskUuid && !isPlayCollapsed)) {
       cellContent = results[index] ? (
         <JobEvent
           isClickable={isHostEvent(results[index])}
           onJobEventClick={() => this.handleHostEventClick(results[index])}
           className="row"
           style={style}
+          onPlayToggle={() => this.handlePlayToggle(playUuid)}
           onTaskToggle={() => this.handleTaskToggle(taskUuid)}
-          isCollapsed={isCollapsed}
+          isCollapsed={isTaskCollapsed || isPlayCollapsed}
           {...results[index]}
         />
       ) : (
@@ -384,18 +431,45 @@ class JobOutput extends Component {
     };
 
     return JobsAPI.readEvents(job.id, type, params).then(response => {
-      this._isMounted &&
-        this.setState(({ results, currentlyLoading }) => {
-          response.data.results.forEach(jobEvent => {
-            results[jobEvent.counter] = jobEvent;
-          });
-          return {
-            results,
-            currentlyLoading: currentlyLoading.filter(
-              n => !loadRange.includes(n)
-            ),
-          };
+      if (!this._isMounted) return;
+      const { collapsedPlayUuids } = this.state;
+
+      this.setState(({ results, currentlyLoading }) => {
+        response.data.results.forEach(jobEvent => {
+          results[jobEvent.counter] = jobEvent;
         });
+        return {
+          results,
+          currentlyLoading: currentlyLoading.filter(
+            n => !loadRange.includes(n)
+          ),
+        };
+      });
+
+      const newCollapsedTaskUuids = [];
+      response.data.results.forEach(jobEvent => {
+        if (jobEvent.event_level === 2) {
+          if (collapsedPlayUuids.includes(jobEvent.event_data.play_uuid)) {
+            newCollapsedTaskUuids.push(jobEvent.uuid);
+          }
+        }
+      });
+
+      if (newCollapsedTaskUuids.length <= 0) {
+        return;
+      }
+
+      this.setState(({ collapsedTaskUuids }) => {
+        const updatedCollapsedTaskUuids = collapsedTaskUuids.concat(
+          newCollapsedTaskUuids
+        );
+        return {
+          collapsedTaskUuids: [...new Set(updatedCollapsedTaskUuids)],
+        };
+      });
+      this.cache.clearAll();
+      this.listRef.recomputeRowHeights();
+      this.listRef.forceUpdateGrid();
     });
   }
 

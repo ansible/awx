@@ -85,8 +85,10 @@ function JobEvent({
   style,
   type,
   event_level,
-  isCollapsed = false,
+  event_data: { task_uuid },
+  isCollapsed,
   onTaskToggle,
+  onPlayToggle,
 }) {
   return !stdout ? null : (
     <div style={style} type={type}>
@@ -103,9 +105,13 @@ function JobEvent({
                 {[0, 1, 2].includes(event_level) &&
                   lineNumber === start_line + 1 &&
                   (isCollapsed ? (
-                    <AngleRightIcon onClick={onTaskToggle} />
+                    <AngleRightIcon
+                      onClick={task_uuid ? onTaskToggle : onPlayToggle}
+                    />
                   ) : (
-                    <AngleDownIcon onClick={onTaskToggle} />
+                    <AngleDownIcon
+                      onClick={task_uuid ? onTaskToggle : onPlayToggle}
+                    />
                   ))}
               </JobEventLineToggle>
               <JobEventLineNumber>{lineNumber}</JobEventLineNumber>
