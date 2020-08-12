@@ -31,7 +31,13 @@ function OrganizationsList({ i18n }) {
   const addUrl = `${match.url}/add`;
 
   const {
-    result: { organizations, organizationCount, actions, relatedSearchFields },
+    result: {
+      organizations,
+      organizationCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading: isOrgsLoading,
     request: fetchOrganizations,
@@ -46,16 +52,20 @@ function OrganizationsList({ i18n }) {
         organizations: orgs.data.results,
         organizationCount: orgs.data.count,
         actions: orgActions.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           orgActions?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(orgActions.data.actions?.GET || {}).filter(
+          key => orgActions.data.actions?.GET[key].filterable
+        ),
       };
     }, [location]),
     {
       organizations: [],
       organizationCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -90,10 +100,6 @@ function OrganizationsList({ i18n }) {
 
   const hasContentLoading = isDeleteLoading || isOrgsLoading;
   const canAdd = actions && actions.POST;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...organizations] : []);

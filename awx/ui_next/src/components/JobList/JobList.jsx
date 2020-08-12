@@ -38,7 +38,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const [selected, setSelected] = useState([]);
   const location = useLocation();
   const {
-    result: { results, count, actions, relatedSearchFields },
+    result: { results, count, relatedSearchableKeys, searchableKeys },
     error: contentError,
     isLoading,
     request: fetchJobs,
@@ -53,10 +53,12 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
         return {
           results: response.data.results,
           count: response.data.count,
-          actions: actionsResponse.data.actions,
-          relatedSearchFields: (
+          relatedSearchableKeys: (
             actionsResponse?.data?.related_search_fields || []
           ).map(val => val.slice(0, -8)),
+          searchableKeys: Object.keys(
+            actionsResponse.data.actions?.GET || {}
+          ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
         };
       },
       [location] // eslint-disable-line react-hooks/exhaustive-deps
@@ -64,8 +66,8 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     {
       results: [],
       count: 0,
-      actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
   useEffect(() => {
@@ -137,11 +139,6 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       setSelected(selected.concat(item));
     }
   };
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>

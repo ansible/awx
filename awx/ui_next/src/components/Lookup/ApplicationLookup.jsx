@@ -22,7 +22,7 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
   const location = useLocation();
   const {
     error,
-    result: { applications, itemCount, actions, relatedSearchFields },
+    result: { applications, itemCount, relatedSearchableKeys, searchableKeys },
     request: fetchApplications,
   } = useRequest(
     useCallback(async () => {
@@ -40,23 +40,24 @@ function ApplicationLookup({ i18n, onChange, value, label }) {
       return {
         applications: results,
         itemCount: count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
-    { applications: [], itemCount: 0, actions: {}, relatedSearchFields: [] }
+    {
+      applications: [],
+      itemCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+    }
   );
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
-
   return (
     <FormGroup fieldId="application" label={label}>
       <Lookup

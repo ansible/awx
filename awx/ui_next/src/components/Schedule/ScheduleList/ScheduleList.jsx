@@ -32,7 +32,13 @@ function ScheduleList({
   const location = useLocation();
 
   const {
-    result: { schedules, itemCount, actions, relatedSearchFields },
+    result: {
+      schedules,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchSchedules,
@@ -49,16 +55,20 @@ function ScheduleList({
         schedules: results,
         itemCount: count,
         actions: scheduleActions.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           scheduleActions?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          scheduleActions.data.actions?.GET || {}
+        ).filter(key => scheduleActions.data.actions?.GET[key].filterable),
       };
     }, [location, loadSchedules, loadScheduleOptions]),
     {
       schedules: [],
       itemCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -106,10 +116,6 @@ function ScheduleList({
     actions &&
     Object.prototype.hasOwnProperty.call(actions, 'POST') &&
     !hideAddButton;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>

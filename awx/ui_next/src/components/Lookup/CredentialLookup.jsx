@@ -35,7 +35,7 @@ function CredentialLookup({
   tooltip,
 }) {
   const {
-    result: { count, credentials, actions, relatedSearchFields },
+    result: { count, credentials, relatedSearchableKeys, searchableKeys },
     error,
     request: fetchCredentials,
   } = useRequest(
@@ -64,10 +64,12 @@ function CredentialLookup({
       return {
         count: data.count,
         credentials: data.results,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [
       credentialTypeId,
@@ -78,19 +80,14 @@ function CredentialLookup({
     {
       count: 0,
       credentials: [],
-      actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
   useEffect(() => {
     fetchCredentials();
   }, [fetchCredentials]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   // TODO: replace credential type search with REST-based grabbing of cred types
 
