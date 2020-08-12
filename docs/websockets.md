@@ -16,7 +16,9 @@ Previously, AWX leveraged RabbitMQ to deliver Ansible events that emanated from 
 
 #### Broadcast Backplane Token
 
-AWX node(s) connect to every other node via the Websocket backplane. Authentication is accomplished via a shared secret that is exchanged via the http header `secret`. The shared secret payload consists of a a `secret`, containing the shared secret, and a `nonce` which is used to mitigate replay attack windows.
+AWX node(s) connect to every other node via the Websocket backplane. The backplane websockets initiate from the `wsbroadcast` process and connect to other nodes via the same nginx process that serves webpage websocket connections and marshalls incoming web/API requests. If you have configured AWX to run with an ssl terminated connection in front of nginx then you likely will have nginx configured to handle http traffic and thus the websocket connection will flow unencrypted over http. If you have nginx configured with ssl enabled, then the websocket traffic will flow encrypted.
+
+Authentication is accomplished via a shared secret that is generated and set at playbook install time. The shared secret is used to derive a payload that is exchanged via the http(s) header `secret`. The shared secret payload consists of a a `secret`, containing the shared secret, and a `nonce` which is used to mitigate replay attack windows.
 
 Note that the nonce timestamp is considered valid if it is within `300` second threshold. This is to allow for machine clock skews.
 ```
@@ -27,6 +29,8 @@ Note that the nonce timestamp is considered valid if it is within `300` second t
 ```
 
 The payload is encrypted using `HMAC-SHA256` with `settings.BROADCAST_WEBSOCKET_SECRET` as the key. The final payload that is sent, including the http header, is of the form: `secret: nonce_plaintext:HMAC_SHA256({"secret": settings.BROADCAST_WEBSOCKET_SECRET, "nonce": nonce_plaintext})`.
+
+Upon receiving the payload, AWX decrypted the `secret` header using the known shared secret and ensures the `secret` value of the decrypted payload matches the known shared secret, `settings.BROADCAST_WEBSOCKET_SECRET`. If it does not match, the connection is closed. If it does match, the `nonce` is compared to the current time. If the nonce is off by more than `300` seconds, the connection is closed. If both tests pass, the connection is accepted.
 
 ## Protocol
 
