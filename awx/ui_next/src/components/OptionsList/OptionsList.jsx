@@ -49,7 +49,6 @@ function OptionsList({
         <SelectedList
           label={i18n._(t`Selected`)}
           selected={value}
-          showOverflowAfter={5}
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
           renderItemChip={renderItemChip}
