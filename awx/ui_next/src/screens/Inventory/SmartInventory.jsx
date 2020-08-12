@@ -47,7 +47,7 @@ function SmartInventory({ i18n, setBreadcrumb }) {
 
   useEffect(() => {
     fetchInventory();
-  }, [fetchInventory, location.pathname]);
+  }, [fetchInventory]);
 
   useEffect(() => {
     if (inventory) {

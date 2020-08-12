@@ -105,14 +105,7 @@ function Inventories({ i18n }) {
           </Config>
         </Route>
         <Route path="/inventories/smart_inventory/:id">
-          <Config>
-            {({ me }) => (
-              <SmartInventory
-                setBreadcrumb={buildBreadcrumbConfig}
-                me={me || {}}
-              />
-            )}
-          </Config>
+          <SmartInventory setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/inventories">
           <InventoryList />

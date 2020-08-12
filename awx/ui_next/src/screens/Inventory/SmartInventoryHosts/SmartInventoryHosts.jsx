@@ -1,10 +1,18 @@
-import React, { Component } from 'react';
-import { CardBody } from '../../../components/Card';
+import React from 'react';
+import { Route } from 'react-router-dom';
+import SmartInventoryHostList from './SmartInventoryHostList';
+import { Inventory } from '../../../types';
 
-class SmartInventoryHosts extends Component {
-  render() {
-    return <CardBody>Coming soon :)</CardBody>;
-  }
+function SmartInventoryHosts({ inventory }) {
+  return (
+    <Route key="host-list" path="/inventories/smart_inventory/:id/hosts">
+      <SmartInventoryHostList inventory={inventory} />
+    </Route>
+  );
 }
+
+SmartInventoryHosts.propTypes = {
+  inventory: Inventory.isRequired,
+};
 
 export default SmartInventoryHosts;

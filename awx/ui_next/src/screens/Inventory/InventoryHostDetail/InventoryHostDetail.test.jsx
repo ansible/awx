@@ -77,11 +77,18 @@ describe('<InventoryHostDetail />', () => {
 
   describe('User has read-only permissions', () => {
     beforeAll(() => {
-      const readOnlyHost = { ...mockHost };
+      const readOnlyHost = {
+        ...mockHost,
+        summary_fields: {
+          ...mockHost.summary_fields,
+          user_capabilities: {
+            ...mockHost.summary_fields.user_capabilities,
+          },
+        },
+      };
       readOnlyHost.summary_fields.user_capabilities.edit = false;
       readOnlyHost.summary_fields.recent_jobs = [];
-
-      wrapper = mountWithContexts(<InventoryHostDetail host={mockHost} />);
+      wrapper = mountWithContexts(<InventoryHostDetail host={readOnlyHost} />);
     });
 
     afterAll(() => {
