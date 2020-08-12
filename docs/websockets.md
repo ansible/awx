@@ -30,7 +30,7 @@ Note that the nonce timestamp is considered valid if it is within `300` second t
 
 The payload is encrypted using `HMAC-SHA256` with `settings.BROADCAST_WEBSOCKET_SECRET` as the key. The final payload that is sent, including the http header, is of the form: `secret: nonce_plaintext:HMAC_SHA256({"secret": settings.BROADCAST_WEBSOCKET_SECRET, "nonce": nonce_plaintext})`.
 
-Upon receiving the payload, AWX decrypted the `secret` header using the known shared secret and ensures the `secret` value of the decrypted payload matches the known shared secret, `settings.BROADCAST_WEBSOCKET_SECRET`. If it does not match, the connection is closed. If it does match, the `nonce` is compared to the current time. If the nonce is off by more than `300` seconds, the connection is closed. If both tests pass, the connection is accepted.
+Upon receiving the payload, AWX decrypts the `secret` header using the known shared secret and ensures the `secret` value of the decrypted payload matches the known shared secret, `settings.BROADCAST_WEBSOCKET_SECRET`. If it does not match, the connection is closed. If it does match, the `nonce` is compared to the current time. If the nonce is off by more than `300` seconds, the connection is closed. If both tests pass, the connection is accepted.
 
 ## Protocol
 
