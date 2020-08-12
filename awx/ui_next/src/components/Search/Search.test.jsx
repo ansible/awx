@@ -94,8 +94,6 @@ describe('<Search />', () => {
   });
 
   test('changing key select to and from advanced causes onShowAdvancedSearch callback to be invoked', () => {
-    const searchButton = 'button[aria-label="Search submit button"]';
-    const searchTextInput = 'input[aria-label="Search text input"]';
     const columns = [
       { name: 'Name', key: 'name__icontains', isDefault: true },
       { name: 'Description', key: 'description__icontains' },
