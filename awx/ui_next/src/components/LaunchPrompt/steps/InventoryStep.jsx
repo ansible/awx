@@ -27,7 +27,7 @@ function InventoryStep({ i18n }) {
   const {
     isLoading,
     error,
-    result: { inventories, count, actions, relatedSearchFields },
+    result: { inventories, count, relatedSearchableKeys, searchableKeys },
     request: fetchInventories,
   } = useRequest(
     useCallback(async () => {
@@ -39,28 +39,25 @@ function InventoryStep({ i18n }) {
       return {
         inventories: data.results,
         count: data.count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [history.location]),
     {
       count: 0,
       inventories: [],
-      actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   if (isLoading) {
     return <ContentLoading />;

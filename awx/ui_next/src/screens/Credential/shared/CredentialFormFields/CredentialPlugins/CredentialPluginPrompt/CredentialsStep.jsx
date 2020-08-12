@@ -25,7 +25,7 @@ function CredentialsStep({ i18n }) {
   const history = useHistory();
 
   const {
-    result: { credentials, count, actions, relatedSearchFields },
+    result: { credentials, count, relatedSearchableKeys, searchableKeys },
     error: credentialsError,
     isLoading: isCredentialsLoading,
     request: fetchCredentials,
@@ -39,23 +39,20 @@ function CredentialsStep({ i18n }) {
       return {
         credentials: data.results,
         count: data.count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [history.location.search]),
-    { credentials: [], count: 0, actions: {}, relatedSearchFields: [] }
+    { credentials: [], count: 0, relatedSearchableKeys: [], searchableKeys: [] }
   );
 
   useEffect(() => {
     fetchCredentials();
   }, [fetchCredentials]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   if (credentialsError) {
     return <ContentError error={credentialsError} />;

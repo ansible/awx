@@ -32,7 +32,13 @@ function ApplicationsList({ i18n }) {
     isLoading,
     error,
     request: fetchApplications,
-    result: { applications, itemCount, actions, relatedSearchFields },
+    result: {
+      applications,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -46,16 +52,20 @@ function ApplicationsList({ i18n }) {
         applications: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       applications: [],
       itemCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -89,10 +99,6 @@ function ApplicationsList({ i18n }) {
   };
 
   const canAdd = actions && actions.POST;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>

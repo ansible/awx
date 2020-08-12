@@ -19,7 +19,7 @@ const QS_CONFIG = getQSConfig('inventory', {
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
   const {
-    result: { inventories, count, actions, relatedSearchFields },
+    result: { inventories, count, relatedSearchableKeys, searchableKeys },
     request: fetchInventories,
     error,
     isLoading,
@@ -33,23 +33,20 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
       return {
         inventories: data.results,
         count: data.count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [history.location]),
-    { inventories: [], count: 0, actions: {}, relatedSearchFields: [] }
+    { inventories: [], count: 0, relatedSearchableKeys: [], searchableKeys: [] }
   );
 
   useEffect(() => {
     fetchInventories();
   }, [fetchInventories]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>

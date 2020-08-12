@@ -29,7 +29,13 @@ function TeamList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { teams, itemCount, actions, relatedSearchFields },
+    result: {
+      teams,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchTeams,
@@ -44,16 +50,20 @@ function TeamList({ i18n }) {
         teams: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       teams: [],
       itemCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -85,10 +95,6 @@ function TeamList({ i18n }) {
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...teams] : []);

@@ -20,7 +20,7 @@ function UserTeamList({ i18n }) {
   const { id: userId } = useParams();
 
   const {
-    result: { teams, count, actions, relatedSearchFields },
+    result: { teams, count, relatedSearchableKeys, searchableKeys },
     error: contentError,
     isLoading,
     request: fetchOrgs,
@@ -39,28 +39,25 @@ function UserTeamList({ i18n }) {
       return {
         teams: results,
         count: teamCount,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [userId, location.search]),
     {
       teams: [],
       count: 0,
-      actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
   useEffect(() => {
     fetchOrgs();
   }, [fetchOrgs]);
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <PaginatedDataList
