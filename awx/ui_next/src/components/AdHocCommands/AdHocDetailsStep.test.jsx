@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import DetailsStep from './DetailsStep';
+import DetailsStep from './AdHocDetailsStep';
 
 jest.mock('../../api/models/Credentials');
 
@@ -17,7 +17,6 @@ const moduleOptions = [
   { key: 1, value: 'shell', label: 'shell', isDisabled: false },
 ];
 const onLimitChange = jest.fn();
-const limitValue = '';
 const initialValues = {
   limit: ['Inventory 1', 'inventory 2'],
   credential: [],
@@ -46,7 +45,6 @@ describe('<DetailsStep />', () => {
             verbosityOptions={verbosityOptions}
             moduleOptions={moduleOptions}
             onLimitChange={onLimitChange}
-            limitValue={limitValue}
           />
         </Formik>
       );
@@ -61,7 +59,6 @@ describe('<DetailsStep />', () => {
             verbosityOptions={verbosityOptions}
             moduleOptions={moduleOptions}
             onLimitChange={onLimitChange}
-            limitValue={limitValue}
           />
         </Formik>
       );
@@ -69,7 +66,7 @@ describe('<DetailsStep />', () => {
     expect(wrapper.find('FormGroup[label="Module"]').length).toBe(1);
     expect(wrapper.find('FormField[name="arguments"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Verbosity"]').length).toBe(1);
-    expect(wrapper.find('FormGroup[label="Limit"]').length).toBe(1);
+    expect(wrapper.find('FormField[label="Limit"]').length).toBe(1);
     expect(wrapper.find('FormField[name="forks"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Show changes"]').length).toBe(1);
     expect(
@@ -86,7 +83,6 @@ describe('<DetailsStep />', () => {
             verbosityOptions={verbosityOptions}
             moduleOptions={moduleOptions}
             onLimitChange={onLimitChange}
-            limitValue={limitValue}
           />
         </Formik>
       );
@@ -99,6 +95,12 @@ describe('<DetailsStep />', () => {
       );
       wrapper.find('input#arguments').simulate('change', {
         target: { value: 'foo', name: 'arguments' },
+      });
+      wrapper.find('input#limit').simulate('change', {
+        target: {
+          value: 'Inventory 1, inventory 2, new inventory',
+          name: 'limit',
+        },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
 
@@ -121,30 +123,14 @@ describe('<DetailsStep />', () => {
       1
     );
     expect(wrapper.find('TextInputBase[name="forks"]').prop('value')).toBe(10);
-    expect(wrapper.find('TextInputBase[label="Limit"]').prop('value')).toBe('');
+    expect(wrapper.find('TextInputBase[name="limit"]').prop('value')).toBe(
+      'Inventory 1, inventory 2, new inventory'
+    );
     expect(wrapper.find('Switch').prop('isChecked')).toBe(true);
     expect(
       wrapper
         .find('Checkbox[aria-label="Enable privilege escalation"]')
         .prop('isChecked')
     ).toBe(true);
-  });
-
-  test('should mount with proper limit value', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <Formik initialValues={initialValues}>
-          <DetailsStep
-            verbosityOptions={verbosityOptions}
-            moduleOptions={moduleOptions}
-            onLimitChange={onLimitChange}
-            limitValue="foo value"
-          />
-        </Formik>
-      );
-    });
-    expect(wrapper.find('TextInputBase[label="Limit"]').prop('value')).toBe(
-      'foo value'
-    );
   });
 });

@@ -2,9 +2,11 @@ import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { CredentialsAPI } from '../../api';
+import { FieldTooltip } from '../FormField';
 
 import { getQSConfig, parseQueryString, mergeParams } from '../../util/qs';
 import useRequest from '../../util/useRequest';
@@ -68,6 +70,13 @@ function AdHocCredentialStep({ i18n, credentialTypeId, onEnableLaunch }) {
           !credentialMeta.touched || !credentialMeta.error ? 'default' : 'error'
         }
         helperTextInvalid={credentialMeta.error}
+        labelIcon={
+          <FieldTooltip
+            content={i18n._(
+              t`Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts.`
+            )}
+          />
+        }
       >
         <OptionsList
           value={credentialField.value || []}
@@ -111,4 +120,8 @@ function AdHocCredentialStep({ i18n, credentialTypeId, onEnableLaunch }) {
   );
 }
 
+AdHocCredentialStep.propTypes = {
+  credentialTypeId: PropTypes.number.isRequired,
+  onEnableLaunch: PropTypes.func.isRequired,
+};
 export default withI18n()(AdHocCredentialStep);

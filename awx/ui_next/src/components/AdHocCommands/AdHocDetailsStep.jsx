@@ -2,20 +2,12 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-
+import PropTypes from 'prop-types';
 import { useField } from 'formik';
-import {
-  Form,
-  FormGroup,
-  InputGroup,
-  TextInput,
-  Label,
-  InputGroupText,
-  Switch,
-  Checkbox,
-} from '@patternfly/react-core';
+import { Form, FormGroup, Switch, Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
 
+import { BrandName } from '../../variables';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField, { FieldTooltip } from '../FormField';
 import { VariablesField } from '../CodeMirrorInput';
@@ -30,18 +22,16 @@ const TooltipWrapper = styled.div`
   text-align: left;
 `;
 
-function CredentialStep({
-  i18n,
-  verbosityOptions,
-  moduleOptions,
-  onLimitChange,
-  limitValue,
-}) {
+// Setting BrandName to a variable here is necessary to get the jest tests
+// passing.  Attempting to use BrandName in the template literal results
+// in failing tests.
+const brandName = BrandName;
+
+function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
   const [moduleField, moduleMeta, moduleHelpers] = useField({
     name: 'module_args',
     validate: required(null, i18n),
   });
-  const [limitField, , limitHelpers] = useField('limit');
   const [variablesField] = useField('extra_vars');
   const [changesField, , changesHelpers] = useField('changes');
   const [escalationField, , escalationHelpers] = useField('escalation');
@@ -65,7 +55,7 @@ function CredentialStep({
             labelIcon={
               <FieldTooltip
                 content={i18n._(
-                  t`These are the modules that AWX supports running commands against.`
+                  t`These are the modules that ${brandName} supports running commands against.`
                 )}
               />
             }
@@ -85,7 +75,9 @@ function CredentialStep({
             name="arguments"
             type="text"
             label={i18n._(t`Arguments`)}
-            isRequired
+            isRequired={
+              moduleField.value === 'command' || moduleField.value === 'shell'
+            }
             tooltip={i18n._(
               t`These arguments are used with the specified module.`
             )}
@@ -118,54 +110,26 @@ function CredentialStep({
               }}
             />
           </FormGroup>
-
-          <FormGroup
+          <FormField
+            id="limit"
+            name="limit"
+            type="text"
             label={i18n._(t`Limit`)}
-            labelIcon={
-              <FieldTooltip
-                content={
-                  <span>
-                    {i18n._(
-                      t`The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns`
-                    )}{' '}
-                    <a
-                      href="https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {i18n._(`here`)}
-                    </a>
-                  </span>
-                }
-              />
+            tooltip={
+              <span>
+                {i18n._(
+                  t`The pattern used to target hosts in the inventory. Leaving the field blank, all, and * will all target all hosts in the inventory. You can find more information about Ansible's host patterns`
+                )}{' '}
+                <a
+                  href="https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {i18n._(`here`)}
+                </a>
+              </span>
             }
-          >
-            <InputGroup>
-              <InputGroupText>
-                {limitField.value.map((item, index) => (
-                  <Label
-                    onClose={() => {
-                      limitField.value.splice(index, 1);
-                      limitHelpers.setValue(limitField.value);
-                    }}
-                  >
-                    {item}
-                  </Label>
-                ))}
-              </InputGroupText>
-              <TextInput
-                id="limit"
-                name="limit"
-                type="text"
-                label={i18n._(t`Limit`)}
-                value={limitValue}
-                isRequired
-                onChange={value => {
-                  onLimitChange(value);
-                }}
-              />
-            </InputGroup>
-          </FormGroup>
+          />
           <FormField
             id="template-forks"
             name="forks"
@@ -175,14 +139,14 @@ function CredentialStep({
             tooltip={
               <span>
                 {i18n._(
-                  t`The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the `
+                  t`The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information`
                 )}{' '}
                 <a
                   href="https://docs.ansible.com/ansible/latest/installation_guide/intro_configuration.html#the-ansible-configuration-file"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {i18n._(t`ansible configuration file.`)}
+                  {i18n._(t`here.`)}
                 </a>
               </span>
             }
@@ -225,13 +189,13 @@ function CredentialStep({
                         content={
                           <p>
                             {i18n._(t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact BRAND_NAME
+                              callback URL. Using the URL a host can contact ${brandName}
                               and request a configuration update using this job
                               template`)}
                             &nbsp;
-                            <code>--{i18n._(t`become`)} &nbsp;</code>
+                            <code>--become </code>
                             {i18n._(t`option to the`)} &nbsp;
-                            <code>{i18n._(t`ansible`)} &nbsp;</code>
+                            <code>ansible </code>
                             {i18n._(t`command`)}
                           </p>
                         }
@@ -296,5 +260,10 @@ function CredentialStep({
     </Form>
   );
 }
+
+CredentialStep.propTypes = {
+  moduleOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+  verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+};
 
 export default withI18n()(CredentialStep);

@@ -20,7 +20,7 @@ const credentials = [
 ];
 const adHocItems = [
   {
-    name: ' Inventory 1 Org 0',
+    name: 'Inventory 1 Org 0',
   },
   { name: 'Inventory 2 Org 0' },
 ];
@@ -43,6 +43,7 @@ describe('<AdHocCOmmands />', () => {
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
           itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
@@ -57,6 +58,7 @@ describe('<AdHocCOmmands />', () => {
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
           itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
@@ -91,12 +93,13 @@ describe('<AdHocCOmmands />', () => {
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
           itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
       );
     });
-    wrapper.find('button').prop('onClick')();
+    await act(async () => wrapper.find('button').prop('onClick')());
 
     wrapper.update();
 
@@ -128,29 +131,32 @@ describe('<AdHocCOmmands />', () => {
         count: 5,
       },
     });
+    InventoriesAPI.launchAdHocCommands.mockResolvedValue({ data: { id: 1 } });
     await act(async () => {
       wrapper = mountWithContexts(
         <AdHocCommands
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
           itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
       );
     });
-    wrapper.find('button').prop('onClick')();
+    await act(async () => wrapper.find('button').prop('onClick')());
 
     wrapper.update();
 
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
+
     expect(
       wrapper
-        .find('WizardNavItem[content="Machine Credential"]')
+        .find('WizardNavItem[content="Machine credential"]')
         .prop('isDisabled')
     ).toBe(true);
 
-    act(() => {
+    await act(async () => {
       wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
         {},
         'command'
@@ -194,7 +200,7 @@ describe('<AdHocCOmmands />', () => {
       escalation: false,
       extra_vars: '---',
       forks: 0,
-      limit: 'I',
+      limit: 'Inventory 1 Org 0, Inventory 2 Org 0',
       module_args: 'command',
       verbosity: 1,
     });
@@ -203,6 +209,7 @@ describe('<AdHocCOmmands />', () => {
 
     expect(wrapper.find('AdHocCommandsWizard').length).toBe(0);
   });
+
   test('should throw error on submission properly', async () => {
     InventoriesAPI.launchAdHocCommands.mockRejectedValue(
       new Error({
@@ -245,24 +252,25 @@ describe('<AdHocCOmmands />', () => {
         <AdHocCommands
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
-          itemId="a"
+          itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
       );
     });
-    wrapper.find('button').prop('onClick')();
+    await act(async () => wrapper.find('button').prop('onClick')());
 
     wrapper.update();
 
     expect(wrapper.find('Button[type="submit"]').prop('isDisabled')).toBe(true);
     expect(
       wrapper
-        .find('WizardNavItem[content="Machine Credential"]')
+        .find('WizardNavItem[content="Machine credential"]')
         .prop('isDisabled')
     ).toBe(true);
 
-    act(() => {
+    await act(async () => {
       wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
         {},
         'command'
@@ -327,12 +335,13 @@ describe('<AdHocCOmmands />', () => {
           apiModule={InventoriesAPI}
           adHocItems={adHocItems}
           itemId={1}
+          credentialTypeId={1}
         >
           {children}
         </AdHocCommands>
       );
     });
-    wrapper.find('button').prop('onClick')();
+    await act(async () => wrapper.find('button').prop('onClick')());
     wrapper.update();
     expect(wrapper.find('ErrorDetail').length).toBe(1);
   });

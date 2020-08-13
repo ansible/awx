@@ -2,7 +2,13 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { Button, Tooltip } from '@patternfly/react-core';
+import {
+  Button,
+  Tooltip,
+  DropdownItem,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from '../../../util/qs';
 import useSelected from '../../../util/useSelected';
 import useRequest from '../../../util/useRequest';
@@ -17,6 +23,7 @@ import PaginatedDataList, {
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
 import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
+import { Kebabified } from '../../../contexts/Kebabified';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,
@@ -141,9 +148,37 @@ function InventoryGroupsList({ i18n }) {
     setSelected([]);
     setIsDeleteLoading(false);
   };
-
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+  const kebabedAdditionalControls = () => {
+    return (
+      <>
+        <AdHocCommandsButton
+          adHocItems={selected}
+          apiModule={InventoriesAPI}
+          itemId={parseInt(inventoryId, 10)}
+        >
+          {({ openAdHocCommands }) => (
+            <DropdownItem
+              key="add"
+              onClick={openAdHocCommands}
+              isDisabled={groupCount === 0}
+            >
+              {i18n._(t`Run command`)}
+            </DropdownItem>
+          )}
+        </AdHocCommandsButton>
+        <DropdownItem
+          variant="danger"
+          aria-label={i18n._(t`Delete`)}
+          onClick={toggleModal}
+          isDisabled={selected.length === 0 || selected.some(cannotDelete)}
+        >
+          {i18n._(t`Delete`)}
+        </DropdownItem>
+      </>
+    );
+  };
 
   return (
     <>
@@ -213,48 +248,66 @@ function InventoryGroupsList({ i18n }) {
                     />,
                   ]
                 : []),
-              <Tooltip content={renderTooltip()} position="top" key="delete">
-                <div>
-                  <Button
-                    variant="secondary"
-                    aria-label={i18n._(t`Delete`)}
-                    onClick={toggleModal}
-                    isDisabled={
-                      selected.length === 0 || selected.some(cannotDelete)
-                    }
-                  >
-                    {i18n._(t`Delete`)}
-                  </Button>
-                </div>
-              </Tooltip>,
-              [
-                <Tooltip
-                  content={i18n._(
-                    t`Select an inventory source by clicking the check box beside it. The inventory source can be a single group or a selection of multiple groups.`
-                  )}
-                  position="top"
-                  key="adhoc"
-                >
-                  <AdHocCommandsButton
-                    adHocItems={selected}
-                    apiModule={InventoriesAPI}
-                    itemId={inventoryId}
-                  >
-                    {({ openAdHocCommands }) => (
-                      <Button
-                        variant="secondary"
-                        aria-label={i18n._(t`Run command`)}
-                        onClick={openAdHocCommands}
-                        isDisabled={
-                          selected.length === 0 || selected.some(cannotDelete)
-                        }
-                      >
-                        {i18n._(t`Run command`)}
-                      </Button>
+              <Kebabified>
+                {({ isKebabified }) => (
+                  <>
+                    {isKebabified ? (
+                      kebabedAdditionalControls()
+                    ) : (
+                      <ToolbarGroup>
+                        <ToolbarItem>
+                          <Tooltip
+                            content={i18n._(
+                              t`Select an inventory source by clicking the check box beside it. The inventory source can be a single group or a selection of multiple groups.`
+                            )}
+                            position="top"
+                            key="adhoc"
+                          >
+                            <AdHocCommandsButton
+                              css="margin-right: 20px"
+                              adHocItems={selected}
+                              apiModule={InventoriesAPI}
+                              itemId={parseInt(inventoryId, 10)}
+                            >
+                              {({ openAdHocCommands }) => (
+                                <Button
+                                  variant="secondary"
+                                  aria-label={i18n._(t`Run command`)}
+                                  onClick={openAdHocCommands}
+                                  isDisabled={groupCount === 0}
+                                >
+                                  {i18n._(t`Run command`)}
+                                </Button>
+                              )}
+                            </AdHocCommandsButton>
+                          </Tooltip>
+                        </ToolbarItem>
+                        <ToolbarItem>
+                          <Tooltip
+                            content={renderTooltip()}
+                            position="top"
+                            key="delete"
+                          >
+                            <div>
+                              <Button
+                                variant="danger"
+                                aria-label={i18n._(t`Delete`)}
+                                onClick={toggleModal}
+                                isDisabled={
+                                  selected.length === 0 ||
+                                  selected.some(cannotDelete)
+                                }
+                              >
+                                {i18n._(t`Delete`)}
+                              </Button>
+                            </div>
+                          </Tooltip>
+                        </ToolbarItem>
+                      </ToolbarGroup>
                     )}
-                  </AdHocCommandsButton>
-                </Tooltip>,
-              ],
+                  </>
+                )}
+              </Kebabified>,
             ]}
           />
         )}
@@ -271,6 +324,7 @@ function InventoryGroupsList({ i18n }) {
         <AlertModal
           isOpen={deletionError}
           variant="error"
+          aria-label={i18n._(t`deletion error`)}
           title={i18n._(t`Error!`)}
           onClose={() => setDeletionError(null)}
         >
