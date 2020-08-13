@@ -38,6 +38,15 @@ describe('JobTemplatesList', () => {
         ],
       },
     });
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplatesList
@@ -67,6 +76,15 @@ describe('JobTemplatesList', () => {
   });
   test('Error shown when read() request errors', async () => {
     JobTemplatesAPI.read.mockRejectedValue(new Error());
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplatesList

@@ -54,6 +54,10 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
     });
   }
 
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
+  }
+
   readSurvey(id) {
     return this.http.get(`${this.baseUrl}${id}/survey_spec/`);
   }
