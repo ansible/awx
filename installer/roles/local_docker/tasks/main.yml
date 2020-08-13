@@ -4,6 +4,7 @@
     broadcast_websocket_secret: "{{ lookup('password', '/dev/null', length=128) }}"
   run_once: true
   no_log: true
+  when: broadcast_websocket_secret is not defined
 
 - import_tasks: upgrade_postgres.yml
   when:
