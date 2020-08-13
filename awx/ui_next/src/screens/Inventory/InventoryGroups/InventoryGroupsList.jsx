@@ -13,8 +13,10 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import PaginatedDataList, {
   ToolbarAddButton,
 } from '../../../components/PaginatedDataList';
+
 import InventoryGroupItem from './InventoryGroupItem';
 import InventoryGroupsDeleteModal from '../shared/InventoryGroupsDeleteModal';
+import AdHocCommandsButton from '../../../components/AdHocCommands/AdHocCommands';
 
 const QS_CONFIG = getQSConfig('group', {
   page: 1,
@@ -225,6 +227,34 @@ function InventoryGroupsList({ i18n }) {
                   </Button>
                 </div>
               </Tooltip>,
+              [
+                <Tooltip
+                  content={i18n._(
+                    t`Select an inventory source by clicking the check box beside it. The inventory source can be a single group or a selection of multiple groups.`
+                  )}
+                  position="top"
+                  key="adhoc"
+                >
+                  <AdHocCommandsButton
+                    adHocItems={selected}
+                    apiModule={InventoriesAPI}
+                    itemId={inventoryId}
+                  >
+                    {({ openAdHocCommands }) => (
+                      <Button
+                        variant="secondary"
+                        aria-label={i18n._(t`Run command`)}
+                        onClick={openAdHocCommands}
+                        isDisabled={
+                          selected.length === 0 || selected.some(cannotDelete)
+                        }
+                      >
+                        {i18n._(t`Run command`)}
+                      </Button>
+                    )}
+                  </AdHocCommandsButton>
+                </Tooltip>,
+              ],
             ]}
           />
         )}
