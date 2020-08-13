@@ -103,10 +103,7 @@ function TemplateListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-        >
+        <DataListAction aria-label="actions" aria-labelledby={labelId}>
           {template.summary_fields.user_capabilities.start && (
             <Tooltip content={i18n._(t`Launch Template`)} position="top">
               <LaunchButton resource={template}>
