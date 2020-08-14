@@ -101,14 +101,14 @@
 
     - name: Deploy and Activate Postgres (Kubernetes)
       shell: |
-        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo add bitnami https://charts.bitnami.com/bitnami
         helm repo update
         helm upgrade {{ postgresql_service_name }} \
           --install \
           --namespace {{ kubernetes_namespace }} \
-          --version="8.3.0" \
+          --version="8.10.14" \
           --values {{ values_file.path }} \
-          stable/postgresql
+          bitnami/postgresql
       register: kubernetes_pg_activate
       no_log: true
 
