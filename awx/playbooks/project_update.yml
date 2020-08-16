@@ -102,61 +102,46 @@
         - update_insights
 
     - block:
-      - name: Ensure the project directory is present
-        file:
-          dest: "{{ project_path|quote }}"
-          state: directory
+        - name: Ensure the project archive directory is present
+          file:
+            dest: "{{ project_path|quote }}/.archive"
+            state: directory
 
-      - name: Get archive from url
-        get_url:
-          url: "{{ scm_url|quote }}"
-          dest: "{{ project_path|quote }}"
-          url_username: "{{ scm_username|default(omit) }}"
-          url_password: "{{ scm_password|default(omit) }}"
-          force_basic_auth: yes
-          force: "{{ scm_clean }}"
-        register: get_url_result
+        - name: Get archive from url
+          get_url:
+            url: "{{ scm_url|quote }}"
+            dest: "{{ project_path|quote }}/.archive/"
+            url_username: "{{ scm_username|default(omit) }}"
+            url_password: "{{ scm_password|default(omit) }}"
+            force_basic_auth: true
+          register: get_archive
 
-      - name: Unpack archive
-        unarchive:
-          src: "{{ get_url_result.dest }}"
-          dest: "{{ project_path|quote }}"
-          keep_newer: "{{ not scm_clean }}"
-          list_files: yes
-        register: unarchived
+        - name: Unpack archive
+          project_archive:
+            src: "{{ get_archive.dest }}"
+            project_path: "{{ project_path|quote }}"
+            force: "{{ scm_clean }}"
+          when: get_archive.changed or scm_clean
+          register: unarchived
 
-      - set_fact:
-          archive_root_dirs: "{{ archive_root_dirs |default([]) |union(item.split('/')[0:1]) }}"
-        loop: "{{ unarchived.files }}"
+        - name: Find previous archives
+          find:
+            paths: "{{ project_path|quote }}/.archive/"
+            excludes:
+              - "{{ get_archive.dest|basename }}"
+          when: unarchived.changed
+          register: previous_archive
 
-      - block:
-          - name: Delete unarchived single root directory
-            file:
-              dest: "{{ project_path|quote }}/{{ archive_root_dirs[0] }}"
-              state: absent
+        - name: Remove previous archives
+          file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ previous_archive.files }}"
+          when: previous_archive.files|default([])
 
-          - name: Link single root directory to project directory
-            file:
-              src: "{{ project_path|quote }}"
-              dest: "{{ project_path|quote }}/{{ archive_root_dirs[0] }}"
-              state: link
-
-          - name: Unpack archive
-            unarchive:
-              src: "{{ get_url_result.dest }}"
-              dest: "{{ project_path|quote }}"
-              keep_newer: "{{ not scm_clean }}"
-
-          - name: Delete link
-            file:
-              dest: "{{ project_path|quote }}/{{ archive_root_dirs[0] }}"
-              state: absent
-        when: archive_root_dirs |length == 1
-
-      - name: Set scm_version to archive sha1 checksum
-        set_fact:
-          scm_version: "{{ get_url_result.checksum_src }}"
-
+        - name: Set scm_version to archive sha1 checksum
+          set_fact:
+            scm_version: "{{ get_archive.checksum_src }}"
       tags:
         - update_archive
 
