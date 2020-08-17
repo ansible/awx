@@ -7,7 +7,7 @@ import { Config } from '../../../contexts/Config';
 
 import NotificationTemplateForm from '../shared/NotificationTemplateForm';
 
-function NotificationTemplateEdit({ template }) {
+function NotificationTemplateEdit({ template, defaultMessages }) {
   const detailsUrl = `/notification_templates/${template.id}/details`;
   const history = useHistory();
   const [formError, setFormError] = useState(null);
@@ -41,17 +41,13 @@ function NotificationTemplateEdit({ template }) {
 
   return (
     <CardBody>
-      <Config>
-        {({ me }) => (
-          <NotificationTemplateForm
-            template={template}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            me={me || {}}
-            submitError={formError}
-          />
-        )}
-      </Config>
+      <NotificationTemplateForm
+        template={template}
+        defaultMessages={defaultMessages}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        submitError={formError}
+      />
     </CardBody>
   );
 }

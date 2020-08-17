@@ -76,6 +76,21 @@ export function integer(i18n) {
   };
 }
 
+export function url(i18n) {
+  return value => {
+    // URL regex from https://urlregex.com/
+    if (
+      // eslint-disable-next-line max-len
+      !/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www\.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w\-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[.!/\\\w]*))?)/.test(
+        value
+      )
+    ) {
+      return i18n._(t`Please enter a valid URL`);
+    }
+    return undefined;
+  };
+}
+
 export function combine(validators) {
   return value => {
     for (let i = 0; i < validators.length; i++) {

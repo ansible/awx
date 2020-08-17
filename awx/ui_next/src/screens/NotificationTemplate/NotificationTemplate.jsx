@@ -24,17 +24,23 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
   const match = useRouteMatch();
   const location = useLocation();
   const {
-    result: template,
+    result: { template, defaultMessages },
     isLoading,
     error,
     request: fetchTemplate,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await NotificationTemplatesAPI.readDetail(templateId);
-      setBreadcrumb(data);
-      return data;
+      const [detail, options] = await Promise.all([
+        NotificationTemplatesAPI.readDetail(templateId),
+        NotificationTemplatesAPI.readOptions(),
+      ]);
+      setBreadcrumb(detail.data);
+      return {
+        template: detail.data,
+        defaultMessages: options.data.actions.POST.messages,
+      };
     }, [templateId, setBreadcrumb]),
-    null
+    { template: null, defaultMessages: null }
   );
 
   useEffect(() => {
@@ -88,11 +94,18 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
             to="/notification_templates/:id/details"
             exact
           />
+          {/* <Route path="/notification_templates/add">
+            <NotificationTemplateAdd
+              defaultMessages={defaultMessages}
+              isLoading={isLoading}
+            />
+          </Route> */}
           {template && (
             <>
               <Route path="/notification_templates/:id/edit">
                 <NotificationTemplateEdit
                   template={template}
+                  defaultMessages={defaultMessages}
                   isLoading={isLoading}
                 />
               </Route>
