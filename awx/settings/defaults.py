@@ -310,7 +310,7 @@ REST_FRAMEWORK = {
         'awx.api.parsers.JSONParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+        'awx.api.renderers.DefaultJSONRenderer',
         'awx.api.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',

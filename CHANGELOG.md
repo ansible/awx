@@ -9,6 +9,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Upgraded git-python to fix a bug that caused workflows to sometimes fail - https://github.com/ansible/awx/issues/6119
 - Fixed a bug in the AWX CLI that prevented Workflow nodes from importing properly - https://github.com/ansible/awx/issues/7793
 - Fixed a bug in the awx.awx collection release process that templated the wrong version - https://github.com/ansible/awx/issues/7870
+- Fixed a bug that caused errors rendering stdout that contained UTF-16 surrogate pairs - https://github.com/ansible/awx/pull/7918
 
 ## 14.0.0 (Aug 6, 2020)
 - As part of our commitment to inclusivity in open source, we recently took some time to audit AWX's source code and user interface and replace certain terminology with more inclusive language.  Strictly speaking, this isn't a bug or a feature, but we think it's important and worth calling attention to:
