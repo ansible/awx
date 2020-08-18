@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useWebsocket from '../../../util/useWebsocket';
 
-export default function useWsJobs(initialSources) {
+export default function useWsInventorySources(initialSources) {
   const [sources, setSources] = useState(initialSources);
   const lastMessage = useWebsocket({
     jobs: ['status_changed'],
