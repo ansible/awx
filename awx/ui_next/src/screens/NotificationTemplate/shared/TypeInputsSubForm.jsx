@@ -1,10 +1,9 @@
 import React from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import {
-  FormCheckboxLayout,
   FormColumnLayout,
   FormFullWidthLayout,
   SubFormLayout,
@@ -418,7 +417,7 @@ function TwilioFields({ i18n }) {
       <FormField
         id="twilio-destination-numbers"
         label={i18n._(t`Destination SMS number(s)`)}
-        name="notification_configuration.account_token"
+        name="notification_configuration.to_numbers"
         type="textarea"
         validate={required(null, i18n)}
         isRequired
@@ -438,13 +437,13 @@ function TwilioFields({ i18n }) {
 }
 
 function WebhookFields({ i18n }) {
-  const [methodField, methodMeta] = useField({
-    name: 'notification_configuration.http_method',
-    validate: required(i18n._(t`Select a value for this field`), i18n),
-  });
   const [headersField, headersMeta, headersHelpers] = useField({
     name: 'notification_configuration.headers',
     validate: required(i18n._(t`Select enter a value for this field`), i18n),
+  });
+  const [methodField, methodMeta] = useField({
+    name: 'notification_configuration.http_method',
+    validate: required(i18n._(t`Select a value for this field`), i18n),
   });
   return (
     <>

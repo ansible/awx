@@ -17,11 +17,12 @@ import { getAddedAndRemoved } from '../../../util/lists';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
+import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 import { NotificationTemplate } from '../../../types';
 
 function NotificationTemplateFormFields({ i18n, defaultMessages }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
-  const [typeField, typeMeta, typeHelpers] = useField({
+  const [typeField, typeMeta] = useField({
     name: 'notification_type',
     validate: required(i18n._(t`Select a value for this field`), i18n),
   });
@@ -97,9 +98,13 @@ function NotificationTemplateForm({
   i18n,
 }) {
   const handleSubmit = values => {
-    console.log(values);
-    // onSubmit(values);
+    onSubmit(normalizeTypeFields(values));
   };
+
+  let emailOptions = '';
+  if (template.notification_type === 'email') {
+    emailOptions = template.notification_configuration.use_ssl ? 'ssl' : 'tls';
+  }
 
   return (
     <Formik
@@ -107,6 +112,11 @@ function NotificationTemplateForm({
         name: template.name,
         description: template.description,
         notification_type: template.notification_type,
+        notification_configuration: {
+          ...initialConfigValues,
+          ...template.notification_configuration,
+        },
+        emailOptions,
       }}
       onSubmit={handleSubmit}
     >
@@ -144,3 +154,25 @@ NotificationTemplateForm.defaultProps = {
 };
 
 export default withI18n()(NotificationTemplateForm);
+
+/* If the user filled in some of the Type Details fields, then switched
+ * to a different notification type, unecessary fields may be set in the
+ * notification_configuration — this function strips them off */
+function normalizeTypeFields(values) {
+  const stripped = {};
+  const fields = typeFieldNames[values.notification_type];
+  fields.foreach(fieldName => {
+    if (typeof values[fieldName] !== 'undefined') {
+      stripped[fieldName] = values[fieldName];
+    }
+  });
+  if (values.notification_type === 'email') {
+    stripped.use_ssl = values.emailOptions === 'ssl';
+    stripped.use_tls = !stripped.use_ssl;
+  }
+
+  return {
+    ...values,
+    notification_configuration: stripped,
+  };
+}
