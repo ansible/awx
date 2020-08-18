@@ -231,7 +231,7 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
-    if scm_credential is not None:
+    if scm_credential is not None and state != 'absent':
         scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
 
     # Attempt to look up project based on the provided name and org ID
