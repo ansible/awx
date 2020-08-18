@@ -64,6 +64,8 @@ export default function visualizerReducer(state, action) {
       return { ...state, linkToDelete: action.value };
     case 'SET_LINK_TO_EDIT':
       return { ...state, linkToEdit: action.value };
+    case 'SET_NODES':
+      return { ...state, nodes: action.value };
     case 'SET_NODE_POSITIONS':
       return { ...state, nodePositions: action.value };
     case 'SET_NODE_TO_DELETE':

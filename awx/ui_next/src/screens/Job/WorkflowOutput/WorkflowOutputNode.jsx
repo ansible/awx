@@ -110,9 +110,11 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
             <>
               <JobTopLine>
                 {node.job.status && <StatusIcon status={node.job.status} />}
-                <p>{node.job.name}</p>
+                <p>{node.job.name || node.unifiedJobTemplate.name}</p>
               </JobTopLine>
-              <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
+              {!!node?.job?.elapsed && (
+                <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
+              )}
             </>
           ) : (
             <NodeDefaultLabel>
