@@ -48,5 +48,3 @@ class TowerAWXKitModule(TowerModule):
     def logout(self):
         if self.authenticated:
             self.connection.logout()
-
-    
