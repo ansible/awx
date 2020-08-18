@@ -64,24 +64,25 @@ Elapsed.displayName = 'Elapsed';
 function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
   const history = useHistory();
   const { nodePositions } = useContext(WorkflowStateContext);
+  const job = node?.originalNodeObject?.summary_fields?.job;
   let borderColor = '#93969A';
 
-  if (node.job) {
+  if (job) {
     if (
-      node.job.status === 'failed' ||
-      node.job.status === 'error' ||
-      node.job.status === 'canceled'
+      job.status === 'failed' ||
+      job.status === 'error' ||
+      job.status === 'canceled'
     ) {
       borderColor = '#d9534f';
     }
-    if (node.job.status === 'successful' || node.job.status === 'ok') {
+    if (job.status === 'successful' || job.status === 'ok') {
       borderColor = '#5cb85c';
     }
   }
 
   const handleNodeClick = () => {
-    if (node.job && node.job.type !== 'workflow_aproval') {
-      history.push(`/jobs/${node.job.id}/details`);
+    if (job && job.type !== 'workflow_aproval') {
+      history.push(`/jobs/${job.id}/details`);
     }
   };
 
@@ -90,7 +91,7 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
       id={`node-${node.id}`}
       transform={`translate(${nodePositions[node.id].x},${nodePositions[node.id]
         .y - nodePositions[1].y})`}
-      job={node.job}
+      job={job}
       onClick={handleNodeClick}
       onMouseEnter={mouseEnter}
       onMouseLeave={mouseLeave}
@@ -106,14 +107,14 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
       />
       <foreignObject height="58" width="178" x="1" y="1">
         <NodeContents>
-          {node.job ? (
+          {job ? (
             <>
               <JobTopLine>
-                {node.job.status && <StatusIcon status={node.job.status} />}
-                <p>{node.job.name || node.unifiedJobTemplate.name}</p>
+                {job.status && <StatusIcon status={job.status} />}
+                <p>{job.name || node.unifiedJobTemplate.name}</p>
               </JobTopLine>
-              {!!node?.job?.elapsed && (
-                <Elapsed>{secondsToHHMMSS(node.job.elapsed)}</Elapsed>
+              {!!job?.elapsed && (
+                <Elapsed>{secondsToHHMMSS(job.elapsed)}</Elapsed>
               )}
             </>
           ) : (
@@ -125,7 +126,7 @@ function WorkflowOutputNode({ i18n, mouseEnter, mouseLeave, node }) {
           )}
         </NodeContents>
       </foreignObject>
-      {(node.unifiedJobTemplate || node.job) && (
+      {(node.unifiedJobTemplate || job) && (
         <WorkflowNodeTypeLetter node={node} />
       )}
     </NodeG>

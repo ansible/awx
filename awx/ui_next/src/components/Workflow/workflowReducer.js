@@ -365,9 +365,6 @@ function generateNodes(workflowNodes, i18n) {
       originalNodeObject: node,
     };
 
-    if (node.summary_fields.job) {
-      nodeObj.job = node.summary_fields.job;
-    }
     if (node.summary_fields.unified_job_template) {
       nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;
     }

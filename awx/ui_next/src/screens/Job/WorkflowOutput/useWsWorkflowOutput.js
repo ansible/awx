@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
 import useWebsocket from '../../../util/useWebsocket';
+import { WorkflowJobsAPI } from '../../../api';
+
+const fetchWorkflowNodes = async (jobId, pageNo = 1, nodes = []) => {
+  const { data } = await WorkflowJobsAPI.readNodes(jobId, {
+    page_size: 200,
+    page: pageNo,
+  });
+
+  if (data.next) {
+    return fetchWorkflowNodes(jobId, pageNo + 1, nodes.concat(data.results));
+  }
+  return nodes.concat(data.results);
+};
 
 export default function useWsWorkflowOutput(workflowJobId, initialNodes) {
   const [nodes, setNodes] = useState(initialNodes);
@@ -14,20 +27,53 @@ export default function useWsWorkflowOutput(workflowJobId, initialNodes) {
 
   useEffect(
     function parseWsMessage() {
-      if (
-        !nodes ||
-        nodes.length === 0 ||
-        lastMessage?.workflow_job_id !== workflowJobId
-      ) {
-        return;
+      async function refreshNodeObjects() {
+        const refreshedNodes = [];
+        const updatedNodeObjects = await fetchWorkflowNodes(workflowJobId);
+        const updatedNodeObjectsMap = updatedNodeObjects.reduce((map, node) => {
+          map[node.id] = node;
+          return map;
+        }, {});
+        nodes.forEach(node => {
+          if (node.id === 1) {
+            // This is our artificial start node
+            refreshedNodes.push({
+              ...node,
+            });
+          } else {
+            refreshedNodes.push({
+              ...node,
+              originalNodeObject:
+                updatedNodeObjectsMap[node.originalNodeObject.id],
+            });
+          }
+        });
+        setNodes(refreshedNodes);
       }
 
-      const index = nodes.findIndex(
-        node => node?.originalNodeObject?.id === lastMessage.workflow_node_id
-      );
+      if (
+        lastMessage?.unified_job_id === workflowJobId &&
+        ['successful', 'failed', 'error', 'cancelled'].includes(
+          lastMessage.status
+        )
+      ) {
+        refreshNodeObjects();
+      } else {
+        if (
+          !nodes ||
+          nodes.length === 0 ||
+          lastMessage?.workflow_job_id !== workflowJobId
+        ) {
+          return;
+        }
 
-      if (index > -1) {
-        setNodes(updateNode(nodes, index, lastMessage));
+        const index = nodes.findIndex(
+          node => node?.originalNodeObject?.id === lastMessage.workflow_node_id
+        );
+
+        if (index > -1) {
+          setNodes(updateNode(nodes, index, lastMessage));
+        }
       }
     },
     [lastMessage] // eslint-disable-line react-hooks/exhaustive-deps
