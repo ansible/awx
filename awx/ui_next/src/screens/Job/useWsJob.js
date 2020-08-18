@@ -43,11 +43,9 @@ export default function useWsJob(initialJob) {
 }
 
 function updateJob(job, message) {
-  const updatedJob = {
+  return {
     ...job,
     finished: message.finished,
     status: message.status,
   };
-
-  return updatedJob;
 }
