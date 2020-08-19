@@ -88,7 +88,7 @@ class CLI(object):
         token = self.get_config('token')
         if token:
             self.root.connection.login(
-                None, None, token=token, auth_type='Bearer'
+                None, None, token=token,
             )
         else:
             config.use_sessions = True
