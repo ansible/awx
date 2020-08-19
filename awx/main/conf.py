@@ -331,25 +331,13 @@ register(
 )
 
 register(
-    'ENTITLEMENT_PUBLIC_CERT',
+    'ENTITLEMENT_CERT',
     field_class=fields.CharField,
     allow_blank=True,
     required=True,
-    validators=[validate_certificate],
-    label=_('RHSM Entitlement Public Certificate'),
-    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com.'),
-    category=_('SYSTEM'),
-    category_slug='system',
-)
-
-register(
-    'ENTITLEMENT_PRIVATE_KEY',
-    field_class=fields.CharField,
-    allow_blank=True,
-    required=True,
-    validators=[validate_private_key],
-    label=_('SAML Service Provider Private Key'),
-    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com.'),
+    validators=[validate_private_key],  # TODO: may need to use/modify `validate_certificate` validator
+    label=_('RHSM Entitlement Public Certificate and Private Key'),
+    help_text=_('Obtain a key pair via subscription-manager, or https://access.redhat.com. Refer to Ansible Tower docs for formatting key pair.'),
     category=_('SYSTEM'),
     category_slug='system',
     encrypted=True,
