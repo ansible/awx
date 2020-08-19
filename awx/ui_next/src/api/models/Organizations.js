@@ -15,6 +15,10 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
   readTeams(id, params) {
     return this.http.get(`${this.baseUrl}${id}/teams/`, { params });
   }
+
+  createUser(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/users/`, data);
+  }
 }
 
 export default Organizations;

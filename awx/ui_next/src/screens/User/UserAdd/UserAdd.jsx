@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from '../../../components/Card';
 import UserForm from '../shared/UserForm';
-import { UsersAPI } from '../../../api';
+import { OrganizationsAPI } from '../../../api';
 
 function UserAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
@@ -11,10 +11,11 @@ function UserAdd() {
 
   const handleSubmit = async values => {
     setFormSubmitError(null);
+    const { organization, ...userValues } = values;
     try {
       const {
         data: { id },
-      } = await UsersAPI.create(values);
+      } = await OrganizationsAPI.createUser(organization, userValues);
       history.push(`/users/${id}/details`);
     } catch (error) {
       setFormSubmitError(error);
