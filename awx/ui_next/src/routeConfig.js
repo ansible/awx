@@ -2,13 +2,13 @@ import { t } from '@lingui/macro';
 
 import ActivityStream from './screens/ActivityStream';
 import Applications from './screens/Application';
-import Credentials from './screens/Credential';
 import CredentialTypes from './screens/CredentialType';
+import Credentials from './screens/Credential';
 import Dashboard from './screens/Dashboard';
+import ExecutionEnvironments from './screens/ExecutionEnvironment';
 import Hosts from './screens/Host';
 import InstanceGroups from './screens/InstanceGroup';
 import Inventory from './screens/Inventory';
-import { Jobs } from './screens/Job';
 import ManagementJobs from './screens/ManagementJob';
 import NotificationTemplates from './screens/NotificationTemplate';
 import Organizations from './screens/Organization';
@@ -19,6 +19,7 @@ import Teams from './screens/Team';
 import Templates from './screens/Template';
 import Users from './screens/User';
 import WorkflowApprovals from './screens/WorkflowApproval';
+import { Jobs } from './screens/Job';
 
 // Ideally, this should just be a regular object that we export, but we
 // need the i18n. When lingui3 arrives, we will be able to import i18n
@@ -137,6 +138,11 @@ function getRouteConfig(i18n) {
           title: i18n._(t`Applications`),
           path: '/applications',
           screen: Applications,
+        },
+        {
+          title: i18n._(t`Execution environments`),
+          path: '/execution_environments',
+          screen: ExecutionEnvironments,
         },
       ],
     },
