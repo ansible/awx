@@ -32,7 +32,7 @@ class TowerAWXKitModule(TowerModule):
     def authenticate(self):
         try:
             if self.oauth_token:
-                self.connection.login(None, None, token=self.oauth_token, auth_type='Bearer')
+                self.connection.login(None, None, token=self.oauth_token)
                 self.authenticated = True
             elif self.username:
                 self.connection.login(username=self.username, password=self.password)
