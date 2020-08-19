@@ -89,7 +89,7 @@ EXAMPLES = '''
     state: present
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
@@ -109,7 +109,7 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     role_type = module.params.pop('role')
     role_field = role_type + '_role'

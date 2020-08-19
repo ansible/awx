@@ -91,7 +91,7 @@ EXAMPLES = '''
     wait: False
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 import json
 import time
 
@@ -111,7 +111,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     optional_args = {}
     # Extract our parameters

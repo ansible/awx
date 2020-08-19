@@ -30,12 +30,12 @@ def mock_ping_response(self, method, url, **kwargs):
 
 
 def test_version_warning(collection_import, silence_warning):
-    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     with mock.patch.object(sys, 'argv', testargs):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_ping_response):
-            my_module = TowerModule(argument_spec=dict())
+            my_module = TowerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.0.0"
             my_module._COLLECTION_TYPE = "not-junk"
             my_module.collection_to_version['not-junk'] = 'not-junk'
@@ -46,12 +46,12 @@ def test_version_warning(collection_import, silence_warning):
 
 
 def test_type_warning(collection_import, silence_warning):
-    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
     cli_data = {'ANSIBLE_MODULE_ARGS': {}}
     testargs = ['module_file2.py', json.dumps(cli_data)]
     with mock.patch.object(sys, 'argv', testargs):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_ping_response):
-            my_module = TowerModule(argument_spec={})
+            my_module = TowerAPIModule(argument_spec={})
             my_module._COLLECTION_VERSION = "1.2.3"
             my_module._COLLECTION_TYPE = "junk"
             my_module.collection_to_version['junk'] = 'junk'
@@ -63,7 +63,7 @@ def test_type_warning(collection_import, silence_warning):
 
 def test_duplicate_config(collection_import, silence_warning):
     # imports done here because of PATH issues unique to this test suite
-    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
     data = {
         'name': 'zigzoom',
         'zig': 'zoom',
@@ -71,12 +71,12 @@ def test_duplicate_config(collection_import, silence_warning):
         'tower_config_file': 'my_config'
     }
 
-    with mock.patch.object(TowerModule, 'load_config') as mock_load:
+    with mock.patch.object(TowerAPIModule, 'load_config') as mock_load:
         argument_spec = dict(
             name=dict(required=True),
             zig=dict(type='str'),
         )
-        TowerModule(argument_spec=argument_spec, direct_params=data)
+        TowerAPIModule(argument_spec=argument_spec, direct_params=data)
         assert mock_load.mock_calls[-1] == mock.call('my_config')
 
     silence_warning.assert_called_once_with(
@@ -92,8 +92,8 @@ def test_no_templated_values(collection_import):
     Those replacements should happen at build time, so they should not be
     checked into source.
     """
-    TowerModule = collection_import('plugins.module_utils.tower_api').TowerModule
-    assert TowerModule._COLLECTION_VERSION == "0.0.1-devel", (
+    TowerAPIModule = collection_import('plugins.module_utils.tower_api').TowerAPIModule
+    assert TowerAPIModule._COLLECTION_VERSION == "0.0.1-devel", (
         'The collection version is templated when the collection is built '
         'and the code should retain the placeholder of "0.0.1-devel".'
     )
