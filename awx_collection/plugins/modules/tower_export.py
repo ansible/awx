@@ -92,7 +92,8 @@ EXAMPLES = '''
 '''
 
 from os import environ
-
+import logging
+from ansible.module_utils.six.moves import StringIO
 from ..module_utils.tower_awxkit import TowerAWXKitModule
 
 try:
@@ -134,11 +135,31 @@ def main():
             # Otherwise we take either the string or None (if the parameter was not passed) to get one or no items
             export_args[resource] = module.params.get(resource)
 
-    # Run the export process
-    module.json_output['assets'] = module.get_api_v2_object().export_assets(**export_args)
+    # Currently the import process does not return anything on error
+    # It simply just logs to pythons logger
+    # Setup a log gobbler to get error messages from import_assets
+    log_capture_string = StringIO()
+    ch = logging.StreamHandler(log_capture_string)
+    for logger_name in ['awxkit.api.pages.api', 'awxkit.api.pages.page']:
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(logging.WARNING)
+        ch.setLevel(logging.WARNING)
 
-    module.exit_json(**module.json_output)
+    logger.addHandler(ch)
+    log_contents = ''
 
+    # Run the import process
+    try:
+        module.json_output['assets'] = module.get_api_v2_object().export_assets(**export_args)
+        module.exit_json(**module.json_output)
+    except Exception as e:
+        module.fail_json(msg="Failed to export assets {0}".format(e))
+    finally:
+        # Finally consume the logs incase there were any errors and die if there were
+        log_contents = log_capture_string.getvalue()
+        log_capture_string.close()
+        if log_contents != '':
+            module.fail_json(msg=log_contents)
 
 if __name__ == '__main__':
     main()
