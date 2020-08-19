@@ -5,28 +5,36 @@ import WorkflowOutputNode from './WorkflowOutputNode';
 
 const nodeWithJT = {
   id: 2,
-  job: {
-    elapsed: 7,
-    id: 9000,
-    name: 'Automation JT',
-    status: 'successful',
-    type: 'job',
-  },
-  unifiedJobTemplate: {
-    id: 77,
-    name: 'Automation JT',
-    unified_job_type: 'job',
+  originalNodeObject: {
+    summary_fields: {
+      job: {
+        elapsed: 7,
+        id: 9000,
+        name: 'Automation JT',
+        status: 'successful',
+        type: 'job',
+      },
+    },
+    unifiedJobTemplate: {
+      id: 77,
+      name: 'Automation JT',
+      unified_job_type: 'job',
+    },
   },
 };
 
 const nodeWithoutJT = {
   id: 2,
-  job: {
-    elapsed: 7,
-    id: 9000,
-    name: 'Automation JT 2',
-    status: 'successful',
-    type: 'job',
+  originalNodeObject: {
+    summary_fields: {
+      job: {
+        elapsed: 7,
+        id: 9000,
+        name: 'Automation JT 2',
+        status: 'successful',
+        type: 'job',
+      },
+    },
   },
 };
 

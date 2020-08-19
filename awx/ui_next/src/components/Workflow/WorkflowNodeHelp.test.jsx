@@ -9,11 +9,15 @@ describe('WorkflowNodeHelp', () => {
   });
   test('renders the expected content for a completed job template job', () => {
     const node = {
-      job: {
-        name: 'Foo Job Template',
-        elapsed: 9000,
-        status: 'successful',
-        type: 'job',
+      originalNodeObject: {
+        summary_fields: {
+          job: {
+            name: 'Foo Job Template',
+            elapsed: 9000,
+            status: 'successful',
+            type: 'job',
+          },
+        },
       },
       unifiedJobTemplate: {
         name: 'Foo Job Template',
