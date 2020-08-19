@@ -160,7 +160,7 @@ function InventoryGroupsList({ i18n }) {
         >
           {({ openAdHocCommands }) => (
             <DropdownItem
-              key="add"
+              key="run command"
               onClick={openAdHocCommands}
               isDisabled={groupCount === 0}
             >
@@ -171,6 +171,7 @@ function InventoryGroupsList({ i18n }) {
         <DropdownItem
           variant="danger"
           aria-label={i18n._(t`Delete`)}
+          key="delete"
           onClick={toggleModal}
           isDisabled={selected.length === 0 || selected.some(cannotDelete)}
         >

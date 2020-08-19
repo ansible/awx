@@ -29,7 +29,7 @@ const children = ({ openAdHocCommands }) => (
   <button type="submit" onClick={() => openAdHocCommands()} />
 );
 
-describe('<AdHocCOmmands />', () => {
+describe('<AdHocCommands />', () => {
   let wrapper;
   afterEach(() => {
     wrapper.unmount();
@@ -311,10 +311,8 @@ describe('<AdHocCOmmands />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
 
-    wrapper.update();
-
+    waitForElement(wrapper, 'ErrorDetail', el => el.length > 0);
     expect(wrapper.find('AdHocCommandsWizard').length).toBe(0);
-    expect(wrapper.find('ErrorDetail').length).toBe(1);
   });
   test('should open alert modal when error on fetching data', async () => {
     InventoriesAPI.readAdHocOptions.mockRejectedValue(
