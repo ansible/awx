@@ -7,10 +7,8 @@ import { Card, PageSection } from '@patternfly/react-core';
 import { JobsAPI } from '../../api';
 import ContentError from '../../components/ContentError';
 import RoutedTabs from '../../components/RoutedTabs';
-
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
-import WorkflowDetail from './WorkflowDetail';
 import { WorkflowOutput } from './WorkflowOutput';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 
@@ -129,7 +127,7 @@ class Job extends Component {
             {job &&
               job.type === 'workflow_job' && [
                 <Route key="workflow-details" path="/jobs/workflow/:id/details">
-                  <WorkflowDetail job={job} />
+                  <JobDetail type={match.params.type} job={job} />
                 </Route>,
                 <Route key="workflow-output" path="/jobs/workflow/:id/output">
                   <WorkflowOutput job={job} />

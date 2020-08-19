@@ -31,7 +31,7 @@ describe('<JobDetail />', () => {
     assertDetail('Status', 'Successful');
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
-    assertDetail('Template', mockJobData.summary_fields.job_template.name);
+    assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
     assertDetail('Job Type', 'Run');
     assertDetail('Launched By', mockJobData.summary_fields.created_by.username);
     assertDetail('Inventory', mockJobData.summary_fields.inventory.name);

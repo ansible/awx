@@ -84,6 +84,7 @@ function JobDetail({ job, i18n }) {
     instance_group: instanceGroup,
     inventory,
     job_template: jobTemplate,
+    workflow_job_template: workflowJobTemplate,
     labels,
     project,
   } = job.summary_fields;
@@ -143,10 +144,22 @@ function JobDetail({ job, i18n }) {
         />
         {jobTemplate && (
           <Detail
-            label={i18n._(t`Template`)}
+            label={i18n._(t`Job Template`)}
             value={
               <Link to={`/templates/job_template/${jobTemplate.id}`}>
                 {jobTemplate.name}
+              </Link>
+            }
+          />
+        )}
+        {workflowJobTemplate && (
+          <Detail
+            label={i18n._(t`Workflow Job Template`)}
+            value={
+              <Link
+                to={`/templates/workflow_job_template/${workflowJobTemplate.id}`}
+              >
+                {workflowJobTemplate.name}
               </Link>
             }
           />
