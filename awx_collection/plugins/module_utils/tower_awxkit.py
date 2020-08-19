@@ -31,9 +31,12 @@ class TowerAWXKitModule(TowerModule):
 
     def authenticate(self):
         try:
-            self.connection.login(username=self.username, password=self.password, token=self.oauth_token)
-            # If we have neither of these, then we can try un-authenticated access
-            self.authenticated = True
+            if self.oauth_token:
+                self.connection.login(None, None, token=self.oauth_token, auth_type='Bearer')
+                self.authenticated = True
+            elif self.username:
+                self.connection.login(username=self.username, password=self.password)
+                self.authenticated = True
         except Exception:
             self.exit_json("Failed to authenticate")
 
