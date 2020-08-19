@@ -3,6 +3,7 @@
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
 ## 14.1.0 (TBD)
+- Deprecated official support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
 - Added the ability to import YAML-based resources (instead of just JSON) when using the AWX CLI - https://github.com/ansible/awx/pull/7808
 - Updated the AWX CLI to export labels associated with Workflow Job Templates - https://github.com/ansible/awx/pull/7847
 - Updated to the latest python-ldap to address a bug - https://github.com/ansible/awx/issues/7868
