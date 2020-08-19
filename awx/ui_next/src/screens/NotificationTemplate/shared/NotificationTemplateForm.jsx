@@ -1,22 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import { shape, func } from 'prop-types';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
 
-import { OrganizationsAPI } from '../../../api';
-import { ConfigContext } from '../../../contexts/Config';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-import ContentError from '../../../components/ContentError';
-import ContentLoading from '../../../components/ContentLoading';
 import FormField, { FormSubmitError } from '../../../components/FormField';
 import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
 import { OrganizationLookup } from '../../../components/Lookup';
-import { getAddedAndRemoved } from '../../../util/lists';
-import { required, minMaxValue } from '../../../util/validators';
+import { required } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
+import CustomMessagesSubForm from './CustomMessagesSubForm';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
 import { NotificationTemplate } from '../../../types';
 
@@ -85,6 +81,10 @@ function NotificationTemplateFormFields({ i18n, defaultMessages }) {
         />
       </FormGroup>
       {typeField.value && <TypeInputsSubForm type={typeField.value} />}
+      <CustomMessagesSubForm
+        defaultMessages={defaultMessages}
+        type={typeField.value}
+      />
     </>
   );
 }
@@ -105,6 +105,14 @@ function NotificationTemplateForm({
   if (template.notification_type === 'email') {
     emailOptions = template.notification_configuration.use_ssl ? 'ssl' : 'tls';
   }
+  const messages = template.messages || { workflow_approval: {} };
+  const defs = defaultMessages[template.notification_type || 'email'];
+  const mergeDefaultMessages = (templ = {}, def) => {
+    return {
+      message: templ.message || def.message || '',
+      body: templ.body || def.body || '',
+    };
+  };
 
   return (
     <Formik
@@ -117,6 +125,38 @@ function NotificationTemplateForm({
           ...template.notification_configuration,
         },
         emailOptions,
+        messages: {
+          started: { ...mergeDefaultMessages(messages.started, defs.started) },
+          success: { ...mergeDefaultMessages(messages.success, defs.success) },
+          error: { ...mergeDefaultMessages(messages.error, defs.error) },
+          workflow_approval: {
+            approved: {
+              ...mergeDefaultMessages(
+                messages.workflow_approval.approved,
+                defs.workflow_approval.approved
+              ),
+            },
+            denied: {
+              ...mergeDefaultMessages(
+                messages.workflow_approval.denied,
+                defs.workflow_approval.denied
+              ),
+            },
+            running: {
+              ...mergeDefaultMessages(
+                messages.workflow_approval.running,
+                defs.workflow_approval.running
+              ),
+            },
+            timed_out: {
+              ...mergeDefaultMessages(
+                messages.workflow_approval.timed_out,
+                defs.workflow_approval.timed_out
+              ),
+            },
+          },
+        },
+        useCustomMessages: hasCustomMessages(messages, defs),
       }}
       onSubmit={handleSubmit}
     >
@@ -154,6 +194,42 @@ NotificationTemplateForm.defaultProps = {
 };
 
 export default withI18n()(NotificationTemplateForm);
+
+function hasCustomMessages(messages, defaults) {
+  return (
+    isCustomized(messages.started, defaults.started) ||
+    isCustomized(messages.success, defaults.success) ||
+    isCustomized(messages.error, defaults.error) ||
+    isCustomized(
+      messages.workflow_approval.approved,
+      defaults.workflow_approval.approved
+    ) ||
+    isCustomized(
+      messages.workflow_approval.denied,
+      defaults.workflow_approval.denied
+    ) ||
+    isCustomized(
+      messages.workflow_approval.running,
+      defaults.workflow_approval.running
+    ) ||
+    isCustomized(
+      messages.workflow_approval.timed_out,
+      defaults.workflow_approval.timed_out
+    )
+  );
+}
+function isCustomized(message, defaultMessage) {
+  if (!message) {
+    return false;
+  }
+  if (!message.message || message.message !== defaultMessage.message) {
+    return true;
+  }
+  if (!message.body || message.body !== defaultMessage.body) {
+    return true;
+  }
+  return false;
+}
 
 /* If the user filled in some of the Type Details fields, then switched
  * to a different notification type, unecessary fields may be set in the
