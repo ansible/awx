@@ -90,7 +90,7 @@ def as_user(v, username, password=None):
             if session_id:
                 del connection.session.cookies['sessionid']
             if access_token:
-                kwargs = dict(token=access_token, auth_type='Bearer')
+                kwargs = dict(token=access_token)
             else:
                 kwargs = connection.get_session_requirements()
         else:
