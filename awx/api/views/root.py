@@ -296,9 +296,15 @@ class ApiV2ConfigView(APIView):
             logger.info(smart_text(u"Invalid JSON submitted for license."),
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save Entitlement Cert/Key
+        license_data = json.loads(data_actual)
+        if license_data['entitlement_cert']:
+            settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
+
+        # TODO: Validate Entitlement Cert by verifying with the CDN/Satellite
         try:
             from awx.main.utils.common import get_licenser
-            license_data = json.loads(data_actual)
             license_data_validated = get_licenser(**license_data).validate()
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
