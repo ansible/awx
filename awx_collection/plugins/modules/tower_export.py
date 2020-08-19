@@ -161,5 +161,6 @@ def main():
         if log_contents != '':
             module.fail_json(msg=log_contents)
 
+
 if __name__ == '__main__':
     main()
