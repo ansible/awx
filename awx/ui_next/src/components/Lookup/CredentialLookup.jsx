@@ -68,8 +68,8 @@ function CredentialLookup({
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
         searchableKeys: Object.keys(
-          actionsResponse.data.actions?.GET || {}
-        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+          actionsResponse.data?.actions?.GET || {}
+        ).filter(key => actionsResponse.data?.actions?.GET[key].filterable),
       };
     }, [
       credentialTypeId,
