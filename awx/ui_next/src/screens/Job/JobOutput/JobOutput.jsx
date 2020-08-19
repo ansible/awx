@@ -32,6 +32,8 @@ import {
   AdHocCommandsAPI,
 } from '../../../api';
 
+const UNLOADED_EVENT = 'UNLOADED_EVENT';
+
 const HeaderTitle = styled.div`
   display: inline-flex;
   align-items: center;
@@ -124,6 +126,7 @@ class JobOutput extends Component {
       hostEvent: {},
       collapsedTaskUuids: [],
       collapsedPlayUuids: [],
+      collapsedRowRanges: [],
     };
 
     this.cache = new CellMeasurerCache({
@@ -179,6 +182,7 @@ class JobOutput extends Component {
     if (shouldRecomputeRowHeights) {
       if (this.listRef.recomputeRowHeights) {
         this.listRef.recomputeRowHeights();
+        this.listRef.forceUpdateGrid();
       }
     }
   }
@@ -284,24 +288,110 @@ class JobOutput extends Component {
     });
   }
 
-  handleTaskToggle(task_uuid) {
+  async handleTaskToggle(task_uuid) {
     if (!task_uuid) return;
 
-    const { collapsedTaskUuids } = this.state;
+    const { job, type } = this.props;
+    const { collapsedTaskUuids, collapsedRowRanges, results } = this.state;
 
-    if (collapsedTaskUuids.includes(task_uuid)) {
-      this.setState({
-        collapsedTaskUuids: collapsedTaskUuids.filter(u => u !== task_uuid),
-      });
+    // get array of our current rows sorted by counter
+    const rows = [];
+    Object.keys(results).forEach(key => {
+      rows.push(results[key]);
+    });
+    rows.sort((a, b) => (a.counter > b.counter ? 1 : -1));
+
+    const [taskRow] = rows.filter(r => r.uuid === task_uuid);
+    let hasAllNestedEvents = false;
+    rows.forEach(row => {
+      if (!hasAllNestedEvents && row.counter > taskRow.counter) {
+        if (row.event_level <= 2) {
+          hasAllNestedEvents = true;
+        }
+      }
+    });
+
+    // make sure there are no missing events between toggled event and
+    // next task or play event
+    rows.forEach((row, index) => {
+      if (row.counter > taskRow.counter) {
+        if (row.counter !== rows[index - 1].counter + 1) {
+          hasAllNestedEvents = false;
+        }
+      }
+    });
+
+    const [collapsedRange2] = collapsedRowRanges.filter(
+      r => r[2] === task_uuid
+    );
+
+    // check if all events nested under that task have been downloaded
+    if (!collapsedRange2 && hasAllNestedEvents) {
+      if (collapsedTaskUuids.includes(task_uuid)) {
+        this.setState({
+          collapsedTaskUuids: collapsedTaskUuids.filter(u => u !== task_uuid),
+        });
+      } else {
+        this.setState({
+          collapsedTaskUuids: collapsedTaskUuids.concat(task_uuid),
+        });
+      }
+
+      this.cache.clearAll();
+      this.listRef.recomputeRowHeights();
+      this.listRef.forceUpdateGrid();
     } else {
-      this.setState({
-        collapsedTaskUuids: collapsedTaskUuids.concat(task_uuid),
-      });
-    }
+      // make an api request to figure out the range of events that _should_ be
+      if (collapsedTaskUuids.includes(task_uuid)) {
+        this.setState(currentState => {
+          // results[counter] = { counter, event: UNLOADED_EVENT };
+          const { results } = currentState;
+          const [collapsedRange] = currentState.collapsedRowRanges.filter(
+            r => r[2] === task_uuid
+          );
+          range(...collapsedRange).forEach(counter => {
+            delete results[counter];
+          });
 
-    this.cache.clearAll();
-    this.listRef.recomputeRowHeights();
-    this.listRef.forceUpdateGrid();
+          return {
+            results,
+            collapsedTaskUuids: collapsedTaskUuids.filter(u => u !== task_uuid),
+            collapsedRowRanges: currentState.collapsedRowRanges.filter(
+              r => r[2] !== task_uuid
+            ),
+          };
+        });
+        this.cache.clearAll();
+        this.listRef.recomputeRowHeights();
+        this.listRef.forceUpdateGrid();
+        return;
+      }
+      const {
+        data: { results: newResults = [] },
+      } = await JobsAPI.readEvents(job.id, type, {
+        counter__gt: taskRow.counter,
+        event__in:
+          'playbook_on_start,playbook_on_notify,playbook_on_include,playbook_on_no_hosts_matched,playbook_on_no_hosts_remaining,playbook_on_task_start,playbook_on_vars_prompt,playbook_on_setup,playbook_on_import_for_host,playbook_on_not_import_for_host,playbook_on_play_start,playbook_on_stats',
+        order_by: '-counter',
+      });
+
+      // TODO: handle no results differently?
+      if (newResults.length <= 0) return;
+
+      const [nextUncollapsedEvent] = newResults;
+      this.setState(currentState => {
+        return {
+          collapsedTaskUuids: currentState.collapsedTaskUuids.concat(task_uuid),
+          collapsedRowRanges: currentState.collapsedRowRanges.concat([
+            [taskRow.counter + 1, nextUncollapsedEvent.counter - 1, task_uuid],
+          ]),
+        };
+      });
+
+      this.cache.clearAll();
+      this.listRef.recomputeRowHeights();
+      this.listRef.forceUpdateGrid();
+    }
   }
 
   handlePlayToggle(play_uuid) {
@@ -374,7 +464,10 @@ class JobOutput extends Component {
 
     let cellContent = null;
 
-    if (!isTaskCollapsed || (uuid === taskUuid && !isPlayCollapsed)) {
+    if (
+      results[index]?.event !== UNLOADED_EVENT &&
+      (!isTaskCollapsed || (uuid === taskUuid && !isPlayCollapsed))
+    ) {
       cellContent = results[index] ? (
         <JobEvent
           isClickable={isHostEvent(results[index])}
@@ -418,6 +511,32 @@ class JobOutput extends Component {
       return Promise.resolve(null);
     }
     const { job, type } = this.props;
+    const { collapsedRowRanges } = this.state;
+
+    // check if the wanted rows are unloaded but collapsed
+    let isRangeCollapsed = false;
+    let collapsedRange = null;
+    collapsedRowRanges.forEach(eventRange => {
+      if (startIndex >= eventRange[0] && stopIndex <= eventRange[1]) {
+        isRangeCollapsed = true;
+        collapsedRange = eventRange;
+      }
+    });
+
+    if (isRangeCollapsed) {
+      this.setState(({ results, currentlyLoading }) => {
+        range(...collapsedRange).forEach(counter => {
+          results[counter] = { counter, event: UNLOADED_EVENT };
+        });
+        return {
+          results,
+        };
+      });
+      this.cache.clearAll();
+      this.listRef.recomputeRowHeights();
+      this.listRef.forceUpdateGrid();
+      return;
+    }
 
     const loadRange = range(startIndex, stopIndex);
     this._isMounted &&
