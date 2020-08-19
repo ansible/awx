@@ -46,6 +46,10 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: 40px;
 `;
 
+const Unavailable = styled.span`
+  color: var(--pf-global--danger-color--200);
+`;
+
 function InstanceGroupListItem({
   instanceGroup,
   detailUrl,
@@ -78,7 +82,7 @@ function InstanceGroupListItem({
           />
         );
       }
-      return <span css="color: red">{i18n._(t`Unavailable`)}</span>;
+      return <Unavailable> {i18n._(t`Unavailable`)}</Unavailable>;
     }
     return null;
   }
