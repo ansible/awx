@@ -27,7 +27,13 @@ function UserList({ i18n }) {
   const match = useRouteMatch();
 
   const {
-    result: { users, itemCount, actions },
+    result: {
+      users,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchUsers,
@@ -42,12 +48,20 @@ function UserList({ i18n }) {
         users: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       users: [],
       itemCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -124,6 +138,8 @@ function UserList({ i18n }) {
                 key: 'last_name',
               },
             ]}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
               <DataListToolbar
                 {...props}

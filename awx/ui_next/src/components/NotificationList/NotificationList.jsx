@@ -23,7 +23,7 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
   const [toggleError, setToggleError] = useState(null);
 
   const {
-    result: fetchNotificationsResult,
+    result: fetchNotificationsResults,
     result: {
       notifications,
       itemCount,
@@ -31,6 +31,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
       successTemplateIds,
       errorTemplateIds,
       typeLabels,
+      relatedSearchableKeys,
+      searchableKeys,
     },
     error: contentError,
     isLoading,
@@ -43,15 +45,13 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         {
           data: { results: notificationsResults, count: notificationsCount },
         },
-        {
-          data: { actions },
-        },
+        actionsResponse,
       ] = await Promise.all([
         NotificationTemplatesAPI.read(params),
         NotificationTemplatesAPI.readOptions(),
       ]);
 
-      const labels = actions.GET.notification_type.choices.reduce(
+      const labels = actionsResponse.data.actions.GET.notification_type.choices.reduce(
         (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
         {}
       );
@@ -78,6 +78,12 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         successTemplateIds: successTemplates.results.map(su => su.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
         typeLabels: labels,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [apiModel, id, location]),
     {
@@ -87,6 +93,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
       successTemplateIds: [],
       errorTemplateIds: [],
       typeLabels: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -108,8 +116,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
           status
         );
         setValue({
-          ...fetchNotificationsResult,
-          [`${status}TemplateIds`]: fetchNotificationsResult[
+          ...fetchNotificationsResults,
+          [`${status}TemplateIds`]: fetchNotificationsResults[
             `${status}TemplateIds`
           ].filter(i => i !== notificationId),
         });
@@ -120,8 +128,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
           status
         );
         setValue({
-          ...fetchNotificationsResult,
-          [`${status}TemplateIds`]: fetchNotificationsResult[
+          ...fetchNotificationsResults,
+          [`${status}TemplateIds`]: fetchNotificationsResults[
             `${status}TemplateIds`
           ].concat(notificationId),
         });
@@ -179,6 +187,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={notification => (
           <NotificationListItem
             key={notification.id}

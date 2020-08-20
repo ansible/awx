@@ -15,6 +15,15 @@ describe('<AssociateModal />', () => {
   const onClose = jest.fn();
   const onAssociate = jest.fn().mockResolvedValue();
   const fetchRequest = jest.fn().mockReturnValue({ data: { ...mockHosts } });
+  const optionsRequest = jest.fn().mockResolvedValue({
+    data: {
+      actions: {
+        GET: {},
+        POST: {},
+      },
+      related_search_fields: [],
+    },
+  });
 
   beforeEach(async () => {
     await act(async () => {
@@ -23,6 +32,7 @@ describe('<AssociateModal />', () => {
           onClose={onClose}
           onAssociate={onAssociate}
           fetchRequest={fetchRequest}
+          optionsRequest={optionsRequest}
           isModalOpen
         />
       );

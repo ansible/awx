@@ -35,6 +35,7 @@ describe('<SelectResourceStep />', () => {
         displayKey="username"
         onRowClick={() => {}}
         fetchItems={() => {}}
+        fetchOptions={() => {}}
       />
     );
   });
@@ -49,6 +50,15 @@ describe('<SelectResourceStep />', () => {
         ],
       },
     });
+    const options = jest.fn().mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -58,6 +68,7 @@ describe('<SelectResourceStep />', () => {
           displayKey="username"
           onRowClick={() => {}}
           fetchItems={handleSearch}
+          fetchOptions={options}
         />
       );
     });
@@ -78,6 +89,15 @@ describe('<SelectResourceStep />', () => {
         { id: 2, username: 'bar', url: 'item/2' },
       ],
     };
+    const options = jest.fn().mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
@@ -87,6 +107,7 @@ describe('<SelectResourceStep />', () => {
           displayKey="username"
           onRowClick={handleRowClick}
           fetchItems={() => ({ data })}
+          fetchOptions={options}
           selectedResourceRows={[]}
         />
       );

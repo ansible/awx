@@ -29,6 +29,7 @@ function SelectResourceStep({
   selectedLabel,
   selectedResourceRows,
   fetchItems,
+  fetchOptions,
   i18n,
 }) {
   const location = useLocation();
@@ -37,7 +38,7 @@ function SelectResourceStep({
     isLoading,
     error,
     request: readResourceList,
-    result: { resources, itemCount },
+    result: { resources, itemCount, relatedSearchableKeys, searchableKeys },
   } = useRequest(
     useCallback(async () => {
       const queryParams = parseQueryString(
@@ -45,14 +46,28 @@ function SelectResourceStep({
         location.search
       );
 
-      const {
-        data: { count, results },
-      } = await fetchItems(queryParams);
-      return { resources: results, itemCount: count };
-    }, [location, fetchItems, sortColumns]),
+      const [
+        {
+          data: { count, results },
+        },
+        actionsResponse,
+      ] = await Promise.all([fetchItems(queryParams), fetchOptions()]);
+      return {
+        resources: results,
+        itemCount: count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+      };
+    }, [location, fetchItems, fetchOptions, sortColumns]),
     {
       resources: [],
       itemCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -84,6 +99,8 @@ function SelectResourceStep({
         onRowClick={onRowClick}
         toolbarSearchColumns={searchColumns}
         toolbarSortColumns={sortColumns}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={item => (
           <CheckboxListItem
             isSelected={selectedResourceRows.some(i => i.id === item.id)}

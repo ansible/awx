@@ -11,7 +11,11 @@ import { TeamsAPI, UsersAPI } from '../../api';
 const readUsers = async queryParams =>
   UsersAPI.read(Object.assign(queryParams, { is_superuser: false }));
 
+const readUsersOptions = async () => UsersAPI.readOptions();
+
 const readTeams = async queryParams => TeamsAPI.read(queryParams);
+
+const readTeamsOptions = async () => TeamsAPI.readOptions();
 
 class AddResourceRole extends React.Component {
   constructor(props) {
@@ -259,6 +263,7 @@ class AddResourceRole extends React.Component {
                 displayKey="username"
                 onRowClick={this.handleResourceCheckboxClick}
                 fetchItems={readUsers}
+                fetchOptions={readUsersOptions}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
                 sortedColumnKey="username"
@@ -270,6 +275,7 @@ class AddResourceRole extends React.Component {
                 sortColumns={teamSortColumns}
                 onRowClick={this.handleResourceCheckboxClick}
                 fetchItems={readTeams}
+                fetchOptions={readTeamsOptions}
                 selectedLabel={i18n._(t`Selected`)}
                 selectedResourceRows={selectedResourceRows}
               />
