@@ -111,7 +111,7 @@ function ContainerGroup({ i18n, setBreadcrumb }) {
             {instanceGroup && (
               <>
                 <Route path="/instance_groups/container_group/:id/edit">
-                  <ContainerGroupEdit />
+                  <ContainerGroupEdit instanceGroup={instanceGroup} />
                 </Route>
                 <Route path="/instance_groups/container_group/:id/details">
                   <ContainerGroupDetails />
