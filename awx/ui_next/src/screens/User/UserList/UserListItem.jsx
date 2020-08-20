@@ -19,72 +19,89 @@ import DataListCell from '../../../components/DataListCell';
 
 import { User } from '../../../types';
 
-class UserListItem extends React.Component {
-  static propTypes = {
-    user: User.isRequired,
-    detailUrl: string.isRequired,
-    isSelected: bool.isRequired,
-    onSelect: func.isRequired,
-  };
+function UserListItem({ user, isSelected, onSelect, detailUrl, i18n }) {
+  const labelId = `check-action-${user.id}`;
 
-  render() {
-    const { user, isSelected, onSelect, detailUrl, i18n } = this.props;
-    const labelId = `check-action-${user.id}`;
-    return (
-      <DataListItem key={user.id} aria-labelledby={labelId} id={`${user.id}`}>
-        <DataListItemRow>
-          <DataListCheck
-            id={`select-user-${user.id}`}
-            checked={isSelected}
-            onChange={onSelect}
-            aria-labelledby={labelId}
-          />
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key="username">
-                <Link to={`${detailUrl}`} id={labelId}>
-                  <b>{user.username}</b>
-                </Link>
-              </DataListCell>,
-              <DataListCell key="first-name">
-                {user.first_name && (
-                  <Fragment>
-                    <b css="margin-right: 24px">{i18n._(t`First Name`)}</b>
-                    {user.first_name}
-                  </Fragment>
-                )}
-              </DataListCell>,
-              <DataListCell key="last-name">
-                {user.last_name && (
-                  <Fragment>
-                    <b css="margin-right: 24px">{i18n._(t`Last Name`)}</b>
-                    {user.last_name}
-                  </Fragment>
-                )}
-              </DataListCell>,
-            ]}
-          />
-          <DataListAction
-            aria-label="actions"
-            aria-labelledby={labelId}
-            id={labelId}
-          >
-            {user.summary_fields.user_capabilities.edit && (
-              <Tooltip content={i18n._(t`Edit User`)} position="top">
-                <Button
-                  aria-label={i18n._(t`Edit User`)}
-                  variant="plain"
-                  component={Link}
-                  to={`/users/${user.id}/edit`}
-                >
-                  <PencilAltIcon />
-                </Button>
-              </Tooltip>
-            )}
-          </DataListAction>
-        </DataListItemRow>
-      </DataListItem>
-    );
+  let user_type;
+  if (user.is_superuser) {
+    user_type = i18n._(t`System Administrator`);
+  } else if (user.is_system_auditor) {
+    user_type = i18n._(t`System Auditor`);
+  } else {
+    user_type = i18n._(t`Normal User`);
   }
+
+  return (
+    <DataListItem key={user.id} aria-labelledby={labelId} id={`${user.id}`}>
+      <DataListItemRow>
+        <DataListCheck
+          id={`select-user-${user.id}`}
+          checked={isSelected}
+          onChange={onSelect}
+          aria-labelledby={labelId}
+        />
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell key="username" aria-label={i18n._(t`username`)}>
+              <Link to={`${detailUrl}`} id={labelId}>
+                <b>{user.username}</b>
+              </Link>
+            </DataListCell>,
+            <DataListCell
+              key="first-name"
+              aria-label={i18n._(t`user first name`)}
+            >
+              {user.first_name && (
+                <Fragment>
+                  <b css="margin-right: 24px">{i18n._(t`First Name`)}</b>
+                  {user.first_name}
+                </Fragment>
+              )}
+            </DataListCell>,
+            <DataListCell
+              key="last-name"
+              aria-label={i18n._(t`user last name`)}
+            >
+              {user.last_name && (
+                <Fragment>
+                  <b css="margin-right: 24px">{i18n._(t`Last Name`)}</b>
+                  {user.last_name}
+                </Fragment>
+              )}
+            </DataListCell>,
+            <DataListCell key="user-type" aria-label={i18n._(t`user type`)}>
+              {user_type}
+            </DataListCell>,
+          ]}
+        />
+        <DataListAction
+          aria-label="actions"
+          aria-labelledby={labelId}
+          id={labelId}
+        >
+          {user.summary_fields.user_capabilities.edit && (
+            <Tooltip content={i18n._(t`Edit User`)} position="top">
+              <Button
+                aria-label={i18n._(t`Edit User`)}
+                variant="plain"
+                component={Link}
+                to={`/users/${user.id}/edit`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </Tooltip>
+          )}
+        </DataListAction>
+      </DataListItemRow>
+    </DataListItem>
+  );
 }
+
+UserListItem.prototype = {
+  user: User.isRequired,
+  detailUrl: string.isRequired,
+  isSelected: bool.isRequired,
+  onSelect: func.isRequired,
+};
+
 export default withI18n()(UserListItem);
