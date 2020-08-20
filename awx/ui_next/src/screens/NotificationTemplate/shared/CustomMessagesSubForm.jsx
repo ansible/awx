@@ -1,39 +1,58 @@
 import 'styled-components/macro';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
+import { Switch, Text } from '@patternfly/react-core';
 import {
-  FormGroup,
-  Title,
-  Switch,
-  Text,
-  TextVariants,
-} from '@patternfly/react-core';
-import {
-  FormColumnLayout,
   FormFullWidthLayout,
   SubFormLayout,
 } from '../../../components/FormLayout';
-import FormField, {
-  PasswordField,
-  CheckboxField,
-  FieldTooltip,
-} from '../../../components/FormField';
-import AnsibleSelect from '../../../components/AnsibleSelect';
 import { CodeMirrorField } from '../../../components/CodeMirrorInput';
-import {
-  combine,
-  required,
-  requiredEmail,
-  url,
-} from '../../../util/validators';
-import { NotificationType } from '../../../types';
 
 function CustomMessagesSubForm({ defaultMessages, type, i18n }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');
   const showMessages = type !== 'webhook';
   const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
+
+  const { setFieldValue } = useFormikContext();
+  const mountedRef = useRef(null);
+  useEffect(
+    function resetToDefaultMessages() {
+      if (!mountedRef.current) {
+        mountedRef.current = true;
+        return;
+      }
+      const defs = defaultMessages[type];
+
+      const resetFields = (name, defaults) => {
+        setFieldValue(`${name}.message`, defaults.message || '');
+        setFieldValue(`${name}.body`, defaults.body || '');
+      };
+
+      resetFields('messages.started', defs.started);
+      resetFields('messages.success', defs.success);
+      resetFields('messages.error', defs.error);
+      resetFields(
+        'messages.workflow_approval.approved',
+        defs.workflow_approval.approved
+      );
+      resetFields(
+        'messages.workflow_approval.denied',
+        defs.workflow_approval.denied
+      );
+      resetFields(
+        'messages.workflow_approval.running',
+        defs.workflow_approval.running
+      );
+      resetFields(
+        'messages.workflow_approval.timed_out',
+        defs.workflow_approval.timed_out
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [type, setFieldValue]
+  );
 
   return (
     <>

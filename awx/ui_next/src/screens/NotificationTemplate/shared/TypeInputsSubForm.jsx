@@ -87,7 +87,7 @@ function EmailFields({ i18n }) {
         type="textarea"
         validate={required(null, i18n)}
         isRequired
-        rows="3"
+        rows={3}
         tooltip={i18n._(t`Enter one email address per line to create a recipient
           list for this type of notification.`)}
       />
@@ -187,7 +187,7 @@ function GrafanaFields({ i18n }) {
         label={i18n._(t`Tags for the annotation (optional)`)}
         name="notification_configuration.annotation_tags"
         type="textarea"
-        rows="3"
+        rows={3}
         tooltip={i18n._(t`Enter one Annotation Tag per line, without commas.`)}
       />
       <CheckboxField
@@ -494,7 +494,7 @@ function WebhookFields({ i18n }) {
               headersHelpers.setValue(value);
             }}
             mode="javascript"
-            rows="5"
+            rows={5}
           />
         </FormGroup>
       </FormFullWidthLayout>

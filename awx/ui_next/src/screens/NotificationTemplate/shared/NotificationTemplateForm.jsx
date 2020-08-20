@@ -163,7 +163,10 @@ function NotificationTemplateForm({
       {formik => (
         <Form autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
-            <NotificationTemplateFormFields i18n={i18n} />
+            <NotificationTemplateFormFields
+              i18n={i18n}
+              defaultMessages={defaultMessages}
+            />
             <FormSubmitError error={submitError} />
             <FormActionGroup
               onCancel={onCancel}
