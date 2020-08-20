@@ -17,6 +17,11 @@ from rest_framework.exceptions import ParseError
 from awx.main.utils import parse_yaml_or_json
 
 
+def validate_entitlement_cert(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
+    # TODO: replace with more actual robust logic here to allow for multiple certificates in one cert file (because this is how entitlements do)
+    # This is a temporary hack that should not be merged. Look at Ln:92
+    pass
+
 def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
     """
     Validate the given PEM data is valid and contains the required numbers of

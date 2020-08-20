@@ -2,11 +2,11 @@
 # All Rights Reserved.
 
 '''
-This is intended to be a lightweight license class for verifying subscriptions, and parsing subscription data 
-from entitlement certificates.  
+This is intended to be a lightweight license class for verifying subscriptions, and parsing subscription data
+from entitlement certificates.
 
 The Licenser class can do the following:
- - Validate an existing 
+ - Parse an Entitlement cert to generate license
 '''
 
 
@@ -18,6 +18,7 @@ import collections
 import copy
 import hashlib
 import time
+import tempfile
 import logging
 import subprocess
 import re
@@ -37,17 +38,17 @@ class Licenser(object):
 
     def __init__(self, **kwargs):
         self._attrs = dict(
-            company_name='',
             instance_count=0,
             license_date=0,
             license_type='UNLICENSED',
         )
         if not kwargs:
             kwargs = getattr(settings, 'LICENSE', None) or {}
+        if 'company_name' in kwargs:
+            kwargs.pop('company_name')
+        
         self._attrs.update(kwargs)
         self._attrs['license_date'] = int(self._attrs['license_date'])
-        if not self._attrs.get('subscription_name', None):
-            self._attrs['subscription_name'] = self._generate_subscription_name()
         if self._check_product_cert():
             self._generate_product_config()
         else:
@@ -63,50 +64,59 @@ class Licenser(object):
 
 
     def _generate_open_config(self):
-        self._attrs.update(dict(company_name="AWX Project Open License",
-                                        license_type='open',
-                                        valid_key=True,
-                                        subscription_name='OPEN'))
+        self._attrs.update(dict(license_type='open',
+            valid_key=True,
+            subscription_name='OPEN'
+            ))
 
 
     def _generate_product_config(self):
-        
+
         # Catch/check if subman is installed
         try:
-            # TODO: Repoint this to read the x509 cert from the database instead.  It will need to write a TempFile, which is parsed with `rct cat-cert`
-            # path = '/etc/tower/certs/consumer.pem' 
-            path = '/etc/tower/certs/6722671512170785735.pem'
-
-            cmd = ["rct", "cat-cert", path, "--no-content"]
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            output = re.split('\n\n|\n\t', smart_text(stdout))
-            cert_dict = dict()
-
-            for line in output:
-                if ': ' in line:
-                    key, value = line.split(': ')
-                    cert_dict.update({key:value})
             
+            raw_cert = getattr(settings, 'ENTITLEMENT_CERT')
+            parsed_cert = raw_cert.split('\n')
+            
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
+                for line in parsed_cert:
+                    f.write(line + '\n')
+
+
+                cmd = ["rct", "cat-cert", f.name, "--no-content"]
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                output = re.split('\n\n|\n\t', smart_text(stdout))
+                cert_dict = dict()
+
+                for line in output:
+                    if ': ' in line:
+                        key, value = line.split(': ')
+                        cert_dict.update({key:value})
+
         except FileNotFoundError as e:
             logger.exception('Subscription-manager is not installed')
         except Exception as e:
             logger.exception(e)
+
+        # # Keep existing license type
+        # type = self._attrs.get('license_type')
+        # if type == 'UNLICENSED':
+        #     type = 'enterprise'
         
-        # Keep existing license type
-        type = self._attrs.get('license_type')
-        if type == 'UNLICENSED':
-            type = 'enterprise'
+        type = 'enterprise'
         
+        # import pdb; pdb.set_trace()
         # Parse output for subscription metadata to build config
         self._attrs.update(dict(subscription_name=cert_dict.get('Name'),
                                 sku=cert_dict.get('SKU', ''),
                                 instance_count=cert_dict.get('Quantity', 0),
+                                support_level=cert_dict.get('Service Level', ''),
                                 # license_date=cert_dict.get('End Date', 2524626011), # Need to convert to seconds
                                 valid_key=True,
                                 license_type=type
                                 ))
-
+        settings.LICENSE = self._attrs
 
     # # TODO: Revisit Cloudforms license code and make sure this works for the CF team
     # def _generate_cloudforms_subscription(self):
@@ -116,7 +126,7 @@ class Licenser(object):
     #                             license_key='xxxx',
     #                             license_type='enterprise',
     #                             subscription_name='Red Hat CloudForms License'))
-    # 
+    #
     # def _check_cloudforms_subscription(self):
     #     if os.path.exists('/var/lib/awx/i18n.db'):
     #         return True
@@ -129,18 +139,18 @@ class Licenser(object):
     #             pass
     #     return False
 
-    def _generate_subscription_name(self):
-        name_parts = ['Ansible Tower by Red Hat', ' (%d Managed Nodes)' % int(self._attrs['instance_count'])]
-        license_type = self._attrs.get('license_type', 'legacy')
-        if license_type == 'legacy':
-            name_parts.insert(1, ', Legacy')
-        elif license_type == 'basic':
-            name_parts.insert(1, ', Self-Support')
-        elif license_type == 'enterprise':
-            name_parts.insert(1, ', Standard')
-        if self._attrs.get('trial', False):
-            name_parts.append(' Trial')
-        return ''.join(name_parts)
+    # def _generate_subscription_name(self):
+    #     name_parts = ['Ansible Tower by Red Hat', ' (%d Managed Nodes)' % int(self._attrs['instance_count'])]
+    #     license_type = self._attrs.get('license_type', 'legacy')
+    #     if license_type == 'legacy':
+    #         name_parts.insert(1, ', Legacy')
+    #     elif license_type == 'basic':
+    #         name_parts.insert(1, ', Self-Support')
+    #     elif license_type == 'enterprise':
+    #         name_parts.insert(1, ', Standard')
+    #     if self._attrs.get('trial', False):
+    #         name_parts.append(' Trial')
+    #     return ''.join(name_parts)
 
     def update(self, **kwargs):
         # Update attributes of the current license.
@@ -281,11 +291,11 @@ class Licenser(object):
         # Return license attributes with additional validation info.
         attrs = copy.deepcopy(self._attrs)
         key = attrs.get('license_type', 'none')
-        
+
         # Use requests to attempt a GET to the CDN/Satellite content repo
         repo_response = False  #if 403, make this True
-        
-        if (key == 'UNLICENSED' or False): # TODO: add logic to check against the CDN here.  
+
+        if (key == 'UNLICENSED' or False): # TODO: add logic to check against the CDN here.
             attrs.update(dict(valid_key=False, compliant=False))
             return attrs
         attrs['valid_key'] = True
