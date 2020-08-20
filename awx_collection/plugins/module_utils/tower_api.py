@@ -114,12 +114,15 @@ class TowerAPIModule(TowerModule):
         try:
             query_params['or__id'] = int(name_or_id)
         except ValueError:
-            # If we got a value error than we didn't have an integer so we can just pass and fall down to the fail
+            # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
             pass
 
         response = self.get_endpoint(endpoint, **{'data': query_params})
         if response['status_code'] != 200:
-            self.fail_json(msg="Failed to query endpoint {0} for {1} {2} ({3}), see results".format(endpoint, name_field, name_or_id, response['status_code']), resuls=response)
+            self.fail_json(
+                msg="Failed to query endpoint {0} for {1} {2} ({3}), see results".format(endpoint, name_field, name_or_id, response['status_code']),
+                resuls=response
+            )
 
         if response['json']['count'] == 1:
             return response['json']['results'][0]

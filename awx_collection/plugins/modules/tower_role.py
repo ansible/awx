@@ -126,7 +126,6 @@ def main():
     resource_data = {}
     for param in resource_param_keys:
         endpoint = module.param_to_endpoint(param)
-        name_field = 'username' if param == 'user' else 'name'
 
         resource_name = params.get(param)
         if resource_name:
