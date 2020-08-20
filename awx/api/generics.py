@@ -225,6 +225,7 @@ class APIView(views.APIView):
         time_started = getattr(self, 'time_started', None)
         response['X-API-Product-Version'] = get_awx_version()
         # currently, this violates atomic transactions when hitting the `api/v2/config` endpoint. 
+        # check settings.LICENSE for license_type==open
         # response['X-API-Product-Name'] = 'AWX' if Licenser().validate().get('license_type') is 'open' else 'Red Hat Ansible Tower'
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:

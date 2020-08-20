@@ -234,11 +234,12 @@ class ApiV2ConfigView(APIView):
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
-        # if request.user.is_superuser or request.user.is_system_auditor:
-        #     license_data = get_license()
-        # if not license_data.get('valid_key', False):
-        #     license_data = {}
-        license_data = settings.LICENSE
+        if request.user.is_superuser or request.user.is_system_auditor:
+            license_data = get_license()
+        if not license_data.get('valid_key', False):
+            license_data = {}
+        # TODO: Update this to just get settings.LICENSE.['valid_key'] from the settings to avoid transaction violations and get quicker HTTP responses
+        # license_data = settings.LICENSE
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
@@ -303,9 +304,12 @@ class ApiV2ConfigView(APIView):
             settings.ENTITLEMENT_CERT = license_data['entitlement_cert']
 
         # TODO: Validate Entitlement Cert by verifying with the CDN/Satellite
+        # potentially do this in Licenser().validate() or ._check_product_cert and just make a call to that here.  
+        
         try:
             from awx.main.utils.common import get_licenser
-            license_data_validated = get_licenser(**license_data).validate()
+            # license_data_validated = get_licenser(**license_data).validate()
+            license_data_validated = get_licenser().validate()
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
@@ -313,7 +317,8 @@ class ApiV2ConfigView(APIView):
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
-            settings.LICENSE = license_data
+            # TODO: Think about if it is better to set this here, or within Licenser()._generate_product_config
+            # settings.LICENSE = license_data
             if not settings_registry.is_setting_read_only('TOWER_URL_BASE'):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
