@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
-import { OrganizationsAPI } from '../../../api';
+import { NotificationTemplatesAPI } from '../../../api';
 
 import NotificationTemplateForm from '../shared/NotificationTemplateForm';
 
@@ -11,23 +11,9 @@ function NotificationTemplateEdit({ template, defaultMessages }) {
   const history = useHistory();
   const [formError, setFormError] = useState(null);
 
-  const handleSubmit = async (
-    values,
-    groupsToAssociate,
-    groupsToDisassociate
-  ) => {
+  const handleSubmit = async values => {
     try {
-      await OrganizationsAPI.update(template.id, values);
-      await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(template.id, id)
-        )
-      );
-      await Promise.all(
-        groupsToDisassociate.map(id =>
-          OrganizationsAPI.disassociateInstanceGroup(template.id, id)
-        )
-      );
+      await NotificationTemplatesAPI.update(template.id, values);
       history.push(detailsUrl);
     } catch (error) {
       setFormError(error);

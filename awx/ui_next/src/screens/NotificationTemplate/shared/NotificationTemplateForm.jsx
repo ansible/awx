@@ -98,7 +98,8 @@ function NotificationTemplateForm({
   i18n,
 }) {
   const handleSubmit = values => {
-    onSubmit(normalizeTypeFields(values));
+    // TODO: convert list values to arrays (do it in the field itself?)
+    onSubmit(normalizeFields(values, defaultMessages));
   };
 
   let emailOptions = '';
@@ -225,13 +226,17 @@ function isCustomized(message, defaultMessage) {
   if (!message) {
     return false;
   }
-  if (!message.message || message.message !== defaultMessage.message) {
+  if (message.message && message.message !== defaultMessage.message) {
     return true;
   }
-  if (!message.body || message.body !== defaultMessage.body) {
+  if (message.body && message.body !== defaultMessage.body) {
     return true;
   }
   return false;
+}
+
+function normalizeFields(values, defaultMessages) {
+  return normalizeTypeFields(normalizeMessageFields(values, defaultMessages));
 }
 
 /* If the user filled in some of the Type Details fields, then switched
@@ -240,9 +245,9 @@ function isCustomized(message, defaultMessage) {
 function normalizeTypeFields(values) {
   const stripped = {};
   const fields = typeFieldNames[values.notification_type];
-  fields.foreach(fieldName => {
-    if (typeof values[fieldName] !== 'undefined') {
-      stripped[fieldName] = values[fieldName];
+  fields.forEach(fieldName => {
+    if (typeof values.notification_configuration[fieldName] !== 'undefined') {
+      stripped[fieldName] = values.notification_configuration[fieldName];
     }
   });
   if (values.notification_type === 'email') {
@@ -253,5 +258,48 @@ function normalizeTypeFields(values) {
   return {
     ...values,
     notification_configuration: stripped,
+  };
+}
+
+function normalizeMessageFields(values, defaults) {
+  if (!values.useCustomMessages) {
+    return values;
+  }
+  const { messages } = values;
+  const defs = defaults[values.notification_type];
+
+  const nullIfDefault = (m, d) => {
+    return {
+      message: m.message === d.message ? null : m.message,
+      body: m.body === d.body ? null : m.body,
+    };
+  };
+
+  const nonDefaultMessages = {
+    started: nullIfDefault(messages.started, defs.started),
+    success: nullIfDefault(messages.success, defs.success),
+    error: nullIfDefault(messages.error, defs.error),
+    workflow_approval: {
+      approved: nullIfDefault(
+        messages.workflow_approval.approved,
+        defs.workflow_approval.approved
+      ),
+      denied: nullIfDefault(
+        messages.workflow_approval.denied,
+        defs.workflow_approval.denied
+      ),
+      running: nullIfDefault(
+        messages.workflow_approval.running,
+        defs.workflow_approval.running
+      ),
+      timed_out: nullIfDefault(
+        messages.workflow_approval.timed_out,
+        defs.workflow_approval.timed_out
+      ),
+    },
+  };
+  return {
+    ...values,
+    messages: nonDefaultMessages,
   };
 }
