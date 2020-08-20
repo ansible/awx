@@ -17,10 +17,10 @@ import { InstanceGroupsAPI } from '../../api';
 import RoutedTabs from '../../components/RoutedTabs';
 import ContentError from '../../components/ContentError';
 import ContentLoading from '../../components/ContentLoading';
+import JobList from '../../components/JobList';
 
 import InstanceGroupDetails from './InstanceGroupDetails';
 import InstanceGroupEdit from './InstanceGroupEdit';
-import Jobs from './Jobs';
 import Instances from './Instances';
 
 function InstanceGroup({ i18n, setBreadcrumb }) {
@@ -126,7 +126,10 @@ function InstanceGroup({ i18n, setBreadcrumb }) {
                   <Instances />
                 </Route>
                 <Route path="/instance_groups/:id/jobs">
-                  <Jobs />
+                  <JobList
+                    showTypeColumn
+                    defaultParams={{ instance_group: instanceGroup.id }}
+                  />
                 </Route>
               </>
             )}
