@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
-import 'styled-components/macro';
+import styled from 'styled-components';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -16,6 +16,10 @@ import {
 } from '../../../components/DetailList';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { InstanceGroupsAPI } from '../../../api';
+
+const Unavailable = styled.span`
+  color: var(--pf-global--danger-color--200);
+`;
 
 function InstanceGroupDetails({ instanceGroup, i18n }) {
   const { id, name } = instanceGroup;
@@ -78,7 +82,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
         ) : (
           <Detail
             label={i18n._(t`Used capacity`)}
-            value={<span css="color: red">{i18n._(t`Unavailable`)}</span>}
+            value={<Unavailable>{i18n._(t`Unavailable`)}</Unavailable>}
             dataCy="instance-group-used-capacity"
           />
         )}
