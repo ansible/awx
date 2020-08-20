@@ -233,6 +233,7 @@ class WorkflowJobTemplate extends Component {
                   id={Number(match.params.id)}
                   canToggleNotifications={canToggleNotifications}
                   apiModel={WorkflowJobTemplatesAPI}
+                  showApprovalsToggle
                 />
               </Route>
             )}

@@ -200,6 +200,7 @@ class Organization extends Component {
                   id={Number(match.params.id)}
                   canToggleNotifications={canToggleNotifications}
                   apiModel={OrganizationsAPI}
+                  showApprovalsToggle
                 />
               </Route>
             )}

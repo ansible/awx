@@ -27,6 +27,27 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
   createUser(id, data) {
     return this.http.post(`${this.baseUrl}${id}/users/`, data);
   }
+
+  readNotificationTemplatesApprovals(id, params) {
+    return this.http.get(
+      `${this.baseUrl}${id}/notification_templates_approvals/`,
+      { params }
+    );
+  }
+
+  associateNotificationTemplatesApprovals(resourceId, notificationId) {
+    return this.http.post(
+      `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
+      { id: notificationId }
+    );
+  }
+
+  disassociateNotificationTemplatesApprovals(resourceId, notificationId) {
+    return this.http.post(
+      `${this.baseUrl}${resourceId}/notification_templates_approvals/`,
+      { id: notificationId, disassociate: true }
+    );
+  }
 }
 
 export default Organizations;
