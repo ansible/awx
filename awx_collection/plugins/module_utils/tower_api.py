@@ -107,7 +107,7 @@ class TowerAPIModule(TowerModule):
 
     def get_one_by_name_or_id(self, endpoint, name_or_id):
         name_field = 'name'
-        if endpoint is 'users':
+        if endpoint == 'users':
             name_field = 'username'
 
         query_params = {'or__{0}'.format(name_field): name_or_id}
@@ -118,12 +118,16 @@ class TowerAPIModule(TowerModule):
             pass
 
         response = self.get_endpoint(endpoint, **{'data': query_params})
+        if response['status_code'] != 200:
+            self.fail_json(msg="Failed to query endpoint {0} for {1} {2} ({3}), see results".format(endpoint, name_field, name_or_id, response['status_code']), resuls=response)
+
         if response['json']['count'] == 1:
             return response['json']['results'][0]
         elif response['json']['count'] == 2:
             for tower_object in response['json']['results']:
-                return tower_object
-        # We shouldn't get here because we found 2 objects and ID has to be unique, so one of the objects must have a matching name
+                if tower_object['name'] == name_or_id:
+                    return tower_object
+            # We shouldn't get here because we found 2 objects and ID has to be unique, so one of the objects must have a matching name
         elif response['json']['count'] == 0:
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
         else:
