@@ -118,6 +118,11 @@ function HostGroupsList({ i18n, host }) {
     [invId, hostId]
   );
 
+  const fetchGroupsOptions = useCallback(
+    () => InventoriesAPI.readGroupsOptions(invId),
+    [invId]
+  );
+
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
       async groupsToAssociate => {
@@ -224,6 +229,7 @@ function HostGroupsList({ i18n, host }) {
         <AssociateModal
           header={i18n._(t`Groups`)}
           fetchRequest={fetchGroupsToAssociate}
+          optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}
