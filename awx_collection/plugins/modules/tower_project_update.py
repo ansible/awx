@@ -14,9 +14,9 @@ DOCUMENTATION = '''
 ---
 module: tower_project_update
 author: "Sean Sullivan (@sean-m-sullivan)"
-short_description: Sync a Project in Ansible Tower
+short_description: Update a Project in Ansible Tower
 description:
-    - Sync an Ansible Tower Project. See
+    - Update a Ansible Tower Project. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
