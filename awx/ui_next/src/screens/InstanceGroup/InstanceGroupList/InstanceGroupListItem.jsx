@@ -6,15 +6,16 @@ import { Link } from 'react-router-dom';
 import 'styled-components/macro';
 import {
   Badge as PFBadge,
-  Progress,
-  ProgressMeasureLocation,
-  ProgressSize,
   Button,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
+  Label,
+  Progress,
+  ProgressMeasureLocation,
+  ProgressSize,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
@@ -112,6 +113,13 @@ function InstanceGroupListItem({
                   <b>{instanceGroup.name}</b>
                 </Link>
               </span>
+              {instanceGroup.is_isolated ? (
+                <span css="margin-left: 12px">
+                  <Label aria-label={i18n._(t`isolated instance`)}>
+                    {i18n._(t`Isolated`)}
+                  </Label>
+                </span>
+              ) : null}
             </DataListCell>,
 
             <DataListCell

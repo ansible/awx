@@ -2,8 +2,8 @@ import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
 import styled from 'styled-components';
+import { Button, Label } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -46,12 +46,28 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
     );
   };
 
+  const verifyIsIsolated = item => {
+    if (item.is_isolated) {
+      return (
+        <>
+          {item.name}
+          <span css="margin-left: 12px">
+            <Label aria-label={i18n._(t`isolated instance`)}>
+              {i18n._(t`Isolated`)}
+            </Label>
+          </span>
+        </>
+      );
+    }
+    return <>{item.name}</>;
+  };
+
   return (
     <CardBody>
       <DetailList>
         <Detail
           label={i18n._(t`Name`)}
-          value={name}
+          value={verifyIsIsolated(instanceGroup)}
           dataCy="instance-group-detail-name"
         />
         <Detail
