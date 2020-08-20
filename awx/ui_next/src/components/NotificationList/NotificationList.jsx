@@ -25,7 +25,7 @@ function NotificationList({
   showApprovalsToggle,
 }) {
   const location = useLocation();
-  const [isToggleLoading, setIsToggleLoading] = useState(false);
+  const [loadingToggleIds, setLoadingToggleIds] = useState([]);
   const [toggleError, setToggleError] = useState(null);
 
   const {
@@ -123,7 +123,7 @@ function NotificationList({
     isCurrentlyOn,
     status
   ) => {
-    setIsToggleLoading(true);
+    setLoadingToggleIds(loadingToggleIds.concat([notificationId]));
     try {
       if (isCurrentlyOn) {
         await apiModel.disassociateNotificationTemplate(
@@ -153,7 +153,9 @@ function NotificationList({
     } catch (err) {
       setToggleError(err);
     } finally {
-      setIsToggleLoading(false);
+      setLoadingToggleIds(
+        loadingToggleIds.filter(item => item !== notificationId)
+      );
     }
   };
 
@@ -208,7 +210,10 @@ function NotificationList({
             key={notification.id}
             notification={notification}
             detailUrl={`/notifications/${notification.id}`}
-            canToggleNotifications={canToggleNotifications && !isToggleLoading}
+            canToggleNotifications={
+              canToggleNotifications &&
+              !loadingToggleIds.includes(notification.id)
+            }
             toggleNotification={handleNotificationToggle}
             approvalsTurnedOn={approvalsTemplateIds.includes(notification.id)}
             errorTurnedOn={errorTemplateIds.includes(notification.id)}
@@ -223,7 +228,7 @@ function NotificationList({
         <AlertModal
           variant="error"
           title={i18n._(t`Error!`)}
-          isOpen={!isToggleLoading}
+          isOpen={loadingToggleIds.length === 0}
           onClose={() => setToggleError(null)}
         >
           {i18n._(t`Failed to toggle notification.`)}
