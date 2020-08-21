@@ -14,7 +14,6 @@ import { FormColumnLayout } from '../../../components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
 import CustomMessagesSubForm from './CustomMessagesSubForm';
 import typeFieldNames, { initialConfigValues } from './typeFieldNames';
-import { NotificationTemplate } from '../../../types';
 
 function NotificationTemplateFormFields({ i18n, defaultMessages }) {
   const [orgField, orgMeta, orgHelpers] = useField('organization');
@@ -98,12 +97,20 @@ function NotificationTemplateForm({
   i18n,
 }) {
   const handleSubmit = values => {
-    onSubmit(normalizeFields(values, defaultMessages));
+    onSubmit(
+      normalizeFields(
+        {
+          ...values,
+          organization: values.organization?.id,
+        },
+        defaultMessages
+      )
+    );
   };
 
   let emailOptions = '';
   if (template.notification_type === 'email') {
-    emailOptions = template.notification_configuration.use_ssl ? 'ssl' : 'tls';
+    emailOptions = template.notification_configuration?.use_ssl ? 'ssl' : 'tls';
   }
   const messages = template.messages || { workflow_approval: {} };
   const defs = defaultMessages[template.notification_type || 'email'];
@@ -125,6 +132,7 @@ function NotificationTemplateForm({
           ...template.notification_configuration,
         },
         emailOptions,
+        organization: template.summary_fields?.organization,
         messages: {
           started: { ...mergeDefaultMessages(messages.started, defs.started) },
           success: { ...mergeDefaultMessages(messages.success, defs.success) },
@@ -180,7 +188,7 @@ function NotificationTemplateForm({
 }
 
 NotificationTemplateForm.propTypes = {
-  template: NotificationTemplate,
+  template: shape(),
   defaultMessages: shape().isRequired,
   onSubmit: func.isRequired,
   onCancel: func.isRequired,
@@ -244,6 +252,7 @@ function normalizeFields(values, defaultMessages) {
 function normalizeTypeFields(values) {
   const stripped = {};
   const fields = typeFieldNames[values.notification_type];
+
   fields.forEach(fieldName => {
     if (typeof values.notification_configuration[fieldName] !== 'undefined') {
       stripped[fieldName] = values.notification_configuration[fieldName];
@@ -253,16 +262,21 @@ function normalizeTypeFields(values) {
     stripped.use_ssl = values.emailOptions === 'ssl';
     stripped.use_tls = !stripped.use_ssl;
   }
+  const { emailOptions, ...rest } = values;
 
   return {
-    ...values,
+    ...rest,
     notification_configuration: stripped,
   };
 }
 
 function normalizeMessageFields(values, defaults) {
-  if (!values.useCustomMessages) {
-    return values;
+  const { useCustomMessages, ...rest } = values;
+  if (!useCustomMessages) {
+    return {
+      ...rest,
+      messages: null,
+    };
   }
   const { messages } = values;
   const defs = defaults[values.notification_type];
@@ -297,8 +311,9 @@ function normalizeMessageFields(values, defaults) {
       ),
     },
   };
+
   return {
-    ...values,
+    ...rest,
     messages: nonDefaultMessages,
   };
 }

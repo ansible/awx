@@ -94,12 +94,6 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
             to="/notification_templates/:id/details"
             exact
           />
-          {/* <Route path="/notification_templates/add">
-            <NotificationTemplateAdd
-              defaultMessages={defaultMessages}
-              isLoading={isLoading}
-            />
-          </Route> */}
           {template && (
             <>
               <Route path="/notification_templates/:id/edit">

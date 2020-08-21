@@ -20,6 +20,7 @@ function ArrayTextField(props) {
 
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
+  const value = field.value || [];
 
   return (
     <FormGroup
@@ -38,7 +39,7 @@ function ArrayTextField(props) {
         resizeOrientation="vertical"
         {...rest}
         {...field}
-        value={field.value.join('\n')}
+        value={value.join('\n')}
         onChange={value => {
           helpers.setValue(value.split('\n').map(v => v.trim()));
         }}
