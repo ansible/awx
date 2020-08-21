@@ -35,6 +35,17 @@ logger = logging.getLogger(__name__)
 class Licenser(object):
     # warn when there is a month (30 days) left on the license
     LICENSE_TIMEOUT = 60 * 60 * 24 * 30
+    
+    UNLICENSED_DATA = dict(
+        subscription_name=None,
+        sku=None,
+        support_level=None,
+        instance_count=0,
+        license_date=None,
+        license_type="UNLICENSED",
+        product_name="Red Hat Ansible Tower",
+        valid_key=False
+    )
 
     def __init__(self, **kwargs):
         self._attrs = dict(
@@ -48,7 +59,7 @@ class Licenser(object):
             kwargs.pop('company_name')
         
         self._attrs.update(kwargs)
-        self._attrs['license_date'] = int(self._attrs['license_date'])
+        # self._attrs['license_date'] = int(self._attrs['license_date'])  # TODO: Is this necessary?
         if self._check_product_cert():
             self._generate_product_config()
         else:
@@ -66,18 +77,27 @@ class Licenser(object):
     def _generate_open_config(self):
         self._attrs.update(dict(license_type='open',
             valid_key=True,
-            subscription_name='OPEN'
+            subscription_name='OPEN',
+            product_name="AWX",
             ))
+        settings.LICENSE = self._attrs
 
 
     def _generate_product_config(self):
-
+        raw_cert = getattr(settings, 'ENTITLEMENT_CERT', None)
+        
+        # Fail early if no entitlement cert is available
+        if not raw_cert or raw_cert == '':
+            self._attrs.update(self.UNLICENSED_DATA)
+            # These should not be needed, keeping them here in case I am wrong
+            # settings.LICENSE = self._attrs
+            # self._attrs = {}
+            settings.LICENSE = {}
+            return
+        
         # Catch/check if subman is installed
         try:
-            
-            raw_cert = getattr(settings, 'ENTITLEMENT_CERT')
             parsed_cert = raw_cert.split('\n')
-            
             with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
                 for line in parsed_cert:
                     f.write(line + '\n')
@@ -96,23 +116,24 @@ class Licenser(object):
 
         except FileNotFoundError as e:
             logger.exception('Subscription-manager is not installed')
+            self._attrs.update(self.UNLICENSED_DATA)
+            settings.LICENSE = {}
+            return
         except Exception as e:
             logger.exception(e)
-
-        # # Keep existing license type
-        # type = self._attrs.get('license_type')
-        # if type == 'UNLICENSED':
-        #     type = 'enterprise'
+            self._attrs.update(self.UNLICENSED_DATA)
+            settings.LICENSE = {}
+            return
         
         type = 'enterprise'
         
-        # import pdb; pdb.set_trace()
         # Parse output for subscription metadata to build config
         self._attrs.update(dict(subscription_name=cert_dict.get('Name'),
                                 sku=cert_dict.get('SKU', ''),
                                 instance_count=cert_dict.get('Quantity', 0),
                                 support_level=cert_dict.get('Service Level', ''),
                                 # license_date=cert_dict.get('End Date', 2524626011), # Need to convert to seconds
+                                product_name="Red Hat Ansible Tower",
                                 valid_key=True,
                                 license_type=type
                                 ))

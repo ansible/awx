@@ -233,9 +233,7 @@ class ApiV2ConfigView(APIView):
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
-
-        if request.user.is_superuser or request.user.is_system_auditor:
-            license_data = get_license()
+        license_data = get_license()
         if not license_data.get('valid_key', False):
             license_data = {}
         # TODO: Update this to just get settings.LICENSE.['valid_key'] from the settings to avoid transaction violations and get quicker HTTP responses
@@ -334,3 +332,4 @@ class ApiV2ConfigView(APIView):
         except Exception:
             # FIX: Log
             return Response({"error": _("Failed to remove license.")}, status=status.HTTP_400_BAD_REQUEST)
+        
