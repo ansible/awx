@@ -98,7 +98,6 @@ function NotificationTemplateForm({
   i18n,
 }) {
   const handleSubmit = values => {
-    // TODO: convert list values to arrays (do it in the field itself?)
     onSubmit(normalizeFields(values, defaultMessages));
   };
 

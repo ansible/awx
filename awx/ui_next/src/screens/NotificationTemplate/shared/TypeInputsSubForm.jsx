@@ -12,6 +12,7 @@ import FormField, {
   PasswordField,
   CheckboxField,
   FieldTooltip,
+  ArrayTextField,
 } from '../../../components/FormField';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import CodeMirrorInput from '../../../components/CodeMirrorInput';
@@ -80,7 +81,7 @@ function EmailFields({ i18n }) {
         validate={required(null, i18n)}
         isRequired
       />
-      <FormField
+      <ArrayTextField
         id="email-recipients"
         label={i18n._(t`Recipient list`)}
         name="notification_configuration.recipients"
@@ -182,7 +183,7 @@ function GrafanaFields({ i18n }) {
         name="notification_configuration.panelId"
         type="text"
       />
-      <FormField
+      <ArrayTextField
         id="grafana-tags"
         label={i18n._(t`Tags for the annotation (optional)`)}
         name="notification_configuration.annotation_tags"
@@ -232,7 +233,7 @@ function IRCFields({ i18n }) {
         validate={required(null, i18n)}
         isRequired
       />
-      <FormField
+      <ArrayTextField
         id="irc-targets"
         label={i18n._(t`Destination channels or users`)}
         name="notification_configuration.targets"
@@ -365,7 +366,7 @@ function RocketChatFields({ i18n }) {
 function SlackFields({ i18n }) {
   return (
     <>
-      <FormField
+      <ArrayTextField
         id="slack-channels"
         label={i18n._(t`Destination channels`)}
         name="notification_configuration.channels"
@@ -414,7 +415,7 @@ function TwilioFields({ i18n }) {
         tooltip={i18n._(t`Enter the number associated with the "Messaging
           Service" in Twilio in the format +18005550199.`)}
       />
-      <FormField
+      <ArrayTextField
         id="twilio-destination-numbers"
         label={i18n._(t`Destination SMS number(s)`)}
         name="notification_configuration.to_numbers"
