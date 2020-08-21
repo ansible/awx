@@ -328,6 +328,7 @@ class ApiV2ConfigView(APIView):
     def delete(self, request):
         try:
             settings.LICENSE = {}
+            settings.ENTITLEMENT_CERT = ''
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
