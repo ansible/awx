@@ -2105,7 +2105,7 @@ class RunProjectUpdate(BaseTask):
                     scm_username = False
             elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
-            elif scm_type == 'insights':
+            elif scm_type in ('insights', 'archive'):
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
             scm_url = update_scm_url(scm_type, scm_url, scm_username,
