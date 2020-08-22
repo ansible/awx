@@ -52,10 +52,16 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 RETURN = '''
-project_info:
-    description: dictionary containing information about the project updated
-    returned: If project synced
-    type: dict
+id:
+    description: project id of the updated project
+    returned: success
+    type: int
+    sample: 86
+status:
+    description: status of the updated project
+    returned: success
+    type: str
+    sample: pending
 '''
 
 
@@ -81,9 +87,9 @@ def main():
     argument_spec = dict(
         name=dict(required=True, aliases=['project']),
         organization=dict(),
-        wait=dict(required=False, default=True, type='bool'),
-        interval=dict(required=False, default=1.0, type='float'),
-        timeout=dict(required=False, default=None, type='int'),
+        wait=dict(default=True, type='bool'),
+        interval=dict(default=1.0, type='float'),
+        timeout=dict(default=None, type='int'),
     )
 
     # Create a module for ourselves
