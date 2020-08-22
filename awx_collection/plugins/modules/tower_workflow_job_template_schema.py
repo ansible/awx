@@ -151,23 +151,28 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Create a node, follows tower_workflow_job_template example
-  tower_workflow_job_template_schema:
-    identifier: my-first-node
-    workflow: example-workflow
-    unified_job_template: jt-for-node-use
-    organization: Default  # organization of workflow job template
-    extra_data:
-      foo_key: bar_value
-
-- name: Create parent node for prior node
-  tower_workflow_job_template_schema:
-    identifier: my-root-node
-    workflow: example-workflow
-    unified_job_template: jt-for-node-use
+- name: Create a workflow job template with schema
+  tower_workflow_job_template:
+    name: example-workflow
+    description: created by Ansible Playbook
     organization: Default
-    success_nodes:
-      - my-first-node
+    schema:
+      - all_parents_must_converge: false
+        identifier: node101
+        unified_job_template: RHVM-01
+        credentials: []
+        success_nodes:
+          - node201
+        failure_nodes: []
+        always_nodes: []
+      - all_parents_must_converge: false
+        identifier: node201
+        unified_job_template: test-template-1
+        credentials: []
+        success_nodes: []
+        failure_nodes: []
+        always_nodes: []    
+
 '''
 
 from ..module_utils.tower_api import TowerModule
