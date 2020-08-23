@@ -26,6 +26,7 @@ description:
     - This module takes a json list of inputs to first create nodes, then link them, and does not worry about ordering.
       For failsafe referencing of a node, specify identifier, WFJT, and organization.
       With those specified, you can choose to modify or not modify any other parameter.
+    - This Module will accept schemas from tower_export.
 options:
     workflow_job_template:
       description:
@@ -151,27 +152,86 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
-- name: Create a workflow job template with schema
-  tower_workflow_job_template:
-    name: example-workflow
-    description: created by Ansible Playbook
-    organization: Default
+More advanced examples can be made from using the tower_export module
+
+- name: Create a workflow job template schema
+  awx.awx.tower_workflow_job_template_schema:
+    workflow_job_template: "{{ wfjt_name }}"
     schema:
-      - all_parents_must_converge: false
-        identifier: node101
-        unified_job_template: RHVM-01
+      - identifier: node101
+        unified_job_template:
+          name: "Default Inventory"
+          inventory:
+            organization:
+              name: Default
+        related:
+          success_nodes: []
+          failure_nodes: 
+            - identifier: node201
+          always_nodes: []
+          credentials: []
+      - identifier: node201
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Job Template 1"
         credentials: []
-        success_nodes:
-          - node201
-        failure_nodes: []
-        always_nodes: []
+        related:
+          success_nodes:
+            - identifier: node301
+          failure_nodes: []
+          always_nodes: []
+          credentials: []                
+      - identifier: node202
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Default Project Name"
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
       - all_parents_must_converge: false
-        identifier: node201
-        unified_job_template: test-template-1
+        identifier: node301
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Job Template 2"
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+
+- name: Destroy schema and create new one
+  awx.awx.tower_workflow_job_template_schema:
+    workflow_job_template: "{{ wfjt_name }}"
+    destroy_current_schema: true
+    schema:
+      - identifier: node101
+        unified_job_template:
+          organization:
+            name: Default
+          name: "Job Template Name"
         credentials: []
-        success_nodes: []
-        failure_nodes: []
-        always_nodes: []    
+        related:
+          success_nodes:
+            - identifier: node201
+          failure_nodes: []
+          always_nodes: []
+          credentials: []
+      - identifier: node201
+        unified_job_template:
+          name: "Project Name"
+          inventory:
+            organization:
+              name: Default
+        related:
+          success_nodes: []
+          failure_nodes: []
+          always_nodes: []
+          credentials: []   
 
 '''
 
@@ -182,16 +242,12 @@ response = []
 
 
 def create_schema_nodes(module, schema, workflow_id):
-    
     for workflow_node in schema:
         workflow_node_fields = {}
         search_fields = {}
         association_fields = {}
 
-        # Set Search fields
-        search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
-        
-        # Lookup Job Template ID      
+        # Lookup Job Template ID
         if workflow_node['unified_job_template']['name']:
           search_fields = {'name': workflow_node['unified_job_template']['name']}
           if "inventory" in workflow_node['unified_job_template']:
@@ -217,6 +273,8 @@ def create_schema_nodes(module, schema, workflow_id):
                     search_fields = {'identifier': workflow_node['identifier']}
             except:
                 pass
+        # Set Search fields
+        search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
 
         # Attempt to look up an existing item based on the provided data
         existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
@@ -242,7 +300,6 @@ def create_schema_nodes(module, schema, workflow_id):
               )
             )
 
-
 def create_schema_nodes_association(module, schema, workflow_id):
 
     for workflow_node in schema:
@@ -257,7 +314,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
         try:
             if workflow_node['identifier']:
                 workflow_node_fields['identifier'] = workflow_node['identifier']
-                search_fields = {'identifier': workflow_node['identifier']}
+                search_fields['identifier'] = workflow_node['identifier']
         except:
             pass
 
@@ -270,6 +327,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
 
         # Get id's for association fields
         association_fields = {}
+
         #raise AnsibleError('var error:  {}'.format(len(workflow_node['related']['success_nodes'])))
         for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
             # Extract out information if it exists
@@ -303,7 +361,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
                   )
                 )
             except:
-                raise AnsibleError('var error:  {}'.format(association))
+                raise AnsibleError('error in association error:  {}, node: {}'.format(association,workflow_node))
                 continue
 
 
@@ -366,7 +424,7 @@ def main():
                 workflow_job_template, organization
             ))
         workflow_job_template_id = wfjt_data['id']
-        
+ 
     # Work thorugh and lookup value for schema fields
     # Destroy current nodes if selected.
     if destroy_current_schema:
@@ -375,7 +433,6 @@ def main():
     create_schema_nodes(module, schema, workflow_job_template_id)
     # Create Schema Associations
     create_schema_nodes_association(module, schema, workflow_job_template_id)
-    #raise AnsibleError('var error:  {}'.format(workflow_job_template_id))
     module.exit_json(**module.json_output)
 
 
