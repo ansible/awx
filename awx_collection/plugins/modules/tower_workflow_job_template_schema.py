@@ -43,110 +43,162 @@ options:
       type: str
     schema:
       description:
-        - A json list of nodes and their coresponding options.
-      type: str
+        - A json list of nodes and their coresponding options. The following suboptions describe a single node.
+      type: list
+      suboptions:
+        extra_data:
+          description:
+            - Variables to apply at launch time.
+            - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
+          type: dict
+          default: {}
+        inventory:
+          description:
+            - Inventory applied as a prompt, if job template prompts for inventory
+          type: str
+        scm_branch:
+          description:
+            - SCM branch applied as a prompt, if job template prompts for SCM branch
+          type: str
+        job_type:
+          description:
+            - Job type applied as a prompt, if job template prompts for job type
+          type: str
+          choices:
+            - 'run'
+            - 'check'
+        job_tags:
+          description:
+            - Job tags applied as a prompt, if job template prompts for job tags
+          type: str
+        skip_tags:
+          description:
+            - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
+          type: str
+        limit:
+          description:
+            - Limit to act on, applied as a prompt, if job template prompts for limit
+          type: str
+        diff_mode:
+          description:
+            - Run diff mode, applied as a prompt, if job template prompts for diff mode
+          type: bool
+        verbosity:
+          description:
+            - Verbosity applied as a prompt, if job template prompts for verbosity
+          type: str
+          choices:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            - '4'
+            - '5'
+        all_parents_must_converge:
+          description:
+            - If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
+          type: bool
+        identifier:
+          description:
+            - An identifier for this node that is unique within its workflow.
+            - It is copied to workflow job nodes corresponding to this node.
+          required: True
+          type: str
+        state:
+          description:
+            - Desired state of the resource.
+          choices: ["present", "absent"]
+          default: "present"
+          type: str
+
+        unified_job_template:
+          description:
+            - Name of unified job template to run in the workflow.
+            - Can be a job template, project sync, inventory source sync, etc.
+            - Omit if creating an approval node (not yet implemented).
+          type: dict
+          suboptions:
+            organization:
+              description:
+                - Name of key for use in model for organizational reference
+                - Only Valid and used if referencing a job template or project sync
+              type: dict
+              suboptions:
+                name:
+                  description:
+                    - The organization of the job template or project sync the node exists in.
+                    - Used for looking up the job template or project sync, not a direct model field.
+                  type:str
+            inventory:
+              description:
+                - Name of key for use in model for organizational reference
+                - Only Valid and used if referencing an inventory sync
+              type: dict
+              suboptions:
+                organization:
+                  description:
+                    - Name of key for use in model for organizational reference
+                  type: dict
+                  suboptions:
+                    name:
+                      description:
+                        - The organization of the inventory the node exists in.
+                        - Used for looking up the job template or project, not a direct model field.
+                      type:str
+        related:
+          description:
+            - Related items to this workflow node.
+            - Must include credentials, failure_nodes, always_nodes, success_nodes, even if empty.
+          type: dict
+          suboptions:
+            always_nodes:
+              description:
+                - Nodes that will run after this node completes.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            success_nodes:
+              description:
+                - Nodes that will run after this node on success.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            failure_nodes:
+              description:
+                - Nodes that will run after this node on failure.
+                - List of node identifiers.
+              type: list
+              suboptions:
+                identifier:
+                description:
+                  - Identifier of Node that will run after this node completes given this option.
+                elements: str
+            credentials:
+              description:
+                - Credentials to be applied to job as launch-time prompts.
+                - List of credential names.
+                - Uniqueness is not handled rigorously.
+              type: list
+              suboptions:
+                name:
+                description:
+                  - Name Credentials to be applied to job as launch-time prompts.
+                elements: str
     destroy_current_schema:
       description:
         - Set in order to destroy current schema on the workflow.
         - This option is used for full schema update, if not used, nodes not described in schema will persist and keep current associations and links.
       type: Bool
       default: False
-schema_options:
-    extra_data:
-      description:
-        - Variables to apply at launch time.
-        - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
-      type: dict
-      default: {}
-    inventory:
-      description:
-        - Inventory applied as a prompt, if job template prompts for inventory
-      type: str
-    scm_branch:
-      description:
-        - SCM branch applied as a prompt, if job template prompts for SCM branch
-      type: str
-    job_type:
-      description:
-        - Job type applied as a prompt, if job template prompts for job type
-      type: str
-      choices:
-        - 'run'
-        - 'check'
-    job_tags:
-      description:
-        - Job tags applied as a prompt, if job template prompts for job tags
-      type: str
-    skip_tags:
-      description:
-        - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
-      type: str
-    limit:
-      description:
-        - Limit to act on, applied as a prompt, if job template prompts for limit
-      type: str
-    diff_mode:
-      description:
-        - Run diff mode, applied as a prompt, if job template prompts for diff mode
-      type: bool
-    verbosity:
-      description:
-        - Verbosity applied as a prompt, if job template prompts for verbosity
-      type: str
-      choices:
-        - '0'
-        - '1'
-        - '2'
-        - '3'
-        - '4'
-        - '5'
-    unified_job_template:
-      description:
-        - Name of unified job template to run in the workflow.
-        - Can be a job template, project, inventory source, etc.
-        - Omit if creating an approval node (not yet implemented).
-      type: str
-    all_parents_must_converge:
-      description:
-        - If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
-      type: bool
-    identifier:
-      description:
-        - An identifier for this node that is unique within its workflow.
-        - It is copied to workflow job nodes corresponding to this node.
-      required: True
-      type: str
-    always_nodes:
-      description:
-        - Nodes that will run after this node completes.
-        - List of node identifiers.
-      type: list
-      elements: str
-    success_nodes:
-      description:
-        - Nodes that will run after this node on success.
-        - List of node identifiers.
-      type: list
-      elements: str
-    failure_nodes:
-      description:
-        - Nodes that will run after this node on failure.
-        - List of node identifiers.
-      type: list
-      elements: str
-    credentials:
-      description:
-        - Credentials to be applied to job as launch-time prompts.
-        - List of credential names.
-        - Uniqueness is not handled rigorously.
-      type: list
-      elements: str
-    state:
-      description:
-        - Desired state of the resource.
-      choices: ["present", "absent"]
-      default: "present"
-      type: str
+
 
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -166,7 +218,7 @@ More advanced examples can be made from using the tower_export module
               name: Default
         related:
           success_nodes: []
-          failure_nodes: 
+          failure_nodes:
             - identifier: node201
           always_nodes: []
           credentials: []
@@ -181,7 +233,7 @@ More advanced examples can be made from using the tower_export module
             - identifier: node301
           failure_nodes: []
           always_nodes: []
-          credentials: []                
+          credentials: []
       - identifier: node202
         unified_job_template:
           organization:
@@ -231,7 +283,7 @@ More advanced examples can be made from using the tower_export module
           success_nodes: []
           failure_nodes: []
           always_nodes: []
-          credentials: []   
+          credentials: []
 
 '''
 
@@ -249,17 +301,17 @@ def create_schema_nodes(module, schema, workflow_id):
 
         # Lookup Job Template ID
         if workflow_node['unified_job_template']['name']:
-          search_fields = {'name': workflow_node['unified_job_template']['name']}
-          if "inventory" in workflow_node['unified_job_template']:
-              #workflow_node['unified_job_template']['inventory']:
-              organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
-              search_fields['organization'] = organization_id
-          else:
-              #workflow_node['unified_job_template']['organization']:
-              organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
-              search_fields['organization'] = organization_id
-          unified_job_template = module.get_one('unified_job_templates', **{'data': search_fields})
-          workflow_node_fields['unified_job_template'] = unified_job_template['id']
+            search_fields = {'name': workflow_node['unified_job_template']['name']}
+            if "inventory" in workflow_node['unified_job_template']:
+                # workflow_node['unified_job_template']['inventory']:
+                organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['inventory']['organization']['name'])
+                search_fields['organization'] = organization_id
+            else:
+                # workflow_node['unified_job_template']['organization']:
+                organization_id = module.resolve_name_to_id('organizations', workflow_node['unified_job_template']['organization']['name'])
+                search_fields['organization'] = organization_id
+            unified_job_template = module.get_one('unified_job_templates', **{'data': search_fields})
+            workflow_node_fields['unified_job_template'] = unified_job_template['id']
 
         # Lookup Values for other fields
 
@@ -300,6 +352,7 @@ def create_schema_nodes(module, schema, workflow_id):
               )
             )
 
+
 def create_schema_nodes_association(module, schema, workflow_id):
 
     for workflow_node in schema:
@@ -328,7 +381,6 @@ def create_schema_nodes_association(module, schema, workflow_id):
         # Get id's for association fields
         association_fields = {}
 
-        #raise AnsibleError('var error:  {}'.format(len(workflow_node['related']['success_nodes'])))
         for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
             # Extract out information if it exists
             try:
@@ -352,7 +404,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
                         temp = sub_obj['id']
                     if id_list:
                         association_fields[association] = id_list
-                
+
                 response.append(
                   module.create_or_update_if_needed(
                       existing_item, workflow_node_fields,
@@ -361,7 +413,7 @@ def create_schema_nodes_association(module, schema, workflow_id):
                   )
                 )
             except:
-                raise AnsibleError('error in association error:  {}, node: {}'.format(association,workflow_node))
+                raise AnsibleError('error in association error: {}, node: {}'.format(association, workflow_node))
                 continue
 
 
@@ -424,7 +476,7 @@ def main():
                 workflow_job_template, organization
             ))
         workflow_job_template_id = wfjt_data['id']
- 
+
     # Work thorugh and lookup value for schema fields
     # Destroy current nodes if selected.
     if destroy_current_schema:
