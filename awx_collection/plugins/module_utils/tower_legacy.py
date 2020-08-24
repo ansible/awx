@@ -110,7 +110,7 @@ class TowerLegacyModule(AnsibleModule):
             ('tower_config_file', 'validate_certs'),
         ))
 
-        super(TowerLegacyModule, self).__init__(argument_spec=args, **kwargs)
+        super().__init__(argument_spec=args, **kwargs)
 
         if not HAS_TOWER_CLI:
             self.fail_json(msg=missing_required_lib('ansible-tower-cli'),

@@ -71,7 +71,7 @@ class TowerModule(AnsibleModule):
         if direct_params is not None:
             self.params = direct_params
         else:
-            super(TowerModule, self).__init__(argument_spec=full_argspec, **kwargs)
+            super().__init__(argument_spec=full_argspec, **kwargs)
 
         self.load_config_files()
 
@@ -225,15 +225,15 @@ class TowerModule(AnsibleModule):
         if self.error_callback:
             self.error_callback(**kwargs)
         else:
-            super(TowerModule, self).fail_json(**kwargs)
+            super().fail_json(**kwargs)
 
     def exit_json(self, **kwargs):
         # Try to log out if we are authenticated
         self.logout()
-        super(TowerModule, self).exit_json(**kwargs)
+        super().exit_json(**kwargs)
 
     def warn(self, warning):
         if self.warn_callback is not None:
             self.warn_callback(warning)
         else:
-            super(TowerModule, self).warn(warning)
+            super().warn(warning)

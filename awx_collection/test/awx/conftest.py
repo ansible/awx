@@ -187,7 +187,7 @@ def run_module(request, collection_import):
         try:
             result = json.loads(module_stdout)
         except Exception as e:
-            raise Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
+            module.fail_json(msg='Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout))
         # A module exception should never be a test expectation
         if 'exception' in result:
             if "ModuleNotFoundError: No module named 'tower_cli'" in result['exception']:
