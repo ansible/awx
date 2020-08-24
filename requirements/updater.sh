@@ -2,9 +2,7 @@
 set -ue
 
 requirements_in="$(readlink -f ./requirements.in)"
-requirements_ansible_in="$(readlink -f ./requirements_ansible.in)"
 requirements="$(readlink -f ./requirements.txt)"
-requirements_ansible="$(readlink -f ./requirements_ansible.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
 
 check_prerequisites() {
@@ -32,31 +30,6 @@ generate_requirements_v3() {
   install_deps
 
   ${pip_compile} --output-file requirements.txt "${requirements_in}"
-  ${pip_compile} --output-file requirements_ansible_py3.txt "${requirements_ansible_in}"
-}
-
-generate_requirements_v2() {
-  venv="./venv2"
-  virtualenv -p python2 "${venv}"
-  # shellcheck disable=SC1090
-  PS1="" . "${venv}/bin/activate"
-
-  install_deps
-
-  ${pip_compile} --output-file requirements_ansible.txt "${requirements_ansible_in}"
-}
-
-generate_patch() {
-  a="requirements_ansible_py3.txt"
-  b="requirements_ansible.txt"
-  replace='; python_version < "3" #'
-
-  # most elegant/quick solution I could come up for now
-  out="$(diff --ignore-matching-lines='^#' --unified "${a}" "${b}" | \
-    awk -v replace="${replace}" '{ if (/^+\w/){ $2=replace; print;} else print; }' | \
-    sed 's/ ;/;/g')"
-  test -n "${out}"
-  echo "${out}"
 }
 
 main() {
@@ -69,19 +42,10 @@ main() {
       pip_compile="${pip_compile} --upgrade"
   fi
 
-  cp -vf requirements.txt requirements_ansible.txt "${_tmp}"
-  cp -vf requirements_ansible.txt "${_tmp}/requirements_ansible_py3.txt"
-
   cd "${_tmp}"
 
   generate_requirements_v3
-  generate_requirements_v2
 
-  sed -i 's/^wheel==0.30.0.*/wheel==0.33.6  # via azure-cli-core (overriden, see upgrade blockers)/g' requirements_ansible.txt
-  sed -i 's/^wheel==0.30.0.*/wheel==0.33.6  # via azure-cli-core (overriden, see upgrade blockers)/g' requirements_ansible_py3.txt
-  generate_patch | patch -p4 requirements_ansible_py3.txt
-
-  cp -vf requirements_ansible_py3.txt "${requirements_ansible}"
   cp -vf requirements.txt "${requirements}"
 
   _cleanup

@@ -51,7 +51,7 @@ def test_python_and_js_licenses():
 
     def read_api_requirements(path):
         ret = {}
-        for req_file in ['requirements.txt', 'requirements_ansible.txt', 'requirements_git.txt', 'requirements_ansible_git.txt']:
+        for req_file in ['requirements.txt', 'requirements_git.txt']:
             fname = '%s/%s' % (path, req_file)
 
             for reqt in parse_requirements(fname, session=''):

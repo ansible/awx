@@ -1,6 +1,6 @@
 # Dependency Management
 
-The `requirements.txt` and `requirements_ansible.txt` files are generated from `requirements.in` and `requirements_ansible.in`, respectively, using `pip-tools` `pip-compile`.
+The `requirements.txt` file is generated from `requirements.in`, using `pip-tools` and `pip-compile`.
 
 ## How To Use
 
@@ -35,11 +35,7 @@ You can upgrade (`pip-compile --upgrade`) the dependencies by running
 
 ## What The Script Does
 
-This script will:
-
-  - Update `requirements.txt` based on `requirements.in`
-  - Update/generate `requirements_ansible.txt` based on `requirements_ansible.in`
-    - including an automated patch that adds `python_version < "3"` for Python 2 backward compatibility
+This script will update `requirements.txt` based on `requirements.in`
 
 ## Licenses and Source Files
 
@@ -128,11 +124,6 @@ https://github.com/adamchainz/django-jsonfield/pull/14
 This breaks a very large amount of AWX code that assumes these fields
 are returned as dicts. Upgrading this library will require a refactor
 to accomidate this change.
-
-### wheel
-
-azure-cli-core requires a version of wheel that is incompatible with
-certain packages building with later versions of pip, so we override it.
 
 ### pip and setuptools
 

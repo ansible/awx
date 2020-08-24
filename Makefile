@@ -173,32 +173,6 @@ virtualenv_awx:
 		fi; \
 	fi
 
-# --ignore-install flag is not used because *.txt files should specify exact versions
-requirements_ansible: virtualenv_ansible
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_py3: virtualenv_ansible_py3
-	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) -r /dev/stdin ; \
-	else \
-	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | PYCURL_SSL_LIBRARY=$(PYCURL_SSL_LIBRARY) $(VENV_BASE)/ansible/bin/pip3 install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) -r /dev/stdin ; \
-	fi
-	$(VENV_BASE)/ansible/bin/pip3 uninstall --yes -r requirements/requirements_ansible_uninstall.txt
-	# Same effect as using --system-site-packages flag on venv creation
-	rm $(shell ls -d $(VENV_BASE)/ansible/lib/python* | head -n 1)/no-global-site-packages.txt
-
-requirements_ansible_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
-	fi
-
 # Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
@@ -216,9 +190,9 @@ requirements_collections:
 	mkdir -p $(COLLECTION_BASE)
 	ansible-galaxy collection install -r requirements/collections_requirements.yml -p $(COLLECTION_BASE)
 
-requirements: requirements_ansible requirements_awx requirements_collections
+requirements: requirements_awx requirements_collections
 
-requirements_dev: requirements_awx requirements_ansible_py3 requirements_awx_dev requirements_ansible_dev
+requirements_dev: requirements_awx requirements_awx_dev
 
 requirements_test: requirements
 

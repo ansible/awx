@@ -1,0 +1,12 @@
+# This defines the default execution environment where jobs run
+# inventory updates, projects, and other system actions may also use this
+---
+version: 1
+dependencies:
+  galaxy: collections_requirements.yml
+  system: bindep_requirements.txt
+additional_build_steps:
+  prepend:
+    - RUN pip3 install -y pip==19.3.1 setuptools==41.6.0
+  append:
+    - RUN pip3 uninstall -y rsa  # stop adding new crypto libs
