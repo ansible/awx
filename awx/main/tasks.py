@@ -2498,7 +2498,7 @@ class RunProjectUpdate(BaseTask):
             "process_isolation": True,
             "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
             "container_volume_mounts": [
-                f"{project_path}:{project_path}",
+                f"{project_path}:{project_path}:Z",
             ]
 
         }
