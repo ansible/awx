@@ -111,7 +111,7 @@ function SmartInventory({ i18n, setBreadcrumb }) {
 
   let showCardHeader = true;
 
-  if (location.pathname.endsWith('edit')) {
+  if (['edit', 'hosts/'].some(name => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 
@@ -145,7 +145,10 @@ function SmartInventory({ i18n, setBreadcrumb }) {
               />
             </Route>,
             <Route key="hosts" path="/inventories/smart_inventory/:id/hosts">
-              <SmartInventoryHosts inventory={inventory} />
+              <SmartInventoryHosts
+                inventory={inventory}
+                setBreadcrumb={setBreadcrumb}
+              />
             </Route>,
             <Route
               key="completed_jobs"

@@ -44,9 +44,4 @@ describe('<SmartInventoryHostListItem />', () => {
     expect(cells.at(1).find('Sparkline').length).toEqual(1);
     expect(cells.at(2).text()).toContain('Inv 1');
   });
-
-  test('should display disabled host toggle', () => {
-    expect(wrapper.find('HostToggle').length).toBe(1);
-    expect(wrapper.find('HostToggle Switch').prop('isDisabled')).toEqual(true);
-  });
 });
