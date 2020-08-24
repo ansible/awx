@@ -59,6 +59,7 @@ describe('<WorkflowJobTemplate/>', () => {
         },
       },
     });
+
     WorkflowJobTemplatesAPI.readWebhookKey.mockResolvedValue({
       data: { webhook_key: 'WebHook Key' },
     });
@@ -74,6 +75,9 @@ describe('<WorkflowJobTemplate/>', () => {
     });
   });
   beforeEach(() => {
+    WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValue({
+      data: { actions: { PUT: {} } },
+    });
     history = createMemoryHistory({
       initialEntries: ['/templates/workflow_job_template/1/details'],
     });
@@ -95,13 +99,18 @@ describe('<WorkflowJobTemplate/>', () => {
       );
     });
   });
-
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
   test('calls api to get workflow job template data', async () => {
     expect(wrapper.find('WorkflowJobTemplate').length).toBe(1);
     expect(WorkflowJobTemplatesAPI.readDetail).toBeCalledWith('1');
     wrapper.update();
     await sleep(0);
     expect(WorkflowJobTemplatesAPI.readWebhookKey).toBeCalledWith('1');
+    expect(WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions).toBeCalled();
+
     expect(CredentialsAPI.readDetail).toBeCalledWith(1234567);
     expect(OrganizationsAPI.read).toBeCalledWith({
       page_size: 1,
@@ -143,5 +152,13 @@ describe('<WorkflowJobTemplate/>', () => {
     wrapper.find('TabContainer').forEach(tc => {
       tabs.forEach(t => expect(tc.prop(`aria-label=[${t}]`)));
     });
+  });
+  test('should not call for webhook key', async () => {
+    WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions.mockResolvedValueOnce(
+      {
+        data: { actions: {} },
+      }
+    );
+    expect(WorkflowJobTemplatesAPI.readWebhookKey).not.toBeCalled();
   });
 });

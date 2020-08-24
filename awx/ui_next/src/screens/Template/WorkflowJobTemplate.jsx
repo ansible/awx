@@ -56,10 +56,20 @@ class WorkflowJobTemplate extends Component {
 
     this.setState({ contentError: null });
     try {
-      const { data } = await WorkflowJobTemplatesAPI.readDetail(id);
+      const [
+        { data },
+        {
+          data: { actions },
+        },
+      ] = await Promise.all([
+        WorkflowJobTemplatesAPI.readDetail(id),
+        WorkflowJobTemplatesAPI.readWorkflowJobTemplateOptions(id),
+      ]);
       let webhookKey;
-      if (data?.webhook_service && data?.related?.webhook_key) {
-        webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
+      if (actions.PUT) {
+        if (data?.webhook_service && data?.related?.webhook_key) {
+          webhookKey = await WorkflowJobTemplatesAPI.readWebhookKey(id);
+        }
       }
       if (data?.summary_fields?.webhook_credential) {
         const {
