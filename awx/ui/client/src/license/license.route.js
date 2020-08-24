@@ -15,7 +15,7 @@ export default {
 	controller: 'licenseController',
 	data: {},
 	ncyBreadcrumb: {
-		label: N_('LICENSE')
+		label: N_('SUBSCRIPTION')
 	},
 	onEnter: ['$state', 'ConfigService', (state, configService) => {
 		return configService.getConfig()
