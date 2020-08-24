@@ -27,6 +27,8 @@ import { QSConfig } from '../../types';
 
 const ChipHolder = styled.div`
   --pf-c-form-control--Height: auto;
+  background-color: ${props =>
+    props.isDisabled ? 'var(--pf-global--disabled-color--300)' : null};
 `;
 function Lookup(props) {
   const {
@@ -43,6 +45,7 @@ function Lookup(props) {
     renderOptionsList,
     history,
     i18n,
+    isDisabled,
   } = props;
 
   const [state, dispatch] = useReducer(
@@ -103,11 +106,15 @@ function Lookup(props) {
           id={id}
           onClick={() => dispatch({ type: 'TOGGLE_MODAL' })}
           variant={ButtonVariant.control}
-          isDisabled={isLoading}
+          isDisabled={isLoading || isDisabled}
         >
           <SearchIcon />
         </Button>
-        <ChipHolder className="pf-c-form-control">
+        <ChipHolder
+          isDisabled={isDisabled}
+          // css="background-color: #d2d2d2"
+          className="pf-c-form-control"
+        >
           <ChipGroup numChips={5} totalChips={items.length}>
             {items.map(item =>
               renderItemChip({

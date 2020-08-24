@@ -19,7 +19,13 @@ const QS_CONFIG = getQSConfig('inventory', {
 
 function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
   const {
-    result: { inventories, count, relatedSearchableKeys, searchableKeys },
+    result: {
+      inventories,
+      count,
+      relatedSearchableKeys,
+      searchableKeys,
+      canEdit,
+    },
     request: fetchInventories,
     error,
     isLoading,
@@ -39,9 +45,16 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
         searchableKeys: Object.keys(
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
+        canEdit: Boolean(actionsResponse.data.actions.POST),
       };
     }, [history.location]),
-    { inventories: [], count: 0, relatedSearchableKeys: [], searchableKeys: [] }
+    {
+      inventories: [],
+      count: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
+      canEdit: false,
+    }
   );
 
   useEffect(() => {
@@ -58,6 +71,7 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
+        isDisabled={!canEdit}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
