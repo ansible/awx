@@ -17,10 +17,15 @@ import ScheduleOccurrences from '../ScheduleOccurrences';
 import ScheduleToggle from '../ScheduleToggle';
 import { formatDateString } from '../../../util/dates';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
-import { SchedulesAPI } from '../../../api';
+import {
+  JobTemplatesAPI,
+  SchedulesAPI,
+  WorkflowJobTemplatesAPI,
+} from '../../../api';
 import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
+import { VariablesDetail } from '../../CodeMirrorInput';
 
 const PromptTitle = styled(Title)`
   --pf-c-title--m-md--FontWeight: 700;
@@ -35,9 +40,9 @@ function ScheduleDetail({ schedule, i18n }) {
     diff_mode,
     dtend,
     dtstart,
+    extra_data,
     job_tags,
     job_type,
-    inventory,
     limit,
     modified,
     name,
@@ -67,20 +72,47 @@ function ScheduleDetail({ schedule, i18n }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const {
-    result: [credentials, preview],
+    result: [credentials, preview, launchData],
     isLoading,
     error: readContentError,
     request: fetchCredentialsAndPreview,
   } = useRequest(
     useCallback(async () => {
-      const [{ data }, { data: schedulePreview }] = await Promise.all([
+      const promises = [
         SchedulesAPI.readCredentials(id),
         SchedulesAPI.createPreview({
           rrule,
         }),
-      ]);
-      return [data.results, schedulePreview];
-    }, [id, rrule]),
+      ];
+
+      if (
+        schedule?.summary_fields?.unified_job_template?.unified_job_type ===
+        'job'
+      ) {
+        promises.push(
+          JobTemplatesAPI.readLaunch(
+            schedule.summary_fields.unified_job_template.id
+          )
+        );
+      } else if (
+        schedule?.summary_fields?.unified_job_template?.unified_job_type ===
+        'workflow_job'
+      ) {
+        promises.push(
+          WorkflowJobTemplatesAPI.readLaunch(
+            schedule.summary_fields.unified_job_template.id
+          )
+        );
+      } else {
+        promises.push(Promise.resolve());
+      }
+
+      const [{ data }, { data: schedulePreview }, launch] = await Promise.all(
+        promises
+      );
+
+      return [data.results, schedulePreview, launch?.data];
+    }, [id, schedule, rrule]),
     []
   );
 
@@ -93,15 +125,33 @@ function ScheduleDetail({ schedule, i18n }) {
     rule.options.freq === RRule.MINUTELY && dtstart === dtend
       ? i18n._(t`None (Run Once)`)
       : rule.toText().replace(/^\w/, c => c.toUpperCase());
+
+  const {
+    ask_credential_on_launch,
+    ask_diff_mode_on_launch,
+    ask_inventory_on_launch,
+    ask_job_type_on_launch,
+    ask_limit_on_launch,
+    ask_scm_branch_on_launch,
+    ask_skip_tags_on_launch,
+    ask_tags_on_launch,
+    ask_variables_on_launch,
+    ask_verbosity_on_launch,
+    survey_enabled,
+  } = launchData || {};
+
   const showPromptedFields =
-    (credentials && credentials.length > 0) ||
-    job_type ||
-    (inventory && summary_fields.inventory) ||
-    scm_branch ||
-    limit ||
-    typeof diff_mode === 'boolean' ||
-    (job_tags && job_tags.length > 0) ||
-    (skip_tags && skip_tags.length > 0);
+    ask_credential_on_launch ||
+    ask_diff_mode_on_launch ||
+    ask_inventory_on_launch ||
+    ask_job_type_on_launch ||
+    ask_limit_on_launch ||
+    ask_scm_branch_on_launch ||
+    ask_skip_tags_on_launch ||
+    ask_tags_on_launch ||
+    ask_variables_on_launch ||
+    ask_verbosity_on_launch ||
+    survey_enabled;
 
   if (isLoading) {
     return <ContentLoading />;
@@ -144,8 +194,10 @@ function ScheduleDetail({ schedule, i18n }) {
             <PromptTitle headingLevel="h2">
               {i18n._(t`Prompted Fields`)}
             </PromptTitle>
-            <Detail label={i18n._(t`Job Type`)} value={job_type} />
-            {inventory && summary_fields.inventory && (
+            {ask_job_type_on_launch && (
+              <Detail label={i18n._(t`Job Type`)} value={job_type} />
+            )}
+            {ask_inventory_on_launch && (
               <Detail
                 label={i18n._(t`Inventory`)}
                 value={
@@ -161,18 +213,22 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            <Detail
-              label={i18n._(t`Source Control Branch`)}
-              value={scm_branch}
-            />
-            <Detail label={i18n._(t`Limit`)} value={limit} />
-            {typeof diff_mode === 'boolean' && (
+            {ask_scm_branch_on_launch && (
+              <Detail
+                label={i18n._(t`Source Control Branch`)}
+                value={scm_branch}
+              />
+            )}
+            {ask_limit_on_launch && (
+              <Detail label={i18n._(t`Limit`)} value={limit} />
+            )}
+            {ask_diff_mode_on_launch && typeof diff_mode === 'boolean' && (
               <Detail
                 label={i18n._(t`Show Changes`)}
                 value={diff_mode ? 'On' : 'Off'}
               />
             )}
-            {credentials && credentials.length > 0 && (
+            {ask_credential_on_launch && (
               <Detail
                 fullWidth
                 label={i18n._(t`Credentials`)}
@@ -185,7 +241,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {job_tags && job_tags.length > 0 && (
+            {ask_tags_on_launch && job_tags && job_tags.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Job Tags`)}
@@ -203,7 +259,7 @@ function ScheduleDetail({ schedule, i18n }) {
                 }
               />
             )}
-            {skip_tags && skip_tags.length > 0 && (
+            {ask_skip_tags_on_launch && skip_tags && skip_tags.length > 0 && (
               <Detail
                 fullWidth
                 label={i18n._(t`Skip Tags`)}
@@ -219,6 +275,13 @@ function ScheduleDetail({ schedule, i18n }) {
                     ))}
                   </ChipGroup>
                 }
+              />
+            )}
+            {(ask_variables_on_launch || survey_enabled) && (
+              <VariablesDetail
+                value={extra_data}
+                rows={4}
+                label={i18n._(t`Variables`)}
               />
             )}
           </>
