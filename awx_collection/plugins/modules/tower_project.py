@@ -86,11 +86,13 @@ options:
       type: bool
       aliases:
         - scm_allow_override
-    job_timeout:
+    timeout:
       description:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
       default: 0
       type: int
+      aliases:
+        - job_timeout
     custom_virtualenv:
       description:
         - Local absolute file path containing a custom Python virtualenv to use
@@ -194,7 +196,7 @@ def main():
         scm_update_on_launch=dict(type='bool', default=False),
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
-        job_timeout=dict(type='int', default=0),
+        timeout=dict(type='int', default=0, aliases=['job_timeout']),
         custom_virtualenv=dict(),
         organization=dict(required=True),
         notification_templates_started=dict(type="list", elements='str'),
@@ -223,7 +225,7 @@ def main():
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
     allow_override = module.params.get('allow_override')
-    job_timeout = module.params.get('job_timeout')
+    timeout = module.params.get('timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
     state = module.params.get('state')
@@ -276,7 +278,7 @@ def main():
         'scm_refspec': scm_refspec,
         'scm_clean': scm_clean,
         'scm_delete_on_update': scm_delete_on_update,
-        'timeout': job_timeout,
+        'timeout': timeout,
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
