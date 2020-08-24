@@ -8,7 +8,7 @@ import re
 # Analysis variables
 # -----------------------------------------------------------------------------------------------------------
 
-# Read-only endpoints are dynamally created by an options page with no POST section
+# Read-only endpoints are dynamically created by an options page with no POST section
 read_only_endpoint = []
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
@@ -50,7 +50,7 @@ return_value = 0
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     global return_value
-    # This is a heiratchal list of things that are ok/failures based on conditions
+    # This is a hierarchical list of things that are ok/failures based on conditions
     if module_id in needs_development and module == 'N/A':
         return "Failed (non-blocking), needs development"
     if module_id in read_only_endpoint and module == 'N/A':
