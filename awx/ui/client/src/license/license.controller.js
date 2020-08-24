@@ -44,9 +44,9 @@ export default
             $scope.fileName = N_("No file selected.");
 
             if ($rootScope.licenseMissing) {
-                $scope.title = $rootScope.BRAND_NAME + i18n._(" License");
+                $scope.title = $rootScope.BRAND_NAME + i18n._(" Subscription");
             } else {
-                $scope.title = i18n._("License Management");
+                $scope.title = i18n._("Subscription Management");
             }
             // What if I POST the file as a field in the License data JSON?
             $scope.license = config;
@@ -100,21 +100,16 @@ export default
             $scope.fileName = event.target.files[0].name;
             // Grab the key from the raw license file
             const raw = new FileReader();
-            // readAsFoo runs async
+
             raw.onload = function() {
-                try {
-                    $scope.newLicense.file = JSON.parse(raw.result);
-                } catch(err) {
-                    ProcessErrors($rootScope, null, null, null,
-                        {msg: i18n._('Invalid file format. Please upload valid JSON.')});
-                }
+                $scope.newLicense.entitlement_cert = raw.result;
             };
 
             try {
                 raw.readAsText(event.target.files[0]);
             } catch(err) {
                 ProcessErrors($rootScope, null, null, null,
-                    {msg: i18n._('Invalid file format. Please upload valid JSON.')});
+                    {msg: i18n._('Invalid file format. Please upload a certificate/key pair')});
             }
         };
 
@@ -131,7 +126,7 @@ export default
         };
 
         $scope.replacePassword = () => {
-            if ($scope.user_is_superuser && !$scope.newLicense.file) {
+            if ($scope.user_is_superuser && !$scope.newLicense.entitlement_cert) {
                 $scope.showPlaceholderPassword = false;
                 $scope.rhCreds.password = "";
                 $timeout(() => {
@@ -185,10 +180,10 @@ export default
         $scope.submit = function() {
             Wait('start');
             let payload = {};
-            if ($scope.newLicense.file) {
-                payload = $scope.newLicense.file;
+            if ($scope.newLicense.entitlement_cert) {
+                payload.entitlement_cert = $scope.newLicense.entitlement_cert;
             } else if ($scope.selectedLicense.fullLicense) {
-                payload = $scope.selectedLicense.fullLicense;
+                payload.entitlement_cert = $scope.selectedLicense.fullLicense;
             }
             
             CheckLicense.post(payload, $scope.newLicense.eula)

@@ -5,10 +5,10 @@
 			<div class="List-titleText" translate>Details</div>
 			<div class="License-fields">
 				<div class="License-field">
-					<div class="License-field--label" translate>License</div>
+					<div class="License-field--label" translate>Subscription</div>
 					<div class="License-field--content">
-					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i><translate>Valid License</translate></span>
-					<span class="License-redText" ng-show='compliant !== undefined && !compliant'><i class="fa fa-circle License-redText"></i><translate>Invalid License</translate></span>
+					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i><translate>Valid</translate></span>
+					<span class="License-redText" ng-show='compliant !== undefined && !compliant'><i class="fa fa-circle License-redText"></i><translate>Invalid</translate></span>
 					</div>
 				</div>
 				<div class="License-field">
@@ -18,7 +18,7 @@
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label" translate>License Type</div>
+					<div class="License-field--label" translate>Subscription Type</div>
 					<div class="License-field--content">
 					{{license.license_info.license_type}}
 					</div>
@@ -27,12 +27,6 @@
 					<div class="License-field--label" translate>Subscription</div>
 					<div class="License-field--content">
 					{{license.license_info.subscription_name}}
-					</div>
-				</div>
-				<div class="License-field">
-					<div class="License-field--label" translate>License Key</div>
-					<div class="License-field--content License-field--key">
-					{{license.license_info.license_key}}
 					</div>
 				</div>
 				<div class="License-field">
@@ -79,7 +73,7 @@
 		<div class="card at-Panel">
 			<div class="List-titleText">{{title}}</div>
 			<div class="License-body">
-				<div class="License-helperText License-introText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
+				<div class="License-helperText License-introText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a Subscription.</div>
 				<div class="input-group License-file--container">
 					<div class="License-file--left">
 						<div class="d-block w-100">
@@ -88,12 +82,12 @@
 									1
 								</span>
 								<span class="License-helperText">
-									<translate>Please click the button below to visit Ansible's website to get a Tower license key.</translate>
+									<translate>Please click the button below to visit Ansible's website to get a Tower Subscription.</translate>
 								</span>
 							</div>
 			
 								<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
-									<translate>Request License</translate>
+									<translate>Request Subscription</translate>
 								</button>
 			
 							<div class="AddPermissions-directions">
@@ -101,14 +95,14 @@
 									2
 								</span>
 								<span class="License-helperText">
-									<translate>Choose your license file, agree to the End User License Agreement, and click submit.</translate>
+									<translate>Choose your entitlement certificate and key pair, agree to the End User License Agreement, and click submit.</translate>
 								</span>
 							</div>
 							<div class="License-subTitleText">
 								<span class="Form-requiredAsterisk">*</span>
-								<translate>License</translate>
+								<translate>Entitlement certificate and key</translate>
 							</div>
-							<div class="License-helperText License-licenseStepHelp" translate>Upload a license file</div>
+							<div class="License-helperText License-licenseStepHelp" translate>Upload an entitlement certificate and key pair</div>
 							<div class="License-filePicker">
 								<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser || (rhCreds.username && rhCreds.username.length > 0) || (rhCreds.password && rhCreds.password.length > 0)" translate>Browse</span>
 								<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
@@ -125,7 +119,7 @@
 						<div class="d-block w-100">
 							<div class="AddPermissions-directions">
 								<span class="License-helperText">
-									<translate>Provide your Red Hat customer credentials and you can choose from a list of your available licenses.  The credentials you use will be stored for future use in retrieving renewal or expanded licenses. You can update or remove them in SETTINGS > SYSTEM.</translate>
+									<translate>Provide your Red Hat customer credentials and you can choose from a list of your available Subscriptions.  The credentials you use will be stored for future use in retrieving renewal or expanded Subscriptions. You can update or remove them in SETTINGS > SYSTEM.</translate>
 								</span>
 							</div>
 							<div class="License-rhCredField">
@@ -200,7 +194,7 @@
 						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
 					</div>
 					<div>
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.file && !selectedLicense.fullLicense) || (newLicense.file && newLicense.file.license_key == null) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="(!newLicense.entitlement_cert && !selectedLicense.fullLicense) || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
 					</div>
 				</div>
 			</div>
