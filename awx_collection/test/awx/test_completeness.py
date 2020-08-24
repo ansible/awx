@@ -6,20 +6,57 @@ import os
 import re
 
 # Analysis variables
-no_module_for_endpoint = [ 'tower_me' ]
-no_endpoint_for_module = [ 'tower_import', 'tower_meta', 'tower_export' ]
+# -----------------------------------------------------------------------------------------------------------
+
+# Read-only endpoints are dynamally created by an options page with no POST section
+read_only_endpoint = []
+
+# If a module should not be created for an endpoint and the endpoint is not read-only add it here
+# THINK HARD ABOUT DOING THIS
+no_module_for_endpoint = []
+
+# Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
+no_endpoint_for_module = [
+    'tower_import', 'tower_meta', 'tower_export', 'tower_job_launch', 'tower_job_wait', 'tower_job_list',
+    'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch', 'tower_job_cancel',
+]
+
+# Global module parameters we can ignore
 ignore_parameters = [ 'state', 'new_name' ]
+
+# Some modules take additional parameters that do not appear in the API
+# Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
-    'tower_credential': ['authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client', 'domain', 'host', 'kind', 'password', 'project', 'secret', 'security_token', 'ssh_key_data', 'ssh_key_unlock', 'subscription', 'tenant', 'username', 'vault_id', 'vault_password'],
+    'tower_credential': [
+        'authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client', 
+        'domain', 'host', 'kind', 'password', 'project', 'secret', 'security_token', 'ssh_key_data',
+        'ssh_key_unlock', 'subscription', 'tenant', 'username', 'vault_id', 'vault_password',
+    ],
+    'tower_project': ['wait', 'timeout'],
+    'tower_token': ['existing_token', 'existing_token_id'],
+    'tower_settings': ['name', 'settings', 'value'],
 }
+
+# When this tool was created we were not feature complete. Adding something in here indicates a module
+# that needs to be developed. If the module is found on the file system it will auto-detect that the
+# work is being done and will bypass this check. At some point this module should be removed from this list.
+needs_development = [
+    'tower_ad_hoc_command', 'tower_application', 'tower_instance_group', 'tower_inventory_script',
+    'tower_workflow_approval'
+]
+# -----------------------------------------------------------------------------------------------------------
 
 return_value = 0
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     global return_value
     # This is a heiratchal list of things that are ok/failures based on conditions
+    if module_id in needs_development and module == 'N/A':
+        return "Failed (non-blocking), needs development"
+    if module_id in read_only_endpoint and module == 'N/A':
+        return "OK, this endpoint is read-only and should not have a module"
     if module_id in no_module_for_endpoint and module == 'N/A':
-        return "OK, this endpoing should not have a module"
+        return "OK, this endpoint should not have a module"
     if module_id in no_endpoint_for_module and endpoint == 'N/A':
         return "OK, this module does not require an endpoint"
     if module == 'N/A':
@@ -95,6 +132,8 @@ def test_completeness(collection_import, request, admin_user):
         )
         if 'POST' in options_response.data.get('actions', {}):
             option_comparison[module_name]['api_options'] = options_response.data.get('actions').get('POST')
+        else:
+            read_only_endpoint.append(module_name)
 
     # Parse through our data to get string lengths to make a pretty report
     longest_module_name = 0
