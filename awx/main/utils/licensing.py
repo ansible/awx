@@ -22,7 +22,7 @@ import tempfile
 import logging
 import subprocess
 import re
-import tracemalloc
+import requests
 
 from django.conf import settings
 from django.utils.encoding import smart_text, smart_bytes
@@ -113,6 +113,15 @@ class Licenser(object):
                     if ': ' in line:
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
+
+                # TODO: Fix issue with PEM headers not being readable when using tempfile.
+                cert_file_path = '/etc/tower/certs/entitlement_cert_key_generic.pem'
+                # TODO: create this URL from Satellite setting
+                content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os/repodata/'
+                request = requests.get(url=content_repo_url, cert=cert_file_path, verify=False)
+                if request.status_code != 200:
+                    logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
+
 
         except FileNotFoundError as e:
             logger.exception('Subscription-manager is not installed')
