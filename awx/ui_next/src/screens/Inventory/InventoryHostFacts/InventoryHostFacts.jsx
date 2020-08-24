@@ -11,32 +11,31 @@ import useRequest from '../../../util/useRequest';
 import { HostsAPI } from '../../../api';
 
 function InventoryHostFacts({ i18n, host }) {
-  const { result: facts, isLoading, error, request: fetchFacts } = useRequest(
+  const { request, isLoading, error, result } = useRequest(
     useCallback(async () => {
-      const [{ data: factsObj }] = await Promise.all([
-        HostsAPI.readFacts(host.id),
-      ]);
-      return JSON.stringify(factsObj, null, 4);
+      const { data } = await HostsAPI.readFacts(host.id);
+
+      return JSON.stringify(data, null, 4);
     }, [host]),
-    '{}'
+    null
   );
 
   useEffect(() => {
-    fetchFacts();
-  }, [fetchFacts]);
-
-  if (isLoading) {
-    return <ContentLoading />;
-  }
+    request();
+  }, [request]);
 
   if (error) {
     return <ContentError error={error} />;
   }
 
+  if (isLoading || result === null) {
+    return <ContentLoading />;
+  }
+
   return (
     <CardBody>
       <DetailList gutter="sm">
-        <VariablesDetail label={i18n._(t`Facts`)} fullHeight value={facts} />
+        <VariablesDetail label={i18n._(t`Facts`)} fullHeight value={result} />
       </DetailList>
     </CardBody>
   );
