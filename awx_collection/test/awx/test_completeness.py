@@ -59,6 +59,12 @@ no_api_parameter_ok = {
     'tower_workflow_job_template_node': ['always_nodes', 'failure_nodes', 'success_nodes', 'credentials', 'organization'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey'],
+    # These fields get wrapped into notification_configuration
+    'tower_notification_template': [
+        'account_sid', 'account_token', 'channels', 'client_name', 'color', 'from_number', 'headers', 'host',
+        'message_from', 'nickname', 'notify', 'password', 'port', 'recipients', 'sender', 'server',
+        'service_key', 'subdomain', 'targets', 'to_numbers', 'token', 'url', 'use_ssl', 'use_tls', 'username',
+    ]
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
