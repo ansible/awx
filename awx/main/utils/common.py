@@ -257,7 +257,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
     # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
     # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
-    if scm_type not in ('git', 'hg', 'svn', 'insights'):
+    if scm_type not in ('git', 'hg', 'svn', 'insights', 'archive'):
         raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
@@ -303,7 +303,8 @@ def update_scm_url(scm_type, url, username=True, password=True,
         'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps', 'file'),
         'hg': ('http', 'https', 'ssh', 'file'),
         'svn': ('http', 'https', 'svn', 'svn+ssh', 'file'),
-        'insights': ('http', 'https')
+        'insights': ('http', 'https'),
+        'archive': ('http', 'https'),
     }
     if parts.scheme not in scm_type_schemes.get(scm_type, ()):
         raise ValueError(_('Unsupported %s URL') % scm_type)
@@ -339,7 +340,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             #raise ValueError('Password not supported for SSH with Mercurial.')
             netloc_password = ''
 
-    if netloc_username and parts.scheme != 'file' and scm_type != "insights":
+    if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
         netloc = u':'.join([urllib.parse.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''

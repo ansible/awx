@@ -4,6 +4,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 
 ## 14.1.0 (TBD)
 - AWX images can now be built on ARM64 - https://github.com/ansible/awx/pull/7607
+- Added the Remote Archive SCM Type to support using immutable artifacts and releases (such as tarballs and zip files) as projects - https://github.com/ansible/awx/issues/7954
 - Deprecated official support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
 - Added resource import/export support to the official AWX collection - https://github.com/ansible/awx/issues/7329
 - Added the ability to import YAML-based resources (instead of just JSON) when using the AWX CLI - https://github.com/ansible/awx/pull/7808
