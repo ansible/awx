@@ -55,10 +55,12 @@ options:
         - The refspec to use for the SCM resource.
       type: str
       default: ''
-    scm_credential:
+    credential:
       description:
         - Name of the credential to use with this SCM resource.
       type: str
+      aliases:
+        - scm_credential
     scm_clean:
       description:
         - Remove local modifications before updating.
@@ -190,7 +192,7 @@ def main():
         local_path=dict(),
         scm_branch=dict(default=''),
         scm_refspec=dict(default=''),
-        scm_credential=dict(),
+        credential=dict(aliases=['scm_credential']),
         scm_clean=dict(type='bool', default=False),
         scm_delete_on_update=dict(type='bool', default=False),
         scm_update_on_launch=dict(type='bool', default=False),
@@ -219,7 +221,7 @@ def main():
     local_path = module.params.get('local_path')
     scm_branch = module.params.get('scm_branch')
     scm_refspec = module.params.get('scm_refspec')
-    scm_credential = module.params.get('scm_credential')
+    credential = module.params.get('credential')
     scm_clean = module.params.get('scm_clean')
     scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
@@ -233,8 +235,8 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
-    if scm_credential is not None:
-        scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
+    if credential is not None:
+        credential = module.resolve_name_to_id('credentials', credential)
 
     # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', **{
@@ -286,8 +288,8 @@ def main():
     }
     if description is not None:
         project_fields['description'] = description
-    if scm_credential is not None:
-        project_fields['credential'] = scm_credential_id
+    if credential is not None:
+        project_fields['credential'] = credential
     if allow_override is not None:
         project_fields['allow_override'] = allow_override
     if scm_type == '':
