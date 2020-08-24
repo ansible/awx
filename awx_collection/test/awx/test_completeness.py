@@ -8,8 +8,11 @@ import re
 # Analysis variables
 # -----------------------------------------------------------------------------------------------------------
 
-# Read-only endpoints are dynamically created by an options page with no POST section
-read_only_endpoint = []
+# Read-only endpoints are dynamically created by an options page with no POST section.
+# Noramlly a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
+# For example, we have a tower_role module but /api/v2/roles is a read only endpoint.
+# Rhis list indicates which read-only endpoints have associated modules with them.
+read_only_endpoints_with_modules = ['tower_settings', 'tower_role']
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
 # THINK HARD ABOUT DOING THIS
@@ -19,22 +22,43 @@ no_module_for_endpoint = []
 no_endpoint_for_module = [
     'tower_import', 'tower_meta', 'tower_export', 'tower_job_launch', 'tower_job_wait', 'tower_job_list',
     'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch', 'tower_job_cancel',
+    'tower_workflow_template',
 ]
 
 # Global module parameters we can ignore
-ignore_parameters = ['state', 'new_name']
+ignore_parameters = [
+    'state', 'new_name',
+    # The way we implemented notifications was to add these fileds to modules which can notify
+    'notification_templates_approvals',
+    'notification_templates_error',
+    'notification_templates_started',
+    'notification_templates_success',
+]
 
 # Some modules take additional parameters that do not appear in the API
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
+    # The credential module used to take a lot of parameters which are now combined into "inputs"
     'tower_credential': [
         'authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client',
         'domain', 'host', 'kind', 'password', 'project', 'secret', 'security_token', 'ssh_key_data',
         'ssh_key_unlock', 'subscription', 'tenant', 'username', 'vault_id', 'vault_password',
     ],
-    'tower_project': ['wait', 'timeout'],
+    # The wait is for wheter or not to wait for a projec update on change
+    'tower_project': ['wait'],
+    # Existing_token and id are for working with an exisitng tokens
     'tower_token': ['existing_token', 'existing_token_id'],
-    'tower_settings': ['name', 'settings', 'value'],
+    # Children and hosts are how tower_group deals with associations
+    'tower_group': ['children', 'hosts'],
+    # Credential and Vault Credential are a legacy fields for old Towers
+    # Credentials/labels/survey spec is now how we handle associations
+    # We take an organization here to help with the lookups only
+    'tower_job_template': ['credential', 'vault_credential', 'credentials', 'labels', 'survey_spec', 'organization'],
+    # Always_nodes, failure_nodes, success_nodes, credentials is how we handle associations
+    # Organization is how we looking job templates
+    'tower_workflow_job_template_node': ['always_nodes', 'failure_nodes', 'success_nodes', 'credentials', 'organization'],
+    # Survey is how we handle associations
+    'tower_workflow_job_template': ['survey'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
@@ -44,18 +68,30 @@ needs_development = [
     'tower_ad_hoc_command', 'tower_application', 'tower_instance_group', 'tower_inventory_script',
     'tower_workflow_approval'
 ]
+needs_param_development = {
+    'tower_host': ['instance_id'],
+    'tower_inventory': ['insights_credential'],
+}
 # -----------------------------------------------------------------------------------------------------------
 
 return_value = 0
+read_only_endpoint = []
 
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     global return_value
     # This is a hierarchical list of things that are ok/failures based on conditions
     if module_id in needs_development and module == 'N/A':
-        return "Failed (non-blocking), needs development"
-    if module_id in read_only_endpoint and module == 'N/A':
-        return "OK, this endpoint is read-only and should not have a module"
+        return "Failed (non-blocking), module needs development"
+    if module_id in read_only_endpoint:
+        if module == 'N/A':
+            # There may be some cases where a read only endpoint has a module 
+            return "OK, this endpoint is read-only and should not have a module"
+        elif module_id not in read_only_endpoints_with_modules:
+            return_value = 255
+            return "Failed, read-only endpoint should not have an associated module"
+        else:
+            return "OK, module params can not be checked to read-only"
     if module_id in no_module_for_endpoint and module == 'N/A':
         return "OK, this endpoint should not have a module"
     if module_id in no_endpoint_for_module and endpoint == 'N/A':
@@ -71,6 +107,8 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
     if api_option == '' and parameter in no_api_parameter_ok.get(module, {}):
         return 'OK, no api parameter is ok'
     if api_option != module_option:
+        if module_id in needs_param_development and parameter in needs_param_development[module_id]:
+            return "Failed (non-blocking), parameter needs development"
         return_value = 255
         return 'Failed, option mismatch'
     if api_option == module_option:
@@ -79,7 +117,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
     return "Failed, unknown reason"
 
 
-def test_completeness(collection_import, request, admin_user):
+def test_completeness(collection_import, request, admin_user, job_template):
     option_comparison = {}
     # Load a list of existing module files from disk
     base_folder = os.path.abspath(
@@ -89,7 +127,7 @@ def test_completeness(collection_import, request, admin_user):
     for root, dirs, files in os.walk(module_directory):
         if root == module_directory:
             for filename in files:
-                if re.match('^tower_.*\.py$', filename):
+                if re.match('^tower_.*.py$', filename):
                     module_name = filename[:-3]
                     option_comparison[module_name] = {
                         'endpoint': 'N/A',
