@@ -2338,10 +2338,14 @@ class RunProjectUpdate(BaseTask):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
+        project_path = instance.project.get_project_path(check_if_exists=False)
+        if not os.path.exists(project_path):
+            os.makedirs(project_path)  # used as container mount
+
         self.acquire_lock(instance)
+
         self.original_branch = None
         if instance.scm_type == 'git' and instance.branch_override:
-            project_path = instance.project.get_project_path(check_if_exists=False)
             if os.path.exists(project_path):
                 git_repo = git.Repo(project_path)
                 if git_repo.head.is_detached:
@@ -2493,12 +2497,14 @@ class RunProjectUpdate(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def build_execution_environment_params(self, instance):
-        project_path = os.path.dirname(instance.get_project_path(check_if_exists=False))
+        project_path = instance.get_project_path(check_if_exists=False)
+        cache_path = instance.get_cache_path()
         execution_environment_params = {
             "process_isolation": True,
             "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
             "container_volume_mounts": [
                 f"{project_path}:{project_path}:Z",
+                f"{cache_path}:{cache_path}:Z",
             ]
 
         }
