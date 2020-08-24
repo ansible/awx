@@ -272,20 +272,28 @@ EXAMPLES = '''
 from ..module_utils.tower_api import TowerModule
 
 KIND_CHOICES = {
-    'ssh': 'Machine',
-    'vault': 'Vault',
-    'net': 'Network',
-    'scm': 'Source Control',
-    'aws': 'Amazon Web Services',
-    'vmware': 'VMware vCenter',
-    'satellite6': 'Red Hat Satellite 6',
-    'cloudforms': 'Red Hat CloudForms',
+    'aws':'Amazon Web Services',
+    'tower': 'Ansible Tower',
     'gce': 'Google Compute Engine',
     'azure_rm': 'Microsoft Azure Resource Manager',
     'openstack': 'OpenStack',
+    'cloudforms': 'Red Hat CloudForms',
+    'satellite': 'Red Hat Satellite 6',
     'rhv': 'Red Hat Virtualization',
+    'vmware': 'VMware vCenter',
+    'aim': 'CyberArk AIM Central Credential Provider Lookup',
+    'conjur': 'CyberArk Conjur Secret Lookup',
+    'hashivault_kv': 'HashiCorp Vault Secret Lookup',
+    'hashivault_ssh': 'HashiCorp Vault Signed SSH',
+    'azure_kv': 'Microsoft Azure Key Vault',
     'insights': 'Insights',
-    'tower': 'Ansible Tower',
+    'kubernetes_bearer_token': 'OpenShift or Kubernetes API Bearer Token',
+    'net': 'Network',
+    'scm': 'Source Control',
+    'ssh': 'Machine',
+    'github_token': 'GitHub Personal Access Token',
+    'gitlab_token': 'GitLab Personal Access Token',
+    'vault': 'Vault',
 }
 
 
