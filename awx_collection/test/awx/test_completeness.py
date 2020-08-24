@@ -22,13 +22,13 @@ no_endpoint_for_module = [
 ]
 
 # Global module parameters we can ignore
-ignore_parameters = [ 'state', 'new_name' ]
+ignore_parameters = ['state', 'new_name']
 
 # Some modules take additional parameters that do not appear in the API
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
     'tower_credential': [
-        'authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client', 
+        'authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client',
         'domain', 'host', 'kind', 'password', 'project', 'secret', 'security_token', 'ssh_key_data',
         'ssh_key_unlock', 'subscription', 'tenant', 'username', 'vault_id', 'vault_password',
     ],
@@ -47,6 +47,7 @@ needs_development = [
 # -----------------------------------------------------------------------------------------------------------
 
 return_value = 0
+
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     global return_value
@@ -77,6 +78,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
     return_value = 255
     return "Failed, unknown reason"
 
+
 def test_completeness(collection_import, request, admin_user):
     option_comparison = {}
     # Load a list of existing module files from disk
@@ -96,7 +98,10 @@ def test_completeness(collection_import, request, admin_user):
                         'module_name': module_name,
                     }
                     resource_module = collection_import('plugins.modules.{0}'.format(module_name))
-                    option_comparison[module_name]['module_options'] = yaml.load(resource_module.DOCUMENTATION, Loader=yaml.SafeLoader)['options']
+                    option_comparison[module_name]['module_options'] = yaml.load(
+                        resource_module.DOCUMENTATION,
+                        Loader=yaml.SafeLoader
+                    )['options']
 
     endpoint_response = _request('get')(
         url='/api/v2/',
@@ -124,7 +129,7 @@ def test_completeness(collection_import, request, admin_user):
         option_comparison[module_name]['endpoint'] = endpoint_url
         option_comparison[module_name]['api_options'] = {}
 
-        # Get out the endpoint, load and parse its options page 
+        # Get out the endpoint, load and parse its options page
         options_response = _request('options')(
             url=endpoint_url,
             user=admin_user,
@@ -148,48 +153,54 @@ def test_completeness(collection_import, request, admin_user):
             if len(option) > longest_option_name:
                 longest_option_name = len(option)
 
-
     # Print out some headers
     print(
-        "End Point", " "*(longest_endpoint-len("End Point")),
-        " | Module Name", " "*(longest_module_name-len("Module Name")),
-        " | Option", " "*(longest_option_name-len("Option")),
+        "End Point", " " * (longest_endpoint - len("End Point")),
+        " | Module Name", " " * (longest_module_name - len("Module Name")),
+        " | Option", " " * (longest_option_name - len("Option")),
         " | API | Module | State",
         sep=""
     )
-    print("-"*longest_endpoint, "-"*longest_module_name, "-"*longest_option_name, "---", "------", "---------------------------------------------", sep="-|-")
+    print(
+        "-" * longest_endpoint,
+        "-" * longest_module_name,
+        "-" * longest_option_name,
+        "---",
+        "------",
+        "---------------------------------------------",
+        sep="-|-"
+    )
 
     # Print out all of our data
     for module in sorted(option_comparison):
-        all_param_names = list(set(option_comparison[module]['api_options']) | set(option_comparison[module]['module_options']))
+        module_data = option_comparison[module]
+        all_param_names = list(set(module_data['api_options']) | set(module_data['module_options']))
         for parameter in sorted(all_param_names):
-    	    print(
-                option_comparison[module]['endpoint'], " "*(longest_endpoint - len(option_comparison[module]['endpoint'])), " | ",
-                option_comparison[module]['module_name'], " "*(longest_module_name - len(option_comparison[module]['module_name'])), " | ",
-                parameter, " "*(longest_option_name - len(parameter)), " | ",
-                " X " if (parameter in option_comparison[module]['api_options']) else '   ', " | ",
-                '  X   ' if (parameter in option_comparison[module]['module_options']) else '      ', " | ",
+            print(
+                module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
+                module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
+                parameter, " " * (longest_option_name - len(parameter)), " | ",
+                " X " if (parameter in module_data['api_options']) else '   ', " | ",
+                '  X   ' if (parameter in module_data['module_options']) else '      ', " | ",
                 determine_state(
                     module,
-                    option_comparison[module]['endpoint'],
-                    option_comparison[module]['module_name'],
+                    module_data['endpoint'],
+                    module_data['module_name'],
                     parameter,
-                    'X' if (parameter in option_comparison[module]['api_options']) else '',
-                    'X' if (parameter in option_comparison[module]['module_options']) else '',
+                    'X' if (parameter in module_data['api_options']) else '',
+                    'X' if (parameter in module_data['module_options']) else '',
                 ),
                 sep=""
             )
         # This handles cases were we got no params from the options page nor from the modules
         if len(all_param_names) == 0:
             print(
-                option_comparison[module]['endpoint'], " "*(longest_endpoint - len(option_comparison[module]['endpoint'])), " | ",
-                option_comparison[module]['module_name'], " "*(longest_module_name - len(option_comparison[module]['module_name'])), " | ",
-                "N/A", " "*(longest_option_name - len("N/A")), " | ",
+                module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
+                module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
+                "N/A", " " * (longest_option_name - len("N/A")), " | ",
                 '   ', " | ",
                 '      ', " | ",
-                determine_state(
-                    module, option_comparison[module]['endpoint'], option_comparison[module]['module_name'], 'N/A', '', ''
-                ),
+                determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', '', ''),
                 sep=""
             )
 
