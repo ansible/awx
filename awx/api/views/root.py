@@ -306,7 +306,7 @@ class ApiV2ConfigView(APIView):
         
         try:
             from awx.main.utils.common import get_licenser
-            # license_data_validated = get_licenser(**license_data).validate()
+            # Validate entitlement cert and get subscription metadata
             license_data_validated = get_licenser().validate()
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
