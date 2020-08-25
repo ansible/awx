@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+import pytest
 
 from awx.main.tests.functional.conftest import _request
 import yaml
@@ -91,7 +94,7 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
         return "Failed (non-blocking), module needs development"
     if module_id in read_only_endpoint:
         if module == 'N/A':
-            # There may be some cases where a read only endpoint has a module 
+            # There may be some cases where a read only endpoint has a module
             return "OK, this endpoint is read-only and should not have a module"
         elif module_id not in read_only_endpoints_with_modules:
             return_value = 255
@@ -154,12 +157,12 @@ def test_completeness(collection_import, request, admin_user, job_template):
     )
     for endpoint in endpoint_response.data.keys():
         # Module names are singular and endpoints are plural so we need to convert to singular
-        singular_endpoint = '{}'.format(endpoint)
+        singular_endpoint = '{0}'.format(endpoint)
         if singular_endpoint.endswith('ies'):
             singular_endpoint = singular_endpoint[:-3]
         if singular_endpoint != 'settings' and singular_endpoint.endswith('s'):
             singular_endpoint = singular_endpoint[:-1]
-        module_name = 'tower_{}'.format(singular_endpoint)
+        module_name = 'tower_{0}'.format(singular_endpoint)
 
         endpoint_url = endpoint_response.data.get(endpoint)
 
