@@ -134,7 +134,8 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, Retri
 
         # Do not allow changes to an Inventory kind.
         if kind is not None and obj.kind != kind:
-            return self.http_method_not_allowed(request, *args, **kwargs)
+            return Response(dict(error=_('You cannot turn a regular inventory into a "smart" inventory.')),
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(InventoryDetail, self).update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
