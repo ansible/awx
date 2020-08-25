@@ -4,6 +4,7 @@ __metaclass__ = type
 import pytest
 
 from awx.main.tests.functional.conftest import _request
+from ansible.module_utils.six import PY2, string_types
 import yaml
 import os
 import re
@@ -31,43 +32,22 @@ no_endpoint_for_module = [
 # Global module parameters we can ignore
 ignore_parameters = [
     'state', 'new_name',
-    # The way we implemented notifications was to add these fileds to modules which can notify
-    'notification_templates_approvals',
-    'notification_templates_error',
-    'notification_templates_started',
-    'notification_templates_success',
 ]
 
 # Some modules take additional parameters that do not appear in the API
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
-    # The credential module used to take a lot of parameters which are now combined into "inputs"
-    'tower_credential': [
-        'authorize', 'authorize_password', 'become_method', 'become_password', 'become_username', 'client',
-        'domain', 'host', 'kind', 'password', 'project', 'secret', 'security_token', 'ssh_key_data',
-        'ssh_key_unlock', 'subscription', 'tenant', 'username', 'vault_id', 'vault_password',
-    ],
     # The wait is for wheter or not to wait for a projec update on change
     'tower_project': ['wait'],
     # Existing_token and id are for working with an exisitng tokens
     'tower_token': ['existing_token', 'existing_token_id'],
-    # Children and hosts are how tower_group deals with associations
-    'tower_group': ['children', 'hosts'],
-    # Credential and Vault Credential are a legacy fields for old Towers
-    # Credentials/labels/survey spec is now how we handle associations
+    # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
-    'tower_job_template': ['credential', 'vault_credential', 'credentials', 'labels', 'survey_spec', 'organization'],
-    # Always_nodes, failure_nodes, success_nodes, credentials is how we handle associations
+    'tower_job_template': ['survey_spec', 'organization'],
     # Organization is how we looking job templates
-    'tower_workflow_job_template_node': ['always_nodes', 'failure_nodes', 'success_nodes', 'credentials', 'organization'],
+    'tower_workflow_job_template_node': ['organization'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey'],
-    # These fields get wrapped into notification_configuration
-    'tower_notification_template': [
-        'account_sid', 'account_token', 'channels', 'client_name', 'color', 'from_number', 'headers', 'host',
-        'message_from', 'nickname', 'notify', 'password', 'port', 'recipients', 'sender', 'server',
-        'service_key', 'subdomain', 'targets', 'to_numbers', 'token', 'url', 'use_ssl', 'use_tls', 'username',
-    ]
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
@@ -87,43 +67,80 @@ return_value = 0
 read_only_endpoint = []
 
 
-def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
+def cause_error(msg):
     global return_value
+    return_value = 255
+    return(msg)
+
+def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     # This is a hierarchical list of things that are ok/failures based on conditions
+
+    # If we know this module needs develpment this is a non-blocking failure
     if module_id in needs_development and module == 'N/A':
         return "Failed (non-blocking), module needs development"
+
+    # If the module is a read only endpoint:
+    #    If it has no module on disk that is ok.
+    #    If it has a module on disk but its listed in read_only_endpoints_with_modules that is ok
+    #    Else we have a module for a read only endpoint that should not exit
     if module_id in read_only_endpoint:
         if module == 'N/A':
             # There may be some cases where a read only endpoint has a module
             return "OK, this endpoint is read-only and should not have a module"
-        elif module_id not in read_only_endpoints_with_modules:
-            return_value = 255
-            return "Failed, read-only endpoint should not have an associated module"
-        else:
+        elif module_id in read_only_endpoints_with_modules:
             return "OK, module params can not be checked to read-only"
+        else:
+            return cause_error("Failed, read-only endpoint should not have an associated module")
+
+    # If the endpoint is listed as not needing a module and we don't have one we are ok
     if module_id in no_module_for_endpoint and module == 'N/A':
         return "OK, this endpoint should not have a module"
+
+    # If module is listed as not needing an endpoint and we don't have one we are ok
     if module_id in no_endpoint_for_module and endpoint == 'N/A':
         return "OK, this module does not require an endpoint"
+
+    # All of the end/point module conditionals are done so if we don't have a module or endpoint we have a problem
     if module == 'N/A':
-        return_value = 255
-        return 'Failed, missing module'
+        return cause_error('Failed, missing module')
     if endpoint == 'N/A':
-        return_value = 255
-        return 'Failed, why does this module have no endpoint'
+        return cause_error('Failed, why does this module have no endpoint')
+
+    # Now perform parameter checks
+
+    # First, if the patemrer is in the ignore_parameters list we are ok
     if parameter in ignore_parameters:
         return "OK, globally ignored parameter"
-    if api_option == '' and parameter in no_api_parameter_ok.get(module, {}):
-        return 'OK, no api parameter is ok'
-    if api_option != module_option:
-        if module_id in needs_param_development and parameter in needs_param_development[module_id]:
+
+    # If both the api option and the module option are both either objects or none
+    if (api_option == None) ^ (module_option == None):
+        # If the API option is node and the parameter is in the no_api_parameter list we are ok
+        if api_option == None and parameter in no_api_parameter_ok.get(module, {}):
+            return 'OK, no api parameter is ok'
+        # If we know this parameter needs development and 
+        if module_option == None and parameter in needs_param_development.get(module_id, {}):
             return "Failed (non-blocking), parameter needs development"
-        return_value = 255
-        return 'Failed, option mismatch'
-    if api_option == module_option:
-        return 'OK'
-    return_value = 255
-    return "Failed, unknown reason"
+        # Check for deprecated in the node, if its deprecated and has no api option we are ok, otherise we have a problem
+        if module_option and module_option.get('description'):
+            description = ''
+            if isinstance(module_option.get('description'), string_types):
+                description = module_option.get('description')
+            else:
+                description = " ".join(module_option.get('description'))
+
+            if 'deprecated' in description.lower():
+                if api_option == None:
+                    return 'OK, depricated module option'
+                else:
+                    return cause_error('Failed, module marks option as deprecated but option still exists in API')
+        # If we don't have a cooresponding API option but we are a list then we are likely a relation
+        if not api_option and module_option and module_option.get('type', 'str') == 'list':
+            return "OK, Field appears to be relation"
+            # TODO, at some point try and check the onbject model to confirm its actually a relation
+        return cause_error('Failed, option mismatch')
+
+    # We made it through all of the checks so we are ok
+    return 'OK'
 
 
 def test_completeness(collection_import, request, admin_user, job_template):
@@ -232,8 +249,8 @@ def test_completeness(collection_import, request, admin_user, job_template):
                     module_data['endpoint'],
                     module_data['module_name'],
                     parameter,
-                    'X' if (parameter in module_data['api_options']) else '',
-                    'X' if (parameter in module_data['module_options']) else '',
+                    module_data['api_options'][parameter] if (parameter in module_data['api_options']) else None,
+                    module_data['module_options'][parameter] if (parameter in module_data['module_options']) else None,
                 ),
             ]))
         # This handles cases were we got no params from the options page nor from the modules
@@ -244,7 +261,7 @@ def test_completeness(collection_import, request, admin_user, job_template):
                 "N/A", " " * (longest_option_name - len("N/A")), " | ",
                 '   ', " | ",
                 '      ', " | ",
-                determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', '', ''),
+                determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', None, None),
             ]))
 
     if return_value != 0:
