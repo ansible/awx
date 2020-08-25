@@ -8,15 +8,20 @@ import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
 import ErrorDetail from '../ErrorDetail';
 import PaginatedDataList, { ToolbarDeleteButton } from '../PaginatedDataList';
-import useRequest, { useDeleteItems } from '../../util/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import JobListItem from './JobListItem';
+import JobListCancelButton from './JobListCancelButton';
 import useWsJobs from './useWsJobs';
 import {
   AdHocCommandsAPI,
   InventoryUpdatesAPI,
   JobsAPI,
   ProjectUpdatesAPI,
+  RelatedAPI,
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
@@ -88,6 +93,30 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
   const jobs = useWsJobs(results, fetchJobsById, QS_CONFIG);
 
   const isAllSelected = selected.length === jobs.length && selected.length > 0;
+
+  const {
+    error: cancelJobsError,
+    isLoading: isCancelLoading,
+    request: cancelJobs,
+  } = useRequest(
+    useCallback(async () => {
+      return Promise.all(
+        selected.map(job => {
+          if (['new', 'pending', 'waiting', 'running'].includes(job.status)) {
+            return RelatedAPI.post(job.related.cancel);
+          }
+          return Promise.resolve();
+        })
+      );
+    }, [selected]),
+    {}
+  );
+
+  const {
+    error: cancelError,
+    dismissError: dismissCancelError,
+  } = useDismissableError(cancelJobsError);
+
   const {
     isLoading: isDeleteLoading,
     deleteItems: deleteJobs,
@@ -123,6 +152,11 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
     }
   );
 
+  const handleJobCancel = async () => {
+    await cancelJobs();
+    setSelected([]);
+  };
+
   const handleJobDelete = async () => {
     await deleteJobs();
     setSelected([]);
@@ -145,7 +179,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       <Card>
         <PaginatedDataList
           contentError={contentError}
-          hasContentLoading={isLoading || isDeleteLoading}
+          hasContentLoading={isLoading || isDeleteLoading || isCancelLoading}
           items={jobs}
           itemCount={count}
           pluralizedItemName={i18n._(t`Jobs`)}
@@ -242,6 +276,10 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
                   itemsToDelete={selected}
                   pluralizedItemName="Jobs"
                 />,
+                <JobListCancelButton
+                  onCancel={handleJobCancel}
+                  jobsToCancel={selected}
+                />,
               ]}
             />
           )}
@@ -256,15 +294,28 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
           )}
         />
       </Card>
-      <AlertModal
-        isOpen={deletionError}
-        variant="error"
-        title={i18n._(t`Error!`)}
-        onClose={clearDeletionError}
-      >
-        {i18n._(t`Failed to delete one or more jobs.`)}
-        <ErrorDetail error={deletionError} />
-      </AlertModal>
+      {deletionError && (
+        <AlertModal
+          isOpen
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={clearDeletionError}
+        >
+          {i18n._(t`Failed to delete one or more jobs.`)}
+          <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+      {cancelError && (
+        <AlertModal
+          isOpen
+          variant="error"
+          title={i18n._(t`Error!`)}
+          onClose={dismissCancelError}
+        >
+          {i18n._(t`Failed to cancel one or more jobs.`)}
+          <ErrorDetail error={cancelError} />
+        </AlertModal>
+      )}
     </>
   );
 }

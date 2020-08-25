@@ -9,6 +9,7 @@ import {
   InventoryUpdatesAPI,
   JobsAPI,
   ProjectUpdatesAPI,
+  RelatedAPI,
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
@@ -23,6 +24,10 @@ const mockResults = [
     url: '/api/v2/project_updates/1',
     name: 'job 1',
     type: 'project_update',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/project_updates/1/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -35,6 +40,10 @@ const mockResults = [
     url: '/api/v2/jobs/2',
     name: 'job 2',
     type: 'job',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/jobs/2/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -47,6 +56,10 @@ const mockResults = [
     url: '/api/v2/inventory_updates/3',
     name: 'job 3',
     type: 'inventory_update',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/inventory_updates/3/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -59,6 +72,10 @@ const mockResults = [
     url: '/api/v2/workflow_jobs/4',
     name: 'job 4',
     type: 'workflow_job',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/workflow_jobs/4/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -71,6 +88,10 @@ const mockResults = [
     url: '/api/v2/system_jobs/5',
     name: 'job 5',
     type: 'system_job',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/system_jobs/5/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -83,6 +104,10 @@ const mockResults = [
     url: '/api/v2/ad_hoc_commands/6',
     name: 'job 6',
     type: 'ad_hoc_command',
+    status: 'running',
+    related: {
+      cancel: '/api/v2/ad_hoc_commands/6/cancel',
+    },
     summary_fields: {
       user_capabilities: {
         delete: true,
@@ -265,6 +290,83 @@ describe('<JobList />', () => {
 
     await act(async () => {
       wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
+    });
+    wrapper.update();
+    await waitForElement(
+      wrapper,
+      'Modal',
+      el => el.props().isOpen === true && el.props().title === 'Error!'
+    );
+  });
+
+  test('should send all corresponding delete API requests', async () => {
+    RelatedAPI.post = jest.fn();
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+
+    act(() => {
+      wrapper.find('DataListToolbar').invoke('onSelectAll')(true);
+    });
+    wrapper.update();
+    wrapper.find('JobListItem');
+    expect(
+      wrapper.find('JobListCancelButton').prop('jobsToCancel')
+    ).toHaveLength(6);
+
+    await act(async () => {
+      wrapper.find('JobListCancelButton').invoke('onCancel')();
+    });
+    expect(RelatedAPI.post).toHaveBeenCalledTimes(6);
+    expect(RelatedAPI.post).toHaveBeenCalledWith(
+      '/api/v2/project_updates/1/cancel'
+    );
+    expect(RelatedAPI.post).toHaveBeenCalledWith('/api/v2/jobs/2/cancel');
+    expect(RelatedAPI.post).toHaveBeenCalledWith(
+      '/api/v2/inventory_updates/3/cancel'
+    );
+    expect(RelatedAPI.post).toHaveBeenCalledWith(
+      '/api/v2/workflow_jobs/4/cancel'
+    );
+    expect(RelatedAPI.post).toHaveBeenCalledWith(
+      '/api/v2/system_jobs/5/cancel'
+    );
+    expect(RelatedAPI.post).toHaveBeenCalledWith(
+      '/api/v2/ad_hoc_commands/6/cancel'
+    );
+
+    jest.restoreAllMocks();
+  });
+
+  test('error is shown when job not successfully cancelled', async () => {
+    RelatedAPI.post.mockImplementation(() => {
+      throw new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/jobs/2/cancel',
+          },
+          data: 'An error occurred',
+        },
+      });
+    });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<JobList />);
+    });
+    await waitForLoaded(wrapper);
+    await act(async () => {
+      wrapper
+        .find('JobListItem')
+        .at(1)
+        .invoke('onSelect')();
+    });
+    wrapper.update();
+
+    await act(async () => {
+      wrapper.find('JobListCancelButton').invoke('onCancel')();
     });
     wrapper.update();
     await waitForElement(
