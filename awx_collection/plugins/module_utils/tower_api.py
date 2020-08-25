@@ -127,24 +127,14 @@ class TowerAPIModule(TowerModule):
         if response['json']['count'] == 1:
             return response['json']['results'][0]
         elif response['json']['count'] > 1:
-            object_to_return = None
             for tower_object in response['json']['results']:
-                # Name takes priority, so we match on name first
-                # If we already have an object to return and it has the right name, we need to fail
-                if object_to_return and object_to_return['name'] == name_or_id:
-                    self.fail_json(msg="The requested name or id was ambiguous and resulted in too many items")
-                # If we found an object ID with this name (which has to be unique) and we don't already have
-                # something to return, select this object for now
-                elif tower_object['id'] == name_or_id and not object_to_return:
-                    object_to_return = tower_object
-                # Otherwise this is the first named object we found, so record that as what to return
-                else:
-                    object_to_return = tower_object
-                return object_to_return
+                # ID takes priority, so we match on that first
+                if str(tower_object['id']) == name_or_id:
+                    return tower_object
+            # We didn't match on an ID but we found more than 1 object, therefore the results are ambiguous
+            self.fail_json(msg="The requested name or id was ambiguous and resulted in too many items")
         elif response['json']['count'] == 0:
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
-        else:
-            self.fail_json(msg="Found too many names {0} at endpoint {1}, try using an ID instead of a name".format(name_or_id, endpoint))
 
     def resolve_name_to_id(self, endpoint, name_or_id):
         return self.get_one_by_name_or_id(endpoint, name_or_id)['id']
