@@ -2,7 +2,7 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
-## 14.1.0 (TBD)
+## 14.1.0 (Aug 25, 2020)
 - AWX images can now be built on ARM64 - https://github.com/ansible/awx/pull/7607
 - Added the Remote Archive SCM Type to support using immutable artifacts and releases (such as tarballs and zip files) as projects - https://github.com/ansible/awx/issues/7954
 - Deprecated official support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
