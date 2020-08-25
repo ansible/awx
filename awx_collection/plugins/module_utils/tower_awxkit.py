@@ -20,7 +20,7 @@ class TowerAWXKitModule(TowerModule):
     def __init__(self, argument_spec, **kwargs):
         kwargs['supports_check_mode'] = False
 
-        super().__init__(argument_spec=argument_spec, **kwargs)
+        super(TowerAWXKitModule, self).__init__(argument_spec=argument_spec, **kwargs)  # noqa
 
         # Die if we don't have AWX_KIT installed
         if not HAS_AWX_KIT:
