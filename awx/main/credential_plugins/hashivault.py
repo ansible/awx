@@ -40,6 +40,12 @@ base_inputs = {
         'multiline': False,
         'secret': True,
         'help_text': _('The Secret ID for AppRole Authentication')
+    }, {
+        'id': 'auth_path',
+        'label': _('Path to Auth'),
+        'type': 'string',
+        'multiline': False,
+        'help_text': _('The path where the Authentication method is mounted e.g, approle')
     }
     ],
     'metadata': [{
@@ -47,11 +53,6 @@ base_inputs = {
         'label': _('Path to Secret'),
         'type': 'string',
         'help_text': _('The path to the secret stored in the secret backend e.g, /some/secret/')
-    },{
-        'id': 'auth_path',
-        'label': _('Path to Auth'),
-        'type': 'string',
-        'help_text': _('The path where the Authentication method is mounted e.g, approle')
     }],
     'required': ['url', 'secret_path'],
 }
