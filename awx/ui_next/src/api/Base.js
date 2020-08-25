@@ -1,17 +1,7 @@
-import axios from 'axios';
-
-import { encodeQueryString } from '../util/qs';
-
-const defaultHttp = axios.create({
-  xsrfCookieName: 'csrftoken',
-  xsrfHeaderName: 'X-CSRFToken',
-  paramsSerializer(params) {
-    return encodeQueryString(params);
-  },
-});
+import AxiosHTTP from './AxiosHTTP';
 
 class Base {
-  constructor(http = defaultHttp, baseURL) {
+  constructor(http = AxiosHTTP, baseURL) {
     this.http = http;
     this.baseUrl = baseURL;
   }
