@@ -91,6 +91,15 @@ function JobTemplateForm({
   const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
   const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
 
+  const [, webhookServiceMeta, webhookServiceHelpers] = useField(
+    'webhook_service'
+  );
+  const [, webhookUrlMeta, webhookUrlHelpers] = useField('webhook_url');
+  const [, webhookKeyMeta, webhookKeyHelpers] = useField('webhook_key');
+  const [, webhookCredentialMeta, webhookCredentialHelpers] = useField(
+    'webhook_credential'
+  );
+
   const {
     request: fetchProject,
     error: projectContentError,
@@ -125,6 +134,21 @@ function JobTemplateForm({
   useEffect(() => {
     loadRelatedInstanceGroups();
   }, [loadRelatedInstanceGroups]);
+
+  useEffect(() => {
+    if (enableWebhooks) {
+      webhookServiceHelpers.setValue(webhookServiceMeta.initialValue);
+      webhookUrlHelpers.setValue(webhookUrlMeta.initialValue);
+      webhookKeyHelpers.setValue(webhookKeyMeta.initialValue);
+      webhookCredentialHelpers.setValue(webhookCredentialMeta.initialValue);
+    } else {
+      webhookServiceHelpers.setValue('');
+      webhookUrlHelpers.setValue('');
+      webhookKeyHelpers.setValue('');
+      webhookCredentialHelpers.setValue(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableWebhooks]);
 
   const handleProjectValidation = project => {
     if (!project && projectMeta.touched) {
