@@ -11,6 +11,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Updated the AWX CLI to export labels associated with Workflow Job Templates - https://github.com/ansible/awx/pull/7847
 - Updated to the latest python-ldap to address a bug - https://github.com/ansible/awx/issues/7868
 - Upgraded git-python to fix a bug that caused workflows to sometimes fail - https://github.com/ansible/awx/issues/6119
+- Worked around a bug in the channels_redis library that slowly causes Daphne processes to leak memory over time - https://github.com/django/channels_redis/issues/212
 - Fixed a bug in the AWX CLI that prevented Workflow nodes from importing properly - https://github.com/ansible/awx/issues/7793
 - Fixed a bug in the awx.awx collection release process that templated the wrong version - https://github.com/ansible/awx/issues/7870
 - Fixed a bug that caused errors rendering stdout that contained UTF-16 surrogate pairs - https://github.com/ansible/awx/pull/7918
