@@ -201,29 +201,27 @@ def test_completeness(collection_import, request, admin_user, job_template):
                 longest_option_name = len(option)
 
     # Print out some headers
-    print(
+    print("".join([
         "End Point", " " * (longest_endpoint - len("End Point")),
         " | Module Name", " " * (longest_module_name - len("Module Name")),
         " | Option", " " * (longest_option_name - len("Option")),
         " | API | Module | State",
-        sep=""
-    )
-    print(
+    ]))
+    print("-|-".join([
         "-" * longest_endpoint,
         "-" * longest_module_name,
         "-" * longest_option_name,
         "---",
         "------",
         "---------------------------------------------",
-        sep="-|-"
-    )
+    ]))
 
     # Print out all of our data
     for module in sorted(option_comparison):
         module_data = option_comparison[module]
         all_param_names = list(set(module_data['api_options']) | set(module_data['module_options']))
         for parameter in sorted(all_param_names):
-            print(
+            print("".join([
                 module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
                 module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
                 parameter, " " * (longest_option_name - len(parameter)), " | ",
@@ -237,19 +235,17 @@ def test_completeness(collection_import, request, admin_user, job_template):
                     'X' if (parameter in module_data['api_options']) else '',
                     'X' if (parameter in module_data['module_options']) else '',
                 ),
-                sep=""
-            )
+            ]))
         # This handles cases were we got no params from the options page nor from the modules
         if len(all_param_names) == 0:
-            print(
+            print("".join([
                 module_data['endpoint'], " " * (longest_endpoint - len(module_data['endpoint'])), " | ",
                 module_data['module_name'], " " * (longest_module_name - len(module_data['module_name'])), " | ",
                 "N/A", " " * (longest_option_name - len("N/A")), " | ",
                 '   ', " | ",
                 '      ', " | ",
                 determine_state(module, module_data['endpoint'], module_data['module_name'], 'N/A', '', ''),
-                sep=""
-            )
+            ]))
 
     if return_value != 0:
         raise Exception("One or more failures caused issues")
