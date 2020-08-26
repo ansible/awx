@@ -6,6 +6,7 @@ import pytest
 from awx.main.models import Inventory, Credential
 from awx.main.tests.functional.conftest import insights_credential, credentialtype_insights
 
+
 @pytest.mark.django_db
 def test_inventory_create(run_module, admin_user, organization, insights_credential):
     # Create an insights credential
@@ -32,6 +33,7 @@ def test_inventory_create(run_module, admin_user, organization, insights_credent
     }
 
     assert inv.organization_id == organization.id
+
 
 @pytest.mark.django_db
 def test_invalid_smart_inventory_create(run_module, admin_user, organization):
