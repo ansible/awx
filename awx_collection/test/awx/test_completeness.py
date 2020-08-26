@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 import pytest
-
 from awx.main.tests.functional.conftest import _request
 from ansible.module_utils.six import PY2, string_types
 import yaml
@@ -13,9 +12,9 @@ import re
 # -----------------------------------------------------------------------------------------------------------
 
 # Read-only endpoints are dynamically created by an options page with no POST section.
-# Noramlly a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
+# Normally a read-only endpoint should not have a module (i.e. /api/v2/me) but sometimes we reuse a name
 # For example, we have a tower_role module but /api/v2/roles is a read only endpoint.
-# Rhis list indicates which read-only endpoints have associated modules with them.
+# This list indicates which read-only endpoints have associated modules with them.
 read_only_endpoints_with_modules = ['tower_settings', 'tower_role']
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
@@ -37,9 +36,9 @@ ignore_parameters = [
 # Some modules take additional parameters that do not appear in the API
 # Add the module name as the key with the value being the list of params to ignore
 no_api_parameter_ok = {
-    # The wait is for wheter or not to wait for a projec update on change
+    # The wait is for whether or not to wait for a project update on change
     'tower_project': ['wait'],
-    # Existing_token and id are for working with an exisitng tokens
+    # Existing_token and id are for working with an existing tokens
     'tower_token': ['existing_token', 'existing_token_id'],
     # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
@@ -70,12 +69,13 @@ read_only_endpoint = []
 def cause_error(msg):
     global return_value
     return_value = 255
-    return(msg)
+    return msg
+
 
 def determine_state(module_id, endpoint, module, parameter, api_option, module_option):
     # This is a hierarchical list of things that are ok/failures based on conditions
 
-    # If we know this module needs develpment this is a non-blocking failure
+    # If we know this module needs development this is a non-blocking failure
     if module_id in needs_development and module == 'N/A':
         return "Failed (non-blocking), module needs development"
 
@@ -108,19 +108,19 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
 
     # Now perform parameter checks
 
-    # First, if the patemrer is in the ignore_parameters list we are ok
+    # First, if the parameter is in the ignore_parameters list we are ok
     if parameter in ignore_parameters:
         return "OK, globally ignored parameter"
 
     # If both the api option and the module option are both either objects or none
-    if (api_option == None) ^ (module_option == None):
+    if (api_option is None) ^ (module_option is None):
         # If the API option is node and the parameter is in the no_api_parameter list we are ok
-        if api_option == None and parameter in no_api_parameter_ok.get(module, {}):
+        if api_option is None and parameter in no_api_parameter_ok.get(module, {}):
             return 'OK, no api parameter is ok'
-        # If we know this parameter needs development and 
-        if module_option == None and parameter in needs_param_development.get(module_id, {}):
+        # If we know this parameter needs development and we don't have a module option we are non-blocking
+        if module_option is None and parameter in needs_param_development.get(module_id, {}):
             return "Failed (non-blocking), parameter needs development"
-        # Check for deprecated in the node, if its deprecated and has no api option we are ok, otherise we have a problem
+        # Check for deprecated in the node, if its deprecated and has no api option we are ok, otherwise we have a problem
         if module_option and module_option.get('description'):
             description = ''
             if isinstance(module_option.get('description'), string_types):
@@ -129,14 +129,14 @@ def determine_state(module_id, endpoint, module, parameter, api_option, module_o
                 description = " ".join(module_option.get('description'))
 
             if 'deprecated' in description.lower():
-                if api_option == None:
-                    return 'OK, depricated module option'
+                if api_option is None:
+                    return 'OK, deprecated module option'
                 else:
                     return cause_error('Failed, module marks option as deprecated but option still exists in API')
-        # If we don't have a cooresponding API option but we are a list then we are likely a relation
+        # If we don't have a corresponding API option but we are a list then we are likely a relation
         if not api_option and module_option and module_option.get('type', 'str') == 'list':
             return "OK, Field appears to be relation"
-            # TODO, at some point try and check the onbject model to confirm its actually a relation
+            # TODO, at some point try and check the object model to confirm its actually a relation
         return cause_error('Failed, option mismatch')
 
     # We made it through all of the checks so we are ok
