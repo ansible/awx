@@ -48,7 +48,13 @@ class HostManager(models.Manager):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
-        qs = super(HostManager, self).get_queryset()
+        qs = super(HostManager, self).get_queryset().defer(
+            'last_job__extra_vars',
+            'last_job_host_summary__job__extra_vars',
+            'last_job__artifacts',
+            'last_job_host_summary__job__artifacts',
+        )
+
         if (hasattr(self, 'instance') and
            hasattr(self.instance, 'host_filter') and
            hasattr(self.instance, 'kind')):
