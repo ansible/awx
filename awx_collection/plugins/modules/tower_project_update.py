@@ -21,7 +21,7 @@ description:
 options:
     name:
       description:
-        - The name of the project to update.
+        - The name or id of the project to update.
       required: True
       type: str
       aliases:
@@ -102,14 +102,19 @@ def main():
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
 
-    # Attempt to look up project based on the provided name
-    lookup_data = {'name': name}
-    if organization:
-        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    project = module.get_one('projects', data=lookup_data)
-
-    if project is None:
-        module.fail_json(msg="Unable to find project")
+    # Attempt to look up project based on the provided name or id
+    if name.isnumeric():
+        results = module.get_endpoint('projects', **{'data': {'id': name}})
+        project = results['json']['results'][0]
+        if project is None:
+            module.fail_json(msg="Unable to find project")
+    else:
+        lookup_data = {'name': name}
+        if organization:
+            lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+        project = module.get_one('projects', data=lookup_data)
+        if project is None:
+            module.fail_json(msg="Unable to find project")
 
     # Update the project
     result = module.post_endpoint(project['related']['update'])
