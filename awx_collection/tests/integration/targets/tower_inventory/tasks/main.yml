@@ -16,8 +16,8 @@
         organization: Default
         kind: insights
         inputs:
-            username: joe
-            password: secret
+          username: joe
+          password: secret
         state: present
       register: result
 
