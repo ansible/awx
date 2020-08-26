@@ -14,6 +14,7 @@ IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 VERSION := $(shell cat VERSION)
 PYCURL_SSL_LIBRARY ?= openssl
+CWD := $(shell pwd)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -676,7 +677,7 @@ docker-compose-clean: awx/projects
 
 # Base development image build
 docker-compose-build:
-	ansible localhost -m template -a "src=installer/roles/image_build/templates/Dockerfile.j2 dest=tools/docker-compose/Dockerfile" -e build_dev=True
+	ansible localhost -m template -a "src=$(CWD)/installer/roles/image_build/templates/Dockerfile.j2 dest=$(CWD)/tools/docker-compose/Dockerfile" -e build_dev=True
 	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
