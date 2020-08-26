@@ -214,7 +214,7 @@ function InventoryGroupsList({ i18n }) {
               <Tooltip content={renderTooltip()} position="top" key="delete">
                 <div>
                   <Button
-                    variant="danger"
+                    variant="secondary"
                     aria-label={i18n._(t`Delete`)}
                     onClick={toggleModal}
                     isDisabled={
