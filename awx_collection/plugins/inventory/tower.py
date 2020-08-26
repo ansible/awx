@@ -89,7 +89,7 @@ class InventoryModule(BaseInventoryPlugin):
         if path.endswith('@tower_inventory'):
             self.no_config_file_supplied = True
             return True
-        elif super(InventoryModule, self).verify_file(path):  # noqa
+        elif super(InventoryModule, self).verify_file(path):
             return path.endswith(('tower_inventory.yml', 'tower_inventory.yaml', 'tower.yml', 'tower.yaml'))
         else:
             return False
@@ -98,7 +98,7 @@ class InventoryModule(BaseInventoryPlugin):
         self.display.warning(warning)
 
     def parse(self, inventory, loader, path, cache=True):
-        super(InventoryModule, self).parse(inventory, loader, path)  # noqa
+        super(InventoryModule, self).parse(inventory, loader, path)
         if not self.no_config_file_supplied and os.path.isfile(path):
             self._read_config_data(path)
 
