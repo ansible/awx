@@ -105,32 +105,39 @@ class TowerAPIModule(TowerModule):
 
         return response['json']['results'][0]
 
-    def resolve_name_to_id(self, endpoint, name_or_id):
-        # Try to resolve the object by name
+    def get_one_by_name_or_id(self, endpoint, name_or_id):
         name_field = 'name'
         if endpoint == 'users':
             name_field = 'username'
 
-        response = self.get_endpoint(endpoint, **{'data': {name_field: name_or_id}})
-        if response['status_code'] == 400:
-            self.fail_json(msg="Unable to try and resolve {0} for {1} : {2}".format(endpoint, name_or_id, response['json']['detail']))
+        query_params = {'or__{0}'.format(name_field): name_or_id}
+        try:
+            query_params['or__id'] = int(name_or_id)
+        except ValueError:
+            # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
+            pass
+
+        response = self.get_endpoint(endpoint, **{'data': query_params})
+        if response['status_code'] != 200:
+            self.fail_json(
+                msg="Failed to query endpoint {0} for {1} {2} ({3}), see results".format(endpoint, name_field, name_or_id, response['status_code']),
+                resuls=response
+            )
 
         if response['json']['count'] == 1:
-            return response['json']['results'][0]['id']
+            return response['json']['results'][0]
+        elif response['json']['count'] > 1:
+            for tower_object in response['json']['results']:
+                # ID takes priority, so we match on that first
+                if str(tower_object['id']) == name_or_id:
+                    return tower_object
+            # We didn't match on an ID but we found more than 1 object, therefore the results are ambiguous
+            self.fail_json(msg="The requested name or id was ambiguous and resulted in too many items")
         elif response['json']['count'] == 0:
-            try:
-                int(name_or_id)
-                # If we got 0 items by name, maybe they gave us an ID, let's try looking it up by ID
-                response = self.head_endpoint("{0}/{1}".format(endpoint, name_or_id), **{'return_none_on_404': True})
-                if response is not None:
-                    return name_or_id
-            except ValueError:
-                # If we got a value error than we didn't have an integer so we can just pass and fall down to the fail
-                pass
-
             self.fail_json(msg="The {0} {1} was not found on the Tower server".format(endpoint, name_or_id))
-        else:
-            self.fail_json(msg="Found too many names {0} at endpoint {1} try using an ID instead of a name".format(name_or_id, endpoint))
+
+    def resolve_name_to_id(self, endpoint, name_or_id):
+        return self.get_one_by_name_or_id(endpoint, name_or_id)['id']
 
     def make_request(self, method, endpoint, *args, **kwargs):
         # In case someone is calling us directly; make sure we were given a method, let's not just assume a GET

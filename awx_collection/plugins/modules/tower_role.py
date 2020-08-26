@@ -126,11 +126,10 @@ def main():
     resource_data = {}
     for param in resource_param_keys:
         endpoint = module.param_to_endpoint(param)
-        name_field = 'username' if param == 'user' else 'name'
 
         resource_name = params.get(param)
         if resource_name:
-            resource = module.get_one(endpoint, **{'data': {name_field: resource_name}})
+            resource = module.get_one_by_name_or_id(module.param_to_endpoint(param), resource_name)
             if not resource:
                 module.fail_json(
                     msg='Failed to update role, {0} not found in {1}'.format(param, endpoint),
@@ -170,14 +169,14 @@ def main():
                 if response['status_code'] == 204:
                     module.json_output['changed'] = True
                 else:
-                    module.fail_json(msg="Failed to grant role {0}".format(response['json']['detail']))
+                    module.fail_json(msg="Failed to grant role. {0}".format(response['json'].get('detail', response['json'].get('msg', 'unknown'))))
         else:
             for an_id in list(set(existing_associated_ids) & set(new_association_list)):
                 response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
                 if response['status_code'] == 204:
                     module.json_output['changed'] = True
                 else:
-                    module.fail_json(msg="Failed to revoke role {0}".format(response['json']['detail']))
+                    module.fail_json(msg="Failed to revoke role. {0}".format(response['json'].get('detail', response['json'].get('msg', 'unknown'))))
 
     module.exit_json(**module.json_output)
 
