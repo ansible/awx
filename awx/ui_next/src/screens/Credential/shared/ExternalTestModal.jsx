@@ -92,13 +92,19 @@ function ExternalTestModal({
             variant="small"
             actions={[
               <Button
+                id="run-external-credential-test"
                 key="confirm"
                 variant="primary"
                 onClick={() => handleSubmit()}
               >
                 {i18n._(t`Run`)}
               </Button>,
-              <Button key="cancel" variant="link" onClick={() => onClose()}>
+              <Button
+                id="cancel-external-credential-test"
+                key="cancel"
+                variant="link"
+                onClick={() => onClose()}
+              >
                 {i18n._(t`Cancel`)}
               </Button>,
             ]}
