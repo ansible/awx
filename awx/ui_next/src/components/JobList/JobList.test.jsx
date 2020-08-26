@@ -9,7 +9,6 @@ import {
   InventoryUpdatesAPI,
   JobsAPI,
   ProjectUpdatesAPI,
-  RelatedAPI,
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
@@ -300,7 +299,7 @@ describe('<JobList />', () => {
   });
 
   test('should send all corresponding delete API requests', async () => {
-    RelatedAPI.post = jest.fn();
+    JobsAPI.cancel = jest.fn();
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobList />);
@@ -319,29 +318,20 @@ describe('<JobList />', () => {
     await act(async () => {
       wrapper.find('JobListCancelButton').invoke('onCancel')();
     });
-    expect(RelatedAPI.post).toHaveBeenCalledTimes(6);
-    expect(RelatedAPI.post).toHaveBeenCalledWith(
-      '/api/v2/project_updates/1/cancel'
-    );
-    expect(RelatedAPI.post).toHaveBeenCalledWith('/api/v2/jobs/2/cancel');
-    expect(RelatedAPI.post).toHaveBeenCalledWith(
-      '/api/v2/inventory_updates/3/cancel'
-    );
-    expect(RelatedAPI.post).toHaveBeenCalledWith(
-      '/api/v2/workflow_jobs/4/cancel'
-    );
-    expect(RelatedAPI.post).toHaveBeenCalledWith(
-      '/api/v2/system_jobs/5/cancel'
-    );
-    expect(RelatedAPI.post).toHaveBeenCalledWith(
-      '/api/v2/ad_hoc_commands/6/cancel'
-    );
+
+    expect(JobsAPI.cancel).toHaveBeenCalledTimes(6);
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(1, 'project_update');
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(2, 'job');
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(3, 'inventory_update');
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(4, 'workflow_job');
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(5, 'system_job');
+    expect(JobsAPI.cancel).toHaveBeenCalledWith(6, 'ad_hoc_command');
 
     jest.restoreAllMocks();
   });
 
   test('error is shown when job not successfully cancelled', async () => {
-    RelatedAPI.post.mockImplementation(() => {
+    JobsAPI.cancel.mockImplementation(() => {
       throw new Error({
         response: {
           config: {

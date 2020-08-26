@@ -21,7 +21,6 @@ import {
   InventoryUpdatesAPI,
   JobsAPI,
   ProjectUpdatesAPI,
-  RelatedAPI,
   SystemJobsAPI,
   UnifiedJobsAPI,
   WorkflowJobsAPI,
@@ -103,7 +102,7 @@ function JobList({ i18n, defaultParams, showTypeColumn = false }) {
       return Promise.all(
         selected.map(job => {
           if (['new', 'pending', 'waiting', 'running'].includes(job.status)) {
-            return RelatedAPI.post(job.related.cancel);
+            return JobsAPI.cancel(job.id, job.type);
           }
           return Promise.resolve();
         })
