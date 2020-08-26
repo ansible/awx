@@ -3,20 +3,25 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import Inventory
-
+from awx.main.models import Inventory, Credential
+from awx.main.tests.functional.conftest import insights_credential, credentialtype_insights
 
 @pytest.mark.django_db
-def test_inventory_create(run_module, admin_user, organization):
+def test_inventory_create(run_module, admin_user, organization, insights_credential):
+    # Create an insights credential
+
     result = run_module('tower_inventory', {
         'name': 'foo-inventory',
         'organization': organization.name,
         'variables': {'foo': 'bar', 'another-foo': {'barz': 'bar2'}},
+        'insights_credential': insights_credential.name,
         'state': 'present'
     }, admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
 
     inv = Inventory.objects.get(name='foo-inventory')
     assert inv.variables == '{"foo": "bar", "another-foo": {"barz": "bar2"}}'
+    assert inv.insights_credential.name == insights_credential.name
 
     result.pop('module_args', None)
     result.pop('invocation', None)
@@ -27,7 +32,6 @@ def test_inventory_create(run_module, admin_user, organization):
     }
 
     assert inv.organization_id == organization.id
-
 
 @pytest.mark.django_db
 def test_invalid_smart_inventory_create(run_module, admin_user, organization):

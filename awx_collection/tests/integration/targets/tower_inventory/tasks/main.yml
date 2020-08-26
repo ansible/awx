@@ -1,101 +1,142 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
 - name: Generate names
   set_fact:
-    inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    inv_name1: "AWX-Collection-tests-tower_inventory-inv1-{{ test_id }}"
+    inv_name2: "AWX-Collection-tests-tower_inventory-inv2-{{ test_id }}"
+    cred_name1: "AWX-Collection-tests-tower_inventory-cred1-{{ test_id }}"
 
-- name: Create an Inventory
-  tower_inventory:
-    name: "{{ inv_name1 }}"
-    organization: Default
-    state: present
-  register: result
+- block:
+    - name: Create an Insights Credential
+      tower_credential:
+        name: "{{ cred_name1 }}"
+        organization: Default
+        kind: insights
+        inputs:
+            username: joe
+            password: secret
+        state: present
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Test Inventory module idempotency
-  tower_inventory:
-    name: "{{ inv_name1 }}"
-    organization: Default
-    state: present
-  register: result
+    - name: Create an Inventory
+      tower_inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        insights_credential: "{{ cred_name1 }}"
+        state: present
+      register: result
 
-- assert:
-    that:
-      - "result is not changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Fail Change Regular to Smart
-  tower_inventory:
-    name: "{{ inv_name1 }}"
-    organization: Default
-    kind: smart
-  register: result
-  ignore_errors: true
+    - meta: end_play
 
-- assert:
-    that:
-      - "result is failed"
+    - name: Test Inventory module idempotency
+      tower_inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        insights_credential: "{{ cred_name1 }}"
+        state: present
+      register: result
 
-- name: Create a smart inventory
-  tower_inventory:
-    name: "{{ inv_name2 }}"
-    organization: Default
-    kind: smart
-    host_filter: name=foo
-  register: result
+    - assert:
+        that:
+          - "result is not changed"
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Fail Change Regular to Smart
+      tower_inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        kind: smart
+      register: result
+      ignore_errors: true
 
-- name: Delete a smart inventory
-  tower_inventory:
-    name: "{{ inv_name2 }}"
-    organization: Default
-    kind: smart
-    host_filter: name=foo
-    state: absent
-  register: result
+    - assert:
+        that:
+          - "result is failed"
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Create a smart inventory
+      tower_inventory:
+        name: "{{ inv_name2 }}"
+        organization: Default
+        kind: smart
+        host_filter: name=foo
+      register: result
 
-- name: Delete an Inventory
-  tower_inventory:
-    name: "{{ inv_name1 }}"
-    organization: Default
-    state: absent
-  register: result
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Delete a smart inventory
+      tower_inventory:
+        name: "{{ inv_name2 }}"
+        organization: Default
+        kind: smart
+        host_filter: name=foo
+        state: absent
+      register: result
 
-- name: Delete a Non-Existent Inventory
-  tower_inventory:
-    name: "{{ inv_name1 }}"
-    organization: Default
-    state: absent
-  register: result
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - "result is not changed"
+    - name: Delete an Inventory
+      tower_inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        state: absent
+      register: result
 
-- name: Check module fails with correct msg
-  tower_inventory:
-    name: test-inventory
-    description: Inventory Description
-    organization: test-non-existing-org
-    state: present
-  register: result
-  ignore_errors: true
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - "result is not changed"
-      - "result.msg =='Failed to update inventory, organization not found: The requested object could not be found.'
-        or result.msg =='The organizations test-non-existing-org was not found on the Tower server'"
+    - name: Delete a Non-Existent Inventory
+      tower_inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Check module fails with correct msg
+      tower_inventory:
+        name: test-inventory
+        description: Inventory Description
+        organization: test-non-existing-org
+        state: present
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is not changed"
+          - "result.msg =='Failed to update inventory, organization not found: The requested object could not be found.'
+            or result.msg =='The organizations test-non-existing-org was not found on the Tower server'"
+  always:
+    - name: Delete Inventories
+      tower_inventory:
+        name: "{{ item }}"
+        organization: Default
+        state: absent
+      loop:
+        - "{{ inv_name1 }}"
+        - "{{ inv_name2 }}"
+
+    - name: Delete Insights Credential
+      tower_credential:
+        name: "{{ cred_name1 }}"
+        organization: "Default"
+        kind: insights
+        state: absent
