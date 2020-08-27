@@ -209,7 +209,7 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         env, content = read_content(private_data_dir, envvars, inventory_update)
 
         # Assert inventory plugin inventory file is in private_data_dir
-        inventory_filename = InventorySource.injectors[inventory_update.source]('2.9').filename
+        inventory_filename = InventorySource.injectors[inventory_update.source]().filename
         assert len([True for k in content.keys() if k.endswith(inventory_filename)]) > 0, \
             f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
 
@@ -252,8 +252,7 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
     with mock.patch('awx.main.queue.CallbackQueueDispatcher.dispatch', lambda self, obj: None):
         # Also do not send websocket status updates
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
-            with mock.patch.object(task, 'get_ansible_version', return_value='2.13'):
-                # The point of this test is that we replace run with assertions
-                with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
-                    # so this sets up everything for a run and then yields control over to substitute_run
-                    task.run(inventory_update.pk)
+            # The point of this test is that we replace run with assertions
+            with mock.patch('awx.main.tasks.ansible_runner.interface.run', substitute_run):
+                # so this sets up everything for a run and then yields control over to substitute_run
+                task.run(inventory_update.pk)
