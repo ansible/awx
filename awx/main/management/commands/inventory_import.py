@@ -12,7 +12,6 @@ import sys
 import time
 import traceback
 import shutil
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
