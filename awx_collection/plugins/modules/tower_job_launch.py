@@ -81,6 +81,22 @@ options:
       description:
         - Passwords for credentials which are set to prompt on launch
       type: dict
+    wait:
+      description:
+        - Wait for the job to complete.
+      default: True
+      type: bool
+    interval:
+      description:
+        - The interval to request an update from Tower.
+      required: False
+      default: 1
+      type: float
+    timeout:
+      description:
+        - If waiting for the job to complete this will abort after this
+          amount of seconds
+      type: int
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -145,7 +161,7 @@ def main():
         credential_passwords=dict(type='dict'),
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
-        timeout=dict(default=None, type='int'),        
+        timeout=dict(default=None, type='int'),
     )
 
     # Create a module for ourselves
