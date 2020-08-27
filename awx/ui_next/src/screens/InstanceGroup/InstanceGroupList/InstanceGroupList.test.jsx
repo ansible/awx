@@ -45,7 +45,7 @@ const instanceGroups = {
 
 const options = { data: { actions: { POST: true } } };
 
-describe('<InstanceGroupList', () => {
+describe('<InstanceGroupList />', () => {
   let wrapper;
 
   test('should have data fetched and render 3 rows', async () => {
