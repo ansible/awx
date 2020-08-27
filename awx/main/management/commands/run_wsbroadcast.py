@@ -99,27 +99,29 @@ class Command(BaseCommand):
 
         executor = MigrationExecutor(connection)
         migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
-        registered = False
 
-        if not migrating:
-            try:
-                Instance.objects.me()
-                registered = True
-            except RuntimeError:
-                pass
+        # In containerized deployments, migrations happen in the task container,
+        # and the services running there don't start until migrations are
+        # finished.
+        # *This* service runs in the web container, and it's possible that it can
+        # start _before_ migrations are finished, thus causing issues with the ORM
+        # queries it makes (specifically, conf.settings queries).
+        # This block is meant to serve as a sort of bail-out for the situation
+        # where migrations aren't yet finished (similar to the migration
+        # detection middleware that the uwsgi processes have) or when instance
+        # registration isn't done yet
+        if migrating:
+            logger.info('AWX is currently migrating, retry in 10s...')
+            time.sleep(10)
+            return
 
-        if migrating or not registered:
-            # In containerized deployments, migrations happen in the task container,
-            # and the services running there don't start until migrations are
-            # finished.
-            # *This* service runs in the web container, and it's possible that it can
-            # start _before_ migrations are finished, thus causing issues with the ORM
-            # queries it makes (specifically, conf.settings queries).
-            # This block is meant to serve as a sort of bail-out for the situation
-            # where migrations aren't yet finished (similar to the migration
-            # detection middleware that the uwsgi processes have) or when instance
-            # registration isn't done yet
-            logger.error('AWX is currently installing/upgrading.  Trying again in 5s...')
+        try:
+            me = Instance.objects.me()
+            logger.info('Active instance with hostname {} is registered.'.format(me.hostname))
+        except RuntimeError as e:
+            # the CLUSTER_HOST_ID in the task, and web instance must match and
+            # ensure network connectivity between the task and web instance
+            logger.info('Unable to return currently active instance: {}, retry in 5s...'.format(e))
             time.sleep(5)
             return
 
