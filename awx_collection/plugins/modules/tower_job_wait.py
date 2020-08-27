@@ -55,7 +55,7 @@ EXAMPLES = '''
 - name: Launch a job
   tower_job_launch:
     job_template: "My Job Template"
-    register: job
+  register: job
 
 - name: Wait for job max 120s
   tower_job_wait:
@@ -93,20 +93,6 @@ status:
 
 
 from ..module_utils.tower_api import TowerAPIModule
-import time
-
-
-def check_job(module, job_url):
-    response = module.get_endpoint(job_url)
-    if response['status_code'] != 200:
-        module.fail_json(msg="Unable to read job from Tower {0}: {1}".format(response['status_code'], module.extract_errors_from_response(response)))
-
-    # Since we were successful, extract the fields we want to return
-    for k in ('id', 'status', 'elapsed', 'started', 'finished'):
-        module.json_output[k] = response['json'].get(k)
-
-    # And finally return the payload
-    return response['json']
 
 
 def main():
@@ -153,31 +139,13 @@ def main():
     if job is None:
         module.fail_json(msg='Unable to wait on job {0}; that ID does not exist in Tower.'.format(job_id))
 
-    job_url = job['url']
-
-    # Grab our start time to compare against for the timeout
-    start = time.time()
-
-    # Get the initial job status from Tower, this will exit if there are any issues with the HTTP call
-    result = check_job(module, job_url)
-
-    # Loop while the job is not yet completed
-    while not result['finished']:
-        # If we are past our time out fail with a message
-        if timeout and timeout < time.time() - start:
-            module.json_output['msg'] = "Monitoring aborted due to timeout"
-            module.fail_json(**module.json_output)
-
-        # Put the process to sleep for our interval
-        time.sleep(interval)
-
-        # Check the job again
-        result = check_job(module, job_url)
-
-    # If the job has failed, we want to raise an Exception for that so we get a non-zero response.
-    if result['failed']:
-        module.json_output['msg'] = 'Job with id {0} failed'.format(job_id)
-        module.fail_json(**module.json_output)
+    # Invoke wait function
+    result = module.wait_on_url(
+        object_name=job_id,
+        object_type='job',
+        url=job['url'],
+        timeout=timeout, interval=interval
+    )
 
     module.exit_json(**module.json_output)
 
