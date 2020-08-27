@@ -122,8 +122,7 @@ def source_cred_hashi_secret(organization):
             "url": "https://secret.hash.example.com",
             "token": "myApiKey",
             "role_id": "role",
-            "secret_id": "secret",
-            "auth_path": "/path/to/auth"
+            "secret_id": "secret"
         }
     )
 
@@ -143,7 +142,7 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, so
         source_credential=source_cred_hashi_secret.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
-        metadata={"secret_path": "/path/to/secret", "secret_backend": "backend", "secret_key": "a_key"},
+        metadata={"secret_path": "/path/to/secret", "auth_path": "/path/to/auth", "secret_backend": "backend", "secret_key": "a_key"},
         state='present'
     ), admin_user)
 
@@ -154,6 +153,7 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, so
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['secret_path'] == "/path/to/secret"
+    assert cis.metadata['auth_path'] == "/path/to/auth"
     assert cis.metadata['secret_backend'] == "backend"
     assert cis.metadata['secret_key'] == "a_key"
     assert cis.source_credential.name == source_cred_hashi_secret.name
@@ -188,14 +188,14 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, sourc
         name='Test Machine Credential',
         organization=organization,
         credential_type=ct,
-        inputs={'username': 'bob', "auth_path": "/path/to/auth"}
+        inputs={'username': 'bob'}
     )
 
     result = run_module('tower_credential_input_source', dict(
         source_credential=source_cred_hashi_ssh.name,
         target_credential=tgt_cred.name,
         input_field_name='password',
-        metadata={"secret_path": "/path/to/secret", "role": "role", "public_key": "a_key", "valid_principals": "some_value"},
+        metadata={"secret_path": "/path/to/secret", "auth_path": "/path/to/auth", "role": "role", "public_key": "a_key", "valid_principals": "some_value"},
         state='present'
     ), admin_user)
 
@@ -206,6 +206,7 @@ def test_hashi_ssh_credential_source(run_module, admin_user, organization, sourc
     cis = CredentialInputSource.objects.first()
 
     assert cis.metadata['secret_path'] == "/path/to/secret"
+    assert cis.metadata['auth_path'] == "/path/to/auth"
     assert cis.metadata['role'] == "role"
     assert cis.metadata['public_key'] == "a_key"
     assert cis.metadata['valid_principals'] == "some_value"
