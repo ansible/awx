@@ -1,0 +1,80 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Generate names
+  set_fact:
+    project_name: "AWX-Collection-tests-tower_inventory_source_update-project-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-tower_inventory_source_update-inv-{{ test_id }}"
+    inv_source1: "AWX-Collection-tests-tower_inventory_source_update-source1-{{ test_id }}"
+    inv_source2: "AWX-Collection-tests-tower_inventory_source_update-source2-{{ test_id }}"
+
+
+- block:
+  - name: Create a git project without credentials
+    tower_project:
+      name: "{{ project_name }}"
+      organization: Default
+      scm_type: git
+      scm_url: https://github.com/ansible/test-playbooks
+      wait: true
+
+  - name: Create an Inventory
+    tower_inventory:
+      name: "{{ inv_name }}"
+      organization: Default
+      state: present
+    register: created_inventory
+
+  - name: Create an Inventory Source
+    tower_inventory_source:
+      name: "{{ inv_source1 }}"
+      source: scm
+      source_project: "{{ project_name }}"
+      source_path: inventories/inventory.ini
+      description: Source for Test inventory
+      inventory: "{{ inv_name }}"
+
+  - name: Create Another Inventory Source
+    tower_inventory_source:
+      name: "{{ inv_source2 }}"
+      source: scm
+      source_project: "{{ project_name }}"
+      source_path: inventories/create_10_hosts.ini
+      description: Source for Test inventory
+      inventory: "{{ inv_name }}"
+
+  - name: Test Inventory Source Update
+    tower_inventory_source_update:
+      inventory: "{{ inv_name }}"
+      inventory_source: "{{ inv_source1 }}"
+    register: result
+
+  - assert:
+      that:
+        - "result is changed"
+
+  - name: Test Inventory Source Update for All Sources
+    tower_inventory_source_update:
+      inventory: "{{ inv_name }}"
+      inventory_source: "{{ item }}"
+    loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, return_ids=True ) }}"
+    register: result
+
+  - assert:
+      that:
+        - "result is changed"
+
+  always:
+    - name: Delete Inventory
+      tower_inventory:
+        name: "{{ inv_name }}"
+        organization: Default
+        state: absent
+
+    - name: Delete Project
+      tower_project:
+        name: "{{ project_name }}"
+        organization: Default
+        state: absent
