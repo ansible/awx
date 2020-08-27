@@ -2,6 +2,20 @@
 
 This is a list of high-level changes for each release of AWX. A full list of commits can be found at `https://github.com/ansible/awx/releases/tag/<version>`.
 
+## 14.1.0 (Aug 25, 2020)
+- AWX images can now be built on ARM64 - https://github.com/ansible/awx/pull/7607
+- Added the Remote Archive SCM Type to support using immutable artifacts and releases (such as tarballs and zip files) as projects - https://github.com/ansible/awx/issues/7954
+- Deprecated official support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
+- Added resource import/export support to the official AWX collection - https://github.com/ansible/awx/issues/7329
+- Added the ability to import YAML-based resources (instead of just JSON) when using the AWX CLI - https://github.com/ansible/awx/pull/7808
+- Updated the AWX CLI to export labels associated with Workflow Job Templates - https://github.com/ansible/awx/pull/7847
+- Updated to the latest python-ldap to address a bug - https://github.com/ansible/awx/issues/7868
+- Upgraded git-python to fix a bug that caused workflows to sometimes fail - https://github.com/ansible/awx/issues/6119
+- Worked around a bug in the channels_redis library that slowly causes Daphne processes to leak memory over time - https://github.com/django/channels_redis/issues/212
+- Fixed a bug in the AWX CLI that prevented Workflow nodes from importing properly - https://github.com/ansible/awx/issues/7793
+- Fixed a bug in the awx.awx collection release process that templated the wrong version - https://github.com/ansible/awx/issues/7870
+- Fixed a bug that caused errors rendering stdout that contained UTF-16 surrogate pairs - https://github.com/ansible/awx/pull/7918
+
 ## 14.0.0 (Aug 6, 2020)
 - As part of our commitment to inclusivity in open source, we recently took some time to audit AWX's source code and user interface and replace certain terminology with more inclusive language.  Strictly speaking, this isn't a bug or a feature, but we think it's important and worth calling attention to:
     * https://github.com/ansible/awx/commit/78229f58715fbfbf88177e54031f532543b57acc

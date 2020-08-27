@@ -76,6 +76,15 @@ describe('<ResourceAccessList />', () => {
 
   beforeEach(async () => {
     OrganizationsAPI.readAccessList.mockResolvedValue({ data });
+    OrganizationsAPI.readAccessOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     TeamsAPI.disassociateRole.mockResolvedValue({});
     UsersAPI.disassociateRole.mockResolvedValue({});
     await act(async () => {

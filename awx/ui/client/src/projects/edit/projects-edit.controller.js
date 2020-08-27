@@ -291,6 +291,14 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             $scope.lookupType = 'scm_credential';
                             $scope.scmBranchLabel = i18n._('SCM Branch/Tag/Revision');
                             break;
+                        case 'archive':
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
+                            $scope.urlPopover = '<p>' + i18n._('Example URLs for Remote Archive SCM include:') + '</p>' +
+                                '<ul class=\"no-bullets\"><li>https://github.com/username/project/archive/v0.0.1.tar.gz</li>' +
+                                '<li>http://github.com/username/project/archive/v0.0.2.zip</li></ul>';
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
+                            break;
                         case 'insights':
                             $scope.pathRequired = false;
                             $scope.scmRequired = false;

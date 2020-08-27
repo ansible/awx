@@ -21,6 +21,7 @@ function AssociateModal({
   onClose,
   onAssociate,
   fetchRequest,
+  optionsRequest,
   isModalOpen = false,
 }) {
   const history = useHistory();
@@ -28,24 +29,35 @@ function AssociateModal({
 
   const {
     request: fetchItems,
-    result: { items, itemCount },
+    result: { items, itemCount, relatedSearchableKeys, searchableKeys },
     error: contentError,
     isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const {
-        data: { count, results },
-      } = await fetchRequest(params);
+      const [
+        {
+          data: { count, results },
+        },
+        actionsResponse,
+      ] = await Promise.all([fetchRequest(params), optionsRequest()]);
 
       return {
         items: results,
         itemCount: count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [fetchRequest, history.location.search]),
+    }, [fetchRequest, optionsRequest, history.location.search]),
     {
       items: [],
       itemCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -132,6 +144,8 @@ function AssociateModal({
               key: 'name',
             },
           ]}
+          searchableKeys={searchableKeys}
+          relatedSearchableKeys={relatedSearchableKeys}
         />
       </Modal>
     </Fragment>

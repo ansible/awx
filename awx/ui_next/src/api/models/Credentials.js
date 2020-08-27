@@ -6,6 +6,7 @@ class Credentials extends Base {
     this.baseUrl = '/api/v2/credentials/';
 
     this.readAccessList = this.readAccessList.bind(this);
+    this.readAccessOptions = this.readAccessOptions.bind(this);
     this.readInputSources = this.readInputSources.bind(this);
   }
 
@@ -13,6 +14,10 @@ class Credentials extends Base {
     return this.http.get(`${this.baseUrl}${id}/access_list/`, {
       params,
     });
+  }
+
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
   }
 
   readInputSources(id, params) {

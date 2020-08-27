@@ -2,14 +2,48 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { SchedulesAPI } from '../../../api';
+import { SchedulesAPI, JobTemplatesAPI } from '../../../api';
 import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import ScheduleDetail from './ScheduleDetail';
 
+jest.mock('../../../api/models/JobTemplates');
 jest.mock('../../../api/models/Schedules');
+jest.mock('../../../api/models/WorkflowJobTemplates');
+
+const allPrompts = {
+  data: {
+    ask_credential_on_launch: true,
+    ask_diff_mode_on_launch: true,
+    ask_inventory_on_launch: true,
+    ask_job_type_on_launch: true,
+    ask_limit_on_launch: true,
+    ask_scm_branch_on_launch: true,
+    ask_skip_tags_on_launch: true,
+    ask_tags_on_launch: true,
+    ask_variables_on_launch: true,
+    ask_verbosity_on_launch: true,
+    survey_enabled: true,
+  },
+};
+
+const noPrompts = {
+  data: {
+    ask_credential_on_launch: false,
+    ask_diff_mode_on_launch: false,
+    ask_inventory_on_launch: false,
+    ask_job_type_on_launch: false,
+    ask_limit_on_launch: false,
+    ask_scm_branch_on_launch: false,
+    ask_skip_tags_on_launch: false,
+    ask_tags_on_launch: false,
+    ask_variables_on_launch: false,
+    ask_verbosity_on_launch: false,
+    survey_enabled: false,
+  },
+};
 
 const schedule = {
   url: '/api/v2/schedules/1',
@@ -53,6 +87,7 @@ const schedule = {
   dtstart: '2020-03-16T04:00:00Z',
   dtend: '2020-07-06T04:00:00Z',
   next_run: '2020-03-16T04:00:00Z',
+  extra_data: {},
 };
 
 SchedulesAPI.createPreview.mockResolvedValue({
@@ -79,6 +114,7 @@ describe('<ScheduleDetail />', () => {
         results: [],
       },
     });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(noPrompts);
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
@@ -134,6 +170,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+    expect(wrapper.find('VariablesDetail').length).toBe(0);
   });
   test('details should render with the proper values with prompts', async () => {
     SchedulesAPI.readCredentials.mockResolvedValue({
@@ -151,6 +188,7 @@ describe('<ScheduleDetail />', () => {
         ],
       },
     });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(allPrompts);
     const scheduleWithPrompts = {
       ...schedule,
       job_type: 'run',
@@ -161,6 +199,7 @@ describe('<ScheduleDetail />', () => {
       limit: 'localhost',
       diff_mode: true,
       verbosity: 1,
+      extra_data: { foo: 'fii' },
     };
     await act(async () => {
       wrapper = mountWithContexts(
@@ -182,7 +221,6 @@ describe('<ScheduleDetail />', () => {
       );
     });
     await waitForElement(wrapper, 'ContentLoading', el => el.length === 0);
-    // await waitForElement(wrapper, 'Title', el => el.length > 0);
     expect(
       wrapper
         .find('Detail[label="Name"]')
@@ -231,6 +269,7 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(1);
+    expect(wrapper.find('VariablesDetail').length).toBe(1);
   });
   test('error shown when error encountered fetching credentials', async () => {
     SchedulesAPI.readCredentials.mockRejectedValueOnce(
@@ -245,6 +284,7 @@ describe('<ScheduleDetail />', () => {
         },
       })
     );
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(noPrompts);
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
@@ -274,6 +314,7 @@ describe('<ScheduleDetail />', () => {
         results: [],
       },
     });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(noPrompts);
     await act(async () => {
       wrapper = mountWithContexts(
         <Route
@@ -313,6 +354,7 @@ describe('<ScheduleDetail />', () => {
         results: [],
       },
     });
+    JobTemplatesAPI.readLaunch.mockResolvedValueOnce(noPrompts);
     await act(async () => {
       wrapper = mountWithContexts(
         <Route

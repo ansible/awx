@@ -34,7 +34,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
         'use_tls': False, 'use_ssl': False,
         'timeout': 4
     }
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='email',
@@ -49,7 +49,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
 
     # Test no-op, this is impossible if the notification_configuration is given
     # because we cannot determine if password fields changed
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='email',
@@ -59,7 +59,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
 
     # Test a change in the configuration
     nt_config['timeout'] = 12
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='email',
@@ -74,7 +74,7 @@ def test_create_modify_notification_template(run_module, admin_user, organizatio
 
 @pytest.mark.django_db
 def test_invalid_notification_configuration(run_module, admin_user, organization):
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='email',
@@ -92,7 +92,7 @@ def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
             'X-Custom-Header': 'value123'
         }
     }
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='webhook',
@@ -101,7 +101,7 @@ def test_deprecated_to_modern_no_op(run_module, admin_user, organization):
     assert not result.get('failed', False), result.get('msg', result)
     assert result.pop('changed', None), result
 
-    result = run_module('tower_notification', dict(
+    result = run_module('tower_notification_template', dict(
         name='foo-notification-template',
         organization=organization.name,
         notification_type='webhook',

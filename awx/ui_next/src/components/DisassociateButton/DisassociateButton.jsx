@@ -61,7 +61,7 @@ function DisassociateButton({
       <Tooltip content={renderTooltip()} position="top">
         <div>
           <Button
-            variant="danger"
+            variant="secondary"
             aria-label={i18n._(t`Disassociate`)}
             onClick={() => setIsOpen(true)}
             isDisabled={isDisabled}

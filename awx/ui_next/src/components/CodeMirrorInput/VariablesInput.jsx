@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { string, func, bool, number } from 'prop-types';
 import { Split, SplitItem } from '@patternfly/react-core';
 import styled from 'styled-components';
-import { yamlToJson, jsonToYaml, isJson } from '../../util/yaml';
+import { yamlToJson, jsonToYaml, isJsonString } from '../../util/yaml';
 import MultiButtonToggle from '../MultiButtonToggle';
 import CodeMirrorInput from './CodeMirrorInput';
 import { JSON_MODE, YAML_MODE } from './constants';
@@ -18,11 +18,11 @@ const SplitItemRight = styled(SplitItem)`
 function VariablesInput(props) {
   const { id, label, readOnly, rows, error, onError, className } = props;
   /* eslint-disable react/destructuring-assignment */
-  const defaultValue = isJson(props.value)
+  const defaultValue = isJsonString(props.value)
     ? formatJson(props.value)
     : props.value;
   const [value, setValue] = useState(defaultValue);
-  const [mode, setMode] = useState(isJson(value) ? JSON_MODE : YAML_MODE);
+  const [mode, setMode] = useState(isJsonString(value) ? JSON_MODE : YAML_MODE);
   const isControlled = !!props.onChange;
   /* eslint-enable react/destructuring-assignment */
 

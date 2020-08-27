@@ -29,7 +29,7 @@ function HostList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { hosts, count, actions, relatedSearchFields },
+    result: { hosts, count, actions, relatedSearchableKeys, searchableKeys },
     error: contentError,
     isLoading,
     request: fetchHosts,
@@ -44,16 +44,20 @@ function HostList({ i18n }) {
         hosts: results[0].data.results,
         count: results[0].data.count,
         actions: results[1].data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           results[1]?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(results[1].data.actions?.GET || {}).filter(
+          key => results[1].data.actions?.GET[key].filterable
+        ),
       };
     }, [location]),
     {
       hosts: [],
       count: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -97,10 +101,6 @@ function HostList({ i18n }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <PageSection>

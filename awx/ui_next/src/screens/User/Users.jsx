@@ -18,7 +18,7 @@ function Users({ i18n }) {
   const match = useRouteMatch();
 
   const addUserBreadcrumb = useCallback(
-    user => {
+    (user, token) => {
       if (!user) {
         return;
       }
@@ -34,6 +34,10 @@ function Users({ i18n }) {
         [`/users/${user.id}/organizations`]: i18n._(t`Organizations`),
         [`/users/${user.id}/tokens`]: i18n._(t`Tokens`),
         [`/users/${user.id}/tokens/add`]: i18n._(t`Create user token`),
+        [`/users/${user.id}/tokens/${token && token.id}`]: `Application Name`,
+        [`/users/${user.id}/tokens/${token && token.id}/details`]: i18n._(
+          t`Details`
+        ),
       });
     },
     [i18n]

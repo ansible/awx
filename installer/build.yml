@@ -1,7 +1,7 @@
 ---
 - name: Build AWX Docker Images
   hosts: all
-  gather_facts: false
+  gather_facts: true
   roles:
     - {role: image_build}
     - {role: image_push, when: "docker_registry is defined"}

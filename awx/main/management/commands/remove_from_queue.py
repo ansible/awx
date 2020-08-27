@@ -32,4 +32,7 @@ class Command(BaseCommand):
             sys.exit(1)
         i = i.first()
         ig.instances.remove(i)
+        if i.hostname in ig.policy_instance_list:
+            ig.policy_instance_list.remove(i.hostname)
+            ig.save()
         print("Instance removed from instance group")

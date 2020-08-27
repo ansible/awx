@@ -65,7 +65,7 @@ function SurveyToolbar({
           </ToolbarItem>
           <ToolbarItem>
             <Button
-              variant="danger"
+              variant="secondary"
               isDisabled={isDeleteDisabled}
               onClick={() => onToggleDeleteModal(true)}
             >

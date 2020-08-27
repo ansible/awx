@@ -25,6 +25,7 @@ import {
   GitSubForm,
   HgSubForm,
   SvnSubForm,
+  ArchiveSubForm,
   InsightsSubForm,
   ManualSubForm,
 } from './ProjectSubForms';
@@ -235,6 +236,13 @@ function ProjectFormFields({
                 ),
                 svn: (
                   <SvnSubForm
+                    credential={credentials.scm}
+                    onCredentialSelection={handleCredentialSelection}
+                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                  />
+                ),
+                archive: (
+                  <ArchiveSubForm
                     credential={credentials.scm}
                     onCredentialSelection={handleCredentialSelection}
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}

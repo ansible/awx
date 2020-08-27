@@ -6,7 +6,7 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import UserAdd from './UserAdd';
-import { UsersAPI } from '../../../api';
+import { OrganizationsAPI } from '../../../api';
 
 jest.mock('../../../api');
 let wrapper;
@@ -16,7 +16,7 @@ describe('<UserAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<UserAdd />);
     });
-    UsersAPI.create.mockResolvedValueOnce({ data: {} });
+    OrganizationsAPI.createUser.mockResolvedValueOnce({ data: {} });
     const updatedUserData = {
       username: 'sysadmin',
       email: 'sysadmin@ansible.com',
@@ -30,7 +30,11 @@ describe('<UserAdd />', () => {
     await act(async () => {
       wrapper.find('UserForm').prop('handleSubmit')(updatedUserData);
     });
-    expect(UsersAPI.create).toHaveBeenCalledWith(updatedUserData);
+
+    const { organization, ...userData } = updatedUserData;
+    expect(OrganizationsAPI.createUser.mock.calls).toEqual([
+      [organization, userData],
+    ]);
   });
 
   test('should navigate to users list when cancel is clicked', async () => {
@@ -58,7 +62,7 @@ describe('<UserAdd />', () => {
       is_superuser: true,
       is_system_auditor: false,
     };
-    UsersAPI.create.mockResolvedValueOnce({
+    OrganizationsAPI.createUser.mockResolvedValueOnce({
       data: {
         id: 5,
         ...userData,

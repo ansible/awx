@@ -36,7 +36,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -64,7 +69,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -83,6 +93,50 @@ describe('<Search />', () => {
     expect(onSearch).toBeCalledWith('description__icontains', 'test-321');
   });
 
+  test('changing key select to and from advanced causes onShowAdvancedSearch callback to be invoked', () => {
+    const columns = [
+      { name: 'Name', key: 'name__icontains', isDefault: true },
+      { name: 'Description', key: 'description__icontains' },
+      { name: 'Advanced', key: 'advanced' },
+    ];
+    const onSearch = jest.fn();
+    const onShowAdvancedSearch = jest.fn();
+    const wrapper = mountWithContexts(
+      <Toolbar
+        id={`${QS_CONFIG.namespace}-list-toolbar`}
+        clearAllFilters={() => {}}
+        collapseListedFiltersBreakpoint="lg"
+      >
+        <ToolbarContent>
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={onShowAdvancedSearch}
+          />
+        </ToolbarContent>
+      </Toolbar>
+    );
+
+    act(() => {
+      wrapper
+        .find('Select[aria-label="Simple key select"]')
+        .invoke('onSelect')({ target: { innerText: 'Advanced' } });
+    });
+    wrapper.update();
+    expect(onShowAdvancedSearch).toHaveBeenCalledTimes(1);
+    expect(onShowAdvancedSearch).toBeCalledWith(true);
+    jest.clearAllMocks();
+    act(() => {
+      wrapper
+        .find('Select[aria-label="Simple key select"]')
+        .invoke('onSelect')({ target: { innerText: 'Description' } });
+    });
+    wrapper.update();
+    expect(onShowAdvancedSearch).toHaveBeenCalledTimes(1);
+    expect(onShowAdvancedSearch).toBeCalledWith(false);
+  });
+
   test('attempt to search with empty string', () => {
     const searchButton = 'button[aria-label="Search submit button"]';
     const searchTextInput = 'input[aria-label="Search text input"]';
@@ -95,7 +149,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -119,7 +178,12 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} onSearch={onSearch} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onSearch={onSearch}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>
     );
@@ -150,7 +214,11 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>,
       { context: { router: { history } } }
@@ -197,6 +265,7 @@ describe('<Search />', () => {
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
+            onShowAdvancedSearch={jest.fn}
           />
         </ToolbarContent>
       </Toolbar>,
@@ -243,6 +312,7 @@ describe('<Search />', () => {
             qsConfig={qsConfigNew}
             columns={columns}
             onRemove={onRemove}
+            onShowAdvancedSearch={jest.fn}
           />
         </ToolbarContent>
       </Toolbar>,
@@ -277,7 +347,11 @@ describe('<Search />', () => {
         collapseListedFiltersBreakpoint="lg"
       >
         <ToolbarContent>
-          <Search qsConfig={QS_CONFIG} columns={columns} />
+          <Search
+            qsConfig={QS_CONFIG}
+            columns={columns}
+            onShowAdvancedSearch={jest.fn}
+          />
         </ToolbarContent>
       </Toolbar>,
       { context: { router: { history } } }

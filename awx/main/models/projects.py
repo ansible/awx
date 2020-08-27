@@ -55,6 +55,7 @@ class ProjectOptions(models.Model):
         ('hg', _('Mercurial')),
         ('svn', _('Subversion')),
         ('insights', _('Red Hat Insights')),
+        ('archive', _('Remote Archive')),
     ]
 
     class Meta:

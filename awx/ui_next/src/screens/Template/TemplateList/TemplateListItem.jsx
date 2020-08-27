@@ -44,9 +44,7 @@ function TemplateListItem({
   fetchTemplates,
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
-
   const labelId = `check-action-${template.id}`;
-  const canLaunch = template.summary_fields.user_capabilities.start;
 
   const copyTemplate = useCallback(async () => {
     if (template.type === 'job_template') {
@@ -78,7 +76,7 @@ function TemplateListItem({
         />
         <DataListItemCells
           dataListCells={[
-            <DataListCell key="divider">
+            <DataListCell key="name" id={labelId}>
               <span>
                 <Link to={`${detailUrl}`}>
                   <b>{template.name}</b>
@@ -105,12 +103,8 @@ function TemplateListItem({
             </DataListCell>,
           ]}
         />
-        <DataListAction
-          aria-label="actions"
-          aria-labelledby={labelId}
-          id={labelId}
-        >
-          {canLaunch && template.type === 'job_template' && (
+        <DataListAction aria-label="actions" aria-labelledby={labelId}>
+          {template.summary_fields.user_capabilities.start && (
             <Tooltip content={i18n._(t`Launch Template`)} position="top">
               <LaunchButton resource={template}>
                 {({ handleLaunch }) => (

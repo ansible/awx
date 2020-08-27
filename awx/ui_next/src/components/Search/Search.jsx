@@ -40,6 +40,7 @@ function Search({
   location,
   searchableKeys,
   relatedSearchableKeys,
+  onShowAdvancedSearch,
 }) {
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [searchKey, setSearchKey] = useState(
@@ -62,7 +63,7 @@ function Search({
     const { key: actualSearchKey } = columns.find(
       ({ name }) => name === target.innerText
     );
-
+    onShowAdvancedSearch(actualSearchKey === 'advanced');
     setIsFilterDropdownOpen(false);
     setSearchKey(actualSearchKey);
   };
@@ -301,6 +302,7 @@ Search.propTypes = {
   columns: SearchColumns.isRequired,
   onSearch: PropTypes.func,
   onRemove: PropTypes.func,
+  onShowAdvancedSearch: PropTypes.func.isRequired,
 };
 
 Search.defaultProps = {

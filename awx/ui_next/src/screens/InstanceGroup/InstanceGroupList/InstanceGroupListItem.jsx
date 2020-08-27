@@ -6,15 +6,16 @@ import { Link } from 'react-router-dom';
 import 'styled-components/macro';
 import {
   Badge as PFBadge,
-  Progress,
-  ProgressMeasureLocation,
-  ProgressSize,
   Button,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
+  Label,
+  Progress,
+  ProgressMeasureLocation,
+  ProgressSize,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
@@ -44,6 +45,10 @@ const DataListAction = styled(_DataListAction)`
   display: grid;
   grid-gap: 16px;
   grid-template-columns: 40px;
+`;
+
+const Unavailable = styled.span`
+  color: var(--pf-global--danger-color--200);
 `;
 
 function InstanceGroupListItem({
@@ -78,7 +83,7 @@ function InstanceGroupListItem({
           />
         );
       }
-      return <span css="color: red">{i18n._(t`Unavailable`)}</span>;
+      return <Unavailable> {i18n._(t`Unavailable`)}</Unavailable>;
     }
     return null;
   }
@@ -108,6 +113,13 @@ function InstanceGroupListItem({
                   <b>{instanceGroup.name}</b>
                 </Link>
               </span>
+              {instanceGroup.is_isolated ? (
+                <span css="margin-left: 12px">
+                  <Label aria-label={i18n._(t`isolated instance`)}>
+                    {i18n._(t`Isolated`)}
+                  </Label>
+                </span>
+              ) : null}
             </DataListCell>,
 
             <DataListCell

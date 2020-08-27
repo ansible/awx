@@ -134,7 +134,7 @@ assets:
     sample: [ {}, {} ]
 '''
 
-from ..module_utils.ansible_tower import TowerModule, tower_auth_config, HAS_TOWER_CLI
+from ..module_utils.tower_legacy import TowerLegacyModule, tower_auth_config, HAS_TOWER_CLI
 
 try:
     from tower_cli.cli.transfer.receive import Receiver
@@ -163,7 +163,7 @@ def main():
         workflow=dict(type='list', default=[], elements='str'),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=False)
+    module = TowerLegacyModule(argument_spec=argument_spec, supports_check_mode=False)
 
     module.deprecate(msg="This module is deprecated and will be replaced by the AWX CLI export command.", version="awx.awx:14.0.0")
 

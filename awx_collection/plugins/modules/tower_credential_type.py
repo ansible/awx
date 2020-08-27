@@ -81,7 +81,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 KIND_CHOICES = {
     'ssh': 'Machine',
@@ -105,7 +105,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')

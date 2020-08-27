@@ -101,6 +101,50 @@
       tags:
         - update_insights
 
+    - block:
+        - name: Ensure the project archive directory is present
+          file:
+            dest: "{{ project_path|quote }}/.archive"
+            state: directory
+
+        - name: Get archive from url
+          get_url:
+            url: "{{ scm_url|quote }}"
+            dest: "{{ project_path|quote }}/.archive/"
+            url_username: "{{ scm_username|default(omit) }}"
+            url_password: "{{ scm_password|default(omit) }}"
+            force_basic_auth: true
+          register: get_archive
+
+        - name: Unpack archive
+          project_archive:
+            src: "{{ get_archive.dest }}"
+            project_path: "{{ project_path|quote }}"
+            force: "{{ scm_clean }}"
+          when: get_archive.changed or scm_clean
+          register: unarchived
+
+        - name: Find previous archives
+          find:
+            paths: "{{ project_path|quote }}/.archive/"
+            excludes:
+              - "{{ get_archive.dest|basename }}"
+          when: unarchived.changed
+          register: previous_archive
+
+        - name: Remove previous archives
+          file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ previous_archive.files }}"
+          when: previous_archive.files|default([])
+
+        - name: Set scm_version to archive sha1 checksum
+          set_fact:
+            scm_version: "{{ get_archive.checksum_src }}"
+      tags:
+        - update_archive
+
     - name: Repository Version
       debug:
         msg: "Repository Version {{ scm_version }}"
@@ -109,6 +153,7 @@
         - update_hg
         - update_svn
         - update_insights
+        - update_archive
 
 - hosts: localhost
   gather_facts: false
