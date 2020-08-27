@@ -42,7 +42,7 @@ def inventory_source_vars_forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0117_v400_remove_cloudforms_inventory'),
+        ('main', '0118_add_remote_archive_scm_type'),
     ]
 
     operations = [
