@@ -1880,13 +1880,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
-@pytest.fixture
-def mock_ansible_version():
-    with mock.patch('awx.main.tasks._get_ansible_version', mock.MagicMock(return_value='2.10')) as _fixture:
-        yield _fixture
-
-
-@pytest.mark.usefixtures("mock_ansible_version")
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self):

@@ -162,23 +162,19 @@ def memoize_delete(function_name):
     return cache.delete(function_name)
 
 
-def _get_ansible_version(ansible_path):
+@memoize()
+def get_ansible_version():
     '''
     Return Ansible version installed.
     Ansible path needs to be provided to account for custom virtual environments
     '''
     try:
-        proc = subprocess.Popen([ansible_path, '--version'],
+        proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
         result = smart_str(proc.communicate()[0])
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
         return 'unknown'
-
-
-@memoize()
-def get_ansible_version():
-    return _get_ansible_version('ansible')
 
 
 def get_awx_version():

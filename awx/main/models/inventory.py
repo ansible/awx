@@ -1373,10 +1373,6 @@ class PluginFileInjector(object):
     collection = None
     collection_migration = '2.9'  # Starting with this version, we use collections
 
-    def __init__(self, ansible_version):
-        # This is InventoryOptions instance, could be source or inventory update
-        self.ansible_version = ansible_version
-
     @classmethod
     def get_proper_name(cls):
         if cls.plugin_name is None:
