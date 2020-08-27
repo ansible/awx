@@ -99,7 +99,7 @@ function WorkflowJobTemplateDetail({ template, i18n }) {
   const canLaunch = summary_fields?.user_capabilities?.start;
   const recentPlaybookJobs = summary_fields.recent_jobs.map(job => ({
     ...job,
-    type: 'job',
+    type: 'workflow_job',
   }));
 
   return (
