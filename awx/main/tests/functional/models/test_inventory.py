@@ -255,7 +255,7 @@ class TestInventorySourceInjectors:
         are named correctly, because Ansible will reject files that do
         not have these exact names
         """
-        injector = InventorySource.injectors[source]('2.7.7')
+        injector = InventorySource.injectors[source]()
         assert injector.filename == filename
 
     @pytest.mark.parametrize('source,proper_name', [
@@ -269,7 +269,7 @@ class TestInventorySourceInjectors:
         ('tower', 'awx.awx.tower'),
     ])
     def test_plugin_proper_names(self, source, proper_name):
-        injector = InventorySource.injectors[source]('2.9')
+        injector = InventorySource.injectors[source]()
         assert injector.get_proper_name() == proper_name
 
 
