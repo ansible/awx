@@ -3,7 +3,7 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
-import { minMaxValue } from '../../../../util/validators';
+import { minMaxValue, regExp } from '../../../../util/validators';
 import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { VariablesField } from '../../../../components/CodeMirrorInput';
 import FormField, {
@@ -192,6 +192,7 @@ export const HostFilterField = withI18n()(({ i18n }) => {
       )}
       name="host_filter"
       type="text"
+      validate={regExp(i18n)}
     />
   );
 });
