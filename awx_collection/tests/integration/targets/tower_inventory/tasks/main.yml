@@ -37,8 +37,6 @@
         that:
           - "result is changed"
 
-    - meta: end_play
-
     - name: Test Inventory module idempotency
       tower_inventory:
         name: "{{ inv_name1 }}"
