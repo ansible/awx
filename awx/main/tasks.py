@@ -2183,7 +2183,7 @@ class RunProjectUpdate(BaseTask):
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
-        return self.get_path_to('..', 'playbooks')
+        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
         return os.path.join('project_update.yml')
@@ -2328,11 +2328,11 @@ class RunProjectUpdate(BaseTask):
             shutil.rmtree(stage_path)
         os.makedirs(stage_path)  # presence of empty cache indicates lack of roles or collections
 
-        # We cannot mount root-owned files w/ podman. They will be owned by 'nobody'
-        # in the container, and unaccessible. There may be a better solution, but for now,
-        # we copy the entire directory into the private data dir.
-        playbook_root = self.build_cwd(instance, private_data_dir)
-        copy_tree(playbook_root, os.path.join(private_data_dir, 'project'))
+        # the project update playbook is not in a git repo, but uses a vendoring directory
+        # to be consistent with the ansible-runner model,
+        # that is moved into the runner projecct folder here
+        awx_playbooks = self.get_path_to('..', 'playbooks')
+        copy_tree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
 
     @staticmethod
