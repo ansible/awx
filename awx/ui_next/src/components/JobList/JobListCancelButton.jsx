@@ -13,6 +13,8 @@ function cannotCancel(job) {
 
 function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const numJobsToCancel = jobsToCancel.length;
+  const zeroOrOneJobSelected = numJobsToCancel < 2;
 
   const handleCancel = () => {
     onCancel();
@@ -22,26 +24,28 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   const renderTooltip = () => {
     const jobsUnableToCancel = jobsToCancel
       .filter(cannotCancel)
-      .map(job => job.name)
-      .join(', ');
-    if (jobsToCancel.some(cannotCancel)) {
+      .map(job => job.name);
+    const numJobsUnableToCancel = jobsUnableToCancel.length;
+    if (numJobsUnableToCancel > 0) {
       return (
         <div>
-          {i18n.plural({
-            value: jobsToCancel.length,
-            one: 'You do not have permission to cancel the following job: ',
-            other: 'You do not have permission to cancel the following jobs: ',
-          })}
-          {jobsUnableToCancel}
+          {i18n._(
+            '{numJobsUnableToCancel, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}',
+            {
+              numJobsUnableToCancel,
+            }
+          )}
+          {' '.concat(jobsUnableToCancel.join(', '))}
         </div>
       );
     }
-    if (jobsToCancel.length) {
-      return i18n.plural({
-        value: jobsToCancel.length,
-        one: 'Cancel selected job',
-        other: 'Cancel selected jobs',
-      });
+    if (numJobsToCancel > 0) {
+      return i18n._(
+        '{numJobsToCancel, plural, one {Cancel selected job} other {Cancel selected jobs}}',
+        {
+          numJobsToCancel,
+        }
+      );
     }
     return i18n._(t`Select a job to cancel`);
   };
@@ -49,11 +53,12 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
   const isDisabled =
     jobsToCancel.length === 0 || jobsToCancel.some(cannotCancel);
 
-  const cancelJobText = i18n.plural({
-    value: jobsToCancel.length < 2,
-    one: 'Cancel job',
-    other: 'Cancel jobs',
-  });
+  const cancelJobText = i18n._(
+    '{zeroOrOneJobSelected, plural, one {Cancel job} other {Cancel jobs}}',
+    {
+      zeroOrOneJobSelected,
+    }
+  );
 
   return (
     <Kebabified>
@@ -90,6 +95,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               onClose={() => setIsModalOpen(false)}
               actions={[
                 <Button
+                  id="cancel-job-confirm-button"
                   key="delete"
                   variant="danger"
                   aria-label={cancelJobText}
@@ -98,6 +104,7 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
                   {cancelJobText}
                 </Button>,
                 <Button
+                  id="cancel-job-return-button"
                   key="cancel"
                   variant="secondary"
                   aria-label={i18n._(t`Return`)}
@@ -108,11 +115,12 @@ function JobListCancelButton({ i18n, jobsToCancel, onCancel }) {
               ]}
             >
               <div>
-                {i18n.plural({
-                  value: jobsToCancel.length,
-                  one: 'This action will cancel the following job:',
-                  other: 'This action will cancel the following jobs:',
-                })}
+                {i18n._(
+                  '{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}',
+                  {
+                    numJobsToCancel,
+                  }
+                )}
               </div>
               {jobsToCancel.map(job => (
                 <span key={job.id}>

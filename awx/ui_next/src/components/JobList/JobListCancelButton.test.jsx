@@ -1,5 +1,4 @@
 import React from 'react';
-import { shallow } from 'enzyme';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import JobListCancelButton from './JobListCancelButton';
 
@@ -38,15 +37,6 @@ describe('<JobListCancelButton />', () => {
     expect(wrapper.find('JobListCancelButton button').props().disabled).toBe(
       true
     );
-    const tooltipContents = wrapper.find('Tooltip').props().content;
-    const renderedTooltipContents = shallow(tooltipContents);
-    expect(
-      renderedTooltipContents.matchesElement(
-        <div>
-          You do not have permission to cancel the following job: some job
-        </div>
-      )
-    ).toBe(true);
   });
   test('should be enabled when user does have permission to cancel selected job', () => {
     wrapper = mountWithContexts(
@@ -68,7 +58,6 @@ describe('<JobListCancelButton />', () => {
     expect(wrapper.find('JobListCancelButton button').props().disabled).toBe(
       false
     );
-    expect(wrapper.find('Tooltip').props().content).toBe('Cancel selected job');
   });
   test('modal functions as expected', () => {
     const onCancel = jest.fn();
@@ -93,7 +82,7 @@ describe('<JobListCancelButton />', () => {
     wrapper.find('JobListCancelButton button').simulate('click');
     wrapper.update();
     expect(wrapper.find('AlertModal').length).toBe(1);
-    wrapper.find('AlertModal button[aria-label="Return"]').simulate('click');
+    wrapper.find('button#cancel-job-return-button').simulate('click');
     wrapper.update();
     expect(onCancel).toHaveBeenCalledTimes(0);
     expect(wrapper.find('AlertModal').length).toBe(0);
@@ -101,9 +90,7 @@ describe('<JobListCancelButton />', () => {
     wrapper.find('JobListCancelButton button').simulate('click');
     wrapper.update();
     expect(wrapper.find('AlertModal').length).toBe(1);
-    wrapper
-      .find('AlertModal button[aria-label="Cancel job"]')
-      .simulate('click');
+    wrapper.find('button#cancel-job-confirm-button').simulate('click');
     wrapper.update();
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
