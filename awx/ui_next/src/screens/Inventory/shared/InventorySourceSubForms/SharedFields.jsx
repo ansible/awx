@@ -174,7 +174,7 @@ export const EnabledValueField = withI18n()(({ i18n }) => {
       id="inventory-enabled-value"
       label={i18n._(t`Enabled Value`)}
       tooltip={i18n._(
-        t`If the enabled variable matches this value, the host will be enabled on import.`
+        t`This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.`
       )}
       name="enabled_value"
       type="text"
@@ -188,7 +188,7 @@ export const HostFilterField = withI18n()(({ i18n }) => {
       id="host-filter"
       label={i18n._(t`Host Filter`)}
       tooltip={i18n._(
-        t`Regular expression where only matching hosts will be imported.`
+        t`Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.`
       )}
       name="host_filter"
       type="text"

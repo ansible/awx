@@ -305,7 +305,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 type: 'text',
                 dataTitle: i18n._('Host Filter'),
                 dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("Regular expression where only matching hosts will be imported.") + "</p>",
+                awPopOver: "<p>" + i18n._("Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.") + "</p>",
                 dataContainer: 'body',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'
@@ -325,7 +325,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                 type: 'text',
                 dataTitle: i18n._('Enabled Value'),
                 dataPlacement: 'right',
-                awPopOver: "<p>" + i18n._("If the enabled variable matches this value, the host will be enabled on import.") + "</p>",
+                awPopOver: "<p>" + i18n._("This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.") + "</p>",
                 dataContainer: 'body',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'
