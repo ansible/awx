@@ -53,7 +53,7 @@ function InstanceListItem({
     if (item.enabled) {
       return (
         <Progress
-          value={100 - item.percent_capacity_remaining}
+          value={Math.round(100 - item.percent_capacity_remaining)}
           measureLocation={ProgressMeasureLocation.top}
           size={ProgressSize.sm}
           title={i18n._(t`Used capacity`)}
