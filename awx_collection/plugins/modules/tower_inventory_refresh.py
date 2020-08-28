@@ -49,7 +49,7 @@ EXAMPLES = '''
 '''
 
 
-from ansible.module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 import json
 
 
