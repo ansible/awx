@@ -3,7 +3,6 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Card, PageSection } from '@patternfly/react-core';
-
 import { InventoriesAPI } from '../../../api';
 import useRequest, { useDeleteItems } from '../../../util/useRequest';
 import AlertModal from '../../../components/AlertModal';
@@ -80,7 +79,13 @@ function InventoryList({ i18n }) {
     },
     [location.search] // eslint-disable-line react-hooks/exhaustive-deps
   );
-  const inventories = useWsInventories(results, fetchInventoriesById);
+
+  const inventories = useWsInventories(
+    results,
+    fetchInventories,
+    fetchInventoriesById,
+    QS_CONFIG
+  );
 
   const isAllSelected =
     selected.length === inventories.length && selected.length > 0;
@@ -94,9 +99,7 @@ function InventoryList({ i18n }) {
       return Promise.all(selected.map(team => InventoriesAPI.destroy(team.id)));
     }, [selected]),
     {
-      qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
-      fetchItems: fetchInventories,
     }
   );
 
@@ -113,10 +116,12 @@ function InventoryList({ i18n }) {
   };
 
   const handleSelect = row => {
-    if (selected.some(s => s.id === row.id)) {
-      setSelected(selected.filter(s => s.id !== row.id));
-    } else {
-      setSelected(selected.concat(row));
+    if (!row.pending_deletion) {
+      if (selected.some(s => s.id === row.id)) {
+        setSelected(selected.filter(s => s.id !== row.id));
+      } else {
+        setSelected(selected.concat(row));
+      }
     }
   };
 
@@ -183,6 +188,10 @@ function InventoryList({ i18n }) {
                   onDelete={handleInventoryDelete}
                   itemsToDelete={selected}
                   pluralizedItemName={i18n._(t`Inventories`)}
+                  warningMessage={i18n._(
+                    '{numItemsToDelete, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}',
+                    { numItemsToDelete: selected.length }
+                  )}
                 />,
               ]}
             />

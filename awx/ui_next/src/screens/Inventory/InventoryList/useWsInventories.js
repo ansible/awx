@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
+import {
+  parseQueryString,
+  replaceParams,
+  encodeNonDefaultQueryString,
+} from '../../../util/qs';
 import useWebsocket from '../../../util/useWebsocket';
 import useThrottle from '../../../util/useThrottle';
 
 export default function useWsInventories(
   initialInventories,
-  fetchInventoriesById
+  fetchInventories,
+  fetchInventoriesById,
+  qsConfig
 ) {
+  const location = useLocation();
+  const history = useHistory();
   const [inventories, setInventories] = useState(initialInventories);
   const [inventoriesToFetch, setInventoriesToFetch] = useState([]);
   const throttledInventoriesToFetch = useThrottle(inventoriesToFetch, 5000);
@@ -53,7 +63,8 @@ export default function useWsInventories(
     function processWsMessage() {
       if (
         !lastMessage?.inventory_id ||
-        lastMessage.type !== 'inventory_update'
+        (lastMessage.type !== 'inventory_update' &&
+          lastMessage.group_name !== 'inventories')
       ) {
         return;
       }
@@ -64,16 +75,41 @@ export default function useWsInventories(
         return;
       }
 
-      if (!['pending', 'waiting', 'running'].includes(lastMessage.status)) {
-        enqueueId(lastMessage.inventory_id);
-        return;
-      }
-
       const inventory = inventories[index];
       const updatedInventory = {
         ...inventory,
-        isSourceSyncRunning: true,
       };
+
+      if (lastMessage.group_name === 'inventories') {
+        if (lastMessage.status === 'pending_deletion') {
+          updatedInventory.pending_deletion = true;
+        } else if (lastMessage.status === 'deleted') {
+          if (inventories.length === 1) {
+            const params = parseQueryString(qsConfig, location.search);
+            if (params.page > 1) {
+              const newParams = encodeNonDefaultQueryString(
+                qsConfig,
+                replaceParams(params, {
+                  page: params.page - 1,
+                })
+              );
+              history.push(`${location.pathname}?${newParams}`);
+            }
+          } else {
+            fetchInventories();
+          }
+        } else {
+          return;
+        }
+      } else {
+        if (!['pending', 'waiting', 'running'].includes(lastMessage.status)) {
+          enqueueId(lastMessage.inventory_id);
+          return;
+        }
+
+        updatedInventory.isSourceSyncRunning = true;
+      }
+
       setInventories([
         ...inventories.slice(0, index),
         updatedInventory,

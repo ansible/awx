@@ -2,17 +2,23 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   func,
   bool,
+  node,
   number,
   string,
   arrayOf,
   shape,
   checkPropTypes,
 } from 'prop-types';
-import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
+import styled from 'styled-components';
+import { Alert, Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import AlertModal from '../AlertModal';
 import { KebabifiedContext } from '../../contexts/Kebabified';
+
+const WarningMessage = styled(Alert)`
+  margin-top: 10px;
+`;
 
 const requireNameOrUsername = props => {
   const { name, username } = props;
@@ -64,6 +70,7 @@ function ToolbarDeleteButton({
   pluralizedItemName,
   errorMessage,
   onDelete,
+  warningMessage,
   i18n,
 }) {
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
@@ -171,6 +178,9 @@ function ToolbarDeleteButton({
               <br />
             </span>
           ))}
+          {warningMessage && (
+            <WarningMessage variant="warning" isInline title={warningMessage} />
+          )}
         </AlertModal>
       )}
     </>
@@ -182,11 +192,13 @@ ToolbarDeleteButton.propTypes = {
   itemsToDelete: arrayOf(ItemToDelete).isRequired,
   pluralizedItemName: string,
   errorMessage: string,
+  warningMessage: node,
 };
 
 ToolbarDeleteButton.defaultProps = {
   pluralizedItemName: 'Items',
   errorMessage: '',
+  warningMessage: null,
 };
 
 export default withI18n()(ToolbarDeleteButton);

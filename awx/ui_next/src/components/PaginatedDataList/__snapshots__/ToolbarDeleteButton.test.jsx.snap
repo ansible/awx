@@ -7,6 +7,7 @@ exports[`<ToolbarDeleteButton /> should render button 1`] = `
   itemsToDelete={Array []}
   onDelete={[Function]}
   pluralizedItemName="Items"
+  warningMessage={null}
 >
   <Tooltip
     content="Select a row to delete"
