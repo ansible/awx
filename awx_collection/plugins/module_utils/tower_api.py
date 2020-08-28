@@ -594,17 +594,21 @@ class TowerAPIModule(TowerModule):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
-        while not result['json']['finished']:
-            # If we are past our time out fail with a message
-            if timeout and timeout < time.time() - start:
-                self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
-                self.fail_json(**self.json_output)
+        if result['json']['finished'] is None:
+            self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
+            self.fail_json(**self.json_output)
+        else:
+            while not result['json']['finished']:
+                # If we are past our time out fail with a message
+                if timeout and timeout < time.time() - start:
+                    self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
+                    self.fail_json(**self.json_output)
 
-            # Put the process to sleep for our interval
-            time.sleep(interval)
+                # Put the process to sleep for our interval
+                time.sleep(interval)
 
-            result = self.get_endpoint(url)
-            self.json_output['status'] = result['json']['status']
+                result = self.get_endpoint(url)
+                self.json_output['status'] = result['json']['status']
 
         # If the job has failed, we want to raise a task failure for that so we get a non-zero response.
         if result['json']['failed']:
