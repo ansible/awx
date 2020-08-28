@@ -1,6 +1,6 @@
 import React from 'react';
 import { func, shape } from 'prop-types';
-import { Formik } from 'formik';
+import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form } from '@patternfly/react-core';
@@ -11,21 +11,24 @@ import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
 
 function InstanceGroupFormFields({ i18n }) {
+  const [instanceGroupNameField, ,] = useField('name');
   return (
     <>
       <FormField
+        name="name"
         id="instance-group-name"
         label={i18n._(t`Name`)}
-        name="name"
         type="text"
         validate={required(null, i18n)}
         isRequired
+        isDisabled={instanceGroupNameField.value === 'tower'}
       />
       <FormField
         id="instance-group-policy-instance-minimum"
         label={i18n._(t`Policy instance minimum`)}
         name="policy_instance_minimum"
         type="number"
+        min="0"
         validate={minMaxValue(0, 2147483647, i18n)}
         tooltip={i18n._(
           t`Minimum number of instances that will be automatically
@@ -37,6 +40,8 @@ function InstanceGroupFormFields({ i18n }) {
         label={i18n._(t`Policy instance percentage`)}
         name="policy_instance_percentage"
         type="number"
+        min="0"
+        max="100"
         tooltip={i18n._(
           t`Minimum percentage of all instances that will be automatically
           assigned to this group when new instances come online.`

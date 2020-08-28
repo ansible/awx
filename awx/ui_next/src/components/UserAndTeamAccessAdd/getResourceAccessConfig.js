@@ -39,6 +39,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => JobTemplatesAPI.read(queryParams),
+      fetchOptions: () => JobTemplatesAPI.readOptions(),
     },
     {
       selectedResource: 'workflowJobTemplate',
@@ -69,6 +70,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => WorkflowJobTemplatesAPI.read(queryParams),
+      fetchOptions: () => WorkflowJobTemplatesAPI.readOptions(),
     },
     {
       selectedResource: 'credential',
@@ -87,6 +89,7 @@ export default function getResourceAccessConfig(i18n) {
             [`git`, i18n._(t`Git`)],
             [`hg`, i18n._(t`Mercurial`)],
             [`svn`, i18n._(t`Subversion`)],
+            [`archive`, i18n._(t`Remote Archive`)],
             [`insights`, i18n._(t`Red Hat Insights`)],
           ],
         },
@@ -110,6 +113,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => CredentialsAPI.read(queryParams),
+      fetchOptions: () => CredentialsAPI.readOptions(),
     },
     {
       selectedResource: 'inventory',
@@ -136,6 +140,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => InventoriesAPI.read(queryParams),
+      fetchOptions: () => InventoriesAPI.readOptions(),
     },
     {
       selectedResource: 'project',
@@ -154,6 +159,7 @@ export default function getResourceAccessConfig(i18n) {
             [`git`, i18n._(t`Git`)],
             [`hg`, i18n._(t`Mercurial`)],
             [`svn`, i18n._(t`Subversion`)],
+            [`archive`, i18n._(t`Remote Archive`)],
             [`insights`, i18n._(t`Red Hat Insights`)],
           ],
         },
@@ -177,6 +183,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => ProjectsAPI.read(queryParams),
+      fetchOptions: () => ProjectsAPI.readOptions(),
     },
     {
       selectedResource: 'organization',
@@ -203,6 +210,7 @@ export default function getResourceAccessConfig(i18n) {
         },
       ],
       fetchItems: queryParams => OrganizationsAPI.read(queryParams),
+      fetchOptions: () => OrganizationsAPI.readOptions(),
     },
   ];
 }

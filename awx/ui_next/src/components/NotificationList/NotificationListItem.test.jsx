@@ -39,6 +39,21 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     expect(wrapper.find('NotificationListItem')).toMatchSnapshot();
+    expect(wrapper.find('Switch').length).toBe(3);
+  });
+
+  test('shows approvals toggle when configured', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+        showApprovalsToggle
+      />
+    );
+    expect(wrapper.find('Switch').length).toBe(4);
   });
 
   test('displays correct label in correct column', () => {
@@ -58,7 +73,46 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     expect(typeCell.text()).toContain('Slack');
   });
 
-  test('handles start click when toggle is on', () => {
+  test('handles approvals click when toggle is on', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        approvalsTurnedOn
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+        showApprovalsToggle
+      />
+    );
+    wrapper
+      .find('Switch[aria-label="Toggle notification approvals"]')
+      .first()
+      .find('input')
+      .simulate('change');
+    expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'approvals');
+  });
+
+  test('handles approvals click when toggle is off', () => {
+    wrapper = mountWithContexts(
+      <NotificationListItem
+        notification={mockNotif}
+        approvalsTurnedOn={false}
+        toggleNotification={toggleNotification}
+        detailUrl="/foo"
+        canToggleNotifications
+        typeLabels={typeLabels}
+        showApprovalsToggle
+      />
+    );
+    wrapper
+      .find('Switch[aria-label="Toggle notification approvals"]')
+      .find('input')
+      .simulate('change');
+    expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'approvals');
+  });
+
+  test('handles started click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}
@@ -70,14 +124,13 @@ describe('<NotificationListItem canToggleNotifications />', () => {
       />
     );
     wrapper
-      .find('Switch')
-      .first()
+      .find('Switch[aria-label="Toggle notification start"]')
       .find('input')
       .simulate('change');
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'started');
   });
 
-  test('handles start click when toggle is off', () => {
+  test('handles started click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}
@@ -95,7 +148,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'started');
   });
 
-  test('handles error click when toggle is on', () => {
+  test('handles success click when toggle is on', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}
@@ -113,7 +166,7 @@ describe('<NotificationListItem canToggleNotifications />', () => {
     expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'success');
   });
 
-  test('handles error click when toggle is off', () => {
+  test('handles success click when toggle is off', () => {
     wrapper = mountWithContexts(
       <NotificationListItem
         notification={mockNotif}

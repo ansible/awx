@@ -17,20 +17,29 @@ const QS_CONFIG = getQSConfig('notification', {
   order_by: 'name',
 });
 
-function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
+function NotificationList({
+  apiModel,
+  canToggleNotifications,
+  id,
+  i18n,
+  showApprovalsToggle,
+}) {
   const location = useLocation();
-  const [isToggleLoading, setIsToggleLoading] = useState(false);
+  const [loadingToggleIds, setLoadingToggleIds] = useState([]);
   const [toggleError, setToggleError] = useState(null);
 
   const {
-    result: fetchNotificationsResult,
+    result: fetchNotificationsResults,
     result: {
       notifications,
       itemCount,
+      approvalsTemplateIds,
       startedTemplateIds,
       successTemplateIds,
       errorTemplateIds,
       typeLabels,
+      relatedSearchableKeys,
+      searchableKeys,
     },
     error: contentError,
     isLoading,
@@ -43,15 +52,13 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         {
           data: { results: notificationsResults, count: notificationsCount },
         },
-        {
-          data: { actions },
-        },
+        actionsResponse,
       ] = await Promise.all([
         NotificationTemplatesAPI.read(params),
         NotificationTemplatesAPI.readOptions(),
       ]);
 
-      const labels = actions.GET.notification_type.choices.reduce(
+      const labels = actionsResponse.data.actions.GET.notification_type.choices.reduce(
         (map, notifType) => ({ ...map, [notifType[0]]: notifType[1] }),
         {}
       );
@@ -71,22 +78,47 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         apiModel.readNotificationTemplatesError(id, idMatchParams),
       ]);
 
-      return {
+      const rtnObj = {
         notifications: notificationsResults,
         itemCount: notificationsCount,
         startedTemplateIds: startedTemplates.results.map(st => st.id),
         successTemplateIds: successTemplates.results.map(su => su.id),
         errorTemplateIds: errorTemplates.results.map(e => e.id),
         typeLabels: labels,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [apiModel, id, location]),
+
+      if (showApprovalsToggle) {
+        const {
+          data: approvalsTemplates,
+        } = await apiModel.readNotificationTemplatesApprovals(
+          id,
+          idMatchParams
+        );
+        rtnObj.approvalsTemplateIds = approvalsTemplates.results.map(
+          st => st.id
+        );
+      } else {
+        rtnObj.approvalsTemplateIds = [];
+      }
+
+      return rtnObj;
+    }, [apiModel, id, location, showApprovalsToggle]),
     {
       notifications: [],
       itemCount: 0,
+      approvalsTemplateIds: [],
       startedTemplateIds: [],
       successTemplateIds: [],
       errorTemplateIds: [],
       typeLabels: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -99,7 +131,7 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
     isCurrentlyOn,
     status
   ) => {
-    setIsToggleLoading(true);
+    setLoadingToggleIds(loadingToggleIds.concat([notificationId]));
     try {
       if (isCurrentlyOn) {
         await apiModel.disassociateNotificationTemplate(
@@ -108,8 +140,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
           status
         );
         setValue({
-          ...fetchNotificationsResult,
-          [`${status}TemplateIds`]: fetchNotificationsResult[
+          ...fetchNotificationsResults,
+          [`${status}TemplateIds`]: fetchNotificationsResults[
             `${status}TemplateIds`
           ].filter(i => i !== notificationId),
         });
@@ -120,8 +152,8 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
           status
         );
         setValue({
-          ...fetchNotificationsResult,
-          [`${status}TemplateIds`]: fetchNotificationsResult[
+          ...fetchNotificationsResults,
+          [`${status}TemplateIds`]: fetchNotificationsResults[
             `${status}TemplateIds`
           ].concat(notificationId),
         });
@@ -129,7 +161,9 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
     } catch (err) {
       setToggleError(err);
     } finally {
-      setIsToggleLoading(false);
+      setLoadingToggleIds(
+        loadingToggleIds.filter(item => item !== notificationId)
+      );
     }
   };
 
@@ -179,17 +213,24 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={notification => (
           <NotificationListItem
             key={notification.id}
             notification={notification}
             detailUrl={`/notifications/${notification.id}`}
-            canToggleNotifications={canToggleNotifications && !isToggleLoading}
+            canToggleNotifications={
+              canToggleNotifications &&
+              !loadingToggleIds.includes(notification.id)
+            }
             toggleNotification={handleNotificationToggle}
+            approvalsTurnedOn={approvalsTemplateIds.includes(notification.id)}
             errorTurnedOn={errorTemplateIds.includes(notification.id)}
             startedTurnedOn={startedTemplateIds.includes(notification.id)}
             successTurnedOn={successTemplateIds.includes(notification.id)}
             typeLabels={typeLabels}
+            showApprovalsToggle={showApprovalsToggle}
           />
         )}
       />
@@ -197,7 +238,7 @@ function NotificationList({ apiModel, canToggleNotifications, id, i18n }) {
         <AlertModal
           variant="error"
           title={i18n._(t`Error!`)}
-          isOpen={!isToggleLoading}
+          isOpen={loadingToggleIds.length === 0}
           onClose={() => setToggleError(null)}
         >
           {i18n._(t`Failed to toggle notification.`)}
@@ -212,6 +253,11 @@ NotificationList.propTypes = {
   apiModel: shape({}).isRequired,
   id: number.isRequired,
   canToggleNotifications: bool.isRequired,
+  showApprovalsToggle: bool,
+};
+
+NotificationList.defaultProps = {
+  showApprovalsToggle: false,
 };
 
 export default withI18n()(NotificationList);

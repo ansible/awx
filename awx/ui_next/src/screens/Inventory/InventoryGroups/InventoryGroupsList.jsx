@@ -47,7 +47,13 @@ function InventoryGroupsList({ i18n }) {
   const { id: inventoryId } = useParams();
 
   const {
-    result: { groups, groupCount, actions },
+    result: {
+      groups,
+      groupCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchGroups,
@@ -62,12 +68,20 @@ function InventoryGroupsList({ i18n }) {
         groups: response.data.results,
         groupCount: response.data.count,
         actions: actionsResponse.data.actions,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [inventoryId, location]),
     {
       groups: [],
       groupCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -168,6 +182,8 @@ function InventoryGroupsList({ i18n }) {
             key: 'name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderItem={item => (
           <InventoryGroupItem
             key={item.id}
@@ -198,7 +214,7 @@ function InventoryGroupsList({ i18n }) {
               <Tooltip content={renderTooltip()} position="top" key="delete">
                 <div>
                   <Button
-                    variant="danger"
+                    variant="secondary"
                     aria-label={i18n._(t`Delete`)}
                     onClick={toggleModal}
                     isDisabled={

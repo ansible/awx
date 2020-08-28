@@ -70,7 +70,7 @@ EXAMPLES = '''
         last_name: "surname"
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 try:
     import yaml
@@ -111,7 +111,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(
+    module = TowerAPIModule(
         argument_spec=argument_spec,
         required_one_of=[['name', 'settings']],
         mutually_exclusive=[['name', 'settings']],

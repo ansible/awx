@@ -55,10 +55,12 @@ options:
         - The refspec to use for the SCM resource.
       type: str
       default: ''
-    scm_credential:
+    credential:
       description:
         - Name of the credential to use with this SCM resource.
       type: str
+      aliases:
+        - scm_credential
     scm_clean:
       description:
         - Remove local modifications before updating.
@@ -86,11 +88,13 @@ options:
       type: bool
       aliases:
         - scm_allow_override
-    job_timeout:
+    timeout:
       description:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
       default: 0
       type: int
+      aliases:
+        - job_timeout
     custom_virtualenv:
       description:
         - Local absolute file path containing a custom Python virtualenv to use
@@ -157,7 +161,7 @@ EXAMPLES = '''
 
 import time
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def wait_for_project_update(module, last_request):
@@ -188,13 +192,13 @@ def main():
         local_path=dict(),
         scm_branch=dict(default=''),
         scm_refspec=dict(default=''),
-        scm_credential=dict(),
+        credential=dict(aliases=['scm_credential']),
         scm_clean=dict(type='bool', default=False),
         scm_delete_on_update=dict(type='bool', default=False),
         scm_update_on_launch=dict(type='bool', default=False),
         scm_update_cache_timeout=dict(type='int', default=0),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
-        job_timeout=dict(type='int', default=0),
+        timeout=dict(type='int', default=0, aliases=['job_timeout']),
         custom_virtualenv=dict(),
         organization=dict(required=True),
         notification_templates_started=dict(type="list", elements='str'),
@@ -205,7 +209,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -217,13 +221,13 @@ def main():
     local_path = module.params.get('local_path')
     scm_branch = module.params.get('scm_branch')
     scm_refspec = module.params.get('scm_refspec')
-    scm_credential = module.params.get('scm_credential')
+    credential = module.params.get('credential')
     scm_clean = module.params.get('scm_clean')
     scm_delete_on_update = module.params.get('scm_delete_on_update')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
     scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
     allow_override = module.params.get('allow_override')
-    job_timeout = module.params.get('job_timeout')
+    timeout = module.params.get('timeout')
     custom_virtualenv = module.params.get('custom_virtualenv')
     organization = module.params.get('organization')
     state = module.params.get('state')
@@ -231,8 +235,8 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
-    if scm_credential is not None and state != 'absent':
-        scm_credential_id = module.resolve_name_to_id('credentials', scm_credential)
+    if credential is not None and state != 'absent':
+        credential = module.resolve_name_to_id('credentials', credential)
 
     # Attempt to look up project based on the provided name and org ID
     project = module.get_one('projects', **{
@@ -276,7 +280,7 @@ def main():
         'scm_refspec': scm_refspec,
         'scm_clean': scm_clean,
         'scm_delete_on_update': scm_delete_on_update,
-        'timeout': job_timeout,
+        'timeout': timeout,
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
@@ -284,8 +288,8 @@ def main():
     }
     if description is not None:
         project_fields['description'] = description
-    if scm_credential is not None:
-        project_fields['credential'] = scm_credential_id
+    if credential is not None:
+        project_fields['credential'] = credential
     if allow_override is not None:
         project_fields['allow_override'] = allow_override
     if scm_type == '':

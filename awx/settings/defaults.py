@@ -310,7 +310,7 @@ REST_FRAMEWORK = {
         'awx.api.parsers.JSONParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+        'awx.api.renderers.DefaultJSONRenderer',
         'awx.api.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
@@ -916,7 +916,7 @@ ASGI_APPLICATION = "awx.main.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "awx.main.consumers.ExpiringRedisChannelLayer",
         "CONFIG": {
             "hosts": [BROKER_URL],
             "capacity": 10000,

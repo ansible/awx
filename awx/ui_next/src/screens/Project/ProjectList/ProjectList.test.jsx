@@ -61,6 +61,24 @@ const mockProjects = [
       },
     },
   },
+  {
+    id: 4,
+    name: 'Project 4',
+    url: '/api/v2/projects/4',
+    type: 'project',
+    scm_type: 'archive',
+    scm_revision: 'odsd9ajf8aagjisooajfij34ikdj3fs994s4daiaos7',
+    summary_fields: {
+      last_job: {
+        id: 9004,
+        status: 'successful',
+      },
+      user_capabilities: {
+        delete: false,
+        update: false,
+      },
+    },
+  },
 ];
 
 describe('<ProjectList />', () => {
@@ -94,7 +112,7 @@ describe('<ProjectList />', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find('ProjectListItem')).toHaveLength(3);
+    expect(wrapper.find('ProjectListItem')).toHaveLength(4);
   });
 
   test('should select project when checked', async () => {
@@ -133,7 +151,7 @@ describe('<ProjectList />', () => {
     wrapper.update();
 
     const items = wrapper.find('ProjectListItem');
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
     items.forEach(item => {
       expect(item.prop('isSelected')).toEqual(true);
     });

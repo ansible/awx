@@ -1336,6 +1336,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
             errors['local_path'] = _('This path is already being used by another manual project.')
+        if attrs.get('scm_branch') and scm_type == 'archive':
+            errors['scm_branch'] = _('SCM branch cannot be used with archive projects.')
         if attrs.get('scm_refspec') and scm_type != 'git':
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
 

@@ -42,6 +42,7 @@ function OptionsList({
   renderItemChip,
   isLoading,
   i18n,
+  displayKey,
 }) {
   return (
     <ModalList>
@@ -52,6 +53,7 @@ function OptionsList({
           onRemove={item => deselectItem(item)}
           isReadOnly={readOnly}
           renderItemChip={renderItemChip}
+          displayKey={displayKey}
         />
       )}
       <PaginatedDataList
@@ -70,8 +72,8 @@ function OptionsList({
           <CheckboxListItem
             key={item.id}
             itemId={item.id}
-            name={multiple ? item.name : name}
-            label={item.name}
+            name={multiple ? item[displayKey] : name}
+            label={item[displayKey]}
             isSelected={value.some(i => i.id === item.id)}
             onSelect={() => selectItem(item)}
             onDeselect={() => deselectItem(item)}
@@ -91,22 +93,24 @@ const Item = shape({
   url: string,
 });
 OptionsList.propTypes = {
-  value: arrayOf(Item).isRequired,
-  options: arrayOf(Item).isRequired,
-  optionCount: number.isRequired,
-  searchColumns: SearchColumns,
-  sortColumns: SortColumns,
-  multiple: bool,
-  qsConfig: QSConfig.isRequired,
-  selectItem: func.isRequired,
   deselectItem: func.isRequired,
+  displayKey: string,
+  multiple: bool,
+  optionCount: number.isRequired,
+  options: arrayOf(Item).isRequired,
+  qsConfig: QSConfig.isRequired,
   renderItemChip: func,
+  searchColumns: SearchColumns,
+  selectItem: func.isRequired,
+  sortColumns: SortColumns,
+  value: arrayOf(Item).isRequired,
 };
 OptionsList.defaultProps = {
   multiple: false,
   renderItemChip: null,
   searchColumns: [],
   sortColumns: [],
+  displayKey: 'name',
 };
 
 export default withI18n()(OptionsList);

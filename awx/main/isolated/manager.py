@@ -58,7 +58,7 @@ class IsolatedManager(object):
                 os.chmod(temp.name, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             for host in hosts:
                 inventory['all']['hosts'][host] = {
-                    "ansible_connection": "community.kubernetes.kubectl",
+                    "ansible_connection": "kubectl",
                     "ansible_kubectl_config": path,
                 }
         else:

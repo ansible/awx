@@ -19,7 +19,7 @@ export default function UserOrganizationListItem({ organization }) {
                 to={`/organizations/${organization.id}/details`}
                 id={labelId}
               >
-                {organization.name}
+                <b>{organization.name}</b>
               </Link>
             </DataListCell>,
             <DataListCell key={organization.description}>

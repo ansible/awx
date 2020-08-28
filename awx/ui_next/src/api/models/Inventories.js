@@ -7,6 +7,7 @@ class Inventories extends InstanceGroupsMixin(Base) {
     this.baseUrl = '/api/v2/inventories/';
 
     this.readAccessList = this.readAccessList.bind(this);
+    this.readAccessOptions = this.readAccessOptions.bind(this);
     this.readHosts = this.readHosts.bind(this);
     this.readHostDetail = this.readHostDetail.bind(this);
     this.readGroups = this.readGroups.bind(this);
@@ -18,6 +19,10 @@ class Inventories extends InstanceGroupsMixin(Base) {
     return this.http.get(`${this.baseUrl}${id}/access_list/`, {
       params,
     });
+  }
+
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
   }
 
   createHost(id, data) {

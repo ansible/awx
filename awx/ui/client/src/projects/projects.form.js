@@ -124,7 +124,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
+                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights' && scm_type.value !== 'archive'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
                 awPopOver: '<p>' + i18n._("Branch to checkout.  In addition to branches, you can input tags, commit hashes, and arbitrary refs.  Some commit hashes and refs may not be availble unless you also provide a custom refspec.") + '</p>',
                 dataTitle: i18n._('SCM Branch'),

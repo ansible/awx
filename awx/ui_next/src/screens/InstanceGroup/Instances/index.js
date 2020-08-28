@@ -1,1 +1,2 @@
-export { default } from './Instances';
+export { default as InstanceList } from './InstanceList';
+export { default as InstanceListItem } from './InstanceListItem';

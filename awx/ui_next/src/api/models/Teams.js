@@ -35,6 +35,10 @@ class Teams extends Base {
     });
   }
 
+  readAccessOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/access_list/`);
+  }
+
   readUsersAccessOptions(teamId) {
     return this.http.options(`${this.baseUrl}${teamId}/users/`);
   }

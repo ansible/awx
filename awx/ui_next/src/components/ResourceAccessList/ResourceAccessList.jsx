@@ -26,22 +26,33 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
   const location = useLocation();
 
   const {
-    result: { accessRecords, itemCount },
+    result: { accessRecords, itemCount, relatedSearchableKeys, searchableKeys },
     error: contentError,
     isLoading,
     request: fetchAccessRecords,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const response = await apiModel.readAccessList(resource.id, params);
+      const [response, actionsResponse] = await Promise.all([
+        apiModel.readAccessList(resource.id, params),
+        apiModel.readAccessOptions(resource.id),
+      ]);
       return {
         accessRecords: response.data.results,
         itemCount: response.data.count,
+        relatedSearchableKeys: (
+          actionsResponse?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [apiModel, location, resource.id]),
     {
       accessRecords: [],
       itemCount: 0,
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -106,6 +117,8 @@ function ResourceAccessList({ i18n, apiModel, resource }) {
             key: 'last_name',
           },
         ]}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
         renderToolbar={props => (
           <DataListToolbar
             {...props}

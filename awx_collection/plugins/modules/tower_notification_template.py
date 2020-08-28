@@ -15,7 +15,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: tower_notification
+module: tower_notification_template
 author: "Samuel Carpentier (@samcarpentier)"
 short_description: create, update, or destroy Ansible Tower notification.
 description:
@@ -203,7 +203,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add Slack notification with custom messages
-  tower_notification:
+  tower_notification_template:
     name: slack notification
     organization: Default
     notification_type: slack
@@ -222,7 +222,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add webhook notification
-  tower_notification:
+  tower_notification_template:
     name: webhook notification
     notification_type: webhook
     notification_configuration:
@@ -233,7 +233,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add email notification
-  tower_notification:
+  tower_notification_template:
     name: email notification
     notification_type: email
     notification_configuration:
@@ -250,7 +250,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add twilio notification
-  tower_notification:
+  tower_notification_template:
     name: twilio notification
     notification_type: twilio
     notification_configuration:
@@ -263,7 +263,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add PagerDuty notification
-  tower_notification:
+  tower_notification_template:
     name: pagerduty notification
     notification_type: pagerduty
     notification_configuration:
@@ -275,7 +275,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Add IRC notification
-  tower_notification:
+  tower_notification_template:
     name: irc notification
     notification_type: irc
     notification_configuration:
@@ -290,7 +290,7 @@ EXAMPLES = '''
     tower_config_file: "~/tower_cli.cfg"
 
 - name: Delete notification
-  tower_notification:
+  tower_notification_template:
     name: old notification
     state: absent
     tower_config_file: "~/tower_cli.cfg"
@@ -300,7 +300,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 OLD_INPUT_NAMES = (
     'username', 'sender', 'recipients', 'use_tls',
@@ -355,7 +355,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
