@@ -598,7 +598,6 @@ class TowerAPIModule(TowerModule):
             # If we are past our time out fail with a message
             if timeout and timeout < time.time() - start:
                 self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
-                # Format data to keep legacy compatability.
                 self.wait_output(result)
                 self.fail_json(**self.json_output)
 
@@ -611,7 +610,6 @@ class TowerAPIModule(TowerModule):
         # If the job has failed, we want to raise a task failure for that so we get a non-zero response.
         if result['json']['failed']:
             self.json_output['msg'] = 'The {0} "{1}" failed'.format(object_type, object_name)
-            # Format data to keep legacy compatability.
             self.wait_output(result)
             self.fail_json(**self.json_output)
 
@@ -620,6 +618,5 @@ class TowerAPIModule(TowerModule):
         return result
 
     def wait_output(self, response):
-        # Format data to keep legacy compatability.
         for k in ('id', 'status', 'elapsed', 'started', 'finished'):
             self.json_output[k] = response['json'].get(k)
