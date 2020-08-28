@@ -60,7 +60,7 @@ def main():
         organization=dict()
     )
 
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     name = module.params.get('name')
 
