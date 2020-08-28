@@ -595,7 +595,7 @@ class TowerAPIModule(TowerModule):
         start = time.time()
         result = self.get_endpoint(url)
         if result['json']['finished'] is None:
-            self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
+            self.json_output['msg'] = 'Finished was not returned in the request of {0}'.format(url)
             self.fail_json(**self.json_output)
         else:
             while not result['json']['finished']:
