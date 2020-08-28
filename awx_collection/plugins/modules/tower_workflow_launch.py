@@ -179,9 +179,9 @@ def main():
         
     # Invoke wait function
     module.wait_on_url(
+        url=result['json']['url'],
         object_name=name,
         object_type='workflow_job',
-        url=result['json']['url'],
         timeout=timeout, interval=interval
     )
 

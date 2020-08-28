@@ -141,14 +141,17 @@ def main():
 
     # Invoke wait function
     result = module.wait_on_url(
+        url=job['url'],
         object_name=job_id,
         object_type='job',
-        url=job['url'],
         timeout=timeout, interval=interval
     )
 
-    module.exit_json(**module.json_output)
+    # Format data to keep legacy compatability. 
+    for k in ('id', 'status', 'elapsed', 'started', 'finished'):
+        module.json_output[k] = result['json'].get(k)
 
+    module.exit_json(**module.json_output)
 
 if __name__ == '__main__':
     main()

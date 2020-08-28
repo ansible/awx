@@ -247,9 +247,9 @@ def main():
 
     # Invoke wait function
     results = module.wait_on_url(
+        url=results['json']['url'],
         object_name=name,
         object_type='job',
-        url=results['json']['url'],
         timeout=timeout, interval=interval
     )
 

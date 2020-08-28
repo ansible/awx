@@ -590,7 +590,7 @@ class TowerAPIModule(TowerModule):
         else:
             return True
 
-    def wait_on_url(self, object_name=None, object_type=None, url=None, timeout=None, interval=None):
+    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=10):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
