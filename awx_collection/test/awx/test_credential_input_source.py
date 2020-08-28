@@ -122,7 +122,8 @@ def source_cred_hashi_secret(organization):
             "url": "https://secret.hash.example.com",
             "token": "myApiKey",
             "role_id": "role",
-            "secret_id": "secret"
+            "secret_id": "secret",
+            "approle_auth_path": "path-to-approle"
         }
     )
 
@@ -157,6 +158,8 @@ def test_hashi_secret_credential_source(run_module, admin_user, organization, so
     assert cis.metadata['secret_backend'] == "backend"
     assert cis.metadata['secret_key'] == "a_key"
     assert cis.source_credential.name == source_cred_hashi_secret.name
+    assert cis.source_credential.approle_auth_path == \
+           source_cred_hashi_secret.inputs["approle_auth_path"]
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
