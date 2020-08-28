@@ -13,6 +13,9 @@ const nodeResource = {
   id: 448,
   type: 'job_template',
   name: 'Test JT',
+  summary_fields: {
+    credentials: [],
+  },
 };
 
 const workflowContext = {

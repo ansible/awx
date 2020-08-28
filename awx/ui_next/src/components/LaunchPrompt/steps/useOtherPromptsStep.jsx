@@ -1,31 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
 import OtherPromptsStep from './OtherPromptsStep';
-import StepName from './StepName';
 
 const STEP_ID = 'other';
 
-export default function useOtherPrompt(config, resource, visitedSteps, i18n) {
-  const [stepErrors, setStepErrors] = useState({});
-
-  const validate = values => {
-    const errors = {};
-    if (config.ask_job_type_on_launch && !values.job_type) {
-      errors.job_type = i18n._(t`This field must not be blank`);
-    }
-    setStepErrors(errors);
-    return errors;
-  };
-
-  const hasErrors = visitedSteps[STEP_ID] && Object.keys(stepErrors).length > 0;
-
+export default function useOtherPrompt(
+  config,
+  visitedSteps,
+  i18n,
+  loadedResource,
+  currentResource
+) {
   return {
-    step: getStep(config, hasErrors, i18n),
-    initialValues: getInitialValues(config, resource),
-    validate,
+    step: getStep(config, i18n),
+    initialValues: getInitialValues(config, loadedResource, currentResource),
     isReady: true,
     contentError: null,
-    formError: stepErrors,
+    formError: null,
     setTouched: setFieldsTouched => {
       setFieldsTouched({
         job_type: true,
@@ -40,14 +31,16 @@ export default function useOtherPrompt(config, resource, visitedSteps, i18n) {
   };
 }
 
-function getStep(config, hasErrors, i18n) {
+function getStep(config, i18n) {
   if (!shouldShowPrompt(config)) {
     return null;
   }
   return {
     id: STEP_ID,
-    name: <StepName hasErrors={hasErrors}>{i18n._(t`Other Prompts`)}</StepName>,
+    key: 5,
+    name: i18n._(t`Other Prompts`),
     component: <OtherPromptsStep config={config} i18n={i18n} />,
+    enableNext: true,
   };
 }
 
@@ -64,31 +57,42 @@ function shouldShowPrompt(config) {
   );
 }
 
-function getInitialValues(config, resource) {
+function getInitialValues(config, loadedResource, currentResource) {
+  if (!config) {
+    return {};
+  }
+
   const initialValues = {};
   if (config.ask_job_type_on_launch) {
-    initialValues.job_type = resource.job_type || '';
+    initialValues.job_type =
+      currentResource?.job_type || loadedResource?.job_type || '';
   }
   if (config.ask_limit_on_launch) {
-    initialValues.limit = resource.limit || '';
+    initialValues.limit = currentResource?.limit || loadedResource?.limit || '';
   }
   if (config.ask_verbosity_on_launch) {
-    initialValues.verbosity = resource.verbosity || 0;
+    initialValues.verbosity =
+      currentResource?.verbosity || loadedResource?.verbosity || 0;
   }
   if (config.ask_tags_on_launch) {
-    initialValues.job_tags = resource.job_tags || '';
+    initialValues.job_tags =
+      currentResource?.job_tags || loadedResource?.job_tags || '';
   }
   if (config.ask_skip_tags_on_launch) {
-    initialValues.skip_tags = resource.skip_tags || '';
+    initialValues.skip_tags =
+      currentResource?.skip_tags || loadedResource?.skip_tags || '';
   }
   if (config.ask_variables_on_launch) {
-    initialValues.extra_vars = resource.extra_vars || '---';
+    initialValues.extra_vars =
+      currentResource?.extra_vars || loadedResource.extra_vars || '---';
   }
   if (config.ask_scm_branch_on_launch) {
-    initialValues.scm_branch = resource.scm_branch || '';
+    initialValues.scm_branch =
+      currentResource?.scm_branch || loadedResource?.scm_branch || '';
   }
   if (config.ask_diff_mode_on_launch) {
-    initialValues.diff_mode = resource.diff_mode || false;
+    initialValues.diff_mode =
+      currentResource?.diff_mode || loadedResource?.diff_mode || false;
   }
   return initialValues;
 }

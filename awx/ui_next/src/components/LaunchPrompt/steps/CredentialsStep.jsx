@@ -162,7 +162,7 @@ function CredentialsStep({ i18n }) {
           header={i18n._(t`Credentials`)}
           name="credentials"
           qsConfig={QS_CONFIG}
-          readOnly={false}
+          readOnly
           selectItem={item => {
             const hasSameVaultID = val =>
               val?.inputs?.vault_id !== undefined &&

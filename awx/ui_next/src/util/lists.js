@@ -14,5 +14,9 @@ export function getAddedAndRemoved(original, current) {
       added.push(cur);
     }
   });
-  return { added, removed };
+
+  return {
+    added,
+    removed
+  };
 }

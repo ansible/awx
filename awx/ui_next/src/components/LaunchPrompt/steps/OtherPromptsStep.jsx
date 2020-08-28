@@ -108,6 +108,7 @@ function JobTypeField({ i18n }) {
       and report problems without executing the playbook.`)}
         />
       }
+      isRequired
       validated={isValid ? 'default' : 'error'}
     >
       <AnsibleSelect

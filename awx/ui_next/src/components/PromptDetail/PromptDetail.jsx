@@ -89,6 +89,13 @@ function PromptDetail({ i18n, resource, launchConfig = {}, overrides = {} }) {
 
   const details = omitOverrides(resource, overrides);
   const hasOverrides = Object.keys(overrides).length > 0;
+  Object.entries(overrides).forEach(item => {
+    if (item[0].startsWith('survey')) {
+      overrides.extra_vars = overrides.extra_vars.concat(
+        `\n${item[0]}: ${item[1]}`
+      );
+    }
+  });
 
   return (
     <>

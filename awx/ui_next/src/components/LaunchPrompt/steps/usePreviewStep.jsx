@@ -6,26 +6,35 @@ const STEP_ID = 'preview';
 
 export default function usePreviewStep(
   config,
-  resource,
+  loadedResource,
   survey,
   formErrors,
-  i18n
+  i18n,
+  currentResource,
+  needsPreviewStep
 ) {
+  const resource = loadedResource || currentResource;
+  const showStep =
+    resource && needsPreviewStep && Object.keys(config).length > 0;
+
   return {
-    step: {
-      id: STEP_ID,
-      name: i18n._(t`Preview`),
-      component: (
-        <PreviewStep
-          config={config}
-          resource={resource}
-          survey={survey}
-          formErrors={formErrors}
-        />
-      ),
-      enableNext: Object.keys(formErrors).length === 0,
-      nextButtonText: i18n._(t`Launch`),
-    },
+    step: showStep
+      ? {
+          id: STEP_ID,
+          key: 7,
+          name: i18n._(t`Preview`),
+          component: (
+            <PreviewStep
+              config={config}
+              resource={resource}
+              survey={survey}
+              formErrors={formErrors}
+            />
+          ),
+          enableNext: Object.keys(formErrors).length === 0,
+          nextButtonText: i18n._(t`Launch`),
+        }
+      : null,
     initialValues: {},
     validate: () => ({}),
     isReady: true,

@@ -1,4 +1,6 @@
-import { t } from '@lingui/macro';
+import {
+  t
+} from '@lingui/macro';
 
 export function initReducer() {
   return {
@@ -39,8 +41,8 @@ export default function visualizerReducer(state, action) {
       return {
         ...state,
         addNodeSource: null,
-        addNodeTarget: null,
-        nodeToEdit: null,
+          addNodeTarget: null,
+          nodeToEdit: null,
       };
     case 'DELETE_ALL_NODES':
       return deleteAllNodes(state);
@@ -55,32 +57,63 @@ export default function visualizerReducer(state, action) {
     case 'SELECT_SOURCE_FOR_LINKING':
       return selectSourceForLinking(state, action.node);
     case 'SET_ADD_LINK_TARGET_NODE':
-      return { ...state, addLinkTargetNode: action.value };
+      return {
+        ...state,
+        addLinkTargetNode: action.value,
+      };
     case 'SET_CONTENT_ERROR':
-      return { ...state, contentError: action.value };
+      return {
+        ...state,
+        contentError: action.value,
+      };
     case 'SET_IS_LOADING':
-      return { ...state, isLoading: action.value };
+      return {
+        ...state,
+        isLoading: action.value,
+      };
     case 'SET_LINK_TO_DELETE':
-      return { ...state, linkToDelete: action.value };
+      return {
+        ...state,
+        linkToDelete: action.value,
+      };
     case 'SET_LINK_TO_EDIT':
-      return { ...state, linkToEdit: action.value };
+      return {
+        ...state, linkToEdit: action.value
+      };
     case 'SET_NODES':
-      return { ...state, nodes: action.value };
+      return {
+        ...state, nodes: action.value
+      };
     case 'SET_NODE_POSITIONS':
-      return { ...state, nodePositions: action.value };
+      return {
+        ...state,
+        nodePositions: action.value,
+      };
     case 'SET_NODE_TO_DELETE':
-      return { ...state, nodeToDelete: action.value };
+      return {
+        ...state,
+        nodeToDelete: action.value,
+      };
     case 'SET_NODE_TO_EDIT':
-      return { ...state, nodeToEdit: action.value };
+      return {
+        ...state,
+        nodeToEdit: action.value,
+      };
     case 'SET_NODE_TO_VIEW':
-      return { ...state, nodeToView: action.value };
+      return {
+        ...state,
+        nodeToView: action.value,
+      };
     case 'SET_SHOW_DELETE_ALL_NODES_MODAL':
-      return { ...state, showDeleteAllNodesModal: action.value };
+      return {
+        ...state,
+        showDeleteAllNodesModal: action.value,
+      };
     case 'START_ADD_NODE':
       return {
         ...state,
         addNodeSource: action.sourceNodeId,
-        addNodeTarget: action.targetNodeId || null,
+          addNodeTarget: action.targetNodeId || null,
       };
     case 'START_DELETE_LINK':
       return startDeleteLink(state, action.link);
@@ -104,7 +137,12 @@ export default function visualizerReducer(state, action) {
 }
 
 function createLink(state, linkType) {
-  const { addLinkSourceNode, addLinkTargetNode, links, nodes } = state;
+  const {
+    addLinkSourceNode,
+    addLinkTargetNode,
+    links,
+    nodes
+  } = state;
   const newLinks = [...links];
   const newNodes = [...nodes];
 
@@ -113,8 +151,12 @@ function createLink(state, linkType) {
   });
 
   newLinks.push({
-    source: { id: addLinkSourceNode.id },
-    target: { id: addLinkTargetNode.id },
+    source: {
+      id: addLinkSourceNode.id,
+    },
+    target: {
+      id: addLinkTargetNode.id,
+    },
     linkType,
   });
 
@@ -137,7 +179,13 @@ function createLink(state, linkType) {
 }
 
 function createNode(state, node) {
-  const { addNodeSource, addNodeTarget, links, nodes, nextNodeId } = state;
+  const {
+    addNodeSource,
+    addNodeTarget,
+    links,
+    nodes,
+    nextNodeId
+  } = state;
   const newNodes = [...nodes];
   const newLinks = [...links];
 
@@ -145,6 +193,7 @@ function createNode(state, node) {
     id: nextNodeId,
     unifiedJobTemplate: node.nodeResource,
     isInvalidLinkTarget: false,
+    promptValues: node.promptValues,
   });
 
   // Ensures that root nodes appear to always run
@@ -154,8 +203,12 @@ function createNode(state, node) {
   }
 
   newLinks.push({
-    source: { id: addNodeSource },
-    target: { id: nextNodeId },
+    source: {
+      id: addNodeSource,
+    },
+    target: {
+      id: nextNodeId,
+    },
     linkType: node.linkType,
   });
 
@@ -165,7 +218,9 @@ function createNode(state, node) {
         linkToCompare.source.id === addNodeSource &&
         linkToCompare.target.id === addNodeTarget
       ) {
-        linkToCompare.source = { id: nextNodeId };
+        linkToCompare.source = {
+          id: nextNodeId,
+        };
       }
     });
   }
@@ -182,7 +237,9 @@ function createNode(state, node) {
 }
 
 function cancelLink(state) {
-  const { nodes } = state;
+  const {
+    nodes
+  } = state;
   const newNodes = [...nodes];
 
   newNodes.forEach(node => {
@@ -200,7 +257,9 @@ function cancelLink(state) {
 }
 
 function deleteAllNodes(state) {
-  const { nodes } = state;
+  const {
+    nodes
+  } = state;
   return {
     ...state,
     addLinkSourceNode: null,
@@ -220,10 +279,13 @@ function deleteAllNodes(state) {
 }
 
 function deleteLink(state) {
-  const { links, linkToDelete } = state;
+  const {
+    links,
+    linkToDelete
+  } = state;
   const newLinks = [...links];
 
-  for (let i = newLinks.length; i--; ) {
+  for (let i = newLinks.length; i--;) {
     const link = newLinks[i];
 
     if (
@@ -268,15 +330,23 @@ function addLinksFromParentsToChildren(
         // doesn't have any other parents
         if (linkParentMapping[child.id].length === 1) {
           newLinks.push({
-            source: { id: parentId },
-            target: { id: child.id },
+            source: {
+              id: parentId,
+            },
+            target: {
+              id: child.id,
+            },
             linkType: 'always',
           });
         }
       } else if (!linkParentMapping[child.id].includes(parentId)) {
         newLinks.push({
-          source: { id: parentId },
-          target: { id: child.id },
+          source: {
+            id: parentId,
+          },
+          target: {
+            id: child.id,
+          },
           linkType: child.linkType,
         });
       }
@@ -291,7 +361,7 @@ function removeLinksFromDeletedNode(
   children,
   parents
 ) {
-  for (let i = newLinks.length; i--; ) {
+  for (let i = newLinks.length; i--;) {
     const link = newLinks[i];
 
     if (!linkParentMapping[link.target.id]) {
@@ -302,7 +372,10 @@ function removeLinksFromDeletedNode(
 
     if (link.source.id === nodeId || link.target.id === nodeId) {
       if (link.source.id === nodeId) {
-        children.push({ id: link.target.id, linkType: link.linkType });
+        children.push({
+          id: link.target.id,
+          linkType: link.linkType,
+        });
       } else if (link.target.id === nodeId) {
         parents.push(link.source.id);
       }
@@ -312,7 +385,11 @@ function removeLinksFromDeletedNode(
 }
 
 function deleteNode(state) {
-  const { links, nodes, nodeToDelete } = state;
+  const {
+    links,
+    nodes,
+    nodeToDelete
+  } = state;
 
   const nodeId = nodeToDelete.id;
   const newNodes = [...nodes];
@@ -349,14 +426,12 @@ function generateNodes(workflowNodes, i18n) {
   const chartNodeIdToIndexMapping = {};
   const nodeIdToChartNodeIdMapping = {};
   let nodeIdCounter = 2;
-  const arrayOfNodesForChart = [
-    {
-      id: 1,
-      unifiedJobTemplate: {
-        name: i18n._(t`START`),
-      },
+  const arrayOfNodesForChart = [{
+    id: 1,
+    unifiedJobTemplate: {
+      name: i18n._(t `START`),
     },
-  ];
+  }, ];
   workflowNodes.forEach(node => {
     node.workflowMakerNodeId = nodeIdCounter;
 
@@ -473,7 +548,10 @@ function generateNodesAndLinks(state, workflowNodes, i18n) {
 }
 
 function selectSourceForLinking(state, sourceNode) {
-  const { links, nodes } = state;
+  const {
+    links,
+    nodes
+  } = state;
   const newNodes = [...nodes];
   const parentMap = {};
   const invalidLinkTargetIds = [];
@@ -524,7 +602,9 @@ function selectSourceForLinking(state, sourceNode) {
 }
 
 function startDeleteLink(state, link) {
-  const { links } = state;
+  const {
+    links
+  } = state;
   const parentMap = {};
   links.forEach(existingLink => {
     if (!parentMap[existingLink.target.id]) {
@@ -542,7 +622,9 @@ function startDeleteLink(state, link) {
 }
 
 function toggleDeleteAllNodesModal(state) {
-  const { showDeleteAllNodesModal } = state;
+  const {
+    showDeleteAllNodesModal
+  } = state;
   return {
     ...state,
     showDeleteAllNodesModal: !showDeleteAllNodesModal,
@@ -550,7 +632,9 @@ function toggleDeleteAllNodesModal(state) {
 }
 
 function toggleLegend(state) {
-  const { showLegend } = state;
+  const {
+    showLegend
+  } = state;
   return {
     ...state,
     showLegend: !showLegend,
@@ -558,7 +642,9 @@ function toggleLegend(state) {
 }
 
 function toggleTools(state) {
-  const { showTools } = state;
+  const {
+    showTools
+  } = state;
   return {
     ...state,
     showTools: !showTools,
@@ -566,7 +652,9 @@ function toggleTools(state) {
 }
 
 function toggleUnsavedChangesModal(state) {
-  const { showUnsavedChangesModal } = state;
+  const {
+    showUnsavedChangesModal
+  } = state;
   return {
     ...state,
     showUnsavedChangesModal: !showUnsavedChangesModal,
@@ -574,7 +662,10 @@ function toggleUnsavedChangesModal(state) {
 }
 
 function updateLink(state, linkType) {
-  const { linkToEdit, links } = state;
+  const {
+    linkToEdit,
+    links
+  } = state;
   const newLinks = [...links];
 
   newLinks.forEach(link => {
@@ -595,12 +686,16 @@ function updateLink(state, linkType) {
 }
 
 function updateNode(state, editedNode) {
-  const { nodeToEdit, nodes } = state;
+  const {
+    nodeToEdit,
+    nodes
+  } = state;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToEdit.id);
   matchingNode.unifiedJobTemplate = editedNode.nodeResource;
   matchingNode.isEdited = true;
+  matchingNode.promptValues = editedNode.promptValues
 
   return {
     ...state,
@@ -611,7 +706,10 @@ function updateNode(state, editedNode) {
 }
 
 function refreshNode(state, refreshedNode) {
-  const { nodeToView, nodes } = state;
+  const {
+    nodeToView,
+    nodes
+  } = state;
   const newNodes = [...nodes];
 
   const matchingNode = newNodes.find(node => node.id === nodeToView.id);
