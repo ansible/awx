@@ -594,25 +594,32 @@ class TowerAPIModule(TowerModule):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
-        if result['json']['finished'] is None:
-            self.json_output['msg'] = 'Finished was not returned in the request of {0}'.format(url)
-            self.fail_json(**self.json_output)
-        else:
-            while not result['json']['finished']:
-                # If we are past our time out fail with a message
-                if timeout and timeout < time.time() - start:
-                    self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
-                    self.fail_json(**self.json_output)
+        while not result['json']['finished']:
+            # If we are past our time out fail with a message
+            if timeout and timeout < time.time() - start:
+                self.json_output['msg'] = 'Monitoring of {0} "{1}" aborted due to timeout'.format(object_type, object_name)
+                # Format data to keep legacy compatability.
+                self.wait_output(result)
+                self.fail_json(**self.json_output)
 
-                # Put the process to sleep for our interval
-                time.sleep(interval)
+            # Put the process to sleep for our interval
+            time.sleep(interval)
 
-                result = self.get_endpoint(url)
-                self.json_output['status'] = result['json']['status']
+            result = self.get_endpoint(url)
+            self.json_output['status'] = result['json']['status']
 
         # If the job has failed, we want to raise a task failure for that so we get a non-zero response.
         if result['json']['failed']:
             self.json_output['msg'] = 'The {0} "{1}" failed'.format(object_type, object_name)
+            # Format data to keep legacy compatability.
+            self.wait_output(result)
             self.fail_json(**self.json_output)
 
+        self.wait_output(result)
+
         return result
+
+    def wait_output(self, response):
+        # Format data to keep legacy compatability.
+        for k in ('id', 'status', 'elapsed', 'started', 'finished'):
+            self.json_output[k] = response['json'].get(k)

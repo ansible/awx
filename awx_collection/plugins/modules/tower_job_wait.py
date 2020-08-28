@@ -147,10 +147,6 @@ def main():
         timeout=timeout, interval=interval
     )
 
-    # Format data to keep legacy compatability. 
-    for k in ('id', 'status', 'elapsed', 'started', 'finished'):
-        module.json_output[k] = result['json'].get(k)
-
     module.exit_json(**module.json_output)
 
 if __name__ == '__main__':
