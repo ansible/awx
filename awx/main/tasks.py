@@ -73,7 +73,6 @@ from awx.main.utils import (update_scm_url,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.common import get_custom_venv_choices
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -1064,30 +1063,18 @@ class BaseTask(object):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def add_ansible_venv(self, venv_path, env, isolated=False):
-        env['VIRTUAL_ENV'] = venv_path
-        env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
-        venv_libdir = os.path.join(venv_path, "lib")
-
-        if not isolated and (
-            not os.path.exists(venv_libdir) or
-            os.path.join(venv_path, '') not in get_custom_venv_choices()
-        ):
-            raise InvalidVirtualenvError(_(
-                'Invalid virtual environment selected: {}'.format(venv_path)
-            ))
-
-        isolated_manager.set_pythonpath(venv_libdir, env)
-
     def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
-        env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
+        if 'PATH' in env:
+            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
+        else:
+            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin")
 
     def build_env(self, instance, private_data_dir, isolated, private_data_files=None):
         '''
         Build environment dictionary for ansible-playbook.
         '''
-        env = dict(os.environ.items())
+        env = {}
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
             if attr == attr.upper() and attr.startswith('ANSIBLE_'):
@@ -1095,14 +1082,6 @@ class BaseTask(object):
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
             env[key] = str(value)
-        # Set environment variables needed for inventory and job event
-        # callbacks to work.
-        # Update PYTHONPATH to use local site-packages.
-        # NOTE:
-        # Derived class should call add_ansible_venv() or add_awx_venv()
-        if self.should_use_proot(instance):
-            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
-        env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
         return env
 
     def should_use_resource_profiling(self, job):
@@ -1690,7 +1669,6 @@ class RunJob(BaseTask):
                                             private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
-        self.add_ansible_venv(job.ansible_virtualenv_path, env, isolated=isolated)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1709,7 +1687,8 @@ class RunJob(BaseTask):
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
-        env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = cp_dir
+        # FIXME: more elegant way to manage this path in container
+        env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = '/runner/cp'
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
@@ -1746,7 +1725,8 @@ class RunJob(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            paths = [os.path.join(private_data_dir, folder)] + paths
+            # FIXME: again, figure out more elegant way for inside container
+            paths = [os.path.join('/runner', folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -2076,7 +2056,6 @@ class RunProjectUpdate(BaseTask):
         env = super(RunProjectUpdate, self).build_env(project_update, private_data_dir,
                                                       isolated=isolated,
                                                       private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
@@ -2518,18 +2497,6 @@ class RunInventoryUpdate(BaseTask):
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
 
-    # TODO: remove once inv updates run in containers
-    def should_use_proot(self, inventory_update):
-        '''
-        Return whether this task should use proot.
-        '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
-    # TODO: remove once inv updates run in containers
-    @property
-    def proot_show_paths(self):
-        return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
-
     def build_private_data(self, inventory_update, private_data_dir):
         """
         Return private data needed for inventory update.
@@ -2556,17 +2523,18 @@ class RunInventoryUpdate(BaseTask):
         are accomplished by the inventory source injectors (in this method)
         or custom credential type injectors (in main run method).
         """
-        env = super(RunInventoryUpdate, self).build_env(inventory_update,
+        base_env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         private_data_dir,
                                                         isolated,
                                                         private_data_files=private_data_files)
+        # TODO: this is able to run by turning off isolation
+        # the goal is to run it a container instead
+        env = dict(os.environ.items())
+        env.update(base_env)
+
         if private_data_files is None:
             private_data_files = {}
-        # TODO: remove once containers replace custom venvs
-        self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env, isolated=isolated)
-
-        # Legacy environment variables, were used as signal to awx-manage command
-        # now they are provided in case some scripts may be relying on them
+        # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
@@ -2604,7 +2572,8 @@ class RunInventoryUpdate(BaseTask):
                 for path in config_values[config_setting].split(':'):
                     if path not in paths:
                         paths = [config_values[config_setting]] + paths
-            paths = [os.path.join(private_data_dir, folder)] + paths
+            # FIXME: containers
+            paths = [os.path.join('/runner', folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
         return env
@@ -2879,7 +2848,6 @@ class RunAdHocCommand(BaseTask):
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, private_data_dir,
                                                      isolated=isolated,
                                                      private_data_files=private_data_files)
-        self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
@@ -2893,7 +2861,8 @@ class RunAdHocCommand(BaseTask):
         cp_dir = os.path.join(private_data_dir, 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = cp_dir
+        # FIXME: more elegant way to manage this path in container
+        env['ANSIBLE_SSH_CONTROL_PATH'] = '/runner/cp'
 
         return env
 
@@ -3055,10 +3024,13 @@ class RunSystemJob(BaseTask):
         return path
 
     def build_env(self, instance, private_data_dir, isolated=False, private_data_files=None):
-        env = super(RunSystemJob, self).build_env(instance, private_data_dir,
+        base_env = super(RunSystemJob, self).build_env(instance, private_data_dir,
                                                   isolated=isolated,
                                                   private_data_files=private_data_files)
-        self.add_awx_venv(env)
+        # TODO: this is able to run by turning off isolation
+        # the goal is to run it a container instead
+        env = dict(os.environ.items())
+        env.update(base_env)
         return env
 
     def build_cwd(self, instance, private_data_dir):
