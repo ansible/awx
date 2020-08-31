@@ -84,7 +84,7 @@ options:
     wait:
       description:
         - Wait for the job to complete.
-      default: True
+      default: False
       type: bool
     interval:
       description:
@@ -183,7 +183,7 @@ def main():
     optional_args['credential_passwords'] = module.params.get('credential_passwords')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
-    timeout = module.params.get('timeout')    
+    timeout = module.params.get('timeout')
 
     # Create a datastructure to pass into our job launch
     post_data = {}
@@ -258,6 +258,7 @@ def main():
         'id': results['json']['id'],
         'status': results['json']['status'],
     })
+
 
 if __name__ == '__main__':
     main()

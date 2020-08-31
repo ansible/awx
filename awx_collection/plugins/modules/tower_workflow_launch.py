@@ -176,7 +176,7 @@ def main():
 
     if not wait:
         module.exit_json(**module.json_output)
-        
+
     # Invoke wait function
     module.wait_on_url(
         url=result['json']['url'],
