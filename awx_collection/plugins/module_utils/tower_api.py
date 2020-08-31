@@ -553,7 +553,7 @@ class TowerAPIModule(TowerModule):
             return self.create_if_needed(existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, associations=associations)
 
     def logout(self):
-        if self.authenticated:
+        if self.authenticated and self.oauth_token_id:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (
