@@ -28,7 +28,7 @@ def test_instance_group_create(run_module, admin_user):
     # Set the new instance group only to the one instnace
     result = run_module('tower_instance_group', {
         'name': 'foo-group',
-        'instances': new_instance.hostname,
+        'instances': [ new_instance.hostname ],
         'state': 'present'
     }, admin_user)
     assert not result.get('failed', False), result
