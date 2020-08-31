@@ -143,7 +143,7 @@ def main():
     result = module.wait_on_url(
         url=job['url'],
         object_name=job_id,
-        object_type='job',
+        object_type='legacy_job_wait',
         timeout=timeout, interval=interval
     )
 

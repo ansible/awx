@@ -181,7 +181,7 @@ def main():
     module.wait_on_url(
         url=result['json']['url'],
         object_name=name,
-        object_type='workflow_job',
+        object_type='Workflow Job',
         timeout=timeout, interval=interval
     )
 
