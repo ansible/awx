@@ -45,9 +45,9 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
 
   useEffect(() => {
     fetchTemplate();
-  }, [fetchTemplate]);
+  }, [fetchTemplate, location.pathname]);
 
-  if (error) {
+  if (!isLoading && error) {
     return (
       <PageSection>
         <Card>
@@ -66,7 +66,7 @@ function NotificationTemplate({ setBreadcrumb, i18n }) {
     );
   }
 
-  const showCardHeader = !isLoading && !location.pathname.endsWith('edit');
+  const showCardHeader = !location.pathname.endsWith('edit');
   const tabs = [
     {
       name: (
