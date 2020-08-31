@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # coding: utf-8 -*-
 
 
@@ -35,7 +35,7 @@ options:
       type: str
     credential:
       description:
-        - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token”.
+        - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "Kubernetes/OpenShift API Bearer Token".
       required: False
       type: str
     policy_instance_percentage:
@@ -127,7 +127,7 @@ def main():
     if instances is not None:
         instances_ids = []
         for item in instances:
-            instances_ids.append( module.resolve_name_to_id('instances', item) )
+            instances_ids.append(module.resolve_name_to_id('instances', item))
 
     # Create the data that gets sent for create and update
     new_fields = {}

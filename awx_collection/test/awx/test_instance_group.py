@@ -6,6 +6,7 @@ import pytest
 from awx.main.models import InstanceGroup, Instance
 from awx.main.tests.functional.conftest import kube_credential, credentialtype_kube
 
+
 @pytest.mark.django_db
 def test_instance_group_create(run_module, admin_user):
     result = run_module('tower_instance_group', {
@@ -40,6 +41,7 @@ def test_instance_group_create(run_module, admin_user):
 
     assert new_instance.hostname in all_instance_names, 'Failed to add instance to group'
     assert len(all_instance_names) == 1, 'Too many instances in group {0}'.format(','.join(all_instance_names))
+
 
 @pytest.mark.django_db
 def test_continer_group_create(run_module, admin_user, kube_credential):
