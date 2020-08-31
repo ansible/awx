@@ -38,15 +38,6 @@ options:
       choices: ["password", "authorization-code"]
       type: str
       required: True
-    client_id:
-      description:
-        - Desired client_id for application. Self generated if empty, returned in response
-      type: str
-    # TODO it can be defined but is never returned through api, need to check
-    client_secret:
-      description:
-        - Desired client_secret for application. Self generated, returned in response
-      type: str
     client_type:
       description:
         - Set to public or confidential depending on how secure the client device is.
@@ -70,20 +61,14 @@ options:
       default: "present"
       choices: ["present", "absent"]
       type: str
-    host:
+    skip_authorization:
       description:
-        - Host for this credential.
-        - Deprecated, will be removed in a future release
-      type: str
+        - Set True to skip authorization step for completely trusted applications.
+      default: false
+      type: bool
     username:
       description:
         - Username for this credential. ``access_key`` for AWS.
-        - Deprecated, please use inputs
-      type: str
-    password:
-      description:
-        - Password for this credential. ``secret_key`` for AWS. ``api_key`` for RAX.
-        - Use "ASK" and launch in Tower to be prompted.
         - Deprecated, please use inputs
       type: str
 '''
@@ -125,9 +110,8 @@ def main():
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
-        host=dict(),
-        username=dict(),
-        password=dict(no_log=True)
+        skip_authorization=dict(type=bool),
+        username=dict()
     )
 
     # Create a module for ourselves
