@@ -72,16 +72,15 @@ def main():
         org_id = module.resolve_name_to_id('organizations', organization)
         lookup_data['organization'] = org_id
 
-    inventory = module.get_one('inventories', **{'data': lookup_data})
+    inventory = module.get_one_by_name_or_id('inventories', **{'data': lookup_data})
 
     if inventory == None:
          module.fail_json(msg="Unable to find inventory by name {0}".format(name))
 
-    inventory_id = module.resolve_name_to_id('inventories', name)
+    result = module.post_endpoint(inventory['update_inventory_sources'], **{'data': {}})
 
-    endpoint = '/inventories/' + str(inventory_id) + '/update_inventory_sources/'
-
-    module.post_endpoint(endpoint)
+    if result['status_code'] != 200:
+        module.fail_json(msg="Failed to update all inventory source, see response for details", **{'response': result})
 
     json_output = dict()
     json_output['changed'] = True
