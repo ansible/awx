@@ -60,23 +60,16 @@ function InstanceGroupListItem({
 }) {
   const labelId = `check-action-${instanceGroup.id}`;
 
-  const isAvailable = item => {
-    return (
-      (item.policy_instance_minimum || item.policy_instance_percentage) &&
-      item.capacity
-    );
-  };
-
   const isContainerGroup = item => {
     return item.is_containerized;
   };
 
   function usedCapacity(item) {
     if (!isContainerGroup(item)) {
-      if (isAvailable(item)) {
+      if (item.capacity) {
         return (
           <Progress
-            value={100 - item.percent_capacity_remaining}
+            value={Math.round(100 - item.percent_capacity_remaining)}
             measureLocation={ProgressMeasureLocation.top}
             size={ProgressSize.sm}
             title={i18n._(t`Used capacity`)}

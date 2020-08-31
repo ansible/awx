@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, useField } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { arrayOf, func, object, shape } from 'prop-types';
-import { Form, FormGroup } from '@patternfly/react-core';
+import { ActionGroup, Button, Form, FormGroup } from '@patternfly/react-core';
 import FormField, { FormSubmitError } from '../../../components/FormField';
-import FormActionGroup from '../../../components/FormActionGroup/FormActionGroup';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+} from '../../../components/FormLayout';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import { required } from '../../../util/validators';
 import OrganizationLookup from '../../../components/Lookup/OrganizationLookup';
-import { FormColumnLayout } from '../../../components/FormLayout';
 import TypeInputsSubForm from './TypeInputsSubForm';
+import ExternalTestModal from './ExternalTestModal';
 
 function CredentialFormFields({
   i18n,
@@ -139,6 +142,7 @@ function CredentialFormFields({
 }
 
 function CredentialForm({
+  i18n,
   credential = {},
   credentialTypes,
   inputSources,
@@ -147,6 +151,7 @@ function CredentialForm({
   submitError,
   ...rest
 }) {
+  const [showExternalTestModal, setShowExternalTestModal] = useState(false);
   const initialValues = {
     name: credential.name || '',
     description: credential.description || '',
@@ -205,21 +210,61 @@ function CredentialForm({
       }}
     >
       {formik => (
-        <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <FormColumnLayout>
-            <CredentialFormFields
-              formik={formik}
-              initialValues={initialValues}
-              credentialTypes={credentialTypes}
-              {...rest}
+        <>
+          <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+            <FormColumnLayout>
+              <CredentialFormFields
+                formik={formik}
+                initialValues={initialValues}
+                credentialTypes={credentialTypes}
+                i18n={i18n}
+                {...rest}
+              />
+              <FormSubmitError error={submitError} />
+              <FormFullWidthLayout>
+                <ActionGroup>
+                  <Button
+                    aria-label={i18n._(t`Save`)}
+                    variant="primary"
+                    type="button"
+                    onClick={formik.handleSubmit}
+                  >
+                    {i18n._(t`Save`)}
+                  </Button>
+                  {formik?.values?.credential_type &&
+                    credentialTypes[formik.values.credential_type]?.kind ===
+                      'external' && (
+                      <Button
+                        aria-label={i18n._(t`Test`)}
+                        variant="secondary"
+                        type="button"
+                        onClick={() => setShowExternalTestModal(true)}
+                        isDisabled={!formik.isValid}
+                      >
+                        {i18n._(t`Test`)}
+                      </Button>
+                    )}
+                  <Button
+                    aria-label={i18n._(t`Cancel`)}
+                    variant="secondary"
+                    type="button"
+                    onClick={onCancel}
+                  >
+                    {i18n._(t`Cancel`)}
+                  </Button>
+                </ActionGroup>
+              </FormFullWidthLayout>
+            </FormColumnLayout>
+          </Form>
+          {showExternalTestModal && (
+            <ExternalTestModal
+              credential={credential}
+              credentialType={credentialTypes[formik.values.credential_type]}
+              credentialFormValues={formik.values}
+              onClose={() => setShowExternalTestModal(false)}
             />
-            <FormSubmitError error={submitError} />
-            <FormActionGroup
-              onCancel={onCancel}
-              onSubmit={formik.handleSubmit}
-            />
-          </FormColumnLayout>
-        </Form>
+          )}
+        </>
       )}
     </Formik>
   );

@@ -8,11 +8,13 @@ import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import useSelected from '../../util/useSelected';
 
-const QS_CONFIG = getQSConfig('associate', {
-  page: 1,
-  page_size: 5,
-  order_by: 'name',
-});
+const QS_CONFIG = (order_by = 'name') => {
+  return getQSConfig('associate', {
+    page: 1,
+    page_size: 5,
+    order_by,
+  });
+};
 
 function AssociateModal({
   i18n,
@@ -23,6 +25,7 @@ function AssociateModal({
   fetchRequest,
   optionsRequest,
   isModalOpen = false,
+  displayKey = 'name',
 }) {
   const history = useHistory();
   const { selected, handleSelect } = useSelected([]);
@@ -34,7 +37,10 @@ function AssociateModal({
     isLoading,
   } = useRequest(
     useCallback(async () => {
-      const params = parseQueryString(QS_CONFIG, history.location.search);
+      const params = parseQueryString(
+        QS_CONFIG(displayKey),
+        history.location.search
+      );
       const [
         {
           data: { count, results },
@@ -52,7 +58,7 @@ function AssociateModal({
           actionsResponse.data.actions?.GET || {}
         ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
-    }, [fetchRequest, optionsRequest, history.location.search]),
+    }, [fetchRequest, optionsRequest, history.location.search, displayKey]),
     {
       items: [],
       itemCount: 0,
@@ -112,6 +118,7 @@ function AssociateModal({
         ]}
       >
         <OptionsList
+          displayKey={displayKey}
           contentError={contentError}
           deselectItem={handleSelect}
           header={header}
@@ -119,14 +126,14 @@ function AssociateModal({
           multiple
           optionCount={itemCount}
           options={items}
-          qsConfig={QS_CONFIG}
+          qsConfig={QS_CONFIG(displayKey)}
           readOnly={false}
           selectItem={handleSelect}
           value={selected}
           searchColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name__icontains',
+              key: `${displayKey}__icontains`,
               isDefault: true,
             },
             {
@@ -141,7 +148,7 @@ function AssociateModal({
           sortColumns={[
             {
               name: i18n._(t`Name`),
-              key: 'name',
+              key: `${displayKey}`,
             },
           ]}
           searchableKeys={searchableKeys}

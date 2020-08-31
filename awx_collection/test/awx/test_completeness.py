@@ -58,7 +58,6 @@ needs_development = [
 ]
 needs_param_development = {
     'tower_host': ['instance_id'],
-    'tower_inventory': ['insights_credential'],
 }
 # -----------------------------------------------------------------------------------------------------------
 

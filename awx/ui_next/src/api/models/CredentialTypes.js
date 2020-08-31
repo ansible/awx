@@ -27,6 +27,10 @@ class CredentialTypes extends Base {
       .concat(nextResults)
       .filter(type => acceptableKinds.includes(type.kind));
   }
+
+  test(id, data) {
+    return this.http.post(`${this.baseUrl}${id}/test/`, data);
+  }
 }
 
 export default CredentialTypes;

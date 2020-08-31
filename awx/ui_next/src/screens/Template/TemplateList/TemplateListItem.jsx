@@ -15,6 +15,7 @@ import { withI18n } from '@lingui/react';
 import {
   ExclamationTriangleIcon,
   PencilAltIcon,
+  ProjectDiagramIcon,
   RocketIcon,
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
@@ -32,7 +33,7 @@ const DataListAction = styled(_DataListAction)`
   align-items: center;
   display: grid;
   grid-gap: 16px;
-  grid-template-columns: repeat(3, 40px);
+  grid-template-columns: repeat(4, 40px);
 `;
 
 function TemplateListItem({
@@ -104,6 +105,20 @@ function TemplateListItem({
           ]}
         />
         <DataListAction aria-label="actions" aria-labelledby={labelId}>
+          {template.type === 'workflow_job_template' && (
+            <Tooltip content={i18n._(t`Visualizer`)} position="top">
+              <Button
+                isDisabled={isDisabled}
+                aria-label={i18n._(t`Visualizer`)}
+                css="grid-column: 1"
+                variant="plain"
+                component={Link}
+                to={`/templates/workflow_job_template/${template.id}/visualizer`}
+              >
+                <ProjectDiagramIcon />
+              </Button>
+            </Tooltip>
+          )}
           {template.summary_fields.user_capabilities.start && (
             <Tooltip content={i18n._(t`Launch Template`)} position="top">
               <LaunchButton resource={template}>
@@ -111,7 +126,7 @@ function TemplateListItem({
                   <Button
                     isDisabled={isDisabled}
                     aria-label={i18n._(t`Launch template`)}
-                    css="grid-column: 1"
+                    css="grid-column: 2"
                     variant="plain"
                     onClick={handleLaunch}
                   >
@@ -126,7 +141,7 @@ function TemplateListItem({
               <Button
                 isDisabled={isDisabled}
                 aria-label={i18n._(t`Edit Template`)}
-                css="grid-column: 2"
+                css="grid-column: 3"
                 variant="plain"
                 component={Link}
                 to={`/templates/${template.type}/${template.id}/edit`}

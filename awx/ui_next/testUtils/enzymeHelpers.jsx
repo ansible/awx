@@ -42,6 +42,7 @@ const defaultContexts = {
     ansible_version: null,
     custom_virtualenvs: [],
     version: null,
+    me: { is_superuser: true },
     toJSON: () => '/config/',
   },
   router: {

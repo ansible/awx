@@ -25,9 +25,7 @@ import {
 
 function WebhookSubForm({ i18n, templateType }) {
   const { id } = useParams();
-
   const { pathname } = useLocation();
-
   const { origin } = document.location;
 
   const [
@@ -35,11 +33,7 @@ function WebhookSubForm({ i18n, templateType }) {
     webhookServiceMeta,
     webhookServiceHelpers,
   ] = useField('webhook_service');
-
-  // eslint-disable-next-line no-unused-vars
-  const [webhookUrlField, webhookUrlMeta, webhookUrlHelpers] = useField(
-    'webhook_url'
-  );
+  const [webhookUrlField, , webhookUrlHelpers] = useField('webhook_url');
   const [webhookKeyField, webhookKeyMeta, webhookKeyHelpers] = useField(
     'webhook_key'
   );

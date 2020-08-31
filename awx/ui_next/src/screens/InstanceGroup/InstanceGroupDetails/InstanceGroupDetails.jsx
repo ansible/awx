@@ -39,13 +39,6 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const isAvailable = item => {
-    return (
-      (item.policy_instance_minimum || item.policy_instance_percentage) &&
-      item.capacity
-    );
-  };
-
   const verifyIsIsolated = item => {
     if (item.is_isolated) {
       return (
@@ -89,10 +82,12 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />
-        {isAvailable(instanceGroup) ? (
+        {instanceGroup.capacity ? (
           <DetailBadge
             label={i18n._(t`Used capacity`)}
-            content={`${100 - instanceGroup.percent_capacity_remaining} %`}
+            content={`${Math.round(
+              100 - instanceGroup.percent_capacity_remaining
+            )} %`}
             dataCy="instance-group-used-capacity"
           />
         ) : (
