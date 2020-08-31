@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Formik, useField } from 'formik';
+import { Formik, useField, useFormikContext } from 'formik';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Form, FormGroup } from '@patternfly/react-core';
@@ -16,6 +16,7 @@ import { InstanceGroupsLookup } from '../../../components/Lookup';
 import { getAddedAndRemoved } from '../../../util/lists';
 import { required, minMaxValue } from '../../../util/validators';
 import { FormColumnLayout } from '../../../components/FormLayout';
+import CredentialLookup from '../../../components/Lookup/CredentialLookup';
 
 function OrganizationFormFields({
   i18n,
@@ -23,7 +24,14 @@ function OrganizationFormFields({
   instanceGroups,
   setInstanceGroups,
 }) {
+  const { setFieldValue } = useFormikContext();
   const [venvField] = useField('custom_virtualenv');
+
+  const [
+    galaxyCredentialsField,
+    galaxyCredentialsMeta,
+    galaxyCredentialsHelpers,
+  ] = useField('galaxy_credentials');
 
   const defaultVenv = {
     label: i18n._(t`Use Default Ansible Environment`),
@@ -31,6 +39,13 @@ function OrganizationFormFields({
     key: 'default',
   };
   const { custom_virtualenvs } = useContext(ConfigContext);
+
+  const handleCredentialUpdate = useCallback(
+    value => {
+      setFieldValue('galaxy_credentials', value);
+    },
+    [setFieldValue]
+  );
 
   return (
     <>
@@ -85,6 +100,16 @@ function OrganizationFormFields({
         tooltip={i18n._(
           t`Select the Instance Groups for this Organization to run on.`
         )}
+      />
+      <CredentialLookup
+        credentialTypeNamespace="galaxy_api_token"
+        label={i18n._(t`Galaxy Credentials`)}
+        helperTextInvalid={galaxyCredentialsMeta.error}
+        isValid={!galaxyCredentialsMeta.touched || !galaxyCredentialsMeta.error}
+        onBlur={() => galaxyCredentialsHelpers.setTouched()}
+        onChange={handleCredentialUpdate}
+        value={galaxyCredentialsField.value}
+        multiple
       />
     </>
   );
@@ -160,6 +185,7 @@ function OrganizationForm({
         description: organization.description,
         custom_virtualenv: organization.custom_virtualenv || '',
         max_hosts: organization.max_hosts || '0',
+        galaxy_credentials: organization.galaxy_credentials || [],
       }}
       onSubmit={handleSubmit}
     >

@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { CardBody } from '../../../components/Card';
 import { OrganizationsAPI } from '../../../api';
 import { Config } from '../../../contexts/Config';
-
+import { getAddedAndRemoved } from '../../../util/lists';
 import OrganizationForm from '../shared/OrganizationForm';
 
 function OrganizationEdit({ organization }) {
@@ -18,16 +18,39 @@ function OrganizationEdit({ organization }) {
     groupsToDisassociate
   ) => {
     try {
+      const {
+        added: addedCredentials,
+        removed: removedCredentials,
+      } = getAddedAndRemoved(
+        organization.galaxy_credentials,
+        values.galaxy_credentials
+      );
+
+      const addedCredentialIds = addedCredentials.map(({ id }) => id);
+      const removedCredentialIds = removedCredentials.map(({ id }) => id);
+
       await OrganizationsAPI.update(organization.id, values);
       await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(organization.id, id)
-        )
+        groupsToAssociate
+          .map(id =>
+            OrganizationsAPI.associateInstanceGroup(organization.id, id)
+          )
+          .concat(
+            addedCredentialIds.map(id =>
+              OrganizationsAPI.associateGalaxyCredential(organization.id, id)
+            )
+          )
       );
       await Promise.all(
-        groupsToDisassociate.map(id =>
-          OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
-        )
+        groupsToDisassociate
+          .map(id =>
+            OrganizationsAPI.disassociateInstanceGroup(organization.id, id)
+          )
+          .concat(
+            removedCredentialIds.map(id =>
+              OrganizationsAPI.disassociateGalaxyCredential(organization.id, id)
+            )
+          )
       );
       history.push(detailsUrl);
     } catch (error) {

@@ -16,9 +16,13 @@ function OrganizationAdd() {
     try {
       const { data: response } = await OrganizationsAPI.create(values);
       await Promise.all(
-        groupsToAssociate.map(id =>
-          OrganizationsAPI.associateInstanceGroup(response.id, id)
-        )
+        groupsToAssociate
+          .map(id => OrganizationsAPI.associateInstanceGroup(response.id, id))
+          .concat(
+            values.galaxy_credentials.map(({ id: credId }) =>
+              OrganizationsAPI.associateGalaxyCredential(response.id, credId)
+            )
+          )
       );
       history.push(`/organizations/${response.id}`);
     } catch (error) {
