@@ -149,6 +149,7 @@ describe('<CredentialForm />', () => {
       wrapper.update();
       sourceFieldExpects();
     });
+
     test('should update expected fields when gce service account json file uploaded', async () => {
       await act(async () => {
         await wrapper
@@ -182,6 +183,7 @@ describe('<CredentialForm />', () => {
         '-----BEGIN PRIVATE KEY-----\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n-----END PRIVATE KEY-----\n'
       );
     });
+
     test('should clear expected fields when file clear button clicked', async () => {
       await act(async () => {
         wrapper
