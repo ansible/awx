@@ -13,7 +13,7 @@
     jt2: "AWX-Collection-tests-tower_job_template-jt2-{{ test_id }}"
     lab1: "AWX-Collection-tests-tower_job_template-lab1-{{ test_id }}"
     email_not: "AWX-Collection-tests-tower_job_template-email-not-{{ test_id }}"
-    webhook_not: "AWX-Collection-tests-tower_notification-wehbook-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ test_id }}"
 
 - name: Create a Demo Project
   tower_project:
@@ -49,7 +49,7 @@
     organization: Default
 
 - name: Add email notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ email_not }}"
     organization: Default
     notification_type: email
@@ -65,7 +65,7 @@
     state: present
 
 - name: Add webhook notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     notification_type: webhook
@@ -366,13 +366,13 @@
 # You can't delete a label directly so no cleanup needed
 
 - name: Delete email notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ email_not }}"
     organization: Default
     state: absent
 
 - name: Delete webhook notification
-  tower_notification:
+  tower_notification_template:
     name: "{{ webhook_not }}"
     organization: Default
     state: absent
