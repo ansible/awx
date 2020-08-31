@@ -245,7 +245,7 @@ describe('<CredentialForm />', () => {
     test('should show Test button when external credential type is selected', async () => {
       await act(async () => {
         await wrapper
-          .find('AnsibleSelect[id="credential_type"]')
+          .find('AnsibleSelect[id="credential-type"]')
           .invoke('onChange')(null, 21);
       });
       wrapper.update();
