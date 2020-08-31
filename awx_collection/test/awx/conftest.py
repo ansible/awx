@@ -17,6 +17,8 @@ import pytest
 from awx.main.tests.functional.conftest import _request
 from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType
 
+from django.db import transaction
+
 try:
     import tower_cli  # noqa
     HAS_TOWER_CLI = True
@@ -107,8 +109,9 @@ def run_module(request, collection_import):
                         kwargs_copy['data'][k] = v
 
             # make request
-            rf = _request(method.lower())
-            django_response = rf(url, user=request_user, expect=None, **kwargs_copy)
+            with transaction.atomic():
+                rf = _request(method.lower())
+                django_response = rf(url, user=request_user, expect=None, **kwargs_copy)
 
             # requests library response object is different from the Django response, but they are the same concept
             # this converts the Django response object into a requests response object for consumption

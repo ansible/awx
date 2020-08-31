@@ -110,7 +110,7 @@ function CredentialField({ credentialType, fieldOptions, i18n }) {
       >
         <AnsibleSelect
           {...subFormField}
-          id="credential_type"
+          id={`credential-${fieldOptions.id}`}
           data={selectOptions}
           onChange={(event, value) => {
             helpers.setValue(value);

@@ -3,7 +3,7 @@ plugins/modules/tower_send.py validate-modules:deprecation-mismatch
 plugins/modules/tower_workflow_template.py validate-modules:deprecation-mismatch
 plugins/modules/tower_credential.py pylint:wrong-collection-deprecated-version-tag
 plugins/modules/tower_job_wait.py pylint:wrong-collection-deprecated-version-tag
-plugins/modules/tower_notification.py pylint:wrong-collection-deprecated-version-tag
+plugins/modules/tower_notification_template.py pylint:wrong-collection-deprecated-version-tag
 plugins/inventory/tower.py pylint:raise-missing-from
 plugins/inventory/tower.py pylint:super-with-arguments
 plugins/lookup/tower_schedule_rrule.py pylint:raise-missing-from

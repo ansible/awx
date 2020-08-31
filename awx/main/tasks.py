@@ -2169,7 +2169,7 @@ class RunProjectUpdate(BaseTask):
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_cwd(self, project_update, private_data_dir):
-        return self.get_path_to('..', 'playbooks')
+        return os.path.join(private_data_dir, 'project')
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
         return os.path.join('project_update.yml')
@@ -2309,6 +2309,12 @@ class RunProjectUpdate(BaseTask):
             logger.warning('{0} unexpectedly existed before update'.format(stage_path))
             shutil.rmtree(stage_path)
         os.makedirs(stage_path)  # presence of empty cache indicates lack of roles or collections
+
+        # the project update playbook is not in a git repo, but uses a vendoring directory
+        # to be consistent with the ansible-runner model,
+        # that is moved into the runner projecct folder here
+        awx_playbooks = self.get_path_to('..', 'playbooks')
+        copy_tree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
     @staticmethod
     def clear_project_cache(cache_dir, keep_value):

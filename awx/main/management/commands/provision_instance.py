@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 class Command(BaseCommand):
     """
     Internal tower command.
-    Regsiter this instance with the database for HA tracking.
+    Register this instance with the database for HA tracking.
     """
 
     help = (

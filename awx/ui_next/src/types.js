@@ -118,6 +118,11 @@ export const InstanceGroup = shape({
   name: string.isRequired,
 });
 
+export const Instance = shape({
+  id: number.isRequired,
+  name: string.isRequired,
+});
+
 export const Label = shape({
   id: number.isRequired,
   name: string.isRequired,

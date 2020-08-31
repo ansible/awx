@@ -239,4 +239,29 @@ describe('<TemplateListItem />', () => {
     );
     expect(wrapper.find('CopyButton').length).toBe(0);
   });
+
+  test('should render visualizer button for workflow', async () => {
+    const wrapper = mountWithContexts(
+      <TemplateListItem
+        isSelected={false}
+        detailUrl="/templates/job_template/1/details"
+        template={{
+          ...mockJobTemplateData,
+          type: 'workflow_job_template',
+        }}
+      />
+    );
+    expect(wrapper.find('ProjectDiagramIcon').length).toBe(1);
+  });
+
+  test('should not render visualizer button for job template', async () => {
+    const wrapper = mountWithContexts(
+      <TemplateListItem
+        isSelected={false}
+        detailUrl="/templates/job_template/1/details"
+        template={mockJobTemplateData}
+      />
+    );
+    expect(wrapper.find('ProjectDiagramIcon').length).toBe(0);
+  });
 });

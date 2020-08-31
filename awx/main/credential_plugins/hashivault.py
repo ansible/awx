@@ -152,7 +152,7 @@ def kv_backend(**kwargs):
 
     sess = requests.Session()
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
-    # Compatability header for older installs of Hashicorp Vault
+    # Compatibility header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
 
     if api_version == 'v2':
