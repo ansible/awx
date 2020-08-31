@@ -13,5 +13,5 @@ plugin_routing:
       deprecation:
         removal_date: TBD
         warning_text: see plugin documentation for details
-    tower_notifitcation:
+    tower_notification:
       redirect: tower_notification_template
