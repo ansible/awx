@@ -44,7 +44,7 @@ def test_instance_group_create(run_module, admin_user):
 
 
 @pytest.mark.django_db
-def test_continer_group_create(run_module, admin_user, kube_credential):
+def test_container_group_create(run_module, admin_user, kube_credential):
     pod_spec = "{ 'Nothing': True }"
 
     result = run_module('tower_instance_group', {
