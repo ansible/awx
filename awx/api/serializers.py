@@ -1702,7 +1702,10 @@ class HostSerializer(BaseSerializerWithVariables):
             'type': j.job.job_type_name,
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
+        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created').defer(
+            'job__extra_vars',
+            'job__artifacts',
+        )[:5]])
         return d
 
     def _get_host_port_from_name(self, name):
