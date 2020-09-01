@@ -98,6 +98,11 @@ options:
       description:
         - The definition of the survey associated to the workflow.
       type: dict
+    labels:
+      description:
+        - The labels applied to this job template
+      type: list
+      elements: str
     state:
       description:
         - Desired state of the resource.
@@ -168,6 +173,7 @@ def main():
         ask_limit_on_launch=dict(type='bool'),
         webhook_service=dict(choices=['github', 'gitlab']),
         webhook_credential=dict(),
+        labels=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -246,6 +252,12 @@ def main():
         association_fields['notification_templates_approvals'] = []
         for item in notifications_approval:
             association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
+
+    labels = module.params.get('labels')
+    if labels is not None:
+        association_fields['labels'] = []
+        for item in labels:
+            association_fields['labels'].append(module.resolve_name_to_id('labels', item))
 
     on_change = None
     new_spec = module.params.get('survey')
