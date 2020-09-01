@@ -1630,21 +1630,10 @@ class RunJob(BaseTask):
 
         return passwords
 
-    def add_ansible_venv(self, venv_path, env, isolated=False):
-        super(RunJob, self).add_ansible_venv(venv_path, env, isolated=isolated)
-        # Add awx/lib to PYTHONPATH.
-        env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
-
     def build_env(self, job, private_data_dir, isolated=False, private_data_files=None):
         '''
         Build environment dictionary for ansible-playbook.
         '''
-        plugin_dir = self.get_path_to('..', 'plugins', 'callback')
-        plugin_dirs = [plugin_dir]
-        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
-        plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, private_data_dir,
                                             isolated=isolated,
                                             private_data_files=private_data_files)
@@ -1656,19 +1645,17 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.use_fact_cache:
-            library_path = env.get('ANSIBLE_LIBRARY')
-            env['ANSIBLE_LIBRARY'] = ':'.join(
-                filter(None, [
-                    library_path,
-                    self.get_path_to('..', 'plugins', 'library')
-                ])
-            )
+            library_source = self.get_path_to('..', 'plugins', 'library')
+            library_dest = os.path.join(private_data_dir, 'library')
+            copy_tree(library_source, library_dest)
+            env['ANSIBLE_LIBRARY'] = library_dest
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not isolated:
-            env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
+            if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+                env['ANSIBLE_CALLBACK_PLUGINS'] = ':'.join(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
             env['AWX_HOST'] = settings.TOWER_URL_BASE
 
         # Create a directory for ControlPath sockets that is unique to each
@@ -2043,7 +2030,6 @@ class RunProjectUpdate(BaseTask):
         # like https://github.com/ansible/ansible/issues/30064
         env['TMP'] = settings.AWX_PROOT_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
-        env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = True
         # Set up the public Galaxy server, if enabled
@@ -2455,7 +2441,7 @@ class RunInventoryUpdate(BaseTask):
 
     @property
     def proot_show_paths(self):
-        return [self.get_path_to('..', 'plugins', 'inventory'), settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
+        return [settings.AWX_ANSIBLE_COLLECTIONS_PATHS]
 
     def build_private_data(self, inventory_update, private_data_dir):
         """
@@ -2762,7 +2748,6 @@ class RunAdHocCommand(BaseTask):
         '''
         Build environment dictionary for ansible.
         '''
-        plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, private_data_dir,
                                                      isolated=isolated,
                                                      private_data_files=private_data_files)
@@ -2772,7 +2757,6 @@ class RunAdHocCommand(BaseTask):
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
         env['INVENTORY_ID'] = str(ad_hoc_command.inventory.pk)
         env['INVENTORY_HOSTVARS'] = str(True)
-        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
