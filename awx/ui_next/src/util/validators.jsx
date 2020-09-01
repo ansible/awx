@@ -88,3 +88,14 @@ export function combine(validators) {
     return undefined;
   };
 }
+
+export function regExp(i18n) {
+  return value => {
+    try {
+      RegExp(value);
+    } catch {
+      return i18n._(t`This field must be a regular expression`);
+    }
+    return undefined;
+  };
+}

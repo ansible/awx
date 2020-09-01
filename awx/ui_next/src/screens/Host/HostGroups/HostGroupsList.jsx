@@ -33,7 +33,13 @@ function HostGroupsList({ i18n, host }) {
   const invId = host.summary_fields.inventory.id;
 
   const {
-    result: { groups, itemCount, actions, relatedSearchFields },
+    result: {
+      groups,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchGroups,
@@ -55,16 +61,20 @@ function HostGroupsList({ i18n, host }) {
         groups: results,
         itemCount: count,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [hostId, search]),
     {
       groups: [],
       itemCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -108,6 +118,11 @@ function HostGroupsList({ i18n, host }) {
     [invId, hostId]
   );
 
+  const fetchGroupsOptions = useCallback(
+    () => InventoriesAPI.readGroupsOptions(invId),
+    [invId]
+  );
+
   const { request: handleAssociate, error: associateError } = useRequest(
     useCallback(
       async groupsToAssociate => {
@@ -128,10 +143,6 @@ function HostGroupsList({ i18n, host }) {
 
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>
@@ -218,6 +229,7 @@ function HostGroupsList({ i18n, host }) {
         <AssociateModal
           header={i18n._(t`Groups`)}
           fetchRequest={fetchGroupsToAssociate}
+          optionsRequest={fetchGroupsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}

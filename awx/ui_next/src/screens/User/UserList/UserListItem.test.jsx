@@ -28,11 +28,17 @@ describe('UserListItem with full permissions', () => {
       </I18nProvider>
     );
   });
-  test('initially renders succesfully', () => {
+  test('initially renders successfully', () => {
     expect(wrapper.length).toBe(1);
   });
   test('edit button shown to users with edit capabilities', () => {
     expect(wrapper.find('PencilAltIcon').exists()).toBeTruthy();
+  });
+
+  test('should display user type', () => {
+    expect(
+      wrapper.find('DataListCell[aria-label="user type"]').prop('children')
+    ).toEqual('System Administrator');
   });
 });
 

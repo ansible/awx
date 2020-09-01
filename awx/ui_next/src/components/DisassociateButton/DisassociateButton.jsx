@@ -16,6 +16,7 @@ function DisassociateButton({
   modalNote = '',
   modalTitle = i18n._(t`Disassociate?`),
   onDisassociate,
+  verifyCannotDisassociate = true,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,33 +26,41 @@ function DisassociateButton({
   }
 
   function cannotDisassociate(item) {
-    return !item.summary_fields.user_capabilities.delete;
+    return !item.summary_fields?.user_capabilities?.delete;
   }
 
   function renderTooltip() {
-    const itemsUnableToDisassociate = itemsToDisassociate
-      .filter(cannotDisassociate)
-      .map(item => item.name)
-      .join(', ');
+    if (verifyCannotDisassociate) {
+      const itemsUnableToDisassociate = itemsToDisassociate
+        .filter(cannotDisassociate)
+        .map(item => item.name)
+        .join(', ');
 
-    if (itemsToDisassociate.some(cannotDisassociate)) {
-      return (
-        <div>
-          {i18n._(
-            t`You do not have permission to disassociate the following: ${itemsUnableToDisassociate}`
-          )}
-        </div>
-      );
+      if (itemsToDisassociate.some(cannotDisassociate)) {
+        return (
+          <div>
+            {i18n._(
+              t`You do not have permission to disassociate the following: ${itemsUnableToDisassociate}`
+            )}
+          </div>
+        );
+      }
     }
+
     if (itemsToDisassociate.length) {
       return i18n._(t`Disassociate`);
     }
     return i18n._(t`Select a row to disassociate`);
   }
 
-  const isDisabled =
-    itemsToDisassociate.length === 0 ||
-    itemsToDisassociate.some(cannotDisassociate);
+  let isDisabled = false;
+  if (verifyCannotDisassociate) {
+    isDisabled =
+      itemsToDisassociate.length === 0 ||
+      itemsToDisassociate.some(cannotDisassociate);
+  } else {
+    isDisabled = itemsToDisassociate.length === 0;
+  }
 
   // NOTE: Once PF supports tooltips on disabled elements,
   // we can delete the extra <div> around the <DeleteButton> below.
@@ -61,7 +70,7 @@ function DisassociateButton({
       <Tooltip content={renderTooltip()} position="top">
         <div>
           <Button
-            variant="danger"
+            variant="secondary"
             aria-label={i18n._(t`Disassociate`)}
             onClick={() => setIsOpen(true)}
             isDisabled={isDisabled}
@@ -102,7 +111,7 @@ function DisassociateButton({
 
           {itemsToDisassociate.map(item => (
             <span key={item.id}>
-              <strong>{item.name}</strong>
+              <strong>{item.hostname ? item.hostname : item.name}</strong>
               <br />
             </span>
           ))}

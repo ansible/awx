@@ -1,0 +1,230 @@
+---
+- name: Generate names
+  set_fact:
+    slack_not: "AWX-Collection-tests-tower_notification_template-slack-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    webhook_not: "AWX-Collection-tests-tower_notification_template-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    email_not: "AWX-Collection-tests-tower_notification_template-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    twillo_not: "AWX-Collection-tests-tower_notification_template-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    pd_not: "AWX-Collection-tests-tower_notification_template-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    irc_not: "AWX-Collection-tests-tower_notification_template-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+
+- name: Test deprecation warnings with legacy name
+  tower_notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    username: maw
+    sender: maw
+    recipients:
+      - everyone
+    use_tls: true
+    host: all
+    use_ssl: false
+    password: password
+    port: 12
+    channels:
+      - general
+    token: chunkecheese
+    account_token: asdf1234
+    from_number: "1 (888) 733-4281"
+    to_numbers:
+      - 867-5309
+    account_sid: vicious
+    subdomain: 'redhat.com'
+    service_key: skeleton
+    client_name: Bill
+    message_from: me
+    color: green
+    notify: true
+    url: ansible.com
+    headers:
+      X-Custom-Header: value123
+    server: littimer.somewhere.com
+    nickname: chalk
+    targets:
+      - zombie
+    state: absent
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'deprecations' in result"
+      # The 25 can be count from the size of the OLD_INPUT_NAMES list in the module
+      - result['deprecations'] | length() == 25
+
+- name: Create Slack notification with custom messages
+  tower_notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    token: a_token
+    channels:
+      - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete Slack notification
+  tower_notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add webhook notification
+  tower_notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    url: http://www.example.com/hook
+    headers:
+      X-Custom-Header: value123
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete webhook notification
+  tower_notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add email notification
+  tower_notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    username: user
+    password: s3cr3t
+    sender: tower@example.com
+    recipients:
+      - user1@example.com
+    host: smtp.example.com
+    port: 25
+    use_tls: false
+    use_ssl: false
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete email notification
+  tower_notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add twilio notification
+  tower_notification_template:
+    name: "{{ twillo_not }}"
+    organization: Default
+    notification_type: twilio
+    account_token: a_token
+    account_sid: a_sid
+    from_number: '+15551112222'
+    to_numbers:
+      - '+15553334444'
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete twilio notification
+  tower_notification_template:
+    name: "{{ twillo_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add PagerDuty notification
+  tower_notification_template:
+    name: "{{ pd_not }}"
+    organization: Default
+    notification_type: pagerduty
+    token: a_token
+    subdomain: sub
+    client_name: client
+    service_key: a_key
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete PagerDuty notification
+  tower_notification_template:
+    name: "{{ pd_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add IRC notification
+  tower_notification_template:
+    name: "{{ irc_not }}"
+    organization: Default
+    notification_type: irc
+    nickname: tower
+    password: s3cr3t
+    targets:
+      - user1
+    port: 8080
+    server: irc.example.com
+    use_ssl: false
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete IRC notification
+  tower_notification_template:
+    name: "{{ irc_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed

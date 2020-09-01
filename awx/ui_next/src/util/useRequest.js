@@ -38,6 +38,9 @@ export default function useRequest(makeRequest, initialValue) {
     request: useCallback(
       async (...args) => {
         setIsLoading(true);
+        if (isMounted.current) {
+          setError(null);
+        }
         try {
           const response = await makeRequest(...args);
           if (isMounted.current) {

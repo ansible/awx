@@ -15,12 +15,11 @@ class ConnectionException(exc.Common):
 
 
 class Token_Auth(requests.auth.AuthBase):
-    def __init__(self, token, auth_type='Token'):
+    def __init__(self, token):
         self.token = token
-        self.auth_type = auth_type
 
     def __call__(self, request):
-        request.headers['Authorization'] = '{0.auth_type} {0.token}'.format(self)
+        request.headers['Authorization'] = 'Bearer {0.token}'.format(self)
         return request
 
 
@@ -57,7 +56,7 @@ class Connection(object):
             else:
                 self.session.auth = (username, password)
         elif token:
-            self.session.auth = Token_Auth(token, auth_type=kwargs.get('auth_type', 'Token'))
+            self.session.auth = Token_Auth(token)
         else:
             self.session.auth = None
 

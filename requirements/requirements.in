@@ -36,6 +36,7 @@ pygerduty
 pyparsing
 python-radius
 python3-saml
+python-ldap>=3.3.1 # https://github.com/python-ldap/python-ldap/issues/270
 pyyaml>=5.3.1  # minimum version to pull in new pyyaml for CVE-2017-18342
 schedule==0.6.0
 social-auth-core==3.3.1  # see UPGRADE BLOCKERs

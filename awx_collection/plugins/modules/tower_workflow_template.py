@@ -108,8 +108,8 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.ansible_tower import (
-    TowerModule,
+from ..module_utils.tower_legacy import (
+    TowerLegacyModule,
     tower_auth_config,
     tower_check_mode
 )
@@ -140,7 +140,7 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(
+    module = TowerLegacyModule(
         argument_spec=argument_spec,
         supports_check_mode=False
     )

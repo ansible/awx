@@ -2,7 +2,6 @@
 
 import pytest
 from unittest import mock
-import json
 
 from django.core.exceptions import ValidationError
 
@@ -256,33 +255,22 @@ class TestInventorySourceInjectors:
         are named correctly, because Ansible will reject files that do
         not have these exact names
         """
-        injector = InventorySource.injectors[source]('2.7.7')
+        injector = InventorySource.injectors[source]()
         assert injector.filename == filename
 
-    def test_group_by_azure(self):
-        injector = InventorySource.injectors['azure_rm']('2.9')
-        inv_src = InventorySource(
-            name='azure source', source='azure_rm',
-            source_vars={'group_by_os_family': True}
-        )
-        group_by_on = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        # suspicious, yes, that is just what the script did
-        expected_groups = 6
-        assert len(group_by_on['keyed_groups']) == expected_groups
-        inv_src.source_vars = json.dumps({'group_by_os_family': False})
-        group_by_off = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        # much better, everyone should turn off the flag and live in the future
-        assert len(group_by_off['keyed_groups']) == expected_groups - 1
-
-    def test_tower_plugin_named_url(self):
-        injector = InventorySource.injectors['tower']('2.9')
-        inv_src = InventorySource(
-            name='my tower source', source='tower',
-            # named URL pattern "inventory++organization"
-            instance_filters='Designer hair 읰++Cosmetic_products䵆'
-        )
-        result = injector.inventory_as_dict(inv_src, '/tmp/foo')
-        assert result['inventory_id'] == 'Designer%20hair%20%EC%9D%B0++Cosmetic_products%E4%B5%86'
+    @pytest.mark.parametrize('source,proper_name', [
+        ('ec2', 'amazon.aws.aws_ec2'),
+        ('openstack', 'openstack.cloud.openstack'),
+        ('gce', 'google.cloud.gcp_compute'),
+        ('azure_rm', 'azure.azcollection.azure_rm'),
+        ('vmware', 'community.vmware.vmware_vm_inventory'),
+        ('rhv', 'ovirt.ovirt.ovirt'),
+        ('satellite6', 'theforeman.foreman.foreman'),
+        ('tower', 'awx.awx.tower'),
+    ])
+    def test_plugin_proper_names(self, source, proper_name):
+        injector = InventorySource.injectors[source]()
+        assert injector.get_proper_name() == proper_name
 
 
 @pytest.mark.django_db

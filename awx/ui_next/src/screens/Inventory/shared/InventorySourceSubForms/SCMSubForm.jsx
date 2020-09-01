@@ -11,7 +11,14 @@ import AnsibleSelect from '../../../../components/AnsibleSelect';
 import { FieldTooltip } from '../../../../components/FormField';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import ProjectLookup from '../../../../components/Lookup/ProjectLookup';
-import { VerbosityField, OptionsField, SourceVarsField } from './SharedFields';
+import {
+  OptionsField,
+  SourceVarsField,
+  VerbosityField,
+  EnabledVarField,
+  EnabledValueField,
+  HostFilterField,
+} from './SharedFields';
 
 const SCMSubForm = ({ i18n }) => {
   const [credentialField, , credentialHelpers] = useField('credential');
@@ -121,6 +128,9 @@ const SCMSubForm = ({ i18n }) => {
         />
       </FormGroup>
       <VerbosityField />
+      <HostFilterField />
+      <EnabledVarField />
+      <EnabledValueField />
       <OptionsField showProjectUpdate />
       <SourceVarsField />
     </>

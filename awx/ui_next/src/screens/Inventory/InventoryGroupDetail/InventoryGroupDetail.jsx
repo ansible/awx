@@ -85,7 +85,7 @@ function InventoryGroupDetail({ i18n, inventoryGroup }) {
           {i18n._(t`Edit`)}
         </Button>
         <Button
-          variant="danger"
+          variant="secondary"
           aria-label={i18n._(t`Delete`)}
           onClick={() => setIsDeleteModalOpen(true)}
         >

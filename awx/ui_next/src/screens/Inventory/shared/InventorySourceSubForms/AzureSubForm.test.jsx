@@ -10,13 +10,10 @@ jest.mock('../../../../api/models/Credentials');
 const initialValues = {
   credential: null,
   custom_virtualenv: '',
-  group_by: '',
-  instance_filters: '',
   overwrite: false,
   overwrite_vars: false,
   source_path: '',
   source_project: null,
-  source_regions: '',
   source_script: null,
   source_vars: '---\n',
   update_cache_timeout: 0,
@@ -27,11 +24,7 @@ const initialValues = {
 
 const mockSourceOptions = {
   actions: {
-    POST: {
-      source_regions: {
-        azure_rm_region_choices: [],
-      },
-    },
+    POST: {},
   },
 };
 
@@ -58,7 +51,6 @@ describe('<AzureSubForm />', () => {
 
   test('should render subform fields', () => {
     expect(wrapper.find('FormGroup[label="Credential"]')).toHaveLength(1);
-    expect(wrapper.find('FormGroup[label="Regions"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Verbosity"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Update options"]')).toHaveLength(1);
     expect(

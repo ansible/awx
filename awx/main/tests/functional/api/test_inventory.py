@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pytest
+import json
 from unittest import mock
 
 from django.core.exceptions import ValidationError
@@ -7,8 +8,6 @@ from django.core.exceptions import ValidationError
 from awx.api.versioning import reverse
 
 from awx.main.models import InventorySource, Inventory, ActivityStream
-
-import json
 
 
 @pytest.fixture
@@ -522,7 +521,8 @@ class TestInventorySourceCredential:
             data={
                 'inventory': inventory.pk, 'name': 'fobar', 'source': 'scm',
                 'source_project': project.pk, 'source_path': '',
-                'credential': vault_credential.pk
+                'credential': vault_credential.pk,
+                'source_vars': 'plugin: a.b.c',
             },
             expect=400,
             user=admin_user
@@ -561,7 +561,7 @@ class TestInventorySourceCredential:
             data={
                 'inventory': inventory.pk, 'name': 'fobar', 'source': 'scm',
                 'source_project': project.pk, 'source_path': '',
-                'credential': os_cred.pk
+                'credential': os_cred.pk, 'source_vars': 'plugin: a.b.c',
             },
             expect=201,
             user=admin_user
@@ -636,8 +636,14 @@ class TestControlledBySCM:
         assert scm_inventory.inventory_sources.count() == 0
 
     def test_adding_inv_src_ok(self, post, scm_inventory, project, admin_user):
-        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-             {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
+        post(reverse('api:inventory_inventory_sources_list',
+             kwargs={'pk': scm_inventory.id}),
+             {'name': 'new inv src',
+              'source_project': project.pk,
+              'update_on_project_update': False,
+              'source': 'scm',
+              'overwrite_vars': True,
+              'source_vars': 'plugin: a.b.c'},
              admin_user, expect=201)
 
     def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
@@ -657,7 +663,7 @@ class TestControlledBySCM:
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)
         post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
-             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
+             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True, 'source_vars': 'plugin: a.b.c'},
              rando, expect=403)
 
 

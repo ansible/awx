@@ -54,11 +54,7 @@ function HostListItem({ i18n, host, isSelected, onSelect, detailUrl }) {
                 <Fragment>
                   <b css="margin-right: 24px">{i18n._(t`Inventory`)}</b>
                   <Link
-                    to={`/inventories/${
-                      host.summary_fields.inventory.kind === 'smart'
-                        ? 'smart_inventory'
-                        : 'inventory'
-                    }/${host.summary_fields.inventory.id}/details`}
+                    to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
                   >
                     {host.summary_fields.inventory.name}
                   </Link>

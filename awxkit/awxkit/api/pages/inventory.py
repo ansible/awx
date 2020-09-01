@@ -499,10 +499,7 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
             payload.source_project = project.id
 
         optional_fields = (
-            'group_by',
-            'instance_filters',
             'source_path',
-            'source_regions',
             'source_vars',
             'timeout',
             'overwrite',

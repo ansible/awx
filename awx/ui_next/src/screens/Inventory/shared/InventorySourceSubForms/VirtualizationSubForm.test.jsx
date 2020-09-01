@@ -10,13 +10,10 @@ jest.mock('../../../../api/models/Credentials');
 const initialValues = {
   credential: null,
   custom_virtualenv: '',
-  group_by: '',
-  instance_filters: '',
   overwrite: false,
   overwrite_vars: false,
   source_path: '',
   source_project: null,
-  source_regions: '',
   source_script: null,
   source_vars: '---\n',
   update_cache_timeout: 0,

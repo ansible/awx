@@ -190,9 +190,6 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 # overwrite_vars	?	?	o	o	o	o		o	o	o		o		o	o	o
 # update_on_launch	?	?	o	o	o	o		o	o	o		o		o	o	o
 # UoPL          	?	?	o	-	-	-		-	-	-		-		-	-	-
-# source_regions	?	?	-	o	o	o		-	-	-		-		-	-	-
-# instance_filters	?	?	-	o	-	-		o	-	-		-		-	o	-
-# group_by			?	?	-	o	-	-		o	-	-		-		-	-	-
 # source_vars*		?	?	-	o	-	o		o	o	o		o		-	-	-
 # environmet vars*	?	?	o	-	-	-		-	-	-		-		-	-	o
 # source_script		?	?	-	-	-	-		-	-	-		-		-	-	r

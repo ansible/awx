@@ -32,7 +32,13 @@ function InventoryGroupHostList({ i18n }) {
   const history = useHistory();
 
   const {
-    result: { hosts, hostCount, actions, relatedSearchFields },
+    result: {
+      hosts,
+      hostCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchHosts,
@@ -48,16 +54,20 @@ function InventoryGroupHostList({ i18n }) {
         hosts: response.data.results,
         hostCount: response.data.count,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [groupId, inventoryId, location.search]),
     {
       hosts: [],
       hostCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -101,6 +111,11 @@ function InventoryGroupHostList({ i18n }) {
     [groupId, inventoryId]
   );
 
+  const fetchHostsOptions = useCallback(
+    () => InventoriesAPI.readHostsOptions(inventoryId),
+    [inventoryId]
+  );
+
   const { request: handleAssociate, error: associateErr } = useRequest(
     useCallback(
       async hostsToAssociate => {
@@ -127,10 +142,6 @@ function InventoryGroupHostList({ i18n }) {
   const canAdd =
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <>
@@ -221,6 +232,7 @@ function InventoryGroupHostList({ i18n }) {
         <AssociateModal
           header={i18n._(t`Hosts`)}
           fetchRequest={fetchHostsToAssociate}
+          optionsRequest={fetchHostsOptions}
           isModalOpen={isModalOpen}
           onAssociate={handleAssociate}
           onClose={() => setIsModalOpen(false)}

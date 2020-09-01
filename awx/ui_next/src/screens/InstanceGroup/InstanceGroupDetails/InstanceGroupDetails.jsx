@@ -2,8 +2,8 @@ import React, { useCallback } from 'react';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import { Link, useHistory } from 'react-router-dom';
-import { Button } from '@patternfly/react-core';
-import 'styled-components/macro';
+import styled from 'styled-components';
+import { Button, Label } from '@patternfly/react-core';
 
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
@@ -16,6 +16,10 @@ import {
 } from '../../../components/DetailList';
 import useRequest, { useDismissableError } from '../../../util/useRequest';
 import { InstanceGroupsAPI } from '../../../api';
+
+const Unavailable = styled.span`
+  color: var(--pf-global--danger-color--200);
+`;
 
 function InstanceGroupDetails({ instanceGroup, i18n }) {
   const { id, name } = instanceGroup;
@@ -35,11 +39,20 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const isAvailable = item => {
-    return (
-      (item.policy_instance_minimum || item.policy_instance_percentage) &&
-      item.capacity
-    );
+  const verifyIsIsolated = item => {
+    if (item.is_isolated) {
+      return (
+        <>
+          {item.name}
+          <span css="margin-left: 12px">
+            <Label aria-label={i18n._(t`isolated instance`)}>
+              {i18n._(t`Isolated`)}
+            </Label>
+          </span>
+        </>
+      );
+    }
+    return <>{item.name}</>;
   };
 
   return (
@@ -47,7 +60,7 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
       <DetailList>
         <Detail
           label={i18n._(t`Name`)}
-          value={name}
+          value={verifyIsIsolated(instanceGroup)}
           dataCy="instance-group-detail-name"
         />
         <Detail
@@ -69,16 +82,18 @@ function InstanceGroupDetails({ instanceGroup, i18n }) {
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />
-        {isAvailable(instanceGroup) ? (
+        {instanceGroup.capacity ? (
           <DetailBadge
             label={i18n._(t`Used capacity`)}
-            content={`${100 - instanceGroup.percent_capacity_remaining} %`}
+            content={`${Math.round(
+              100 - instanceGroup.percent_capacity_remaining
+            )} %`}
             dataCy="instance-group-used-capacity"
           />
         ) : (
           <Detail
             label={i18n._(t`Used capacity`)}
-            value={<span css="color: red">{i18n._(t`Unavailable`)}</span>}
+            value={<Unavailable>{i18n._(t`Unavailable`)}</Unavailable>}
             dataCy="instance-group-used-capacity"
           />
         )}

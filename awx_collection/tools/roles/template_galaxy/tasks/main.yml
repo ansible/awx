@@ -2,7 +2,7 @@
 - name: Set the collection version in the tower_api.py file
   replace:
     path: "{{ collection_path }}/plugins/module_utils/tower_api.py"
-    regexp: '^    _COLLECTION_VERSION = "devel"'
+    regexp: '^    _COLLECTION_VERSION = "0.0.1-devel"'
     replace: '    _COLLECTION_VERSION = "{{ collection_version }}"'
   when:
     - "awx_template_version | default(True)"

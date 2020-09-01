@@ -49,6 +49,7 @@ describe('<ProjectEdit />', () => {
               ['git', 'Git'],
               ['hg', 'Mercurial'],
               ['svn', 'Subversion'],
+              ['archive', 'Remote Archive'],
               ['insights', 'Red Hat Insights'],
             ],
           },

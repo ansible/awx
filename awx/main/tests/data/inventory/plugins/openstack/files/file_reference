@@ -1,7 +1,3 @@
-ansible:
-  expand_hostvars: true
-  fail_on_errors: true
-  use_hostnames: false
 clouds:
   devstack:
     auth:
@@ -11,5 +7,5 @@ clouds:
       project_domain_name: fooo
       project_name: fooo
       username: fooo
-    private: false
+    private: true
     verify: false

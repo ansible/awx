@@ -12,7 +12,8 @@ def test_empty():
         'git': 0,
         'svn': 0,
         'hg': 0,
-        'insights': 0
+        'insights': 0,
+        'archive': 0,
     }
 
 
@@ -24,7 +25,8 @@ def test_multiple(scm_type):
         'git': 0,
         'svn': 0,
         'hg': 0,
-        'insights': 0
+        'insights': 0,
+        'archive': 0,
     }
     for i in range(random.randint(0, 10)):
         Project(scm_type=scm_type).save()

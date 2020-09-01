@@ -57,21 +57,21 @@ options:
       description:
         - The variables or environment fields to apply to this source type.
       type: dict
+    enabled_var:
+      description:
+        - The variable to use to determine enabled state e.g., "status.power_state"
+      type: str
+    enabled_value:
+      description:
+        - Value when the host is considered enabled, e.g., "powered_on"
+      type: str
+    host_filter:
+      description:
+        - If specified, AWX will only import hosts that match this regular expression.
+      type: str
     credential:
       description:
         - Credential to use for the source.
-      type: str
-    source_regions:
-      description:
-        - Regions for cloud provider.
-      type: str
-    instance_filters:
-      description:
-        - Comma-separated list of filter expressions for matching hosts.
-      type: str
-    group_by:
-      description:
-        - Limit groups automatically created from inventory source.
       type: str
     overwrite:
       description:
@@ -144,7 +144,7 @@ EXAMPLES = '''
       private: false
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 from json import dumps
 
 
@@ -164,10 +164,10 @@ def main():
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
+        enabled_var=dict(),
+        enabled_value=dict(),
+        host_filter=dict(),
         credential=dict(),
-        source_regions=dict(),
-        instance_filters=dict(),
-        group_by=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -184,7 +184,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -245,10 +245,9 @@ def main():
 
     OPTIONAL_VARS = (
         'description', 'source', 'source_path', 'source_vars',
-        'source_regions', 'instance_filters', 'group_by',
         'overwrite', 'overwrite_vars', 'custom_virtualenv',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
-        'update_on_project_update'
+        'update_on_project_update', 'enabled_var', 'enabled_value', 'host_filter',
     )
 
     # Layer in all remaining optional information

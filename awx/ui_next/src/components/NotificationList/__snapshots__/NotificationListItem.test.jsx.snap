@@ -2,6 +2,7 @@
 
 exports[`<NotificationListItem canToggleNotifications /> initially renders succesfully and displays correct label 1`] = `
 <NotificationListItem
+  approvalsTurnedOn={false}
   canToggleNotifications={true}
   detailUrl="/foo"
   errorTurnedOn={false}
@@ -13,6 +14,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
       "notification_type": "slack",
     }
   }
+  showApprovalsToggle={false}
   startedTurnedOn={false}
   successTurnedOn={false}
   toggleNotification={[MockFunction]}
@@ -215,6 +217,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
           <Styled(DataListAction)
             aria-label="actions"
             aria-labelledby="items-list-item-9000"
+            columns={3}
             id="items-list-item-9000"
             key=".1"
             rowid="items-list-item-9000"
@@ -222,6 +225,7 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
             <StyledComponent
               aria-label="actions"
               aria-labelledby="items-list-item-9000"
+              columns={3}
               forwardedComponent={
                 Object {
                   "$$typeof": Symbol(react.forward_ref),
@@ -235,7 +239,9 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
   align-items: center;
   display: grid;
   grid-gap: 16px;
-  grid-template-columns: repeat(3, max-content);
+  grid-template-columns: ",
+                      [Function],
+                      ";
 ",
                     ],
                   },
@@ -257,11 +263,13 @@ exports[`<NotificationListItem canToggleNotifications /> initially renders succe
                 aria-label="actions"
                 aria-labelledby="items-list-item-9000"
                 className="sc-bwzfXH llKtln"
+                columns={3}
                 id="items-list-item-9000"
                 rowid="items-list-item-9000"
               >
                 <div
                   className="pf-c-data-list__item-action sc-bwzfXH llKtln"
+                  columns={3}
                   rowid="items-list-item-9000"
                 >
                   <Switch

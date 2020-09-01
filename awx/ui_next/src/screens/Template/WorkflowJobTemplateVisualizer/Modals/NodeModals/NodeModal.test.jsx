@@ -40,6 +40,15 @@ describe('NodeModal', () => {
         ],
       },
     });
+    JobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     ProjectsAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -51,6 +60,15 @@ describe('NodeModal', () => {
             url: '/api/v2/projects/1',
           },
         ],
+      },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
     InventorySourcesAPI.read.mockResolvedValue({
@@ -66,6 +84,15 @@ describe('NodeModal', () => {
         ],
       },
     });
+    InventorySourcesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
     WorkflowJobTemplatesAPI.read.mockResolvedValue({
       data: {
         count: 1,
@@ -77,6 +104,15 @@ describe('NodeModal', () => {
             url: '/api/v2/workflow_job_templates/1',
           },
         ],
+      },
+    });
+    WorkflowJobTemplatesAPI.readOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
       },
     });
   });

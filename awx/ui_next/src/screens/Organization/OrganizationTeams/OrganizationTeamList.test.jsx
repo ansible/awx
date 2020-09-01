@@ -53,6 +53,15 @@ const listData = {
 describe('<OrganizationTeamList />', () => {
   beforeEach(() => {
     OrganizationsAPI.readTeams.mockResolvedValue(listData);
+    OrganizationsAPI.readTeamsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: [],
+      },
+    });
   });
 
   afterEach(() => {

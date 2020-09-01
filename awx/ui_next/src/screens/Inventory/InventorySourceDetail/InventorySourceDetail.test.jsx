@@ -64,32 +64,6 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Inventory file', 'foo');
     assertDetail(wrapper, 'Verbosity', '2 (Debug)');
     assertDetail(wrapper, 'Cache timeout', '2 seconds');
-    expect(
-      wrapper
-        .find('Detail[label="Regions"]')
-        .containsAllMatchingElements([
-          <span>us-east-1</span>,
-          <span>us-east-2</span>,
-        ])
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find('Detail[label="Instance filters"]')
-        .containsAllMatchingElements([
-          <span>filter1</span>,
-          <span>filter2</span>,
-          <span>filter3</span>,
-        ])
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find('Detail[label="Only group by"]')
-        .containsAllMatchingElements([
-          <span>group1</span>,
-          <span>group2</span>,
-          <span>group3</span>,
-        ])
-    ).toEqual(true);
     expect(wrapper.find('CredentialChip').text()).toBe('Cloud: mock cred');
     expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
       '---\nfoo: bar'

@@ -21,6 +21,7 @@ const instanceGroups = [
     policy_instance_percentage: 50,
     percent_capacity_remaining: 60,
     is_containerized: false,
+    is_isolated: false,
     created: '2020-07-21T18:41:02.818081Z',
     modified: '2020-07-24T20:32:03.121079Z',
     summary_fields: {
@@ -40,6 +41,7 @@ const instanceGroups = [
     policy_instance_percentage: 0,
     percent_capacity_remaining: 0,
     is_containerized: true,
+    is_isolated: false,
     created: '2020-07-21T18:41:02.818081Z',
     modified: '2020-07-24T20:32:03.121079Z',
     summary_fields: {
@@ -67,7 +69,11 @@ describe('<InstanceGroupDetails/>', () => {
     });
 
     wrapper.update();
-    expectDetailToMatch(wrapper, 'Name', instanceGroups[0].name);
+
+    expect(wrapper.find('Detail[label="Name"]').text()).toEqual(
+      expect.stringContaining(instanceGroups[0].name)
+    );
+    expect(wrapper.find('Detail[label="Name"]')).toHaveLength(1);
     expectDetailToMatch(wrapper, 'Type', `Instance group`);
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
@@ -143,5 +149,19 @@ describe('<InstanceGroupDetails/>', () => {
     wrapper.update();
 
     expect(wrapper.find('Button[aria-label="Edit"]').length).toBe(0);
+  });
+
+  test('should display isolated label', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InstanceGroupDetails
+          instanceGroup={{ ...instanceGroups[0], is_isolated: true }}
+        />
+      );
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('Label[aria-label="isolated instance"]').prop('children')
+    ).toEqual('Isolated');
   });
 });
