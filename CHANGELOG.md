@@ -8,6 +8,7 @@ This is a list of high-level changes for each release of AWX. A full list of com
 - Deprecated official support for Mercurial-based project updates - https://github.com/ansible/awx/issues/7932
 - Added resource import/export support to the official AWX collection - https://github.com/ansible/awx/issues/7329
 - Added the ability to import YAML-based resources (instead of just JSON) when using the AWX CLI - https://github.com/ansible/awx/pull/7808
+- Users upgrading from older versions of AWX may encounter an issue that causes their postgres container to restart in a loop (https://github.com/ansible/awx/issues/7854) - if you encounter this, bring your containers down and then back up (e.g., `docker-compose down && docker-compose up -d`) after upgrading to 14.1.0.
 - Updated the AWX CLI to export labels associated with Workflow Job Templates - https://github.com/ansible/awx/pull/7847
 - Updated to the latest python-ldap to address a bug - https://github.com/ansible/awx/issues/7868
 - Upgraded git-python to fix a bug that caused workflows to sometimes fail - https://github.com/ansible/awx/issues/6119
