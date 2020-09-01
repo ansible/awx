@@ -599,7 +599,7 @@ class TowerAPIModule(TowerModule):
             if timeout and timeout < time.time() - start:
                 # Account for Legacy messages
                 if object_type is 'legacy_job_wait':
-                    self.json_output['msg'] = 'Monitoring of Job - {1} aborted due to timeout'.format(object_name)
+                    self.json_output['msg'] = 'Monitoring of Job - {0} aborted due to timeout'.format(object_name)
                 else:
                     self.json_output['msg'] = 'Monitoring of {0} - {1} aborted due to timeout'.format(object_type, object_name)
                 self.wait_output(result)
