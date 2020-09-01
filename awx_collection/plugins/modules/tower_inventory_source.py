@@ -57,6 +57,18 @@ options:
       description:
         - The variables or environment fields to apply to this source type.
       type: dict
+    enabled_var:
+      description:
+        - The variable to use to determine enabled state e.g., "status.power_state"
+      type: str
+    enabled_value:
+      description:
+        - Value when the host is considered enabled, e.g., "powered_on"
+      type: str
+    host_filter:
+      description:
+        - If specified, AWX will only import hosts that match this regular expression.
+      type: str
     credential:
       description:
         - Credential to use for the source.
@@ -152,6 +164,9 @@ def main():
         source_path=dict(),
         source_script=dict(),
         source_vars=dict(type='dict'),
+        enabled_var=dict(),
+        enabled_value=dict(),
+        host_filter=dict(),
         credential=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
@@ -232,7 +247,7 @@ def main():
         'description', 'source', 'source_path', 'source_vars',
         'overwrite', 'overwrite_vars', 'custom_virtualenv',
         'timeout', 'verbosity', 'update_on_launch', 'update_cache_timeout',
-        'update_on_project_update'
+        'update_on_project_update', 'enabled_var', 'enabled_value', 'host_filter',
     )
 
     # Layer in all remaining optional information
