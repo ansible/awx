@@ -110,6 +110,8 @@ class TowerAPIModule(TowerModule):
         name_field = 'name'
         if endpoint == 'users':
             name_field = 'username'
+        elif endpoint == 'instances':
+            name_field = 'hostname'
 
         query_params = {'or__{0}'.format(name_field): name_or_id}
         try:
