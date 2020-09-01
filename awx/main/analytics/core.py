@@ -180,7 +180,8 @@ def ship(path):
                                   auth=(rh_user, rh_password),
                                   headers=s.headers,
                                   timeout=(31, 31))
-            if response.status_code != 202:
+            # Accept 2XX status_codes
+            if response.status_code >= 300:
                 return logger.exception('Upload failed with status {}, {}'.format(response.status_code,
                                                                                   response.text))
         run_now = now()

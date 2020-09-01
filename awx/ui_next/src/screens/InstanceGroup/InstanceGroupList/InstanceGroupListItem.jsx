@@ -6,15 +6,16 @@ import { Link } from 'react-router-dom';
 import 'styled-components/macro';
 import {
   Badge as PFBadge,
-  Progress,
-  ProgressMeasureLocation,
-  ProgressSize,
   Button,
   DataListAction as _DataListAction,
   DataListCheck,
   DataListItem,
-  DataListItemRow,
   DataListItemCells,
+  DataListItemRow,
+  Label,
+  Progress,
+  ProgressMeasureLocation,
+  ProgressSize,
   Tooltip,
 } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons';
@@ -46,6 +47,10 @@ const DataListAction = styled(_DataListAction)`
   grid-template-columns: 40px;
 `;
 
+const Unavailable = styled.span`
+  color: var(--pf-global--danger-color--200);
+`;
+
 function InstanceGroupListItem({
   instanceGroup,
   detailUrl,
@@ -55,30 +60,23 @@ function InstanceGroupListItem({
 }) {
   const labelId = `check-action-${instanceGroup.id}`;
 
-  const isAvailable = item => {
-    return (
-      (item.policy_instance_minimum || item.policy_instance_percentage) &&
-      item.capacity
-    );
-  };
-
   const isContainerGroup = item => {
     return item.is_containerized;
   };
 
   function usedCapacity(item) {
     if (!isContainerGroup(item)) {
-      if (isAvailable(item)) {
+      if (item.capacity) {
         return (
           <Progress
-            value={100 - item.percent_capacity_remaining}
+            value={Math.round(100 - item.percent_capacity_remaining)}
             measureLocation={ProgressMeasureLocation.top}
             size={ProgressSize.sm}
             title={i18n._(t`Used capacity`)}
           />
         );
       }
-      return <span css="color: red">{i18n._(t`Unavailable`)}</span>;
+      return <Unavailable> {i18n._(t`Unavailable`)}</Unavailable>;
     }
     return null;
   }
@@ -108,6 +106,13 @@ function InstanceGroupListItem({
                   <b>{instanceGroup.name}</b>
                 </Link>
               </span>
+              {instanceGroup.is_isolated ? (
+                <span css="margin-left: 12px">
+                  <Label aria-label={i18n._(t`isolated instance`)}>
+                    {i18n._(t`Isolated`)}
+                  </Label>
+                </span>
+              ) : null}
             </DataListCell>,
 
             <DataListCell

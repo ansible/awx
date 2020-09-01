@@ -34,12 +34,22 @@ master:
 {{ affinity | to_nice_yaml(indent=2) | indent(width=4, indentfirst=True) }}
 {% endif %}
 {% endif %}
-{% if pg_image_registry is defined %}
 image:
+{% if pg_image_registry is defined %}
   registry: {{ pg_image_registry }}
+{% endif %}
+  # The default bitnami image from the chart doesn't work on ARM
+  repository: postgres
+  tag: '11'
 volumePermissions:
   image:
+{% if pg_image_registry is defined %}
     registry: {{ pg_image_registry }}
+{% endif %}
+    # The default bitnami image from the chart doesn't work on ARM
+    repository: alpine
+    tag: '3'
+{% if pg_image_registry is defined %}
 metrics:
   image:
     registry: {{ pg_image_registry }}

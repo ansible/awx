@@ -45,7 +45,7 @@ __all__ = [
     'get_object_or_400', 'camelcase_to_underscore', 'underscore_to_camelcase', 'memoize',
     'memoize_delete', 'get_ansible_version', 'get_licenser', 'get_awx_http_client_headers',
     'get_awx_version', 'update_scm_url', 'get_type_for_model', 'get_model_for_type',
-    'copy_model_by_class', 'region_sorting', 'copy_m2m_relationships',
+    'copy_model_by_class', 'copy_m2m_relationships',
     'prefetch_page_capabilities', 'to_python_boolean', 'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal', '_inventory_updates', 'get_pk_from_dict', 'getattrd',
     'getattr_dne', 'NoDefaultProvided', 'get_current_apps', 'set_current_apps',
@@ -85,15 +85,6 @@ def to_python_boolean(value, allow_none=False):
         return None
     else:
         raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
-
-
-def region_sorting(region):
-    # python3's removal of sorted(cmp=...) is _stupid_
-    if region[1].lower() == 'all':
-        return ''
-    elif region[1].lower().startswith('us'):
-        return region[1]
-    return 'ZZZ' + str(region[1])
 
 
 def camelcase_to_underscore(s):
@@ -171,23 +162,19 @@ def memoize_delete(function_name):
     return cache.delete(function_name)
 
 
-def _get_ansible_version(ansible_path):
+@memoize()
+def get_ansible_version():
     '''
     Return Ansible version installed.
     Ansible path needs to be provided to account for custom virtual environments
     '''
     try:
-        proc = subprocess.Popen([ansible_path, '--version'],
+        proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
         result = smart_str(proc.communicate()[0])
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
         return 'unknown'
-
-
-@memoize()
-def get_ansible_version():
-    return _get_ansible_version('ansible')
 
 
 def get_awx_version():
@@ -257,7 +244,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
     # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
     # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
-    if scm_type not in ('git', 'hg', 'svn', 'insights'):
+    if scm_type not in ('git', 'hg', 'svn', 'insights', 'archive'):
         raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
@@ -303,7 +290,8 @@ def update_scm_url(scm_type, url, username=True, password=True,
         'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps', 'file'),
         'hg': ('http', 'https', 'ssh', 'file'),
         'svn': ('http', 'https', 'svn', 'svn+ssh', 'file'),
-        'insights': ('http', 'https')
+        'insights': ('http', 'https'),
+        'archive': ('http', 'https'),
     }
     if parts.scheme not in scm_type_schemes.get(scm_type, ()):
         raise ValueError(_('Unsupported %s URL') % scm_type)
@@ -339,7 +327,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             #raise ValueError('Password not supported for SSH with Mercurial.')
             netloc_password = ''
 
-    if netloc_username and parts.scheme != 'file' and scm_type != "insights":
+    if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
         netloc = u':'.join([urllib.parse.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''

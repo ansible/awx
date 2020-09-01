@@ -1336,6 +1336,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
             errors['local_path'] = _('This path is already being used by another manual project.')
+        if attrs.get('scm_branch') and scm_type == 'archive':
+            errors['scm_branch'] = _('SCM branch cannot be used with archive projects.')
         if attrs.get('scm_refspec') and scm_type != 'git':
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
 
@@ -1700,7 +1702,10 @@ class HostSerializer(BaseSerializerWithVariables):
             'type': j.job.job_type_name,
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
+        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created').defer(
+            'job__extra_vars',
+            'job__artifacts',
+        )[:5]])
         return d
 
     def _get_host_port_from_name(self, name):
@@ -1932,7 +1937,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'enabled_var', 'enabled_value', 'host_filter', 'overwrite', 'overwrite_vars',
                   'custom_virtualenv', 'timeout', 'verbosity')
 
     def get_related(self, obj):
@@ -1952,7 +1957,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return ret
 
     def validate(self, attrs):
-        # TODO: Validate source, validate source_regions
+        # TODO: Validate source
         errors = {}
 
         source = attrs.get('source', self.instance and self.instance.source or '')

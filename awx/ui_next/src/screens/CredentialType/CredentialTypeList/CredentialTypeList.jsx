@@ -32,7 +32,13 @@ function CredentialTypeList({ i18n }) {
     error: contentError,
     isLoading,
     request: fetchCredentialTypes,
-    result: { credentialTypes, credentialTypesCount, actions },
+    result: {
+      credentialTypes,
+      credentialTypesCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -46,12 +52,20 @@ function CredentialTypeList({ i18n }) {
         credentialTypes: response.data.results,
         credentialTypesCount: response.data.count,
         actions: responseActions.data.actions,
+        relatedSearchableKeys: (
+          responseActions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          responseActions.data.actions?.GET || {}
+        ).filter(key => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       credentialTypes: [],
       credentialTypesCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -100,6 +114,8 @@ function CredentialTypeList({ i18n }) {
             pluralizedItemName={i18n._(t`Credential Types`)}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}

@@ -181,42 +181,32 @@ const FrequencyDetailSubform = ({ i18n }) => {
   };
 
   const getRunEveryLabel = () => {
+    const intervalValue = interval.value;
+
     switch (frequency.value) {
       case 'minute':
-        return i18n.plural({
-          value: interval.value,
-          one: 'minute',
-          other: 'minutes',
+        return i18n._('{intervalValue, plural, one {minute} other {minutes}}', {
+          intervalValue,
         });
       case 'hour':
-        return i18n.plural({
-          value: interval.value,
-          one: 'hour',
-          other: 'hours',
+        return i18n._('{intervalValue, plural, one {hour} other {hours}}', {
+          intervalValue,
         });
       case 'day':
-        return i18n.plural({
-          value: interval.value,
-          one: 'day',
-          other: 'days',
+        return i18n._('{intervalValue, plural, one {day} other {days}}', {
+          intervalValue,
         });
       case 'week':
-        return i18n.plural({
-          value: interval.value,
-          one: 'week',
-          other: 'weeks',
+        return i18n._('{intervalValue, plural, one {week} other {weeks}}', {
+          intervalValue,
         });
       case 'month':
-        return i18n.plural({
-          value: interval.value,
-          one: 'month',
-          other: 'months',
+        return i18n._('{intervalValue, plural, one {month} other {months}}', {
+          intervalValue,
         });
       case 'year':
-        return i18n.plural({
-          value: interval.value,
-          one: 'year',
-          other: 'years',
+        return i18n._('{intervalValue, plural, one {year} other {years}}', {
+          intervalValue,
         });
       default:
         throw new Error(i18n._(t`Frequency did not match an expected value`));

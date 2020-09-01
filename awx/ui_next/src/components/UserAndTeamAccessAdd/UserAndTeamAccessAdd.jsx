@@ -96,6 +96,7 @@ function UserAndTeamAccessAdd({
           displayKey="name"
           onRowClick={handleResourceSelect}
           fetchItems={selectedResourceType.fetchItems}
+          fetchOptions={selectedResourceType.fetchOptions}
           selectedLabel={i18n._(t`Selected`)}
           selectedResourceRows={resourcesSelected}
           sortedColumnKey="username"

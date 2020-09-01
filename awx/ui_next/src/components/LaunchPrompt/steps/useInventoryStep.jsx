@@ -9,7 +9,11 @@ export default function useInventoryStep(config, resource, visitedSteps, i18n) {
   const [stepErrors, setStepErrors] = useState({});
 
   const validate = values => {
-    if (!config.ask_inventory_on_launch) {
+    if (
+      !config.ask_inventory_on_launch ||
+      (['workflow_job', 'workflow_job_template'].includes(resource.type) &&
+        !resource.inventory)
+    ) {
       return {};
     }
     const errors = {};

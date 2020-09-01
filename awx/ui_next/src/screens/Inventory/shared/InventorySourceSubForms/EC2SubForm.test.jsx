@@ -10,13 +10,10 @@ jest.mock('../../../../api/models/Credentials');
 const initialValues = {
   credential: null,
   custom_virtualenv: '',
-  group_by: '',
-  instance_filters: '',
   overwrite: false,
   overwrite_vars: false,
   source_path: '',
   source_project: null,
-  source_regions: '',
   source_script: null,
   source_vars: '---\n',
   update_cache_timeout: 0,
@@ -27,14 +24,7 @@ const initialValues = {
 
 const mockSourceOptions = {
   actions: {
-    POST: {
-      source_regions: {
-        ec2_region_choices: [],
-      },
-      group_by: {
-        ec2_group_by_choices: [],
-      },
-    },
+    POST: {},
   },
 };
 
@@ -61,9 +51,6 @@ describe('<EC2SubForm />', () => {
 
   test('should render subform fields', () => {
     expect(wrapper.find('FormGroup[label="Credential"]')).toHaveLength(1);
-    expect(wrapper.find('FormGroup[label="Regions"]')).toHaveLength(1);
-    expect(wrapper.find('FormGroup[label="Instance filters"]')).toHaveLength(1);
-    expect(wrapper.find('FormGroup[label="Only group by"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Verbosity"]')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Update options"]')).toHaveLength(1);
     expect(

@@ -36,7 +36,14 @@ function TemplateList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { results, count, jtActions, wfjtActions, relatedSearchFields },
+    result: {
+      results,
+      count,
+      jtActions,
+      wfjtActions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchTemplates,
@@ -47,20 +54,19 @@ function TemplateList({ i18n }) {
         UnifiedJobTemplatesAPI.read(params),
         JobTemplatesAPI.readOptions(),
         WorkflowJobTemplatesAPI.readOptions(),
+        UnifiedJobTemplatesAPI.readOptions(),
       ]);
       return {
         results: responses[0].data.results,
         count: responses[0].data.count,
         jtActions: responses[1].data.actions,
         wfjtActions: responses[2].data.actions,
-        relatedSearchFields: [
-          ...(responses[1]?.data?.related_search_fields || []).map(val =>
-            val.slice(0, -8)
-          ),
-          ...(responses[2]?.data?.related_search_fields || []).map(val =>
-            val.slice(0, -8)
-          ),
-        ],
+        relatedSearchableKeys: (
+          responses[3]?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          responses[3].data.actions?.GET || {}
+        ).filter(key => responses[3].data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
@@ -68,7 +74,8 @@ function TemplateList({ i18n }) {
       count: 0,
       jtActions: {},
       wfjtActions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -128,17 +135,6 @@ function TemplateList({ i18n }) {
   const canAddWFJT =
     wfjtActions && Object.prototype.hasOwnProperty.call(wfjtActions, 'POST');
   // spreading Set() returns only unique keys
-  const relatedSearchableKeys = [...new Set(relatedSearchFields)] || [];
-  const searchableKeys = [
-    ...new Set([
-      ...Object.keys(jtActions?.GET || {}).filter(
-        key => jtActions.GET[key].filterable
-      ),
-      ...Object.keys(wfjtActions?.GET || {}).filter(
-        key => wfjtActions.GET[key].filterable
-      ),
-    ]),
-  ];
   const addButtonOptions = [];
 
   if (canAddJT) {

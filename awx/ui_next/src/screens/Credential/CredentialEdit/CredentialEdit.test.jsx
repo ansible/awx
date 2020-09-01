@@ -268,7 +268,10 @@ describe('<CredentialEdit />', () => {
 
     test('handleCancel returns the user to credential detail', async () => {
       await waitForElement(wrapper, 'isLoading', el => el.length === 0);
-      wrapper.find('Button[aria-label="Cancel"]').simulate('click');
+      await act(async () => {
+        wrapper.find('Button[aria-label="Cancel"]').simulate('click');
+      });
+      wrapper.update();
       expect(history.location.pathname).toEqual('/credentials/3/details');
     });
 

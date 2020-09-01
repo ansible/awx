@@ -49,7 +49,12 @@ function MultiCredentialsLookup(props) {
   }, [fetchTypes]);
 
   const {
-    result: { credentials, credentialsCount, actions, relatedSearchFields },
+    result: {
+      credentials,
+      credentialsCount,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     request: fetchCredentials,
     error: credentialsError,
     isLoading: isCredentialsLoading,
@@ -69,17 +74,19 @@ function MultiCredentialsLookup(props) {
       return {
         credentials: results,
         credentialsCount: count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [selectedType, history.location]),
     {
       credentials: [],
       credentialsCount: 0,
-      actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -103,11 +110,6 @@ function MultiCredentialsLookup(props) {
   );
 
   const isVault = selectedType?.kind === 'vault';
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   return (
     <Lookup

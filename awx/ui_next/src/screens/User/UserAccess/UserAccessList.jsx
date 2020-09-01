@@ -38,7 +38,13 @@ function UserAccessList({ i18n, user }) {
     isLoading,
     request: fetchRoles,
     error,
-    result: { roleCount, roles, actions, relatedSearchFields },
+    result: {
+      roleCount,
+      roles,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, search);
@@ -55,16 +61,20 @@ function UserAccessList({ i18n, user }) {
         roleCount: count,
         roles: results,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [user.id, search]),
     {
       roles: [],
       roleCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -91,11 +101,6 @@ function UserAccessList({ i18n, user }) {
   const canAdd =
     user?.summary_fields?.user_capabilities?.edit ||
     (actions && Object.prototype.hasOwnProperty.call(actions, 'POST'));
-
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   const saveRoles = () => {
     setIsWizardOpen(false);

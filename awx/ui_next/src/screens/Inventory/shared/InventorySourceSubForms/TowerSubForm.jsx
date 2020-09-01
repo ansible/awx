@@ -4,9 +4,11 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
-  InstanceFiltersField,
   OptionsField,
   VerbosityField,
+  EnabledVarField,
+  EnabledValueField,
+  HostFilterField,
 } from './SharedFields';
 
 const TowerSubForm = ({ i18n }) => {
@@ -28,8 +30,10 @@ const TowerSubForm = ({ i18n }) => {
         value={credentialField.value}
         required
       />
-      <InstanceFiltersField />
       <VerbosityField />
+      <HostFilterField />
+      <EnabledVarField />
+      <EnabledValueField />
       <OptionsField />
     </>
   );

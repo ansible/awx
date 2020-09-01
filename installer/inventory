@@ -119,6 +119,11 @@ create_preload_data=True
 # your credentials
 secret_key=awxsecret
 
+# By default a broadcast websocket secret will be generated.
+# If you would like to *rerun the playbook*, you need to set a unique password.
+# Otherwise it would generate a new one every playbook run.
+# broadcast_websocket_secret=
+
 # Build AWX with official logos
 # Requires cloning awx-logos repo as a sibling of this project.
 # Review the trademark guidelines at https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md

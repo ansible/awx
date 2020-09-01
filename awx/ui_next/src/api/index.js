@@ -7,6 +7,7 @@ import Credentials from './models/Credentials';
 import Groups from './models/Groups';
 import Hosts from './models/Hosts';
 import InstanceGroups from './models/InstanceGroups';
+import Instances from './models/Instances';
 import Inventories from './models/Inventories';
 import InventoryScripts from './models/InventoryScripts';
 import InventorySources from './models/InventorySources';
@@ -19,8 +20,8 @@ import NotificationTemplates from './models/NotificationTemplates';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
-import Root from './models/Root';
 import Roles from './models/Roles';
+import Root from './models/Root';
 import Schedules from './models/Schedules';
 import SystemJobs from './models/SystemJobs';
 import Teams from './models/Teams';
@@ -42,6 +43,7 @@ const CredentialsAPI = new Credentials();
 const GroupsAPI = new Groups();
 const HostsAPI = new Hosts();
 const InstanceGroupsAPI = new InstanceGroups();
+const InstancesAPI = new Instances();
 const InventoriesAPI = new Inventories();
 const InventoryScriptsAPI = new InventoryScripts();
 const InventorySourcesAPI = new InventorySources();
@@ -54,8 +56,8 @@ const NotificationTemplatesAPI = new NotificationTemplates();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
-const RootAPI = new Root();
 const RolesAPI = new Roles();
+const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
 const SystemJobsAPI = new SystemJobs();
 const TeamsAPI = new Teams();
@@ -78,6 +80,7 @@ export {
   GroupsAPI,
   HostsAPI,
   InstanceGroupsAPI,
+  InstancesAPI,
   InventoriesAPI,
   InventoryScriptsAPI,
   InventorySourcesAPI,
@@ -90,8 +93,8 @@ export {
   OrganizationsAPI,
   ProjectUpdatesAPI,
   ProjectsAPI,
-  RootAPI,
   RolesAPI,
+  RootAPI,
   SchedulesAPI,
   SystemJobsAPI,
   TeamsAPI,

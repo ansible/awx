@@ -48,7 +48,11 @@ options:
       type: str
     host_filter:
       description:
-        -  The host_filter field. Only useful when C(kind=smart).
+        - The host_filter field. Only useful when C(kind=smart).
+      type: str
+    insights_credential:
+      description:
+        - Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.
       type: str
     state:
       description:
@@ -71,7 +75,7 @@ EXAMPLES = '''
 '''
 
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 import json
 
 
@@ -84,11 +88,12 @@ def main():
         variables=dict(type='dict'),
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
+        insights_credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     name = module.params.get('name')
@@ -98,6 +103,7 @@ def main():
     state = module.params.get('state')
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
+    insights_credential = module.params.get('insights_credential')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
@@ -125,6 +131,8 @@ def main():
         inventory_fields['description'] = description
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
+    if insights_credential is not None:
+        inventory_fields['insights_credential'] = module.resolve_name_to_id('credentials', insights_credential)
 
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':

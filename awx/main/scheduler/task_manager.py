@@ -14,8 +14,10 @@ from django.utils.translation import ugettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 
 # AWX
+from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
     AdHocCommand,
+    Instance,
     InstanceGroup,
     InventorySource,
     InventoryUpdate,
@@ -515,6 +517,20 @@ class TaskManager():
                 task.job_explanation = timeout_message
                 task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
+    def reap_jobs_from_orphaned_instances(self):
+        # discover jobs that are in running state but aren't on an execution node
+        # that we know about; this is a fairly rare event, but it can occur if you,
+        # for example, SQL backup an awx install with running jobs and restore it
+        # elsewhere
+        for j in UnifiedJob.objects.filter(
+            status__in=['pending', 'waiting', 'running'],
+        ).exclude(
+            execution_node__in=Instance.objects.values_list('hostname', flat=True)
+        ):
+            if j.execution_node and not j.is_containerized:
+                logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
+                reap_job(j, 'failed')
+
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
@@ -567,6 +583,7 @@ class TaskManager():
             self.spawn_workflow_graph_jobs(running_workflow_tasks)
 
             self.timeout_approval_node()
+            self.reap_jobs_from_orphaned_instances()
 
             self.process_tasks(all_sorted_tasks)
         return finished_wfjs

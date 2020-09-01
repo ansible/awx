@@ -93,7 +93,7 @@ pyrad==2.3                # via django-radius
 pyrsistent==0.15.7        # via jsonschema
 python-daemon==2.2.4      # via ansible-runner
 python-dateutil==2.8.1    # via adal, kubernetes
-python-ldap==3.2.0        # via django-auth-ldap
+python-ldap==3.3.1        # via -r /awx_devel/requirements/requirements.in, django-auth-ldap
 python-radius==1.0        # via -r /awx_devel/requirements/requirements.in
 python-string-utils==1.0.0  # via openshift
 python3-openid==3.1.0     # via social-auth-core

@@ -30,7 +30,13 @@ function ProjectList({ i18n }) {
   const [selected, setSelected] = useState([]);
 
   const {
-    result: { results, itemCount, actions, relatedSearchFields },
+    result: {
+      results,
+      itemCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
     error: contentError,
     isLoading,
     request: fetchProjects,
@@ -45,16 +51,20 @@ function ProjectList({ i18n }) {
         results: response.data.results,
         itemCount: response.data.count,
         actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       results: [],
       itemCount: 0,
       actions: {},
-      relatedSearchFields: [],
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -89,10 +99,6 @@ function ProjectList({ i18n }) {
 
   const hasContentLoading = isDeleteLoading || isLoading;
   const canAdd = actions && actions.POST;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
 
   const handleSelectAll = isSelected => {
     setSelected(isSelected ? [...projects] : []);
@@ -132,6 +138,7 @@ function ProjectList({ i18n }) {
                   [`git`, i18n._(t`Git`)],
                   [`hg`, i18n._(t`Mercurial`)],
                   [`svn`, i18n._(t`Subversion`)],
+                  [`archive`, i18n._(t`Remote Archive`)],
                   [`insights`, i18n._(t`Red Hat Insights`)],
                 ],
               },

@@ -75,20 +75,20 @@ const InventorySourceFormFields = ({ sourceOptions, i18n }) => {
     } else {
       const defaults = {
         credential: null,
-        group_by: '',
-        instance_filters: '',
         overwrite: false,
         overwrite_vars: false,
         source: sourceType,
         source_path: '',
         source_project: null,
-        source_regions: '',
         source_script: null,
         source_vars: '---\n',
         update_cache_timeout: 0,
         update_on_launch: false,
         update_on_project_update: false,
         verbosity: 1,
+        enabled_var: '',
+        enabled_value: '',
+        host_filter: '',
       };
       Object.keys(defaults).forEach(label => {
         setFieldValue(label, defaults[label]);
@@ -200,21 +200,21 @@ const InventorySourceForm = ({
     credential: source?.summary_fields?.credential || null,
     custom_virtualenv: source?.custom_virtualenv || '',
     description: source?.description || '',
-    group_by: source?.group_by || '',
-    instance_filters: source?.instance_filters || '',
     name: source?.name || '',
     overwrite: source?.overwrite || false,
     overwrite_vars: source?.overwrite_vars || false,
     source: source?.source || '',
     source_path: source?.source_path === '' ? '/ (project root)' : '',
     source_project: source?.summary_fields?.source_project || null,
-    source_regions: source?.source_regions || '',
     source_script: source?.summary_fields?.source_script || null,
     source_vars: source?.source_vars || '---\n',
     update_cache_timeout: source?.update_cache_timeout || 0,
     update_on_launch: source?.update_on_launch || false,
     update_on_project_update: source?.update_on_project_update || false,
     verbosity: source?.verbosity || 1,
+    enabled_var: source?.enabled_var || '',
+    enabled_value: source?.enabled_value || '',
+    host_filter: source?.host_filter || '',
   };
 
   const {

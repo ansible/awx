@@ -4,11 +4,12 @@ import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 import CredentialLookup from '../../../../components/Lookup/CredentialLookup';
 import {
-  InstanceFiltersField,
-  GroupByField,
   OptionsField,
   SourceVarsField,
   VerbosityField,
+  EnabledVarField,
+  EnabledValueField,
+  HostFilterField,
 } from './SharedFields';
 
 const VMwareSubForm = ({ i18n }) => {
@@ -30,9 +31,10 @@ const VMwareSubForm = ({ i18n }) => {
         value={credentialField.value}
         required
       />
-      <InstanceFiltersField />
-      <GroupByField isCreatable />
       <VerbosityField />
+      <HostFilterField />
+      <EnabledVarField />
+      <EnabledValueField />
       <OptionsField />
       <SourceVarsField />
     </>

@@ -43,6 +43,15 @@ describe('<UserAndTeamAccessAdd/>', () => {
       count: 1,
     },
   };
+  const options = {
+    data: {
+      actions: {
+        GET: {},
+        POST: {},
+      },
+      related_search_fields: [],
+    },
+  };
   let wrapper;
   beforeEach(async () => {
     await act(async () => {
@@ -111,11 +120,13 @@ describe('<UserAndTeamAccessAdd/>', () => {
 
   test('should call api to associate role', async () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
+    JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockResolvedValue({});
 
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
+        fetchOptions: JobTemplatesAPI.readOptions,
         label: 'Job template',
         selectedResource: 'jobTemplate',
         searchColumns: [
@@ -169,6 +180,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
 
   test('should throw error', async () => {
     JobTemplatesAPI.read.mockResolvedValue(resources);
+    JobTemplatesAPI.readOptions.mockResolvedValue(options);
     UsersAPI.associateRole.mockRejectedValue(
       new Error({
         response: {
@@ -192,6 +204,7 @@ describe('<UserAndTeamAccessAdd/>', () => {
     await act(async () =>
       wrapper.find('SelectableCard[label="Job templates"]').prop('onClick')({
         fetchItems: JobTemplatesAPI.read,
+        fetchOptions: JobTemplatesAPI.readOptions,
         label: 'Job template',
         selectedResource: 'jobTemplate',
         searchColumns: [

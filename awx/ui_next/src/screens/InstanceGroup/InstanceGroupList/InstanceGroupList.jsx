@@ -49,7 +49,13 @@ function InstanceGroupList({ i18n }) {
     error: contentError,
     isLoading,
     request: fetchInstanceGroups,
-    result: { instanceGroups, instanceGroupsCount, actions },
+    result: {
+      instanceGroups,
+      instanceGroupsCount,
+      actions,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -63,12 +69,20 @@ function InstanceGroupList({ i18n }) {
         instanceGroups: response.data.results,
         instanceGroupsCount: response.data.count,
         actions: responseActions.data.actions,
+        relatedSearchableKeys: (
+          responseActions?.data?.related_search_fields || []
+        ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          responseActions.data.actions?.GET || {}
+        ).filter(key => responseActions.data.actions?.GET[key].filterable),
       };
     }, [location]),
     {
       instanceGroups: [],
       instanceGroupsCount: 0,
       actions: {},
+      relatedSearchableKeys: [],
+      searchableKeys: [],
     }
   );
 
@@ -171,6 +185,8 @@ function InstanceGroupList({ i18n }) {
             pluralizedItemName={pluralizedItemName}
             qsConfig={QS_CONFIG}
             onRowClick={handleSelect}
+            toolbarSearchableKeys={searchableKeys}
+            toolbarRelatedSearchableKeys={relatedSearchableKeys}
             renderToolbar={props => (
               <DatalistToolbar
                 {...props}

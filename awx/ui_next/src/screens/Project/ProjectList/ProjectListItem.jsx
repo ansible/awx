@@ -16,7 +16,7 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { PencilAltIcon, SyncIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
-import { timeOfDay } from '../../../util/dates';
+import { formatDateString, timeOfDay } from '../../../util/dates';
 import { ProjectsAPI } from '../../../api';
 import ClipboardCopyButton from '../../../components/ClipboardCopyButton';
 import StatusIcon from '../../../components/StatusIcon';
@@ -72,7 +72,7 @@ function ProjectListItem({
         </div>
         {job.finished && (
           <div>
-            {i18n._(t`FINISHED:`)} {job.finished}
+            {i18n._(t`FINISHED:`)} {formatDateString(job.finished)}
           </div>
         )}
       </Fragment>

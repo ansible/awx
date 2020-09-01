@@ -12,21 +12,21 @@
 
 - name: Create Docker Compose Configuration
   template:
-    src: "{{ item }}.j2"
-    dest: "{{ docker_compose_dir }}/{{ item }}"
-    mode: 0600
-  with_items:
-    - environment.sh
-    - credentials.py
-    - docker-compose.yml
-    - nginx.conf
-    - redis.conf
+    src: "{{ item.file }}.j2"
+    dest: "{{ docker_compose_dir }}/{{ item.file }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - file: environment.sh
+      mode: "0600"
+    - file: credentials.py
+      mode: "0600"
+    - file: docker-compose.yml
+      mode: "0600"
+    - file: nginx.conf
+      mode: "0600"
+    - file: redis.conf
+      mode: "0664"
   register: awx_compose_config
-
-- name: Set redis config to other group readable to satisfy redis-server
-  file:
-    path: "{{ docker_compose_dir }}/redis.conf"
-    mode: 0666
 
 - name: Render SECRET_KEY file
   copy:

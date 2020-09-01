@@ -28,7 +28,7 @@ function UserTokenList({ i18n }) {
     error,
     isLoading,
     request: fetchTokens,
-    result: { tokens, itemCount, actions, relatedSearchFields },
+    result: { tokens, itemCount, relatedSearchableKeys, searchableKeys },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
@@ -53,13 +53,15 @@ function UserTokenList({ i18n }) {
       return {
         tokens: modifiedResults,
         itemCount: count,
-        actions: actionsResponse.data.actions,
-        relatedSearchFields: (
+        relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
         ).map(val => val.slice(0, -8)),
+        searchableKeys: Object.keys(
+          actionsResponse.data.actions?.GET || {}
+        ).filter(key => actionsResponse.data.actions?.GET[key].filterable),
       };
     }, [id, location.search]),
-    { tokens: [], itemCount: 0, actions: {}, relatedSearchFields: [] }
+    { tokens: [], itemCount: 0, relatedSearchableKeys: [], searchableKeys: [] }
   );
 
   useEffect(() => {
@@ -93,10 +95,7 @@ function UserTokenList({ i18n }) {
   };
 
   const canAdd = true;
-  const relatedSearchableKeys = relatedSearchFields || [];
-  const searchableKeys = Object.keys(actions?.GET || {}).filter(
-    key => actions.GET[key].filterable
-  );
+
   return (
     <>
       <PaginatedDataList

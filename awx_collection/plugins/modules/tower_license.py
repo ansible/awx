@@ -43,12 +43,12 @@ EXAMPLES = '''
     eula_accepted: True
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 
 
 def main():
 
-    module = TowerModule(
+    module = TowerAPIModule(
         argument_spec=dict(
             data=dict(type='dict', required=True),
             eula_accepted=dict(type='bool', required=True),
