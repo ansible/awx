@@ -111,7 +111,7 @@ def main():
     else:
         lookup_data = {'name': name}
         if organization:
-            lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+            lookup_data['organization'] = module.get_one_by_name_or_id('organizations', organization)
         project = module.get_one('projects', data=lookup_data)
         if project is None:
             module.fail_json(msg="Unable to find project")
