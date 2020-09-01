@@ -52,8 +52,6 @@ options:
     redirect_uris:
       description:
         - Allowed urls list, space separated. Required when authorization-grant-type=authorization-code
-      default: "present"
-      choices: ["present", "absent"]
       type: str
     state:
       description:
@@ -66,11 +64,6 @@ options:
         - Set True to skip authorization step for completely trusted applications.
       default: false
       type: bool
-    username:
-      description:
-        - Username for this credential. ``access_key`` for AWS.
-        - Deprecated, please use inputs
-      type: str
 '''
 
 
@@ -110,8 +103,7 @@ def main():
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
-        skip_authorization=dict(type=bool),
-        username=dict()
+        skip_authorization=dict(type=bool)
     )
 
     # Create a module for ourselves
@@ -155,9 +147,6 @@ def main():
         application_fields['description'] = description
     if redirect_uris is not None:
         application_fields['redirect_uris'] = redirect_uris
-
-    if authorization_grant_type == 'authorization-code' and not redirect_uris:
-        module.fail_json(msg='Parameter redirect_uris is required when authorization-grant-type is authorization code based.')
 
     # If the state was present and we can let the module build or update the existing application, this will return on its own
     module.create_or_update_if_needed(
