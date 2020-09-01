@@ -132,23 +132,16 @@ def main():
     # Grab our start time to compare against for the timeout
     start = time.time()
 
-    project_url = result['json']['url']
-    while not result['json']['finished']:
-        # If we are past our time out fail with a message
-        if timeout and timeout < time.time() - start:
-            module.json_output['msg'] = "Monitoring aborted due to timeout"
-            module.fail_json(**module.json_output)
+    if not wait:
+        module.exit_json(**module.json_output)
 
-        # Put the process to sleep for our interval
-        time.sleep(interval)
-
-        result = module.get_endpoint(project_url)
-        module.json_output['status'] = result['json']['status']
-
-    # If the update has failed, we want to raise a task failure for that so we get a non-zero response.
-    if result['json']['failed']:
-        module.json_output['msg'] = 'The project "{0}" failed'.format(name)
-        module.fail_json(**module.json_output)
+    # Invoke wait function
+    module.wait_on_url(
+        url=result['json']['url'],
+        object_name=name,
+        object_type='Project Update',
+        timeout=timeout, interval=interval
+    )
 
     module.exit_json(**module.json_output)
 
