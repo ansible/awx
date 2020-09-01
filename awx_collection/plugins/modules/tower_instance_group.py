@@ -54,7 +54,7 @@ options:
       description:
         - List of exact-match Instances that will be assigned to this group
       required: False
-      type: dict
+      type: list
     pod_spec_override:
       description:
         - A custom Kubernetes or OpenShift Pod specification.
@@ -88,7 +88,7 @@ def main():
         credential=dict(),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
-        policy_instance_list=dict(type='dict'),
+        policy_instance_list=dict(type='list'),
         pod_spec_override=dict(),
         instances=dict(required=False, type="list", default=None),
         state=dict(choices=['present', 'absent'], default='present'),
