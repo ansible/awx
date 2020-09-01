@@ -847,13 +847,6 @@ class BaseTask(object):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def get_path_to_ansible(self, instance, executable='ansible-playbook', **kwargs):
-        venv_path = getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH)
-        venv_exe = os.path.join(venv_path, 'bin', executable)
-        if os.path.exists(venv_exe):
-            return venv_exe
-        return shutil.which(executable)
-
     def build_private_data(self, instance, private_data_dir):
         '''
         Return SSH private key data (only if stored in DB as ssh_key_data).
