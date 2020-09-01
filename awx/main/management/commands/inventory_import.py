@@ -12,7 +12,6 @@ import sys
 import time
 import traceback
 import shutil
-from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -39,7 +38,6 @@ from awx.main.utils import (
     build_proot_temp_dir,
     get_licenser
 )
-from awx.main.utils.common import _get_ansible_version
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.utils.pglock import advisory_lock
@@ -136,15 +134,10 @@ class AnsibleInventoryLoader(object):
         # inside of /venv/ansible, so we override the specified interpreter
         # https://github.com/ansible/ansible/issues/50714
         bargs = ['python', ansible_inventory_path, '-i', self.source]
-        ansible_version = _get_ansible_version(ansible_inventory_path[:-len('-inventory')])
-        if ansible_version != 'unknown':
-            this_version = Version(ansible_version)
-            if this_version >= Version('2.5'):
-                bargs.extend(['--playbook-dir', self.source_dir])
-            if this_version >= Version('2.8'):
-                if self.verbosity:
-                    # INFO: -vvv, DEBUG: -vvvvv, for inventory, any more than 3 makes little difference
-                    bargs.append('-{}'.format('v' * min(5, self.verbosity * 2 + 1)))
+        bargs.extend(['--playbook-dir', self.source_dir])
+        if self.verbosity:
+            # INFO: -vvv, DEBUG: -vvvvv, for inventory, any more than 3 makes little difference
+            bargs.append('-{}'.format('v' * min(5, self.verbosity * 2 + 1)))
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 

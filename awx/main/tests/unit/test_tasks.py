@@ -1880,13 +1880,6 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
-@pytest.fixture
-def mock_ansible_version():
-    with mock.patch('awx.main.tasks._get_ansible_version', mock.MagicMock(return_value='2.10')) as _fixture:
-        yield _fixture
-
-
-@pytest.mark.usefixtures("mock_ansible_version")
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self):
@@ -2020,7 +2013,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
-        inventory_update.source_regions = 'north, south, east, west'
 
         def get_cred():
             cred = Credential(
@@ -2059,7 +2051,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         azure_rm = CredentialType.defaults['azure_rm']()
         inventory_update.source = 'azure_rm'
-        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(
@@ -2097,7 +2088,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         gce = CredentialType.defaults['gce']()
         inventory_update.source = 'gce'
-        inventory_update.source_regions = 'all'
 
         def get_cred():
             cred = Credential(
@@ -2216,7 +2206,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         tower = CredentialType.defaults['tower']()
         inventory_update.source = 'tower'
-        inventory_update.instance_filters = '12345'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',
@@ -2248,7 +2237,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         task = tasks.RunInventoryUpdate()
         tower = CredentialType.defaults['tower']()
         inventory_update.source = 'tower'
-        inventory_update.instance_filters = '12345'
         inputs = {
             'host': 'https://tower.example.org',
             'username': 'bob',

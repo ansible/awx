@@ -23,6 +23,7 @@ import fcntl
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse as urlparse
+import shlex
 
 # Django
 from django.conf import settings
@@ -72,7 +73,7 @@ from awx.main.utils import (update_scm_url,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager,
                             get_awx_version)
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.common import _get_ansible_version, get_custom_venv_choices
+from awx.main.utils.common import get_custom_venv_choices
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
@@ -839,12 +840,6 @@ class BaseTask(object):
             else:
                 logger.error('Failed to update %s after %d retries.',
                              self.model._meta.object_name, _attempt)
-
-    def get_ansible_version(self, instance):
-        if not hasattr(self, '_ansible_version'):
-            self._ansible_version = _get_ansible_version(
-                ansible_path=self.get_path_to_ansible(instance, executable='ansible'))
-        return self._ansible_version
 
     def get_path_to(self, *args):
         '''
@@ -2459,7 +2454,7 @@ class RunInventoryUpdate(BaseTask):
         If no private data is needed, return None.
         """
         if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
+            injector = InventorySource.injectors[inventory_update.source]()
             return injector.build_private_data(inventory_update, private_data_dir)
 
     def build_env(self, inventory_update, private_data_dir, isolated, private_data_files=None):
@@ -2487,7 +2482,7 @@ class RunInventoryUpdate(BaseTask):
 
         injector = None
         if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
+            injector = InventorySource.injectors[inventory_update.source]()
 
         if injector is not None:
             env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
@@ -2559,23 +2554,18 @@ class RunInventoryUpdate(BaseTask):
         args.extend(['--venv', inventory_update.ansible_virtualenv_path])
 
         src = inventory_update.source
-        # Add several options to the shell arguments based on the
-        # inventory-source-specific setting in the AWX configuration.
-        # These settings are "per-source"; it's entirely possible that
-        # they will be different between cloud providers if an AWX user
-        # actively uses more than one.
-        if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
-            args.extend(['--enabled-var',
-                        getattr(settings, '%s_ENABLED_VAR' % src.upper())])
-        if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
-            args.extend(['--enabled-value',
-                        getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
-        if getattr(settings, '%s_GROUP_FILTER' % src.upper(), False):
-            args.extend(['--group-filter',
-                         getattr(settings, '%s_GROUP_FILTER' % src.upper())])
-        if getattr(settings, '%s_HOST_FILTER' % src.upper(), False):
-            args.extend(['--host-filter',
-                         getattr(settings, '%s_HOST_FILTER' % src.upper())])
+        if inventory_update.enabled_var:
+            args.extend(['--enabled-var', shlex.quote(inventory_update.enabled_var)])
+            args.extend(['--enabled-value', shlex.quote(inventory_update.enabled_value)])
+        else:
+            if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
+                args.extend(['--enabled-var',
+                            getattr(settings, '%s_ENABLED_VAR' % src.upper())])
+            if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
+                args.extend(['--enabled-value',
+                            getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
+        if inventory_update.host_filter:
+            args.extend(['--host-filter', shlex.quote(inventory_update.host_filter)])
         if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
             args.append('--exclude-empty-groups')
         if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
@@ -2605,7 +2595,7 @@ class RunInventoryUpdate(BaseTask):
 
         injector = None
         if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
+            injector = InventorySource.injectors[src]()
 
         if injector is not None:
             content = injector.inventory_contents(inventory_update, private_data_dir)

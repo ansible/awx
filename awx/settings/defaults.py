@@ -8,8 +8,6 @@ from datetime import timedelta
 
 # global settings
 from django.conf import global_settings
-# ugettext lazy
-from django.utils.translation import ugettext_lazy as _
 
 # Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
@@ -671,145 +669,32 @@ INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM")
 # ----------------
 # -- Amazon EC2 --
 # ----------------
-
-# AWS does not appear to provide pretty region names via any API, so store the
-# list of names here.  The available region IDs will be pulled from boto.
-# http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
-EC2_REGION_NAMES = {
-    'us-east-1': _('US East (Northern Virginia)'),
-    'us-east-2': _('US East (Ohio)'),
-    'us-west-2': _('US West (Oregon)'),
-    'us-west-1': _('US West (Northern California)'),
-    'ca-central-1': _('Canada (Central)'),
-    'eu-central-1': _('EU (Frankfurt)'),
-    'eu-west-1': _('EU (Ireland)'),
-    'eu-west-2': _('EU (London)'),
-    'ap-southeast-1': _('Asia Pacific (Singapore)'),
-    'ap-southeast-2': _('Asia Pacific (Sydney)'),
-    'ap-northeast-1': _('Asia Pacific (Tokyo)'),
-    'ap-northeast-2': _('Asia Pacific (Seoul)'),
-    'ap-south-1': _('Asia Pacific (Mumbai)'),
-    'sa-east-1': _('South America (Sao Paulo)'),
-    'us-gov-west-1': _('US West (GovCloud)'),
-    'cn-north-1': _('China (Beijing)'),
-}
-
-# Inventory variable name/values for determining if host is active/enabled.
 EC2_ENABLED_VAR = 'ec2_state'
 EC2_ENABLED_VALUE = 'running'
-
-# Inventory variable name containing unique instance ID.
 EC2_INSTANCE_ID_VAR = 'ec2_id'
-
-# Filter for allowed group/host names when importing inventory from EC2.
-EC2_GROUP_FILTER = r'^.+$'
-EC2_HOST_FILTER = r'^.+$'
 EC2_EXCLUDE_EMPTY_GROUPS = True
-
 
 # ------------
 # -- VMware --
 # ------------
-# Inventory variable name/values for determining whether a host is
-# active in vSphere.
 VMWARE_ENABLED_VAR = 'guest.gueststate'
 VMWARE_ENABLED_VALUE = 'running'
-
-# Inventory variable name containing the unique instance ID.
 VMWARE_INSTANCE_ID_VAR = 'config.instanceUuid, config.instanceuuid'
-
-# Filter for allowed group and host names when importing inventory
-# from VMware.
-VMWARE_GROUP_FILTER = r'^.+$'
-VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
 
 VMWARE_VALIDATE_CERTS = False
+
 # ---------------------------
 # -- Google Compute Engine --
 # ---------------------------
-
-# It's not possible to get zones in GCE without authenticating, so we
-# provide a list here.
-# Source: https://developers.google.com/compute/docs/zones
-GCE_REGION_CHOICES = [
-    ('us-east1-b', _('US East 1 (B)')),
-    ('us-east1-c', _('US East 1 (C)')),
-    ('us-east1-d', _('US East 1 (D)')),
-    ('us-east4-a', _('US East 4 (A)')),
-    ('us-east4-b', _('US East 4 (B)')),
-    ('us-east4-c', _('US East 4 (C)')),
-    ('us-central1-a', _('US Central (A)')),
-    ('us-central1-b', _('US Central (B)')),
-    ('us-central1-c', _('US Central (C)')),
-    ('us-central1-f', _('US Central (F)')),
-    ('us-west1-a', _('US West (A)')),
-    ('us-west1-b', _('US West (B)')),
-    ('us-west1-c', _('US West (C)')),
-    ('europe-west1-b', _('Europe West 1 (B)')),
-    ('europe-west1-c', _('Europe West 1 (C)')),
-    ('europe-west1-d', _('Europe West 1 (D)')),
-    ('europe-west2-a', _('Europe West 2 (A)')),
-    ('europe-west2-b', _('Europe West 2 (B)')),
-    ('europe-west2-c', _('Europe West 2 (C)')),
-    ('asia-east1-a', _('Asia East (A)')),
-    ('asia-east1-b', _('Asia East (B)')),
-    ('asia-east1-c', _('Asia East (C)')),
-    ('asia-southeast1-a', _('Asia Southeast (A)')),
-    ('asia-southeast1-b', _('Asia Southeast (B)')),
-    ('asia-northeast1-a', _('Asia Northeast (A)')),
-    ('asia-northeast1-b', _('Asia Northeast (B)')),
-    ('asia-northeast1-c', _('Asia Northeast (C)')),
-    ('australia-southeast1-a', _('Australia Southeast (A)')),
-    ('australia-southeast1-b', _('Australia Southeast (B)')),
-    ('australia-southeast1-c', _('Australia Southeast (C)')),
-]
-# Inventory variable name/value for determining whether a host is active
-# in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
 GCE_ENABLED_VALUE = 'running'
-
-# Filter for allowed group and host names when importing inventory from
-# Google Compute Engine.
-GCE_GROUP_FILTER = r'^.+$'
-GCE_HOST_FILTER = r'^.+$'
 GCE_EXCLUDE_EMPTY_GROUPS = True
 GCE_INSTANCE_ID_VAR = 'gce_id'
 
 # --------------------------------------
 # -- Microsoft Azure Resource Manager --
 # --------------------------------------
-# It's not possible to get zones in Azure without authenticating, so we
-# provide a list here.
-AZURE_RM_REGION_CHOICES = [
-    ('eastus', _('US East')),
-    ('eastus2', _('US East 2')),
-    ('centralus', _('US Central')),
-    ('northcentralus', _('US North Central')),
-    ('southcentralus', _('US South Central')),
-    ('westcentralus', _('US West Central')),
-    ('westus', _('US West')),
-    ('westus2', _('US West 2')),
-    ('canadaeast', _('Canada East')),
-    ('canadacentral', _('Canada Central')),
-    ('brazilsouth', _('Brazil South')),
-    ('northeurope', _('Europe North')),
-    ('westeurope', _('Europe West')),
-    ('ukwest', _('UK West')),
-    ('uksouth', _('UK South')),
-    ('eastasia', _('Asia East')),
-    ('southestasia', _('Asia Southeast')),
-    ('australiaeast', _('Australia East')),
-    ('australiasoutheast', _('Australia Southeast')),
-    ('westindia', _('India West')),
-    ('southindia', _('India South')),
-    ('japaneast', _('Japan East')),
-    ('japanwest', _('Japan West')),
-    ('koreacentral', _('Korea Central')),
-    ('koreasouth', _('Korea South')),
-]
-AZURE_RM_GROUP_FILTER = r'^.+$'
-AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'
 AZURE_RM_ENABLED_VALUE = 'running'
 AZURE_RM_INSTANCE_ID_VAR = 'id'
@@ -820,8 +705,6 @@ AZURE_RM_EXCLUDE_EMPTY_GROUPS = True
 # ---------------------
 OPENSTACK_ENABLED_VAR = 'status'
 OPENSTACK_ENABLED_VALUE = 'ACTIVE'
-OPENSTACK_GROUP_FILTER = r'^.+$'
-OPENSTACK_HOST_FILTER = r'^.+$'
 OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 
@@ -830,8 +713,6 @@ OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 # ---------------------
 RHV_ENABLED_VAR = 'status'
 RHV_ENABLED_VALUE = 'up'
-RHV_GROUP_FILTER = r'^.+$'
-RHV_HOST_FILTER = r'^.+$'
 RHV_EXCLUDE_EMPTY_GROUPS = True
 RHV_INSTANCE_ID_VAR = 'id'
 
@@ -840,8 +721,6 @@ RHV_INSTANCE_ID_VAR = 'id'
 # ---------------------
 TOWER_ENABLED_VAR = 'remote_tower_enabled'
 TOWER_ENABLED_VALUE = 'true'
-TOWER_GROUP_FILTER = r'^.+$'
-TOWER_HOST_FILTER = r'^.+$'
 TOWER_EXCLUDE_EMPTY_GROUPS = True
 TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 
@@ -850,8 +729,6 @@ TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
-SATELLITE6_GROUP_FILTER = r'^.+$'
-SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
@@ -861,8 +738,6 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 # ---------------------
 #CUSTOM_ENABLED_VAR =
 #CUSTOM_ENABLED_VALUE =
-CUSTOM_GROUP_FILTER = r'^.+$'
-CUSTOM_HOST_FILTER = r'^.+$'
 CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 #CUSTOM_INSTANCE_ID_VAR =
 
@@ -871,8 +746,6 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 # ---------------------
 #SCM_ENABLED_VAR =
 #SCM_ENABLED_VALUE =
-SCM_GROUP_FILTER = r'^.+$'
-SCM_HOST_FILTER = r'^.+$'
 SCM_EXCLUDE_EMPTY_GROUPS = False
 #SCM_INSTANCE_ID_VAR =
 

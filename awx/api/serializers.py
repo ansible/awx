@@ -1937,7 +1937,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'enabled_var', 'enabled_value', 'host_filter', 'overwrite', 'overwrite_vars',
                   'custom_virtualenv', 'timeout', 'verbosity')
 
     def get_related(self, obj):
@@ -1957,7 +1957,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return ret
 
     def validate(self, attrs):
-        # TODO: Validate source, validate source_regions
+        # TODO: Validate source
         errors = {}
 
         source = attrs.get('source', self.instance and self.instance.source or '')

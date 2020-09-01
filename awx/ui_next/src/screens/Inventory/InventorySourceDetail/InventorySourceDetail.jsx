@@ -3,10 +3,9 @@ import { Link, useHistory } from 'react-router-dom';
 import { withI18n } from '@lingui/react';
 import { t } from '@lingui/macro';
 
-import { Button, Chip, List, ListItem } from '@patternfly/react-core';
+import { Button, List, ListItem } from '@patternfly/react-core';
 import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
-import ChipGroup from '../../../components/ChipGroup';
 import { VariablesDetail } from '../../../components/CodeMirrorInput';
 import ContentError from '../../../components/ContentError';
 import ContentLoading from '../../../components/ContentLoading';
@@ -28,21 +27,21 @@ function InventorySourceDetail({ inventorySource, i18n }) {
     created,
     custom_virtualenv,
     description,
-    group_by,
     id,
-    instance_filters,
     modified,
     name,
     overwrite,
     overwrite_vars,
     source,
     source_path,
-    source_regions,
     source_vars,
     update_cache_timeout,
     update_on_launch,
     update_on_project_update,
     verbosity,
+    enabled_var,
+    enabled_value,
+    host_filter,
     summary_fields: {
       created_by,
       credentials,
@@ -224,6 +223,9 @@ function InventorySourceDetail({ inventorySource, i18n }) {
           label={i18n._(t`Cache timeout`)}
           value={`${update_cache_timeout} ${i18n._(t`seconds`)}`}
         />
+        <Detail label={i18n._(t`Host Filter`)} value={host_filter} />
+        <Detail label={i18n._(t`Enabled Variable`)} value={enabled_var} />
+        <Detail label={i18n._(t`Enabled Value`)} value={enabled_value} />
         {credentials?.length > 0 && (
           <Detail
             fullWidth
@@ -231,57 +233,6 @@ function InventorySourceDetail({ inventorySource, i18n }) {
             value={credentials.map(cred => (
               <CredentialChip key={cred?.id} credential={cred} isReadOnly />
             ))}
-          />
-        )}
-        {source_regions && (
-          <Detail
-            fullWidth
-            label={i18n._(t`Regions`)}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={source_regions.split(',').length}
-              >
-                {source_regions.split(',').map(region => (
-                  <Chip key={region} isReadOnly>
-                    {region}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
-        {instance_filters && (
-          <Detail
-            fullWidth
-            label={i18n._(t`Instance filters`)}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={instance_filters.split(',').length}
-              >
-                {instance_filters.split(',').map(filter => (
-                  <Chip key={filter} isReadOnly>
-                    {filter}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
-        {group_by && (
-          <Detail
-            fullWidth
-            label={i18n._(t`Only group by`)}
-            value={
-              <ChipGroup numChips={5} totalChips={group_by.split(',').length}>
-                {group_by.split(',').map(group => (
-                  <Chip key={group} isReadOnly>
-                    {group}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
           />
         )}
         {optionsList && (
