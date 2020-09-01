@@ -24,7 +24,7 @@ no_module_for_endpoint = []
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
     'tower_import', 'tower_meta', 'tower_export', 'tower_job_launch', 'tower_job_wait', 'tower_job_list',
-    'tower_license', 'tower_ping', 'tower_receive', 'tower_send', 'tower_workflow_launch', 'tower_job_cancel',
+    'tower_license', 'tower_ping', 'tower_project_update', 'tower_receive', 'tower_send', 'tower_workflow_launch', 'tower_job_cancel',
     'tower_workflow_template',
 ]
 
