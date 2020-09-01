@@ -2,14 +2,20 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import zipfile
-import tarfile
+import errno
 import os
+import tarfile
+import zipfile
 
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display
 
 display = Display()
+
+try:
+    from zipfile import BadZipFile
+except ImportError:
+    from zipfile import BadZipfile as BadZipFile  # py2 compat
 
 
 class ActionModule(ActionBase):
@@ -26,14 +32,15 @@ class ActionModule(ActionBase):
             archive = zipfile.ZipFile(src)
             get_filenames = archive.namelist
             get_members = archive.infolist
-        except zipfile.BadZipFile:
-            archive = tarfile.open(src)
+        except BadZipFile:
+            try:
+                archive = tarfile.open(src)
+            except tarfile.ReadError:
+                result["failed"] = True
+                result["msg"] = "{0} is not a valid archive".format(src)
+                return result
             get_filenames = archive.getnames
             get_members = archive.getmembers
-        except tarfile.ReadError:
-            result["failed"] = True
-            result["msg"] = "{0} is not a valid archive".format(src)
-            return result
 
         # Most well formed archives contain a single root directory, typically named
         # project-name-1.0.0. The project contents should be inside that directory.
@@ -62,10 +69,19 @@ class ActionModule(ActionBase):
             try:
                 is_dir = member.is_dir()
             except AttributeError:
-                is_dir = member.isdir()
+                try:
+                    is_dir = member.isdir()
+                except AttributeError:
+                    is_dir = member.filename[-1] == '/'  # py2 compat for ZipInfo
 
             if is_dir:
-                os.makedirs(dest, exist_ok=True)
+                try:
+                    os.makedirs(dest)
+                except OSError as exc:  # Python >= 2.5
+                    if exc.errno == errno.EEXIST and os.path.isdir(dest):
+                        pass
+                    else:
+                        raise
             else:
                 try:
                     member_f = archive.open(member)
