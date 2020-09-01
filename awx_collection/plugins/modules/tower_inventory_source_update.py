@@ -34,9 +34,25 @@ options:
       type: str
     organization:
       description:
-        - Name of organization for project.
+        - Name of the inventory source's inventory's organization.
       type: str
       required: False
+    wait:
+      description:
+        - Wait for the job to complete.
+      default: False
+      type: bool
+    interval:
+      description:
+        - The interval to request an update from Tower.
+      required: False
+      default: 1
+      type: float
+    timeout:
+      description:
+        - If waiting for the job to complete this will abort after this
+          amount of seconds
+      type: int
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -76,6 +92,9 @@ def main():
         inventory=dict(required=True),
         inventory_source=dict(required=True),
         organization=dict(),
+        wait=dict(default=False, type='bool'),
+        interval=dict(default=1.0, type='float'),
+        timeout=dict(default=None, type='int'),
     )
 
     # Create a module for ourselves
@@ -84,6 +103,9 @@ def main():
     # Extract our parameters
     inventory = module.params.get('inventory')
     inventory_source = module.params.get('inventory_source')
+    wait = module.params.get('wait')
+    interval = module.params.get('interval')
+    timeout = module.params.get('timeout')
 
     new_fields = {}
     organization_id = None
@@ -101,6 +123,13 @@ def main():
 
     if inventory_source_update_results['status_code'] != 202:
         module.fail_json(msg="Failed to update inventory source, see response for details", **{'response': inventory_source_update_results})
+
+    inventory_source_update_results = module.wait_on_url(
+        url=inventory_source_update_results['json']['url'],
+        object_name=inventory_object,
+        object_type='inventory_update',
+        timeout=timeout, interval=interval
+    )
 
     module.exit_json(**{
         'changed': True,

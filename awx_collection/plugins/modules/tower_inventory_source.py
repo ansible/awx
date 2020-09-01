@@ -130,7 +130,7 @@ options:
       elements: str
     organization:
       description:
-        - Name of organization for project.
+        - Name of the inventory source's inventory's organization.
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -173,9 +173,6 @@ def main():
         enabled_value=dict(),
         host_filter=dict(),
         credential=dict(),
-        source_regions=dict(),
-        instance_filters=dict(),
-        group_by=dict(),
         organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),

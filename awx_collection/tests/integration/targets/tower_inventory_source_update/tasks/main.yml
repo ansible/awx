@@ -77,6 +77,7 @@
         inventory: "{{ inv_name }}"
         inventory_source: "{{ item }}"
         organization: "{{ created_org.id }}"
+        wait: true
       loop: "{{ query('awx.awx.tower_api', 'inventory_sources', query_params={ 'inventory': created_inventory.id }, return_ids=True ) }}"
       register: result
 
