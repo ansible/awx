@@ -22,6 +22,24 @@ class Organization(HasCreate, HasInstanceGroups, HasNotifications, base.Base):
         with suppress(exc.NoContent):
             self.related.users.post(user)
 
+    def add_galaxy_credential(self, credential):
+        if isinstance(credential, page.Page):
+            credential = credential.json
+        with suppress(exc.NoContent):
+            self.related.galaxy_credentials.post({
+                "id": credential.id,
+            })
+
+    def remove_galaxy_credential(self, credential):
+        if isinstance(credential, page.Page):
+            credential = credential.json
+        with suppress(exc.NoContent):
+            self.related.galaxy_credentials.post({
+                "id": credential.id,
+                "disassociate": True,
+            })
+
+
     def payload(self, **kwargs):
         payload = PseudoNamespace(name=kwargs.get('name') or 'Organization - {}'.format(random_title()),
                                   description=kwargs.get('description') or random_title(10))
