@@ -271,6 +271,7 @@ function VisualizerGraph({ i18n, readOnly }) {
               key="start"
               showActionTooltip={!readOnly}
               onUpdateHelpText={setHelpText}
+              readOnly={readOnly}
             />,
             links.map(link => {
               if (
