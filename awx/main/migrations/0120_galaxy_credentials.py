@@ -19,7 +19,7 @@ logger = logging.getLogger('awx.main.migrations')
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0117_v400_remove_cloudforms_inventory'),
+        ('main', '0119_inventory_plugins'),
     ]
 
     operations = [
