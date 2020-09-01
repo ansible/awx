@@ -32,6 +32,11 @@ options:
         - The name of the inventory source to update.
       required: True
       type: str
+    organization:
+      description:
+        - Name of organization for project.
+      type: str
+      required: False
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -40,6 +45,7 @@ EXAMPLES = '''
   tower_inventory_source_update:
     inventory: "My Inventory"
     inventory_source: "Example Inventory Source"
+    organization: Default
 
 - name: Update all inventory sources
   tower_inventory_source_update:
@@ -69,6 +75,7 @@ def main():
     argument_spec = dict(
         inventory=dict(required=True),
         inventory_source=dict(required=True),
+        organization=dict(),
     )
 
     # Create a module for ourselves
@@ -77,6 +84,12 @@ def main():
     # Extract our parameters
     inventory = module.params.get('inventory')
     inventory_source = module.params.get('inventory_source')
+
+    new_fields = {}
+    organization_id = None
+    organization = module.params.get('organization')
+    if organization:
+        organization_id = module.get_one_by_name_or_id('organizations', organization)
 
     # Attempt to look up the inventory the user specified (these will fail the module if not found)
     inventory_object = module.get_one_by_name_or_id('inventories', inventory)

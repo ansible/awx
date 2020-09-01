@@ -128,6 +128,10 @@ options:
         - list of notifications to send on error
       type: list
       elements: str
+    organization:
+      description:
+        - Name of organization for project.
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -140,6 +144,7 @@ EXAMPLES = '''
     credential: previously-created-credential
     overwrite: True
     update_on_launch: True
+    organization: Default
     source_vars:
       private: false
 '''
@@ -168,6 +173,10 @@ def main():
         enabled_value=dict(),
         host_filter=dict(),
         credential=dict(),
+        source_regions=dict(),
+        instance_filters=dict(),
+        group_by=dict(),
+        organization=dict(),
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         custom_virtualenv=dict(),
@@ -194,6 +203,12 @@ def main():
     credential = module.params.get('credential')
     source_project = module.params.get('source_project')
     state = module.params.get('state')
+
+    new_fields = {}
+    organization_id = None
+    organization = module.params.get('organization')
+    if organization:
+        organization_id = module.get_one_by_name_or_id('organizations', organization)
 
     # Attempt to look up inventory source based on the provided name and inventory ID
     inventory_id = module.resolve_name_to_id('inventories', inventory)

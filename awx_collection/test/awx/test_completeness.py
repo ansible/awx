@@ -43,7 +43,8 @@ no_api_parameter_ok = {
     # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
     'tower_job_template': ['survey_spec', 'organization'],
-    # Organization is how we looking job templates
+    'tower_inventory_source': ['organization'],
+    # Organization is how we are looking up job templates
     'tower_workflow_job_template_node': ['organization'],
     # Survey is how we handle associations
     'tower_workflow_job_template': ['survey'],
