@@ -28,6 +28,7 @@ from django.conf import settings
 from django.utils.encoding import smart_text, smart_bytes
 
 from awx.main.models import Host
+from awx.main.utils import get_awx_http_client_headers
 
 logger = logging.getLogger(__name__)
 
@@ -89,9 +90,6 @@ class Licenser(object):
         # Fail early if no entitlement cert is available
         if not raw_cert or raw_cert == '':
             self._attrs.update(self.UNLICENSED_DATA)
-            # These should not be needed, keeping them here in case I am wrong
-            # settings.LICENSE = self._attrs
-            # self._attrs = {}
             settings.LICENSE = {}
             return
         
@@ -101,28 +99,40 @@ class Licenser(object):
             with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8') as f:
                 for line in parsed_cert:
                     f.write(line + '\n')
-
+                # clear the buffer to ensure the complete cert has been written to the file
+                f.flush()
+                os.fsync(f)
 
                 cmd = ["rct", "cat-cert", f.name, "--no-content"]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 output = re.split('\n\n|\n\t', smart_text(stdout))
                 cert_dict = dict()
-
+                
                 for line in output:
                     if ': ' in line:
                         key, value = line.split(': ')
                         cert_dict.update({key:value})
-
-                # TODO: Fix issue with PEM headers not being readable when using tempfile.
-                cert_file_path = '/etc/tower/certs/entitlement_cert_key_generic.pem'
+                
+                # curl https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os --cert /etc/tower/certs/entitlement_cert_key_generic.pem -i
                 # TODO: create this URL from Satellite setting
-                content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os/repodata/'
-                request = requests.get(url=content_repo_url, cert=cert_file_path, verify=False)
+                content_repo_url = 'https://cdn.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ansible-tower/3.7/os'
+                request = requests.get(url=content_repo_url, 
+                                       cert=f.name, 
+                                       verify=False,
+                                       # verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+                                       # headers=get_awx_http_client_headers(),
+                                       # timeout=(5, 5)
+                                       )
+
+
                 if request.status_code != 200:
                     logger.exception('Validation Error: Entitlement key not valid.  Ensure the correct key is present in the entitlement certificate.')
+                
 
-
+        except ValueError:
+            logger.exception('Could not parse entitlement certificate')
+            return
         except FileNotFoundError as e:
             logger.exception('Subscription-manager is not installed')
             self._attrs.update(self.UNLICENSED_DATA)

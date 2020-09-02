@@ -311,6 +311,8 @@ class ApiV2ConfigView(APIView):
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
+            # If License invalid, clear entitlment cert value  # TODO: maybe do this inside licensing.py
+            settings.ENTITLEMENT_CERT = None
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
@@ -328,7 +330,7 @@ class ApiV2ConfigView(APIView):
     def delete(self, request):
         try:
             settings.LICENSE = {}
-            settings.ENTITLEMENT_CERT = ''
+            settings.ENTITLEMENT_CERT = None
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
