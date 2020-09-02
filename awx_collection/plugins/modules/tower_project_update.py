@@ -103,11 +103,11 @@ def main():
     timeout = module.params.get('timeout')
 
     # Attempt to look up project based on the provided name or id
-    if name.isnumeric():
+    if name.isdigit():
         results = module.get_endpoint('projects', **{'data': {'id': name}})
+        if results['json']['count'] == 0:
+            module.fail_json(msg='Could not find Project with ID: {0}'.format(name))        
         project = results['json']['results'][0]
-        if project is None:
-            module.fail_json(msg="Unable to find project")
     else:
         lookup_data = {'name': name}
         if organization:
