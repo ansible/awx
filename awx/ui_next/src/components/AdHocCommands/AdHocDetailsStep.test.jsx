@@ -29,7 +29,7 @@ const initialValues = {
   extra_vars: '---',
 };
 
-describe('<DetailsStep />', () => {
+describe('<AdHocDetailsStep />', () => {
   let wrapper;
 
   afterEach(() => {
@@ -64,14 +64,12 @@ describe('<DetailsStep />', () => {
       );
     });
     expect(wrapper.find('FormGroup[label="Module"]').length).toBe(1);
-    expect(wrapper.find('FormField[name="arguments"]').length).toBe(1);
+    expect(wrapper.find('FormField[label="Arguments"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Verbosity"]').length).toBe(1);
     expect(wrapper.find('FormField[label="Limit"]').length).toBe(1);
     expect(wrapper.find('FormField[name="forks"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Show changes"]').length).toBe(1);
-    expect(
-      wrapper.find('FormGroup[name="enable privilege escalation"]').length
-    ).toBe(1);
+    expect(wrapper.find('FormGroup[name="become_enabled"]').length).toBe(1);
     expect(wrapper.find('VariablesField').length).toBe(1);
   });
 
@@ -89,12 +87,12 @@ describe('<DetailsStep />', () => {
     });
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('input#limit').simulate('change', {
         target: {
@@ -116,9 +114,9 @@ describe('<DetailsStep />', () => {
     });
     wrapper.update();
     expect(
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('value')
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('value')
     ).toBe('command');
-    expect(wrapper.find('input#arguments').prop('value')).toBe('foo');
+    expect(wrapper.find('input#module_args').prop('value')).toBe('foo');
     expect(wrapper.find('AnsibleSelect[name="verbosity"]').prop('value')).toBe(
       1
     );

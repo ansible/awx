@@ -73,12 +73,12 @@ describe('<AdHocCommandsWizard/>', () => {
     await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });
@@ -105,12 +105,12 @@ describe('<AdHocCommandsWizard/>', () => {
     await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });
@@ -165,12 +165,12 @@ describe('<AdHocCommandsWizard/>', () => {
     await waitForElement(wrapper, 'WizardNavItem', el => el.length > 0);
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });

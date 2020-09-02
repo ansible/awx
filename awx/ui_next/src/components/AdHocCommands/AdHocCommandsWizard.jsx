@@ -22,12 +22,12 @@ function AdHocCommandsWizard({
   const { values } = useFormikContext();
 
   const enabledNextOnDetailsStep = () => {
-    if (!values.module_args) {
+    if (!values.module_name) {
       return false;
     }
 
-    if (values.module_args === 'shell' || values.module_args === 'command') {
-      if (values.arguments) {
+    if (values.module_name === 'shell' || values.module_name === 'command') {
+      if (values.module_args) {
         return true;
         // eslint-disable-next-line no-else-return
       } else {
@@ -90,15 +90,16 @@ const FormikApp = withFormik({
   mapPropsToValues({ adHocItems, verbosityOptions }) {
     const adHocItemStrings = adHocItems.map(item => item.name).join(', ');
     return {
-      limit: adHocItemStrings || [],
+      limit: adHocItemStrings || 'all',
       credential: [],
       module_args: '',
-      arguments: '',
       verbosity: verbosityOptions[0].value,
       forks: 0,
-      changes: false,
-      escalation: false,
+      diff_mode: false,
+      become_enabled: '',
+      module_name: '',
       extra_vars: '---',
+      job_type: 'run',
     };
   },
 })(AdHocCommandsWizard);

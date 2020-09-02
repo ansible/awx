@@ -65,7 +65,7 @@ function AdHocCommands({ children, apiModule, adHocItems, itemId, i18n }) {
     useCallback(
       async values => {
         const { data } = await apiModule.launchAdHocCommands(itemId, values);
-        history.push(`/jobs/${data.module_name}/${data.id}/output`);
+        history.push(`/jobs/command/${data.id}/output`);
       },
 
       [apiModule, itemId, history]

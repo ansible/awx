@@ -28,29 +28,36 @@ const TooltipWrapper = styled.div`
 const brandName = BrandName;
 
 function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
-  const [moduleField, moduleMeta, moduleHelpers] = useField({
+  const [module_nameField, module_nameMeta, module_nameHelpers] = useField({
+    name: 'module_name',
+    validate: required(null, i18n),
+  });
+  const [module_argsField] = useField({
     name: 'module_args',
     validate: required(null, i18n),
   });
   const [variablesField] = useField('extra_vars');
-  const [changesField, , changesHelpers] = useField('changes');
-  const [escalationField, , escalationHelpers] = useField('escalation');
+  const [diff_modeField, , diff_modeHelpers] = useField('diff_mode');
+  const [become_enabledField, , become_enabledHelpers] = useField(
+    'become_enabled'
+  );
   const [verbosityField, verbosityMeta, verbosityHelpers] = useField({
     name: 'verbosity',
     validate: required(null, i18n),
   });
-
   return (
     <Form>
       <FormColumnLayout>
         <FormFullWidthLayout>
           <FormGroup
-            fieldId="module"
+            fieldId="module_name"
             label={i18n._(t`Module`)}
             isRequired
-            helperTextInvalid={moduleMeta.error}
+            helperTextInvalid={module_nameMeta.error}
             validated={
-              !moduleMeta.touched || !moduleMeta.error ? 'default' : 'error'
+              !module_nameMeta.touched || !module_nameMeta.error
+                ? 'default'
+                : 'error'
             }
             labelIcon={
               <FieldTooltip
@@ -61,26 +68,43 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             }
           >
             <AnsibleSelect
-              {...moduleField}
-              isValid={!moduleMeta.touched || !moduleMeta.error}
-              id="module"
+              {...module_nameField}
+              isValid={!module_nameMeta.touched || !module_nameMeta.error}
+              id="module_name"
               data={moduleOptions || []}
               onChange={(event, value) => {
-                moduleHelpers.setValue(value);
+                module_nameHelpers.setValue(value);
               }}
             />
           </FormGroup>
           <FormField
-            id="arguments"
-            name="arguments"
+            id="module_args"
+            name="module_args"
             type="text"
             label={i18n._(t`Arguments`)}
             isRequired={
-              moduleField.value === 'command' || moduleField.value === 'shell'
+              module_nameField.value === 'command' ||
+              module_nameField.value === 'shell'
             }
-            tooltip={i18n._(
-              t`These arguments are used with the specified module.`
-            )}
+            tooltip={
+              module_nameField.value ? (
+                <>
+                  {i18n._(
+                    t`These arguments are used with the specified module. You can find information about the ${module_argsField.value} by clicking `
+                  )}
+                  <a
+                    href={`https://docs.ansible.com/ansible/latest/modules/${module_argsField.value}_module.html`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {' '}
+                    {i18n._(t`here.`)}
+                  </a>
+                </>
+              ) : (
+                i18n._(t`These arguments are used with the specified module.`)
+              )
+            }
           />
           <FormGroup
             fieldId="verbosity"
@@ -106,7 +130,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
               id="verbosity"
               data={verbosityOptions || []}
               onChange={(event, value) => {
-                verbosityHelpers.setValue(value);
+                verbosityHelpers.setValue(parseInt(value, 10));
               }}
             />
           </FormGroup>
@@ -164,20 +188,17 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             >
               <Switch
                 css="display: inline-flex;"
-                id="changes"
+                id="diff_mode"
                 label={i18n._(t`On`)}
                 labelOff={i18n._(t`Off`)}
-                isChecked={changesField.value}
+                isChecked={diff_modeField.value}
                 onChange={() => {
-                  changesHelpers.setValue(!changesField.value);
+                  diff_modeHelpers.setValue(!diff_modeField.value);
                 }}
                 aria-label={i18n._(t`toggle changes`)}
               />
             </FormGroup>
-            <FormGroup
-              name={i18n._(t`enable privilege escalation`)}
-              fieldId="escalation"
-            >
+            <FormGroup name="become_enabled" fieldId="become_enabled">
               <FormCheckboxLayout>
                 <Checkbox
                   aria-label={i18n._(t`Enable privilege escalation`)}
@@ -202,10 +223,10 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
                       />
                     </span>
                   }
-                  id="escalation"
-                  isChecked={escalationField.value}
+                  id="become_enabled"
+                  isChecked={become_enabledField.value}
                   onChange={checked => {
-                    escalationHelpers.setValue(checked);
+                    become_enabledHelpers.setValue(checked);
                   }}
                 />
               </FormCheckboxLayout>

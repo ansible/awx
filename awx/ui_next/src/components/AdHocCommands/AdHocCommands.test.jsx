@@ -157,12 +157,12 @@ describe('<AdHocCommands />', () => {
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });
@@ -194,14 +194,15 @@ describe('<AdHocCommands />', () => {
     );
 
     expect(InventoriesAPI.launchAdHocCommands).toBeCalledWith(1, {
-      arguments: 'foo',
-      changes: false,
+      module_args: 'foo',
+      diff_mode: false,
       credential: 4,
-      escalation: false,
+      job_type: 'run',
+      become_enabled: '',
       extra_vars: '---',
       forks: 0,
       limit: 'Inventory 1 Org 0, Inventory 2 Org 0',
-      module_args: 'command',
+      module_name: 'command',
       verbosity: 1,
     });
 
@@ -271,12 +272,12 @@ describe('<AdHocCommands />', () => {
     ).toBe(true);
 
     await act(async () => {
-      wrapper.find('AnsibleSelect[name="module_args"]').prop('onChange')(
+      wrapper.find('AnsibleSelect[name="module_name"]').prop('onChange')(
         {},
         'command'
       );
-      wrapper.find('input#arguments').simulate('change', {
-        target: { value: 'foo', name: 'arguments' },
+      wrapper.find('input#module_args').simulate('change', {
+        target: { value: 'foo', name: 'module_args' },
       });
       wrapper.find('AnsibleSelect[name="verbosity"]').prop('onChange')({}, 1);
     });
