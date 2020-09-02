@@ -885,7 +885,12 @@ class BaseTask(object):
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
     def build_execution_environment_params(self, instance):
-        return {}
+        params = {}
+        if settings.AWX_PROOT_SHOW_PATHS:
+            params['container_volume_mounts'] = []
+            for this_path in settings.AWX_PROOT_SHOW_PATHS:
+                params['container_volume_mounts'].append(f'{this_path}:{this_path}:Z')
+        return params
 
     def build_private_data(self, instance, private_data_dir):
         '''
@@ -1984,11 +1989,12 @@ class RunJob(BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
     def build_execution_environment_params(self, instance):
-        execution_environment_params = {
+        params = super(RunJob, self).build_execution_environment_params(instance)
+        params.update({
             "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
             "process_isolation": True
-        }
-        return execution_environment_params
+        })
+        return params
 
 
 
@@ -2476,18 +2482,17 @@ class RunProjectUpdate(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def build_execution_environment_params(self, instance):
+        params = super(RunProjectUpdate, self).build_execution_environment_params(instance)
         project_path = instance.get_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
-        execution_environment_params = {
-            "process_isolation": True,
-            "container_image": settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE,
-            "container_volume_mounts": [
-                f"{project_path}:{project_path}:Z",
-                f"{cache_path}:{cache_path}:Z",
-            ]
-
-        }
-        return execution_environment_params
+        params['process_isolation'] = True
+        params['container_image'] = settings.AWX_EXECUTION_ENVIRONMENT_DEFAULT_IMAGE
+        params.setdefault('container_volume_mounts', [])
+        params['container_volume_mounts'].extend([
+            f"{project_path}:{project_path}:Z",
+            f"{cache_path}:{cache_path}:Z",
+        ])
+        return params
 
 
 @task(queue=get_local_queuename)
