@@ -256,13 +256,14 @@ def main():
     labels = module.params.get('labels')
     if labels is not None:
         association_fields['labels'] = []
-      
         for item in labels:
-            search_fields = {'name': item}
-            if organization:
-                search_fields['organization'] = organization_id  
-            label_id = module.get_one('labels', **{'data': search_fields})
-            association_fields['labels'].append(label_id)
+            association_fields['labels'].append(module.resolve_name_to_id('labels', item))
+# Code to use once Issue #7567 is resolved
+#            search_fields = {'name': item}
+#            if organization:
+#                search_fields['organization'] = organization_id  
+#            label_id = module.get_one('labels', **{'data': search_fields})
+#            association_fields['labels'].append(label_id)
 
     on_change = None
     new_spec = module.params.get('survey')
