@@ -32,10 +32,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
     name: 'module_name',
     validate: required(null, i18n),
   });
-  const [module_argsField] = useField({
-    name: 'module_args',
-    validate: required(null, i18n),
-  });
+
   const [variablesField] = useField('extra_vars');
   const [diff_modeField, , diff_modeHelpers] = useField('diff_mode');
   const [become_enabledField, , become_enabledHelpers] = useField(
@@ -82,6 +79,7 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
             name="module_args"
             type="text"
             label={i18n._(t`Arguments`)}
+            validate={required(null, i18n)}
             isRequired={
               module_nameField.value === 'command' ||
               module_nameField.value === 'shell'
@@ -90,10 +88,10 @@ function CredentialStep({ i18n, verbosityOptions, moduleOptions }) {
               module_nameField.value ? (
                 <>
                   {i18n._(
-                    t`These arguments are used with the specified module. You can find information about the ${module_argsField.value} by clicking `
+                    t`These arguments are used with the specified module. You can find information about the ${module_nameField.value} by clicking `
                   )}
                   <a
-                    href={`https://docs.ansible.com/ansible/latest/modules/${module_argsField.value}_module.html`}
+                    href={`https://docs.ansible.com/ansible/latest/modules/${module_nameField.value}_module.html`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
