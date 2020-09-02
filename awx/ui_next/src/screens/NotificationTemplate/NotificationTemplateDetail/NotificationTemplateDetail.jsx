@@ -7,6 +7,7 @@ import AlertModal from '../../../components/AlertModal';
 import { CardBody, CardActionsRow } from '../../../components/Card';
 import {
   Detail,
+  ArrayDetail,
   DetailList,
   DeletedDetail,
 } from '../../../components/DetailList';
@@ -81,9 +82,9 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.host}
               dataCy="nt-detail-host"
             />
-            <Detail
+            <ArrayDetail
               label={i18n._(t`Recipient List`)}
-              value={configuration.recipients} // array
+              value={configuration.recipients}
               dataCy="nt-detail-recipients"
             />
             <Detail
@@ -127,9 +128,9 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.panelId}
               dataCy="nt-detail-panel-id"
             />
-            <Detail
+            <ArrayDetail
               label={i18n._(t`Tags for the Annotation`)}
-              value={configuration.annotation_tags} // array
+              value={configuration.annotation_tags}
               dataCy="nt-detail-"
             />
             <Detail
@@ -160,9 +161,9 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.nickname}
               dataCy="nt-detail-irc-nickname"
             />
-            <Detail
+            <ArrayDetail
               label={i18n._(t`Destination Channels or Users`)}
-              value={configuration.targets} // array
+              value={configuration.targets}
               dataCy="nt-detail-channels"
             />
             <Detail
@@ -254,9 +255,9 @@ function NotificationTemplateDetail({ i18n, template }) {
         )}
         {template.notification_type === 'slack' && (
           <>
-            <Detail
+            <ArrayDetail
               label={i18n._(t`Destination Channels`)}
-              value={configuration.channels} // array
+              value={configuration.channels}
               dataCy="nt-detail-slack-channels"
             />
             <Detail
@@ -273,9 +274,9 @@ function NotificationTemplateDetail({ i18n, template }) {
               value={configuration.from_number}
               dataCy="nt-detail-twilio-source-phone"
             />
-            <Detail
+            <ArrayDetail
               label={i18n._(t`Destination SMS Number`)}
-              value={configuration.to_numbers} // array
+              value={configuration.to_numbers}
               dataCy="nt-detail-twilio-destination-numbers"
             />
             <Detail
