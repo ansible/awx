@@ -106,7 +106,7 @@ def main():
     if name.isdigit():
         results = module.get_endpoint('projects', **{'data': {'id': name}})
         if results['json']['count'] == 0:
-            module.fail_json(msg='Could not find Project with ID: {0}'.format(name))        
+            module.fail_json(msg='Could not find Project with ID: {0}'.format(name))
         project = results['json']['results'][0]
     else:
         lookup_data = {'name': name}
