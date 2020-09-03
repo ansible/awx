@@ -91,7 +91,8 @@ function Lookup(props) {
   };
 
   const { isModalOpen, selectedItems } = state;
-  const canDelete = !required || (multiple && value.length > 1);
+  const canDelete =
+    (!required || (multiple && value.length > 1)) && !isDisabled;
   let items = [];
   if (multiple) {
     items = value;
@@ -110,11 +111,7 @@ function Lookup(props) {
         >
           <SearchIcon />
         </Button>
-        <ChipHolder
-          isDisabled={isDisabled}
-          // css="background-color: #d2d2d2"
-          className="pf-c-form-control"
-        >
+        <ChipHolder isDisabled={isDisabled} className="pf-c-form-control">
           <ChipGroup numChips={5} totalChips={items.length}>
             {items.map(item =>
               renderItemChip({

@@ -234,17 +234,15 @@ function JobTemplateForm({
             }}
           />
         </FieldWithPrompt>
-        <FieldWithPrompt
-          fieldId="template-inventory"
-          isRequired={!askInventoryOnLaunchField.value}
-          label={i18n._(t`Inventory`)}
-          promptId="template-ask-inventory-on-launch"
-          promptName="ask_inventory_on_launch"
-          tooltip={i18n._(t`Select the inventory containing the hosts
-            you want this job to manage.`)}
-        >
+        <>
           <InventoryLookup
             value={inventory}
+            fieldId="template-inventory"
+            promptId="template-ask-inventory-on-launch"
+            promptName="ask_inventory_on_launch"
+            isPromptableField
+            tooltip={i18n._(t`Select the inventory containing the hosts
+            you want this job to manage.`)}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={value => {
               inventoryHelpers.setValue(value ? value.id : null);
@@ -263,7 +261,7 @@ function JobTemplateForm({
                 {inventoryMeta.error}
               </div>
             )}
-        </FieldWithPrompt>
+        </>
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}

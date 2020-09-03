@@ -35,7 +35,7 @@ function PlaybookSelect({ projectId, isValid, field, onBlur, onError, i18n }) {
       });
       return opts;
     }, [projectId, i18n]),
-    [field.value]
+    []
   );
 
   useEffect(() => {

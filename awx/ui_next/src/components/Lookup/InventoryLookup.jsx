@@ -10,6 +10,7 @@ import OptionsList from '../OptionsList';
 import useRequest from '../../util/useRequest';
 import { getQSConfig, parseQueryString } from '../../util/qs';
 import LookupErrorMessage from './shared/LookupErrorMessage';
+import FieldWithPrompt from '../FieldWithPrompt';
 
 const QS_CONFIG = getQSConfig('inventory', {
   page: 1,
@@ -17,7 +18,18 @@ const QS_CONFIG = getQSConfig('inventory', {
   order_by: 'name',
 });
 
-function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
+function InventoryLookup({
+  value,
+  onChange,
+  onBlur,
+  i18n,
+  history,
+  required,
+  isPromptableField,
+  fieldId,
+  promptId,
+  promptName,
+}) {
   const {
     result: {
       inventories,
@@ -61,7 +73,70 @@ function InventoryLookup({ value, onChange, onBlur, required, i18n, history }) {
     fetchInventories();
   }, [fetchInventories]);
 
-  return (
+  return isPromptableField ? (
+    <>
+      <FieldWithPrompt
+        fieldId={fieldId}
+        isRequired={required}
+        label={i18n._(t`Inventory`)}
+        promptId={promptId}
+        promptName={promptName}
+        isDisabled={!canEdit}
+        tooltip={i18n._(t`Select the inventory containing the hosts
+            you want this job to manage.`)}
+      >
+        <Lookup
+          id="inventory-lookup"
+          header={i18n._(t`Inventory`)}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          required={required}
+          isLoading={isLoading}
+          isDisabled={!canEdit}
+          qsConfig={QS_CONFIG}
+          renderOptionsList={({ state, dispatch, canDelete }) => (
+            <OptionsList
+              value={state.selectedItems}
+              options={inventories}
+              optionCount={count}
+              searchColumns={[
+                {
+                  name: i18n._(t`Name`),
+                  key: 'name__icontains',
+                  isDefault: true,
+                },
+                {
+                  name: i18n._(t`Created By (Username)`),
+                  key: 'created_by__username__icontains',
+                },
+                {
+                  name: i18n._(t`Modified By (Username)`),
+                  key: 'modified_by__username__icontains',
+                },
+              ]}
+              sortColumns={[
+                {
+                  name: i18n._(t`Name`),
+                  key: 'name',
+                },
+              ]}
+              searchableKeys={searchableKeys}
+              relatedSearchableKeys={relatedSearchableKeys}
+              multiple={state.multiple}
+              header={i18n._(t`Inventory`)}
+              name="inventory"
+              qsConfig={QS_CONFIG}
+              readOnly={!canDelete}
+              selectItem={item => dispatch({ type: 'SELECT_ITEM', item })}
+              deselectItem={item => dispatch({ type: 'DESELECT_ITEM', item })}
+            />
+          )}
+        />
+        <LookupErrorMessage error={error} />
+      </FieldWithPrompt>
+    </>
+  ) : (
     <>
       <Lookup
         id="inventory-lookup"

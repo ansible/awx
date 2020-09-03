@@ -33,6 +33,7 @@ function CredentialLookup({
   history,
   i18n,
   tooltip,
+  isDisabled,
 }) {
   const {
     result: { count, credentials, relatedSearchableKeys, searchableKeys },
@@ -108,6 +109,7 @@ function CredentialLookup({
         onChange={onChange}
         required={required}
         qsConfig={QS_CONFIG}
+        isDisabled={isDisabled}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
             value={state.selectedItems}

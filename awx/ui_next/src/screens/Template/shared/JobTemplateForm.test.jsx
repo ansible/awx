@@ -14,6 +14,7 @@ import {
   ProjectsAPI,
   CredentialsAPI,
   CredentialTypesAPI,
+  InventoriesAPI,
 } from '../../../api';
 
 jest.mock('../../../api');
@@ -111,13 +112,22 @@ describe('<JobTemplateForm />', () => {
     JobTemplatesAPI.updateWebhookKey.mockReturnValue({
       data: { webhook_key: 'webhook key' },
     });
-    ProjectsAPI.readPlaybooks.mockReturnValue({
-      data: ['debug.yml'],
+    JobTemplatesAPI.updateWebhookKey.mockReturnValue({
+      data: { webhook_key: 'webhook key' },
     });
     ProjectsAPI.readDetail.mockReturnValue({
       name: 'foo',
       id: 1,
       allow_override: true,
+    });
+    ProjectsAPI.readPlaybooks.mockReturnValue({
+      data: ['debug.yml'],
+    });
+    InventoriesAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
+    });
+    ProjectsAPI.readOptions.mockResolvedValue({
+      data: { actions: { GET: {}, POST: {} } },
     });
   });
 

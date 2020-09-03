@@ -23,6 +23,7 @@ function FieldWithPrompt({
   promptId,
   promptName,
   tooltip,
+  isDisabled,
 }) {
   return (
     <div className="pf-c-form__group">
@@ -39,6 +40,7 @@ function FieldWithPrompt({
           {tooltip && <FieldTooltip content={tooltip} />}
         </div>
         <StyledCheckboxField
+          isDisabled={isDisabled}
           id={promptId}
           label={i18n._(t`Prompt on launch`)}
           name={promptName}
