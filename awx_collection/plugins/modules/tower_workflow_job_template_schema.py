@@ -287,7 +287,7 @@ More advanced examples can be made from using the tower_export module
 
 '''
 
-from ..module_utils.tower_api import TowerModule
+from ..module_utils.tower_api import TowerAPIModule
 from ansible.errors import AnsibleError
 
 response = []
@@ -449,7 +449,7 @@ def main():
     )
 
     # Create a module for ourselves
-    module = TowerModule(argument_spec=argument_spec)
+    module = TowerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
     schema = None
