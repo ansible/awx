@@ -920,6 +920,17 @@ def get_saml_entity_id():
 
 
 register(
+    'SAML_AUTO_CREATE_OBJECTS',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Automatically Create Organizations and Teams on SAML Login'),
+    help_text=_('When enabled (the default), mapped Organizations and Teams '
+                'will be created automatically on successful SAML login.'),
+    category=_('SAML'),
+    category_slug='saml',
+)
+
+register(
     'SOCIAL_AUTH_SAML_CALLBACK_URL',
     field_class=fields.CharField,
     read_only=True,
