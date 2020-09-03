@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
+import redis
 from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
@@ -152,6 +153,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.capacity = get_system_task_capacity(self.capacity_adjustment)
         else:
             self.capacity = 0
+
+        try:
+            # if redis is down for some reason, that means we can't persist
+            # playbook event data; we should consider this a zero capacity event
+            redis.Redis.from_url(settings.BROKER_URL).ping()
+        except redis.ConnectionError:
+            self.capacity = 0
+
         self.cpu = cpu[0]
         self.memory = mem[0]
         self.cpu_capacity = cpu[1]
