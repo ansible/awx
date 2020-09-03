@@ -88,7 +88,28 @@ class TowerAPIModule(TowerModule):
             response['json']['next'] = next_page
         return response
 
-    def get_one(self, endpoint, *args, **kwargs):
+    def get_name_field_from_endpoint(self, endpoint):
+        if endpoint == 'users':
+            return 'username'
+        elif endpoint == 'instances':
+            return 'hostname'
+        return 'name'
+
+    def get_one(self, endpoint, name_or_id=None, *args, **kwargs):
+        if name_or_id:
+            name_field = self.get_name_field_from_endpoint(endpoint)
+            new_args = kwargs.get('data', {}).copy()
+            if name_field in new_args:
+                self.fail_json(msg="You can't specify the field {0} in your search data if using the name_or_id field".format(name_field))
+
+            new_args['or__{0}'.format(name_field)] = name_or_id
+            try:
+                new_args['or__id'] = int(name_or_id)
+            except ValueError:
+                # If we get a value error, then we didn't have an integer so we can just pass and fall down to the fail
+                pass
+            kwargs['data'] = new_args
+
         response = self.get_endpoint(endpoint, *args, **kwargs)
         if response['status_code'] != 200:
             fail_msg = "Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint)
@@ -102,16 +123,19 @@ class TowerAPIModule(TowerModule):
         if response['json']['count'] == 0:
             return None
         elif response['json']['count'] > 1:
+            if name_or_id:
+                # Since we did a name or ID search and got > 1 return something if the id matches
+                for asset in response['json']['results']:
+                    if asset['id'] == name_or_id:
+                        return asset
+            # We got > 1 and either didn't find something by ID (which means multiple names)
+            # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_json(msg="An unexpected number of items was returned from the API ({0})".format(response['json']['count']))
 
         return response['json']['results'][0]
 
     def get_one_by_name_or_id(self, endpoint, name_or_id):
-        name_field = 'name'
-        if endpoint == 'users':
-            name_field = 'username'
-        elif endpoint == 'instances':
-            name_field = 'hostname'
+        name_field = self.get_name_field_from_endpoint(endpoint)
 
         query_params = {'or__{0}'.format(name_field): name_or_id}
         try:
