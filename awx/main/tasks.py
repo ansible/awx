@@ -1394,9 +1394,10 @@ class BaseTask(object):
             cwd = self.build_cwd(self.instance, private_data_dir)
             resource_profiling_params = self.build_params_resource_profiling(self.instance,
                                                                              private_data_dir)
-            process_isolation_params = self.build_params_process_isolation(self.instance,
-                                                                           private_data_dir,
-                                                                           cwd)
+            # TODO: Remove if fully replaced with containerized runs
+            # process_isolation_params = self.build_params_process_isolation(self.instance,
+            #                                                                private_data_dir,
+            #                                                                cwd)
             execution_environment_params = self.build_execution_environment_params(self.instance)
             env = self.build_env(self.instance, private_data_dir, isolated,
                                  private_data_files=private_data_files)
@@ -2507,10 +2508,9 @@ class RunInventoryUpdate(BaseTask):
         injectors. The primary purpose this still serves is to
         still point to the inventory update INI or config file.
         """
-        base_env = super(RunInventoryUpdate, self).build_env(inventory_update,
-                                                        private_data_dir,
-                                                        isolated,
-                                                        private_data_files=private_data_files)
+        base_env = super(RunInventoryUpdate, self).build_env(
+            inventory_update, private_data_dir, isolated,
+            private_data_files=private_data_files)
         # TODO: this is able to run by turning off isolation
         # the goal is to run it a container instead
         env = dict(os.environ.items())
@@ -2961,9 +2961,9 @@ class RunSystemJob(BaseTask):
         return path
 
     def build_env(self, instance, private_data_dir, isolated=False, private_data_files=None):
-        base_env = super(RunSystemJob, self).build_env(instance, private_data_dir,
-                                                  isolated=isolated,
-                                                  private_data_files=private_data_files)
+        base_env = super(RunSystemJob, self).build_env(
+            instance, private_data_dir, isolated=isolated,
+            private_data_files=private_data_files)
         # TODO: this is able to run by turning off isolation
         # the goal is to run it a container instead
         env = dict(os.environ.items())
