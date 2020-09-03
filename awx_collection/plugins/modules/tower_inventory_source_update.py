@@ -36,7 +36,7 @@ options:
       description:
         - Name of the inventory source's inventory's organization.
       type: str
-      required: False
+      required: True
     wait:
       description:
         - Wait for the job to complete.
@@ -91,7 +91,7 @@ def main():
     argument_spec = dict(
         inventory=dict(required=True),
         inventory_source=dict(required=True),
-        organization=dict(),
+        organization=dict(required=True),
         wait=dict(default=False, type='bool'),
         interval=dict(default=1.0, type='float'),
         timeout=dict(default=None, type='int'),
@@ -103,20 +103,31 @@ def main():
     # Extract our parameters
     inventory = module.params.get('inventory')
     inventory_source = module.params.get('inventory_source')
+    organization = module.params.get('organization')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
 
-    new_fields = {}
-    organization_id = None
-    organization = module.params.get('organization')
-    if organization:
-        organization_id = module.get_one_by_name_or_id('organizations', organization)
+    org_id = module.resolve_name_to_id('organizations', organization)
+    inventory_object = module.get_one('inventories', **{
+        'data': {
+            'name': inventory,
+            'organization': org_id,
+        }
+    })
 
-    # Attempt to look up the inventory the user specified (these will fail the module if not found)
-    inventory_object = module.get_one_by_name_or_id('inventories', inventory)
-    # Return all inventory sources related to the specified inventory
-    inventory_source_object = module.get_one_by_name_or_id(inventory_object['related']['inventory_sources'], inventory_source)
+    if not inventory_object:
+        module.fail_json(msg='The specified inventory was not found.')
+
+    inventory_source_object = module.get_one('inventory_sources', **{
+        'data': {
+            'name': inventory_source,
+            'inventory': inventory_object['id'],
+        }
+    })
+
+    if not inventory_source_object:
+        module.fail_json(msg='The specified inventory source was not found.')
 
     # Sync the inventory source(s)
     inventory_source_update_results = module.post_endpoint(inventory_source_object['related']['update'], **{'data': {}})
@@ -124,12 +135,13 @@ def main():
     if inventory_source_update_results['status_code'] != 202:
         module.fail_json(msg="Failed to update inventory source, see response for details", **{'response': inventory_source_update_results})
 
-    inventory_source_update_results = module.wait_on_url(
-        url=inventory_source_update_results['json']['url'],
-        object_name=inventory_object,
-        object_type='inventory_update',
-        timeout=timeout, interval=interval
-    )
+    if wait:
+        inventory_source_update_results = module.wait_on_url(
+            url=inventory_source_update_results['json']['url'],
+            object_name=inventory_object,
+            object_type='inventory_update',
+            timeout=timeout, interval=interval
+        )
 
     module.exit_json(**{
         'changed': True,

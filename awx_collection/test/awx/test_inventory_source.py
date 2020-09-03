@@ -24,11 +24,12 @@ def project(base_inventory):
 
 
 @pytest.mark.django_db
-def test_inventory_source_create(run_module, admin_user, base_inventory, project):
+def test_inventory_source_create(run_module, admin_user, base_inventory, project, organization):
     source_path = '/var/lib/awx/example_source_path/'
     result = run_module('tower_inventory_source', dict(
         name='foo',
         inventory=base_inventory.name,
+        organization='test-org',
         state='present',
         source='scm',
         source_path=source_path,
@@ -46,30 +47,6 @@ def test_inventory_source_create(run_module, admin_user, base_inventory, project
 
 
 @pytest.mark.django_db
-def test_create_inventory_source_implied_org(run_module, admin_user):
-    org = Organization.objects.create(name='test-org')
-    inv = Inventory.objects.create(name='test-inv', organization=org)
-
-    # Credential is not required for ec2 source, because of IAM roles
-    result = run_module('tower_inventory_source', dict(
-        name='Test Inventory Source',
-        inventory='test-inv',
-        source='ec2',
-        state='present'
-    ), admin_user)
-    assert result.pop('changed', None), result
-
-    inv_src = InventorySource.objects.get(name='Test Inventory Source')
-    assert inv_src.inventory == inv
-
-    result.pop('invocation')
-    assert result == {
-        "name": "Test Inventory Source",
-        "id": inv_src.id,
-    }
-
-
-@pytest.mark.django_db
 def test_create_inventory_source_multiple_orgs(run_module, admin_user):
     org = Organization.objects.create(name='test-org')
     Inventory.objects.create(name='test-inv', organization=org)
@@ -80,7 +57,8 @@ def test_create_inventory_source_multiple_orgs(run_module, admin_user):
 
     result = run_module('tower_inventory_source', dict(
         name='Test Inventory Source',
-        inventory=inv2.id,
+        inventory=inv2.name,
+        organization='test-org-number-two',
         source='ec2',
         state='present'
     ), admin_user)
@@ -104,6 +82,7 @@ def test_create_inventory_source_with_venv(run_module, admin_user, base_inventor
         result = run_module('tower_inventory_source', dict(
             name='foo',
             inventory=base_inventory.name,
+            organization='test-org',
             state='present',
             source='scm',
             source_project=project.name,
@@ -120,7 +99,7 @@ def test_create_inventory_source_with_venv(run_module, admin_user, base_inventor
 
 
 @pytest.mark.django_db
-def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, project):
+def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, project, organization):
     """If the inventory source is modified, then it should not blank fields
     unrelated to the params that the user passed.
     This enforces assumptions about the behavior of the AnsibleModule
@@ -140,6 +119,7 @@ def test_custom_venv_no_op(run_module, admin_user, base_inventory, mocker, proje
             name='foo',
             description='this is the changed description',
             inventory=base_inventory.name,
+            organization='test-org',
             source='scm',  # is required, but behavior is arguable
             state='present',
             source_project=project.name,
@@ -156,6 +136,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='falsy-test',
         inventory=base_inventory.name,
+        organization='test-org',
         source='ec2',
         update_on_launch=True
     ), admin_user)
@@ -168,6 +149,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='falsy-test',
         inventory=base_inventory.name,
+        organization='test-org',
         # source='ec2',
         update_on_launch=False
     ), admin_user)
@@ -203,6 +185,7 @@ def test_missing_required_credential(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='Test Azure Source',
         inventory=base_inventory.name,
+        organization='test-org',
         source='azure_rm',
         state='present'
     ), admin_user)
@@ -216,6 +199,7 @@ def test_source_project_not_for_cloud(run_module, admin_user, base_inventory, pr
     result = run_module('tower_inventory_source', dict(
         name='Test ec2 Inventory Source',
         inventory=base_inventory.name,
+        organization='test-org',
         source='ec2',
         state='present',
         source_project=project.name
@@ -230,6 +214,7 @@ def test_source_path_not_for_cloud(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='Test ec2 Inventory Source',
         inventory=base_inventory.name,
+        organization='test-org',
         source='ec2',
         state='present',
         source_path='where/am/I'
@@ -243,6 +228,7 @@ def test_source_path_not_for_cloud(run_module, admin_user, base_inventory):
 def test_scm_source_needs_project(run_module, admin_user, base_inventory):
     result = run_module('tower_inventory_source', dict(
         name='SCM inventory without project',
+        organization='test-org',
         inventory=base_inventory.name,
         state='present',
         source='scm',
