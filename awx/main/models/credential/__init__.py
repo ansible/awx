@@ -528,15 +528,20 @@ class CredentialType(CommonModelNameNotUnique):
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            # FIXME: develop some better means of referencing paths inside containers
+            container_path = os.path.join(
+                '/runner',
+                os.path.basename(path)
+            )
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
-                tower_namespace.filename = path
+                tower_namespace.filename = container_path
             else:
                 if not hasattr(tower_namespace, 'filename'):
                     tower_namespace.filename = TowerNamespace()
                 file_label = file_label.split('.')[1]
-                setattr(tower_namespace.filename, file_label, path)
+                setattr(tower_namespace.filename, file_label, container_path)
 
         injector_field = self._meta.get_field('injectors')
         for env_var, tmpl in self.injectors.get('env', {}).items():
