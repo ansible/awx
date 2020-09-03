@@ -18,7 +18,6 @@ import RoutedTabs from '../../components/RoutedTabs';
 import useRequest from '../../util/useRequest';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
-import WorkflowDetail from './WorkflowDetail';
 import { WorkflowOutput } from './WorkflowOutput';
 import useWsJob from './useWsJob';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
@@ -47,7 +46,7 @@ function Job({ i18n, lookup, setBreadcrumb }) {
     jobType = JOB_TYPE_URL_SEGMENTS[job.type];
   }
 
-const tabsArray = [
+  const tabsArray = [
     {
       name: (
         <>
@@ -98,7 +97,7 @@ const tabsArray = [
           {job &&
             job.type === 'workflow_job' && [
               <Route key="workflow-details" path="/jobs/workflow/:id/details">
-                <WorkflowDetail job={job} />
+                <JobDetail type={match.params.type} job={job} />
               </Route>,
               <Route key="workflow-output" path="/jobs/workflow/:id/output">
                 <WorkflowOutput job={job} />
