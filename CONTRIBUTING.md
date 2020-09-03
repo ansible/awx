@@ -80,7 +80,7 @@ For Linux platforms, refer to the following from Docker:
 If you're not using Docker for Mac, or Docker for Windows, you may need, or choose to, install the Docker compose Python module separately, in which case you'll need to run the following:
 
 ```bash
-(host)$ pip install docker-compose
+(host)$ pip3 install docker-compose
 ```
 
 #### Frontend Development
