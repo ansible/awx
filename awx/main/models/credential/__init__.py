@@ -564,7 +564,12 @@ class CredentialType(CommonModelNameNotUnique):
 
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
-                args.extend(['-e', '@%s' % path])
+                # FIXME: develop some better means of referencing paths inside containers
+                container_path = os.path.join(
+                    '/runner',
+                    os.path.basename(path)
+                )
+                args.extend(['-e', '@%s' % container_path])
 
 
 class ManagedCredentialType(SimpleNamespace):
